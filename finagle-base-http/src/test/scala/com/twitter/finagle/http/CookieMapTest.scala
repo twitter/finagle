@@ -16,6 +16,12 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends FunS
       assert(cookieMap.isEmpty)
     }
 
+    test(s"$codec: Accessing cookies of a $messageType does not change its header") {
+      val message = newMessage()
+      message.cookies
+      assert(message.headerMap.isEmpty)
+    }
+
     test(s"$codec: Invalid cookies on a $messageType are ignored") {
       val message = newMessage()
       lazy val cookieMap = new CookieMap(message, codec)
@@ -121,6 +127,15 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends FunS
       cookieMap -= "name"
 
       assert(cookieMap.size == 0)
+    }
+
+    test(s"$codec: Removing all cookies of a $messageType also removes its Cookie header") {
+      val message = newMessage()
+      message.headerMap.add("Cookie", "name=value")
+      lazy val cookieMap = new CookieMap(message, codec)
+      cookieMap -= "name"
+
+      assert(!message.headerMap.contains(headerName))
     }
   }
 

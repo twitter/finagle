@@ -61,13 +61,15 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     // Clear all cookies - there may be more than one with this name.
     message.headerMap.remove(cookieHeaderName)
 
-    // Add cookies back again
-    if (message.isRequest) {
-      message.headerMap.set(cookieHeaderName, cookieCodec.encodeClient(values))
-    } else {
-      foreach {
-        case (_, cookie) =>
-          message.headerMap.add(cookieHeaderName, cookieCodec.encodeServer(cookie))
+    // Add cookies back again if there are any
+    if (nonEmpty) {
+      if (message.isRequest) {
+        message.headerMap.set(cookieHeaderName, cookieCodec.encodeClient(values))
+      } else {
+        foreach {
+          case (_, cookie) =>
+            message.headerMap.add(cookieHeaderName, cookieCodec.encodeServer(cookie))
+        }
       }
     }
   }
