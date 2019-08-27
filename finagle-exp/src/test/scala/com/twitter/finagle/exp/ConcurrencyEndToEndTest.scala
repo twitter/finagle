@@ -48,8 +48,6 @@ class ConcurrencyEndToEndTest extends FunSuite {
     def failuresCounter(): Long = sr.counters(Seq("testClient", "failures"))
     def droppedRequestsCounter(): Long =
       sr.counters(Seq("testClient", "concurrency_limit", "dropped_requests"))
-    def limitGauge(): () => Float =
-      sr.gauges(Seq("testClient", "concurrency_limit", "estimated_concurrency_limit"))
   }
 
   test("Requests exceeding limit should increase dropped_request count") {
@@ -70,7 +68,6 @@ class ConcurrencyEndToEndTest extends FunSuite {
     // the excessRps is not counted by request counter
     // because the filter is inserted before stats filter
     assert(requestsCounter == initialConcurrentReqLimit)
-    assert(limitGauge()() > initialConcurrentReqLimit)
     assert(droppedRequestsCounter == excessRps)
     await(testClient.close())
   }
@@ -84,7 +81,6 @@ class ConcurrencyEndToEndTest extends FunSuite {
 
     assert(successCounter == initialConcurrentReqLimit)
     assert(droppedRequestsCounter == 0)
-    assert(limitGauge()() >= initialConcurrentReqLimit)
     await(testClient.close())
     await(testServer.close())
   }
@@ -102,7 +98,6 @@ class ConcurrencyEndToEndTest extends FunSuite {
     await(testServer.close())
     assert(failuresCounter == initialConcurrentReqLimit)
     assert(droppedRequestsCounter == 0)
-    assert(limitGauge()() < initialConcurrentReqLimit)
     await(testClient.close())
   }
 }
