@@ -5,8 +5,7 @@ import com.twitter.finagle.http2.transport.ClientSession
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{CancelledConnectionException, Failure, FailureFlags, Stack, Status}
-import com.twitter.logging.Level
+import com.twitter.finagle.{Failure, FailureFlags, Stack, Status}
 import com.twitter.util.{Future, Promise, Time}
 import io.netty.channel.{
   Channel,
@@ -134,35 +133,26 @@ private final class ClientSessionImpl(
   }
 
   private[this] def initNewNettyChildChannel(): Future[Transport[Any, Any]] = {
+    // This is similar to what is found in the ConnectionBuilder but doesn't
+    // perform the second phase where we then make something out of the `Transport`
+    // or wire up interrupts. We're not concerned about interrupts because the
+    // operation should be very quick, just registering with the event loop, and thus
+    // most often a waste of allocations.
+
     val p = Promise[Transport[Any, Any]]
-    val nettyFuture = bootstrap.open()
-
-    p.setInterruptHandler {
-      case _ =>
-        nettyFuture.cancel( /*mayInterruptIfRunning*/ false)
-    }
-
-    // This is largely the same code as found in the ConnectionBuilder but doesn't
-    // perform the second phase where we then make something out of the `Transport`.
-    nettyFuture.addListener(new GenericFutureListener[util.concurrent.Future[Http2StreamChannel]] {
-      def operationComplete(future: util.concurrent.Future[Http2StreamChannel]): Unit = {
-        if (future.isCancelled) {
-          p.setException(
-            Failure(
-              cause = new CancelledConnectionException,
-              flags = FailureFlags.Interrupted | FailureFlags.Retryable,
-              logLevel = Level.DEBUG
-            )
-          )
-        } else if (!future.isSuccess) {
-          p.setException(Failure.rejected(future.cause))
-        } else {
-          val channel = future.get
-          val trans = new ChildTransport(channel)
-          p.setValue(trans)
+    bootstrap
+      .open()
+      .addListener(new GenericFutureListener[util.concurrent.Future[Http2StreamChannel]] {
+        def operationComplete(future: util.concurrent.Future[Http2StreamChannel]): Unit = {
+          if (!future.isSuccess) {
+            p.setException(Failure.rejected(future.cause))
+          } else {
+            val channel = future.get
+            val trans = new ChildTransport(channel)
+            p.setValue(trans)
+          }
         }
-      }
-    })
+      })
 
     p
   }
