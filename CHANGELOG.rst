@@ -44,6 +44,12 @@ Runtime Behavior Changes
   the Ping Failure Detection implementation has been removed completely from the
   non-MultiplexHandler based HTTP/2 client. ``PHAB_ID=D360712``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-base-http: Removes the `Cookie` header of a `c.t.f.http.Message` whenever its cookie map
+  becomes empty. ``PHAB_ID=D361326``
+
 19.8.0
 ------
 
