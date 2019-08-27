@@ -259,6 +259,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleZipkinCore,
   finagleZipkinScribe,
   finagleServersets,
+  finaglePartitioning,
   finagleTunable,
   finagleException,
   finagleIntegration,
@@ -503,7 +504,23 @@ lazy val finagleServersets = Project(
     if (scalaVersion.value.startsWith("2.12")) Seq("-no-java-comments")
     else Nil
   }
-).dependsOn(finagleCore)
+).dependsOn(finagleCore, finaglePartitioning)
+
+lazy val finaglePartitioning = Project(
+  id = "finagle-partitioning",
+  base = file("finagle-partitioning")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-partitioning",
+  libraryDependencies ++= Seq(
+    util("core"),
+    util("hashing")
+  )
+).dependsOn(
+  finagleNetty4,
+  finagleCore % "compile->compile;test->test",
+)
 
 lazy val finagleTunable = Project(
   id = "finagle-tunable",
@@ -610,6 +627,7 @@ lazy val finagleMemcached = Project(
   finagleNetty4,
   finagleCore % "compile->compile;test->test",
   finagleServersets,
+  finaglePartitioning,
   finagleStats,
   finagleToggle
 )

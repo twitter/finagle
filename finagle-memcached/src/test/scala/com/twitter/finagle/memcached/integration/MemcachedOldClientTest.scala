@@ -4,6 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.memcached.Client
+import com.twitter.finagle.param.{Stats, Timer}
+import com.twitter.finagle.partitioning.param
+import com.twitter.finagle.partitioning.param.EjectFailedHost
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import java.net.InetSocketAddress
@@ -25,7 +28,7 @@ class MemcachedOldClientTest extends MemcachedTest {
     val sr = new InMemoryStatsReceiver
     val client = Memcached.client
       .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-      .configured(Memcached.param.EjectFailedHost(true))
+      .configured(param.EjectFailedHost(true))
       .withStatsReceiver(sr)
       .newRichClient(Name.bound(servers.map { s =>
         Address(s.address)
@@ -39,9 +42,9 @@ class MemcachedOldClientTest extends MemcachedTest {
       (timer, cacheServer, statsReceiver) =>
         Memcached.client
           .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-          .configured(Memcached.param.EjectFailedHost(true))
-          .configured(param.Timer(timer))
-          .configured(param.Stats(statsReceiver))
+          .configured(EjectFailedHost(true))
+          .configured(Timer(timer))
+          .configured(Stats(statsReceiver))
           .newRichClient(
             Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])),
             clientName

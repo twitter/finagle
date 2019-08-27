@@ -1,9 +1,10 @@
 package com.twitter.finagle.memcached.partitioning
 
 import com.twitter.finagle.Stack.Params
+import com.twitter.finagle.{param => _, _}
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.param.Logger
-import com.twitter.finagle.{Memcached, _}
+import com.twitter.finagle.partitioning.{KetamaPartitioningService, param}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
 import com.twitter.logging.Level
@@ -33,8 +34,8 @@ private[finagle] object MemcachedPartitioningService {
         params: Params
       ): KetamaPartitioningService[Command, Response, Buf] = {
 
-        val Memcached.param.KeyHasher(hasher) = params[Memcached.param.KeyHasher]
-        val Memcached.param.NumReps(numReps) = params[Memcached.param.NumReps]
+        val param.KeyHasher(hasher) = params[param.KeyHasher]
+        val param.NumReps(numReps) = params[param.NumReps]
 
         new MemcachedPartitioningService(underlying, params, hasher, numReps)
       }

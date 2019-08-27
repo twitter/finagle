@@ -1,9 +1,9 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.finagle.common.zookeeper.ServerSetImpl
-import com.twitter.finagle.{Addr, Address, Resolver, Name}
+import com.twitter.finagle.{Addr, Address, Name, Resolver}
 import com.twitter.finagle.addr.WeightedAddress
-import com.twitter.finagle.serverset2.addr.ZkMetadata
+import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.util.RandomSocket
 import java.net.InetSocketAddress
@@ -11,7 +11,7 @@ import org.scalactic.source.Position
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.{Span, SpanSugar}
-import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
+import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import scala.collection.JavaConverters.mapAsJavaMapConverter
 
 class Zk2ResolverTest

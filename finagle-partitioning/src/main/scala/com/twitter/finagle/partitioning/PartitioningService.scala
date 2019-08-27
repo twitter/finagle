@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcached.partitioning
+package com.twitter.finagle.partitioning
 
 import com.twitter.finagle._
 import com.twitter.util._

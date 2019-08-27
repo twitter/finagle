@@ -8,7 +8,7 @@ import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService.UnsupportedCommand
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.serverset2.addr.ZkMetadata
+import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf

@@ -3,8 +3,8 @@ package com.twitter.finagle.serverset2
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.addr.WeightedAddress
+import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
-import com.twitter.finagle.serverset2.addr.ZkMetadata
 import com.twitter.finagle.{Addr, FixedInetResolver, InetResolver, Resolver}
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}

@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcached
+package com.twitter.finagle.partitioning
 
 import com.twitter.finagle.Addr
 
@@ -7,10 +7,10 @@ import com.twitter.finagle.Addr
  * [[com.twitter.finagle.memcached.KetamaPartitionedClient]]).
  *
  * This class and its companion object are private because they are only an implementation detail for
- * converting between [[com.twitter.finagle.memcached.CacheNode]] and
+ * converting between [[com.twitter.finagle.partitioning.CacheNode]] and
  * [[com.twitter.finagle.Address]]. We need to convert between these types for backwards
- * compatibility: [[com.twitter.finagle.memcached.KetamaPartitionedClient]] consumes
- * [[com.twitter.finagle.memcached.CacheNode]]s but [[com.twitter.finagle.Resolver]]s return
+ * compatibility: [[com.twitter.finagle.KetamaPartitionedClient]] consumes
+ * [[CacheNode]]s but [[com.twitter.finagle.Resolver]]s return
  * [[com.twitter.finagle.Address]]s.
  *
  * @param weight The weight of the cache node. Default value is 1. Note that this determines where
@@ -18,9 +18,9 @@ import com.twitter.finagle.Addr
  * [[com.twitter.finagle.addr.WeightedAddress]], which pertains to load balancing.
  * @param key An optional unique identifier for the cache node (e.g.  shard ID).
  */
-private[memcached] case class CacheNodeMetadata(weight: Int, key: Option[String])
+private[finagle] case class CacheNodeMetadata(weight: Int, key: Option[String])
 
-private[memcached] object CacheNodeMetadata {
+private[finagle] object CacheNodeMetadata {
   private val key = "cache_node_metadata"
 
   /**

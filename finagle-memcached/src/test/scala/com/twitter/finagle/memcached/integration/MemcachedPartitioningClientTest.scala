@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle._
+import com.twitter.finagle.{param => ctfparam, _}
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
@@ -9,6 +9,7 @@ import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.{Client, TwemcacheClient}
 import com.twitter.finagle.naming.BindingFactory
+import com.twitter.finagle.partitioning.param
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.hashing.KeyHasher
@@ -44,9 +45,9 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
   private[this] def newClient(dest: Name, label: String = clientName) = {
     TwemcacheClient(
       baseClient
-        .configured(Memcached.param.KeyHasher(KeyHasher.KETAMA))
+        .configured(param.KeyHasher(KeyHasher.KETAMA))
         .configured(TimeoutFilter.Param(10000.milliseconds))
-        .configured(Memcached.param.EjectFailedHost(false))
+        .configured(param.EjectFailedHost(false))
         .configured(LoadBalancerFactory.ReplicateAddresses(2))
         .withStack(newClientStack())
         .newService(dest, label)
@@ -57,11 +58,11 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
     val sr = new InMemoryStatsReceiver
     val client = TwemcacheClient(
       Memcached.client
-        .configured(Memcached.param.KeyHasher(KeyHasher.FNV1_32))
+        .configured(param.KeyHasher(KeyHasher.FNV1_32))
         .configured(TimeoutFilter.Param(10000.milliseconds))
-        .configured(Memcached.param.EjectFailedHost(true))
+        .configured(param.EjectFailedHost(true))
         .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-        .configured(param.Stats(sr))
+        .configured(ctfparam.Stats(sr))
         .withStack(newClientStack())
         .newService(Name.bound(servers.map { s =>
           Address(s.address)
@@ -76,12 +77,12 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
       (timer, cacheServer, statsReceiver) =>
         TwemcacheClient(
           Memcached.client
-            .configured(Memcached.param.KeyHasher(KeyHasher.FNV1_32))
+            .configured(param.KeyHasher(KeyHasher.FNV1_32))
             .configured(TimeoutFilter.Param(10000.milliseconds))
             .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-            .configured(Memcached.param.EjectFailedHost(true))
-            .configured(param.Timer(timer))
-            .configured(param.Stats(statsReceiver))
+            .configured(param.EjectFailedHost(true))
+            .configured(ctfparam.Timer(timer))
+            .configured(ctfparam.Stats(statsReceiver))
             .withStack(newClientStack())
             .newService(
               Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])),
@@ -103,10 +104,10 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
 
     val client = TwemcacheClient(
       Memcached.client
-        .configured(Memcached.param.KeyHasher(KeyHasher.FNV1_32))
+        .configured(param.KeyHasher(KeyHasher.FNV1_32))
         .configured(TimeoutFilter.Param(10000.milliseconds))
         .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-        .configured(Memcached.param.EjectFailedHost(true))
+        .configured(param.EjectFailedHost(true))
         .connectionsPerEndpoint(NumConnections)
         .withStack(newClientStack())
         .withStatsReceiver(sr)
@@ -122,10 +123,10 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
   test("FailureAccrualFactoryException has remote address") {
     val client = TwemcacheClient(
       Memcached.client
-        .configured(Memcached.param.KeyHasher(KeyHasher.FNV1_32))
+        .configured(param.KeyHasher(KeyHasher.FNV1_32))
         .configured(TimeoutFilter.Param(10000.milliseconds))
         .configured(FailureAccrualFactory.Param(1, 10.minutes))
-        .configured(Memcached.param.EjectFailedHost(false))
+        .configured(param.EjectFailedHost(false))
         .connectionsPerEndpoint(1)
         .withStack(newClientStack())
         .newService(Name.bound(Address("localhost", 1234)), clientName)

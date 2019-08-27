@@ -1,8 +1,7 @@
-package com.twitter.finagle.memcached.unit.partitioning
+package com.twitter.finagle.partitioning
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.memcached.partitioning.PartitioningService
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Address, _}
 import com.twitter.util._

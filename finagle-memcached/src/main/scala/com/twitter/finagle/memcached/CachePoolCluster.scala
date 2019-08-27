@@ -1,32 +1,13 @@
 package com.twitter.finagle.memcached
 
-import _root_.java.net.{SocketAddress, InetSocketAddress}
+import _root_.java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.finagle.{Addr, Address, Group, Resolver}
 import com.twitter.finagle.common.zookeeper._
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory}
+import com.twitter.finagle.partitioning.{CacheNode, CacheNodeMetadata}
+import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.zookeeper.{DefaultZkClientFactory, ZkGroup}
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
-
-object CacheNode {
-
-  /**
-   * Utility method for translating a `CacheNode` to an `Address`
-   * (used when constructing a `Name` representing a `Cluster`).
-   */
-  private[memcached] val toAddress: CacheNode => Address = {
-    case CacheNode(host, port, weight, key) =>
-      val metadata = CacheNodeMetadata.toAddrMetadata(CacheNodeMetadata(weight, key))
-      Address.Inet(new InetSocketAddress(host, port), metadata)
-  }
-}
-
-// Type definition representing a cache node
-case class CacheNode(host: String, port: Int, weight: Int, key: Option[String] = None)
-    extends SocketAddress {
-  // Use overloads to keep the same ABI
-  def this(host: String, port: Int, weight: Int) = this(host, port, weight, None)
-}
 
 /**
  * Indicates that an error occurred while resolving a cache address.

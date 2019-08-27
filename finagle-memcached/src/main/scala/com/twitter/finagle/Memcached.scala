@@ -36,6 +36,13 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
+import com.twitter.finagle.partitioning.param.{EjectFailedHost, KeyHasher, NumReps}
+import com.twitter.finagle.partitioning.{
+  CacheNode,
+  KetamaClientKey,
+  KetamaFailureAccrualFactory,
+  NodeHealth
+}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service._
@@ -184,38 +191,6 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
   private[this] val toggle = Toggles(UsePartitioningMemcachedClientToggle)
   private[this] def UsePartitioningMemcachedClient = toggle(ServerInfo().id.hashCode)
 
-  /**
-   * Memcached specific stack params.
-   */
-  object param {
-    case class EjectFailedHost(v: Boolean) {
-      def mk(): (EjectFailedHost, Stack.Param[EjectFailedHost]) =
-        (this, EjectFailedHost.param)
-    }
-
-    object EjectFailedHost {
-      implicit val param = Stack.Param(EjectFailedHost(false))
-    }
-
-    case class KeyHasher(hasher: hashing.KeyHasher) {
-      def mk(): (KeyHasher, Stack.Param[KeyHasher]) =
-        (this, KeyHasher.param)
-    }
-
-    object KeyHasher {
-      implicit val param = Stack.Param(KeyHasher(hashing.KeyHasher.KETAMA))
-    }
-
-    case class NumReps(reps: Int) {
-      def mk(): (NumReps, Stack.Param[NumReps]) =
-        (this, NumReps.param)
-    }
-
-    object NumReps {
-      implicit val param = Stack.Param(NumReps(KetamaPartitionedClient.DefaultNumReps))
-    }
-  }
-
   object Client {
 
     private[Memcached] val ProtocolLibraryName = "memcached"
@@ -331,7 +306,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       val Logger(logger) = params[Logger]
       val label0 = if (label == "") params[Label].label else label
 
-      val param.KeyHasher(hasher) = params[param.KeyHasher]
+      val KeyHasher(hasher) = params[KeyHasher]
       registerClient(label0, hasher.toString)
 
       def partitionAwareFinagleClient() = {
@@ -350,7 +325,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
         logger.info(s"Using the old memcached client: $destination")
 
         val finagle.param.Stats(sr) = params[finagle.param.Stats]
-        val param.NumReps(numReps) = params[param.NumReps]
+        val NumReps(numReps) = params[NumReps]
 
         val scopedSr = sr.scope(label0)
         val healthBroker = new Broker[NodeHealth]
@@ -395,14 +370,14 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * cache host from a separate mechanism that's based on a global view.
      */
     def withEjectFailedHost(eject: Boolean): Client =
-      configured(param.EjectFailedHost(eject))
+      configured(EjectFailedHost(eject))
 
     /**
      * Defines the hash function to use for partitioned clients when
      * mapping keys to partitions.
      */
     def withKeyHasher(hasher: hashing.KeyHasher): Client =
-      configured(param.KeyHasher(hasher))
+      configured(KeyHasher(hasher))
 
     /**
      * Duplicate each node across the hash ring according to `reps`.
@@ -411,7 +386,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * details.
      */
     def withNumReps(reps: Int): Client =
-      configured(param.NumReps(reps))
+      configured(NumReps(reps))
 
     /**
      * Configures the number of concurrent `connections` a single endpoint has.

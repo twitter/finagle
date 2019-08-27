@@ -1,7 +1,8 @@
-package com.twitter.finagle.memcached.partitioning
+package com.twitter.finagle.partitioning
 
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle._
+import com.twitter.finagle
+import com.twitter.finagle.{param => _, _}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param.Logger
 import com.twitter.hashing._
@@ -13,7 +14,7 @@ import scala.collection.breakOut
  * KetamaPartitioningService implements consistent hashing based partitioning across the
  * 'CacheNodeGroup'. The group is dynamic and the hash ring is rebuilt upon observed changes
  * to the group. Optionally, unhealthy nodes are removed from the hash ring when
- * 'Memcached.param.EjectFailedHost' param is true.
+ * 'param.EjectFailedHost' param is true.
  */
 private[finagle] object KetamaPartitioningService {
 
@@ -28,7 +29,7 @@ private[finagle] object KetamaPartitioningService {
 
     val parameters = Seq(
       implicitly[Stack.Param[LoadBalancerFactory.Dest]],
-      implicitly[Stack.Param[param.Stats]]
+      implicitly[Stack.Param[finagle.param.Stats]]
     )
 
     def newKetamaPartitioningService(
@@ -132,5 +133,4 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
     val hash = keyHasher.hashKey(bytes)
     nodeManager.getServiceForHash(hash)
   }
-
 }

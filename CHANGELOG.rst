@@ -26,6 +26,17 @@ Breaking API Changes
        `private[this] count(Long, Response)` and is no longer part of the public API.
   ``PHAB_ID=D350733``
 
+* finagle-partitioning: the hash-based routing that memcached uses has been relocated to a new
+  top-level module so that it can be used more broadly across protocols. This results
+  in several classes moving to the c.t.f.partitioning package:
+    1. The `Memcached.param.EjectFailedHost`, `KeyHasher`, and `NumReps` parameters are now
+       available under `c.t.f.partitioning.param`
+    2. The `FailureAccrualException` and `CacheNode` definitions are now in the `c.t.f.paritioning`
+       package.
+    3. The `ZkMetadata` class has moved to `c.t.f.p.zk` and the finagle-serverset module now depends
+       on finagle-partitioning.
+  ``PHAB_ID=D359303``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
