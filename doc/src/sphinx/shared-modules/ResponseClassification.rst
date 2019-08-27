@@ -136,7 +136,7 @@ One possible classifier would be:
     case ReqRep(_, Return(x: Int)) if x == 0 =>
       ResponseClass.NonRetryableFailure
 
-    // #3
+    // #3 *Caution*
     case ReqRep(SocialGraph.Follow.Args(a, b), _) if a <= 0 =>
       ResponseClass.NonRetryableFailure
 
@@ -149,8 +149,13 @@ If you examine that classifier you'll note a few things. First (#1), the
 deserialized ``NotFoundException`` can be treated as a failure. Second (#2), a
 "successful" response can be examined to enable services using status codes to
 classify errors. Next (#3), the request can be introspected to make the
-decision. Lastly (#4), the deserialized ``InvalidQueryException`` can be treated
-as a successful response.
+decision - *HOWEVER* - if an exception is thrown at the Mux layer
+(ex: ``c.t.f.mux.ClientDiscardedRequestException``) there will **NOT**
+be a match against (#3). This style (#3) should be avoided for Thrift and ThriftMux.
+Instead, prefer to handle request specific details at the application layer, such as creating
+a `Filter <ServicesAndFilters.html#filters>`_ to reject the request, and reserve Response
+Classification to deal with wire level response concerns. Lastly (#4), the deserialized
+``InvalidQueryException`` can be treated as a successful response.
 
 Other Details
 ~~~~~~~~~~~~~

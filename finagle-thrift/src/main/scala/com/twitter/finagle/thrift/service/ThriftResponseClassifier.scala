@@ -38,7 +38,7 @@ import scala.util.control.NonFatal
  *   case ReqRep(_, Throw(_: RateLimitedException)) => RetryableFailure
  *   case ReqRep(_, Throw(_: NotFoundException)) => NonRetryableFailure
  *   case ReqRep(_, Return(x: Int)) if x == 0 => NonRetryableFailure
- *   case ReqRep(SocialGraph.Follow.Args(a, b), _) if a <= 0 || b <= 0 => NonRetryableFailure
+ *   case ReqRep(SocialGraph.Follow.Args(a, b), _) if a <= 0 || b <= 0 => NonRetryableFailure // avoid this style!
  * }
  * }}}
  *
@@ -46,6 +46,10 @@ import scala.util.control.NonFatal
  * [[ThriftResponseClassifier.ThriftExceptionsAsFailures]] which treats
  * any Thrift response that deserializes into an Exception as
  * a non-retryable failure.
+ *
+ * @see The user guide for more information on Response Classification of Thrift and ThriftMux
+ *      [[https://twitter.github.io/finagle/guide/Clients.html#response-classification Clients]]  and
+ *      [[https://twitter.github.io/finagle/guide/Servers.html#response-classification Servers]].
  */
 object ThriftResponseClassifier {
 
