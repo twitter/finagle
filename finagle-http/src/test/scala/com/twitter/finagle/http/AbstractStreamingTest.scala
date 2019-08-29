@@ -13,7 +13,6 @@ import org.scalatest.FunSuite
 
 abstract class AbstractStreamingTest extends FunSuite {
 
-  def impl: FinagleHttp.HttpImpl
   def configureClient: FinagleHttp.Client => FinagleHttp.Client = identity
   def configureServer: FinagleHttp.Server => FinagleHttp.Server = identity
 
@@ -495,7 +494,6 @@ abstract class AbstractStreamingTest extends FunSuite {
   def startServer(service: Service[Request, Response]): ListeningServer = {
     configureServer(FinagleHttp.server)
       .withStreaming(0.bytes) // no aggregation
-      .configured(impl)
       .withLabel("server")
       .serve(new InetSocketAddress(0), service)
   }
