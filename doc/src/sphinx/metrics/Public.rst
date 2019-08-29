@@ -60,8 +60,13 @@ StatsFactoryWrapper
   creation has failed.
 
 **service_acquisition_latency_ms**
-  A stat of the latency, in milliseconds, to acquire a service.
-  This entails establishing a connection or waiting for a connection from a pool.
+  A stat of the latency, in milliseconds, to acquire a service (a session). This entails
+  an amortized cost of materializing a connection for each request, either by establishing new
+  (slow path) or by checking it out from the connection pool (fast path).
+
+  In the worst case (establishing a connection on each request), this histogram converges on
+  `connect_latency_ms` (socket connect latency, including SSL/TLS handshaking). In the best case,
+  this represents a cost of acquiring connection from the pool.
 
 ServerStatsFilter
 <<<<<<<<<<<<<<<<<

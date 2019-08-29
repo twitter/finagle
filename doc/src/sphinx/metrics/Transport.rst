@@ -2,12 +2,12 @@ Netty Transporter
 <<<<<<<<<<<<<<<<<
 
 **connect_latency_ms**
-  A histogram of the length of time it takes for a connection to succeed,
-  in milliseconds.
+  A histogram of the length of time it takes for a socket connection (including SSL/TLS handshake)
+  to succeed, in milliseconds.
 
 **failed_connect_latency_ms**
-  A histogram of the length of time it takes for a connection to fail,
-  in milliseconds.
+  A histogram of the length of time it takes for a socket connection (including SSL/TLS handshake)
+  to fail, in milliseconds.
 
 **cancelled_connects**
   A counter of the number of attempts to connect that were cancelled before
@@ -100,7 +100,7 @@ SSL/TLS
 <<<<<<<
 
 **handshake_latency_ms**
-   A histogram of the tls handshake latency in milliseconds.
+   A histogram of the SSL/TLS handshake latency in milliseconds.
 
 **failed_handshake_latency_ms** `verbosity:debug`
-   A histogram of the failed tls handshake latency in milliseconds.
+   A histogram of the failed SSL/TLS handshake latency in milliseconds.
