@@ -65,6 +65,8 @@ matrix:
     - env: PROJECT=finagle-netty4 USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-netty4-http USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-thriftmux USE_NETTY_SNAPSHOT=true
+    # Allow all JDK11 tests to fail
+    - jdk: openjdk11
 
 # These directories are cached to S3 at the end of the build
 cache:
@@ -85,6 +87,7 @@ scala:
 
 jdk:
   - openjdk8
+  - openjdk11
 
 notifications:
   slack:
