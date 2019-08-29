@@ -57,6 +57,7 @@ private[http] object SameSiteCodec {
   def encodeSameSite(cookie: Cookie, encoded: String): String = cookie.sameSite match {
     case SameSite.Lax => encoded + "; SameSite=Lax"
     case SameSite.Strict => encoded + "; SameSite=Strict"
+    case SameSite.None => encoded + "; SameSite=None"
     case _ => encoded
   }
 
@@ -94,6 +95,7 @@ private[http] object SameSiteCodec {
       val sameSite =
         if (values.get(pos).equalsIgnoreCase("lax")) SameSite.Lax
         else if (values.get(pos).equalsIgnoreCase("strict")) SameSite.Strict
+        else if (values.get(pos).equalsIgnoreCase("none")) SameSite.None
         else SameSite.Unset
 
       cookie.sameSite(sameSite)

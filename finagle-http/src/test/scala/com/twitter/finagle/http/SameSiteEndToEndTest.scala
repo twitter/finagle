@@ -33,6 +33,8 @@ class SameSiteEndToEndTest extends FunSuite {
               response.cookies += new Cookie("containsSameSite", "lax")
             } else if (cookie.sameSite == SameSite.Strict || header.contains("Strict")) {
               response.cookies += new Cookie("containsSameSite", "strict")
+            } else if (cookie.sameSite == SameSite.None|| header.contains("none")) {
+              response.cookies += new Cookie("containsSameSite", "none")
             } else {
               response.cookies += new Cookie("containsSameSite", "nope")
             }
@@ -95,7 +97,26 @@ class SameSiteEndToEndTest extends FunSuite {
     }
   }
 
-  test("response should contain no SameSite attribute if set to None") {
+  test("response should contain None if set in strictService") {
+    supportSameSiteCodec.let(true) {
+      new Ctx {
+        val server =
+          Http.server
+            .withLabel("myservice")
+            .serve(new InetSocketAddress(0), setCookieservice(SameSite.None))
+
+        val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+        val client = Http.client.newService(s":${addr.getPort}", "http")
+
+        val response: Response = await(client(request))
+        assert(response.status == Status.Ok)
+        assert(response.headerMap.get("Set-Cookie").get == "foo=bar; SameSite=None")
+        assert(response.cookies.get("foo").get.sameSite == SameSite.None)
+      }
+    }
+  }
+
+  test("response should contain no SameSite attribute if set to Unset") {
     new Ctx {
       val server =
         Http.server

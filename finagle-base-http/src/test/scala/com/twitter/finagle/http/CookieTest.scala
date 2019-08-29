@@ -23,8 +23,8 @@ class CookieTest extends FunSuite {
     assert(cookie.domain == "domain")
     assert(cookie.path == "path")
     assert(cookie.maxAge == 99.seconds)
-    assert(cookie.secure == true)
-    assert(cookie.httpOnly == false)
+    assert(cookie.secure)
+    assert(!cookie.httpOnly)
 
     /* Experimental */
     assert(cookie.sameSite == SameSite.Strict)
@@ -155,8 +155,8 @@ class CookieTest extends FunSuite {
     assert(cookie.value == "value2")
     assert(cookie.domain == "domain")
     assert(cookie.maxAge == 99.seconds)
-    assert(cookie.httpOnly == true)
-    assert(cookie.secure == true)
+    assert(cookie.httpOnly)
+    assert(cookie.secure)
 
     /* Experimental */
     assert(cookie.sameSite == SameSite.Lax)
