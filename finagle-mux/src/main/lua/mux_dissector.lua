@@ -41,7 +41,7 @@ local dprint2 = function() end
 local function resetDebugLevel()
     if default_settings.debug_level > debug_level.DISABLED then
         dprint = function(...)
-            info(table.concat({"Lua: ", ...}," "))
+            print(table.concat({"Lua: ", ...}," "))
         end
 
         if default_settings.debug_level > debug_level.LEVEL_1 then
