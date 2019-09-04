@@ -61,6 +61,11 @@ Bug Fixes
 * finagle-base-http: Removes the `Cookie` header of a `c.t.f.http.Message` whenever its cookie map
   becomes empty. ``PHAB_ID=D361326``
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-base-http: Add `None` as a valid SameSite header value. ``PHAB_ID=D365170``
+
 19.8.0
 ------
 

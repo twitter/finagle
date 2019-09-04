@@ -21,6 +21,8 @@ object SameSite {
 
   case object Strict extends SameSite
 
+  case object None extends SameSite
+
   /**
    * Represents the attribute not being set on the Cookie.
    */
@@ -34,6 +36,7 @@ object SameSite {
   def fromString(s: String): SameSite = s match {
     case "Lax" => Lax
     case "Strict" => Strict
+    case "None" => None
     case _ => Unset
   }
 
