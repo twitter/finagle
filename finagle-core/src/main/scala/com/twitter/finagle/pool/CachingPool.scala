@@ -60,20 +60,23 @@ private[finagle] final class CachingPool[Req, Rep](
     // access mediated by synchronizing on `this`. note that contention on it
     // should be close to non-existent as it would be rare for multiple threads
     // to call `close` concurrently.
-    private[this] var closeF: Future[Unit] = null
+    private[this] var closed = false
 
     // We ensure that a service wrapper instance is only ever closed once to defend against
     // inserting the same underlying service into the cache multiple times.
-    override def close(deadline: Time): Future[Unit] = synchronized {
-      if (closeF eq null) {
-        if (pool.checkin(underlying)) {
-          closeF = Future.Done
+    override def close(deadline: Time): Future[Unit] = {
+      val closeUnderlying = synchronized {
+        if (closed) {
+          false // already back in the pool, nothing to do.
         } else {
-          // if not added back to the pool, close the underlying service.
-          closeF = underlying.close(deadline)
+          closed = true
+          !pool.checkin(underlying)
         }
       }
-      closeF
+      // wasn't added back to the pool, close the underlying service.
+      if (closeUnderlying)
+        underlying.close(deadline)
+      Future.Done
     }
   }
 
@@ -182,7 +185,10 @@ private[pool] object CachingPool {
         null // nothing left in the pool
       } else if (idle.maybeCheckout()) {
         if (idle.service.status == Status.Closed) {
-          // got one that was already closed. try again.
+          // got one that was already closed. try again. note that while
+          // a `Service` may signal that it is unusable with `Status.Closed`,
+          // it does not guarantee that it's ever had `Service.close` called.
+          // this does so in order to assure that resources are cleaned up.
           idle.service.close()
           checkout()
         } else {
