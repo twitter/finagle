@@ -46,7 +46,7 @@ private object TrafficDistributorTest {
   }
 
   private case class Balancer(
-    endpoints: Activity[Traversable[AddressFactory]],
+    endpoints: Activity[Iterable[AddressFactory]],
     onClose: scala.Function0[Unit] = () => ())
       extends ServiceFactory[Int, Int] {
     var offeredLoad = 0
@@ -68,8 +68,10 @@ private object TrafficDistributorTest {
     override def toString: String = s"Balancer($endpoints)"
   }
 
-  // Return the distribution for the the given `balancer` as a tuple
-  // of (weight, size, offer load).
+  /**
+   * Return the distribution for the the given `balancer` as a tuple
+   * of (weight, size, offer load).
+   */
   def distribution(balancers: Set[Balancer]): Set[(Double, Int, Int)] = {
     balancers.flatMap { b =>
       val endpoints = b.endpoints.sample()
@@ -204,7 +206,7 @@ class TrafficDistributorTest extends FunSuite {
     }
 
     locally {
-      val R = 10 * 1000
+      val R = 100 * 1000
       // This shows that weights can still be interpreted as multipliers for load relative
       // to other nodes. For example, a node with weight 2.0 should receive roughly twice
       // the traffic it would have normally received with weight 1.0. We say "roughly"
@@ -222,14 +224,13 @@ class TrafficDistributorTest extends FunSuite {
 
       val result = distribution(balancers)
 
-      val baseline = result.collect {
-        case ((w, s, l)) if s / w == 1.0 => l / w
-      }.head
+      val baseline = result.collectFirst {
+        case ((weight, size, loadOffered)) if size / weight == 1.0 => loadOffered / weight
+      }.get
 
-      result.foreach {
-        case ((w, _, l)) => assert(math.abs(l / w - baseline) <= baseline * ε)
-      }
+      result.foreach { case ((w, s, l)) => assert(math.abs((l / w) - baseline) <= baseline * ε) }
     }
+
   })
 
   test("memoize calls to newEndpoint and newBalancer")(new Ctx {

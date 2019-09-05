@@ -4,7 +4,6 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.util.registry.GlobalRegistry
 import java.util.concurrent.atomic.AtomicInteger
-import scala.collection.breakOut
 
 object StackRegistry {
 
@@ -27,7 +26,7 @@ object StackRegistry {
               case p: Product =>
                 // TODO: many case classes have a $outer field because they close over an outside scope.
                 // this is not very useful, and it might make sense to filter them out in the future.
-                val fields = p.getClass.getDeclaredFields.map(_.getName)(breakOut)
+                val fields = p.getClass.getDeclaredFields.map(_.getName)
                 val valueFunctions = p.productIterator.map(v => () => v.toString).toSeq
                 seq ++ fields.zipAll(valueFunctions, "<unknown>", () => "<unknown>")
               case _ => seq

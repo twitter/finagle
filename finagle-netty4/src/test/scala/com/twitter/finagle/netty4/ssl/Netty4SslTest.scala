@@ -31,7 +31,7 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
   private[this] def assertGaugeIsZero(
     statsReceiver: InMemoryStatsReceiver,
     name: Array[String]
-  ): Unit = statsReceiver.gauges.get(name) match {
+  ): Unit = statsReceiver.gauges.get(name.toIndexedSeq) match {
     case Some(f) => assert(f() == 0.0)
     case None => // all good
   }
@@ -40,7 +40,7 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
     value: Float
   )(statsReceiver: InMemoryStatsReceiver,
     name: Array[String]
-  ): Unit = statsReceiver.gauges.get(name) match {
+  ): Unit = statsReceiver.gauges.get(name.toIndexedSeq) match {
     case Some(f) => assert(f() == value)
     case None => fail()
   }

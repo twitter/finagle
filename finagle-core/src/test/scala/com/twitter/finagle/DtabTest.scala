@@ -9,7 +9,7 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     NameTree.read(t).map(Name(_))
 
   def assertEquiv[T: Equiv](left: T, right: T): Assertion =
-    assert(Equiv[T].equiv(left, right), left + "!=" + right)
+    assert(Equiv[T].equiv(left, right), s"$left!=$right")
 
   test("d1 ++ d2") {
     val d1 = Dtab.read("/foo => /bar")
@@ -77,10 +77,8 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     b += Dentry.read("/c => /d")
     val dtab = b.result
 
-    val dtab1: Dtab = dtab map {
-      case Dentry(a, b) =>
-        Dentry.read("%s=>%s".format(a.show.toUpperCase, b.show.toUpperCase))
-    }
+    val dtab1: Dtab = Dtab(dtab.map((e: Dentry) =>
+      Dentry.read("%s=>%s".format(e.prefix.show.toUpperCase, e.dst.show.toUpperCase))))
 
     assert(dtab1.size == 2)
     dtab1(0) match {

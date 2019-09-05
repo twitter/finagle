@@ -7,7 +7,7 @@ import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Status}
 import com.twitter.util.{Activity, Await, Closable, Future, Time, Var}
 import org.scalatest.FunSuite
 import scala.annotation.tailrec
-import scala.collection.SortedMap
+import scala.collection.immutable.SortedMap
 
 class P2CPeakEwmaTest extends FunSuite with P2CSuite {
   override val ε: Double = 0.0005 * R

@@ -5,6 +5,7 @@ import com.twitter.finagle.stats.BucketAndCount
 import com.twitter.util.{Closable, Duration, Future, MockTimer, Time, Timer}
 import org.HdrHistogram.{Histogram, HistogramIterationValue, Recorder}
 import scala.collection.mutable
+import scala.collection.immutable
 
 object WindowedPercentileHistogram {
   // Based on testing, a window of 30 seconds and 3 buckets tracked request
@@ -132,7 +133,7 @@ class WindowedPercentileHistogram(
     def createBucketAndCounts(
       histogramIterator: java.util.Iterator[HistogramIterationValue]
     ): Seq[BucketAndCount] = {
-      var bucketAndCounts = mutable.ArrayBuffer[BucketAndCount]()
+      var bucketAndCounts = new immutable.VectorBuilder[BucketAndCount]()
 
       while (histogramIterator.hasNext) {
         val bucket = histogramIterator.next()
@@ -158,7 +159,7 @@ class WindowedPercentileHistogram(
               bucket.getCountAtValueIteratedTo.toInt)
         }
       }
-      bucketAndCounts
+      bucketAndCounts.result()
     }
 
     val iterator = synchronized {

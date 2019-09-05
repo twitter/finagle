@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
 import org.scalatest.FunSuite
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CyclicBarrier
 import scala.collection.mutable.Buffer
-import java.util.concurrent.CountDownLatch
 
 class ChanTest extends FunSuite {
   test("Proc should admit one at a time, in the order received, queueing items") {

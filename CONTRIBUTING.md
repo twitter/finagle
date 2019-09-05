@@ -89,7 +89,7 @@ locally).
 When appropriate, use [ScalaCheck][scalacheck] to write property-based
 tests for your code. This will often produce more thorough and effective
 inputs for your tests. We use ScalaTest's
-[GeneratorDrivenPropertyChecks][gendrivenprop] as the entry point for
+[ScalaCheckDrivenPropertyChecks][gendrivenprop] as the entry point for
 writing these tests.
 
 ## Compatibility

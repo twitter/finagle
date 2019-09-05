@@ -10,7 +10,7 @@ class FinagleSchedulerTest extends FunSuite {
   test("addGauges") {
     val stats = new InMemoryStatsReceiver()
     val scheduler = new LocalScheduler()
-    val gauges = new mutable.MutableList[Gauge]()
+    val gauges = new mutable.ArrayBuffer[Gauge]()
 
     FinagleScheduler.addGauges(scheduler, stats, gauges)
     assert(2 == gauges.size)
