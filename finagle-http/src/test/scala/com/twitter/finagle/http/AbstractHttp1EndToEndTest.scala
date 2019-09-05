@@ -282,7 +282,7 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     }
   }
 
-  test(s"streaming server won't accept fixed length messages that exceed maxRequestSize") {
+  test(s"streaming server will accept fixed length messages that exceed maxRequestSize") {
     // given
     val svc = Service.mk[Request, Response] { req =>
       Future.value(Response(req))
@@ -305,7 +305,7 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     val resp = await(client(req))
 
     // then
-    assert(resp.statusCode == 413)
+    assert(resp.statusCode == 200)
 
     await(server.close())
     await(client.close())
