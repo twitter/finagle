@@ -96,7 +96,10 @@ class MarshalledContextTest extends AbstractContextTest {
       checkKey(a)
       checkKey(b)
 
-      assert(ctx.marshal(roundTrip) == ctx.marshal())
+      val marshallRoundtrip = ctx.marshal(roundTrip)
+      val marshallDirect = ctx.marshal()
+
+      assert(marshallRoundtrip.iterator.sameElements(marshallDirect.iterator))
     }
   }
 }

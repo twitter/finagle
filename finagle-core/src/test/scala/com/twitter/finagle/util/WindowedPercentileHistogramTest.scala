@@ -306,7 +306,7 @@ class WindowedPercentileHistogramTest
       eventually {
         assert(
           wp.toBucketAndCounts().toSet == generateBucketAndCounts(
-            listOfInputsToCreateBucketAndCounts,
+            listOfInputsToCreateBucketAndCounts.toSeq,
             10000,
             wp).toSet)
       }

@@ -368,13 +368,13 @@ object FlagBalancerFactory extends LoadBalancerFactory {
   def get: LoadBalancerFactory = this
 
   private def p2c(): LoadBalancerFactory =
-    exp.loadMetric() match {
+    loadbalancer.exp.loadMetric() match {
       case "ewma" => Balancers.p2cPeakEwma()
       case _ => Balancers.p2c()
     }
 
   private def aperture(useDeterminsticOrdering: Option[Boolean]): LoadBalancerFactory =
-    exp.loadMetric() match {
+    loadbalancer.exp.loadMetric() match {
       case "ewma" => Balancers.aperturePeakEwma(useDeterministicOrdering = useDeterminsticOrdering)
       case _ => Balancers.aperture(useDeterministicOrdering = useDeterminsticOrdering)
     }

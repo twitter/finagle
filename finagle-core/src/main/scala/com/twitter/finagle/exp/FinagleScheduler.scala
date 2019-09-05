@@ -18,7 +18,7 @@ object scheduler
 private[finagle] object FinagleScheduler {
   private val log = DefaultLogger
 
-  private[this] val gauges = mutable.MutableList[Gauge]()
+  private[this] val gauges: mutable.Buffer[Gauge] = mutable.ArrayBuffer[Gauge]()
 
   private object Integer {
     def unapply(str: String): Option[Int] = {
@@ -60,7 +60,7 @@ private[finagle] object FinagleScheduler {
   private[exp] def addGauges(
     scheduler: Scheduler,
     statsReceiver: StatsReceiver,
-    gauges: mutable.MutableList[Gauge]
+    gauges: mutable.Buffer[Gauge]
   ): Unit = {
     gauges.synchronized {
       gauges += statsReceiver.addGauge("dispatches") {

@@ -7,7 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
-Breaking API Changes
+New Features
+~~~~~~~~~~~~
+
+* finagle-{core,init,toggle,netty4}: Enables cross-build for 2.13.0. ``PHAB_ID=D364013``
+
+  Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
 * finagle-core: The constructor on `c.t.f.filter.NackAdmissionFilter` used for testing that
@@ -54,6 +59,8 @@ Runtime Behavior Changes
 * finagle-http: Enable Ping Failure Detection for MultiplexHandler based HTTP/2 clients. Note that
   the Ping Failure Detection implementation has been removed completely from the
   non-MultiplexHandler based HTTP/2 client. ``PHAB_ID=D360712``
+
+* finagle: Added a dependency on Scala Collections Compat 2.1.2. ``PHAB_ID=D364013``
 
 Bug Fixes
 ~~~~~~~~~

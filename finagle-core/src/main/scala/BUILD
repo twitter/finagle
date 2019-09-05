@@ -1,5 +1,5 @@
 scala_library(
-    sources = rglobs("*.scala"),
+    sources = rglobs("*.scala", "../scala-2.12-/*.scala"),
     compiler_option_sets = {"fatal_warnings"},
     provides = scala_artifact(
         org = "com.twitter",
@@ -10,6 +10,7 @@ scala_library(
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
         "3rdparty/jvm/org/hdrhistogram",
+        "3rdparty/jvm/org/scala-lang/modules:scala-collection-compat",
         "finagle-internal/init/src/main/scala",
         "finagle/finagle-core/src/main/resources",
         "finagle/finagle-init/src/main/scala",

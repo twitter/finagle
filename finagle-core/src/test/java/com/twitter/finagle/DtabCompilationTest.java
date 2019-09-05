@@ -8,12 +8,12 @@ import org.junit.Test;
 public class DtabCompilationTest {
   @Test
   public void testCompilation() {
-    Dtab d = Dtab.empty();
+    Dtab d = Dtab.emptyDtab();
     d = Dtab.local();
     d = Dtab.base();
     Dtab.setLocal(d);
     Dtab base = Dtab.base();
-    Dtab.setBase(Dtab.empty());
+    Dtab.setBase(Dtab.emptyDtab());
     Dtab.setBase(base);
     d = Dtab.local().concat(Dtab.base());
     d = Dtab.local().append(Dentry.read("/foo=>/bar"));

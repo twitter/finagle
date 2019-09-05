@@ -6,9 +6,9 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.{spy, verify, when, atLeastOnce}
 import org.mockito.Matchers.any
 import org.scalactic.source.Position
+import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import scala.collection.JavaConverters._
 
 class TracingFilterTest
@@ -39,14 +39,14 @@ class TracingFilterTest
     val composed = filter andThen service
     Await.result(composed(4))
     verify(tracer, atLeastOnce()).record(captor.capture())
-    captor.getAllValues.asScala
+    captor.getAllValues.asScala.toSeq
   }
 
   def recordException(filter: Filter[Int, Int, Int, Int]): Seq[Record] = {
     val composed = filter andThen exceptingService
     intercept[Exception] { Await.result(composed(4)) }
     verify(tracer, atLeastOnce()).record(captor.capture())
-    captor.getAllValues.asScala
+    captor.getAllValues.asScala.toSeq
   }
 
   def testAnnotatingTracingFilter(

@@ -8,7 +8,6 @@ import java.util
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.StampedLock
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
 
 /**
  * A service factory that keeps track of idling times to implement
@@ -102,6 +101,7 @@ class ServiceFactoryCache[Key, Req, Rep](
         } else {
           expired
         }
+
         evictees.foreach {
           case (key, _) =>
             val removed = cache.remove(key)
@@ -212,7 +212,7 @@ class ServiceFactoryCache[Key, Req, Rep](
   def close(deadline: Time): Future[Unit] = {
     val writeStamp = lock.writeLock()
     val svcFacs = try {
-      val values = ListBuffer.empty[Closable]
+      val values = List.newBuilder[Closable]
       val it = cache.values.iterator
       // Clear the cache to avoid racing with the timer task. If the
       // task is invoked after releasing this lock but before it has
@@ -225,8 +225,8 @@ class ServiceFactoryCache[Key, Req, Rep](
     } finally {
       lock.unlockWrite(writeStamp)
     }
-    val closables = svcFacs :+ expiryTask
-    Closable.all(closables: _*).close(deadline)
+    svcFacs += expiryTask
+    Closable.all(svcFacs.result: _*).close(deadline)
   }
 
   private[finagle] def status(key: Key): Status = {

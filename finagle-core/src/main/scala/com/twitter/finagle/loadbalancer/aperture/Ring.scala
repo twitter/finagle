@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.util.Rng
-import scala.collection.mutable.ListBuffer
+import scala.collection.immutable.VectorBuilder
 
 private object Ring {
 
@@ -114,16 +114,16 @@ private class Ring(size: Int, rng: Rng) {
    * Thus, we interpret a width of 0 as picking one index.
    */
   def indices(offset: Double, width: Double): Seq[Int] = {
-    val seq = new ListBuffer[Int]
+    val builder = new VectorBuilder[Int]
     var i = index(offset)
     var r = range(offset, width)
     while (r > 0) {
       val idx = i % size
-      seq += idx
+      builder += idx
       i += 1
       r -= 1
     }
-    seq
+    builder.result()
   }
 
   /**
