@@ -7,12 +7,17 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+19.9.0
+------
+
 New Features
 ~~~~~~~~~~~~
 
 * finagle-{core,init,toggle,netty4}: Enables cross-build for 2.13.0. ``PHAB_ID=D364013``
 
-  Breaking API Changes
+* finagle-base-http: Add `None` as a valid SameSite header value. ``PHAB_ID=D365170``
+
+Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
 * finagle-core: The constructor on `c.t.f.filter.NackAdmissionFilter` used for testing that
@@ -67,11 +72,6 @@ Bug Fixes
 
 * finagle-base-http: Removes the `Cookie` header of a `c.t.f.http.Message` whenever its cookie map
   becomes empty. ``PHAB_ID=D361326``
-
-New Features
-~~~~~~~~~~~~
-
-* finagle-base-http: Add `None` as a valid SameSite header value. ``PHAB_ID=D365170``
 
 19.8.0
 ------
