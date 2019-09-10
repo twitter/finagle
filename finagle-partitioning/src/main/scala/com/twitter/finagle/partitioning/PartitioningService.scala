@@ -2,6 +2,7 @@ package com.twitter.finagle.partitioning
 
 import com.twitter.finagle._
 import com.twitter.util._
+import scala.collection.compat.immutable.ArraySeq
 
 /**
  * PartitioningService is responsible for request-key(s) based partition selection. Specially
@@ -16,6 +17,7 @@ import com.twitter.util._
  * operate only on a specific partition.
  */
 private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Req, Rep] {
+  import PartitioningService._
 
   /**
    * Returns the partition that the request belongs to. All keys in the request are assumed to
@@ -45,11 +47,12 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    * the caller can retry the failed batches again. The mergeResponses implementations should
    * construct the response object accordingly.
    *
-   * @param successes: successful responses
-   * @param failures: map of failed partitioned requests against the exception
+   * @param originalReq: The non-partitioned request the user supplied
+   * @param results: A PartitionedResults instance that encapsulates the successful and failed
+   *                 responses of paired with their partitioned requests.
    * @return merged response
    */
-  protected def mergeResponses(successes: Seq[Rep], failures: Map[Req, Throwable]): Rep
+  protected def mergeResponses(originalReq: Req, results: PartitionedResults[Req, Rep]): Rep
 
   protected[this] def applyService(
     request: Req,
@@ -65,11 +68,6 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
     applyService(t._1, t._2)
   }
 
-  private[this] val mergeResponsesFn = (seq: Seq[Either[(Req, Throwable), Rep]]) => {
-    val (failures, successes) = seq.partition(_.isLeft)
-    mergeResponses(successes.map(_.right.get), failures.map(_.left.get).toMap)
-  }
-
   /**
    * Determines whether the request's keys live on only one partition or on more than one partition.
    * In the former case we can skip `partitionRequest` and immediately call `applyService`. In the
@@ -80,6 +78,26 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    */
   protected def isSinglePartition(request: Req): Boolean
 
+  private[this] def makePartitionedRequests(req: Req): Seq[Future[(Req, Try[Rep])]] =
+    partitionRequest(req).map {
+      case (pReq, service) =>
+        partitionRequestFn((pReq, service)).transform { t =>
+          Future.value((pReq, t))
+        }
+    }
+
+  private[this] def doMergeResponses(request: Req)(results: Seq[(Req, Try[Rep])]): Rep = {
+    val success = ArraySeq.newBuilder[(Req, Rep)]
+    val failure = ArraySeq.newBuilder[(Req, Throwable)]
+
+    results.foreach {
+      case (req, Return(rep)) => success += ((req, rep))
+      case (req, Throw(t)) => failure += ((req, t))
+    }
+
+    mergeResponses(request, PartitionedResults(success.result(), failure.result()))
+  }
+
   final def apply(request: Req): Future[Rep] = {
     // Note that the services will be constructed in the implementing classes. So the
     // implementations will be responsible for closing them too.
@@ -88,17 +106,20 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
       applyService(request, getPartitionFor(request))
     } else {
       Future
-        .collect(
-          partitionRequest(request).map {
-            case (pReq, service) =>
-              partitionRequestFn((pReq, service)).transform {
-                case Return(response) =>
-                  Future.value(Right(response))
-                case Throw(exc) =>
-                  Future.value(Left((pReq, exc)))
-              }
-          }
-        ).map(mergeResponsesFn)
+        .collect(makePartitionedRequests(request))
+        .map(doMergeResponses(request))
     }
   }
+}
+
+object PartitioningService {
+
+  /**
+   * Encapsulates the success and failure pairs of the results of the partitioned requests.
+   * The requests are paired with the responses so that they can be matched up with the keys
+   * specified by the user and returned in that order.
+   */
+  protected[finagle] case class PartitionedResults[Req, Rep](
+    successes: Seq[(Req, Rep)],
+    failures: Seq[(Req, Throwable)])
 }

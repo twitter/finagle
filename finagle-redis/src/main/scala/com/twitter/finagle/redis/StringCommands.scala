@@ -157,6 +157,7 @@ private[redis] trait StringCommands { self: BaseClient =>
             case _ => throw new IllegalStateException()
           }.toSeq
         }
+
       case EmptyMBulkReply => Future.Nil
     }
 
@@ -169,7 +170,7 @@ private[redis] trait StringCommands { self: BaseClient =>
    */
   def mSet(kv: Map[Buf, Buf]): Future[Unit] =
     doRequest(MSet(kv)) {
-      case StatusReply(message) => Future.Unit
+      case StatusReply(_) => Future.Unit
     }
 
   /**
@@ -194,7 +195,7 @@ private[redis] trait StringCommands { self: BaseClient =>
    */
   def pSetEx(key: Buf, millis: Long, value: Buf): Future[Unit] =
     doRequest(PSetEx(key, millis, value)) {
-      case StatusReply(message) => Future.Unit
+      case StatusReply(_) => Future.Unit
     }
 
   /**
@@ -206,7 +207,7 @@ private[redis] trait StringCommands { self: BaseClient =>
    */
   def set(key: Buf, value: Buf): Future[Unit] =
     doRequest(Set(key, value)) {
-      case StatusReply(message) => Future.Unit
+      case StatusReply(_) => Future.Unit
     }
 
   /**
@@ -230,7 +231,7 @@ private[redis] trait StringCommands { self: BaseClient =>
    */
   def setEx(key: Buf, seconds: Long, value: Buf): Future[Unit] =
     doRequest(SetEx(key, seconds, value)) {
-      case StatusReply(message) => Future.Unit
+      case StatusReply(_) => Future.Unit
     }
 
   /**

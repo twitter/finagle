@@ -7,6 +7,7 @@ scala_library(
         repo = artifactory,
     ),
     dependencies = [
+        "3rdparty/jvm/org/scala-lang/modules:scala-collection-compat",
         "finagle/finagle-core",
         "util/util-core/src/main/scala",
         "util/util-hashing",

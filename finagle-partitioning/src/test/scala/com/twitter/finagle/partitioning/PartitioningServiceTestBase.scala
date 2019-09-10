@@ -7,6 +7,7 @@ import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.{param => ctfparam}
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
@@ -23,7 +24,6 @@ trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with 
 
   protected[this] val failingHosts = new mutable.HashSet[String]()
   protected[this] val slowHosts = new mutable.HashSet[String]()
-
   protected[this] var servers: Seq[(ListeningServer, InetSocketAddress, Int, Int)] = _
   protected[this] var client: Service[String, String] = _
   protected[this] var timer: MockTimer = _
@@ -124,4 +124,18 @@ object PartitioningServiceTestBase {
   val EchoDelimiter = ':'
 
   val Timeout: Duration = 5.seconds
+
+  def mergeStringResults(origReq: String, pr: PartitionedResults[String, String]): String = {
+    // responses contain the request keys. So just concatenate. In a real implementation this will
+    // typically be a key-value map.
+    if (pr.failures.isEmpty) {
+      pr.successes.map { case (_, v) => v }.mkString(ResponseDelimiter)
+    } else if (pr.successes.isEmpty) {
+      pr.failures.map { case (_, t) => t.getClass.getTypeName }.mkString(ResponseDelimiter)
+    } else {
+      // appending the server exceptions here to easily test partial success for batch operations
+      pr.successes.map { case (_, v) => v }.mkString(ResponseDelimiter) + ResponseDelimiter +
+        pr.failures.map { case (_, t) => t.getClass.getTypeName }.mkString(ResponseDelimiter)
+    }
+  }
 }
