@@ -1,10 +1,11 @@
 package com.twitter.finagle.memcached.partitioning
 
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.{param => _, _}
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.param.Logger
-import com.twitter.finagle.partitioning.{KetamaPartitioningService, param}
+import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
+import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, param}
+import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
 import com.twitter.logging.Level
@@ -24,15 +25,15 @@ private[finagle] object MemcachedPartitioningService {
     "Partitioning Service based on Ketama consistent hashing for memcached protocol"
 
   def module: Stackable[ServiceFactory[Command, Response]] =
-    new KetamaPartitioningService.Module[Command, Response, Buf] {
+    new ConsistentHashPartitioningService.Module[Command, Response, Buf] {
 
       override val role: Stack.Role = MemcachedPartitioningService.role
       override val description: String = MemcachedPartitioningService.description
 
-      def newKetamaPartitioningService(
+      def newConsistentHashPartitioningService(
         underlying: Stack[ServiceFactory[Command, Response]],
         params: Params
-      ): KetamaPartitioningService[Command, Response, Buf] = {
+      ): ConsistentHashPartitioningService[Command, Response, Buf] = {
 
         val param.KeyHasher(hasher) = params[param.KeyHasher]
         val param.NumReps(numReps) = params[param.NumReps]
@@ -46,8 +47,8 @@ private[finagle] class MemcachedPartitioningService(
   underlying: Stack[ServiceFactory[Command, Response]],
   params: Stack.Params,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
-  numReps: Int = KetamaPartitioningService.DefaultNumReps)
-    extends KetamaPartitioningService[Command, Response, Buf](
+  numReps: Int = ConsistentHashPartitioningService.DefaultNumReps)
+    extends ConsistentHashPartitioningService[Command, Response, Buf](
       underlying,
       params,
       keyHasher,
@@ -105,28 +106,26 @@ private[finagle] class MemcachedPartitioningService(
    * (get/getv/gets). It barfs upon unexpected invocations.
    */
   final override protected def mergeResponses(
-    successes: Seq[Response],
-    failures: Map[Command, Throwable]
+    origReq: Command,
+    pr: PartitionedResults[Command, Response]
   ): Response = {
     ValuesAndErrors(
-      successes.flatMap {
-        case Values(values) =>
-          values
-        case nonValue =>
+      values = pr.successes.flatMap {
+        case (_, Values(values)) => values
+        case (_, nonValue) =>
           if (logger.isLoggable(Level.DEBUG))
             logger
               .log(Level.DEBUG, s"UnsupportedResponse: Expected Values, instead found $nonValue")
           throw new UnsupportedResponse(s"Expected Values, instead found $nonValue")
       },
-      failures.flatMap {
-        case (command, t) =>
-          getPartitionKeys(command).map(_ -> t)
-      }
+      errors = pr.failures.flatMap {
+        case (cmd, t) => getPartitionKeys(cmd).map(_ -> t)
+      }.toMap
     )
   }
 
   protected def isSinglePartition(request: Command): Boolean = request match {
     case _: StorageCommand | _: ArithmeticCommand | _: Delete => true
-    case _ => false
+    case _ => allKeysForSinglePartition(request)
   }
 }

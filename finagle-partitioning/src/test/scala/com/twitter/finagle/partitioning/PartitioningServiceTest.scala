@@ -2,6 +2,7 @@ package com.twitter.finagle.partitioning
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Address, _}
 import com.twitter.util._
@@ -281,21 +282,10 @@ private[this] class SimplePartitioningService(
   }
 
   protected override def mergeResponses(
-    successes: Seq[String],
-    failures: Map[String, Throwable]
-  ): String = {
-    // responses contain the request keys. So just concatenate. In a real implementation this will
-    // typically be a key-value map.
-    if (failures.isEmpty) {
-      successes.mkString(ResponseDelimiter)
-    } else if (successes.nonEmpty) {
-      // appending the server exceptions here to easily test partial success for batch operations
-      successes.mkString(ResponseDelimiter) + ResponseDelimiter +
-        failures.values.map(_.getClass.getTypeName).mkString(ResponseDelimiter)
-    } else {
-      failures.values.map(_.getClass.getTypeName).mkString(ResponseDelimiter)
-    }
-  }
+    originalReq: String,
+    pr: PartitionedResults[String, String]
+  ): String =
+    mergeStringResults(originalReq, pr)
 
   protected def isSinglePartition(request: String): Boolean = false
 }

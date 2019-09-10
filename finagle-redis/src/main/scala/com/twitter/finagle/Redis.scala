@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{ClientDispatcher, StalledPipelineTimeout}
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
@@ -11,6 +12,7 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
+import com.twitter.finagle.redis.RedisPartitioningService
 import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -40,6 +42,16 @@ trait RedisRichClient { self: Client[Command, Reply] =>
 
   def newTransactionalClient(dest: Name, label: String): redis.TransactionalClient =
     redis.TransactionalClient(newClient(dest, label))
+
+  def newPartitionedClient(dest: Name, label: String): redis.PartitionedClient =
+    redis.PartitionedClient.apply(
+      Redis.partitionedClient.newClient(dest, label)
+    )
+
+  def newPartitionedClient(dest: String): redis.PartitionedClient =
+    redis.PartitionedClient.apply(
+      Redis.partitionedClient.newClient(dest)
+    )
 }
 
 object Redis extends Client[Command, Reply] with RedisRichClient {
@@ -57,6 +69,9 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
      */
     private val stack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
       .insertBefore(DefaultPool.Role, RedisPool.module)
+
+    private[finagle] val hashRingStack: Stack[ServiceFactory[Command, Reply]] =
+      stack.insertAfter(BindingFactory.role, RedisPartitioningService.module)
   }
 
   case class Client(
@@ -128,6 +143,9 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
   }
 
   def client: Redis.Client = Client()
+
+  private[finagle] def partitionedClient: Redis.Client =
+    client.withStack(Client.hashRingStack)
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Reply] =
     client.newClient(dest, label)

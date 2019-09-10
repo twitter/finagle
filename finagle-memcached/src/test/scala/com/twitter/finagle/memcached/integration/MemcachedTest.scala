@@ -310,7 +310,7 @@ abstract class MemcachedTest
         assert(clientSet.size == 1)
       case _ =>
       // the new client doesn't have a way to get to the equivalent functionality in
-      // KetamaPartitioningService.partitionByKey
+      // ConsistentHashPartitioningService.partitionByKey
     }
 
     // previously set values have cache misses

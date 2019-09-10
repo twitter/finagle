@@ -2,12 +2,12 @@ package com.twitter.finagle.partitioning
 
 import com.twitter.concurrent.Broker
 import com.twitter.finagle
-import com.twitter.finagle.{param => _, _}
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.service.FailedService
+import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing._
 import com.twitter.util._
 import java.net.InetSocketAddress
@@ -19,10 +19,10 @@ import scala.collection.{breakOut, mutable}
  * node restart. This way implementations can adjust their partitions if weight is a factor
  * in partitioning.
  */
-private[partitioning] class KetamaNodeManager[Req, Rep, Key](
+private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   underlying: Stack[ServiceFactory[Req, Rep]],
   params: Stack.Params,
-  numReps: Int = KetamaPartitioningService.DefaultNumReps) { self =>
+  numReps: Int = ConsistentHashPartitioningService.DefaultNumReps) { self =>
 
   private[this] val statsReceiver = {
     val finagle.param.Stats(stats) = params[finagle.param.Stats]
@@ -243,9 +243,11 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
     }
   }
 
-  def getServiceForHash(hash: Long): Future[Service[Req, Rep]] = {
+  def getServiceForHash(hash: Long): Future[Service[Req, Rep]] =
     currentDistributor.nodeForHash(hash)
-  }
+
+  def getPartitionIdForHash(hash: Long): Long =
+    currentDistributor.partitionIdForHash(hash)
 
   def close(deadline: Time): Future[Unit] = {
     nodeWatcher.close(deadline)

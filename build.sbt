@@ -42,6 +42,7 @@ val nettyVersionInfo = settingKey[String]("A setting reference for printing the 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
 
+val scalaCollectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.4"
 val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.11"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
@@ -113,9 +114,10 @@ def gcJavaOptions: Seq[String] = {
     "-Xmx3G"
   )
 }
+
 val withTwoThirteen = Seq(
   crossScalaVersions += "2.13.0",
-  libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"
+  libraryDependencies += scalaCollectionCompat
 )
 
 val sharedSettings = Seq(
@@ -141,7 +143,7 @@ val sharedSettings = Seq(
       case _ => sourceDir / "scala-2.12-"
     }
   },
-  
+
   ScoverageKeys.coverageHighlighting := true,
   ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
 
@@ -162,13 +164,13 @@ val sharedSettings = Seq(
     "-Xlint:-missing-interpolator",
     "-Ypatmat-exhaust-depth", "40"
   ),
-  
+
   javacOptions ++= Seq(
     "-Xlint:unchecked",
     "-source", "1.8",
     "-target", "1.8"
   ),
-  
+
   javacOptions in doc := Seq("-source", "1.8"),
 
   javaOptions ++= Seq(
@@ -533,7 +535,8 @@ lazy val finaglePartitioning = Project(
   name := "finagle-partitioning",
   libraryDependencies ++= Seq(
     util("core"),
-    util("hashing")
+    util("hashing"),
+    scalaCollectionCompat
   )
 ).dependsOn(
   finagleNetty4,
@@ -664,7 +667,7 @@ lazy val finagleRedis = Project(
   libraryDependencies ++= Seq(
     util("logging")
   )
-).dependsOn(finagleCore, finagleNetty4)
+).dependsOn(finagleCore, finagleNetty4, finaglePartitioning)
 
 lazy val finagleMux = Project(
   id = "finagle-mux",

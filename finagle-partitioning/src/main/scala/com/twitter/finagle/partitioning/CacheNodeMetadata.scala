@@ -4,12 +4,12 @@ import com.twitter.finagle.Addr
 
 /**
  * Cache node metadata consumed by clients that implement sharding (see
- * [[com.twitter.finagle.memcached.KetamaPartitionedClient]]).
+ * [[com.twitter.finagle.partitioning.ConsistentHashPartitioningService]]).
  *
  * This class and its companion object are private because they are only an implementation detail for
  * converting between [[com.twitter.finagle.partitioning.CacheNode]] and
  * [[com.twitter.finagle.Address]]. We need to convert between these types for backwards
- * compatibility: [[com.twitter.finagle.KetamaPartitionedClient]] consumes
+ * compatibility: [[com.twitter.finagle.partitioning.ConsistentHashPartitioningService]] consumes
  * [[CacheNode]]s but [[com.twitter.finagle.Resolver]]s return
  * [[com.twitter.finagle.Address]]s.
  *

@@ -3,19 +3,20 @@ package com.twitter.finagle.partitioning
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
-import com.twitter.finagle.partitioning.KetamaPartitioningService.NoPartitioningKeys
+import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
+import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.hashing.KeyHasher
 import com.twitter.util._
 import java.nio.charset.StandardCharsets.UTF_8
 import scala.util.Random
 
-class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
+class ConsistentHashPartitioningServiceTest extends PartitioningServiceTestBase {
 
   import PartitioningServiceTestBase._
 
   override def getPartitioningServiceModule: Stackable[ServiceFactory[String, String]] = {
-    TestKetamaPartitioningService.module
+    TestConsistentHashPartitioningService.module
   }
 
   private[this] def randomString(length: Int): String = {
@@ -271,24 +272,49 @@ class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
       awaitResult(client(""))
     }
   }
+
+  import ConsistentHashPartitioningService.allKeysForSinglePartition
+
+  def isSingleLongPartition(ids: Seq[Long]): Boolean =
+    allKeysForSinglePartition[Long](ids, identity)
+
+  test("SinglePartitionDetector when all keys map to the same partition") {
+    assert(isSingleLongPartition(Seq(1L, 1L, 1L, 1L)))
+  }
+
+  test("SinglePartitionDetector when keys map to different partitions") {
+    assert(!isSingleLongPartition(Seq(1L, 1L, 1L, 2L)))
+    assert(!isSingleLongPartition(Seq(1L, 1L, 2L, 1L)))
+    assert(!isSingleLongPartition(Seq(1L, 2L, 1L, 1L)))
+    assert(!isSingleLongPartition(Seq(2L, 1L, 1L, 1L)))
+    assert(!isSingleLongPartition(Seq(1L, 2L, 3L, 4L)))
+  }
+
+  test("SinglePartitionDetector when there is only one key") {
+    assert(isSingleLongPartition(Seq(1L)))
+  }
+
+  test("SinglePartitionDetector when the keys are empty") {
+    assert(isSingleLongPartition(Seq.empty[Long]))
+  }
 }
 
-object TestKetamaPartitioningService {
+object TestConsistentHashPartitioningService {
 
   val role = Stack.Role("KetamaPartitioning")
   val description = "Partitioning Service based on Ketama consistent hashing"
 
   private[finagle] def module: Stackable[ServiceFactory[String, String]] =
-    new KetamaPartitioningService.Module[String, String, String] {
+    new ConsistentHashPartitioningService.Module[String, String, String] {
 
-      override val role: Stack.Role = TestKetamaPartitioningService.role
-      override val description: String = TestKetamaPartitioningService.description
+      override val role: Stack.Role = TestConsistentHashPartitioningService.role
+      override val description: String = TestConsistentHashPartitioningService.description
 
-      def newKetamaPartitioningService(
+      def newConsistentHashPartitioningService(
         underlying: Stack[ServiceFactory[String, String]],
         params: Params
-      ): KetamaPartitioningService[String, String, String] = {
-        new TestKetamaPartitioningService(
+      ): ConsistentHashPartitioningService[String, String, String] = {
+        new TestConsistentHashPartitioningService(
           underlying = underlying,
           params = params
         )
@@ -296,13 +322,13 @@ object TestKetamaPartitioningService {
     }
 }
 
-private[this] class TestKetamaPartitioningService(
+private[this] class TestConsistentHashPartitioningService(
   underlying: Stack[ServiceFactory[String, String]],
   params: Stack.Params,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
-  numReps: Int = KetamaPartitioningService.DefaultNumReps,
+  numReps: Int = ConsistentHashPartitioningService.DefaultNumReps,
   oldLibMemcachedVersionComplianceMode: Boolean = false)
-    extends KetamaPartitioningService[String, String, String](
+    extends ConsistentHashPartitioningService[String, String, String](
       underlying,
       params,
       keyHasher,
@@ -330,21 +356,10 @@ private[this] class TestKetamaPartitioningService(
   }
 
   protected override def mergeResponses(
-    successes: Seq[String],
-    failures: Map[String, Throwable]
-  ): String = {
-    // responses contain the request keys. So just concatenate. In a real implementation this will
-    // typically be a key-value map.
-    if (failures.isEmpty) {
-      successes.mkString(ResponseDelimiter)
-    } else if (successes.nonEmpty) {
-      // appending the server exceptions here to easily test partial success for batch operations
-      successes.mkString(ResponseDelimiter) + ResponseDelimiter +
-        failures.values.map(_.getClass.getTypeName).mkString(ResponseDelimiter)
-    } else {
-      failures.values.map(_.getClass.getTypeName).mkString(ResponseDelimiter)
-    }
-  }
+    origReq: String,
+    pr: PartitionedResults[String, String]
+  ): String =
+    mergeStringResults(origReq, pr)
 
   protected def isSinglePartition(request: String): Boolean = false
 }
