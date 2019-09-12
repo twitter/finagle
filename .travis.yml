@@ -12,18 +12,25 @@ env:
     - JAVA_OPTS="-Dsbt.log.noformat=true"
 
   matrix:
+    - PROJECT=finagle-base-http
+    - PROJECT=finagle-benchmark
+    - PROJECT=finagle-benchmark-thrift
     - PROJECT=finagle-core
+    - PROJECT=finagle-example
     - PROJECT=finagle-exception
     - PROJECT=finagle-exp
     - PROJECT=finagle-grpc-context
     - PROJECT=finagle-http
     - PROJECT=finagle-http2
+    - PROJECT=finagle-init
     - PROJECT=finagle-integration
+    - PROJECT=finagle-memcached
     - PROJECT=finagle-mux
     - PROJECT=finagle-mysql
     - PROJECT=finagle-netty4
     - PROJECT=finagle-netty4-http
     - PROJECT=finagle-opencensus-tracing
+    - PROJECT=finagle-partitioning
     - PROJECT=finagle-redis
     - PROJECT=finagle-serversets
     - PROJECT=finagle-stats
@@ -39,6 +46,7 @@ env:
     # against the latest Netty development branch (or if Netty has introduced a breaking change to
     # the Finagle code). We choose specific projects to target that are more likely to be impacted
     # by Netty changes to prevent having to build & test for every project.
+    - PROJECT=finagle-base-http USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-core USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-http USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-http2 USE_NETTY_SNAPSHOT=true
@@ -56,6 +64,7 @@ matrix:
   allow_failures:
     # Anything that tests against a Netty SNAPSHOT build should not be considered when failing
     # the overall build result. The env vars here must match EXACTLY to the env matrix properties.
+    - env: PROJECT=finagle-base-http USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-core USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-http USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-http2 USE_NETTY_SNAPSHOT=true

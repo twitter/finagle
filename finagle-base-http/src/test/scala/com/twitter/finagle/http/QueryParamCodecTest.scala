@@ -111,23 +111,25 @@ class QueryParamCodecTest
     (0 until num).toIterator.map(f(_, length))
   }
 
-  test("massive number of collisions isn't super slow") {
-    // Using a quad core laptop i7 (single threaded) this many params took 399771 ms
-    // for scala HashMap and 277 ms using the Java LinkedHashMap on Java 8.
-    val num = 100 * 1000
+  // On Travis CI, we've seen this test take over 5.seconds.
+  if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
+    test("massive number of collisions isn't super slow") {
+      // Using a quad core laptop i7 (single threaded) this many params took 399771 ms
+      // for scala HashMap and 277 ms using the Java LinkedHashMap on Java 8.
+      val num = 100 * 1000
 
-    val cs = collisions(num, 22)
-    val queryString = cs.map(_ + "=a").mkString("?", "&", "")
+      val cs = collisions(num, 22)
+      val queryString = cs.map(_ + "=a").mkString("?", "&", "")
 
-    eventually {
-      val stopwatch = Stopwatch.start()
-      val result = QueryParamDecoder.decode(queryString)
-      assert(result.size == num)
-      // we give a generous 2 seconds to complete, 10x what was observed in local
-      // testing because CI can be slow at times. We'd expect quadratic behavior
-      // to take two orders of magnitude longer, so just making sure it's below
-      // 2 seconds should be enough to confirm we're not vulnerable to DoS attack.
-      assert(stopwatch() < 2.seconds)
+      eventually {
+        val stopwatch = Stopwatch.start()
+        val result = QueryParamDecoder.decode(queryString)
+        assert(result.size == num)
+        // we give a generous 2 seconds to complete, 10x what was observed in local
+        // testing because CI can be slow at times. We'd expect quadratic behavior
+        // to take two orders of magnitude longer, so just making sure it's below
+        // 2 seconds should be enough to confirm we're not vulnerable to DoS attack.
+        assert(stopwatch() < 2.seconds)
+      }
     }
-  }
 }
