@@ -734,7 +734,8 @@ lazy val finagleGrpcContext = Project(
   id = "finagle-grpc-context",
   base = file("finagle-grpc-context")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-grpc-context",
   libraryDependencies ++= Seq(
