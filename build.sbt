@@ -689,7 +689,8 @@ lazy val finagleThriftMux = Project(
   id = "finagle-thriftmux",
   base = file("finagle-thriftmux")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-thriftmux",
   libraryDependencies ++= Seq(
