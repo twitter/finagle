@@ -617,7 +617,8 @@ lazy val finagleThrift = Project(
   id = "finagle-thrift",
   base = file("finagle-thrift")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-thrift",
   libraryDependencies ++= scroogeLibs

@@ -16,6 +16,7 @@ import com.twitter.finagle.stats.{
 }
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
+import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.TempFile
