@@ -671,7 +671,8 @@ lazy val finagleMux = Project(
   id = "finagle-mux",
   base = file("finagle-mux")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-mux",
   libraryDependencies ++= Seq(

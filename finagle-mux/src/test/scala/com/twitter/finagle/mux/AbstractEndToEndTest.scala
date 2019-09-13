@@ -79,7 +79,7 @@ abstract class AbstractEndToEndTest
       for (n <- 0 until 2) {
         val rsp = Await.result(client(Request(Path.empty, Nil, Buf.Empty)), 30.seconds)
         val Buf.Utf8(str) = rsp.body
-        assert(str == "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
+        assert(str.replace("\r", "") == "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
       }
     }
     Await.result(server.close(), 5.seconds)
