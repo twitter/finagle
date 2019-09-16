@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http2: H2ServerFilter will no longer swallow exceptions that fire via
+  `exceptionCaught` in the Netty pipeline. `PHAB_ID=D369185`
+
 19.9.0
 ------
 
