@@ -49,12 +49,6 @@ private[http2] final class H2ServerFilter(timer: Timer) extends ChannelDuplexHan
       super.channelRead(ctx, msg)
   }
 
-  override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
-    // Swallowed so as to not bork the parent pipeline. This includes
-    // GOAWAY messages.
-    ()
-  }
-
   override def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
     val connectionHandler = ctx.pipeline.get(classOf[Http2ConnectionHandler])
 
