@@ -620,6 +620,9 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
   test("A failure during probing that does not mark dead moves back to probing") {
     val policy = new FailureAccrualPolicy {
+      val name = "Foo"
+      def show() = name
+
       var markDead = true
 
       def recordSuccess() = ()

@@ -6,12 +6,13 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.{Backoff, ResponseClass, ResponseClassifier, ReqRep}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.logging.Level
+import com.twitter.logging.Logger
 import com.twitter.util._
 import scala.util.Random
 
 object FailureAccrualFactory {
   private[this] val rng = new Random
+  private[this] val logger = Logger.get(this.getClass.getName)
 
   private[this] val DefaultConsecutiveFailures = FailureAccrualPolicy.DefaultConsecutiveFailures
   private[this] val DefaultSuccessRateThreshold = FailureAccrualPolicy.DefaultSuccessRateThreshold
@@ -181,7 +182,6 @@ object FailureAccrualFactory {
         implicitly[Stack.Param[FailureAccrualFactory.Param]],
         implicitly[Stack.Param[param.Timer]],
         implicitly[Stack.Param[param.Label]],
-        implicitly[Stack.Param[param.Logger]],
         implicitly[Stack.Param[param.ResponseClassifier]],
         implicitly[Stack.Param[Transporter.EndpointAddr]]
       )
@@ -192,26 +192,28 @@ object FailureAccrualFactory {
             val timer = params[param.Timer].timer
             val statsReceiver = params[param.Stats].statsReceiver
             val classifier = params[param.ResponseClassifier].responseClassifier
-
-            // extract some info useful for logging
-            val logger = params[param.Logger].log
             val endpoint = params[Transporter.EndpointAddr].addr
             val label = params[param.Label].label
 
+            val failureAccrualPolicy: FailureAccrualPolicy = policy()
+
             new FailureAccrualFactory[Req, Rep](
               underlying = next,
-              policy = policy(),
+              policy = failureAccrualPolicy,
               responseClassifier = classifier,
               timer = timer,
               statsReceiver = statsReceiver.scope("failure_accrual")
             ) {
-              override def didMarkDead(): Unit = {
-                logger.log(
-                  Level.INFO,
-                  s"""FailureAccrualFactory marking connection to "$label" as dead. """ +
+              override def didMarkDead(duration: Duration): Unit = {
+                // acceptable race condition here for the right `policy.show()`. A policy's
+                // state is only reset after it is revived,`policy.revived()` which is called
+                // afer `duration` and a successful probe.
+                logger.info(
+                  s"""marking connection to "$label" as dead for ${duration.inSeconds} seconds. """ +
+                    s"""Policy: ${failureAccrualPolicy.show()}. """ +
                     s"""Remote Address: $endpoint"""
                 )
-                super.didMarkDead()
+                super.didMarkDead(duration)
               }
             }
 
@@ -342,14 +344,14 @@ class FailureAccrualFactory[Req, Rep](
 
     removedForCounter.incr(duration.inMilliseconds.toInt)
 
-    didMarkDead()
+    didMarkDead(duration)
   }
 
   /**
    * Called by FailureAccrualFactory after marking an endpoint dead. Override
    * this method to perform additional actions.
    */
-  protected def didMarkDead() = {}
+  protected def didMarkDead(duration: Duration) = {}
 
   /**
    * Enter 'Probing' state.

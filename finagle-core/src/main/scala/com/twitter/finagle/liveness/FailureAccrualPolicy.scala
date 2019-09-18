@@ -2,7 +2,7 @@ package com.twitter.finagle.liveness
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.util.Ema
+import com.twitter.finagle.util.{Ema, Showable}
 import com.twitter.util.{Duration, Stopwatch, WindowedAdder}
 
 /**
@@ -16,6 +16,11 @@ import com.twitter.util.{Duration, Stopwatch, WindowedAdder}
  *      for more details.
  */
 abstract class FailureAccrualPolicy { self =>
+
+  /**
+   * Name of the policy.
+   */
+  def name: String
 
   /** Invoked by FailureAccrualFactory when a request is successful. */
   def recordSuccess(): Unit
@@ -33,6 +38,12 @@ abstract class FailureAccrualPolicy { self =>
    */
   def revived(): Unit
 
+  /*
+   * Invoked by FailureAccrualFActory to retrieve a string representation
+   * of the policy's current state.
+   */
+  def show(): String
+
   /**
    * Creates a [[FailureAccrualPolicy]] which uses both `this` and `that`.
    *
@@ -41,6 +52,8 @@ abstract class FailureAccrualPolicy { self =>
    */
   final def orElse(that: FailureAccrualPolicy): FailureAccrualPolicy =
     new FailureAccrualPolicy {
+      val name: String = s"${self.name}, ${that.name}"
+
       def recordSuccess(): Unit = {
         self.recordSuccess()
         that.recordSuccess()
@@ -65,10 +78,16 @@ abstract class FailureAccrualPolicy { self =>
         self.revived()
         that.revived()
       }
+
+      def show(): String = s"${self.show()}, ${that.show()}"
     }
 }
 
 object FailureAccrualPolicy {
+
+  implicit val showable: Showable[FailureAccrualPolicy] = new Showable[FailureAccrualPolicy] {
+    def show(policy: FailureAccrualPolicy): String = policy.show()
+  }
 
   val DefaultConsecutiveFailures = 5
   val DefaultMinimumRequestThreshold = 5
@@ -118,6 +137,8 @@ object FailureAccrualPolicy {
     )
     assert(window > 0, s"window must be positive: $window")
 
+    val name = "SuccessRateFailureAccrualPolicy"
+
     // Pad the back of the stream to mark dead for a constant amount (300 seconds)
     // when the stream runs out.
     private[this] val freshMarkDeadFor = markDeadFor ++ constantBackoff
@@ -150,6 +171,8 @@ object FailureAccrualPolicy {
       resetEmaCounter()
       successRate.reset()
     }
+
+    def show(): String = s"$name(sr=${successRate.last}, requiredSuccessRate=$requiredSuccessRate)"
 
     /**
      * Returns the Ema stamp corresponding this request.
@@ -348,6 +371,7 @@ object FailureAccrualPolicy {
    */
   def consecutiveFailures(numFailures: Int, markDeadFor: Stream[Duration]): FailureAccrualPolicy =
     new FailureAccrualPolicy {
+      val name = "ConsecutiveFailureAccrualPolicy"
 
       // Pad the back of the stream to mark dead for a constant amount (300 seconds)
       // when the stream runs out.
@@ -379,5 +403,8 @@ object FailureAccrualPolicy {
         consecutiveFailures = 0
         nextMarkDeadFor = freshMarkDeadFor
       }
+
+      def show(): String =
+        s"$name(consecutiveFailures=$consecutiveFailures, consecutiveFailuresThreshold=$numFailures)"
     }
 }
