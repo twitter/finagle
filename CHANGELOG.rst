@@ -13,6 +13,12 @@ Runtime Behavior Changes
 * finagle-http2: H2ServerFilter will no longer swallow exceptions that fire via
   `exceptionCaught` in the Netty pipeline. `PHAB_ID=D369185`
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: `c.t.f.l.FailureAccrualFactory`'s `didMarkDead()` changed to `didMarkDead(Duration)`.
+  The `Duration` is the length of time the endpoint is marked dead. ``PHAB_ID=D369209``
+
 19.9.0
 ------
 

@@ -7,10 +7,11 @@ import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy
 import com.twitter.finagle.service.{ReqRep, ResponseClassifier}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle._
-import com.twitter.logging.Level
-import com.twitter.util.{Future, Return, Throw, Timer}
+import com.twitter.logging.Logger
+import com.twitter.util.{Duration, Future, Return, Throw, Timer}
 
 private[finagle] object KetamaFailureAccrualFactory {
+  private[this] val logger = Logger.get(this.getClass.getName)
 
   /**
    * Configures a stackable KetamaFailureAccrual factory with the given
@@ -30,7 +31,6 @@ private[finagle] object KetamaFailureAccrualFactory {
         implicitly[Stack.Param[FailureAccrualFactory.Param]],
         implicitly[Stack.Param[finagle.param.Timer]],
         implicitly[Stack.Param[finagle.param.Label]],
-        implicitly[Stack.Param[finagle.param.Logger]],
         implicitly[Stack.Param[finagle.param.ResponseClassifier]],
         implicitly[Stack.Param[Transporter.EndpointAddr]]
       )
@@ -44,12 +44,12 @@ private[finagle] object KetamaFailureAccrualFactory {
             val classifier = params[finagle.param.ResponseClassifier].responseClassifier
 
             val label = params[finagle.param.Label].label
-            val logger = params[finagle.param.Logger].log
+            val failureAccrualPolicy: FailureAccrualPolicy = policy()
             val endpoint = params[Transporter.EndpointAddr].addr
 
             new KetamaFailureAccrualFactory[Req, Rep](
               underlying = next,
-              policy = policy(),
+              policy = failureAccrualPolicy,
               responseClassifier = classifier,
               statsReceiver = stats,
               timer = timer,
@@ -58,14 +58,16 @@ private[finagle] object KetamaFailureAccrualFactory {
               ejectFailedHost = ejectFailedHost,
               label = label
             ) {
-              override def didMarkDead(): Unit = {
-                logger.log(
-                  Level.INFO,
-                  s"""FailureAccrualFactory marking connection to "$label" as dead. """ +
-                    s"""Remote Address: $endpoint. """ +
-                    s"""Eject failed host from ring: $ejectFailedHost"""
+              override def didMarkDead(duration: Duration): Unit = {
+                // acceptable race condition here for the right `policy.show(). A policy's
+                // state is only reset after it is revived,`policy.revived()` which is called
+                // afer `duration` and a successful probe.
+                logger.info(
+                  s"""marking connection to "$label" as dead for ${duration.inSeconds} seconds. """ +
+                    s"""Policy: ${failureAccrualPolicy.show()}. """ +
+                    s"""Remote Address: $endpoint"""
                 )
-                super.didMarkDead()
+                super.didMarkDead(duration)
               }
             }
 
@@ -125,7 +127,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     case Throw(e) => false
   }
 
-  override protected def didMarkDead(): Unit = {
+  override protected def didMarkDead(duration: Duration): Unit = {
     if (ejectFailedHost) healthBroker ! NodeMarkedDead(key)
   }
 
