@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle
-import com.twitter.finagle.{Http, Service, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.http2.RstException
 import com.twitter.finagle.stats.InMemoryStatsReceiver
@@ -19,12 +19,9 @@ import scala.collection.mutable.ArrayBuffer
 
 abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
 
-  def useMultiplexCodec: Boolean
-
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client.withHttp2
       .withStatsReceiver(statsRecv)
-      .configured(Http.H2ClientImpl(Some(useMultiplexCodec)))
 
   def serverImpl(): finagle.Http.Server = finagle.Http.server.withHttp2
 

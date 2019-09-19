@@ -6,7 +6,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Status
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.exp.{Multi, StreamTransport}
-import com.twitter.finagle.http2.exp.transport.Http2Transport
+import com.twitter.finagle.http2.transport.client.Http2Transport
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest}

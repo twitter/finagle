@@ -2,7 +2,8 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http.Fields
-import com.twitter.finagle.http2.transport.{H2StreamChannelInit, PriorKnowledgeHandler}
+import com.twitter.finagle.http2.transport.common.H2StreamChannelInit
+import com.twitter.finagle.http2.transport.server.PriorKnowledgeHandler
 import com.twitter.finagle.netty4.http.HttpCodecName
 import com.twitter.finagle.netty4.http.util.UriUtils
 import com.twitter.finagle.param.Stats

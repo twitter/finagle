@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.client.DefaultPool
-import com.twitter.finagle.http2.exp.transport.H2Pool
+import com.twitter.finagle.http2.transport.client.H2Pool
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.{ServiceFactory, Stack}
 
@@ -25,12 +25,12 @@ private[finagle] object HttpPool extends Stack.Module[ServiceFactory[Request, Re
     next: Stack[ServiceFactory[Request, Response]]
   ): Stack[ServiceFactory[Request, Response]] = {
     val poolModule =
-      if (ClientEndpointer.isMultiplexPriorKnowledge(params))
+      if (ClientEndpointer.isPriorKnowledgeEnabled(params))
         // For multiplexed prior knowledge we need to use the SingletonPool because we
         // can concurrently dispatch against the HTTP/2 service implementation
         // just like with Mux.
         SingletonPool.module[Request, Response](allowInterrupts = false)
-      else if (ClientEndpointer.isMultiplexCodec(params))
+      else if (ClientEndpointer.isHttp2Enabled(params))
         // If we're using the multiplex codec we need to be able to dynamically switch
         // between the DefaultPool and the singleton pool, and that indirection is
         // done in the H2Pool.

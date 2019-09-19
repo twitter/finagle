@@ -13,6 +13,9 @@ Runtime Behavior Changes
 * finagle-http2: H2ServerFilter will no longer swallow exceptions that fire via
   `exceptionCaught` in the Netty pipeline. `PHAB_ID=D369185`
 
+* finagle-http: Remove legacy HTTP/2 client implementation and make the `MultiplexHandler`-based
+  implementation the default HTTP/2. ``PHAB_ID=D362950``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

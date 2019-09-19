@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.transport.H2ServerFilter
+import com.twitter.finagle.http2.transport.server.H2ServerFilter
 import com.twitter.finagle.netty4.http.handler.UriValidatorHandler
 import com.twitter.finagle.param.Timer
 import io.netty.channel.ChannelHandlerContext
