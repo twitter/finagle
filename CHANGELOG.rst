@@ -28,6 +28,8 @@ Breaking API Changes
 New Features
 ~~~~~~~~~~~~
 
+* finagle-grpc-context: Enables cross-build for 2.13.0. ``PHAB_ID=D373168``
+
 * finagle-{core,init,toggle,netty4}: Enables cross-build for 2.13.0. ``PHAB_ID=D364013``
 
 * finagle-base-http: Add `None` as a valid SameSite header value. ``PHAB_ID=D365170``
