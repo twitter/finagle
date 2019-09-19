@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.transport.ServerNpnOrAlpnHandler
+import com.twitter.finagle.http2.transport.server.ServerNpnOrAlpnHandler
 import io.netty.channel.{Channel, ChannelInitializer}
 import io.netty.channel.socket.SocketChannel
 

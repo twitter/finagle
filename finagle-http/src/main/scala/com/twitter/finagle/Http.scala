@@ -93,13 +93,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     )
   }
 
-  case class H2ClientImpl(useMultiplexClient: Option[Boolean])
-
-  object H2ClientImpl {
-    implicit val useMultiplexClientParam: Stack.Param[H2ClientImpl] =
-      Stack.Param(H2ClientImpl(None))
-  }
-
   val Netty4Impl: Http.HttpImpl = HttpImpl.Netty4Impl
 
   val Http2: Stack.Params = Stack.Params.empty +

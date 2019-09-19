@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.http2.transport.H2ServerFilter
+import com.twitter.finagle.http2.transport.server.H2ServerFilter
 import com.twitter.finagle.{Announcement, ListeningServer, Stack}
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.http.{HttpCodecName, initServer, newHttpServerCodec}

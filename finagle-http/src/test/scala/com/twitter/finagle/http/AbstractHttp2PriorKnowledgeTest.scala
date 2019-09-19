@@ -1,19 +1,16 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle
-import com.twitter.finagle.{Http, Service}
+import com.twitter.finagle.Service
 import com.twitter.finagle.http2.param.PriorKnowledge
 import com.twitter.util.Future
 
 abstract class AbstractHttp2PriorKnowledgeTest extends AbstractHttp2EndToEndTest {
 
-  def useMultiplexCodec: Boolean
-
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client.withHttp2
       .configured(PriorKnowledge(true))
       .withStatsReceiver(statsRecv)
-      .configured(Http.H2ClientImpl(Some(useMultiplexCodec)))
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server.withHttp2

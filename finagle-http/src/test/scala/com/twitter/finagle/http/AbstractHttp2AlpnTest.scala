@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle
-import com.twitter.finagle.{Http, Service}
+import com.twitter.finagle.Service
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
@@ -16,7 +16,6 @@ import java.net.InetSocketAddress
 abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
 
   def implName: String
-  def useMultiplexCodec: Boolean
 
   def clientConfiguration(): SslClientConfiguration = {
     val intermediateFile = TempFile.fromResourcePath("/ssl/certs/intermediate.cert.pem")
@@ -43,7 +42,6 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
       .configured(FailureDetector.Param(FailureDetector.NullConfig))
       .configured(Transport.ClientSsl(Some(clientConfiguration())))
       .withStatsReceiver(statsRecv)
-      .configured(Http.H2ClientImpl(Some(useMultiplexCodec)))
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server.withHttp2
