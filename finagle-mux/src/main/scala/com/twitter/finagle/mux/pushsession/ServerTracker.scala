@@ -106,13 +106,16 @@ private class ServerTracker(
       case dispatch =>
         // We raise on the dispatch and immediately send back a Rdiscarded
         why match {
-          case BackupRequestFilter.SupersededRequestFailureToString =>
-            dispatch.response.raise(
-              new ClientDiscardedRequestException(
-                why,
-                FailureFlags.Interrupted | FailureFlags.Ignorable
-              )
-            )
+          // We match on both the `BackupRequestFilter` failure string, and the
+          // exception string. The first one handles a single hop, while the second
+          // one handles multi-level propagation.
+          case BackupRequestFilter.SupersededRequestFailureToString |
+              ServerTracker.SupersededBackupRequestExceptionString =>
+            dispatch.response.raise(newSupersededBackupRequestException())
+          // This condition handles where an in-between hop has not been updated to this
+          // version of code and is still adding an additional wrapping.
+          case reason if reason.endsWith(ServerTracker.SupersededBackupRequestExceptionString) =>
+            dispatch.response.raise(newSupersededBackupRequestException())
           case _ =>
             dispatch.response.raise(new ClientDiscardedRequestException(why))
         }
@@ -261,6 +264,17 @@ private class ServerTracker(
 private object ServerTracker {
 
   private val log = Logger.get()
+
+  private def newSupersededBackupRequestException(): Exception =
+    new ClientDiscardedRequestException(
+      BackupRequestFilter.SupersededRequestFailureToString,
+      FailureFlags.Interrupted | FailureFlags.Ignorable
+    )
+
+  // This ends up being the BackupRequestFilter.SupersededRequestFailureToString
+  // with "com.twitter.finagle.mux.ClientDiscardedRequestException: " prepended.
+  private val SupersededBackupRequestExceptionString: String =
+    newSupersededBackupRequestException().toString
 
   private case class Dispatch(tag: Int, response: Future[Message], timer: Stopwatch.Elapsed)
 

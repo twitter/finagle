@@ -22,6 +22,14 @@ Breaking API Changes
 * finagle-core: `c.t.f.l.FailureAccrualFactory`'s `didMarkDead()` changed to `didMarkDead(Duration)`.
   The `Duration` is the length of time the endpoint is marked dead. ``PHAB_ID=D369209``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-mux: Mux now properly propagates `Ignorable` failures multiple levels for superseded
+  backup requests. This allows for more accurate success rate metrics for downstream services,
+  when using backup requests.
+  ``PHAB_ID=D365729``
+
 19.9.0
 ------
 
