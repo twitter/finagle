@@ -547,7 +547,8 @@ lazy val finagleTunable = Project(
   id = "finagle-tunable",
   base = file("finagle-tunable")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-tunable",
   libraryDependencies ++= Seq(

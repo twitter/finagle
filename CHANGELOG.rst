@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-tunable: Enables cross-build for 2.13.0. ``PHAB_ID=D373170``
+
+* finagle-grpc-context: Enables cross-build for 2.13.0. ``PHAB_ID=D373168``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -35,8 +42,6 @@ Bug Fixes
 
 New Features
 ~~~~~~~~~~~~
-
-* finagle-grpc-context: Enables cross-build for 2.13.0. ``PHAB_ID=D373168``
 
 * finagle-{core,init,toggle,netty4}: Enables cross-build for 2.13.0. ``PHAB_ID=D364013``
 
