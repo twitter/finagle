@@ -1,6 +1,5 @@
 package com.twitter.finagle.mux
 
-import com.twitter.conversions.PercentOps._
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.client.{EndpointerStackClient, BackupRequestFilter}
@@ -8,17 +7,15 @@ import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.server.ListeningStackServer
-import com.twitter.finagle.service.{Retries, ReqRep, ResponseClass, ResponseClassifier, RetryBudget}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.service.Retries
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.util.MockWindowedPercentileHistogram
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util._
-import com.twitter.util.tunable.Tunable
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.nio.ByteBuffer
-import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
+import java.util.concurrent.atomic.AtomicInteger
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.junit.AssertionsForJUnit
@@ -50,6 +47,9 @@ abstract class AbstractEndToEndTest
     Dtab.base = saveBase
   }
 
+  private[this] def getName(server: ListeningServer): Name =
+    Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+
   // turn off failure detector since we don't need it for these tests.
   override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     super.test(testName, testTags: _*) {
@@ -69,10 +69,7 @@ abstract class AbstractEndToEndTest
       }
     )
 
-    val client = clientImpl.newService(
-      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-      "client"
-    )
+    val client = clientImpl.newService(getName(server), "client")
 
     Dtab.unwind {
       Dtab.local ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
@@ -93,10 +90,7 @@ abstract class AbstractEndToEndTest
       Future.value(Response(Nil, bw.owned()))
     })
 
-    val client = clientImpl.newService(
-      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-      "client"
-    )
+    val client = clientImpl.newService(getName(server), "client")
 
     val payload = Await.result(client(Request.empty), 30.seconds).body
     val br = ByteReader(payload)
@@ -130,10 +124,7 @@ abstract class AbstractEndToEndTest
 
     client = clientImpl
       .configured(param.Tracer(tracer))
-      .newService(
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-        "theClient"
-      )
+      .newService(getName(server), "theClient")
 
     Await.result(client(Request.empty), 30.seconds)
 
@@ -194,7 +185,7 @@ abstract class AbstractEndToEndTest
     }
 
     val server = serverImpl.serve("localhost:*", service)
-    val address = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val address = getName(server)
     // Don't mask failures so we can examine which flags were propagated
     // Remove the retries module because otherwise requests will be retried until the default budget
     // is exceeded and then flagged as NonRetryable.
@@ -229,10 +220,7 @@ abstract class AbstractEndToEndTest
     }
 
     val server = serverImpl.serve("localhost:*", factory)
-    val client = clientImpl.newService(
-      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-      "client"
-    )
+    val client = clientImpl.newService(getName(server), "client")
 
     // This will try until it exhausts its budget. That's o.k.
     val failure = intercept[Failure] { Await.result(client(Request.empty), 30.seconds) }
@@ -312,10 +300,7 @@ abstract class AbstractEndToEndTest
 
     val factory = clientImpl
       .configured(param.Stats(sr))
-      .newClient(
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-        "client"
-      )
+      .newClient(getName(server), "client")
 
     val fclient = factory()
     eventually { assert(fclient.isDefined) }
@@ -356,10 +341,7 @@ abstract class AbstractEndToEndTest
 
     val client = clientImpl
       .withStatsReceiver(sr)
-      .newService(
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-        "client"
-      )
+      .newService(getName(server), "client")
 
     Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
 
@@ -385,10 +367,7 @@ abstract class AbstractEndToEndTest
 
     val client = clientImpl
       .withStatsReceiver(sr)
-      .newService(
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-        "client"
-      )
+      .newService(getName(server), "client")
 
     Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
 
@@ -508,60 +487,12 @@ abstract class AbstractEndToEndTest
 
   test("BackupRequestFilter's interrupts are propagated to the remote peer as ignorable") {
     val slow: Promise[Response] = new Promise[Response]
-    val first = new AtomicBoolean(true)
-    slow.setInterruptHandler {
-      case exn: Throwable =>
-        slow.setException(exn)
-    }
-    val server = serverImpl.serve(
-      "localhost:*",
-      Service.mk[Request, Response] { _ =>
-        if (first.compareAndSet(true, false)) slow
-        else {
-          Future.value(Response.empty)
-        }
-      }
-    )
+    slow.setInterruptHandler { case exn: Throwable => slow.setException(exn) }
 
-    val client = clientImpl.newService(
-      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-      "client"
-    )
-
-    val tunable: Tunable.Mutable[Double] = Tunable.mutable[Double]("tunable", 1.percent)
-    val classifier: ResponseClassifier = {
-      case ReqRep(_, Return(_)) => ResponseClass.Success
-    }
-    val retryBudget = RetryBudget.Infinite
-    Time.withCurrentTimeFrozen { ctl =>
-      val timer = new MockTimer()
-
-      val wp = new MockWindowedPercentileHistogram(timer)
-      wp.add(1.second.inMillis.toInt)
-
-      val brf = new BackupRequestFilter[Request, Response](
-        tunable,
-        true,
-        classifier,
-        (_, _) => retryBudget,
-        retryBudget,
-        Stopwatch.timeMillis,
-        NullStatsReceiver,
-        timer,
-        () => wp
-      )
-      ctl.advance(3.seconds)
-      timer.tick()
-
-      val filtered = brf.andThen(client)
-
-      val f = filtered(Request.empty)
-
-      ctl.advance(2.seconds)
-      timer.tick()
-
-      Await.result(f, 5.seconds)
-    }
+    val slowService = BackupRequests.mkSlowService(slow)
+    val server = serverImpl.serve("localhost:*", slowService)
+    val client = clientImpl.newService(getName(server), "client")
+    Time.withCurrentTimeFrozen(BackupRequests.mkRequestWithBackup(client))
 
     val e = intercept[ClientDiscardedRequestException] {
       Await.result(slow, 5.seconds)
@@ -569,5 +500,40 @@ abstract class AbstractEndToEndTest
 
     assert(e.getMessage == BackupRequestFilter.SupersededRequestFailureToString)
     assert(e.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
+
+    Await.result(client.close(), 5.seconds)
+    Await.result(server.close(), 5.seconds)
   }
+
+  test("BackupRequestFilter's interrupts are propagated multiple levels as ignorable") {
+    val slow: Promise[Response] = new Promise[Response]
+    slow.setInterruptHandler { case exn: Throwable => slow.setException(exn) }
+
+    val slowService = BackupRequests.mkSlowService(slow)
+    val server = serverImpl.serve("localhost:*", slowService)
+
+    val proxy1Client = clientImpl.newService(getName(server), "proxy1Client")
+    val proxy1Server = serverImpl.serve("localhost:*", proxy1Client)
+
+    val proxy2Client = clientImpl.newService(getName(proxy1Server), "proxy2Client")
+    val proxy2Server = serverImpl.serve("localhost:*", proxy2Client)
+
+    val client = clientImpl.newService(getName(proxy2Server), "client")
+    Time.withCurrentTimeFrozen(BackupRequests.mkRequestWithBackup(client))
+
+    val e = intercept[ClientDiscardedRequestException] {
+      Await.result(slow, 5.seconds)
+    }
+
+    assert(e.getMessage == BackupRequestFilter.SupersededRequestFailureToString)
+    assert(e.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
+
+    Await.result(client.close(), 5.seconds)
+    Await.result(proxy2Server.close(), 5.seconds)
+    Await.result(proxy2Client.close(), 5.seconds)
+    Await.result(proxy1Server.close(), 5.seconds)
+    Await.result(proxy1Client.close(), 5.seconds)
+    Await.result(server.close(), 5.seconds)
+  }
+
 }
