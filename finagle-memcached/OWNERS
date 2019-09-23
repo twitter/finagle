@@ -1,3 +1,10 @@
+# finagle-memcached has a shared ownership between RealTime Storage (cache-group) and CSL.
+# CSL team owns the library support and RTS team owns the functional changes (protocol, hashing algorithms etc) of the client.
+
+brobinson
+fsareshwala
+jennyl
+ashanat
 banderson
 koliver
 mnakamura
