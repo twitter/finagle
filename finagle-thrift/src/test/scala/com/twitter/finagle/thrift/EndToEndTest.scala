@@ -14,6 +14,7 @@ import com.twitter.finagle.stats.{
   NullStatsReceiver,
   StatsReceiver
 }
+import com.twitter.finagle.thrift.{ClientId => FinagleClientId}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
@@ -82,7 +83,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   def servers(serverParam: RichServerParam): Seq[(String, Closable, Int)] = {
     val iface = new BServiceImpl {
       override def show_me_your_dtab(): Future[String] = {
-        ClientId.current.map(_.name) match {
+        FinagleClientId.current.map(_.name) match {
           case Some(name) => Future.value(name)
           case _ => Future.exception(missingClientIdEx)
         }
@@ -109,7 +110,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
   def clients(
     pf: TProtocolFactory,
-    clientId: Option[ClientId],
+    clientId: Option[FinagleClientId],
     port: Int
   ): Seq[(String, B.ServiceIface, Closable)] = {
     val dest = s"localhost:$port"
@@ -137,7 +138,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   // While we're supporting both old & new APIs, test the cross-product
   test("Mix of client and server creation styles") {
     for {
-      clientId <- Seq(Some(ClientId("anClient")), None)
+      clientId <- Seq(Some(FinagleClientId("anClient")), None)
       pf <- Seq(Protocols.binaryFactory(), new TCompactProtocol.Factory())
       (serverWhich, serverClosable, port) <- servers(RichServerParam(pf))
     } {
@@ -1196,7 +1197,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val pf = Protocols.binaryFactory()
     val iface = new BServiceImpl {
       override def someway(): Future[Void] = {
-        ClientId.current.map(_.name) match {
+        FinagleClientId.current.map(_.name) match {
           case Some(name) => Future.exception(presentClientIdEx)
           case _ => Future.Void
         }
@@ -1210,7 +1211,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val client = Thrift.client
       .configured(Stats(sr))
       .withProtocolFactory(pf)
-      .withClientId(ClientId("aClient"))
+      .withClientId(FinagleClientId("aClient"))
       .withNoAttemptTTwitterUpgrade
       .build[B.ServiceIface](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),

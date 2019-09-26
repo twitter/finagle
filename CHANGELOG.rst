@@ -10,6 +10,8 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-{mux,thrift,thrift-mux}: Enables cross-build for 2.13.0. ``PHAB_ID=D373165``
+
 * finagle-tunable: Enables cross-build for 2.13.0. ``PHAB_ID=D373170``
 
 * finagle-grpc-context: Enables cross-build for 2.13.0. ``PHAB_ID=D373168``
