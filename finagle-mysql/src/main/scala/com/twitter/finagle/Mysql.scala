@@ -6,7 +6,7 @@ import com.twitter.finagle.mysql.param._
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
-  Monitor => _,
+  Monitor => ParamMonitor,
   ResponseClassifier => _,
   Tracer => _,
   _
@@ -110,7 +110,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
         idleTime = Duration.Top,
         maxWaiters = Int.MaxValue
       ) +
-      param.Monitor(ServerErrorMonitor(Seq()))
+      ParamMonitor(ServerErrorMonitor(Seq()))
 
     private val stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
       .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)
