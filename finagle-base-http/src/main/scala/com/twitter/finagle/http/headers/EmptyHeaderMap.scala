@@ -1,4 +1,4 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.http.headers
 
 /**
  * An empty and read-only [[HeaderMap]]. Use [[HeaderMap.Empty]] for a singleton instance.

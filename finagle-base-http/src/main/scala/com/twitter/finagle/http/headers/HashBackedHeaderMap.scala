@@ -1,4 +1,4 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.http.headers
 
 import scala.annotation.tailrec
 import scala.collection.mutable

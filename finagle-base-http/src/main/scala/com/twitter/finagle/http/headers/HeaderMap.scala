@@ -1,6 +1,6 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.http.headers
 
-import com.twitter.finagle.http.Rfc7230HeaderValidation.{
+import com.twitter.finagle.http.headers.Rfc7230HeaderValidation.{
   ObsFoldDetected,
   ValidationFailure,
   ValidationSuccess

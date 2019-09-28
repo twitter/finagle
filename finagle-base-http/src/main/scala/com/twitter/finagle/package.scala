@@ -6,6 +6,16 @@ import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
 package object http {
 
   /**
+   * A type alias for finagle.headers.HeaderMap
+   */
+  type HeaderMap = http.headers.HeaderMap
+  /**
+   * The companion object for HeaderMap
+   */
+  val HeaderMap = http.headers.HeaderMap
+  val Rfc7230HeaderValidation = http.headers.Rfc7230HeaderValidation
+
+  /**
    * The name of the finagle-http [[ToggleMap]].
    */
   private val LibraryName: String =

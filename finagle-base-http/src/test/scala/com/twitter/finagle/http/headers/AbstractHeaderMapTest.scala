@@ -1,4 +1,4 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.http.headers
 
 import java.util.Date
 import org.scalacheck.Gen
