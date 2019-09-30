@@ -530,7 +530,8 @@ lazy val finaglePartitioning = Project(
   id = "finagle-partitioning",
   base = file("finagle-partitioning")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-partitioning",
   libraryDependencies ++= Seq(
