@@ -710,7 +710,8 @@ lazy val finagleMySQL = Project(
   id = "finagle-mysql",
   base = file("finagle-mysql")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-mysql",
   libraryDependencies ++= Seq(util("logging"), util("cache"), caffeineLib, jsr305Lib),
