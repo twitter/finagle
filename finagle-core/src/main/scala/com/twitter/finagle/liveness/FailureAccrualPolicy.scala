@@ -258,9 +258,9 @@ object FailureAccrualPolicy {
    *
    * @param requiredSuccessRate successRate that must be met
    *
-   * @param window window over which the success rate is tracked.
-   * `markDeadOnFailure()` will return None, until we get requests for a duration
-   * of at least `window`.
+   * @param window duration over which the success rate is tracked.
+   * `markDeadOnFailure()` will return None, until we get at least `minRequestThreshold`
+   *  requests within a `window` duration.
    *
    * @param markDeadFor stream of durations to use for the next duration
    * returned from `markDeadOnFailure()`
