@@ -1,10 +1,25 @@
 package com.twitter.finagle.http.headers
 
-import com.twitter.finagle.http.HeaderMap
 import scala.collection.mutable
+import scala.collection.AbstractIterator
+import com.twitter.finagle.http.HeaderMap
 
 private[http] sealed class Header private (final val name: String, final val value: String)
     extends HeaderMap.NameValue {
+    
+  def iterator: Iterator[HeaderMap.NameValue] =
+    if (next == null) Iterator.single(this)
+    else {
+      var cur = this
+      new AbstractIterator[HeaderMap.NameValue] {
+        def hasNext: Boolean = cur != null
+        def next(): HeaderMap.NameValue = {
+          var n = cur
+          cur = n.next
+          n
+        }
+      }
+    }
 
   final protected var _next: Header = null
 

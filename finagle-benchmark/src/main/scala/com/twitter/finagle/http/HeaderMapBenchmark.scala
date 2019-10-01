@@ -38,7 +38,7 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
   def keySet(): scala.collection.Set[String] = map.keySet
 
   @Benchmark
-  def iterateKeys(b: Blackhole): Unit = doIterateKeys(b, map)
+  def iterateKeys(b: Blackhole): Unit = doIterateKeys(b, randommap)
 
   @Benchmark
   def iterateRepeatedKeys(b: Blackhole): Unit = doIterateKeys(b, duplicateKeyMap)
