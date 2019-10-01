@@ -8,7 +8,7 @@ import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class QueryParamCodecTest
     extends FunSuite
@@ -108,7 +108,7 @@ class QueryParamCodecTest
       case _ => equiv(x % 2) + f(x / 2, n - 1)
     }
 
-    (0 until num).toIterator.map(f(_, length))
+    (0 until num).iterator.map(f(_, length))
   }
 
   // On Travis CI, we've seen this test take over 5.seconds.
