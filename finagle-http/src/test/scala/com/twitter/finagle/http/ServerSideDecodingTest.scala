@@ -82,7 +82,7 @@ class ServerSideDecodingTest extends FunSuite with ScalaCheckDrivenPropertyCheck
       s"http://${addr.getHostName}:${addr.getPort}/"
     }
 
-    forAll { (content: String, encoder: Encoder) ⇒
+    forAll { (content: String, encoder: Encoder) =>
       val req = RequestBuilder()
         .setHeader("Content-Encoding", encoder.name)
         .setHeader("Content-Type", "text/plain;charset=utf-8")

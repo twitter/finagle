@@ -9,6 +9,7 @@ import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.http.codec.context.LoadableHttpContext
 import com.twitter.finagle.http.service.{HttpResponseClassifier, NullService}
+import com.twitter.finagle.http.{Status => HttpStatus}
 import com.twitter.finagle.http2.param.EncoderIgnoreMaxHeaderListSize
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureDetector}
 import com.twitter.finagle.service._
@@ -117,13 +118,13 @@ abstract class AbstractEndToEndTest
     loop(Buf.Empty)
   }
 
-  private def requestWith(status: Status): Request =
+  private def requestWith(status: HttpStatus): Request =
     Request("/", ("statusCode", status.code.toString))
 
   private val statusCodeSvc = new HttpService {
     def apply(request: Request): Future[Response] = {
-      val statusCode = request.getIntParam("statusCode", Status.BadRequest.code)
-      Future.value(Response(Status.fromCode(statusCode)))
+      val statusCode = request.getIntParam("statusCode", HttpStatus.BadRequest.code)
+      Future.value(Response(HttpStatus.fromCode(statusCode)))
     }
   }
 
@@ -207,18 +208,18 @@ abstract class AbstractEndToEndTest
       val request = Request("/")
       request.headerMap.add("header", "a" * 8192)
       val response = await(client(request))
-      assert(response.status == Status.RequestHeaderFieldsTooLarge)
+      assert(response.status == HttpStatus.RequestHeaderFieldsTooLarge)
       await(client.close())
     }
 
     test(implName + ": with default client-side ResponseClassifier") {
       val client = connect(statusCodeSvc)
 
-      await(client(requestWith(Status.Ok)))
+      await(client(requestWith(HttpStatus.Ok)))
       assert(statsRecv.counters(Seq("client", "requests")) == 1)
       assert(statsRecv.counters(Seq("client", "success")) == 1)
 
-      await(client(requestWith(Status.ServiceUnavailable)))
+      await(client(requestWith(HttpStatus.ServiceUnavailable)))
       assert(statsRecv.counters(Seq("client", "requests")) == 2)
       // by default 500s are treated as unsuccessful
       assert(statsRecv.counters(Seq("client", "success")) == 1)
@@ -229,11 +230,11 @@ abstract class AbstractEndToEndTest
     test(implName + ": with default server-side ResponseClassifier") {
       val client = connect(statusCodeSvc)
 
-      await(client(requestWith(Status.Ok)))
+      await(client(requestWith(HttpStatus.Ok)))
       assert(statsRecv.counters(Seq("server", "requests")) == 1)
       assert(statsRecv.counters(Seq("server", "success")) == 1)
 
-      await(client(requestWith(Status.ServiceUnavailable)))
+      await(client(requestWith(HttpStatus.ServiceUnavailable)))
       assert(statsRecv.counters(Seq("server", "requests")) == 2)
       // by default 500s are treated as unsuccessful
       assert(statsRecv.counters(Seq("server", "success")) == 1)
@@ -248,7 +249,7 @@ abstract class AbstractEndToEndTest
 
       val client = connect(service)
       val response = await(client(Request("/")))
-      assert(response.status == Status.InternalServerError)
+      assert(response.status == HttpStatus.InternalServerError)
       await(client.close())
     }
 
@@ -265,8 +266,8 @@ abstract class AbstractEndToEndTest
         val justRight = Request("/")
         justRight.content = Buf.ByteArray.Owned(new Array[Byte](200))
 
-        assert(await(client(tooBig)).status == Status.RequestEntityTooLarge)
-        assert(await(client(justRight)).status == Status.Ok)
+        assert(await(client(tooBig)).status == HttpStatus.RequestEntityTooLarge)
+        assert(await(client(justRight)).status == HttpStatus.Ok)
         await(client.close())
       }
 
@@ -281,7 +282,7 @@ abstract class AbstractEndToEndTest
         val client = connect(service)
 
         val justRight = Request("/")
-        assert(await(client(justRight)).status == Status.Ok)
+        assert(await(client(justRight)).status == HttpStatus.Ok)
 
         val tooMuch = Request("/")
         tooMuch.setChunked(true)
@@ -292,7 +293,7 @@ abstract class AbstractEndToEndTest
 
         res.poll.get match {
           case Return(resp) =>
-            assert(resp.status == Status.RequestEntityTooLarge)
+            assert(resp.status == HttpStatus.RequestEntityTooLarge)
           case Throw(_: ChannelClosedException) =>
             ()
           case t =>
@@ -442,7 +443,7 @@ abstract class AbstractEndToEndTest
         val req = Request()
         val client = connect(service)
         val res = await(client(Request("/")))
-        assert(res.status == Status.Ok)
+        assert(res.status == HttpStatus.Ok)
         await(client.close())
       }
     }
@@ -573,7 +574,7 @@ abstract class AbstractEndToEndTest
       assert(!f2.isDefined)
 
       second.setValue(req.response)
-      assert(await(f2).status == Status.Ok)
+      assert(await(f2).status == HttpStatus.Ok)
 
       await(client.close())
     }
@@ -632,7 +633,7 @@ abstract class AbstractEndToEndTest
     test(s"$implName (streaming)" + ": stream") {
       def service(r: Reader[Buf]) = new HttpService {
         def apply(request: Request) = {
-          val response = Response.chunked(Version.Http11, Status.Ok, r)
+          val response = Response.chunked(Version.Http11, HttpStatus.Ok, r)
           Future.value(response)
         }
       }
@@ -687,7 +688,7 @@ abstract class AbstractEndToEndTest
       val service = new HttpService {
         def apply(request: Request): Future[Response] = {
           val resp = Response()
-          resp.status = Status.NoContent
+          resp.status = HttpStatus.NoContent
           Future.value(resp)
         }
       }
@@ -706,7 +707,7 @@ abstract class AbstractEndToEndTest
       // Test streaming partial data separated in time
       def service = new HttpService {
         def apply(request: Request) = {
-          val response = EnrichedResponse(Response(Version.Http11, Status.Ok))
+          val response = EnrichedResponse(Response(Version.Http11, HttpStatus.Ok))
           response.setChunked(true)
 
           response.writer.write(Buf.Utf8("hello")) before {
@@ -1024,7 +1025,7 @@ abstract class AbstractEndToEndTest
       req.setChunked(true)
 
       val rep = await(client(req))
-      assert(rep.status == Status.Ok)
+      assert(rep.status == HttpStatus.Ok)
 
       val trailers = HeaderMap.newHeaderMap
       illegalHeaders.foreach { case (k, v) => trailers.addUnsafe(k, v) }
@@ -1181,7 +1182,7 @@ abstract class AbstractEndToEndTest
 
   test("Client-side ResponseClassifier based on status code") {
     val classifier = HttpResponseClassifier {
-      case (_, r: Response) if r.status == Status.ServiceUnavailable =>
+      case (_, r: Response) if r.status == HttpStatus.ServiceUnavailable =>
         ResponseClass.NonRetryableFailure
     }
 
@@ -1194,11 +1195,11 @@ abstract class AbstractEndToEndTest
       .withResponseClassifier(classifier)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
-    val rep1 = await(client(requestWith(Status.Ok)))
+    val rep1 = await(client(requestWith(HttpStatus.Ok)))
     assert(statsRecv.counters(Seq("client", "requests")) == 1)
     assert(statsRecv.counters(Seq("client", "success")) == 1)
 
-    val rep2 = await(client(requestWith(Status.ServiceUnavailable)))
+    val rep2 = await(client(requestWith(HttpStatus.ServiceUnavailable)))
 
     assert(statsRecv.counters(Seq("client", "requests")) == 2)
     assert(statsRecv.counters(Seq("client", "success")) == 1)
@@ -1209,7 +1210,7 @@ abstract class AbstractEndToEndTest
 
   test("server-side ResponseClassifier based on status code") {
     val classifier = HttpResponseClassifier {
-      case (_, r: Response) if r.status == Status.ServiceUnavailable =>
+      case (_, r: Response) if r.status == HttpStatus.ServiceUnavailable =>
         ResponseClass.NonRetryableFailure
     }
 
@@ -1222,11 +1223,11 @@ abstract class AbstractEndToEndTest
     val client = clientImpl()
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
-    await(client(requestWith(Status.Ok)))
+    await(client(requestWith(HttpStatus.Ok)))
     assert(statsRecv.counters(Seq("server", "requests")) == 1)
     assert(statsRecv.counters(Seq("server", "success")) == 1)
 
-    await(client(requestWith(Status.ServiceUnavailable)))
+    await(client(requestWith(HttpStatus.ServiceUnavailable)))
     assert(statsRecv.counters(Seq("server", "requests")) == 2)
     assert(statsRecv.counters(Seq("server", "success")) == 1)
     assert(statsRecv.counters(Seq("server", "failures")) == 1)
@@ -1285,7 +1286,7 @@ abstract class AbstractEndToEndTest
         val badRequest = Request()
         badRequest.headerMap.addUnsafe(k, v)
         val resp = await(service(badRequest))
-        assert(resp.status == Status.BadRequest)
+        assert(resp.status == HttpStatus.BadRequest)
     }
 
     await(service.close())
@@ -1309,7 +1310,7 @@ abstract class AbstractEndToEndTest
 
         val resp = await(service(badRequest))
 
-        assert(resp.status == Status.BadRequest)
+        assert(resp.status == HttpStatus.BadRequest)
     }
 
     await(service.close())
@@ -1398,7 +1399,7 @@ abstract class AbstractEndToEndTest
 
     try {
       val rep = await(client(Request("/DSC02175拷貝.jpg")))
-      assert(rep.status == Status.BadRequest)
+      assert(rep.status == HttpStatus.BadRequest)
     } finally {
       await(client.close())
       await(server.close())
@@ -1424,7 +1425,7 @@ abstract class AbstractEndToEndTest
       .newService(s"${addr.getHostName}:${addr.getPort}", "client")
 
     val rep = await(client(Request("/")))
-    assert(rep.status == Status.InternalServerError)
+    assert(rep.status == HttpStatus.InternalServerError)
 
   }
 
@@ -1595,7 +1596,7 @@ abstract class AbstractEndToEndTest
 
     val rep1 = await(client(Request("/")))
 
-    assert(rep1.status == Status.Ok)
+    assert(rep1.status == HttpStatus.Ok)
     await(server1.close())
 
     // we wait to ensure the client has been informed the connection has been dropped
@@ -1604,7 +1605,7 @@ abstract class AbstractEndToEndTest
     val server2 = serverImpl()
       .serve("localhost:%d".format(addr.getPort), svc)
     val rep2 = await(client(Request("/")))
-    assert(rep2.status == Status.Ok)
+    assert(rep2.status == HttpStatus.Ok)
   }
 
   test("Does not retry service acquisition many times when not using FactoryToService") {
@@ -1876,7 +1877,7 @@ abstract class AbstractEndToEndTest
   testIfImplemented(NoBodyMessage)(
     "response with status code {1xx, 204 and 304} must not have a message body nor Content-Length header field"
   ) {
-    def check(resStatus: Status): Unit = {
+    def check(resStatus: HttpStatus): Unit = {
       val svc = new Service[Request, Response] {
         def apply(request: Request) = {
           val response = Response(Version.Http11, resStatus)
@@ -1901,9 +1902,9 @@ abstract class AbstractEndToEndTest
     }
 
     List(
-      Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing,
-      Status.NoContent,
-      Status.NotModified
+      HttpStatus.Continue, /*HttpStatus.SwitchingProtocols,*/ HttpStatus.Processing,
+      HttpStatus.NoContent,
+      HttpStatus.NotModified
     ).foreach {
       check(_)
     }
@@ -1913,7 +1914,7 @@ abstract class AbstractEndToEndTest
     "response with status code {1xx, 204 and 304} must not have a message body nor Content-Length header field" +
       "when non-empty body is returned"
   ) {
-    def check(resStatus: Status): Unit = {
+    def check(resStatus: HttpStatus): Unit = {
       val svc = new Service[Request, Response] {
         def apply(request: Request) = {
           val body = Buf.Utf8("some data")
@@ -1940,16 +1941,16 @@ abstract class AbstractEndToEndTest
     }
 
     List(
-      Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing,
-      Status.NoContent,
-      Status.NotModified
+      HttpStatus.Continue, /*HttpStatus.SwitchingProtocols,*/ HttpStatus.Processing,
+      HttpStatus.NoContent,
+      HttpStatus.NotModified
     ).foreach {
       check(_)
     }
   }
 
   // We exclude SwitchingProtocols(101) since it should only be sent in response to a upgrade request
-  List(Status.Continue, Status.Processing, Status.NoContent)
+  List(HttpStatus.Continue, HttpStatus.Processing, HttpStatus.NoContent)
     .foreach { resStatus =>
       testIfImplemented(NoBodyMessage)(
         s"response with status code ${resStatus.code} must not have a message body nor " +
@@ -1989,7 +1990,7 @@ abstract class AbstractEndToEndTest
     val body = Buf.Utf8("some data")
     val svc = new Service[Request, Response] {
       def apply(request: Request) = {
-        val response = Response(Version.Http11, Status.NotModified)
+        val response = Response(Version.Http11, HttpStatus.NotModified)
         response.content = body
         response.headerMap.set(Fields.ContentLength, body.length.toString)
 
@@ -2004,7 +2005,7 @@ abstract class AbstractEndToEndTest
       .newService(s"${addr.getHostName}:${addr.getPort}", "client")
 
     val res = await(client(Request(Method.Get, "/")))
-    assert(res.status == Status.NotModified)
+    assert(res.status == HttpStatus.NotModified)
     assert(!res.isChunked)
     assert(res.length == 0)
     assert(res.contentLength.contains(body.length.toLong))

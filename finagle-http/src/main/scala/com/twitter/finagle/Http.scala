@@ -19,6 +19,9 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit}
 import java.net.SocketAddress
+import com.twitter.finagle.param
+import com.twitter.finagle.service
+import com.twitter.finagle.http.netty4
 
 /**
  * A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
@@ -97,10 +100,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
   val Http2: Stack.Params = Stack.Params.empty +
     HttpImpl.Http2Impl +
-    param.ProtocolLibrary("http/2") +
-    netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
+    com.twitter.finagle.param.ProtocolLibrary("http/2") +
+    com.twitter.finagle.netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
 
-  private val protocolLibrary = param.ProtocolLibrary("http")
+  private val protocolLibrary = com.twitter.finagle.param.ProtocolLibrary("http")
 
   private[this] def treatServerErrorsAsFailures: Boolean = serverErrorsAsFailures()
 

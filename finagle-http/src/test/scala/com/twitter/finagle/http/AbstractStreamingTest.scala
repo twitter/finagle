@@ -3,6 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.{Http => FinagleHttp, _}
+import com.twitter.finagle.http.Status // import for 2.13 shading
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.transport.Transport
 import com.twitter.io._
