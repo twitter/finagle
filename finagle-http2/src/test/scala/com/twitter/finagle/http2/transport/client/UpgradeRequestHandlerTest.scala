@@ -56,7 +56,7 @@ class UpgradeRequestHandlerTest extends FunSuite {
       val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
       channel.writeOutbound(request)
 
-      assert(stats.counters.get(Seq("upgrade", "attempt")) == Some(1l))
+      assert(stats.counters.get(Seq("upgrade", "attempt")).contains(1L))
       assert(channel.pipeline.get(classOf[HttpClientUpgradeHandler]) != null)
     }
   }
@@ -82,7 +82,7 @@ class UpgradeRequestHandlerTest extends FunSuite {
       request.content().writeByte(1)
       channel.writeOutbound(request)
 
-      assert(stats.counters.get(Seq("upgrade", "ignored")) == Some(1l))
+      assert(stats.counters.get(Seq("upgrade", "ignored")).contains(1L))
       assert(channel.readInbound[Object]() == Http2UpgradingTransport.UpgradeAborted)
       assert(channel.pipeline.get(classOf[HttpClientUpgradeHandler]) == null)
       assert(channel.pipeline.get(classOf[UpgradeRequestHandler]) == null)

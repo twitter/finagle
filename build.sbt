@@ -638,7 +638,8 @@ lazy val finagleHttp2 = Project(
   id = "finagle-http2",
   base = file("finagle-http2")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-http2",
   libraryDependencies ++= Seq(

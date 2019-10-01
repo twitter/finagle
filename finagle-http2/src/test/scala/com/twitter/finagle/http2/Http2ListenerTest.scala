@@ -87,11 +87,12 @@ class Http2ListenerTest extends FunSuite {
                   |
                   |""".stripMargin.replaceAll("\n", "\r\n")))
 
-    assert(await(read()).get == """HTTP/1.0 400 Bad Request
-                                  |Connection: close
-                                  |Content-Length: 0
-                                  |
-                                  |""".stripMargin.replaceAll("\n", "\r\n"))
+    val responseLines = await(read()).get.lines.toIndexedSeq // not sure whether lines plays nice with JDK11, would only break running the *tests* anyway?
+
+    assert(responseLines(0) == """HTTP/1.0 400 Bad Request""")
+    assert(responseLines.tail.contains("Connection: close"))
+    assert(responseLines.tail.contains("Content-Length: 0"))
+    assert(responseLines.size == 4) // 3 lines with data + terminating blank line
 
     await(close())
   })
