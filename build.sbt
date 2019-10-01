@@ -624,7 +624,8 @@ lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
   base = file("finagle-netty4-http")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-netty4-http",
   libraryDependencies ++= Seq(
