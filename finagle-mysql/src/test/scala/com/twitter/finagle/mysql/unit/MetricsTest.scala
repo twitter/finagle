@@ -1,7 +1,14 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.stats.{Client => _, _}
+import com.twitter.finagle.stats.{
+  Counter,
+  Gauge,
+  InMemoryStatsReceiver,
+  Stat,
+  StatsReceiverProxy,
+  Verbosity
+}
 import com.twitter.util.{Await, Awaitable, Future}
 import java.util.concurrent.atomic.LongAdder
 import org.mockito.Mockito._
