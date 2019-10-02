@@ -714,7 +714,7 @@ lazy val finagleMySQL = Project(
   withTwoThirteen
 ).settings(
   name := "finagle-mysql",
-  libraryDependencies ++= Seq(util("logging"), util("cache"), caffeineLib, jsr305Lib),
+  libraryDependencies ++= Seq(util("logging"), util("cache"), util("core"), util("stats"), caffeineLib, jsr305Lib),
   excludeFilter in unmanagedSources := {
     "EmbeddableMysql.scala" || "ClientTest.scala"
   }
