@@ -724,7 +724,8 @@ lazy val finagleExp = Project(
   id = "finagle-exp",
   base = file("finagle-exp")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-exp",
   libraryDependencies ++= Seq(
