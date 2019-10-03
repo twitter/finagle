@@ -488,7 +488,8 @@ lazy val finagleException = Project(
   id = "finagle-exception",
   base = file("finagle-exception")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-exception",
   libraryDependencies ++= Seq(
