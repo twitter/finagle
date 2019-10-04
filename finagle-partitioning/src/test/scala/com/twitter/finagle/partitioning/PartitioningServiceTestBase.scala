@@ -6,6 +6,7 @@ import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.{param => ctfparam}
+import com.twitter.finagle.partitioning.{param => partitioningParam}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
 import com.twitter.finagle.server.utils.StringServer
@@ -105,7 +106,7 @@ trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with 
       .withRequestTimeout(1.second)
       .configured(Stats(sr))
       .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-      .configured(param.EjectFailedHost(ejectFailedHosts))
+      .configured(partitioningParam.EjectFailedHost(ejectFailedHosts))
       .configured(ctfparam.Timer(timer))
       .newService(dest, "client")
   }

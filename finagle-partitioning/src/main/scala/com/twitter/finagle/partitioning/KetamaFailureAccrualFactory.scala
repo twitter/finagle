@@ -1,12 +1,12 @@
 package com.twitter.finagle.partitioning
 
 import com.twitter.concurrent.Broker
-import com.twitter.finagle
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.service.{ReqRep, ResponseClassifier}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle._
+import com.twitter.finagle.{param => finagleParam, _}
+import com.twitter.finagle.partitioning.{param => partitioningParam}
 import com.twitter.logging.Logger
 import com.twitter.util.{Duration, Future, Return, Throw, Timer}
 
@@ -27,23 +27,23 @@ private[finagle] object KetamaFailureAccrualFactory {
       val role: Stack.Role = FailureAccrualFactory.role
       val description: String = "Memcached ketama failure accrual"
       override def parameters: Seq[Stack.Param[_]] = Seq(
-        implicitly[Stack.Param[finagle.param.Stats]],
+        implicitly[Stack.Param[finagleParam.Stats]],
         implicitly[Stack.Param[FailureAccrualFactory.Param]],
-        implicitly[Stack.Param[finagle.param.Timer]],
-        implicitly[Stack.Param[finagle.param.Label]],
-        implicitly[Stack.Param[finagle.param.ResponseClassifier]],
+        implicitly[Stack.Param[finagleParam.Timer]],
+        implicitly[Stack.Param[finagleParam.Label]],
+        implicitly[Stack.Param[finagleParam.ResponseClassifier]],
         implicitly[Stack.Param[Transporter.EndpointAddr]]
       )
 
       def make(params: Stack.Params, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
         params[FailureAccrualFactory.Param] match {
           case Param.Configured(policy) =>
-            val param.EjectFailedHost(ejectFailedHost) = params[param.EjectFailedHost]
-            val timer = params[finagle.param.Timer].timer
-            val stats = params[finagle.param.Stats].statsReceiver
-            val classifier = params[finagle.param.ResponseClassifier].responseClassifier
+            val param.EjectFailedHost(ejectFailedHost) = params[partitioningParam.EjectFailedHost]
+            val timer = params[finagleParam.Timer].timer
+            val stats = params[finagleParam.Stats].statsReceiver
+            val classifier = params[finagleParam.ResponseClassifier].responseClassifier
 
-            val label = params[finagle.param.Label].label
+            val label = params[finagleParam.Label].label
             val failureAccrualPolicy: FailureAccrualPolicy = policy()
             val endpoint = params[Transporter.EndpointAddr].addr
 
@@ -72,7 +72,7 @@ private[finagle] object KetamaFailureAccrualFactory {
             }
 
           case Param.Replaced(f) =>
-            val timer = params[finagle.param.Timer].timer
+            val timer = params[finagleParam.Timer].timer
             f(timer).andThen(next)
 
           case Param.Disabled => next
