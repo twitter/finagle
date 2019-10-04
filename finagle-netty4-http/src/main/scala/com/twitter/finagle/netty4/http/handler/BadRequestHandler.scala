@@ -1,6 +1,7 @@
 package com.twitter.finagle.netty4.http.handler
 
-import com.twitter.finagle.http.{BadRequestResponse, Response, Rfc7230HeaderValidation}
+import com.twitter.finagle.http.headers.Rfc7230HeaderValidation
+import com.twitter.finagle.http.{BadRequestResponse, Response}
 import com.twitter.finagle.netty4.http.Bijections
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger

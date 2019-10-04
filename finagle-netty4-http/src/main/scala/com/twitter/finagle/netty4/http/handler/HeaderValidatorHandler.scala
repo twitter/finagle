@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.http.handler
 
-import com.twitter.finagle.http.Rfc7230HeaderValidation
-import com.twitter.finagle.http.Rfc7230HeaderValidation.{
+import com.twitter.finagle.http.headers.Rfc7230HeaderValidation
+import com.twitter.finagle.http.headers.Rfc7230HeaderValidation.{
   ObsFoldDetected,
   ValidationFailure,
   ValidationSuccess
