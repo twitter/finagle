@@ -1,5 +1,12 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.http.headers.Rfc7230HeaderValidation.{
+  ObsFoldDetected,
+  ValidationFailure,
+  ValidationSuccess
+}
+import com.twitter.finagle.http.headers._
+import com.twitter.logging.Logger
 import com.twitter.util.TwitterDateFormat
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, TimeZone}
@@ -84,6 +91,7 @@ abstract class HeaderMap
 }
 
 object HeaderMap {
+  private[this] val logger = Logger.get(classOf[HeaderMap])
 
   /**
    * Empty, read-only [[HeaderMap]].
@@ -111,6 +119,29 @@ object HeaderMap {
   private def format(date: Date): String =
     if (date == null) null
     else formatter.get().format(date)
+
+  // Exposed for testing
+  private[http] val ObsFoldRegex = "\r?\n[\t ]+".r
+
+  private[http] def validateName(name: String): Unit =
+    Rfc7230HeaderValidation.validateName(name) match {
+      case ValidationSuccess => () // nop
+      case ValidationFailure(ex) => throw ex
+    }
+
+  private[http] def foldReplacingValidateValue(name: String, value: String): String =
+    Rfc7230HeaderValidation.validateValue(name, value) match {
+      case ValidationSuccess =>
+        value
+      case ValidationFailure(ex) =>
+        throw ex
+      case ObsFoldDetected =>
+        logger.debug("`obs-fold` sequence replaced.")
+        // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
+        // to a SP char and suggests that such header values should be 'fixed' before
+        // interpreting or forwarding the message.
+        Rfc7230HeaderValidation.replaceObsFold(value)
+    }
 
   private[finagle] trait NameValue {
     def name: String

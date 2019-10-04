@@ -1,9 +1,12 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.http.headers
+
+import com.twitter.finagle.http
+import com.twitter.finagle.http.HeaderMap
 
 /**
  * An empty and read-only [[HeaderMap]]. Use [[HeaderMap.Empty]] for a singleton instance.
  */
-private final class EmptyHeaderMap extends HeaderMap {
+private[http] final class EmptyHeaderMap extends http.HeaderMap {
   def getAll(key: String): Seq[String] = Nil
   def get(key: String): Option[String] = None
   def add(k: String, v: String): HeaderMap = this

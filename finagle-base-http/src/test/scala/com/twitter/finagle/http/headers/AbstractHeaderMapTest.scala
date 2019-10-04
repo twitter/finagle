@@ -1,5 +1,6 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.http.headers
 
+import com.twitter.finagle.http.HeaderMap
 import java.util.Date
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
@@ -261,7 +262,7 @@ abstract class AbstractHeaderMapTest extends FunSuite with ScalaCheckDrivenPrope
   test("validates header names & values with obs-folds (success)") {
     forAll(genFoldedValue) { v =>
       val value = newHeaderMap("foo" -> v).apply("foo")
-      assert(value == DefaultHeaderMap.ObsFoldRegex.replaceAllIn(v, " "))
+      assert(value == HeaderMap.ObsFoldRegex.replaceAllIn(v, " "))
       assert(v.contains("\n"))
       assert(!value.contains("\n"))
     }
