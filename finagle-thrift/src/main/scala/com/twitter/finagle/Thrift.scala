@@ -243,7 +243,7 @@ object Thrift
 
     protected val clientParam: RichClientParam = RichClientParam(
       protocolFactory = params[param.ProtocolFactory].protocolFactory,
-      maxThriftBufferSize = params[param.MaxReusableBufferSize].maxReusableBufferSize,
+      maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
       clientStats = params[Stats].statsReceiver,
       responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier,
       perEndpointStats = params[Thrift.param.PerEndpointStats].enabled

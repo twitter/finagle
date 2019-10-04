@@ -18,6 +18,9 @@ New Features
 
 * finagle-grpc-context: Enables cross-build for 2.13.0. ``PHAB_ID=D373168``
 
+* finagle-thrift: Pass a factory to create a TReusableBuffer as the parameter of a finagle client
+  to allow multiple clients share one TReusableBuffer. ``PHAB_ID=D378466``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
