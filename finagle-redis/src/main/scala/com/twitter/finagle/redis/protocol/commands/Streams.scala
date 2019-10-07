@@ -27,11 +27,11 @@ case class XAdd(key: Buf, id: Option[Buf], fv: Map[Buf, Buf]) extends StrictKeyC
   override def name: Buf = Command.XADD
 
   override def body: Seq[Buf] = {
-    val fvList: Seq[Buf] = fv.flatMap {
+    val fvList: List[Buf] = fv.iterator.flatMap {
       case (f, v) => f :: v :: Nil
-    }(collection.breakOut)
+    }.toList
 
-    Seq(key, id.getOrElse(XAdd.AutogenId)) ++ fvList
+    key :: id.getOrElse(XAdd.AutogenId) :: fvList
   }
 
   override protected def validate(): Unit = {
