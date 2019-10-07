@@ -190,7 +190,7 @@ private[finagle] object BindingFactory {
   private[finagle] trait Module[Req, Rep] extends Stack.Module[ServiceFactory[Req, Rep]] {
     val role: Stack.Role = BindingFactory.role
     val description: String = "Bind destination names to endpoints"
-    val parameters = Seq(
+    val parameters: Seq[Stack.Param[_]] = Seq(
       implicitly[Stack.Param[BaseDtab]],
       implicitly[Stack.Param[Dest]],
       implicitly[Stack.Param[param.Label]],
