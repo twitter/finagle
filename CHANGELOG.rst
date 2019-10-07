@@ -12,6 +12,8 @@ New Features
 
 * finagle-partition: Enables cross-build for 2.13.0. ``PHAB_ID=D380444``
 
+* finagle-exception: Enables cross-build for 2.13.0. ``PHAB_ID=D381107``
+
 * finagle-exp: Enables cross-build for 2.13.0. ``PHAB_ID=D380497``
 
 * finagle-mysql: Enables cross-build for 2.13.0. ``PHAB_ID=D377721``
