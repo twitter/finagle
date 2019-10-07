@@ -9,10 +9,7 @@ import scala.collection.mutable
 // - iteration by gaining access to `entriesIterator` (protected method).
 // - get/add functions by providing custom hashCode and equals methods for a key
 private[http] final class HeadersHash extends mutable.HashMap[String, Header.Root] {
-
-  private def hashChar(c: Char): Int =
-    if (c >= 'A' && c <= 'Z') c + 32
-    else c
+  import HeadersHash._
 
   // Adopted from Netty 3 HttpHeaders.
   override protected def elemHashCode(key: String): Int = {
@@ -180,4 +177,10 @@ private[http] final class HeadersHash extends mutable.HashMap[String, Header.Roo
 
   def removeAll(key: String): Unit = remove(key)
 
+}
+
+object HeadersHash {
+  final def hashChar(c: Char): Int =
+    if (c >= 'A' && c <= 'Z') c + 32
+    else c
 }
