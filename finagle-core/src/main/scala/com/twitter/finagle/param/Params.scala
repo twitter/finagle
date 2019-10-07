@@ -130,7 +130,7 @@ object HighResTimer {
    */
   val Default: com.twitter.util.Timer =
     new JavaTimer(true, Some("HighResTimer")) {
-      override def stop(): Unit = ()
+
     }
 
   implicit val param: Stack.Param[HighResTimer] =
