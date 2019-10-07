@@ -15,10 +15,4 @@ package object netty4 {
    */
   private[finagle] val Toggles: ToggleMap =
     StandardToggleMap("com.twitter.finagle.netty4", DefaultStatsReceiver)
-	
-  /** Stops HashedWheelTimer thread */
-  def stopHashedWheelTimer {
-    HashedWheelTimer.instance.stop()
-  }
-  
 }

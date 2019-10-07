@@ -24,7 +24,7 @@ private object timerTickDuration
 /**
  * A Netty timer for use with [[Netty4HashedWheelTimer]].
  */
-private class HashedWheelTimer(
+class HashedWheelTimer(
   statsReceiver: StatsReceiver,
   tickDuration: Duration,
   ticksPerWheel: Int)
@@ -67,7 +67,7 @@ private class HashedWheelTimer(
   self.newTimeout(pendingTasksStat, statsPollInterval.inSeconds, TimeUnit.SECONDS)
 }
 
-private object HashedWheelTimer {
+object HashedWheelTimer {
 
   /**
    * A singleton instance of [[HashedWheelTimer]] that is used for the all service loaded
