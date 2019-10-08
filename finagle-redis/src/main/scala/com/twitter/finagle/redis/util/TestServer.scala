@@ -43,9 +43,10 @@ object RedisCluster { self =>
 
   def address: Option[InetSocketAddress] = instanceStack.head.address
   def address(i: Int) = instanceStack(i).address
-  def addresses: Seq[Option[InetSocketAddress]] = instanceStack.map { i =>
-    i.address
-  }
+  def addresses: Seq[Option[InetSocketAddress]] =
+    instanceStack.map { i =>
+      i.address
+    }.toList
 
   def hostAddresses(from: Int = 0, until: Int = instanceStack.size): String = {
     require(instanceStack.nonEmpty)

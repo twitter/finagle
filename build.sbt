@@ -661,7 +661,8 @@ lazy val finagleRedis = Project(
   id = "finagle-redis",
   base = file("finagle-redis")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).configs(
   IntegrationTest extend(Test)
 ).settings(

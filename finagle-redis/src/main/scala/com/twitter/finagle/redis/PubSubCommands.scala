@@ -4,7 +4,6 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.io.Buf
 import com.twitter.util.Future
-import scala.collection.breakOut
 
 private[redis] trait PubSubCommands { self: BaseClient =>
 
@@ -28,10 +27,10 @@ private[redis] trait PubSubCommands { self: BaseClient =>
         Future.value(
           messages
             .grouped(2)
-            .toSeq
             .map({
               case List(BulkReply(channel), IntegerReply(num)) => channel -> num
-            })(breakOut)
+            })
+            .toMap
         )
       case EmptyMBulkReply => Future.value(Map.empty)
     }

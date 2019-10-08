@@ -43,10 +43,10 @@ case class HMGet(key: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
 case class HMSet(key: Buf, fv: Map[Buf, Buf]) extends StrictKeyCommand {
   def name: Buf = Command.HMSET
   override def body: Seq[Buf] = {
-    val fvList: Seq[Buf] = fv.flatMap {
+    val fvList: Seq[Buf] = fv.iterator.flatMap {
       case (f, v) =>
         f :: v :: Nil
-    }(collection.breakOut)
+    }.toSeq
 
     key +: fvList
   }
@@ -55,10 +55,10 @@ case class HMSet(key: Buf, fv: Map[Buf, Buf]) extends StrictKeyCommand {
 case class HMSetEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends StrictKeyCommand {
   def name: Buf = Command.HMSETEX
   override def body: Seq[Buf] = {
-    val fvList: Seq[Buf] = fv.flatMap {
+    val fvList: Seq[Buf] = fv.iterator.flatMap {
       case (f, v) =>
         f :: v :: Nil
-    }(collection.breakOut)
+    }.toSeq
 
     key +: (Buf.Utf8(milliseconds.toString) +: fvList)
   }
@@ -67,10 +67,10 @@ case class HMSetEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends Stri
 case class HMergeEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends StrictKeyCommand {
   def name: Buf = Command.HMADDEX
   override def body: Seq[Buf] = {
-    val fvList: Seq[Buf] = fv.flatMap {
+    val fvList: Seq[Buf] = fv.iterator.flatMap {
       case (f, v) =>
         f :: v :: Nil
-    }(collection.breakOut)
+    }.toSeq
 
     key +: (Buf.Utf8(milliseconds.toString) +: fvList)
   }

@@ -15,7 +15,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
       case MBulkReply(messages) => withScoresHelper(withScores)(messages)
       case EmptyMBulkReply => withScoresHelper(withScores)(Nil)
     }
-    parse andThen Future.value
+    parse.andThen(Future.value(_))
   }
 
   private[this] def withScoresHelper(

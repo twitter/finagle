@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.io.Buf
-import scala.collection.breakOut
+import scala.collection.compat.immutable.ArraySeq
 
 trait CommandArgument extends Command
 
@@ -21,7 +21,7 @@ class Weights(underlying: Array[Double]) extends CommandArgument with IndexedSeq
   def apply(idx: Int) = underlying(idx)
   def length = underlying.length
 
-  override def body: Seq[Buf] = underlying.map(w => Buf.Utf8(w.toString))(breakOut)
+  override def body: Seq[Buf] = ArraySeq.unsafeWrapArray(underlying.map(w => Buf.Utf8(w.toString)))
 
   override def toString: String = Weights.toString + " " + this.mkString(" ")
 }

@@ -125,7 +125,7 @@ private[finagle] class RedisPartitioningService(
       case d: Del => d.copy(keys = pKeys)
       case s: SInter => s.copy(keys = pKeys)
       case m: MGet => m.copy(keys = pKeys)
-      case m: MSet => m.copy(kv = m.kv.filterKeys(pKeys.toSet))
+      case m: MSet => m.copy(kv = m.kv.filterKeys(pKeys.toSet).toMap)
       case _ => unsupportedCommand(command)
     }
 
