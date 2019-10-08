@@ -35,6 +35,9 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle-base-http: Better performance for the default `HeaderMap.add` method for headers with
+  the same name. ``PHAB_ID=D381142``
+
 * finagle-http2: H2ServerFilter will no longer swallow exceptions that fire via
   `exceptionCaught` in the Netty pipeline. `PHAB_ID=D369185`
 

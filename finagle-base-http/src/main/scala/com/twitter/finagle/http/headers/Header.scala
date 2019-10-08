@@ -3,43 +3,50 @@ package com.twitter.finagle.http.headers
 import com.twitter.finagle.http.HeaderMap
 import scala.collection.mutable
 
-private[http] final class Header(val name: String, val value: String, var next: Header = null)
+private[http] sealed class Header private (final val name: String, final val value: String)
     extends HeaderMap.NameValue {
 
-  def values: Seq[String] =
-    if (next == null) value :: Nil
-    else {
-      val result = new mutable.ListBuffer[String] += value
+  final protected var _next: Header = null
 
-      var i = next
-      do {
-        result += i.value
-        i = i.next
-      } while (i != null)
+  final def next: Header = _next
+}
 
-      result.toList
+private[http] object Header {
+
+  final class Root private[Header] (name: String, value: String) extends Header(name, value) {
+
+    // We want to keep a reference to the last element of this linked list
+    // so we don't need to traverse the whole list to add an element.
+    private[this] var last: Header = null
+
+    def add(name: String, value: String): Unit = {
+      val n = new Header(name, value)
+      if (next == null) {
+        // the second element.
+        _next = n
+      } else {
+        last._next = n
+      }
+      // Set the reference to the last element for future `add` calls.
+      last = n
     }
 
-  def names: Seq[String] =
-    if (next == null) name :: Nil
-    else {
-      val result = new mutable.ListBuffer[String] += name
+    def values: Seq[String] =
+      if (next == null) value :: Nil
+      else {
+        val result = new mutable.ListBuffer[String] += value
 
-      var i = next
-      do {
-        result += i.name
-        i = i.next
-      } while (i != null)
+        var i = next
+        do {
+          result += i.value
+          i = i.next
+        } while (i != null)
 
-      result.toList
-    }
-
-  def add(h: Header): Unit = {
-    var i = this
-    while (i.next != null) {
-      i = i.next
-    }
-
-    i.next = h
+        result.toList
+      }
   }
+
+  /** Create a new root node */
+  def root(name: String, value: String): Root =
+    new Root(name, value)
 }
