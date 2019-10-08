@@ -128,9 +128,16 @@ object HighResTimer {
    *
    * It is a shared resource and as such, `stop` is ignored.
    */
-  val Default: com.twitter.util.Timer =
+  private[finagle] val Default: com.twitter.util.Timer =
     new JavaTimer(true, Some("HighResTimer"))
 
+  /**
+   * Stop default HighResTimer
+   */
+  def stop() {
+    Default.stop()
+  }
+  
   implicit val param: Stack.Param[HighResTimer] =
     Stack.Param(HighResTimer(Default))
 }
