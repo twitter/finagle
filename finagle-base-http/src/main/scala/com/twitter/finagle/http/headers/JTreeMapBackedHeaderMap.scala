@@ -19,7 +19,7 @@ final private[http] class JTreeMapBackedHeaderMap extends JMapBackedHeaderMap {
       else got.values
     }
 
-     // Does not validate key and value.
+  // Does not validate key and value.
   def addUnsafe(key: String, value: String): this.type  = underlying.synchronized {
     val header = new Header(key, value)
     underlying.get(key) match {
@@ -29,63 +29,22 @@ final private[http] class JTreeMapBackedHeaderMap extends JMapBackedHeaderMap {
     this
   }
 
-    // Does not validate key and value.
-    def setUnsafe(key: String, value: String): this.type = underlying.synchronized {
-      underlying.put(key, new Header(key, value))
-      this
-    }
-
-    def get(key: String): Option[String] = underlying.synchronized {
-      Option(underlying.get(key)).map(_.value)
-    }
-
-    def removed(key: String): this.type = underlying.synchronized {
-      underlying.remove(key)
-      this
-    }
-}
-
-/**
- * Mutable, thread-safe [[HeaderMap]] implementation, backed by
- * a mutable [[Map[String, Header]]], where the map key
- * is forced to lower case
- */
-final private[http] class JHashMapBackedHeaderMap extends JMapBackedHeaderMap {
-  override val underlying: java.util.HashMap[String, Header] = 
-    new java.util.HashMap[String, Header]()
-
-    def getAll(key: String): Seq[String] = underlying.synchronized {
-      val got = underlying.get(key.toLowerCase)
-      if (got == null) Nil
-      else got.values
-    }
-
-     // Does not validate key and value.
-  def addUnsafe(key: String, value: String): this.type  = underlying.synchronized {
-    val lower = key.toLowerCase
-    val header = new Header(key, value)
-    underlying.get(lower) match {
-      case null => underlying.put(lower, header)
-      case h    => h.add(header)
-    }
+  // Does not validate key and value.
+  def setUnsafe(key: String, value: String): this.type = underlying.synchronized {
+    underlying.put(key, new Header(key, value))
     this
   }
 
-    // Does not validate key and value.
-    def setUnsafe(key: String, value: String): this.type = underlying.synchronized {
-      underlying.put(key.toLowerCase, new Header(key, value))
-      this
-    }
+  def get(key: String): Option[String] = underlying.synchronized {
+    Option(underlying.get(key)).map(_.value)
+  }
 
-    def get(key: String): Option[String] = underlying.synchronized {
-      Option(underlying.get(key.toLowerCase)).map(_.value)
-    }
-
-    def removed(key: String): this.type = underlying.synchronized {
-      underlying.remove(key.toLowerCase)
-      this
-    }
+  def removed(key: String): this.type = underlying.synchronized {
+    underlying.remove(key)
+    this
+  }
 }
+
 
 object JTreeMapBackedHeaderMap {
 

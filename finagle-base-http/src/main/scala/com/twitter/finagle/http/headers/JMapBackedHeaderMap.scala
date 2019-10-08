@@ -12,9 +12,10 @@ import scala.jdk.CollectionConverters._
 private[http] trait JMapBackedHeaderMap extends HeaderMap {
   import HeaderMap._
 
-  // In general, HashSet/HashTables that are not thread safe are not
-  // durable to concurrent modification and can result in infinite loops.
-  // As such, we synchronize on the underlying `Headers` when performing
+  // In general, Map's that are not thread safe are not
+  // durable to concurrent modification and can result in infinite loops
+  // and exceptions.
+  // As such, we synchronize on the underlying collection when performing
   // accesses to avoid this. In the common case of no concurrent access,
   // this should be cheap.
   protected val underlying: java.util.Map[String, Header]
