@@ -24,7 +24,7 @@ private object timerTickDuration
 /**
  * A Netty timer for use with [[Netty4HashedWheelTimer]].
  */
-class HashedWheelTimer(
+private class HashedWheelTimer(
   statsReceiver: StatsReceiver,
   tickDuration: Duration,
   ticksPerWheel: Int)
@@ -75,13 +75,21 @@ object HashedWheelTimer {
    *
    * @note Stats are reported into the "finagle" scope.
    */
-  val instance: HashedWheelTimer = {
+  private[netty4] val instance: HashedWheelTimer = {
     new HashedWheelTimer(
       FinagleStatsReceiver,
       timerTickDuration(),
       timerTicksPerWheel()
     )
   }
+  
+  /**
+   * Stop default Netty 4 Timer
+   */
+  def stop() {
+    instance.stop()
+  }
+  
 }
 
 /**
