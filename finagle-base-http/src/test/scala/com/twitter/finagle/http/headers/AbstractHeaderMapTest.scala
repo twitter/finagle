@@ -1,15 +1,22 @@
 package com.twitter.finagle.http.headers
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.HeaderMap
+import com.twitter.util.Stopwatch
 import java.util.Date
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 /**
  * Test battery that all `HeaderMap` types should pass.
  */
-abstract class AbstractHeaderMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+abstract class AbstractHeaderMapTest
+    extends FunSuite
+    with ScalaCheckDrivenPropertyChecks
+    with Eventually
+    with IntegrationPatience {
 
   def newHeaderMap(headers: (String, String)*): HeaderMap
 
@@ -334,6 +341,22 @@ abstract class AbstractHeaderMapTest extends FunSuite with ScalaCheckDrivenPrope
   test("header names with separators are rejected") {
     ((0x1 to 0x20).map(_.toChar) ++ "\"(),/:;<=>?@[\\]{}").foreach { illegalChar =>
       intercept[IllegalArgumentException](newHeaderMap(illegalChar.toString -> "bar"))
+    }
+  }
+
+  test("large number of collisions isn't super slow to add") {
+    val num = 300 * 1000
+    eventually {
+      val stopwatch = Stopwatch.start()
+
+      val hs = newHeaderMap()
+
+      (0 until num).foreach { _ =>
+        hs.add("key", "value")
+      }
+      assert(hs.size == num)
+
+      assert(stopwatch() < 10.seconds)
     }
   }
 }

@@ -8,7 +8,7 @@ import scala.collection.mutable
 //
 // - iteration by gaining access to `entriesIterator` (protected method).
 // - get/add functions by providing custom hashCode and equals methods for a key
-private[http] final class HeadersHash extends mutable.HashMap[String, Header] {
+private[http] final class HeadersHash extends mutable.HashMap[String, Header.Root] {
 
   private def hashChar(c: Char): Int =
     if (c >= 'A' && c <= 'Z') c + 32
@@ -139,15 +139,14 @@ private[http] final class HeadersHash extends mutable.HashMap[String, Header] {
     }
 
   def add(key: String, value: String): Unit = {
-    val h = new Header(key, value)
     findEntry(key) match {
-      case null => update(key, h)
-      case e => e.value.add(h)
+      case null => update(key, Header.root(key, value))
+      case e => e.value.add(key, value)
     }
   }
 
   def set(key: String, value: String): Unit = {
-    val h = new Header(key, value)
+    val h = Header.root(key, value)
     update(key, h)
   }
 
