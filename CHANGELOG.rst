@@ -23,6 +23,8 @@ New Features
 
 * finagle-{mux,thrift,thrift-mux}: Enables cross-build for 2.13.0. ``PHAB_ID=D373165``
 
+* finagle-netty4: Add support to stop default Finagle Netty 4 Timer. ``PHAB_ID=D381605``
+
 * finagle-redis: Enables cross-build for 2.13.0. ``PHAB_ID=D381107``
 
 * finagle-tunable: Enables cross-build for 2.13.0. ``PHAB_ID=D373170``
