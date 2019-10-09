@@ -598,6 +598,22 @@ the netty4 event loop.
 finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>Defines common <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
 finagle clients and servers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.partitioning" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="partitioning"></a><a id="partitioning:partitioning"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#partitioning" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="partitioning/index.html"><span class="name">partitioning</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -991,7 +1007,7 @@ generator.
                         <a class="class" href="DroppedWriteException.html" title="Indicates that a com.twitter.finagle.transport.Transport write associated with the request was dropped by the transport (usually to respect backpressure)."></a>
                         <a href="DroppedWriteException.html" title="Indicates that a com.twitter.finagle.transport.Transport write associated with the request was dropped by the transport (usually to respect backpressure).">DroppedWriteException</a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Dtab$.html" title="Object Dtab manages 'base' and 'local' Dtabs."></a>
+                        <a class="object" href="Dtab$.html" title=""></a>
                         <a class="class" href="" title="A Dtab--short for delegation table--comprises a sequence of delegation rules."></a>
                         <a href="" title="A Dtab--short for delegation table--comprises a sequence of delegation rules.">Dtab</a>
                       </li><li class="current-entities indented3">
@@ -1211,6 +1227,10 @@ generator.
                         <a class="trait" href="Server.html" title="Servers implement RPC servers with Req-typed requests and Rep-typed responses."></a>
                         <a href="Server.html" title="Servers implement RPC servers with Req-typed requests and Rep-typed responses.">Server</a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ServerErrorMonitor.html" title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor."></a>
+                        <a href="ServerErrorMonitor.html" title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor.">ServerErrorMonitor</a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Service$.html" title=""></a>
                         <a class="class" href="Service.html" title="A Service is an asynchronous function from a Request to a Future[Response]."></a>
                         <a href="Service.html" title="A Service is an asynchronous function from a Request to a Future[Response].">Service</a>
@@ -1367,7 +1387,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Dtab</span><span class="params">(<span name="dentries0">dentries0: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>] with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">Dtab</span><span class="params">(<span name="dentries0">dentries0: <a href="../../../scala/index.html#IndexedSeq[+A]=IndexedSeq[A]" class="extmbr" name="scala.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.DtabBase">DtabBase</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
@@ -1382,7 +1402,7 @@ implements the default binding strategy.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeqLike.html#scala.collection.IndexedSeqLike" class="extype" name="scala.collection.IndexedSeqLike">IndexedSeqLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Seq.html#scala.collection.Seq" class="extype" name="scala.collection.Seq">Seq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/SeqLike.html#scala.collection.SeqLike" class="extype" name="scala.collection.SeqLike">SeqLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenSeq.html#scala.collection.GenSeq" class="extype" name="scala.collection.GenSeq">GenSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenSeqLike.html#scala.collection.GenSeqLike" class="extype" name="scala.collection.GenSeqLike">GenSeqLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterable.html#scala.collection.Iterable" class="extype" name="scala.collection.Iterable">Iterable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableLike.html#scala.collection.IterableLike" class="extype" name="scala.collection.IterableLike">IterableLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterableLike.html#scala.collection.GenIterableLike" class="extype" name="scala.collection.GenIterableLike">GenIterableLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Traversable.html#scala.collection.Traversable" class="extype" name="scala.collection.Traversable">Traversable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversable.html#scala.collection.GenTraversable" class="extype" name="scala.collection.GenTraversable">GenTraversable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/GenericTraversableTemplate.html#scala.collection.generic.GenericTraversableTemplate" class="extype" name="scala.collection.generic.GenericTraversableTemplate">GenericTraversableTemplate</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableLike.html#scala.collection.TraversableLike" class="extype" name="scala.collection.TraversableLike">TraversableLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableLike.html#scala.collection.GenTraversableLike" class="extype" name="scala.collection.GenTraversableLike">GenTraversableLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Parallelizable.html#scala.collection.Parallelizable" class="extype" name="scala.collection.Parallelizable">Parallelizable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/parallel/ParSeq.html#scala.collection.parallel.ParSeq" class="extype" name="scala.collection.parallel.ParSeq">ParSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableOnce.html#scala.collection.TraversableOnce" class="extype" name="scala.collection.TraversableOnce">TraversableOnce</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/FilterMonadic.html#scala.collection.generic.FilterMonadic" class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/HasNewBuilder.html#scala.collection.generic.HasNewBuilder" class="extype" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, IndexedSeq[com.twitter.finagle.Dentry] @scala.annotation.unchecked.uncheckedVariance], <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>, <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], (<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <span class="extype" name="com.twitter.finagle.DtabBase">DtabBase</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeqLike.html#scala.collection.IndexedSeqLike" class="extype" name="scala.collection.IndexedSeqLike">IndexedSeqLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Seq.html#scala.collection.Seq" class="extype" name="scala.collection.Seq">Seq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/SeqLike.html#scala.collection.SeqLike" class="extype" name="scala.collection.SeqLike">SeqLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenSeq.html#scala.collection.GenSeq" class="extype" name="scala.collection.GenSeq">GenSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenSeqLike.html#scala.collection.GenSeqLike" class="extype" name="scala.collection.GenSeqLike">GenSeqLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterable.html#scala.collection.Iterable" class="extype" name="scala.collection.Iterable">Iterable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableLike.html#scala.collection.IterableLike" class="extype" name="scala.collection.IterableLike">IterableLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterableLike.html#scala.collection.GenIterableLike" class="extype" name="scala.collection.GenIterableLike">GenIterableLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Traversable.html#scala.collection.Traversable" class="extype" name="scala.collection.Traversable">Traversable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversable.html#scala.collection.GenTraversable" class="extype" name="scala.collection.GenTraversable">GenTraversable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/GenericTraversableTemplate.html#scala.collection.generic.GenericTraversableTemplate" class="extype" name="scala.collection.generic.GenericTraversableTemplate">GenericTraversableTemplate</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableLike.html#scala.collection.TraversableLike" class="extype" name="scala.collection.TraversableLike">TraversableLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableLike.html#scala.collection.GenTraversableLike" class="extype" name="scala.collection.GenTraversableLike">GenTraversableLike</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Parallelizable.html#scala.collection.Parallelizable" class="extype" name="scala.collection.Parallelizable">Parallelizable</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/parallel/ParSeq.html#scala.collection.parallel.ParSeq" class="extype" name="scala.collection.parallel.ParSeq">ParSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableOnce.html#scala.collection.TraversableOnce" class="extype" name="scala.collection.TraversableOnce">TraversableOnce</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/FilterMonadic.html#scala.collection.generic.FilterMonadic" class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/HasNewBuilder.html#scala.collection.generic.HasNewBuilder" class="extype" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, IndexedSeq[com.twitter.finagle.Dentry] @scala.annotation.unchecked.uncheckedVariance], <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>, <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], (<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1408,7 +1428,7 @@ implements the default binding strategy.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.Dtab"><span>Dtab</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.collection.IndexedSeq"><span>IndexedSeq</span></li><li class="in" name="scala.collection.IndexedSeqLike"><span>IndexedSeqLike</span></li><li class="in" name="scala.collection.Seq"><span>Seq</span></li><li class="in" name="scala.collection.SeqLike"><span>SeqLike</span></li><li class="in" name="scala.collection.GenSeq"><span>GenSeq</span></li><li class="in" name="scala.collection.GenSeqLike"><span>GenSeqLike</span></li><li class="in" name="scala.collection.Iterable"><span>Iterable</span></li><li class="in" name="scala.collection.IterableLike"><span>IterableLike</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.collection.GenIterable"><span>GenIterable</span></li><li class="in" name="scala.collection.GenIterableLike"><span>GenIterableLike</span></li><li class="in" name="scala.collection.Traversable"><span>Traversable</span></li><li class="in" name="scala.collection.GenTraversable"><span>GenTraversable</span></li><li class="in" name="scala.collection.generic.GenericTraversableTemplate"><span>GenericTraversableTemplate</span></li><li class="in" name="scala.collection.TraversableLike"><span>TraversableLike</span></li><li class="in" name="scala.collection.GenTraversableLike"><span>GenTraversableLike</span></li><li class="in" name="scala.collection.Parallelizable"><span>Parallelizable</span></li><li class="in" name="scala.collection.TraversableOnce"><span>TraversableOnce</span></li><li class="in" name="scala.collection.GenTraversableOnce"><span>GenTraversableOnce</span></li><li class="in" name="scala.collection.generic.FilterMonadic"><span>FilterMonadic</span></li><li class="in" name="scala.collection.generic.HasNewBuilder"><span>HasNewBuilder</span></li><li class="in" name="scala.PartialFunction"><span>PartialFunction</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.Dtab"><span>Dtab</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="com.twitter.finagle.DtabBase"><span>DtabBase</span></li><li class="in" name="scala.collection.IndexedSeq"><span>IndexedSeq</span></li><li class="in" name="scala.collection.IndexedSeqLike"><span>IndexedSeqLike</span></li><li class="in" name="scala.collection.Seq"><span>Seq</span></li><li class="in" name="scala.collection.SeqLike"><span>SeqLike</span></li><li class="in" name="scala.collection.GenSeq"><span>GenSeq</span></li><li class="in" name="scala.collection.GenSeqLike"><span>GenSeqLike</span></li><li class="in" name="scala.collection.Iterable"><span>Iterable</span></li><li class="in" name="scala.collection.IterableLike"><span>IterableLike</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.collection.GenIterable"><span>GenIterable</span></li><li class="in" name="scala.collection.GenIterableLike"><span>GenIterableLike</span></li><li class="in" name="scala.collection.Traversable"><span>Traversable</span></li><li class="in" name="scala.collection.GenTraversable"><span>GenTraversable</span></li><li class="in" name="scala.collection.generic.GenericTraversableTemplate"><span>GenericTraversableTemplate</span></li><li class="in" name="scala.collection.TraversableLike"><span>TraversableLike</span></li><li class="in" name="scala.collection.GenTraversableLike"><span>GenTraversableLike</span></li><li class="in" name="scala.collection.Parallelizable"><span>Parallelizable</span></li><li class="in" name="scala.collection.TraversableOnce"><span>TraversableOnce</span></li><li class="in" name="scala.collection.GenTraversableOnce"><span>GenTraversableOnce</span></li><li class="in" name="scala.collection.generic.FilterMonadic"><span>FilterMonadic</span></li><li class="in" name="scala.collection.generic.HasNewBuilder"><span>HasNewBuilder</span></li><li class="in" name="scala.PartialFunction"><span>PartialFunction</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -1440,7 +1460,7 @@ implements the default binding strategy.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Dtab</span><span class="params">(<span name="dentries0">dentries0: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span>
+        <span class="name">Dtab</span><span class="params">(<span name="dentries0">dentries0: <a href="../../../scala/index.html#IndexedSeq[+A]=IndexedSeq[A]" class="extmbr" name="scala.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span>
       </span>
       
       
@@ -1540,7 +1560,7 @@ implements the default binding strategy.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#+" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#+" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="+(dentry:com.twitter.finagle.Dentry):com.twitter.finagle.Dtab"></a><a id="+(Dentry):Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#+(dentry:com.twitter.finagle.Dentry):com.twitter.finagle.Dtab" title="Permalink">
@@ -1556,8 +1576,10 @@ implements the default binding strategy.
       </span>
       
       <p class="shortcomment cmt">Construct a new Dtab with the given delegation
-entry appended.</p>
-    </li><li name="com.twitter.finagle.Dtab#++" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+entry appended.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a new Dtab with the given delegation
+entry appended.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd></dl></div>
+    </li><li name="com.twitter.finagle.DtabBase#++" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="++(dtab:com.twitter.finagle.Dtab):com.twitter.finagle.Dtab"></a><a id="++(Dtab):Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#++(dtab:com.twitter.finagle.Dtab):com.twitter.finagle.Dtab" title="Permalink">
@@ -1572,7 +1594,8 @@ entry appended.</p>
         <span title="gt4s: $plus$plus" class="name">++</span><span class="params">(<span name="dtab">dtab: <a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>
       </span>
       
-      <p class="shortcomment cmt">Construct a new Dtab with the given dtab appended.</p>
+      <p class="shortcomment cmt">Construct a new Dtab with the given dtab appended.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a new Dtab with the given dtab appended.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#++" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="++[B&gt;:A,That](that:scala.collection.GenTraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="++[B&gt;:Dentry,That](GenTraversableOnce[B])(CanBuildFrom[IndexedSeq[Dentry],B,That]):That"></a>
       <span class="permalink">
@@ -1713,7 +1736,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addString</span><span class="params">(<span name="b">b: <span class="extype" name="scala.StringBuilder">StringBuilder</span></span>)</span><span class="result">: <span class="extype" name="scala.StringBuilder">StringBuilder</span></span>
+        <span class="name">addString</span><span class="params">(<span name="b">b: <a href="../../../scala/index.html#StringBuilder=StringBuilder" class="extmbr" name="scala.StringBuilder">StringBuilder</a></span>)</span><span class="result">: <a href="../../../scala/index.html#StringBuilder=StringBuilder" class="extmbr" name="scala.StringBuilder">StringBuilder</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce</dd></dl></div>
@@ -1729,7 +1752,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addString</span><span class="params">(<span name="b">b: <span class="extype" name="scala.StringBuilder">StringBuilder</span></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.StringBuilder">StringBuilder</span></span>
+        <span class="name">addString</span><span class="params">(<span name="b">b: <a href="../../../scala/index.html#StringBuilder=StringBuilder" class="extmbr" name="scala.StringBuilder">StringBuilder</a></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../../../scala/index.html#StringBuilder=StringBuilder" class="extmbr" name="scala.StringBuilder">StringBuilder</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce</dd></dl></div>
@@ -1745,7 +1768,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addString</span><span class="params">(<span name="b">b: <span class="extype" name="scala.StringBuilder">StringBuilder</span></span>, <span name="start">start: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="end">end: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.StringBuilder">StringBuilder</span></span>
+        <span class="name">addString</span><span class="params">(<span name="b">b: <a href="../../../scala/index.html#StringBuilder=StringBuilder" class="extmbr" name="scala.StringBuilder">StringBuilder</a></span>, <span name="start">start: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="end">end: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../../../scala/index.html#StringBuilder=StringBuilder" class="extmbr" name="scala.StringBuilder">StringBuilder</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce</dd></dl></div>
@@ -1781,7 +1804,7 @@ entry appended.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction → Function1</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#append" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#append" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="append(dentry:com.twitter.finagle.Dentry):com.twitter.finagle.Dtab"></a><a id="append(Dentry):Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#append(dentry:com.twitter.finagle.Dentry):com.twitter.finagle.Dtab" title="Permalink">
@@ -1797,8 +1820,9 @@ entry appended.</p>
       </span>
       
       <p class="shortcomment cmt">Java API for '+'
-</p>
-    </li><li name="com.twitter.finagle.Dtab#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+</p><div class="fullcomment"><div class="comment cmt"><p>Java API for '+'
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd></dl></div>
+    </li><li name="com.twitter.finagle.DtabBase#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(i:Int):com.twitter.finagle.Dentry"></a><a id="apply(Int):Dentry"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#apply(i:Int):com.twitter.finagle.Dentry" title="Permalink">
@@ -1813,7 +1837,7 @@ entry appended.</p>
         <span class="name">apply</span><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> → SeqLike → GenSeqLike → Function1</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase → SeqLike → GenSeqLike → Function1</dd></dl></div>
     </li><li name="scala.PartialFunction#applyOrElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="applyOrElse[A1&lt;:A,B1&gt;:B](x:A1,default:A1=&gt;B1):B1"></a><a id="applyOrElse[A1&lt;:Int,B1&gt;:Dentry](A1,(A1)⇒B1):B1"></a>
       <span class="permalink">
@@ -1874,7 +1898,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1969,7 +1993,7 @@ entry appended.</p>
                 <span class="name">@unspecialized</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#concat" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#concat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="concat(dtab:com.twitter.finagle.Dtab):com.twitter.finagle.Dtab"></a><a id="concat(Dtab):Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#concat(dtab:com.twitter.finagle.Dtab):com.twitter.finagle.Dtab" title="Permalink">
@@ -1985,7 +2009,8 @@ entry appended.</p>
       </span>
       
       <p class="shortcomment cmt">Java API for '++'
-</p>
+</p><div class="fullcomment"><div class="comment cmt"><p>Java API for '++'
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd></dl></div>
     </li><li name="scala.collection.SeqLike#contains" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="contains[A1&gt;:A](elem:A1):Boolean"></a><a id="contains[A1&gt;:Dentry](A1):Boolean"></a>
       <span class="permalink">
@@ -2114,7 +2139,7 @@ entry appended.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#dentries0" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Dtab#dentries0" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dentries0:IndexedSeq[com.twitter.finagle.Dentry]"></a><a id="dentries0:IndexedSeq[Dentry]"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#dentries0:IndexedSeq[com.twitter.finagle.Dentry]" title="Permalink">
@@ -2126,10 +2151,10 @@ entry appended.</p>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">dentries0</span><span class="result">: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>
+        <span class="name">dentries0</span><span class="result">: <a href="../../../scala/index.html#IndexedSeq[+A]=IndexedSeq[A]" class="extmbr" name="scala.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>
       </span>
       
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> → DtabBase</dd></dl></div>
     </li><li name="scala.collection.SeqLike#diff" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="diff[B&gt;:A](that:scala.collection.GenSeq[B]):Repr"></a><a id="diff[B&gt;:Dentry](GenSeq[B]):IndexedSeq[Dentry]"></a>
       <span class="permalink">
@@ -2238,7 +2263,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -2763,7 +2788,7 @@ entry appended.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GenSeqLike</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#isEmpty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#isEmpty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isEmpty:Boolean"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#isEmpty:Boolean" title="Permalink">
@@ -2778,7 +2803,7 @@ entry appended.</p>
         <span class="name">isEmpty</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> → SeqLike → IterableLike → GenericTraversableTemplate → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase → SeqLike → IterableLike → GenericTraversableTemplate → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -2955,7 +2980,7 @@ entry appended.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#length" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#length" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="length:Int"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#length:Int" title="Permalink">
@@ -2970,7 +2995,7 @@ entry appended.</p>
         <span class="name">length</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> → SeqLike → GenSeqLike</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase → SeqLike → GenSeqLike</dd></dl></div>
     </li><li name="scala.collection.SeqLike#lengthCompare" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="lengthCompare(len:Int):Int"></a><a id="lengthCompare(Int):Int"></a>
       <span class="permalink">
@@ -3003,7 +3028,7 @@ entry appended.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#lookup" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#lookup" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="lookup(path:com.twitter.finagle.Path):com.twitter.finagle.NameTree[com.twitter.finagle.Name.Path]"></a><a id="lookup(Path):NameTree[Name.Path]"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#lookup(path:com.twitter.finagle.Path):com.twitter.finagle.NameTree[com.twitter.finagle.Name.Path]" title="Permalink">
@@ -3018,7 +3043,8 @@ entry appended.</p>
         <span class="name">lookup</span><span class="params">(<span name="path">path: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Name$$Path.html" class="extype" name="com.twitter.finagle.Name.Path">Name.Path</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Lookup the given <code>path</code> with this dtab.</p>
+      <p class="shortcomment cmt">Lookup the given <code>path</code> with this dtab.</p><div class="fullcomment"><div class="comment cmt"><p>Lookup the given <code>path</code> with this dtab.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#map" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="map[B,That](f:A=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="map[B,That]((Dentry)⇒B)(CanBuildFrom[IndexedSeq[Dentry],B,That]):That"></a>
       <span class="permalink">
@@ -3047,7 +3073,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">max</span><span class="tparams">[<span name="B">B &gt;: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="scala.collection.TraversableOnce.max.B">B</span>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
+        <span class="name">max</span><span class="tparams">[<span name="B">B &gt;: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: <a href="../../../scala/index.html#Ordering[T]=scala.math.Ordering[T]" class="extmbr" name="scala.Ordering">Ordering</a>[<span class="extype" name="scala.collection.TraversableOnce.max.B">B</span>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
@@ -3063,7 +3089,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">maxBy</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>) ⇒ <span class="extype" name="scala.collection.TraversableOnce.maxBy.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="scala.collection.TraversableOnce.maxBy.B">B</span>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
+        <span class="name">maxBy</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>) ⇒ <span class="extype" name="scala.collection.TraversableOnce.maxBy.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: <a href="../../../scala/index.html#Ordering[T]=scala.math.Ordering[T]" class="extmbr" name="scala.Ordering">Ordering</a>[<span class="extype" name="scala.collection.TraversableOnce.maxBy.B">B</span>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
@@ -3079,7 +3105,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">min</span><span class="tparams">[<span name="B">B &gt;: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="scala.collection.TraversableOnce.min.B">B</span>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
+        <span class="name">min</span><span class="tparams">[<span name="B">B &gt;: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: <a href="../../../scala/index.html#Ordering[T]=scala.math.Ordering[T]" class="extmbr" name="scala.Ordering">Ordering</a>[<span class="extype" name="scala.collection.TraversableOnce.min.B">B</span>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
@@ -3095,7 +3121,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">minBy</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>) ⇒ <span class="extype" name="scala.collection.TraversableOnce.minBy.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="scala.collection.TraversableOnce.minBy.B">B</span>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
+        <span class="name">minBy</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>) ⇒ <span class="extype" name="scala.collection.TraversableOnce.minBy.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cmp">cmp: <a href="../../../scala/index.html#Ordering[T]=scala.math.Ordering[T]" class="extmbr" name="scala.Ordering">Ordering</a>[<span class="extype" name="scala.collection.TraversableOnce.minBy.B">B</span>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
@@ -3159,7 +3185,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -3361,7 +3387,7 @@ entry appended.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GenSeqLike</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#print" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#print" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="print(printer:java.io.PrintWriter):Unit"></a><a id="print(PrintWriter):Unit"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#print(printer:java.io.PrintWriter):Unit" title="Permalink">
@@ -3376,7 +3402,8 @@ entry appended.</p>
         <span class="name">print</span><span class="params">(<span name="printer">printer: <span class="extype" name="java.io.PrintWriter">PrintWriter</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Print a pretty representation of this Dtab.</p>
+      <p class="shortcomment cmt">Print a pretty representation of this Dtab.</p><div class="fullcomment"><div class="comment cmt"><p>Print a pretty representation of this Dtab.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd></dl></div>
     </li><li name="scala.collection.TraversableOnce#product" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="product[B&gt;:A](implicitnum:Numeric[B]):B"></a><a id="product[B&gt;:Dentry](Numeric[B]):B"></a>
       <span class="permalink">
@@ -3389,7 +3416,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">product</span><span class="tparams">[<span name="B">B &gt;: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="num">num: <span class="extype" name="scala.Numeric">Numeric</span>[<span class="extype" name="scala.collection.TraversableOnce.product.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableOnce.product.B">B</span></span>
+        <span class="name">product</span><span class="tparams">[<span name="B">B &gt;: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="num">num: <a href="../../../scala/index.html#Numeric[T]=scala.math.Numeric[T]" class="extmbr" name="scala.Numeric">Numeric</a>[<span class="extype" name="scala.collection.TraversableOnce.product.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableOnce.product.B">B</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
@@ -3565,7 +3592,7 @@ entry appended.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reversed</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>
+        <span class="name">reversed</span><span class="result">: <a href="../../../scala/index.html#List[+A]=List[A]" class="extmbr" name="scala.List">List</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>TraversableOnce</dd></dl></div>
@@ -3684,7 +3711,7 @@ entry appended.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IndexedSeq → IndexedSeqLike → Seq → GenSeq → GenSeqLike → Iterable → GenIterable → Traversable → GenTraversable → Parallelizable → TraversableOnce → GenTraversableOnce</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#show" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#show" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="show:String"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#show:String" title="Permalink">
@@ -3699,8 +3726,8 @@ entry appended.</p>
         <span class="name">show</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.Dtab#simplified" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd></dl></div>
+    </li><li name="com.twitter.finagle.DtabBase#simplified" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="simplified:com.twitter.finagle.Dtab"></a><a id="simplified:Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#simplified:com.twitter.finagle.Dtab" title="Permalink">
@@ -3718,7 +3745,7 @@ entry appended.</p>
       <p class="shortcomment cmt">Simplify the Dtab.</p><div class="fullcomment"><div class="comment cmt"><p>Simplify the Dtab. This returns a functionally equivalent Dtab
 whose destination name trees have been simplified. The returned
 Dtab is equivalent with respect to evaluation.
-</p></div><dl class="attributes block"> <dt>To do</dt><dd><span class="cmt"><p>dedup equivalent entries so that only the last entry is retained</p></span><span class="cmt"><p>collapse entries with common prefixes</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd><dt>To do</dt><dd><span class="cmt"><p>dedup equivalent entries so that only the last entry is retained</p></span><span class="cmt"><p>collapse entries with common prefixes</p></span></dd></dl></div>
     </li><li name="scala.collection.SeqLike#size" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="size:Int"></a>
       <span class="permalink">
@@ -3927,7 +3954,7 @@ Dtab is equivalent with respect to evaluation.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#stripPrefix" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#stripPrefix" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stripPrefix(prefix:com.twitter.finagle.Dtab):com.twitter.finagle.Dtab"></a><a id="stripPrefix(Dtab):Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#stripPrefix(prefix:com.twitter.finagle.Dtab):com.twitter.finagle.Dtab" title="Permalink">
@@ -3942,7 +3969,8 @@ Dtab is equivalent with respect to evaluation.
         <span class="name">stripPrefix</span><span class="params">(<span name="prefix">prefix: <a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>
       </span>
       
-      <p class="shortcomment cmt">Efficiently removes prefix <code>prefix</code> from <code>dtab</code>.</p>
+      <p class="shortcomment cmt">Efficiently removes prefix <code>prefix</code> from <code>dtab</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Efficiently removes prefix <code>prefix</code> from <code>dtab</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase</dd></dl></div>
     </li><li name="scala.collection.TraversableOnce#sum" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sum[B&gt;:A](implicitnum:Numeric[B]):B"></a><a id="sum[B&gt;:Dentry](Numeric[B]):B"></a>
       <span class="permalink">
@@ -3955,7 +3983,7 @@ Dtab is equivalent with respect to evaluation.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sum</span><span class="tparams">[<span name="B">B &gt;: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="num">num: <span class="extype" name="scala.Numeric">Numeric</span>[<span class="extype" name="scala.collection.TraversableOnce.sum.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableOnce.sum.B">B</span></span>
+        <span class="name">sum</span><span class="tparams">[<span name="B">B &gt;: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="num">num: <a href="../../../scala/index.html#Numeric[T]=scala.math.Numeric[T]" class="extmbr" name="scala.Numeric">Numeric</a>[<span class="extype" name="scala.collection.TraversableOnce.sum.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableOnce.sum.B">B</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
@@ -4204,7 +4232,7 @@ Dtab is equivalent with respect to evaluation.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toList</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>
+        <span class="name">toList</span><span class="result">: <a href="../../../scala/index.html#List[+A]=List[A]" class="extmbr" name="scala.List">List</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
@@ -4272,7 +4300,7 @@ Dtab is equivalent with respect to evaluation.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableOnce</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabBase#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab.html#toString():String" title="Permalink">
@@ -4287,7 +4315,7 @@ Dtab is equivalent with respect to evaluation.
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> → SeqLike → TraversableLike → Function1 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabBase → SeqLike → TraversableLike → Function1 → AnyRef → Any</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#toTraversable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toTraversable:Traversable[A]"></a><a id="toTraversable:Traversable[Dentry]"></a>
       <span class="permalink">
@@ -4325,7 +4353,7 @@ Dtab is equivalent with respect to evaluation.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toVector</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>
+        <span class="name">toVector</span><span class="result">: <a href="../../../scala/index.html#Vector[+A]=scala.collection.immutable.Vector[A]" class="extmbr" name="scala.Vector">Vector</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>
@@ -4592,6 +4620,8 @@ Dtab is equivalent with respect to evaluation.
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
             </div><div class="parent" name="scala.Product">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.DtabBase">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.DtabBase">DtabBase</span></h3>
             </div><div class="parent" name="scala.collection.IndexedSeq">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IndexedSeq.html#scala.collection.IndexedSeq" class="extype" name="scala.collection.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</h3>
             </div><div class="parent" name="scala.collection.IndexedSeqLike">
@@ -4639,7 +4669,7 @@ Dtab is equivalent with respect to evaluation.
             </div><div class="parent" name="scala.Function1">
               <h3>Inherited from (<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>

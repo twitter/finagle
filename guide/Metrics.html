@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 19.8.0 documentation</title>
+    <title>Metrics &#8212; Finagle 19.10.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.8.0',
+        VERSION:     '19.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.8.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.10.0 documentation" href="index.html" />
     <link rel="next" title="Flags" href="Flags.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -140,8 +140,13 @@ creation has failed with this specific exception.</dd>
 <dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
 creation has failed.</dd>
 <dt><strong>service_acquisition_latency_ms</strong></dt>
-<dd>A stat of the latency, in milliseconds, to acquire a service.
-This entails establishing a connection or waiting for a connection from a pool.</dd>
+<dd><p class="first">A stat of the latency, in milliseconds, to acquire a service (a session). This entails
+an amortized cost of materializing a connection for each request, either by establishing new
+(slow path) or by checking it out from the connection pool (fast path).</p>
+<p class="last">In the worst case (establishing a connection on each request), this histogram converges on
+<cite>connect_latency_ms</cite> (socket connect latency, including SSL/TLS handshaking). In the best case,
+this represents a cost of acquiring connection from the pool.</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="serverstatsfilter">
@@ -782,11 +787,11 @@ Understanding these stats often requires deep knowledge of the protocol, or indi
 <h3>Netty Transporter<a class="headerlink" href="#netty-transporter" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>connect_latency_ms</strong></dt>
-<dd>A histogram of the length of time it takes for a connection to succeed,
-in milliseconds.</dd>
+<dd>A histogram of the length of time it takes for a socket connection (including SSL/TLS handshake)
+to succeed, in milliseconds.</dd>
 <dt><strong>failed_connect_latency_ms</strong></dt>
-<dd>A histogram of the length of time it takes for a connection to fail,
-in milliseconds.</dd>
+<dd>A histogram of the length of time it takes for a socket connection (including SSL/TLS handshake)
+to fail, in milliseconds.</dd>
 <dt><strong>cancelled_connects</strong></dt>
 <dd>A counter of the number of attempts to connect that were cancelled before
 they succeeded.</dd>
@@ -868,9 +873,9 @@ given idle state.</dd>
 <h3>SSL/TLS<a class="headerlink" href="#ssl-tls" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>handshake_latency_ms</strong></dt>
-<dd>A histogram of the tls handshake latency in milliseconds.</dd>
+<dd>A histogram of the SSL/TLS handshake latency in milliseconds.</dd>
 <dt><strong>failed_handshake_latency_ms</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the failed tls handshake latency in milliseconds.</dd>
+<dd>A histogram of the failed SSL/TLS handshake latency in milliseconds.</dd>
 </dl>
 </div>
 </div>

@@ -598,6 +598,22 @@ the netty4 event loop.
 finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>Defines common <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
 finagle clients and servers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.partitioning" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="partitioning"></a><a id="partitioning:partitioning"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#partitioning" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="partitioning/index.html"><span class="name">partitioning</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -991,7 +1007,7 @@ generator.
                         <a class="class" href="DroppedWriteException.html" title="Indicates that a com.twitter.finagle.transport.Transport write associated with the request was dropped by the transport (usually to respect backpressure)."></a>
                         <a href="DroppedWriteException.html" title="Indicates that a com.twitter.finagle.transport.Transport write associated with the request was dropped by the transport (usually to respect backpressure).">DroppedWriteException</a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Dtab$.html" title="Object Dtab manages 'base' and 'local' Dtabs."></a>
+                        <a class="object" href="Dtab$.html" title=""></a>
                         <a class="class" href="Dtab.html" title="A Dtab--short for delegation table--comprises a sequence of delegation rules."></a>
                         <a href="Dtab.html" title="A Dtab--short for delegation table--comprises a sequence of delegation rules.">Dtab</a>
                       </li><li class="current-entities indented3">
@@ -1211,6 +1227,10 @@ generator.
                         <a class="trait" href="Server.html" title="Servers implement RPC servers with Req-typed requests and Rep-typed responses."></a>
                         <a href="Server.html" title="Servers implement RPC servers with Req-typed requests and Rep-typed responses.">Server</a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ServerErrorMonitor.html" title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor."></a>
+                        <a href="ServerErrorMonitor.html" title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor.">ServerErrorMonitor</a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Service$.html" title=""></a>
                         <a class="class" href="Service.html" title="A Service is an asynchronous function from a Request to a Future[Response]."></a>
                         <a href="Service.html" title="A Service is an asynchronous function from a Request to a Future[Response].">Service</a>
@@ -1376,7 +1396,7 @@ generator.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1540,7 +1560,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">adapt</span><span class="params">(<span name="exc">exc: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">adapt</span><span class="params">(<span name="exc">exc: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Adapt an exception.</p><div class="fullcomment"><div class="comment cmt"><p>Adapt an exception. If the passed-in exception is already a failure,
@@ -1591,7 +1611,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">apply</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new failure with the given message and cause; no flags.</p>
@@ -1607,7 +1627,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">apply</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new failure with the given message, cause, and flags.</p>
@@ -1623,7 +1643,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">apply</span><span class="params">(<span name="cause">cause: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new failure with the given cause; no flags.</p>
@@ -1639,7 +1659,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="logLevel">logLevel: <span class="extype" name="com.twitter.logging.Level">Level</span> = <span class="symbol"><span class="name"><a href="../../index.html">Level.WARNING</a></span></span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">apply</span><span class="params">(<span name="cause">cause: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="logLevel">logLevel: <span class="extype" name="com.twitter.logging.Level">Level</span> = <span class="symbol"><span class="name"><a href="../../index.html">Level.WARNING</a></span></span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new failure with the given cause and flags.</p>
@@ -1671,7 +1691,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1711,7 +1731,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -1854,7 +1874,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -1908,7 +1928,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">rejected</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">rejected</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new <a href="FailureFlags$.html#Retryable:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Retryable">FailureFlags.Retryable</a> and <a href="FailureFlags$.html#Rejected:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Rejected">FailureFlags.Rejected</a> failure with the given
@@ -1925,7 +1945,7 @@ message and cause.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">rejected</span><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">rejected</span><span class="params">(<span name="cause">cause: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new <a href="FailureFlags$.html#Retryable:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Retryable">FailureFlags.Retryable</a> and <a href="FailureFlags$.html#Rejected:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Rejected">FailureFlags.Rejected</a> failure with the given cause.</p>
@@ -2021,7 +2041,7 @@ message and cause.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unapply</span><span class="params">(<span name="exc">exc: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]]</span>
+        <span class="name">unapply</span><span class="params">(<span name="exc">exc: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a>]]</span>
       </span>
       
       <p class="shortcomment cmt">Extractor for <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a>; returns its cause.</p>
@@ -2105,7 +2125,7 @@ message and cause.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wrap</span><span class="params">(<span name="exc">exc: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">wrap</span><span class="params">(<span name="exc">exc: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new wrapped Failure with no flags.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new wrapped Failure with no flags. If the passed-in exception
@@ -2123,7 +2143,7 @@ is a failure, it is simply extended, otherwise a new Failure is created.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wrap</span><span class="params">(<span name="exc">exc: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">wrap</span><span class="params">(<span name="exc">exc: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new wrapped Failure with the given flags.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new wrapped Failure with the given flags. If the passed-in exception
@@ -2208,7 +2228,7 @@ first be unwrapped: the inner cause is the presentable failure.
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>

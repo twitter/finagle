@@ -642,6 +642,22 @@ the netty4 event loop.
 finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>Defines common <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
 finagle clients and servers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.partitioning" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="partitioning"></a><a id="partitioning:partitioning"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#partitioning" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../partitioning/index.html"><span class="name">partitioning</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -1057,7 +1073,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="An implementation of ExceptionReceiver custom to the chickadee reporting service." href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="client">client: <a href="thriftscala/Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>]</span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">NullStatsReceiver</a></span></span></span>, <span name="sourceAddress">sourceAddress: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="defval" name="Some(InetAddress.getLoopbackAddress.getHostName)">...</span></span>, <span name="clientAddress">clientAddress: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">Monitor</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="An implementation of ExceptionReceiver custom to the chickadee reporting service." href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="client">client: <a href="thriftscala/Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>]</span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">NullStatsReceiver</a></span></span></span>, <span name="sourceAddress">sourceAddress: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="defval" name='<span class="name"><a href="../../../../scala/index.html">Some(InetAddress.getLoopbackAddress.getHostName)</a></span>'>...</span></span>, <span name="clientAddress">clientAddress: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../scala/index.html">None</a></span></span></span>)</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">Monitor</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">An implementation of ExceptionReceiver custom to the chickadee reporting service.</p><div class="fullcomment"><div class="comment cmt"><p>An implementation of ExceptionReceiver custom to the chickadee reporting service.</p><p>Optionally logs stats to a statsReceiver if desired.</p><p>Note that this implementation does not guarantee that a logged exception will be received

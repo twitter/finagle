@@ -141,6 +141,12 @@ As well as per entire client or server:
     val client: Http.Client = Http.client
       .withExecutionOffloaded(FuturePool.unboundedPool)
 
+Or per entire application (JVM process), using command-line flags:
+
+.. code-block:: scala
+
+   -com.twitter.finagle.offload.numWorkers=14 -com.twitter.finagle.netty4.numWorkers=10
+
 
 .. _ExecutorService: https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ExecutorService.html
 .. _jstack: https://docs.oracle.com/javase/7/docs/technotes/tools/share/jstack.html

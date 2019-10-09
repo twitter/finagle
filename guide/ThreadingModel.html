@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Threading Model &#8212; Finagle 19.8.0 documentation</title>
+    <title>Threading Model &#8212; Finagle 19.10.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.8.0',
+        VERSION:     '19.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.8.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.10.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Clients" href="Clients.html" />
    
@@ -188,6 +188,10 @@ threads in Finagle while preserving the first-class support to Twitter Futures (
 
 <span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Http.Client</span> <span class="o">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withExecutionOffloaded</span><span class="o">(</span><span class="nc">FuturePool</span><span class="o">.</span><span class="n">unboundedPool</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>Or per entire application (JVM process), using command-line flags:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">14</span> <span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">10</span>
 </pre></div>
 </div>
 </div>

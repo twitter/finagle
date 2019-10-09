@@ -674,6 +674,22 @@ the netty4 event loop.
 finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>Defines common <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
 finagle clients and servers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.partitioning" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="partitioning"></a><a id="partitioning:partitioning"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#partitioning" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../partitioning/index.html"><span class="name">partitioning</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -1003,7 +1019,7 @@ and Updating).
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1063,7 +1079,7 @@ and Updating).
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A registry of load balancers currently in use." href="BalancerRegistry.html"><span class="name">BalancerRegistry</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A registry of load balancers currently in use." href="BalancerRegistry.html"><span class="name">BalancerRegistry</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A registry of <span class="extype" name="Balancer">load balancers</span> currently in use.</p><div class="fullcomment"><div class="comment cmt"><p>A registry of <span class="extype" name="Balancer">load balancers</span> currently in use.</p><p>This class is thread-safe.
@@ -1100,7 +1116,7 @@ here is used by Finagle's load balancers.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A thin interface around a Balancer's constructor that allows Finagle to pass in context from the stack to the balancers at construction time." href="LoadBalancerFactory.html"><span class="name">LoadBalancerFactory</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A thin interface around a Balancer's constructor that allows Finagle to pass in context from the stack to the balancers at construction time." href="LoadBalancerFactory.html"><span class="name">LoadBalancerFactory</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A thin interface around a Balancer's constructor that allows Finagle to pass in
@@ -1120,7 +1136,7 @@ for more details.</p></span></dd></dl></div>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Information about a load balancer." href="Metadata.html"><span class="name">Metadata</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Information about a load balancer." href="Metadata.html"><span class="name">Metadata</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Information about a <span class="extype" name="Balancer">load balancer</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Information about a <span class="extype" name="Balancer">load balancer</span>.</p><p>This class is thread-safe and while the class itself is immutable,
@@ -1138,7 +1154,7 @@ it proxies data from a <span class="extype" name="Balancer">Balancer</span> whic
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="While this exception is safe to retry, the assumption used here is that the underlying situation will not change soon enough to make a retry worthwhile as retrying is most likely to eat up the entire budget." href="NoNodesOpenException.html"><span class="name">NoNodesOpenException</span></a><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="NoNodesOpenException.html" class="extype" name="com.twitter.finagle.loadbalancer.NoNodesOpenException">NoNodesOpenException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a title="While this exception is safe to retry, the assumption used here is that the underlying situation will not change soon enough to make a retry worthwhile as retrying is most likely to eat up the entire budget." href="NoNodesOpenException.html"><span class="name">NoNodesOpenException</span></a><span class="result"> extends <a href="../../../../scala/index.html#RuntimeException=RuntimeException" class="extmbr" name="scala.RuntimeException">RuntimeException</a> with <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="NoNodesOpenException.html" class="extype" name="com.twitter.finagle.loadbalancer.NoNodesOpenException">NoNodesOpenException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
       </span>
       
       <p class="shortcomment cmt">While this exception is safe to retry, the assumption used here is
@@ -1157,7 +1173,7 @@ budget.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="The behavior the load balancer should take when none of its nodes have a com.twitter.finagle.Status of Open." href="WhenNoNodesOpen.html"><span class="name">WhenNoNodesOpen</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="The behavior the load balancer should take when none of its nodes have a com.twitter.finagle.Status of Open." href="WhenNoNodesOpen.html"><span class="name">WhenNoNodesOpen</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">The behavior the load balancer should take when none
@@ -1183,7 +1199,7 @@ Http.client
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Java API for WhenNoNodesOpen." href="WhenNoNodesOpens.html"><span class="name">WhenNoNodesOpens</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Java API for WhenNoNodesOpen." href="WhenNoNodesOpens.html"><span class="name">WhenNoNodesOpens</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Java API for <code><a href="WhenNoNodesOpen.html" class="extype" name="com.twitter.finagle.loadbalancer.WhenNoNodesOpen">WhenNoNodesOpen</a></code>.</p>
@@ -1207,7 +1223,7 @@ Http.client
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">defaultAddressOrdering</span><span class="result">: <span class="extype" name="scala.Ordering">Ordering</span>[<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>
+        <span class="name">defaultAddressOrdering</span><span class="result">: <a href="../../../../scala/index.html#Ordering[T]=scala.math.Ordering[T]" class="extmbr" name="scala.Ordering">Ordering</a>[<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
@@ -1229,7 +1245,7 @@ is used, outside of Finagle, the default ordering should be overridden.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">defaultAddressOrdering</span><span class="params">(<span name="order">order: <span class="extype" name="scala.Ordering">Ordering</span>[<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">defaultAddressOrdering</span><span class="params">(<span name="order">order: <a href="../../../../scala/index.html#Ordering[T]=scala.math.Ordering[T]" class="extmbr" name="scala.Ordering">Ordering</a>[<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <p class="shortcomment cmt">Set the default <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering for the entire process (outside of clients
@@ -1425,7 +1441,7 @@ is large. However, they can be quite useful for debugging.
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>

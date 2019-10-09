@@ -230,7 +230,7 @@ cannot be used across different instances of this context type.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a>, <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -309,7 +309,7 @@ which can be used to set multiple keys in the context.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="LocalContext$Key.html"><span class="name">Key</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="" href="LocalContext$Key.html"><span class="name">Key</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       
@@ -421,7 +421,7 @@ in the current request-local context.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -464,7 +464,7 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -609,7 +609,7 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">let</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="pairs">pairs: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="#KeyValuePair[T]extendsProductwithSerializable" class="extmbr" name="com.twitter.finagle.context.Context.KeyValuePair">KeyValuePair</a>[_]]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.LocalContext.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.LocalContext.let.R">R</span></span>
+        <span class="name">let</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="pairs">pairs: <a href="../../../../scala/index.html#Iterable[+A]=Iterable[A]" class="extmbr" name="scala.Iterable">Iterable</a>[<a href="#KeyValuePair[T]extendsProductwithSerializable" class="extmbr" name="com.twitter.finagle.context.Context.KeyValuePair">KeyValuePair</a>[_]]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.LocalContext.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.LocalContext.let.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Bind multiple key-value pairs.</p><div class="fullcomment"><div class="comment cmt"><p>Bind multiple key-value pairs. Keys later in the collection take
@@ -661,7 +661,7 @@ precedent over keys earlier in the collection.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[_]]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.LocalContext.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.LocalContext.letClear.R">R</span></span>
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="keys">keys: <a href="../../../../scala/index.html#Iterable[+A]=Iterable[A]" class="extmbr" name="scala.Iterable">Iterable</a>[<a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[_]]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.LocalContext.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.LocalContext.letClear.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Unbind the passed-in keys, in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Unbind the passed-in keys, in the scope of <code>fn</code>.
@@ -720,7 +720,7 @@ precedent over keys earlier in the collection.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -891,7 +891,7 @@ precedent over keys earlier in the collection.
         <div class="parent" name="com.twitter.finagle.context.Context">
               <h3>Inherited from <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>

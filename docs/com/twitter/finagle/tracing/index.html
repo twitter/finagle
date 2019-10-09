@@ -598,6 +598,22 @@ the netty4 event loop.
 finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>Defines common <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
 finagle clients and servers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.partitioning" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="partitioning"></a><a id="partitioning:partitioning"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#partitioning" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../partitioning/index.html"><span class="name">partitioning</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -1096,7 +1112,7 @@ of a trace. Finagle-specific trace information should live here.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="An ADT describing a tracing annotation." href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="An ADT describing a tracing annotation." href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">An ADT describing a tracing annotation.</p><div class="fullcomment"><div class="comment cmt"><p>An ADT describing a tracing annotation. Prefer <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> API to creating raw <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a>
@@ -1114,7 +1130,7 @@ instances (especially, when used from Java).
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A tracer that buffers each record in memory." href="BufferingTracer.html"><span class="name">BufferingTracer</span></a><span class="result"> extends <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> with <span class="extype" name="scala.Iterable">Iterable</span>[<a href="Record.html" class="extype" name="com.twitter.finagle.tracing.Record">Record</a>]</span>
+        <a title="A tracer that buffers each record in memory." href="BufferingTracer.html"><span class="name">BufferingTracer</span></a><span class="result"> extends <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> with <a href="../../../../scala/index.html#Iterable[+A]=Iterable[A]" class="extmbr" name="scala.Iterable">Iterable</a>[<a href="Record.html" class="extype" name="com.twitter.finagle.tracing.Record">Record</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A tracer that buffers each record in memory.</p><div class="fullcomment"><div class="comment cmt"><p>A tracer that buffers each record in memory. These may then be
@@ -1237,7 +1253,7 @@ and traceId).
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A trace id represents one particular trace for one request." href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>, <span name="traceIdHigh">traceIdHigh: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>] = <span class="symbol">None</span></span>, <span name="terminal">terminal: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A trace id represents one particular trace for one request." href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>, <span name="traceIdHigh">traceIdHigh: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>] = <span class="symbol"><span class="name"><a href="../../../../scala/index.html">None</a></span></span></span>, <span name="terminal">terminal: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A trace id represents one particular trace for one request.</p><div class="fullcomment"><div class="comment cmt"><p>A trace id represents one particular trace for one request.</p><p>A request is composed of one or more spans, which are generally RPCs but
@@ -1307,7 +1323,7 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl></
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Tracers record trace events." href="Tracer.html"><span class="name">Tracer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Tracers record trace events." href="Tracer.html"><span class="name">Tracer</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Tracers record trace events.</p>
@@ -1323,7 +1339,7 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl></
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="This is a tracing system similar to Dapper:" href="Tracing.html"><span class="name">Tracing</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="This is a tracing system similar to Dapper:" href="Tracing.html"><span class="name">Tracing</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">This is a tracing system similar to Dapper:</p><div class="fullcomment"><div class="comment cmt"><p>This is a tracing system similar to Dapper:</p><p>  “Dapper, a Large-Scale Distributed Systems Tracing Infrastructure”,

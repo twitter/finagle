@@ -598,6 +598,22 @@ the netty4 event loop.
 finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>Defines common <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
 finagle clients and servers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.partitioning" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="partitioning"></a><a id="partitioning:partitioning"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#partitioning" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../partitioning/index.html"><span class="name">partitioning</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -662,6 +678,22 @@ finagle clients and servers.
       </span>
       
       
+    </li><li name="com.twitter.finagle.redis.param" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="param"></a><a id="param:param"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#param" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="param/index.html"><span class="name">param</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.redis.protocol" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="protocol"></a><a id="protocol:protocol"></a>
       <span class="permalink">
@@ -718,6 +750,10 @@ finagle clients and servers.
                         <span class="separator"></span>
                         <a class="trait" href="NormalCommands.html" title=""></a>
                         <a href="NormalCommands.html" title="">NormalCommands</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="PartitionedClient$.html" title=""></a>
+                        <a class="class" href="PartitionedClient.html" title="A redis client that uses a consistent hash ring to do key-based routing between multiple backend nodes."></a>
+                        <a href="PartitionedClient.html" title="A redis client that uses a consistent hash ring to do key-based routing between multiple backend nodes.">PartitionedClient</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ReplyCastFailure.html" title="An error caused by failing to cast com.twitter.finagle.redis.protocol.Reply to a target type"></a>
@@ -1113,7 +1149,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ClientError.html"><span class="name">ClientError</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="ClientError.html"><span class="name">ClientError</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="../../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1129,7 +1165,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Thrown when the response from a cluster management command could not be decoded correctly." href="ClusterDecodeError.html"><span class="name">ClusterDecodeError</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Thrown when the response from a cluster management command could not be decoded correctly." href="ClusterDecodeError.html"><span class="name">ClusterDecodeError</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="../../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Thrown when the response from a cluster management command could not be decoded correctly.</p>
@@ -1165,6 +1201,25 @@ generator.
       </span>
       
       
+    </li><li name="com.twitter.finagle.redis.PartitionedClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PartitionedClientextendsBaseClientwithNormalCommands"></a><a id="PartitionedClient:PartitionedClient"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#PartitionedClientextendsBaseClientwithNormalCommands" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A redis client that uses a consistent hash ring to do key-based routing between multiple backend nodes." href="PartitionedClient.html"><span class="name">PartitionedClient</span></a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.redis.BaseClient">BaseClient</a> with <a href="NormalCommands.html" class="extype" name="com.twitter.finagle.redis.NormalCommands">NormalCommands</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A redis client that uses a consistent hash ring to do key-based routing between multiple
+backend nodes.</p><div class="fullcomment"><div class="comment cmt"><p>A redis client that uses a consistent hash ring to do key-based routing between multiple
+backend nodes. Use <a href="PartitionedClient$.html#apply(raw:com.twitter.finagle.ServiceFactory[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]):com.twitter.finagle.redis.PartitionedClient" class="extmbr" name="com.twitter.finagle.redis.PartitionedClient#apply">com.twitter.finagle.redis.PartitionedClient.apply</a> to create a new instance
+</p></div></div>
     </li><li name="com.twitter.finagle.redis.ReplyCastFailure" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ReplyCastFailureextendsExceptionwithProductwithSerializable"></a><a id="ReplyCastFailure:ReplyCastFailure"></a>
       <span class="permalink">
@@ -1177,7 +1232,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="An error caused by failing to cast com.twitter.finagle.redis.protocol.Reply to a target type" href="ReplyCastFailure.html"><span class="name">ReplyCastFailure</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="An error caused by failing to cast com.twitter.finagle.redis.protocol.Reply to a target type" href="ReplyCastFailure.html"><span class="name">ReplyCastFailure</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="../../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">An error caused by failing to cast <a href="protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">com.twitter.finagle.redis.protocol.Reply</a> to a target type
@@ -1226,7 +1281,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="../../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1242,7 +1297,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="StreamEntryReply.html"><span class="name">StreamEntryReply</span></a><span class="params">(<span name="id">id: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="fields">fields: <span class="extype" name="scala.Seq">Seq</span>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="StreamEntryReply.html"><span class="name">StreamEntryReply</span></a><span class="params">(<span name="id">id: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="fields">fields: <a href="../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1276,7 +1331,7 @@ single redis instance, supporting transactions
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Transactions.html"><span class="name">Transactions</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="" href="Transactions.html"><span class="name">Transactions</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       
@@ -1292,7 +1347,7 @@ single redis instance, supporting transactions
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="XPendingAllReply.html"><span class="name">XPendingAllReply</span></a><span class="params">(<span name="count">count: <span class="extype" name="java.lang.Long">Long</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>, <span name="pendingByConsumer">pendingByConsumer: <span class="extype" name="scala.Seq">Seq</span>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="XPendingAllReply.html"><span class="name">XPendingAllReply</span></a><span class="params">(<span name="count">count: <span class="extype" name="java.lang.Long">Long</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>, <span name="pendingByConsumer">pendingByConsumer: <a href="../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1324,7 +1379,7 @@ single redis instance, supporting transactions
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="XReadStreamReply.html"><span class="name">XReadStreamReply</span></a><span class="params">(<span name="stream">stream: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="entries">entries: <span class="extype" name="scala.Seq">Seq</span>[<a href="StreamEntryReply.html" class="extype" name="com.twitter.finagle.redis.StreamEntryReply">StreamEntryReply</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="XReadStreamReply.html"><span class="name">XReadStreamReply</span></a><span class="params">(<span name="stream">stream: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="entries">entries: <a href="../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="StreamEntryReply.html" class="extype" name="com.twitter.finagle.redis.StreamEntryReply">StreamEntryReply</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1349,6 +1404,22 @@ single redis instance, supporting transactions
       </span>
       <span class="symbol">
         <a title="" href="Client$.html"><span class="name">Client</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.redis.PartitionedClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PartitionedClient"></a><a id="PartitionedClient:PartitionedClient"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#PartitionedClient" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PartitionedClient$.html"><span class="name">PartitionedClient</span></a>
       </span>
       
       

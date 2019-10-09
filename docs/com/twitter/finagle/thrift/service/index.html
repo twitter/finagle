@@ -359,7 +359,7 @@ of a <code>ServicePerEndpoint</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A typeclass to construct a MethodPerEndpoint by wrapping a ServicePerEndpoint." href="MethodPerEndpointBuilder.html"><span class="name">MethodPerEndpointBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint</span>, <span name="MethodPerEndpoint">MethodPerEndpoint</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A typeclass to construct a MethodPerEndpoint by wrapping a ServicePerEndpoint." href="MethodPerEndpointBuilder.html"><span class="name">MethodPerEndpointBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint</span>, <span name="MethodPerEndpoint">MethodPerEndpoint</span>]</span><span class="result"> extends <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A typeclass to construct a MethodPerEndpoint by wrapping a ServicePerEndpoint.</p><div class="fullcomment"><div class="comment cmt"><p>A typeclass to construct a MethodPerEndpoint by wrapping a ServicePerEndpoint.
@@ -413,7 +413,7 @@ a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this buil
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients." href="ServicePerEndpointBuilder.html"><span class="name">ServicePerEndpointBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint &lt;: <a href="Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder.ServicePerEndpoint">ServicePerEndpoint</span>]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients." href="ServicePerEndpointBuilder.html"><span class="name">ServicePerEndpointBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint &lt;: <a href="Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder.ServicePerEndpoint">ServicePerEndpoint</span>]</span>]</span><span class="result"> extends <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.</p><div class="fullcomment"><div class="comment cmt"><p>Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.
@@ -431,7 +431,7 @@ Scrooge generates implementations of this builder.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint." href="ThriftServiceBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 2018-01-12) Use MethodPerEndpointBuilder">ThriftServiceBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint</span>, <span name="ThriftService">ThriftService</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint." href="ThriftServiceBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 2018-01-12) Use MethodPerEndpointBuilder">ThriftServiceBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint</span>, <span name="ThriftService">ThriftService</span>]</span><span class="result"> extends <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint.</p><div class="fullcomment"><div class="comment cmt"><p>A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint.
@@ -513,12 +513,14 @@ service SocialGraph {
   <span class="kw">case</span> ReqRep(_, Throw(_: RateLimitedException)) <span class="kw">=&gt;</span> RetryableFailure
   <span class="kw">case</span> ReqRep(_, Throw(_: NotFoundException)) <span class="kw">=&gt;</span> NonRetryableFailure
   <span class="kw">case</span> ReqRep(_, Return(x: <span class="std">Int</span>)) <span class="kw">if</span> x == <span class="num">0</span> <span class="kw">=&gt;</span> NonRetryableFailure
-  <span class="kw">case</span> ReqRep(SocialGraph.Follow.Args(a, b), _) <span class="kw">if</span> a &lt;= <span class="num">0</span> || b &lt;= <span class="num">0</span> <span class="kw">=&gt;</span> NonRetryableFailure
+  <span class="kw">case</span> ReqRep(SocialGraph.Follow.Args(a, b), _) <span class="kw">if</span> a &lt;= <span class="num">0</span> || b &lt;= <span class="num">0</span> <span class="kw">=&gt;</span> NonRetryableFailure <span class="cmt">// avoid this style!</span>
 }</pre><p>Often times, a good default classifier is
 <a href="ThriftResponseClassifier$.html#ThriftExceptionsAsFailures:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.thrift.service.ThriftResponseClassifier#ThriftExceptionsAsFailures">ThriftResponseClassifier.ThriftExceptionsAsFailures</a> which treats
 any Thrift response that deserializes into an Exception as
 a non-retryable failure.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The user guide for more information on Response Classification of Thrift and ThriftMux
+     <a href="https://twitter.github.io/finagle/guide/Clients.html#response-classification" target="_blank">Clients</a>  and
+     <a href="https://twitter.github.io/finagle/guide/Servers.html#response-classification" target="_blank">Servers</a>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.service.ThriftServicePerEndpoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ThriftServicePerEndpoint"></a><a id="ThriftServicePerEndpoint:ThriftServicePerEndpoint"></a>
       <span class="permalink">

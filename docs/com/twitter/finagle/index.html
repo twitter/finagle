@@ -593,6 +593,22 @@ the netty4 event loop.</p>
       
       <p class="shortcomment cmt">Defines common <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
 finagle clients and servers.</p>
+    </li><li name="com.twitter.finagle.partitioning" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="partitioning"></a><a id="partitioning:partitioning"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#partitioning" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="partitioning/index.html"><span class="name">partitioning</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -986,7 +1002,7 @@ generator.
                         <a class="class" href="DroppedWriteException.html" title="Indicates that a com.twitter.finagle.transport.Transport write associated with the request was dropped by the transport (usually to respect backpressure)."></a>
                         <a href="DroppedWriteException.html" title="Indicates that a com.twitter.finagle.transport.Transport write associated with the request was dropped by the transport (usually to respect backpressure).">DroppedWriteException</a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Dtab$.html" title="Object Dtab manages 'base' and 'local' Dtabs."></a>
+                        <a class="object" href="Dtab$.html" title=""></a>
                         <a class="class" href="Dtab.html" title="A Dtab--short for delegation table--comprises a sequence of delegation rules."></a>
                         <a href="Dtab.html" title="A Dtab--short for delegation table--comprises a sequence of delegation rules.">Dtab</a>
                       </li><li class="current-entities indented3">
@@ -1206,6 +1222,10 @@ generator.
                         <a class="trait" href="Server.html" title="Servers implement RPC servers with Req-typed requests and Rep-typed responses."></a>
                         <a href="Server.html" title="Servers implement RPC servers with Req-typed requests and Rep-typed responses.">Server</a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ServerErrorMonitor.html" title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor."></a>
+                        <a href="ServerErrorMonitor.html" title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor.">ServerErrorMonitor</a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Service$.html" title=""></a>
                         <a class="class" href="Service.html" title="A Service is an asynchronous function from a Request to a Future[Response]."></a>
                         <a href="Service.html" title="A Service is an asynchronous function from a Request to a Future[Response].">Service</a>
@@ -1399,7 +1419,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1459,7 +1479,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="For Java users wanting to implement exceptions that are FailureFlags." href="AbstractFailureFlags.html"><span class="name">AbstractFailureFlags</span></a><span class="tparams">[<span name="T">T &lt;: <a href="AbstractFailureFlags.html" class="extype" name="com.twitter.finagle.AbstractFailureFlags">AbstractFailureFlags</a>[<span class="extype" name="com.twitter.finagle.AbstractFailureFlags.T">T</span>]</span>]</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<span class="extype" name="com.twitter.finagle.AbstractFailureFlags.T">T</span>]</span>
+        <a title="For Java users wanting to implement exceptions that are FailureFlags." href="AbstractFailureFlags.html"><span class="name">AbstractFailureFlags</span></a><span class="tparams">[<span name="T">T &lt;: <a href="AbstractFailureFlags.html" class="extype" name="com.twitter.finagle.AbstractFailureFlags">AbstractFailureFlags</a>[<span class="extype" name="com.twitter.finagle.AbstractFailureFlags.T">T</span>]</span>]</span><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<span class="extype" name="com.twitter.finagle.AbstractFailureFlags.T">T</span>]</span>
       </span>
       
       <p class="shortcomment cmt">For Java users wanting to implement exceptions that are <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>.</p>
@@ -1507,7 +1527,7 @@ resources for using Finagle.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="An address identifies the location of an object--it is a bound name." href="Addr.html"><span class="name">Addr</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="An address identifies the location of an object--it is a bound name." href="Addr.html"><span class="name">Addr</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">An address identifies the location of an object--it is a bound
@@ -1528,7 +1548,7 @@ physical locations (see <a href="Address.html" class="extype" name="com.twitter.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="An Address represents the physical location of a single host or endpoint." href="Address.html"><span class="name">Address</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="An Address represents the physical location of a single host or endpoint." href="Address.html"><span class="name">Address</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">An <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> represents the physical location of a single host or
@@ -1565,7 +1585,7 @@ that pertains to the entire set.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Announcer.html"><span class="name">Announcer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="" href="Announcer.html"><span class="name">Announcer</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       
@@ -1581,7 +1601,7 @@ that pertains to the entire set.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that a forum string passed to an com.twitter.finagle.Announcer was invalid according to the forum grammar [1]." href="AnnouncerForumInvalid.html"><span class="name">AnnouncerForumInvalid</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+        <a title="Indicates that a forum string passed to an com.twitter.finagle.Announcer was invalid according to the forum grammar [1]." href="AnnouncerForumInvalid.html"><span class="name">AnnouncerForumInvalid</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that a forum string passed to an <a href="Announcer.html" class="extype" name="com.twitter.finagle.Announcer">com.twitter.finagle.Announcer</a>
@@ -1600,7 +1620,7 @@ was invalid according to the forum grammar [1].</p><p>[1] https://twitter.github
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that an com.twitter.finagle.Announcer was not found for the given scheme." href="AnnouncerNotFoundException.html"><span class="name">AnnouncerNotFoundException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+        <a title="Indicates that an com.twitter.finagle.Announcer was not found for the given scheme." href="AnnouncerNotFoundException.html"><span class="name">AnnouncerNotFoundException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that an <a href="Announcer.html" class="extype" name="com.twitter.finagle.Announcer">com.twitter.finagle.Announcer</a> was not found for the
@@ -1621,7 +1641,7 @@ on the classpath that define an Announcer for the given scheme.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A base class for exceptions encountered on account of incorrect API usage." href="ApiException.html"><span class="name">ApiException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+        <a title="A base class for exceptions encountered on account of incorrect API usage." href="ApiException.html"><span class="name">ApiException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a></span>
       </span>
       
       <p class="shortcomment cmt">A base class for exceptions encountered on account of incorrect API usage.</p>
@@ -1637,7 +1657,7 @@ on the classpath that define an Announcer for the given scheme.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A typeclass for &quot;stackable&quot; items." href="CanStackFrom.html"><span class="name">CanStackFrom</span></a><span class="tparams">[<span name="From">-From</span>, <span name="To">To</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A typeclass for &quot;stackable&quot; items." href="CanStackFrom.html"><span class="name">CanStackFrom</span></a><span class="tparams">[<span name="From">-From</span>, <span name="To">To</span>]</span><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A typeclass for &quot;stackable&quot; items.</p><div class="fullcomment"><div class="comment cmt"><p>A typeclass for &quot;stackable&quot; items. This is used by the
@@ -1709,7 +1729,7 @@ conserve resources.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that an error occurred on account of incorrect usage of a org.jboss.netty.buffer.ChannelBuffer." href="ChannelBufferUsageException.html"><span class="name">ChannelBufferUsageException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+        <a title="Indicates that an error occurred on account of incorrect usage of a org.jboss.netty.buffer.ChannelBuffer." href="ChannelBufferUsageException.html"><span class="name">ChannelBufferUsageException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that an error occurred on account of incorrect usage of a
@@ -1746,7 +1766,7 @@ was reset by a peer or a proxy.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="An exception encountered within the context of a given socket channel." href="ChannelException.html"><span class="name">ChannelException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
+        <a title="An exception encountered within the context of a given socket channel." href="ChannelException.html"><span class="name">ChannelException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
       </span>
       
       <p class="shortcomment cmt">An exception encountered within the context of a given socket channel.</p>
@@ -1762,7 +1782,7 @@ was reset by a peer or a proxy.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Default implementation for WriteException that wraps an underlying exception." href="ChannelWriteException.html"><span class="name">ChannelWriteException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Default implementation for WriteException that wraps an underlying exception." href="ChannelWriteException.html"><span class="name">ChannelWriteException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Default implementation for <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> that wraps an underlying exception.</p>
@@ -1778,7 +1798,7 @@ was reset by a peer or a proxy.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="RPC clients with Req-typed requests and Rep typed replies." href="Client.html"><span class="name">Client</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="RPC clients with Req-typed requests and Rep typed replies." href="Client.html"><span class="name">Client</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">RPC clients with <code>Req</code>-typed requests and <code>Rep</code> typed replies.</p><div class="fullcomment"><div class="comment cmt"><p>RPC clients with <code>Req</code>-typed requests and <code>Rep</code> typed replies.
@@ -1880,9 +1900,9 @@ tree for this prefix on lookup.
       <p class="shortcomment cmt">Indicates that a <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">com.twitter.finagle.transport.Transport</a> write associated
 with the request was dropped by the transport (usually to respect backpressure).</p>
     </li><li name="com.twitter.finagle.Dtab" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DtabextendsIndexedSeq[com.twitter.finagle.Dentry]withProductwithSerializable"></a><a id="Dtab:Dtab"></a>
+      <a id="DtabextendsDtabBasewithProductwithSerializable"></a><a id="Dtab:Dtab"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#DtabextendsIndexedSeq[com.twitter.finagle.Dentry]withProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#DtabextendsDtabBasewithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1891,7 +1911,7 @@ with the request was dropped by the transport (usually to respect backpressure).
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A Dtab--short for delegation table--comprises a sequence of delegation rules." href="Dtab.html"><span class="name">Dtab</span></a><span class="params">(<span name="dentries0">dentries0: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>] with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A Dtab--short for delegation table--comprises a sequence of delegation rules." href="Dtab.html"><span class="name">Dtab</span></a><span class="params">(<span name="dentries0">dentries0: <a href="../../../scala/index.html#IndexedSeq[+A]=IndexedSeq[A]" class="extmbr" name="scala.IndexedSeq">IndexedSeq</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.DtabBase">DtabBase</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A Dtab--short for delegation table--comprises a sequence of
@@ -1930,7 +1950,7 @@ implements the default binding strategy.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Defines a com.twitter.app.Flag for specifying a supplemental com.twitter.finagle.Dtab to append to the com.twitter.finagle.Dtab.base delegation table." href="DtabFlags.html"><span class="name">DtabFlags</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Defines a com.twitter.app.Flag for specifying a supplemental com.twitter.finagle.Dtab to append to the com.twitter.finagle.Dtab.base delegation table." href="DtabFlags.html"><span class="name">DtabFlags</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Defines a <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html" class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</a> for specifying a supplemental <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a>
@@ -1988,7 +2008,7 @@ for details on this behavior.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Base exception for all Finagle originated failures." href="Failure.html"><span class="name">Failure</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</span>
+        <a title="Base exception for all Finagle originated failures." href="Failure.html"><span class="name">Failure</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Base exception for all Finagle originated failures.</p><div class="fullcomment"><div class="comment cmt"><p>Base exception for all Finagle originated failures. These are
@@ -2008,7 +2028,7 @@ mark attributes of the Failure (e.g. Restartable).
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Carries metadata for exceptions such as whether or not the exception is safe to retry." href="FailureFlags.html"><span class="name">FailureFlags</span></a><span class="tparams">[<span name="T">T &lt;: <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<span class="extype" name="com.twitter.finagle.FailureFlags.T">T</span>]</span>]</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+        <a title="Carries metadata for exceptions such as whether or not the exception is safe to retry." href="FailureFlags.html"><span class="name">FailureFlags</span></a><span class="tparams">[<span name="T">T &lt;: <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<span class="extype" name="com.twitter.finagle.FailureFlags.T">T</span>]</span>]</span><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a></span>
       </span>
       
       <p class="shortcomment cmt">Carries metadata for exceptions such as whether or not the
@@ -2100,7 +2120,7 @@ exception pertains to.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A trait for exceptions that contain remote information: the downstream address/client id, upstream address/client id (if applicable), and trace id of the request." href="HasRemoteInfo.html"><span class="name">HasRemoteInfo</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+        <a title="A trait for exceptions that contain remote information: the downstream address/client id, upstream address/client id (if applicable), and trace id of the request." href="HasRemoteInfo.html"><span class="name">HasRemoteInfo</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a></span>
       </span>
       
       <p class="shortcomment cmt">A trait for exceptions that contain remote information:
@@ -2122,7 +2142,7 @@ has been set.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A rich HTTP/1.1 client with a *very* basic URL fetcher." href="HttpRichClient.html"><span class="name">HttpRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A rich HTTP/1.1 client with a *very* basic URL fetcher." href="HttpRichClient.html"><span class="name">HttpRichClient</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A rich HTTP/1.1 client with a *very* basic URL fetcher.</p><div class="fullcomment"><div class="comment cmt"><p>A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
@@ -2180,7 +2200,7 @@ application-level RPC.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Java compatibility for the FailureFlags companion object." href="JavaFailureFlags.html"><span class="name">JavaFailureFlags</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Java compatibility for the FailureFlags companion object." href="JavaFailureFlags.html"><span class="name">JavaFailureFlags</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Java compatibility for the <code><a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></code> companion object.</p>
@@ -2216,7 +2236,7 @@ relinquishes resources that are associated with the server.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Factory methods to build a finagle-memcached client." href="MemcachedRichClient.html"><span class="name">MemcachedRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Factory methods to build a finagle-memcached client." href="MemcachedRichClient.html"><span class="name">MemcachedRichClient</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Factory methods to build a finagle-memcached client.</p>
@@ -2232,7 +2252,7 @@ relinquishes resources that are associated with the server.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that multiple Announcers were discovered for given scheme." href="MultipleAnnouncersPerSchemeException.html"><span class="name">MultipleAnnouncersPerSchemeException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
+        <a title="Indicates that multiple Announcers were discovered for given scheme." href="MultipleAnnouncersPerSchemeException.html"><span class="name">MultipleAnnouncersPerSchemeException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that multiple <a href="Announcer.html" class="extype" name="com.twitter.finagle.Announcer">Announcers</a> were
@@ -2253,7 +2273,7 @@ libraries on the classpath with conflicting scheme definitions.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that multiple Resolvers were discovered for given scheme." href="MultipleResolversPerSchemeException.html"><span class="name">MultipleResolversPerSchemeException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
+        <a title="Indicates that multiple Resolvers were discovered for given scheme." href="MultipleResolversPerSchemeException.html"><span class="name">MultipleResolversPerSchemeException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that multiple <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolvers</a> were
@@ -2274,7 +2294,7 @@ libraries on the classpath with conflicting scheme definitions.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Supplements a com.twitter.finagle.Client with convenient builder methods for constructing a mysql client." href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Supplements a com.twitter.finagle.Client with convenient builder methods for constructing a mysql client." href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Supplements a <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> with convenient
@@ -2291,7 +2311,7 @@ builder methods for constructing a mysql client.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Names identify network locations." href="Name.html"><span class="name">Name</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Names identify network locations." href="Name.html"><span class="name">Name</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Names identify network locations.</p><div class="fullcomment"><div class="comment cmt"><p>Names identify network locations. They come in two varieties:</p><ol class="decimal"><li><a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a> names are concrete.
@@ -2322,7 +2342,7 @@ unbound residual name to be processed by a downstream Namer.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Name trees represent a composite T-typed name whose interpretation is subject to evaluation rules." href="NameTree.html"><span class="name">NameTree</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Name trees represent a composite T-typed name whose interpretation is subject to evaluation rules." href="NameTree.html"><span class="name">NameTree</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Name trees represent a composite T-typed name whose interpretation
@@ -2347,7 +2367,7 @@ is used to provide evaluation context for these trees.</p><ul><li><a href="NameT
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A namer is a context in which a NameTree is bound." href="Namer.html"><span class="name">Namer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A namer is a context in which a NameTree is bound." href="Namer.html"><span class="name">Namer</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A namer is a context in which a <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> is bound.</p><div class="fullcomment"><div class="comment cmt"><p>A namer is a context in which a <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> is bound. The context is provided by the
@@ -2470,7 +2490,7 @@ hierarchically-addressed object.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request." href="ProxyConnectException.html"><span class="name">ProxyConnectException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="ProxyConnectException.html" class="extype" name="com.twitter.finagle.ProxyConnectException">ProxyConnectException</a>]</span>
+        <a title="Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request." href="ProxyConnectException.html"><span class="name">ProxyConnectException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="ProxyConnectException.html" class="extype" name="com.twitter.finagle.ProxyConnectException">ProxyConnectException</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request.</p>
@@ -2502,7 +2522,7 @@ hierarchically-addressed object.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="RedisRichClient.html"><span class="name">RedisRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="" href="RedisRichClient.html"><span class="name">RedisRichClient</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       
@@ -2536,7 +2556,7 @@ hierarchically-addressed object.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A base class for request failures." href="RequestException.html"><span class="name">RequestException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a title="A base class for request failures." href="RequestException.html"><span class="name">RequestException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
       </span>
       
       <p class="shortcomment cmt">A base class for request failures.</p><div class="fullcomment"><div class="comment cmt"><p>A base class for request failures. Indicates that some failure occurred
@@ -2574,7 +2594,7 @@ different request granularities that this exception class can pertain to.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A resolver binds a name, represented by a string, to a variable address." href="Resolver.html"><span class="name">Resolver</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A resolver binds a name, represented by a string, to a variable address." href="Resolver.html"><span class="name">Resolver</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A resolver binds a name, represented by a string, to a
@@ -2602,7 +2622,7 @@ documentation for further details.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that a destination name string passed to a com.twitter.finagle.Resolver was invalid according to the destination name grammar [1]." href="ResolverAddressInvalid.html"><span class="name">ResolverAddressInvalid</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+        <a title="Indicates that a destination name string passed to a com.twitter.finagle.Resolver was invalid according to the destination name grammar [1]." href="ResolverAddressInvalid.html"><span class="name">ResolverAddressInvalid</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that a destination name string passed to a
@@ -2623,7 +2643,7 @@ name grammar [1].</p><p>[1] https://twitter.github.io/finagle/guide/Names.html
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that a com.twitter.finagle.Resolver was not found for the given scheme." href="ResolverNotFoundException.html"><span class="name">ResolverNotFoundException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+        <a title="Indicates that a com.twitter.finagle.Resolver was not found for the given scheme." href="ResolverNotFoundException.html"><span class="name">ResolverNotFoundException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that a <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">com.twitter.finagle.Resolver</a> was not found for the
@@ -2644,7 +2664,7 @@ on the classpath that define a Resolver for the given scheme.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Servers implement RPC servers with Req-typed requests and Rep-typed responses." href="Server.html"><span class="name">Server</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Servers implement RPC servers with Req-typed requests and Rep-typed responses." href="Server.html"><span class="name">Server</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Servers implement RPC servers with <code>Req</code>-typed requests and
@@ -2666,6 +2686,31 @@ significant: a new <code>Service</code> is requested from the
 connection are dispatched to the supplied service. The service is
 also closed when the client disconnects or the connection is
 otherwise terminated.</p></div></div>
+    </li><li name="com.twitter.finagle.ServerErrorMonitor" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ServerErrorMonitorextendsMonitorwithProductwithSerializable"></a><a id="ServerErrorMonitor:ServerErrorMonitor"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#ServerErrorMonitorextendsMonitorwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor." href="ServerErrorMonitor.html"><span class="name">ServerErrorMonitor</span></a><span class="params">(<span name="suppressedCodes">suppressedCodes: <a href="../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a>]</span>)</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">Monitor</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">ServerErrorMonitor is a <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">com.twitter.util.Monitor</a> that specifically handles mysql ServerErrors
+in a less verbose way then <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>.</p><div class="fullcomment"><div class="comment cmt"><p>ServerErrorMonitor is a <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">com.twitter.util.Monitor</a> that specifically handles mysql ServerErrors
+in a less verbose way then <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>.</p><p>By default it will log an info statement with details about the ServerError and encourage end
+users to explicitly <code>handle</code> or <code>rescue</code> the ServerError in application code, and then suppress
+the logging.</p><p>Specific error codes can be suppressed, with the intention being that this happens when application
+code is explicitly dealing with that ServerError variant.
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p></p><pre><span class="kw">val</span> client = Mysql.client
+  .withMonitor(ServerErrorMonitor(<span class="std">Seq</span>(&lt;code&gt;)))</pre></li></ol>
+            </div></dl></div>
     </li><li name="com.twitter.finagle.Service" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Service[-Req,+Rep]extendsReq=&gt;com.twitter.util.Future[Rep]withClosable"></a><a id="Service[-Req,+Rep]:Service[Req,Rep]"></a>
       <span class="permalink">
@@ -2697,7 +2742,7 @@ otherwise terminated.</p></div></div>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that a request was applied to a com.twitter.finagle.Service that is closed (i.e." href="ServiceClosedException.html"><span class="name">ServiceClosedException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a></span>
+        <a title="Indicates that a request was applied to a com.twitter.finagle.Service that is closed (i.e." href="ServiceClosedException.html"><span class="name">ServiceClosedException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that a request was applied to a <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>
@@ -2716,7 +2761,7 @@ that is closed (i.e. the connection is closed).
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A trait for exceptions related to a com.twitter.finagle.Service." href="ServiceException.html"><span class="name">ServiceException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a title="A trait for exceptions related to a com.twitter.finagle.Service." href="ServiceException.html"><span class="name">ServiceException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
       </span>
       
       <p class="shortcomment cmt">A trait for exceptions related to a <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>.</p>
@@ -2768,7 +2813,7 @@ an existing <code>ServiceFactory</code>.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A ServiceFactoryWrapper adds behavior to an underlying ServiceFactory." href="ServiceFactoryWrapper.html"><span class="name">ServiceFactoryWrapper</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A ServiceFactoryWrapper adds behavior to an underlying ServiceFactory." href="ServiceFactoryWrapper.html"><span class="name">ServiceFactoryWrapper</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A ServiceFactoryWrapper adds behavior to an underlying ServiceFactory.</p>
@@ -2803,7 +2848,7 @@ since the naming step obscures the service's type to observers.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that a request was applied to a com.twitter.finagle.Service that is unavailable." href="ServiceNotAvailableException.html"><span class="name">ServiceNotAvailableException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a></span>
+        <a title="Indicates that a request was applied to a com.twitter.finagle.Service that is unavailable." href="ServiceNotAvailableException.html"><span class="name">ServiceNotAvailableException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that a request was applied to a <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>
@@ -2840,7 +2885,7 @@ This is useful if you want to wrap-but-modify an existing service.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that the connection was not established within the timeouts." href="ServiceTimeoutException.html"><span class="name">ServiceTimeoutException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a> with <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
+        <a title="Indicates that the connection was not established within the timeouts." href="ServiceTimeoutException.html"><span class="name">ServiceTimeoutException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a> with <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that the connection was not established within the timeouts.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that the connection was not established within the timeouts.
@@ -2893,7 +2938,7 @@ behavior.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A trait for exceptions that have a source." href="SourcedException.html"><span class="name">SourcedException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a></span>
+        <a title="A trait for exceptions that have a source." href="SourcedException.html"><span class="name">SourcedException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a></span>
       </span>
       
       <p class="shortcomment cmt">A trait for exceptions that have a source.</p><div class="fullcomment"><div class="comment cmt"><p>A trait for exceptions that have a source. The name of the source is
@@ -2928,7 +2973,7 @@ specified as a <code>serviceName</code>. The &quot;unspecified&quot; value is us
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that an error occurred while SslClientSessionVerification was being performed, or the server disconnected from the client in a way that indicates that there was high probability that the server failed to verify the client's certificate." href="SslVerificationFailedException.html"><span class="name">SslVerificationFailedException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Indicates that an error occurred while SslClientSessionVerification was being performed, or the server disconnected from the client in a way that indicates that there was high probability that the server failed to verify the client's certificate." href="SslVerificationFailedException.html"><span class="name">SslVerificationFailedException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that an error occurred while <code>SslClientSessionVerification</code> was
@@ -2947,7 +2992,7 @@ the client's certificate.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Stacks represent stackable elements of type T." href="Stack.html"><span class="name">Stack</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Stacks represent stackable elements of type T." href="Stack.html"><span class="name">Stack</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Stacks represent stackable elements of type T.</p><div class="fullcomment"><div class="comment cmt"><p>Stacks represent stackable elements of type T. It is assumed that
@@ -2973,7 +3018,7 @@ only!
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="StackBuilders are imperative-style builders for Stacks." href="StackBuilder.html"><span class="name">StackBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="StackBuilders are imperative-style builders for Stacks." href="StackBuilder.html"><span class="name">StackBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">StackBuilders are imperative-style builders for Stacks.</p><div class="fullcomment"><div class="comment cmt"><p>StackBuilders are imperative-style builders for Stacks. It
@@ -3035,7 +3080,7 @@ params, as it may change depending on the module's placement in the stack.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A Java adaptation of the com.twitter.finagle.Stack companion object." href="Stacks.html"><span class="name">Stacks</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A Java adaptation of the com.twitter.finagle.Stack companion object." href="Stacks.html"><span class="name">Stacks</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A Java adaptation of the <code><a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a></code> companion object.</p>
@@ -3051,7 +3096,7 @@ params, as it may change depending on the module's placement in the stack.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Status tells the condition of a networked endpoint." href="Status.html"><span class="name">Status</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Status tells the condition of a networked endpoint." href="Status.html"><span class="name">Status</span></a><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Status tells the condition of a networked endpoint.</p><div class="fullcomment"><div class="comment cmt"><p>Status tells the condition of a networked endpoint. They are used
@@ -3087,7 +3132,7 @@ was reset by a peer or a proxy.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that an operation exceeded some timeout duration before completing." href="TimeoutException.html"><span class="name">TimeoutException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
+        <a title="Indicates that an operation exceeded some timeout duration before completing." href="TimeoutException.html"><span class="name">TimeoutException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that an operation exceeded some timeout duration before completing.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that an operation exceeded some timeout duration before completing.
@@ -3144,7 +3189,7 @@ become available from a client's connection pool.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A base class for exceptions encountered in the context of a com.twitter.finagle.transport.Transport." href="TransportException.html"><span class="name">TransportException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a title="A base class for exceptions encountered in the context of a com.twitter.finagle.transport.Transport." href="TransportException.html"><span class="name">TransportException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
       </span>
       
       <p class="shortcomment cmt">A base class for exceptions encountered in the context of a
@@ -3161,7 +3206,7 @@ become available from a client's connection pool.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A catch-all exception class for uncategorized ChannelExceptions." href="UnknownChannelException.html"><span class="name">UnknownChannelException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A catch-all exception class for uncategorized ChannelExceptions." href="UnknownChannelException.html"><span class="name">UnknownChannelException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A catch-all exception class for uncategorized
@@ -3178,7 +3223,7 @@ become available from a client's connection pool.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Marker trait to indicate there was an exception before writing any of the request." href="WriteException.html"><span class="name">WriteException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a title="Marker trait to indicate there was an exception before writing any of the request." href="WriteException.html"><span class="name">WriteException</span></a><span class="result"> extends <a href="../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
       </span>
       
       <p class="shortcomment cmt">Marker trait to indicate there was an exception before writing any of the
@@ -3214,7 +3259,7 @@ These exceptions should generally be retryable.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A group is a dynamic set of T-typed values." href="Group.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use com.twitter.finagle.Name to represent clusters instead">Group</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A group is a dynamic set of T-typed values." href="Group.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use com.twitter.finagle.Name to represent clusters instead">Group</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A group is a dynamic set of <code>T</code>-typed values.</p><div class="fullcomment"><div class="comment cmt"><p>A group is a dynamic set of <code>T</code>-typed values. It is used to
@@ -3452,10 +3497,10 @@ to assign labels to groups that ascribe meaning to them.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Object Dtab manages 'base' and 'local' Dtabs." href="Dtab$.html"><span class="name">Dtab</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Dtab$.html"><span class="name">Dtab</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.DtabCompanionBase">DtabCompanionBase</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">Object Dtab manages 'base' and 'local' Dtabs.</p>
+      
     </li><li name="com.twitter.finagle.FactoryToService" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FactoryToService"></a><a id="FactoryToService:FactoryToService"></a>
       <span class="permalink">
@@ -4127,7 +4172,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>

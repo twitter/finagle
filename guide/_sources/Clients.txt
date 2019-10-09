@@ -721,19 +721,19 @@ allows for a probe request. If the probe fails, it goes back to unavailable rega
 Put differently, at least one request must succeed before the module starts to apply the policy
 again.
 
-There are two available policies out of the box:
+There are two types of policies out of the box:
 
 1. A policy based on the requests success rate meaning (i.e, an endpoint marked dead if its success rate
-   goes bellow the given threshold)
+   goes below the given threshold).
 2. A policy based on the number of consecutive failures occurred in the endpoint (i.e., an endpoint marked
    dead if there are at least ``N`` consecutive failures occurred in this endpoint)
 
-The default setup for the `Failure Accrual` module is to use a policy based on the
-number of consecutive failures (default is 5) accompanied by equal jittered backoff [#backoff]_ producing
-durations for which an endpoint is marked dead.
+The default setup for the `Failure Accrual` module is a hybrid policy based on the number of consecutive
+failures (default is 5) and required success rate (default is 80%). The policy is accompanied by an equal
+jittered backoff [#backoff]_ (5 to 300 seconds) producing durations for which an endpoint is marked dead.
 
-Use ``FailureAccrualFactory.Param`` [#experimental]_ to configure Failure Accrual` based on requests
-success rate [#example]_.
+Use ``FailureAccrualFactory.Param`` [#experimental]_ to configure Failure Accrual`. The following snippets
+illustrate some examples [#example]_.
 
 .. code-block:: scala
 
@@ -752,10 +752,36 @@ success rate [#example]_.
 
 The ``successRate`` factory method takes three arguments:
 
-1. `requiredSuccessRate` - the minimally required success rate bellow which an endpoint marked dead
-2. `window` - the size of the window to tack success rate on
+1. `requiredSuccessRate` - the minimally required success rate below which an endpoint marked dead
+2. `window` - the window of *requests* to measure success rate on; measured using an exponentially
+   weighted moving average
 3. `markDeadFor` - the backoff policy (an instance of ``Stream[Duration]``) used to mark an endpoint
    dead for
+
+.. code-block:: scala
+
+  import com.twitter.conversions.DurationOps._
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+  import com.twitter.finagle.service.Backoff
+
+  val twitter = Http.client
+    .configured(FailureAccrualFactory.Param(() => FailureAccrualPolicy.successRateWithinDuration(
+      requiredSuccessRate = 0.95,
+      window = 5.minutes,
+      markDeadFor = Backoff.const(10.seconds),
+      minRequestThreshold = 100
+    )))
+    .newService("twitter.com")
+
+The ``successRateWithinDuration`` factory method takes four arguments:
+
+1. `requiredSuccessRate` - the minimally required success rate below which an endpoint is marked dead
+2. `window` - duration over which the success rate is tracked over.
+3. `markDeadFor` - the backoff policy (an instance of ``Stream[Duration]``) used to mark an endpoint
+   dead for
+4. `minRequestThreshold` - the minimum number of requests required within the past ``window`` before considering
+   the measured success rate
 
 To configure `Failure Accrual` based on a number of consecutive failures [#experimental]_, use the
 following snippet [#example]_.
@@ -774,11 +800,36 @@ following snippet [#example]_.
     )))
     .newService("twitter.com")
 
-The ``consecutiveFailures`` method takes two arguments:
+The ``consecutiveFailures`` factory method takes two arguments:
 
 1. `consecutiveFailures` - the number of failures after which an endpoint is marked dead
 2. `markDeadFor` - the backoff policy (an instance of ``Stream[Duration]``) used to mark an endpoint
    dead for
+
+FailureAccrualPolicys can also be composed together via the ``orElse`` method. If multiple policies return a duration on `markDeadOnFailure()`,
+the maximum duration is used.
+
+.. code-block:: scala
+  import com.twitter.conversions.DurationOps._
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+  import com.twitter.finagle.service.Backoff
+
+  val twitter = Http.client
+    .configured(FailureAccrual.Param(() =>
+      FailureAccrualPolicy.consecutiveFailures(
+        numFailures = 10,
+        markDeadFor = Backoff.const(10.seconds)
+        ).orElse(
+          FailureAccrualPolicy.successRate(
+            requiredSuccessRate = 0.95,
+            window = 100,
+            markDeadFor = Backoff.const(10.seconds)
+          )
+        )
+      )
+    )
+    .newService("twitter.com")
 
 .. note::
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &#8212; Finagle 19.8.0 documentation</title>
+    <title>Servers &#8212; Finagle 19.10.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.8.0',
+        VERSION:     '19.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.8.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.10.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Aperture Load Balancers" href="ApertureLoadBalancers.html" />
    
@@ -308,7 +308,7 @@ service SocialGraph {
   <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">))</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">=&gt;</span>
     <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">NonRetryableFailure</span>
 
-  <span class="c1">// #3</span>
+  <span class="c1">// #3 *Caution*</span>
   <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="nc">SocialGraph</span><span class="o">.</span><span class="nc">Follow</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span> <span class="k">_</span><span class="o">)</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">=&gt;</span>
     <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">NonRetryableFailure</span>
 
@@ -322,8 +322,13 @@ service SocialGraph {
 deserialized <code class="docutils literal"><span class="pre">NotFoundException</span></code> can be treated as a failure. Second (#2), a
 &#8220;successful&#8221; response can be examined to enable services using status codes to
 classify errors. Next (#3), the request can be introspected to make the
-decision. Lastly (#4), the deserialized <code class="docutils literal"><span class="pre">InvalidQueryException</span></code> can be treated
-as a successful response.</p>
+decision - <em>HOWEVER</em> - if an exception is thrown at the Mux layer
+(ex: <code class="docutils literal"><span class="pre">c.t.f.mux.ClientDiscardedRequestException</span></code>) there will <strong>NOT</strong>
+be a match against (#3). This style (#3) should be avoided for Thrift and ThriftMux.
+Instead, prefer to handle request specific details at the application layer, such as creating
+a <a class="reference external" href="ServicesAndFilters.html#filters">Filter</a> to reject the request, and reserve Response
+Classification to deal with wire level response concerns. Lastly (#4), the deserialized
+<code class="docutils literal"><span class="pre">InvalidQueryException</span></code> can be treated as a successful response.</p>
 <p>If you have a response classifier that categorizes <code class="docutils literal"><span class="pre">Returns</span></code> as
 failures, note that they will be counted in the <code class="docutils literal"><span class="pre">StatsFilter</span></code>
 as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code> in the

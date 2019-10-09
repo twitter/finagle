@@ -280,7 +280,7 @@ generator.
                         <a class="object" href="Protocols$.html" title=""></a>
                         <a href="Protocols$.html" title="">Protocols</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="RichClientParam$.html" title=""></a>
                         <a class="class" href="" title="Produce a client with params wrapped in RichClientParam"></a>
                         <a href="" title="Produce a client with params wrapped in RichClientParam">RichClientParam</a>
                       </li><li class="current-entities indented4">
@@ -337,8 +337,8 @@ generator.
                         <a href="ValidateThriftService.html" title="A filter that invalidates a connection if it suffers from an irrecoverable application exception.">ValidateThriftService</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="package$$maxReusableBufferSize$.html" title=""></a>
-                        <a href="package$$maxReusableBufferSize$.html" title="">maxReusableBufferSize</a>
+                        <a class="object" href="maxReusableBufferSize$.html" title=""></a>
+                        <a href="maxReusableBufferSize$.html" title="">maxReusableBufferSize</a>
                       </li>
               </ul>
             </div>
@@ -346,14 +346,16 @@ generator.
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <div class="big-circle class">c</div>
+        <a href="RichClientParam$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></p>
-        <h1>RichClientParam<span class="permalink">
+        <h1><a href="RichClientParam$.html" title="See companion object">RichClientParam</a><span class="permalink">
       <a href="../../../../com/twitter/finagle/thrift/RichClientParam.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="RichClientParam$.html" title="See companion object">object RichClientParam</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -362,19 +364,20 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">RichClientParam</span><span class="params">(<span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.protocolFactory</a></span></span></span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="maxThriftBufferSize">maxThriftBufferSize: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.maxThriftBufferSize</a></span></span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ResponseClassifier.Default</a></span></span></span>, <span name="clientStats">clientStats: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ClientStatsReceiver</a></span></span></span>, <span name="perEndpointStats">perEndpointStats: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">RichClientParam</span><span class="params">(<span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.protocolFactory</a></span></span></span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="maxThriftBufferSize">maxThriftBufferSize: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.maxThriftBufferSize</a></span></span></span>, <span name="thriftReusableBufferFactory">thriftReusableBufferFactory: () ⇒ <span class="extype" name="com.twitter.scrooge.TReusableBuffer">TReusableBuffer</span> = <span class="defval" name='<span class="name"><a href="RichClientParam$.html">RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY</a></span>'>...</span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ResponseClassifier.Default</a></span></span></span>, <span name="clientStats">clientStats: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ClientStatsReceiver</a></span></span></span>, <span name="perEndpointStats">perEndpointStats: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Produce a client with params wrapped in RichClientParam
-</p></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For client stats, (default: empty string)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">responseClassifier</dt><dd class="cmt"><p>See <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a></p></dd><dt class="param">clientStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd><dt class="param">perEndpointStats</dt><dd class="cmt"><p>Whether to record per-endpoint stats, (default: false).
+</p></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For client stats, (default: empty string)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">thriftReusableBufferFactory</dt><dd class="cmt"><p>A reusable buffer for the thrift request/response, if passed
+                                 maxThriftBufferSize is ignored</p></dd><dt class="param">responseClassifier</dt><dd class="cmt"><p>See <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a></p></dd><dt class="param">clientStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd><dt class="param">perEndpointStats</dt><dd class="cmt"><p>Whether to record per-endpoint stats, (default: false).
                         By enabling this, the specific Thrift Exceptions can be recorded.
 See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter" target="_blank">PerEndpoint StatsFilter</a></p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -501,9 +504,9 @@ See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-st
       
       
     </li><li name="com.twitter.finagle.thrift.RichClientParam#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(protocolFactory:org.apache.thrift.protocol.TProtocolFactory,serviceName:String,maxThriftBufferSize:Int,responseClassifier:com.twitter.finagle.service.ResponseClassifier,clientStats:com.twitter.finagle.stats.StatsReceiver,perEndpointStats:Boolean):com.twitter.finagle.thrift.RichClientParam"></a><a id="&lt;init&gt;:RichClientParam"></a>
+      <a id="&lt;init&gt;(protocolFactory:org.apache.thrift.protocol.TProtocolFactory,serviceName:String,maxThriftBufferSize:Int,thriftReusableBufferFactory:()=&gt;com.twitter.scrooge.TReusableBuffer,responseClassifier:com.twitter.finagle.service.ResponseClassifier,clientStats:com.twitter.finagle.stats.StatsReceiver,perEndpointStats:Boolean):com.twitter.finagle.thrift.RichClientParam"></a><a id="&lt;init&gt;:RichClientParam"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/RichClientParam.html#&lt;init&gt;(protocolFactory:org.apache.thrift.protocol.TProtocolFactory,serviceName:String,maxThriftBufferSize:Int,responseClassifier:com.twitter.finagle.service.ResponseClassifier,clientStats:com.twitter.finagle.stats.StatsReceiver,perEndpointStats:Boolean):com.twitter.finagle.thrift.RichClientParam" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/RichClientParam.html#&lt;init&gt;(protocolFactory:org.apache.thrift.protocol.TProtocolFactory,serviceName:String,maxThriftBufferSize:Int,thriftReusableBufferFactory:()=&gt;com.twitter.scrooge.TReusableBuffer,responseClassifier:com.twitter.finagle.service.ResponseClassifier,clientStats:com.twitter.finagle.stats.StatsReceiver,perEndpointStats:Boolean):com.twitter.finagle.thrift.RichClientParam" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -512,10 +515,11 @@ See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-st
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">RichClientParam</span><span class="params">(<span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.protocolFactory</a></span></span></span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="maxThriftBufferSize">maxThriftBufferSize: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.maxThriftBufferSize</a></span></span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ResponseClassifier.Default</a></span></span></span>, <span name="clientStats">clientStats: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ClientStatsReceiver</a></span></span></span>, <span name="perEndpointStats">perEndpointStats: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span>
+        <span class="name">RichClientParam</span><span class="params">(<span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.protocolFactory</a></span></span></span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="maxThriftBufferSize">maxThriftBufferSize: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.maxThriftBufferSize</a></span></span></span>, <span name="thriftReusableBufferFactory">thriftReusableBufferFactory: () ⇒ <span class="extype" name="com.twitter.scrooge.TReusableBuffer">TReusableBuffer</span> = <span class="defval" name='<span class="name"><a href="RichClientParam$.html">RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY</a></span>'>...</span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ResponseClassifier.Default</a></span></span></span>, <span name="clientStats">clientStats: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ClientStatsReceiver</a></span></span></span>, <span name="perEndpointStats">perEndpointStats: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For client stats, (default: empty string)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">responseClassifier</dt><dd class="cmt"><p>See <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a></p></dd><dt class="param">clientStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd><dt class="param">perEndpointStats</dt><dd class="cmt"><p>Whether to record per-endpoint stats, (default: false).
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For client stats, (default: empty string)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">thriftReusableBufferFactory</dt><dd class="cmt"><p>A reusable buffer for the thrift request/response, if passed
+                                 maxThriftBufferSize is ignored</p></dd><dt class="param">responseClassifier</dt><dd class="cmt"><p>See <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a></p></dd><dt class="param">clientStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd><dt class="param">perEndpointStats</dt><dd class="cmt"><p>Whether to record per-endpoint stats, (default: false).
                         By enabling this, the specific Thrift Exceptions can be recorded.
 See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter" target="_blank">PerEndpoint StatsFilter</a></p></dd></dl></div>
     </li></ol>
@@ -620,7 +624,7 @@ See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-st
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -632,6 +636,22 @@ See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-st
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.RichClientParam#createThriftReusableBuffer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="createThriftReusableBuffer():com.twitter.scrooge.TReusableBuffer"></a><a id="createThriftReusableBuffer():TReusableBuffer"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/RichClientParam.html#createThriftReusableBuffer():com.twitter.scrooge.TReusableBuffer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">createThriftReusableBuffer</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.scrooge.TReusableBuffer">TReusableBuffer</span></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -644,7 +664,7 @@ See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-st
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -705,22 +725,6 @@ See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-st
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.RichClientParam#maxThriftBufferSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="maxThriftBufferSize:Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/RichClientParam.html#maxThriftBufferSize:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">maxThriftBufferSize</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -733,7 +737,7 @@ See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-st
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -876,6 +880,22 @@ any of the following System Properties are set:
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.RichClientParam#thriftReusableBufferFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="thriftReusableBufferFactory:()=&gt;com.twitter.scrooge.TReusableBuffer"></a><a id="thriftReusableBufferFactory:()⇒TReusableBuffer"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/RichClientParam.html#thriftReusableBufferFactory:()=&gt;com.twitter.scrooge.TReusableBuffer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">thriftReusableBufferFactory</span><span class="result">: () ⇒ <span class="extype" name="com.twitter.scrooge.TReusableBuffer">TReusableBuffer</span></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -950,7 +970,29 @@ any of the following System Properties are set:
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.thrift.RichClientParam#maxThriftBufferSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="maxThriftBufferSize:Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/RichClientParam.html#maxThriftBufferSize:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2019-10-03) Use thriftReusableBufferFactory instead">maxThriftBufferSize</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2019-10-03)</i> Use thriftReusableBufferFactory instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
@@ -963,7 +1005,7 @@ any of the following System Properties are set:
             </div><div class="parent" name="scala.Equals">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>

@@ -598,6 +598,22 @@ the netty4 event loop.
 finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>Defines common <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s shared between
 finagle clients and servers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.partitioning" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="partitioning"></a><a id="partitioning:partitioning"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#partitioning" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="partitioning/index.html"><span class="name">partitioning</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -991,7 +1007,7 @@ generator.
                         <a class="class" href="DroppedWriteException.html" title="Indicates that a com.twitter.finagle.transport.Transport write associated with the request was dropped by the transport (usually to respect backpressure)."></a>
                         <a href="DroppedWriteException.html" title="Indicates that a com.twitter.finagle.transport.Transport write associated with the request was dropped by the transport (usually to respect backpressure).">DroppedWriteException</a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="" title="Object Dtab manages 'base' and 'local' Dtabs."></a>
+                        <a class="object" href="" title=""></a>
                         <a class="class" href="Dtab.html" title="A Dtab--short for delegation table--comprises a sequence of delegation rules."></a>
                         <a href="Dtab.html" title="A Dtab--short for delegation table--comprises a sequence of delegation rules.">Dtab</a>
                       </li><li class="current-entities indented3">
@@ -1211,6 +1227,10 @@ generator.
                         <a class="trait" href="Server.html" title="Servers implement RPC servers with Req-typed requests and Rep-typed responses."></a>
                         <a href="Server.html" title="Servers implement RPC servers with Req-typed requests and Rep-typed responses.">Server</a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ServerErrorMonitor.html" title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor."></a>
+                        <a href="ServerErrorMonitor.html" title="ServerErrorMonitor is a com.twitter.util.Monitor that specifically handles mysql ServerErrors in a less verbose way then com.twitter.finagle.util.DefaultMonitor.">ServerErrorMonitor</a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Service$.html" title=""></a>
                         <a class="class" href="Service.html" title="A Service is an asynchronous function from a Request to a Future[Response]."></a>
                         <a href="Service.html" title="A Service is an asynchronous function from a Request to a Future[Response].">Service</a>
@@ -1367,17 +1387,16 @@ generator.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Dtab</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">Dtab</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.DtabCompanionBase">DtabCompanionBase</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Object Dtab manages 'base' and 'local' Dtabs.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="com.twitter.finagle.DtabCompanionBase">DtabCompanionBase</span>, <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1403,7 +1422,7 @@ generator.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.Dtab"><span>Dtab</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.Dtab"><span>Dtab</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="com.twitter.finagle.DtabCompanionBase"><span>DtabCompanionBase</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -1494,7 +1513,7 @@ generator.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#base" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabCompanionBase#base" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="base:com.twitter.finagle.Dtab"></a><a id="base:Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#base:com.twitter.finagle.Dtab" title="Permalink">
@@ -1513,7 +1532,7 @@ generator.
 every request in this process.</p><div class="fullcomment"><div class="comment cmt"><p>The base, or &quot;system&quot;, or &quot;global&quot;, delegation table applies to
 every request in this process. It is generally set at process
 startup, and not changed thereafter.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="com.twitter.finagle.Dtab#canBuildFrom" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="canBuildFrom:scala.collection.generic.CanBuildFrom[TraversableOnce[com.twitter.finagle.Dentry],com.twitter.finagle.Dentry,com.twitter.finagle.Dtab]"></a><a id="canBuildFrom:CanBuildFrom[TraversableOnce[Dentry],Dentry,Dtab]"></a>
       <span class="permalink">
@@ -1526,7 +1545,7 @@ startup, and not changed thereafter.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">canBuildFrom</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
+        <span class="name">canBuildFrom</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="../../../scala/index.html#TraversableOnce[+A]=scala.collection.TraversableOnce[A]" class="extmbr" name="scala.TraversableOnce">TraversableOnce</a>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>], <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>, <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
       </span>
       
       
@@ -1542,7 +1561,7 @@ startup, and not changed thereafter.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1554,7 +1573,7 @@ startup, and not changed thereafter.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#empty" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabCompanionBase#empty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="empty:com.twitter.finagle.Dtab"></a><a id="empty:Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#empty:com.twitter.finagle.Dtab" title="Permalink">
@@ -1569,7 +1588,25 @@ startup, and not changed thereafter.
         <span class="name">empty</span><span class="result">: <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>
       </span>
       
-      <p class="shortcomment cmt">An empty delegation table.</p>
+      <p class="shortcomment cmt">An empty delegation table.</p><div class="fullcomment"><div class="comment cmt"><p>An empty delegation table.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
+    </li><li name="com.twitter.finagle.DtabCompanionBase#emptyDtab" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="emptyDtab:com.twitter.finagle.Dtab"></a><a id="emptyDtab:Dtab"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Dtab$.html#emptyDtab:com.twitter.finagle.Dtab" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">emptyDtab</span><span class="result">: <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An empty delegation table.</p><div class="fullcomment"><div class="comment cmt"><p>An empty delegation table.</p><p>Use this one if you're coming from Java.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1582,7 +1619,7 @@ startup, and not changed thereafter.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -1602,7 +1639,7 @@ startup, and not changed thereafter.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#equiv" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabCompanionBase#equiv" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equiv:Equiv[com.twitter.finagle.Dtab]"></a><a id="equiv:Equiv[Dtab]"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#equiv:Equiv[com.twitter.finagle.Dtab]" title="Permalink">
@@ -1614,11 +1651,11 @@ startup, and not changed thereafter.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">equiv</span><span class="result">: <span class="extype" name="scala.Equiv">Equiv</span>[<a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
+        <span class="name">equiv</span><span class="result">: <a href="../../../scala/index.html#Equiv[T]=scala.math.Equiv[T]" class="extmbr" name="scala.Equiv">Equiv</a>[<a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.Dtab#fail" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
+    </li><li name="com.twitter.finagle.DtabCompanionBase#fail" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fail:com.twitter.finagle.Dtab"></a><a id="fail:Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#fail:com.twitter.finagle.Dtab" title="Permalink">
@@ -1627,13 +1664,14 @@ startup, and not changed thereafter.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
         <span class="name">fail</span><span class="result">: <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>
       </span>
       
-      <p class="shortcomment cmt">A failing delegation table.</p>
+      <p class="shortcomment cmt">A failing delegation table.</p><div class="fullcomment"><div class="comment cmt"><p>A failing delegation table.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
@@ -1656,7 +1694,7 @@ startup, and not changed thereafter.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#flaggable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabCompanionBase#flaggable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="flaggable:com.twitter.app.Flaggable[com.twitter.finagle.Dtab]"></a><a id="flaggable:Flaggable[Dtab]"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#flaggable:com.twitter.app.Flaggable[com.twitter.finagle.Dtab]" title="Permalink">
@@ -1674,7 +1712,10 @@ startup, and not changed thereafter.
       <p class="shortcomment cmt">implicit conversion from <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> to
 <span class="extype" name="com.twitter.app.Flaggable">com.twitter.app.Flaggable</span>, allowing Dtabs to be easily used as
 <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html" class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</a>s
-</p>
+</p><div class="fullcomment"><div class="comment cmt"><p>implicit conversion from <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> to
+<span class="extype" name="com.twitter.app.Flaggable">com.twitter.app.Flaggable</span>, allowing Dtabs to be easily used as
+<a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html" class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</a>s
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -1729,7 +1770,7 @@ startup, and not changed thereafter.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#local" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabCompanionBase#local" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="local:com.twitter.finagle.Dtab"></a><a id="local:Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#local:com.twitter.finagle.Dtab" title="Permalink">
@@ -1754,8 +1795,8 @@ supported protocols are used. (Http, Thrift via TTwitter, Mux,
 and ThriftMux are among these.) The upshot is that <code>local</code> is
 defined for the entire request graph, so that a local dtab
 defined here will apply to downstream services as well.
-</p></div></div>
-    </li><li name="com.twitter.finagle.Dtab#local_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
+    </li><li name="com.twitter.finagle.DtabCompanionBase#local_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="local_=(dtab:com.twitter.finagle.Dtab):Unit"></a><a id="local_=(Dtab):Unit"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#local_=(dtab:com.twitter.finagle.Dtab):Unit" title="Permalink">
@@ -1770,7 +1811,7 @@ defined here will apply to downstream services as well.
         <span title="gt4s: local_$eq" class="name">local_=</span><span class="params">(<span name="dtab">dtab: <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1783,11 +1824,11 @@ defined here will apply to downstream services as well.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#newBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabCompanionBase#newBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newBuilder:com.twitter.finagle.DtabBuilder"></a><a id="newBuilder:DtabBuilder"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#newBuilder:com.twitter.finagle.DtabBuilder" title="Permalink">
@@ -1802,7 +1843,7 @@ defined here will apply to downstream services as well.
         <span class="name">newBuilder</span><span class="result">: <a href="DtabBuilder.html" class="extype" name="com.twitter.finagle.DtabBuilder">DtabBuilder</a></span>
       </span>
       
-      <p class="shortcomment cmt">Scala collection plumbing required to build new dtabs</p>
+      <p class="shortcomment cmt">Scala collection plumbing required to build new dtabs</p><div class="fullcomment"><div class="comment cmt"><p>Scala collection plumbing required to build new dtabs</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
@@ -1841,7 +1882,7 @@ defined here will apply to downstream services as well.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#read" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabCompanionBase#read" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="read(s:String):com.twitter.finagle.Dtab"></a><a id="read(String):Dtab"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#read(s:String):com.twitter.finagle.Dtab" title="Permalink">
@@ -1857,8 +1898,8 @@ defined here will apply to downstream services as well.
       </span>
       
       <p class="shortcomment cmt">Parse a Dtab from string <code>s</code> with concrete syntax</p><div class="fullcomment"><div class="comment cmt"><p>Parse a Dtab from string <code>s</code> with concrete syntax</p><pre>dtab       ::= dentry <span class="lit">';'</span> dtab | dentry</pre><p>where the production <code>dentry</code> is from the grammar documented in
-<a href="Dentry$.html#read(s:String):com.twitter.finagle.Dentry" class="extmbr" name="com.twitter.finagle.Dentry#read">Dentry.read</a></p></div></div>
-    </li><li name="com.twitter.finagle.Dtab#setBase" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+<a href="Dentry$.html#read(s:String):com.twitter.finagle.Dentry" class="extmbr" name="com.twitter.finagle.Dentry#read">Dentry.read</a></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
+    </li><li name="com.twitter.finagle.DtabCompanionBase#setBase" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setBase(dtab:com.twitter.finagle.Dtab):Unit"></a><a id="setBase(Dtab):Unit"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#setBase(dtab:com.twitter.finagle.Dtab):Unit" title="Permalink">
@@ -1874,8 +1915,9 @@ defined here will apply to downstream services as well.
       </span>
       
       <p class="shortcomment cmt">Java API for <code>base_=</code>
-</p>
-    </li><li name="com.twitter.finagle.Dtab#setLocal" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+</p><div class="fullcomment"><div class="comment cmt"><p>Java API for <code>base_=</code>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
+    </li><li name="com.twitter.finagle.DtabCompanionBase#setLocal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setLocal(dtab:com.twitter.finagle.Dtab):Unit"></a><a id="setLocal(Dtab):Unit"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#setLocal(dtab:com.twitter.finagle.Dtab):Unit" title="Permalink">
@@ -1891,7 +1933,8 @@ defined here will apply to downstream services as well.
       </span>
       
       <p class="shortcomment cmt">Java API for <code>local_=</code>
-</p>
+</p><div class="fullcomment"><div class="comment cmt"><p>Java API for <code>local_=</code>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -1924,7 +1967,7 @@ defined here will apply to downstream services as well.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Dtab#unwind" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.DtabCompanionBase#unwind" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="unwind[T](f:=&gt;T):T"></a><a id="unwind[T](⇒T):T"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Dtab$.html#unwind[T](f:=&gt;T):T" title="Permalink">
@@ -1936,10 +1979,10 @@ defined here will apply to downstream services as well.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unwind</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.Dtab.unwind.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.Dtab.unwind.T">T</span></span>
+        <span class="name">unwind</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.DtabCompanionBase.unwind.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.DtabCompanionBase.unwind.T">T</span></span>
       </span>
       
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -2022,8 +2065,10 @@ defined here will apply to downstream services as well.
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="com.twitter.finagle.DtabCompanionBase">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.DtabCompanionBase">DtabCompanionBase</span></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
