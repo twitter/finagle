@@ -359,4 +359,46 @@ abstract class AbstractHeaderMapTest
       assert(stopwatch() < 10.seconds)
     }
   }
+
+  test("large number of colliding names doesn't make the `.names` iterator slow") {
+    def collidingNames(n: Int): Iterator[String] = new Iterator[String] {
+      private[this] val stringLen: Int = (math.log(n) / math.log(2)).asInstanceOf[Int] + 1
+      private[this] var i = 0
+
+      def hasNext: Boolean = i < n
+      def next(): String = {
+        val s = new StringBuilder
+        def go(j: Int): Unit = {
+          if (j != stringLen) {
+            val c = if (((1 << j) & i) == 0) 'a' else 'A'
+            s.append(c)
+            go(j + 1)
+          }
+        }
+        go(0)
+        i += 1
+        s.result()
+      }
+    }
+
+    val num = 300 * 1000
+    val collisions = collidingNames(num)
+    val hs = newHeaderMap()
+
+    while (collisions.hasNext) {
+      hs.add(collisions.next(), "")
+    }
+
+    // Now iterate through the keys. Took ~14 minutes before the patch.
+    // Takes ~130 ms after the patch.
+    eventually {
+      val stopwatch = Stopwatch.start()
+      var acc = 0
+      // Just do some arbitrary work
+      hs.keysIterator.foreach(_ => acc += 1)
+      assert(acc == num)
+      assert(stopwatch() < 30.seconds)
+
+    }
+  }
 }

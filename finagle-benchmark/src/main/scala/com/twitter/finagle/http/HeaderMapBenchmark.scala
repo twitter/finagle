@@ -19,6 +19,9 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
     .foldLeft(newMap())((map, h) => map.add(h.head, h.last))
     .add("Content-Length", "100")
 
+  private val duplicateKeyMap =
+    (0 until 10).foldLeft(newMap())((map, _) => map.add("key'", "value"))
+
   @Benchmark
   def create(): HeaderMap = newMap()
 
@@ -35,7 +38,12 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
   def keySet(): scala.collection.Set[String] = map.keySet
 
   @Benchmark
-  def iterateKeys(b: Blackhole): Unit =
+  def iterateKeys(b: Blackhole): Unit = doIterateKeys(b, map)
+
+  @Benchmark
+  def iterateRepeatedKeys(b: Blackhole): Unit = doIterateKeys(b, duplicateKeyMap)
+
+  private def doIterateKeys(b: Blackhole, map: HeaderMap): Unit =
     map.keysIterator.foreach(k => b.consume(k))
 
   @Benchmark
