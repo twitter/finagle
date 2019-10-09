@@ -67,7 +67,7 @@ private class HashedWheelTimer(
   self.newTimeout(pendingTasksStat, statsPollInterval.inSeconds, TimeUnit.SECONDS)
 }
 
-private object HashedWheelTimer {
+object HashedWheelTimer {
 
   /**
    * A singleton instance of [[HashedWheelTimer]] that is used for the all service loaded
@@ -75,13 +75,28 @@ private object HashedWheelTimer {
    *
    * @note Stats are reported into the "finagle" scope.
    */
-  val instance: HashedWheelTimer = {
+  private[netty4] val instance: HashedWheelTimer = {
     new HashedWheelTimer(
       FinagleStatsReceiver,
       timerTickDuration(),
       timerTicksPerWheel()
     )
   }
+
+  /**
+   * Stop default Netty 4 Timer.
+   *
+   * @note When timer is stopped, the behaviors of Finagle client and server are undefined.
+   */
+  def stop(): Unit = {
+    Logger
+      .get().warning(
+        "Stopping the default Finagle Netty 4 Timer. When timer is stopped, " +
+          "the behaviors of Finagle client and server are undefined."
+      )
+    instance.stop()
+  }
+
 }
 
 /**
