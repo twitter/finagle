@@ -2,9 +2,8 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.http.headers.{
-  MapBackedHeaderMap,
   JTreeMapBackedHeaderMap,
-  JHashMapBackedHeaderMap
+  HashBackedHeaderMap
 }
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
@@ -115,16 +114,8 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
     map.keysIterator.foreach(k => b.consume(k))
 }
 
-class DefaultHeaderMapBenchmark extends HeaderMapBenchmark {
-  protected def newMap(): HeaderMap = HeaderMap()
-}
-
-class MapBackedHeaderMapBenchmark extends HeaderMapBenchmark {
-  protected def newMap(): HeaderMap = new MapBackedHeaderMap()
-}
-
-class JHMapBackedHeaderMapBenchmark extends HeaderMapBenchmark {
-  protected def newMap(): HeaderMap = new JHashMapBackedHeaderMap()
+class HashBackedHeaderMapBenchmark extends HeaderMapBenchmark {
+  protected def newMap(): HeaderMap = HashBackedHeaderMap()
 }
 
 class JTMapBackedHeaderMapBenchmark extends HeaderMapBenchmark {

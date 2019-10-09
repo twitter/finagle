@@ -2,7 +2,7 @@ package com.twitter.finagle.http.headers
 
 import com.twitter.finagle.http.HeaderMap
 import java.util.function.BiConsumer
-import scala.jdk.CollectionConverters._
+import scala.collection.AbstractIterator
 
 /**
  * Mutable, thread-safe [[HeaderMap]] implementation, backed by
@@ -18,13 +18,13 @@ private[http] trait JMapBackedHeaderMap extends HeaderMap {
   // As such, we synchronize on the underlying collection when performing
   // accesses to avoid this. In the common case of no concurrent access,
   // this should be cheap.
-  protected val underlying: java.util.Map[String, Header]
+  protected val underlying: java.util.Map[String, Header.Root]
 
   private def foreachConsumer[U](f: ((String, String)) => U):
-    BiConsumer[String, Header] = new BiConsumer[String, Header](){
-      def accept(key: String, header: Header): Unit = header.iterator.foreach {
-        case nv => f(nv.name, nv.value)
-      }
+    BiConsumer[String, Header.Root] = new BiConsumer[String, Header.Root](){
+      def accept(key: String, header: Header.Root): Unit = header.iterator.foreach(
+        nv => f(nv.name, nv.value)
+      )
     }
 
   final override def foreach[U](f: ((String, String)) => U): Unit = 
@@ -58,13 +58,14 @@ private[http] trait JMapBackedHeaderMap extends HeaderMap {
 
   def get(key: String): Option[String]
 
+  /**
+   * Underlying headers eagerly copied to an array, without synchronizing
+   * on the underlying collection.
+   */
+  private[this] def copyHeaders: Iterator[Header.Root] = underlying.values.toArray(new Array[Header.Root](underlying.size)).iterator
+
   final def iterator: Iterator[(String, String)] = underlying.synchronized {
-    val underlyingEntries = underlying.entrySet.toArray
-    underlyingEntries.toIterator.flatMap {
-      case es: java.util.Map.Entry[String @unchecked, Header @unchecked] => {
-        es.getValue.iterator.map(nv => (nv.name, nv.value))
-      }
-    }
+    copyHeaders.flatMap(_.iterator.map(nv => (nv.name, nv.value)))
   }
 
   def removed(key: String): this.type
@@ -72,18 +73,27 @@ private[http] trait JMapBackedHeaderMap extends HeaderMap {
   final override def keys: Set[String] = keysIterator.toSet
 
   final override def keysIterator: Iterator[String] = underlying.synchronized {
-    underlying.values.iterator.asScala.flatMap(header => {
-      def rec(uniq: List[String], todo: List[String]): List[String] = todo match {
-        case Nil => uniq
-        case (head :: tail) =>
-          rec(head :: uniq, todo.filterNot(x => x == head))
-      }
-      rec(Nil, header.names.toList)
-    })
+    //the common case has a single element in Headers. Prevent unneeded List
+    //allocations for that case (don't flatMap)
+    val valuesIterator = copyHeaders
+    var currentEntries: Iterator[String] = Iterator.empty
+    new AbstractIterator[String]{
+      def hasNext: Boolean = currentEntries.hasNext || valuesIterator.hasNext
+      def next(): String =
+        if (currentEntries.hasNext) currentEntries.next()
+        else {
+          val h = valuesIterator.next()
+          if (h.next == null) h.name
+          else {
+            currentEntries = h.iterator.map(nv => nv.name).toList.distinct.iterator
+            currentEntries.next()
+          }
+        }
+    }
   }
 
   private[finagle] final override def nameValueIterator: Iterator[HeaderMap.NameValue] =
     underlying.synchronized {
-      underlying.values.toArray.toIterator.flatMap{ case (h: Header) => h.iterator}
+      copyHeaders.flatMap(_.iterator)
     }
 }

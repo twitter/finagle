@@ -6,20 +6,6 @@ import com.twitter.finagle.http.HeaderMap
 
 private[http] sealed class Header private (final val name: String, final val value: String)
     extends HeaderMap.NameValue {
-    
-  def iterator: Iterator[HeaderMap.NameValue] =
-    if (next == null) Iterator.single(this)
-    else {
-      var cur = this
-      new AbstractIterator[HeaderMap.NameValue] {
-        def hasNext: Boolean = cur != null
-        def next(): HeaderMap.NameValue = {
-          var n = cur
-          cur = n.next
-          n
-        }
-      }
-    }
 
   final protected var _next: Header = null
 
@@ -29,6 +15,20 @@ private[http] sealed class Header private (final val name: String, final val val
 private[http] object Header {
 
   final class Root private[Header] (name: String, value: String) extends Header(name, value) {
+
+    def iterator: Iterator[HeaderMap.NameValue] =
+      if (next == null) Iterator.single(this)
+      else {
+        var cur: Header = this
+        new AbstractIterator[HeaderMap.NameValue] {
+          def hasNext: Boolean = cur != null
+          def next(): HeaderMap.NameValue = {
+            var n = cur
+            cur = n.next
+            n
+          }
+        }
+      }
 
     // We want to keep a reference to the last element of this linked list
     // so we don't need to traverse the whole list to add an element.

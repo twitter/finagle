@@ -10,28 +10,29 @@ import scala.annotation.tailrec
  */
 final private[http] class JTreeMapBackedHeaderMap extends JMapBackedHeaderMap {
   
-  override val underlying: java.util.TreeMap[String, Header] = 
-    new java.util.TreeMap[String, Header](JTreeMapBackedHeaderMap.SharedComparitor)
+  override val underlying: java.util.TreeMap[String, Header.Root] = 
+    new java.util.TreeMap[String, Header.Root](JTreeMapBackedHeaderMap.SharedComparitor)
 
     def getAll(key: String): Seq[String] = underlying.synchronized {
-      val got = underlying.get(key.toLowerCase)
-      if (got == null) Nil
-      else got.values
+      underlying.get(key.toLowerCase) match {
+        case null => Nil
+        case r: Header.Root => r.values
+      }
     }
 
   // Does not validate key and value.
   def addUnsafe(key: String, value: String): this.type  = underlying.synchronized {
-    val header = new Header(key, value)
+    def header = Header.root(key, value)
     underlying.get(key) match {
       case null => underlying.put(key, header)
-      case h    => h.add(header)
+      case h    => h.add(key, value)
     }
     this
   }
 
   // Does not validate key and value.
   def setUnsafe(key: String, value: String): this.type = underlying.synchronized {
-    underlying.put(key, new Header(key, value))
+    underlying.put(key, Header.root(key, value))
     this
   }
 
@@ -72,14 +73,6 @@ object JTreeMapBackedHeaderMap {
 
   def apply(headers: (String, String)*): HeaderMap = {
     val result = new JTreeMapBackedHeaderMap
-    headers.foreach(t => result.add(t._1, t._2))
-    result
-  }
-}
-
-object JHashMapBackedHeaderMap {
-  def apply(headers: (String, String)*): HeaderMap = {
-    val result = new JHashMapBackedHeaderMap
     headers.foreach(t => result.add(t._1, t._2))
     result
   }
