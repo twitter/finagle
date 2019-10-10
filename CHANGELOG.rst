@@ -34,6 +34,8 @@ New Features
 * finagle-thrift: Pass a factory to create a TReusableBuffer as the parameter of a finagle client
   to allow multiple clients share one TReusableBuffer. ``PHAB_ID=D378466``
 
+* finagle-zipkin-{core,scribe}: Enables cross-build for 2.13.0. ``PHAB_ID=D381675``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
