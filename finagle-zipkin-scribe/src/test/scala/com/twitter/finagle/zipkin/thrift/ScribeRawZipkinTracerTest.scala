@@ -4,10 +4,10 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.zipkin.core.{BinaryAnnotation, Span, ZipkinAnnotation, Endpoint}
-import com.twitter.finagle.zipkin.thriftscala.{Scribe, ResultCode, LogEntry}
+import com.twitter.finagle.zipkin.core.{BinaryAnnotation, Endpoint, Span, ZipkinAnnotation}
+import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.util._
-import java.net.{InetSocketAddress, InetAddress}
+import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
 
 class ScribeRawZipkinTracerTest extends FunSuite {
@@ -17,7 +17,7 @@ class ScribeRawZipkinTracerTest extends FunSuite {
   class ScribeClient extends Scribe.FutureIface {
     var messages: Seq[LogEntry] = Seq.empty[LogEntry]
     var response: Future[ResultCode] = Future.value(ResultCode.Ok)
-    def log(msgs: Seq[LogEntry]): Future[ResultCode] = {
+    def log(msgs: scala.collection.Seq[LogEntry]): Future[ResultCode] = {
       messages ++= msgs
       response
     }

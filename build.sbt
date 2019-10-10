@@ -465,7 +465,8 @@ lazy val finagleZipkinCore = Project(
   id = "finagle-zipkin-core",
   base = file("finagle-zipkin-core")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-zipkin-core",
   libraryDependencies ++= Seq(
@@ -478,7 +479,8 @@ lazy val finagleZipkinScribe = Project(
   id = "finagle-zipkin-scribe",
   base = file("finagle-zipkin-scribe")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-zipkin-scribe",
   libraryDependencies ++= scroogeLibs

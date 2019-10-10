@@ -264,7 +264,7 @@ private[thrift] class ScribeRawZipkinTracer(
       }
     }
 
-    entries
+    entries.toSeq
   }
 
   /**
