@@ -19,6 +19,8 @@ New Features
 
 * finagle-exp: Enables cross-build for 2.13.0. ``PHAB_ID=D380497``
 
+* finagle-http: Expose header validation API to public. ``PHAB_ID=D381771``
+
 * finagle-mysql: Enables cross-build for 2.13.0. ``PHAB_ID=D377721``
 
 * finagle-{mux,thrift,thrift-mux}: Enables cross-build for 2.13.0. ``PHAB_ID=D373165``
