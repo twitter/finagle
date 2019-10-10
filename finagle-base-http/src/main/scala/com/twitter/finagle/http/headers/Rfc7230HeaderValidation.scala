@@ -9,7 +9,7 @@ import java.util.BitSet
  * validation. Invalid names or values will result in throwing an
  * `HeaderValidationException`.
  */
-private[finagle] object Rfc7230HeaderValidation {
+object Rfc7230HeaderValidation {
 
   /** Exception that represents header validation failure */
   sealed abstract class HeaderValidationException(details: String)
