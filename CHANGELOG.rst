@@ -54,6 +54,9 @@ Breaking API Changes
 * finagle-core: `c.t.f.l.FailureAccrualFactory`'s `didMarkDead()` changed to `didMarkDead(Duration)`.
   The `Duration` is the length of time the endpoint is marked dead. ``PHAB_ID=D369209``
 
+* finagle-core: removed the `staticDetermisticApertureWidth` flag. The behavior is now as if the flag
+  was set to `true` which was also the default behavior. ``PHAB_ID=D382779``
+
 Bug Fixes
 ~~~~~~~~~
 
