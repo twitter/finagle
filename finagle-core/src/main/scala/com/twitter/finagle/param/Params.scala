@@ -137,13 +137,13 @@ object HighResTimer {
    *
    * It is a shared resource and as such, `stop` is ignored.
    */
-  val Default:com.twitter.util.Timer = underlying
+  val Default: com.twitter.util.Timer = underlying
 
   /**
    * Stop default HighResTimer
    */
-  def stop():Unit = {
-    util.DefaultLogger.warning("Stopping the default Finagle HighResTimer. When timer is stopped, " +
+  def stop(): Unit = {
+    com.twitter.logging.Logger.get().warning("Stopping the default Finagle HighResTimer. When timer is stopped, " +
         "the behaviors of Finagle client and server are undefined.")
     underlying.stopTimer()
   }
