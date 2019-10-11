@@ -124,21 +124,28 @@ case class HighResTimer(timer: com.twitter.util.Timer) {
 object HighResTimer {
 
   /**
-   * The default Timer used for configuration.
-   *
-   * It is a shared resource and as such, `stop` is ignored.
+   * The underlying default Timer used for configuration
+   * Default `stop` behaviour is ignored in order to not be accidentally stopped
    */
-  val Default = new JavaTimer(true, Some("HighResTimer")) {
+  private[this] val underlying = new JavaTimer(true, Some("HighResTimer")) {
     override def stop(): Unit = ()
     def stopTimer(): Unit = super.stop()
   }
 
+  /**
+   * The default Timer used for configuration.
+   *
+   * It is a shared resource and as such, `stop` is ignored.
+   */
+  val Default:com.twitter.util.Timer = underlying
 
   /**
    * Stop default HighResTimer
    */
-  def stop() {
-    Default.stopTimer()
+  def stop():Unit = {
+    util.DefaultLogger.warning("Stopping the default Finagle HighResTimer. When timer is stopped, " +
+        "the behaviors of Finagle client and server are undefined.")
+    underlying.stopTimer()
   }
   
   implicit val param: Stack.Param[HighResTimer] =
