@@ -13,7 +13,7 @@
 
 ## Status
 
-This project is used in production at Twitter (and many other organizations), and is being actively developed and maintained.
+This project is used in production at Twitter (and many other organizations) and is being actively developed and maintained.
 
 
 ## Releases
