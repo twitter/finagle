@@ -798,7 +798,8 @@ lazy val finagleBenchmarkThrift = Project(
   id = "finagle-benchmark-thrift",
   base = file("finagle-benchmark-thrift")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   libraryDependencies ++= scroogeLibs
 ).dependsOn(finagleThrift)
