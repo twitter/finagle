@@ -504,7 +504,8 @@ lazy val finagleServersets = Project(
   id = "finagle-serversets",
   base = file("finagle-serversets")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-serversets",
   libraryDependencies ++= Seq(

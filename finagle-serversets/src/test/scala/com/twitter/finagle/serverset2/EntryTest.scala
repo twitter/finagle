@@ -37,10 +37,14 @@ class EntryTest extends FunSuite {
 
   test("Endpoint.parseJson: ok input same hostports") {
     val eps = Endpoint.parseJson(exampleJson2)
-    assert(
-      eps ==
-        Seq(Endpoint(Array(null, "aurora", "http"), "10.0.0.1", port, 0, Endpoint.Status.Alive, ""))
-    )
+    assert(eps.size == 1)
+    val ep = eps.head
+    assert(ep.names.toSet == Set(null, "aurora", "http"))
+    assert(ep.host == "10.0.0.1")
+    assert(ep.port == port)
+    assert(ep.shard == 0)
+    assert(ep.status == Endpoint.Status.Alive)
+    assert(ep.memberId.isEmpty)
   }
 
   test("Endpoint.parseJson: bad input") {

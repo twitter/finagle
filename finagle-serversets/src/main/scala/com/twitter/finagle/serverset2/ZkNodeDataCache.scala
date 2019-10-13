@@ -8,7 +8,7 @@ import com.twitter.io.Buf
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.Future
 import java.util.concurrent.atomic.AtomicReference
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * A cache for the members and vectors of a given cluster (/twitter/service/role/env/job).

@@ -12,7 +12,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.{Span, SpanSugar}
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
-import scala.collection.JavaConverters.mapAsJavaMapConverter
+import scala.jdk.CollectionConverters._
 
 class Zk2ResolverTest
     extends FunSuite

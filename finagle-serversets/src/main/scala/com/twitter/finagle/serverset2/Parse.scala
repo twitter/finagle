@@ -1,7 +1,7 @@
 package com.twitter.finagle.serverset2
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
 private[serverset2] object IntObj {

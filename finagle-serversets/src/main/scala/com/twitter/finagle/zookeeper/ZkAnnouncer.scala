@@ -6,8 +6,8 @@ import com.twitter.finagle.{Announcer, Announcement}
 import com.twitter.util.{Future, Promise}
 import java.net.InetSocketAddress
 import java.util.concurrent.LinkedBlockingQueue
-import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
 /**
