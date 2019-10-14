@@ -30,32 +30,32 @@ class SamplerTest extends FunSuite with MockitoSugar {
   }
 
   test("Sampler should drop all by setting samplerate") {
-    val sampler = new Sampler
-    sampler.setSampleRate(0)
+    val sampler = new Sampler()
+    sampler.setSampleRate(0f)
     for (i <- 1 until 100) {
-      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None)) == Some(false))
+      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None)).contains(false))
     }
   }
 
   test("Sampler should drop none by setting samplerate") {
-    val sampler = new Sampler
+    val sampler = new Sampler()
     sampler.setSampleRate(1f)
     for (i <- 1 until 100) {
-      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None)) == Some(true))
+      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None)).contains(true))
     }
   }
 
   test("Sampler should drop all by providing samplerate") {
-    val sampler = new Sampler
+    val sampler = new Sampler()
     for (i <- 1 until 100) {
-      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None), 0f) == Some(false))
+      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None), 0f).contains(false))
     }
   }
 
   test("Sampler should drop none by providing samplerate") {
-    val sampler = new Sampler
+    val sampler = new Sampler()
     for (i <- 1 until 100) {
-      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None), 1f) == Some(true))
+      assert(sampler.sampleTrace(TraceId(None, None, SpanId(i), None), 1f).contains(true))
     }
   }
 
@@ -63,7 +63,7 @@ class SamplerTest extends FunSuite with MockitoSugar {
     val h = new SamplerHelper
     import h._
 
-    val sampler = new Sampler
+    val sampler = new Sampler()
     sampler.setSampleRate(0f)
     assert(sampler.sampleRecord(Record(traceIdSampled, Time.now, Annotation.ClientSend)))
   }
@@ -72,7 +72,7 @@ class SamplerTest extends FunSuite with MockitoSugar {
     val h = new SamplerHelper
     import h._
 
-    val sampler = new Sampler
+    val sampler = new Sampler()
     sampler.setSampleRate(1f)
     assert(sampler.sampleRecord(Record(traceId, Time.now, Annotation.ClientSend)))
   }
