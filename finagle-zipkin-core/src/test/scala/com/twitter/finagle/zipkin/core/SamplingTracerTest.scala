@@ -3,24 +3,26 @@ package com.twitter.finagle.zipkin.core
 import com.twitter.finagle.tracing._
 import com.twitter.util._
 import org.mockito.Mockito._
-import org.scalacheck.{Gen, Arbitrary}
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import java.net.InetSocketAddress
 
-class ZipkinTracerTest extends FunSuite with MockitoSugar with ScalaCheckDrivenPropertyChecks {
-  test("ZipkinTracer should handle sampling") {
+class SamplingTracerTest extends FunSuite with MockitoSugar with ScalaCheckDrivenPropertyChecks {
+  test("SamplingTracer should handle sampling") {
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
     val underlying = mock[RawZipkinTracer]
     val tracer = new SamplingTracer(underlying, 0f)
-    assert(tracer.sampleTrace(traceId) == Some(false))
+    assert(tracer.getSampleRate == 0f)
+    assert(tracer.sampleTrace(traceId).contains(false))
     tracer.setSampleRate(1f)
-    assert(tracer.sampleTrace(traceId) == Some(true))
+    assert(tracer.getSampleRate == 1f)
+    assert(tracer.sampleTrace(traceId).contains(true))
   }
 
-  test("ZipkinTracer should pass through trace id with sampled true despite of sample rate") {
+  test("SamplingTracer should pass through trace id with sampled true despite sample rate") {
     val underlying = mock[RawZipkinTracer]
     val tracer = new SamplingTracer(underlying, 0f)
     val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))
@@ -29,7 +31,7 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with ScalaCheckDrivenP
     verify(underlying).record(record)
   }
 
-  test("ZipkinTracer should return isActivelyTracing correctly based on sampled value") {
+  test("SamplingTracer should return isActivelyTracing correctly based on sampled value") {
     val underlying = mock[RawZipkinTracer]
     val tracer = new SamplingTracer(underlying, 0f)
     val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))
@@ -46,7 +48,7 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with ScalaCheckDrivenP
   }
 }
 
-private[twitter] object ZipkinTracerTest {
+private[twitter] object SamplingTracerTest {
   import Annotation._
   import Arbitrary.arbitrary
 

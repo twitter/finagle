@@ -1,6 +1,7 @@
 package com.twitter.finagle.zipkin.core
 
 import com.twitter.finagle.tracing.{Record, TraceId}
+import com.twitter.logging.Logger
 import scala.util.Random
 
 object Sampler {
@@ -21,9 +22,10 @@ object Sampler {
 /**
  * Decide if we should sample a particular trace or not.
  */
-class Sampler {
-  @volatile
-  private[this] var sr = Sampler.DefaultSampleRate
+class Sampler(var sr: Float) {
+  private[this] val log = Logger(getClass.getName)
+
+  def this() = this(Sampler.DefaultSampleRate)
 
   /**
    * Set the sample rate.
@@ -37,6 +39,7 @@ class Sampler {
       )
     }
     sr = sampleRate
+    log.info(s"Zipkin trace sample rate set to $sampleRate")
   }
 
   /**

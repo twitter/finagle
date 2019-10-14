@@ -14,7 +14,6 @@ scala_library(
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-thrift/src/main/java",
         "util/util-core/src/main/scala",
-        "util/util-stats/src/main/scala",
     ],
     exports = [
         "util/util-core/src/main/scala",

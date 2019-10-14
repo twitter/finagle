@@ -2,8 +2,7 @@ package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Tracer
-import com.twitter.finagle.zipkin.core
-import com.twitter.finagle.zipkin.{host => Host, initialSampleRate => sampleRateFlag}
+import com.twitter.finagle.zipkin.{core, host => Host}
 
 object ZipkinTracer {
 
@@ -56,20 +55,20 @@ object ZipkinTracer {
 /**
  * Receives the Finagle generated traces and sends a sample of them off to Zipkin via Scribe
  */
-class ScribeZipkinTracer(tracer: ScribeRawZipkinTracer, sampleRate: Float)
-    extends core.SamplingTracer(tracer, sampleRate) {
+class ScribeZipkinTracer(tracer: ScribeRawZipkinTracer, sampler: core.Sampler)
+    extends core.SamplingTracer(tracer, sampler) {
 
   /**
    * Default constructor for the service loader
    */
-  def this() =
+  private[finagle] def this() =
     this(
       ScribeRawZipkinTracer(
         Host().getHostName,
         Host().getPort,
         DefaultStatsReceiver.scope("zipkin")
       ),
-      sampleRateFlag()
+      DefaultSampler
     )
 }
 
@@ -79,4 +78,12 @@ class ScribeZipkinTracer(tracer: ScribeRawZipkinTracer, sampleRate: Float)
  * @param sampleRate ratio of requests to trace
  */
 class ZipkinTracer(tracer: ScribeRawZipkinTracer, sampleRate: Float)
-    extends core.SamplingTracer(tracer, sampleRate)
+    extends core.SamplingTracer(tracer, sampleRate) {
+
+  def this(tracer: ScribeRawZipkinTracer, sampler: core.Sampler) =
+    this(tracer, sampler.sampleRate)
+
+  def this(tracer: ScribeRawZipkinTracer) =
+    this(tracer, DefaultSampler)
+
+}
