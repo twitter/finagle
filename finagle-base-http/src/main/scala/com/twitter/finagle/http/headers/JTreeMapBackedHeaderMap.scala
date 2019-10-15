@@ -2,29 +2,102 @@ package com.twitter.finagle.http.headers
 
 import com.twitter.finagle.http.HeaderMap
 import scala.annotation.tailrec
+import java.util.function.BiConsumer
+import scala.collection.AbstractIterator
 
 /**
  * Mutable, thread-safe [[HeaderMap]] implementation, backed by
  * a mutable [[Map[String, Header]]], where the map key
  * is forced to lower case
  */
-final private[http] class JTreeMapBackedHeaderMap extends JMapBackedHeaderMap {
-  
-  override val underlying: java.util.TreeMap[String, Header.Root] = 
-    new java.util.TreeMap[String, Header.Root](JTreeMapBackedHeaderMap.SharedComparitor)
+final private class JTreeMapBackedHeaderMap extends HeaderMap {
+  import HeaderMap._
 
-    def getAll(key: String): Seq[String] = underlying.synchronized {
-      underlying.get(key.toLowerCase) match {
-        case null => Nil
-        case r: Header.Root => r.values
-      }
+  // In general, Map's that are not thread safe are not
+  // durable to concurrent modification and can result in infinite loops
+  // and exceptions.
+  // As such, we synchronize on the underlying collection when performing
+  // accesses to avoid this. In the common case of no concurrent access,
+  // this should be cheap.
+  val underlying: java.util.TreeMap[String, Header.Root] = 
+  new java.util.TreeMap[String, Header.Root](JTreeMapBackedHeaderMap.SharedComparitor)
+
+  private def foreachConsumer[U](f: ((String, String)) => U):
+    BiConsumer[String, Header.Root] = new BiConsumer[String, Header.Root](){
+      def accept(key: String, header: Header.Root): Unit = header.iterator.foreach(
+        nv => f(nv.name, nv.value)
+      )
     }
+
+  override def foreach[U](f: ((String, String)) => U): Unit = 
+    underlying.forEach(foreachConsumer(f))
+
+  // ---- HeaderMap -----
+
+  // Validates key and value.
+  def add(key: String, value: String): this.type = {
+    validateName(key)
+    addUnsafe(key, foldReplacingValidateValue(key, value))
+  }
+
+  // Validates key and value.
+  def set(key: String, value: String): this.type = {
+    validateName(key)
+    setUnsafe(key, foldReplacingValidateValue(key, value))
+  }
+
+  // ---- Map/MapLike -----
+
+  def -=(key: String): this.type = removed(key)
+  def +=(kv: (String, String)): this.type = set(kv._1, kv._2)
+
+  /**
+   * Underlying headers eagerly copied to an array, without synchronizing
+   * on the underlying collection.
+   */
+  private[this] def copyHeaders: Iterator[Header.Root] = underlying.values.toArray(new Array[Header.Root](underlying.size)).iterator
+
+  def iterator: Iterator[(String, String)] =
+    nameValueIterator.map(nv => (nv.name, nv.value))
+
+  override def keys: Set[String] = keysIterator.toSet
+
+  override def keysIterator: Iterator[String] = underlying.synchronized {
+    //the common case has a single element in Headers. Prevent unneeded List
+    //allocations for that case (don't flatMap)
+    val valuesIterator = copyHeaders
+    var currentEntries: Iterator[String] = Iterator.empty
+    new AbstractIterator[String]{
+      def hasNext: Boolean = currentEntries.hasNext || valuesIterator.hasNext
+      def next(): String =
+        if (currentEntries.hasNext) currentEntries.next()
+        else {
+          val h = valuesIterator.next()
+          if (h.next == null) h.name
+          else {
+            currentEntries = h.iterator.map(nv => nv.name).toList.distinct.iterator
+            currentEntries.next()
+          }
+        }
+    }
+  }
+
+  private[finagle] final override def nameValueIterator: Iterator[HeaderMap.NameValue] =
+    underlying.synchronized {
+      copyHeaders.flatMap(_.iterator)
+    }
+
+  def getAll(key: String): Seq[String] = underlying.synchronized {
+    underlying.get(key) match {
+      case null => Nil
+      case r: Header.Root => r.values
+    }
+  }
 
   // Does not validate key and value.
   def addUnsafe(key: String, value: String): this.type  = underlying.synchronized {
-    def header = Header.root(key, value)
     underlying.get(key) match {
-      case null => underlying.put(key, header)
+      case null => underlying.put(key, Header.root(key, value))
       case h    => h.add(key, value)
     }
     this
@@ -37,7 +110,10 @@ final private[http] class JTreeMapBackedHeaderMap extends JMapBackedHeaderMap {
   }
 
   def get(key: String): Option[String] = underlying.synchronized {
-    Option(underlying.get(key)).map(_.value)
+    underlying.get(key) match {
+      case null => None
+      case h => Some(h.value)
+    }
   }
 
   def removed(key: String): this.type = underlying.synchronized {

@@ -15,12 +15,13 @@ private[http] sealed class Header private (final val name: String, final val val
 private[http] object Header {
 
   final class Root private[Header] (name: String, value: String) extends Header(name, value) {
+    self => 
 
     def iterator: Iterator[HeaderMap.NameValue] =
       if (next == null) Iterator.single(this)
       else {
-        var cur: Header = this
         new AbstractIterator[HeaderMap.NameValue] {
+          var cur: Header = self
           def hasNext: Boolean = cur != null
           def next(): HeaderMap.NameValue = {
             var n = cur
