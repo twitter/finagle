@@ -119,5 +119,5 @@ class HashBackedHeaderMapBenchmark extends HeaderMapBenchmark {
 }
 
 class JTMapBackedHeaderMapBenchmark extends HeaderMapBenchmark {
-  protected def newMap(): HeaderMap = new JTreeMapBackedHeaderMap()
+  protected def newMap(): HeaderMap = JTreeMapBackedHeaderMap()
 }

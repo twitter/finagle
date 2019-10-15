@@ -63,23 +63,7 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
   override def keys: Set[String] = keysIterator.toSet
 
   override def keysIterator: Iterator[String] = underlying.synchronized {
-    //the common case has a single element in Headers. Prevent unneeded List
-    //allocations for that case (don't flatMap)
-    val valuesIterator = copyHeaders
-    var currentEntries: Iterator[String] = Iterator.empty
-    new AbstractIterator[String]{
-      def hasNext: Boolean = currentEntries.hasNext || valuesIterator.hasNext
-      def next(): String =
-        if (currentEntries.hasNext) currentEntries.next()
-        else {
-          val h = valuesIterator.next()
-          if (h.next == null) h.name
-          else {
-            currentEntries = h.iterator.map(nv => nv.name).toList.distinct.iterator
-            currentEntries.next()
-          }
-        }
-    }
+    Header.uniqueNames(copyHeaders)
   }
 
   private[finagle] final override def nameValueIterator: Iterator[HeaderMap.NameValue] =
