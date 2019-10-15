@@ -302,8 +302,12 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      */
     def indices: Set[Int]
 
-    def additionalMetadata: Map[String, Any]
+    /*
+     * Returns the best status of nodes within `indices`
+     */
+    def status: Status
 
+    def additionalMetadata: Map[String, Any]
   }
 
   /**
@@ -313,6 +317,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected class EmptyVector(initAperture: Int) extends BaseDist(Vector.empty, initAperture) {
     require(vector.isEmpty, s"vector must be empty: $vector")
     def indices: Set[Int] = Set.empty
+    def status: Status = Status.Closed
     def pick(): Node = failingNode(emptyException)
     def needsRebuild: Boolean = false
     def additionalMetadata: Map[String, Any] = Map.empty
@@ -368,7 +373,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // by `token` which is deterministic across rebuilds but random
     // globally, since `token` is assigned randomly per process
     // when the node is created.
-    protected val vec = statusOrder(vector.sortBy(nodeToken))
+    protected val vec: Vector[Node] = statusOrder(vector.sortBy(nodeToken))
     protected def bound: Int = logicalAperture
     protected def emptyNode: Node = failingNode(emptyException)
     protected def rng: Rng = self.rng
@@ -384,6 +389,22 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     def indices: Set[Int] = (0 until logicalAperture).toSet
+
+    def status: Status = {
+      // acceptable race condition here with `adjust` that can update
+      // _logicalAperture
+      val logicalAperture = this.logicalAperture
+
+      var i = 0
+      var status: Status = Status.Closed
+      while (i < logicalAperture && status != Status.Open) {
+        status = Status.best(status, vec(i).factory.status)
+
+        i += 1
+      }
+
+      status
+    }
 
     // To reduce the amount of rebuilds needed, we rely on the probabilistic
     // nature of p2c pick. That is, we know that only when a significant
@@ -421,7 +442,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // and how we calculate the `apertureWidth`.
     override def min: Int = math.min(Aperture.MinDeterministicAperture, vector.size)
 
-    // If we don't allow the aperture to be dynamic based on the load, we just use the min value.
+    // DeterministicAperture does not dynamically adjust the aperture based on load
     override def logicalAperture: Int = min
 
     // Translates the logical `aperture` into a physical one that
@@ -472,6 +493,25 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         val weight = ring.weight(i, offset, width)
         (i, weight, addr)
       }
+    }
+
+    // Save an array-version of the indices that we can traverse over index-wise for
+    // a zero allocation `status` implementation.
+    //
+    // DeterministicAperture has `coord` and `logicalAperture` fixed on construction,
+    // used to compute `indicies`. We can safely cache the resulting set into `seqIndices`.
+    // This cache will be recomputed on subsequent rebuilds.
+    private[this] val seqIndices: Array[Int] = indices.toArray
+    def status: Status = {
+      var i = 0
+      var status: Status = Status.Closed
+      while (i < seqIndices.length && status != Status.Open) {
+        status = Status.best(status, vector(seqIndices(i)).factory.status)
+
+        i += 1
+      }
+
+      status
     }
 
     // We log the contents of the aperture on each distributor rebuild when using
@@ -566,4 +606,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     gauges.foreach(_.remove())
     coordObservation.close(deadline).before { super.close(deadline) }
   }
+
+  override def status: Status = dist.status
 }
