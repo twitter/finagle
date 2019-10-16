@@ -9,6 +9,7 @@ junit_tests(
         "3rdparty/jvm/org/scalacheck",
         "3rdparty/jvm/org/scalatest",
         "finagle/finagle-base-http",
+        "finagle/finagle-base-http/src/test/resources",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-toggle/src/main/scala",
     ],

@@ -2,7 +2,7 @@ package com.twitter.finagle.context
 import com.twitter.io.Buf
 import com.twitter.util.{Return, Throw, Try}
 
-private[finagle] final class BackupRequest
+private[finagle] final class BackupRequest private ()
 
 /**
  * Used to signal that a request was initiated as a "backup request".
@@ -18,7 +18,7 @@ object BackupRequest {
   private[finagle] val ContextId: String = "com.twitter.finagle.BackupRequest"
 
   private[this] val backupRequest = new BackupRequest
-  private[this] val ReturnBackupRequest = Return(backupRequest)
+  private[finagle] val ReturnBackupRequest = Return(backupRequest)
 
   private[this] final class Context extends Contexts.broadcast.Key[BackupRequest](ContextId) {
     def marshal(value: BackupRequest): Buf = Buf.Empty

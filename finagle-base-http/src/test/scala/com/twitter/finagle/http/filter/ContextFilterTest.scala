@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
-import com.twitter.finagle.http.codec.HttpContext
+import com.twitter.finagle.http.codec.context.HttpContext
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.util.{Await, Future}
 import org.scalatest.FunSuite

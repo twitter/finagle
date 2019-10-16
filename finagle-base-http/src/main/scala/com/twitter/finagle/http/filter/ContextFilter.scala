@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle._
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.codec.HttpContext
+import com.twitter.finagle.http.codec.context.HttpContext
 import com.twitter.util.Future
 
 /**
