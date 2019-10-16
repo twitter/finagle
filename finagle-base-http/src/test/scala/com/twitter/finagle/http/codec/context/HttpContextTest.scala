@@ -1,13 +1,73 @@
-package com.twitter.finagle.http.codec
+package com.twitter.finagle.http.codec.context
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.context.{BackupRequest, Contexts, Deadline, Retries}
 import com.twitter.finagle.http.{Message, Method, Request, Version}
+import com.twitter.io.Buf
+import com.twitter.util.Try
 import org.scalatest.FunSuite
+
+// This context type is loaded in via the `LoadService` mechanism
+case class Name(name: String)
+
+object Name extends Contexts.broadcast.Key[Name]("com.twitter.finagle.http.codec.Name") {
+  def current: Option[Name] = Contexts.broadcast.get(Name)
+
+  def marshal(n: Name): Buf = {
+    Buf.ByteArray.Owned(n.name.getBytes())
+  }
+
+  def tryUnmarshal(buf: Buf): Try[Name] = {
+    Try {
+      Name(
+        new String(Buf.ByteArray.Owned.extract(buf))
+      )
+    }
+  }
+}
+
+// This class definition must be included into jar's resources via the file,
+// `c.t.f.http.codec.context.LoadableHttpContext`, under META-INF/services
+// directory so that LoadService can pickup this definition at runtime. See
+// the resources of this target as an example.
+class LoadedName extends LoadableHttpContext {
+  type ContextKeyType = Name
+  val key: Contexts.broadcast.Key[ContextKeyType] = Name
+}
 
 class HttpContextTest extends FunSuite {
 
   def newMsg(): Message = Request(Version.Http11, Method.Get, "/")
+
+  test("writes custom broadcast context types via LoadService") {
+    val m = newMsg()
+    val name = Name("kobe")
+    Contexts.broadcast.let(Name, name) {
+      HttpContext.write(m)
+
+      Contexts.broadcast.letClear(Name) {
+        assert(Name.current == None)
+
+        HttpContext.read(m) {
+          val n = Name.current.get
+          assert(n.name == "kobe")
+        }
+      }
+
+    }
+  }
+
+  test("custom context types are also prefixed") {
+    val m = newMsg()
+    val name = Name("bryant")
+    Contexts.broadcast.let(Name, name) {
+      HttpContext.write(m)
+
+      val hm = m.headerMap
+      assert(!hm.isEmpty)
+      assert(hm.keySet.forall(_.startsWith(HttpContext.Prefix)))
+    }
+  }
 
   test("written request deadline matches read request deadline") {
     val m = newMsg()

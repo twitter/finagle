@@ -12,6 +12,12 @@ Runtime Behavior Changes
 
 * finagle: Upgrade to caffeine 2.8.0 ``PHAB_ID=D384592``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-base-http: `c.t.f.http.codec.HttpContext` moved into `c.t.f.http.codec.context.HttpContext`
+  ``PHAB_ID=D380407``
+
 19.10.0
 -------
 

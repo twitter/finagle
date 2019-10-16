@@ -7,6 +7,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.ServerAdmissionControl
+import com.twitter.finagle.http.codec.context.LoadableHttpContext
 import com.twitter.finagle.http.service.{HttpResponseClassifier, NullService}
 import com.twitter.finagle.http2.param.EncoderIgnoreMaxHeaderListSize
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureDetector}
@@ -24,6 +25,34 @@ import org.scalactic.source.Position
 import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.language.reflectiveCalls
+
+// copied from finagle-base-http HttpContext test for marshalling external custom context type via
+// LoadService. We have an end-to-end test here as well
+case class NameContext(name: String)
+
+object NameContext
+    extends Contexts.broadcast.Key[NameContext]("com.twitter.finagle.http.NameContext") {
+  def marshal(ctxVal: NameContext): Buf = {
+    Buf.ByteArray.Owned(ctxVal.name.getBytes())
+  }
+
+  def tryUnmarshal(buf: Buf): Try[NameContext] = {
+    Try {
+      NameContext(
+        new String(Buf.ByteArray.Owned.extract(buf))
+      )
+    }
+  }
+}
+
+// This class definition must be included into jar's resources via the file,
+// `c.t.f.http.codec.context.LoadableHttpContext`, under META-INF/services
+// directory so that LoadService can pickup this definition at runtime. See
+// the resources of this target as an example.
+class LoadedNameContext extends LoadableHttpContext {
+  type ContextKeyType = NameContext
+  val key: Contexts.broadcast.Key[NameContext] = NameContext
+}
 
 abstract class AbstractEndToEndTest
     extends FunSuite
@@ -352,6 +381,27 @@ abstract class AbstractEndToEndTest
       }
 
       await(client.close())
+    }
+
+    test(implName + ": external contexts via loadservice") {
+      // lets reuse the external Name context type defined in finagle-base-http
+      val name = NameContext("foo")
+      val service = new HttpService {
+        def apply(request: Request) = {
+          val nameCtx = Contexts.broadcast.get(NameContext).get
+          assert(nameCtx.name == name.name)
+
+          val response = Response(request)
+          Future.value(response)
+        }
+      }
+
+      Contexts.broadcast.let(NameContext, name) {
+        val client = connect(service)
+        val res = await(client(Request("/")))
+        assert(res.status == Status.Ok)
+        await(client.close())
+      }
     }
 
     test(implName + ": (no) dtab") {
