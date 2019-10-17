@@ -19,8 +19,8 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
   // As such, we synchronize on the underlying collection when performing
   // accesses to avoid this. In the common case of no concurrent access,
   // this should be cheap.
-  val underlying: java.util.TreeMap[String, Header.Root] = 
-  new java.util.TreeMap[String, Header.Root](JTreeMapBackedHeaderMap.SharedComparitor)
+  private[this] val underlying: java.util.TreeMap[String, Header.Root] = 
+    new java.util.TreeMap[String, Header.Root](JTreeMapBackedHeaderMap.sharedComparator)
 
   private def foreachConsumer[U](f: ((String, String)) => U):
     BiConsumer[String, Header.Root] = new BiConsumer[String, Header.Root](){
@@ -53,9 +53,11 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
 
   /**
    * Underlying headers eagerly copied to an array, without synchronizing
-   * on the underlying collection.
+   * on the underlying collection. That means the calling method
+   * must synchronize.
    */
-  private[this] def copyHeaders: Iterator[Header.Root] = underlying.values.toArray(new Array[Header.Root](underlying.size)).iterator
+  private[this] def copyHeaders: Iterator[Header.Root] =
+    underlying.values.toArray(new Array[Header.Root](underlying.size)).iterator
 
   def iterator: Iterator[(String, String)] =
     nameValueIterator.map(nv => (nv.name, nv.value))
@@ -109,7 +111,7 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
 
 object JTreeMapBackedHeaderMap {
 
-  val SharedComparitor = new java.util.Comparator[String] {
+  val sharedComparator = new java.util.Comparator[String] {
     def compare(key1: String, key2: String): Int = {
       // Shorter strings are always less, regardless of their content
       val lenthDiff = key1.length - key2.length

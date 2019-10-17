@@ -22,7 +22,7 @@ private[http] object Header {
       if (next == null) Iterator.single(this)
       else {
         new AbstractIterator[HeaderMap.NameValue] {
-          var cur: Header = self
+          private[this] var cur: Header = self
           def hasNext: Boolean = cur != null
           def next(): HeaderMap.NameValue = {
             var n = cur
