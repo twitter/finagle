@@ -29,8 +29,9 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
       )
     }
 
-  override def foreach[U](f: ((String, String)) => U): Unit = 
+  override def foreach[U](f: ((String, String)) => U): Unit = underlying.synchronized {
     underlying.forEach(foreachConsumer(f))
+  }
 
   // ---- HeaderMap -----
 
