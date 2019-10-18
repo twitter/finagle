@@ -109,6 +109,31 @@ class HttpContextTest extends FunSuite {
     }
   }
 
+  test("headers are set/replaced, not added") {
+    val m = newMsg()
+    Contexts.broadcast.let(Retries, Retries(5)) {
+      HttpContext.write(m)
+    }
+
+    assert(m.headerMap.getAll(HttpRetries.headerKey).size == 1)
+    HttpContext.read(m) {
+      assert(Contexts.broadcast.get(HttpRetries.key) == Some(Retries(5)))
+    }
+
+    // and again...
+    Contexts.broadcast.let(Retries, Retries(4)) {
+      HttpContext.write(m)
+    }
+
+    // Still just 1...
+    assert(m.headerMap.getAll(HttpRetries.headerKey).size == 1)
+
+    // Should be the last entry written
+    HttpContext.read(m) {
+      assert(Contexts.broadcast.get(HttpRetries.key) == Some(Retries(4)))
+    }
+  }
+
   test("BackupRequest written matches read") {
     val m = newMsg()
     assert(!BackupRequest.wasInitiated)
