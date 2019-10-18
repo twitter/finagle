@@ -145,12 +145,12 @@ object HttpContext {
     Contexts.broadcast.get(contextType.key) match {
       case Some(ctxVal) =>
         if (isSafe) {
-          headerMap.addUnsafe(contextType.headerKey, contextType.toHeader(ctxVal))
+          headerMap.setUnsafe(contextType.headerKey, contextType.toHeader(ctxVal))
         } else {
           try {
-            headerMap.add(contextType.headerKey, contextType.toHeader(ctxVal))
+            headerMap.set(contextType.headerKey, contextType.toHeader(ctxVal))
           } catch {
-            case NonFatal(exc) =>
+            case NonFatal(_) =>
               if (log.isLoggable(Level.DEBUG))
                 log.debug(s"unable to add ${contextType.key} to the header")
           }
