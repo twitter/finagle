@@ -292,8 +292,6 @@ class ApertureTest extends FunSuite with ApertureSuite {
     for (f <- counts)
       f.status = Status.Closed
 
-    assert(bal.status == Status.Closed)
-
     bal.applyn(1000)
     assert(bal.aperturex == 1)
     // since our status sort is stable, we know that
@@ -306,54 +304,6 @@ class ApertureTest extends FunSuite with ApertureSuite {
     counts.clear()
     bal.applyn(1000)
     assert(counts.nonzero == Set(goodkey))
-    assert(bal.status == Status.Open)
-  }
-
-  test("status, unavailabe endpoints in the aperture") {
-    val counts = new Counts
-    val bal = new Bal {
-      override protected val useDeterministicOrdering = Some(true)
-    }
-
-    ProcessCoordinate.setCoordinate(instanceId = 0, totalInstances = 12)
-    bal.update(counts.range(24))
-    bal.rebuildx()
-    assert(bal.isDeterministicAperture)
-    assert(bal.minUnitsx == 12)
-
-    // mark all endpoints within the aperture as busy
-    for (i <- 0 until 12) {
-      counts(i).status = Status.Busy
-    }
-
-    assert(bal.status == Status.Busy)
-
-    // one endpoint in the aperture that's open
-    counts(0).status = Status.Open
-    assert(bal.status == Status.Open)
-  }
-
-  test("status, respects vector order in random aperture") {
-    val counts = new Counts
-    val bal = new Bal {
-      override protected val useDeterministicOrdering = Some(false)
-    }
-
-    bal.update(counts.range(24))
-    assert(bal.aperturex == 1)
-    assert(bal.isRandomAperture)
-
-    // all but the last endpoint as Busy
-    for (i <- 0 until 23) {
-      counts(i).status = Status.Busy
-    }
-
-    // RandomAperture will sort on status. The last busy endpoint should
-    // become the head
-    bal.rebuildx()
-
-    // should be available due to the single endpoint
-    assert(bal.status == Status.Open)
   }
 
   test("useDeterministicOrdering, clients evenly divide servers") {
