@@ -7,7 +7,7 @@ import scala.collection.mutable
 
 private[finagle] object CookieMap {
 
-  private def cookieCodec = Netty4CookieCodec
+  def cookieCodec = Netty4CookieCodec
 
   // Note that this is a def to allow it to be toggled for unit tests.
   private[finagle] def includeSameSite: Boolean = supportSameSiteCodec()
@@ -23,9 +23,9 @@ private[finagle] object CookieMap {
  * the ''message''
  */
 class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
-    extends mutable.Map[String, Cookie]
-    with mutable.MapLike[String, Cookie, CookieMap] {
-
+    extends CookieMapVersionSpecific(message, cookieCodec) with mutable.Map[String, Cookie]
+    {
+  
   def this(message: Message) =
     this(message, CookieMap.cookieCodec)
 
@@ -113,14 +113,14 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
    * and Cookie` itself) into this map. If there are already cookies
    * with the given `name` in the map, they will be removed.
    */
-  def +=(cookie: (String, Cookie)): this.type = {
+  def addCookie(cookie: (String, Cookie)): this.type = {
     val (n, c) = cookie
     setNoRewrite(n, c)
     rewriteCookieHeaders()
     this
   }
 
-  /**
+   /**
    * Adds the given `cookie` into this map. If there are already cookies
    * with the given `name` in the map, they will be removed.
    */
@@ -128,13 +128,13 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     this += ((cookie.name, cookie))
   }
 
-  override def ++=(xs: TraversableOnce[(String, Cookie)]): this.type = {
-    xs.foreach { case (n, c) => setNoRewrite(n, c) }
+  def addCookies(cookies: scala.collection.TraversableOnce[(String, Cookie)]): this.type = {
+    cookies.foreach { case (n, c) => setNoRewrite(n, c) }
     rewriteCookieHeaders()
     this
   }
 
-  override def --=(xs: TraversableOnce[String]): this.type = {
+  def removeCookies(xs: TraversableOnce[String]): this.type = {
     xs.foreach { n =>
       underlying -= n
     }
@@ -145,7 +145,7 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   /**
    * Deletes all cookies with the given `name` from this map.
    */
-  def -=(name: String): this.type = {
+  def removeCookie(name: String): this.type = {
     underlying -= name
     rewriteCookieHeaders()
     this

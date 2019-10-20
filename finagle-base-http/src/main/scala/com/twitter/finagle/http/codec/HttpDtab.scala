@@ -5,7 +5,8 @@ import com.twitter.finagle.http.{HeaderMap, Message}
 import com.twitter.util.{Return, Throw, Try}
 import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
 import java.util.Base64
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.compat.immutable.ArraySeq
+import scala.collection.mutable.Builder
 import scala.util.control.NonFatal
 
 /**
@@ -91,19 +92,20 @@ object HttpDtab {
    * @return a Seq[(String, String)] containing the dtab header entries found.
    */
   private[finagle] def strip(msg: Message): Seq[(String, String)] = {
-    var headerArr: ArrayBuffer[(String, String)] = null
+    var builder: Builder[(String, String), ArraySeq[(String, String)]] = null
+    var x = ArraySeq.newBuilder[(String, String)]
     val nameValueIt = msg.headerMap.nameValueIterator
     while (nameValueIt.hasNext) {
       val nameValue = nameValueIt.next()
       if (isDtabHeader(nameValue)) {
-        if (headerArr == null)
-          headerArr = new ArrayBuffer[(String, String)]()
-        headerArr += ((nameValue.name, nameValue.value))
+        if (builder == null)
+        builder = ArraySeq.newBuilder[(String, String)]
+        builder += ((nameValue.name, nameValue.value))
         msg.headerMap -= nameValue.name
       }
     }
-    if (headerArr == null) Nil
-    else headerArr
+    if (builder == null) Nil
+    else builder.result
   }
 
   /**
@@ -170,24 +172,24 @@ object HttpDtab {
    */
   private def readXDtabPairs(msg: Message): Try[Dtab] = {
     // Common case: no actual overrides.
-    var keys: ArrayBuffer[String] = null
+    var builder: Builder[String, ArraySeq[String]] = null
     val headers = msg.headerMap.nameValueIterator
     while (headers.hasNext) {
       val key = headers.next().name.toLowerCase
       if (key.startsWith(Prefix)) {
-        if (keys == null) keys = ArrayBuffer[String]()
-        keys += key
+        if (builder == null) builder = ArraySeq.newBuilder[String]
+        builder += key
       }
     }
 
-    if (keys == null)
+    if (builder == null)
       return EmptyReturn
 
+    val keys = builder.mapResult(as => as.sorted).result
     if (keys.size % 2 != 0)
       return Throw(unmatchedFailure)
-
-    keys = keys.sorted
-    val n = keys.size / 2
+    
+      val n = keys.size / 2
 
     val dentries = new Array[Dentry](n)
     var i = 0
