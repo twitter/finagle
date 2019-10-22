@@ -25,11 +25,10 @@ class FilterBenchmark extends StdBenchAnnotations {
       }
     }
 
-    var f: Filter[Mutable, Mutable, Mutable, Mutable] = filter
+    svc = Service.const(Future.value(mutable))
     for (i <- 0.until(numAndThens)) {
-      f = f.andThen(filter)
+      svc = filter.andThen(svc)
     }
-    svc = f.andThen(Service.const(Future.value(mutable)))
   }
 
   @Benchmark
