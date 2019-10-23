@@ -2,7 +2,7 @@ package com.twitter.finagle.util
 
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.ConcurrentLinkedQueue
-import scala.collection.immutable.VectorBuilder
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * An Updater processes updates in sequence. At most one
@@ -39,18 +39,16 @@ private[finagle] trait Updater[T] extends (T => Unit) {
     if (n.getAndIncrement() > 0)
       return
 
-    val elems = new VectorBuilder[T]()
-
     do {
-      elems.clear()
-      elems.sizeHint(1 + n.get)
+      val elems = new ArrayBuffer[T](1 + n.get)
       while (n.get > 1) {
         n.decrementAndGet()
         elems += q.poll()
       }
 
       elems += q.poll()
-      preprocess(elems.result()).foreach(handle _)
+      // toSeq needed for 2.13 compat
+      preprocess(elems.toSeq).foreach(handle)
 
     } while (n.decrementAndGet() > 0)
   }
