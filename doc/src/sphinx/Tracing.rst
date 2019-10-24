@@ -1,0 +1,191 @@
+.. _finagle_tracing
+
+Tracing
+=======
+
+Finagle generates distributed trace data for each request. Traces allow one to understand and debug how distributed systems work. Traces don't just capture timing information, they are able to hold any number of different types of information. Information such as payload sizes, serialization/deserialization times, as well as information about retries and backup requests can be logged for each request. This data is collected in segments and is sent off for storage at each hop of the request path.
+
+Finagle tracing represents pieces of a request/response path as segments. Each segment shares a single 64-bit traceid which allows them to later be aggregated and analyzed as a complete trace. Systems such as `Zipkin <http://zipkin.io>`_ can be used to collect, correlate, and view this data.
+
+By default Finagle uses a `DefaultTracer` which will load implementations from included artifacts using the Java `ServiceLoader <https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html>`_. Out of the box, adding the finagle-zipkin-scribe package to your classpath will enable sending tracing segments to zipkin via the `scribe <http://go/scribe>`_ protocol.
+
+You can replicate this functionality and globally install a tracer by including an artifact with a service loaded `Tracer`. Your implementation must implement the `Tracer <https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/tracing/Tracer.scala>`_ API and follow the requirements necessary to be loaded by the `ServiceLoader <https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html>`_.
+
+Furthermore, tracers can be overridden in code, they may be specified when creating a client or server. In the following example we replace the default tracer with our own `BroadcastTracer` which will send traces both to zipkin, via scribe, as well as to the console:
+
+.. code-block:: scala
+
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.tracing.{BroadcastTracer, Record, TraceId, Tracer}
+  import com.twitter.finagle.zipkin.thrift.ZipkinTracer
+
+  object SystemOutTracer extends Tracer {
+    def record(record: Record): Unit = println(record)
+    def sampleTrace(traceId: TraceId): Option[Boolean] = Some(false)
+  }
+
+  val client = Http.client
+    .withTracer(BroadcastTracer(Seq(
+      ZipkinTracer.mk(),
+      SystemOutTracer
+    )))
+
+Information about active traces is located within the Finagle `Context <Context>`_. The Trace API is a convenient way of accessing the currently active traces for a request and provides the ability to manipulate them with operations such as adding custom annotations.
+
+.. code-block:: scala
+
+  import com.twitter.finagle.http.{Request, Response}
+  import com.twitter.finagle.tracing.Trace
+  import com.twitter.finagle.{Service, SimpleFilter}
+  import com.twitter.util.Future
+
+  class MyFilter extends SimpleFilter[Request, Response] {
+    def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+      val header = request.headerMap("Special-Header")
+      Trace.recordBinary("special-header", header)
+      service(request)
+    }
+  }
+
+Available Tracers
+-----------------
+
+NullTracer
+~~~~~~~~~~
+
+A tracer that drops all traces on the ground. This is the default behavior if no tracer is confgured.
+
+BroadcastTracer
+~~~~~~~~~~~~~~~
+
+A tracer that will forward all traces to any number of child tracers. This is useful if you want spans sent to multiple backend systems. By default all service loaded tracers are bundled under a single `BroadcastTracer`.
+
+SamplingTracer
+~~~~~~~~~~~~~~
+
+A tracer that will only forward a subset of traces to the backing store. This is useful when a service has a high request rate and you do not want to overwhelm the tracing system. Sampling is determined when a new trace is created. If the trace survives sampling this decision will be recorded and passed along with the trace so that all segments along the way will also survive sampling.
+
+RawZipkinTracer
+~~~~~~~~~~~~~~~
+
+An abstract `SamplingTracer` which formats traces for consumption by Zipkin but leaves the transport open to implementation.
+
+ScribeZipkinTracer
+~~~~~~~~~~~~~~~~~~
+
+A `RawZipkinTracer` that sends spans to Zipkin using the Scribe protocol. This tracer is included with the finagle-zipkin-scribe artifact and exposes the following flags for configuration:
+
+-com.twitter.finagle.zipkin.host
+-com.twitter.finagle.zipkin.initialSampleRate
+
+Standard Annotations
+--------------------
+
+=======================  ==================================================
+Annotation               Description
+=======================  ==================================================
+Wire Send                Time a message is handed to the transport layer
+Wire Receive             Time a message is received by the transport layer
+Wire Receive Error       Any error message generated by the transport layer
+Client Send              Time a request is sent by a client
+Client Receive           Time a response is received by a client
+Client Receive Error     Any error message generated by the client stack
+Server Send              Time a request is received by a server
+Server Receive           Time a response is sent by a server
+Server Send Error        Any error generated by the server stack
+Client Send Fragment     UNUSED
+Client Receive Fragment  UNUSED
+Service Name             The service name where this span originated
+RPC                      The RPC name and method
+Message                  Informational message
+Client Address           Originating address for a request
+Server Address           Terminal address for an address
+Local Address            Address where a span is generated
+=======================  ==================================================
+
+Additional Annotations
+----------------------
+
+Backup Requests
+~~~~~~~~~~~~~~~
+
+srv/backup_request_processing
+`````````````````````````````
+A binary annotation generated on a server when processing a backup request.
+
+clnt/backup_request_threshold_ms
+````````````````````````````````
+The configured backup request threshold in milliseconds.
+
+clnt/backup_request_span_id
+```````````````````````````
+The span id for the backup request, this is useful to be able to analyze which spans are responsible for the main request and which spans are responsible for the backup request.
+
+Client Backup Request Issued
+````````````````````````````
+A Message annotation generated by the `BackupRequestFilter` when a backup request is issued.
+
+Client Backup Request Won
+`````````````````````````
+A Message type annotation generated by the `BackupRequestFilter` when a backup request has completed before the main request.
+
+Client Backup Request Lost
+``````````````````````````
+A Message type annotation generated by the `BackupRequestFilter` when a backup request completed after the main request.
+
+Garbage Collection
+~~~~~~~~~~~~~~~~~~
+
+GC Start
+````````
+A Message type annotation generated for the current trace with the beginning timestamp of all gc events within the last minute before the request.
+
+GC End
+``````
+A Message type annotation generated for the current trace with the timestamp of the end of all gc events within the last minute before the request.
+
+jvm/gc_count
+````````````
+The number of gc cycles in the last minute before the request.
+
+jvm/gc_ms
+`````````
+The total amount of time spent on gc within the last minute before the request.
+
+Payload Size
+~~~~~~~~~~~~
+
+clnt/request_payload_bytes
+``````````````````````````
+The size of the payload for a request sent by a client.
+
+srv/request_payload_bytes
+`````````````````````````
+The size of the payload for a request received by a server.
+
+clnt/response_payload_bytes
+```````````````````````````
+The size of the payload for a response received by a client.
+
+srv/response_payload_bytes
+``````````````````````````
+The size of the payload for a response sent by a server.
+
+Request/Response Serialization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+clnt/request_serialization_ns
+`````````````````````````````
+The total amount of time taken by a client to serialize a request.
+
+clnt/response_deserialization_ns
+````````````````````````````````
+The total amount of time taken by a client to deserialize a response.
+
+srv/request_deserialization_ns
+``````````````````````````````
+The total amount of time taken by a server to deserialize a request.
+
+srv/response_serialization_ns
+`````````````````````````````
+The total amount of time taken by a server to serialize a response.

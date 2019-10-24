@@ -207,7 +207,7 @@ output. To override this, use the following sample.
     .withMonitor(monitor)
     .newService("twitter.com")
 
-Finally, clients have built-in support for `Zipkin <https://zipkin.io/>`_.
+Finally, clients have built-in support for `Tracing <Tracing.html>`_.
 
 .. _client_retries:
 

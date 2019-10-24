@@ -31,13 +31,12 @@ check out the `whitepaper <https://thrift.apache.org/static/files/thrift-2007040
 service-oriented architecture we had to extend the Thrift protocol. We
 introduced the notion of “Twitter-upgraded Thrift”, or TTwitter, which augments
 the protocol with support for our internal infrastructure. Specifically, we tack
-on a request header containing Zipkin tracing info, Finagle ClientId strings, and
+on a request header containing tracing info, Finagle ClientId strings, and
 Wily delegations. In order to maintain backwards compatibility, TTwitter clients
 perform protocol negotiation upon connection and will downgrade to raw TBinary
 Thrift if servers are not using the upgraded protocol. By default, `finagle-thrift`
 uses the Thrift framed codec and the binary protocol for serialization.
 
-.. note:: Some Thrift server implementations do not handle this protocol
           negotiation well. If your client should run into this, you can disable
           it by calling ``Thrift.client.withNoAttemptTTwitterUpgrade``.
 

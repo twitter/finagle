@@ -127,7 +127,7 @@ If a custom `Throwable` is used, its message and `FailureFlags` (if any) will
 propagate but it will be converted in to a `Failure`. Any other information,
 such as stack traces, will be discarded. Due to Finagle's asynchronous nature,
 stack traces are not particularly useful. Instead Finagle provides built in
-support for `Zipkin`_, the distributed tracing system.
+support for distributed tracing systems.
 
 When sending these responses across service boundaries, `toString` is called on
 each hop. This means that messages will appear like
@@ -150,4 +150,3 @@ any information (stack trace, message, etc) except for the flags. See
   "any `Throwable with HasFailureFlags` flagged `Rejected` and `NonRetryable`","`T: HasFailureFlags`","`503 Service Unavailable` w/ 'finagle-http-nack' header","`Failure` flagged `Rejected` and `NonRetryable`"
   "any `Throwable with HasFailureFlags` flagged `Rejected`","`T: HasFailureFlags`","`503 Service Unavailable` w/ 'finagle-http-nonretryable-nack' header","`Failure` flagged `Rejected` and `NonRetryable`"
 
-.. _zipkin: https://zipkin.io
