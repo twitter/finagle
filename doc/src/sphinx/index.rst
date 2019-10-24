@@ -58,6 +58,7 @@ Contents
    Metrics
    Flags
    UnsuccessfulResponses
+   Tracing
    FAQ
    Glossary
 
