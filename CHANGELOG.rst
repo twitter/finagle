@@ -10,6 +10,8 @@ Unreleased
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Add initial support for JDK 11 compatibility. ``PHAB_ID=D365075``
+
 * finagle: Upgrade to caffeine 2.8.0 ``PHAB_ID=D384592``
 
 Breaking API Changes

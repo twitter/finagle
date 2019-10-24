@@ -101,8 +101,31 @@ def travisTestJavaOptions: Seq[String] = {
 }
 
 def gcJavaOptions: Seq[String] = {
+  val javaVersion = System.getProperty("java.version")
+  if (javaVersion.startsWith("1.8")) {
+    jdk8GcJavaOptions
+  } else {
+    jdk11GcJavaOptions
+  }
+}
+
+def jdk8GcJavaOptions: Seq[String] = {
   Seq(
     "-XX:+UseParNewGC",
+    "-XX:+UseConcMarkSweepGC",
+    "-XX:+CMSParallelRemarkEnabled",
+    "-XX:+CMSClassUnloadingEnabled",
+    "-XX:ReservedCodeCacheSize=128m",
+    "-XX:SurvivorRatio=128",
+    "-XX:MaxTenuringThreshold=0",
+    "-Xss8M",
+    "-Xms512M",
+    "-Xmx3G"
+  )
+}
+
+def jdk11GcJavaOptions: Seq[String] = {
+  Seq(
     "-XX:+UseConcMarkSweepGC",
     "-XX:+CMSParallelRemarkEnabled",
     "-XX:+CMSClassUnloadingEnabled",
