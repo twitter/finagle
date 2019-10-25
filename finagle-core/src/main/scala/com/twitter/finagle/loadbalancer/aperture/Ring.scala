@@ -62,29 +62,34 @@ private class Ring(size: Int, rng: Rng) {
    * Thus, we interpret a width of 0 as picking one index.
    */
   def range(offset: Double, width: Double): Int = {
-    if (width < 0 || width > 1.0)
+    if (width < 0 || width > 1.0) {
       throw new IllegalArgumentException(s"width must be between [0, 1.0]: $width")
+    } else if (width < 1.0) {
+      val begin = index(offset)
+      val end = index((offset + width) % 1.0)
 
-    val begin = index(offset)
-    val end = index((offset + width) % 1.0)
+      // We wrapped around the entire ring, so return the size.
+      if (begin == end && width > unitWidth) size
+      // We only have one index to select from. Arguably, returning
+      // a diff of zero here is correct too. However, in order to
+      // project what `pick2` will do we return a range of 1.
+      else if (begin == end) 1
+      else {
+        val beginWeight = weight(begin, offset, width)
+        val endWeight = weight(end, offset, width)
 
-    // We wrapped around the entire ring, so return the size.
-    if (begin == end && width > unitWidth) size
-    // We only have one index to select from. Arguably, returning
-    // a diff of zero here is correct too. However, in order to
-    // project what `pick2` will do we return a range of 1.
-    else if (begin == end) 1
-    else {
-      val beginWeight = weight(begin, offset, width)
-      val endWeight = weight(end, offset, width)
+        // we want to project what `pick2` will do, so we need to
+        // take into account the weight of `begin` and `end`.
+        val adjustedBegin = if (beginWeight > 0) begin else begin + 1
+        val adjustedEnd = if (endWeight > 0) end + 1 else end
 
-      // we want to project what `pick2` will do, so we need to
-      // take into account the weight of `begin` and `end`.
-      val adjustedBegin = if (beginWeight > 0) begin else begin + 1
-      val adjustedEnd = if (endWeight > 0) end + 1 else end
-
-      val diff = adjustedEnd - adjustedBegin
-      if (diff < 0) diff + size else diff
+        val diff = adjustedEnd - adjustedBegin
+        if (diff < 0) diff + size else diff
+      }
+    } else {
+      // We know that `width == 1.0` in this case, meaning the entire
+      // ring is within range.
+      size
     }
   }
 
