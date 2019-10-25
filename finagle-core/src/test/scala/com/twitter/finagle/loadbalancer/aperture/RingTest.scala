@@ -1,9 +1,11 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.util.Rng
+import org.scalacheck.Gen
 import org.scalatest.FunSuite
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class RingTest extends FunSuite {
+class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   val rng = Rng(12345L)
 
   def histo(seq: Seq[Int]): Map[Int, Int] =
@@ -93,6 +95,13 @@ class RingTest extends FunSuite {
     assert(r1.range(rng.nextDouble, .999999) == size)
     assert(r1.range(rng.nextDouble, 1.0 - Double.MinPositiveValue) == size)
     assert(r1.range(rng.nextDouble, 1.0) == size)
+
+    forAll(Gen.posNum[Int], Gen.posNum[Int]) { (size, id) =>
+      whenever(size > 0 && id > 0) {
+        val r = new Ring(size, rng)
+        assert(r.range(id.toDouble / size, 1.0) == size)
+      }
+    }
   }
 
   test("range projects pick2") {
