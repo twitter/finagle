@@ -8,8 +8,8 @@ import com.twitter.util.Duration
 import java.net.InetSocketAddress
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{Watcher, WatchedEvent}
-import scala.collection.JavaConverters._
 import scala.collection._
+import scala.jdk.CollectionConverters._
 
 private[finagle] class ZooKeeperHealthHandler extends Watcher {
   private[this] val mu = new AsyncMutex

@@ -9,7 +9,7 @@ import java.net.InetSocketAddress
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.time._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class ZkResolverTest extends FunSuite with BeforeAndAfter {
   val zkTimeout = 100.milliseconds

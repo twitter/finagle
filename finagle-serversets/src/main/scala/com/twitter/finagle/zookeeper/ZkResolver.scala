@@ -11,8 +11,8 @@ import com.twitter.thrift.{Endpoint, ServiceInstance}
 import com.twitter.util.Var
 import java.net.InetSocketAddress
 import java.util.logging.{Level, Logger}
-import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 /**
  * Indicates that a failure occurred while attempting to resolve a cluster

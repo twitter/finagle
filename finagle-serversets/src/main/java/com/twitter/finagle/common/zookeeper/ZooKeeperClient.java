@@ -57,7 +57,7 @@ public class ZooKeeperClient {
   /**
    * Indicates an error connecting to a zookeeper cluster.
    */
-  public class ZooKeeperConnectionException extends Exception {
+  public static class ZooKeeperConnectionException extends Exception {
     public ZooKeeperConnectionException(String message, Throwable cause) {
       super(message, cause);
     }
