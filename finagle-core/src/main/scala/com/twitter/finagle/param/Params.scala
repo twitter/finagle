@@ -5,6 +5,7 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Stack, stats, tracing, util}
 import com.twitter.util.{JavaTimer, NullMonitor}
 import scala.annotation.varargs
+import scala.language.reflectiveCalls
 
 /**
  * A class eligible for configuring a label used to identify finagle
@@ -124,14 +125,30 @@ case class HighResTimer(timer: com.twitter.util.Timer) {
 object HighResTimer {
 
   /**
+   * The underlying default Timer used for configuration
+   * Default `stop` behaviour is ignored in order to not be accidentally stopped
+   */
+  private[this] val underlying = new JavaTimer(true, Some("HighResTimer")) {
+    override def stop(): Unit = ()
+    def stopTimer(): Unit = super.stop()
+  }
+
+  /**
    * The default Timer used for configuration.
    *
    * It is a shared resource and as such, `stop` is ignored.
    */
-  val Default: com.twitter.util.Timer =
-    new JavaTimer(true, Some("HighResTimer")) {
-      override def stop(): Unit = ()
-    }
+  val Default: com.twitter.util.Timer = underlying
+
+  /**
+   * Stop default HighResTimer
+   */
+  def stop(): Unit = {
+    com.twitter.logging.Logger
+      .get().warning("Stopping the default Finagle HighResTimer. When timer is stopped, " +
+        "the behaviors of Finagle client and server are undefined.")
+    underlying.stopTimer()
+  }
 
   implicit val param: Stack.Param[HighResTimer] =
     Stack.Param(HighResTimer(Default))
