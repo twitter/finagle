@@ -8,7 +8,7 @@ import com.twitter.util._
 import com.twitter.finagle.serverset2.client._
 import org.apache.zookeeper
 import org.apache.zookeeper.AsyncCallback._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * ZooKeeperClient implementation based on Apache ZooKeeper Library
@@ -86,7 +86,7 @@ private[serverset2] class ApacheZooKeeper private[apache] (zk: zookeeper.ZooKeep
     val cb = new VoidCallback {
       def processResult(ret: Int, path: String, ctx: Object) =
         ApacheKeeperException(ret, Option(path)) match {
-          case None => rv.setValue(Unit)
+          case None => rv.setValue(())
           case Some(e) => rv.setException(e)
         }
     }
@@ -306,7 +306,7 @@ private[serverset2] class ApacheZooKeeper private[apache] (zk: zookeeper.ZooKeep
     val cb = new VoidCallback {
       def processResult(ret: Int, path: String, ctx: Object) =
         ApacheKeeperException(ret, Option(path)) match {
-          case None => rv.setValue(Unit)
+          case None => rv.setValue(())
           case Some(e) => rv.setException(e)
         }
     }

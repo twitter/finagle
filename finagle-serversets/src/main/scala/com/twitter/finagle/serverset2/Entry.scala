@@ -1,7 +1,7 @@
 package com.twitter.finagle.serverset2
 
-import collection.JavaConverters._
-import collection.mutable.ArrayBuffer
+import scala.collection.mutable.ArrayBuffer
+import scala.jdk.CollectionConverters._
 
 import com.twitter.util.Memoize
 

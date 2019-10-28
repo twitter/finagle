@@ -1,6 +1,7 @@
 package com.twitter.finagle.serverset2.client
 
 import com.twitter.io.Buf
+import scala.collection.Seq
 
 private[serverset2] object Perms {
   val Read: Int = 1 << 0

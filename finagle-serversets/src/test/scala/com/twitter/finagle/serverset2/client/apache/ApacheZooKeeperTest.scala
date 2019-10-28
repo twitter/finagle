@@ -12,7 +12,8 @@ import org.mockito.Matchers.{eq => meq}
 import org.mockito.Mockito.{doNothing, doThrow, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+
 class ApacheZooKeeperTest extends FunSuite with MockitoSugar with OneInstancePerTest {
   val statsReceiver = new InMemoryStatsReceiver
   val mockZK = mock[org.apache.zookeeper.ZooKeeper]
