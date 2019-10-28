@@ -21,12 +21,17 @@ final class GoAwayException private[http2] (
   flags: Long)
     extends StreamClosedException(
       remoteAddress,
-      streamId.toString,
-      s"GOAWAY(${Http2StreamClosedException.errorToString(errorCode)}, $streamId)",
+      streamId,
       flags
     ) {
   def this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress]) =
     this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress], FailureFlags.Empty)
+
+  protected def whyFailed: String =
+    s"GOAWAY(${Http2StreamClosedException.errorToString(errorCode)}, $streamId)"
+
+  protected def copyWithFlags(flags: Long): GoAwayException =
+    new GoAwayException(errorCode, streamId, remoteAddress, flags)
 }
 
 final class RstException private[http2] (
@@ -36,11 +41,16 @@ final class RstException private[http2] (
   flags: Long)
     extends StreamClosedException(
       remoteAddress,
-      streamId.toString,
-      s"RST(${Http2StreamClosedException.errorToString(errorCode)})",
+      streamId,
       flags
     ) {
 
   def this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress]) =
     this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress], FailureFlags.Empty)
+
+  protected def whyFailed: String =
+    s"RST(${Http2StreamClosedException.errorToString(errorCode)})"
+
+  protected def copyWithFlags(flags: Long): RstException =
+    new RstException(errorCode, streamId, remoteAddress, flags)
 }

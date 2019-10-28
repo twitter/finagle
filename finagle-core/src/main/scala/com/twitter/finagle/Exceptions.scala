@@ -370,26 +370,19 @@ class ChannelClosedException private[finagle] (
  * Indicates that a given stream was closed, for instance if the stream
  * was reset by a peer or a proxy.
  */
-class StreamClosedException(
+abstract class StreamClosedException(
   remoteAddress: Option[SocketAddress],
-  streamId: String,
-  whyFailed: String,
+  streamId: Long,
   val flags: Long)
     extends ChannelException(None, remoteAddress)
     with FailureFlags[StreamClosedException]
     with NoStackTrace {
 
-  def this(remoteAddress: Option[SocketAddress], streamId: String, whyFailed: String) =
-    this(remoteAddress, streamId, whyFailed, FailureFlags.Empty)
+  def this(remoteAddress: Option[SocketAddress], streamId: Int) =
+    this(remoteAddress, streamId, FailureFlags.Empty)
 
-  def this(remoteAddress: Option[SocketAddress], streamId: String) =
-    this(remoteAddress, streamId, null)
-
-  def this(remoteAddress: SocketAddress, streamId: String) =
-    this(Option(remoteAddress), streamId, null)
-
-  protected def copyWithFlags(newFlags: Long): StreamClosedException =
-    new StreamClosedException(remoteAddress, streamId, whyFailed, newFlags)
+  /** Description of why this stream failed */
+  protected def whyFailed: String
 
   override def exceptionMessage(): String = {
     if (whyFailed == null) s"Stream: $streamId was closed at remote address: $remoteAddress"
@@ -586,7 +579,7 @@ class TooManyConcurrentRequestsException extends ApiException
 
 /**
  * Indicates that an error occurred on account of incorrect usage of a
- * [[org.jboss.netty.buffer.ChannelBuffer]].
+ * `io.netty.buffer.ByteBuf`.
  *
  * TODO: Probably remove this exception class once we migrate away from Netty
  * usage in public APIs.
