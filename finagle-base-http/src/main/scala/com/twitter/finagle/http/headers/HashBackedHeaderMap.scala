@@ -82,7 +82,7 @@ private final class HashBackedHeaderMap extends http.HeaderMap {
     }
 }
 
-private object HashBackedHeaderMap {
+private[http] object HashBackedHeaderMap {
 
   /** Construct a new `HeaderMap` with the header list
    *
