@@ -9,10 +9,7 @@ import scala.collection.mutable
 // - iteration by gaining access to `entriesIterator` (protected method).
 // - get/add functions by providing custom hashCode and equals methods for a key
 private[http] final class HeadersHash extends mutable.HashMap[String, Header.Root] {
-
-  private def hashChar(c: Char): Int =
-    if (c >= 'A' && c <= 'Z') c + 32
-    else c
+  import HeadersHash._
 
   // Adopted from Netty 3 HttpHeaders.
   override protected def elemHashCode(key: String): Int = {
@@ -68,66 +65,8 @@ private[http] final class HeadersHash extends mutable.HashMap[String, Header.Roo
     array.iterator
   }
 
-  def uniqueNamesIterator: Iterator[String] = new Iterator[String] {
-    private[this] val it = copiedEntitiesIterator
-    private[this] var current: Iterator[String] = Iterator.empty
-
-    private[this] def collectUnique(from: Header): Iterator[String] = new Iterator[String] {
-
-      // We need to keep `_next` current so that we can reliably determine `.hasNext`.
-      // That means that if `_next` is not null, it is, in fact, the next value.
-      private[this] var nextUnique = from
-
-      // We keep a set of observed names so that we don't accidentally return
-      // duplicates. Another way to have done this would be to simply add all names
-      // to a set and return an iterator over that set, but this way is more lazy.
-      private[this] var seen = Set.empty + from.name
-
-      def hasNext: Boolean = nextUnique != null
-
-      def next(): String = {
-        if (!hasNext) throw new NoSuchElementException
-
-        val result = nextUnique.name
-        // We then need to determine the next `_next` so we can
-        // again have a sane `.hasNext`.
-        prepareNext()
-        result
-      }
-
-      @tailrec
-      private[this] def prepareNext(): Unit = {
-        nextUnique = nextUnique.next
-        if (nextUnique != null) {
-          val prevSize = seen.size
-          seen = seen + nextUnique.name
-          if (seen.size == prevSize) {
-            // already observed. Try again.
-            prepareNext()
-          }
-        }
-      }
-    }
-
-    def hasNext: Boolean =
-      it.hasNext || current.hasNext
-
-    def next(): String = {
-      if (current.isEmpty) {
-        val hs = it.next()
-        if (hs.next == null) {
-          // A shortcut to see if we have only a single entry for this name
-          hs.name
-        } else {
-          // slow path: we need to make a sub-iterator
-          current = collectUnique(hs)
-          current.next()
-        }
-      } else {
-        current.next()
-      }
-    }
-  }
+  def uniqueNamesIterator: Iterator[String] =
+    Header.uniqueNames(copiedEntitiesIterator)
 
   def flattenIterator: Iterator[(String, String)] =
     flattenedNameValueIterator.map(nv => (nv.name, nv.value))
@@ -180,4 +119,10 @@ private[http] final class HeadersHash extends mutable.HashMap[String, Header.Roo
 
   def removeAll(key: String): Unit = remove(key)
 
+}
+
+private object HeadersHash {
+  final def hashChar(c: Char): Int =
+    if (c >= 'A' && c <= 'Z') c + 32
+    else c
 }
