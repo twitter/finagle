@@ -578,6 +578,28 @@ abstract class AbstractEndToEndTest
       await(client.close())
     }
 
+    test("Retryable nacks surface as finagle Failures") {
+      val svc = Service.mk[Request, Response] { _ =>
+        Future.exception(Failure.RetryableNackFailure)
+      }
+      val client = nonStreamingConnect(svc)
+      val f = intercept[Failure] { await(client(Request())) }
+      assert(!f.isFlagged(FailureFlags.Retryable))
+      assert(f.isFlagged(FailureFlags.Rejected))
+      await(client.close())
+    }
+
+    test("Non-retryable nacks surface as finagle Failures") {
+      val svc = Service.mk[Request, Response] { _ =>
+        Future.exception(Failure.NonRetryableNackFailure)
+      }
+      val client = nonStreamingConnect(svc)
+      val f = intercept[Failure] { await(client(Request())) }
+      assert(f.isFlagged(FailureFlags.NonRetryable))
+      assert(f.isFlagged(FailureFlags.Rejected))
+      await(client.close())
+    }
+
     test(implName + ": aggregates trailers when streams are aggregated") {
       val service = new HttpService {
         def apply(req: Request): Future[Response] = {

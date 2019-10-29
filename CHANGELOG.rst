@@ -14,6 +14,10 @@ Runtime Behavior Changes
 
 * finagle: Upgrade to caffeine 2.8.0 ``PHAB_ID=D384592``
 
+* finagle-http2: Nacks in the form of RST(STREAM_REFUSED | ENHANCE_YOUR_CALM) no
+  longer surface as a RstException, instead opting for a generic Failure to be
+  symmetric with the HTTP/1.x nack behavior. ``PHAB_ID=D389234``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
