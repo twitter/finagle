@@ -10,7 +10,7 @@ import org.scalatest.FunSuite
 class HttpSslTest extends FunSuite {
 
   private[this] def await[T](f: Awaitable[T]): T =
-    Await.result(f, Duration.fromSeconds(1))
+    Await.result(f, Duration.fromSeconds(5))
 
   private val service = new Service[Request, Response] {
     override def apply(request: Request): Future[Response] = {
