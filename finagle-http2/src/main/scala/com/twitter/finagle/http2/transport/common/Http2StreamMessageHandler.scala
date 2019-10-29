@@ -1,13 +1,20 @@
 package com.twitter.finagle.http2.transport.common
 
 import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.http2.RstException
 import com.twitter.logging.{HasLogLevel, Level, Logger}
+import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
-import io.netty.handler.codec.http.HttpObject
+import io.netty.handler.codec.http.{
+  DefaultFullHttpResponse,
+  FullHttpResponse,
+  HttpObject,
+  HttpResponseStatus,
+  HttpVersion
+}
 import io.netty.handler.codec.http2.{Http2Error, Http2ResetFrame, Http2WindowUpdateFrame}
 import io.netty.util.ReferenceCountUtil
-import java.net.SocketAddress
 import scala.util.control.NoStackTrace
 
 /**
@@ -107,25 +114,40 @@ private[http2] object Http2StreamMessageHandler {
       // If this is the first message, we fire our own exception down the pipeline
       // which may be a nack.
       if (!observedFirstHttpObject) {
-        ctx.fireExceptionCaught(rstToException(rst, Option(ctx.channel.remoteAddress)))
+        convertAndFireRst(ctx, rst)
       }
     }
   }
 
-  private[this] def rstToException(
-    rst: Http2ResetFrame,
-    remoteAddress: Option[SocketAddress]
-  ): RstException = {
+  private[this] def convertAndFireRst(ctx: ChannelHandlerContext, rst: Http2ResetFrame): Unit = {
     val rstCode = rst.errorCode
-    val flags = if (rstCode == Http2Error.REFUSED_STREAM.code) {
-      FailureFlags.Retryable | FailureFlags.Rejected
-    } else if (rstCode == Http2Error.ENHANCE_YOUR_CALM.code) {
-      FailureFlags.Rejected | FailureFlags.NonRetryable
-    } else {
-      FailureFlags.Empty
-    }
 
-    new RstException(rstCode, rst.stream.id, remoteAddress, flags)
+    // For nack RST frames we want to reuse the machinery in ClientNackFilter
+    // so we synthesize an appropriate 503 response and fire it down the pipeline.
+    // For all other RST frames something bad happened so we push a RstException
+    // down the exception pathway that will close the pipeline.
+    if (rstCode == Http2Error.REFUSED_STREAM.code) {
+      ctx.fireChannelRead(syntheticNackResponse(HttpNackFilter.RetryableNackHeader))
+    } else if (rstCode == Http2Error.ENHANCE_YOUR_CALM.code) {
+      ctx.fireChannelRead(syntheticNackResponse(HttpNackFilter.NonRetryableNackHeader))
+    } else {
+      // If we don't have a handle on the stream use -1 as a sentinel. In
+      // practice this should be exceedingly rare or never happen since we
+      // are part of the stream pipeline.
+      val streamId = if (rst.stream != null) rst.stream.id else -1
+      ctx.fireExceptionCaught(
+        new RstException(rstCode, streamId, Option(ctx.channel.remoteAddress), FailureFlags.Empty))
+    }
+  }
+
+  private[this] def syntheticNackResponse(nackHeader: String): FullHttpResponse = {
+    val resp =
+      new DefaultFullHttpResponse(
+        HttpVersion.HTTP_1_1,
+        HttpResponseStatus.SERVICE_UNAVAILABLE,
+        Unpooled.buffer(0))
+    resp.headers.set(nackHeader, "true")
+    resp
   }
 }
 

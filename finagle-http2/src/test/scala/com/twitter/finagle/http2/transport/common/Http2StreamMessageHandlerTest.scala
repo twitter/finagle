@@ -1,8 +1,10 @@
 package com.twitter.finagle.http2.transport.common
 
+import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.http2.RstException
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
+import io.netty.handler.codec.http.FullHttpMessage
 import io.netty.handler.codec.http2._
 import io.netty.util.ReferenceCounted
 import org.mockito.Mockito.when
@@ -71,5 +73,37 @@ class Http2StreamMessageHandlerTest
           case _ => ()
         }
     }
+  }
+
+  test(
+    "RST frames of type REFUSED_STREAM get propagated as a 503 " +
+      "with the finagle retryable nack header") {
+    val em = new EmbeddedChannel(Http2StreamMessageHandler(isServer = false))
+    em.pipeline.fireUserEventTriggered(new DefaultHttp2ResetFrame(Http2Error.REFUSED_STREAM))
+
+    val response = em.readInbound[FullHttpMessage]()
+    assert(response.headers.get(HttpNackFilter.RetryableNackHeader) == "true")
+    assert(!response.headers.contains(HttpNackFilter.NonRetryableNackHeader))
+  }
+
+  test(
+    "RST frames of type ENHANCE_YOUR_CALM get propagated as a 503 " +
+      "with the finagle non-retryable nack header") {
+    val em = new EmbeddedChannel(Http2StreamMessageHandler(isServer = false))
+    em.pipeline.fireUserEventTriggered(new DefaultHttp2ResetFrame(Http2Error.ENHANCE_YOUR_CALM))
+
+    val response = em.readInbound[FullHttpMessage]()
+    assert(response.headers.get(HttpNackFilter.NonRetryableNackHeader) == "true")
+    assert(!response.headers.contains(HttpNackFilter.RetryableNackHeader))
+  }
+
+  test(
+    "RST frames of type other than REFUSED_STREAM and ENHANCE_YOUR_CALM " +
+      "gets propagated as a RstException") {
+    val em = new EmbeddedChannel(Http2StreamMessageHandler(isServer = false))
+    em.pipeline.fireUserEventTriggered(new DefaultHttp2ResetFrame(Http2Error.CANCEL))
+
+    val ex = intercept[RstException] { em.checkException() }
+    assert(ex.errorCode == Http2Error.CANCEL.code)
   }
 }
