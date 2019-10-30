@@ -5,7 +5,7 @@ import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, StreamTermination, Writer}
+import com.twitter.io._
 import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
@@ -71,7 +71,7 @@ abstract class AbstractStreamingTest extends FunSuite {
         await(res2.liftToTry) match {
           case Return(rsp) =>
             await(req2.writer.close())
-            await(Reader.readAll(rsp.reader))
+            await(BufReader.readAll(rsp.reader))
           case Throw(e) =>
             fail(s"second request failed: $e")
         }
@@ -197,7 +197,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
-    await(Reader.readAll(res2.reader))
+    await(BufReader.readAll(res2.reader))
     await(Closable.all(server, client1, client2).close())
   }
 
@@ -250,7 +250,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
-    await(Reader.readAll(res2.reader))
+    await(BufReader.readAll(res2.reader))
     await(Closable.all(client1, client2).close())
   }
 
@@ -290,7 +290,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
-    await(Reader.readAll(res2.reader))
+    await(BufReader.readAll(res2.reader))
     await(Closable.all(server, client1, client2).close())
   }
 
@@ -333,7 +333,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
-    await(Reader.readAll(res2.reader))
+    await(BufReader.readAll(res2.reader))
     await(Closable.all(server, client1, client2).close())
   }
 
@@ -341,7 +341,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val service = const(Seq(Buf.Utf8("hello"), Buf.Empty, Buf.Utf8("world")))
     val server = startServer(service)
     val client = connect(server.boundAddress, "client")
-    val body = await(client(get("/")).flatMap(res => Reader.readAll(res.reader)))
+    val body = await(client(get("/")).flatMap(res => BufReader.readAll(res.reader)))
     assert(body == Buf.Utf8("helloworld"))
     await(Closable.all(server, client).close())
   }
@@ -357,7 +357,7 @@ abstract class AbstractStreamingTest extends FunSuite {
       _ <- req.writer.write(Buf.Utf8("world"))
       _ <- req.writer.close()
     } yield ())
-    val body = await(Reader.readAll(res.reader))
+    val body = await(BufReader.readAll(res.reader))
     assert(body == Buf.Utf8("helloworld"))
     await(Closable.all(server, client).close())
   }
