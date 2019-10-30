@@ -15,7 +15,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
+import com.twitter.io.{Buf, BufReader, Pipe, Reader, ReaderDiscardedException, Writer}
 import com.twitter.util._
 import io.netty.buffer.PooledByteBufAllocator
 import java.io.{PrintWriter, StringWriter}
@@ -678,7 +678,7 @@ abstract class AbstractEndToEndTest
 
       val client = connect(serviceWithResponseProxy)
       val response = await(client(Request()))
-      val Buf.Utf8(actual) = await(Reader.readAll(response.reader))
+      val Buf.Utf8(actual) = await(BufReader.readAll(response.reader))
       assert(actual == "goodbyeworld")
       await(client.close())
     }
@@ -723,7 +723,7 @@ abstract class AbstractEndToEndTest
 
       val client = connect(service)
       val response = await(client(Request()))
-      val Buf.Utf8(actual) = await(Reader.readAll(response.reader))
+      val Buf.Utf8(actual) = await(BufReader.readAll(response.reader))
       assert(actual == "helloworld")
       await(client.close())
     }
@@ -741,7 +741,7 @@ abstract class AbstractEndToEndTest
       req.headerMap.set("accept-encoding", "gzip")
 
       val content = await(client(req).flatMap { rep =>
-        Reader.readAll(rep.reader)
+        BufReader.readAll(rep.reader)
       })
       assert(Buf.Utf8.unapply(content).get == "raw content")
       await(client.close())
@@ -749,7 +749,7 @@ abstract class AbstractEndToEndTest
 
     test(s"$implName (streaming)" + ": symmetric reader and getContent") {
       val s = Service.mk[Request, Response] { req =>
-        Reader.readAll(req.reader).map { buf =>
+        BufReader.readAll(req.reader).map { buf =>
           assert(buf == Buf.Utf8("hello"))
           if (!req.isChunked) {
             assert(req.contentString == "hello")
@@ -765,7 +765,7 @@ abstract class AbstractEndToEndTest
       val client = connect(s)
       val res = await(client(req))
 
-      val buf = await(Reader.readAll(res.reader))
+      val buf = await(BufReader.readAll(res.reader))
       assert(buf == Buf.Utf8("hello"))
       assert(res.contentString == "hello")
     }
@@ -775,7 +775,7 @@ abstract class AbstractEndToEndTest
     ) {
       val p = new Promise[Buf]
       val s = Service.mk[Request, Response] { req =>
-        p.become(Reader.readAll(req.reader))
+        p.become(BufReader.readAll(req.reader))
         Future.value(Response())
       }
       val client = connect(s)
@@ -828,7 +828,7 @@ abstract class AbstractEndToEndTest
       await(req.writer.write(buf("hello")))
 
       val contentf = resf flatMap { res =>
-        Reader.readAll(res.reader)
+        BufReader.readAll(res.reader)
       }
       assert(await(contentf) == Buf.Utf8("hello"))
 
@@ -849,7 +849,7 @@ abstract class AbstractEndToEndTest
 
           // Make sure the body is fully read.
           // Then we hang forever.
-          val body = Reader.readAll(req.reader)
+          val body = BufReader.readAll(req.reader)
 
           Future.value(rep)
         }

@@ -5,7 +5,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Status, Version}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Annotation, BufferingTracer, Record, Trace, TraceId}
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, BufReader, Reader}
 import com.twitter.util.{Await, Future, Time}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
@@ -27,7 +27,7 @@ class PayloadSizeFilterTest extends FunSuite with Eventually {
 
   private def streamingService(sr: StatsReceiver) = filter(sr).andThen {
     Service.mk[Request, Response] { req =>
-      Reader.readAll(req.reader)
+      BufReader.readAll(req.reader)
       val reader = Reader.fromSeq(List("1234", "12345", "123456", "1234567"))
       Future.value(Response.apply(Version.Http11, Status.Ok, reader.map(Buf.Utf8(_))))
     }
@@ -103,7 +103,7 @@ class PayloadSizeFilterTest extends FunSuite with Eventually {
         assert(Trace.isActivelyTracing)
         val rep = await(svc(streamingRequest))
         assert(
-          Buf.Utf8.unapply(await(Reader.readAll(rep.reader))) == Some(
+          Buf.Utf8.unapply(await(BufReader.readAll(rep.reader))) == Some(
             "1234" + "12345" + "123456" + "1234567"))
       }
       assert(
@@ -164,7 +164,7 @@ class PayloadSizeFilterTest extends FunSuite with Eventually {
       assert(!Trace.isActivelyTracing)
       val rep = await(svc(streamingRequest))
       assert(
-        Buf.Utf8.unapply(await(Reader.readAll(rep.reader))) == Some(
+        Buf.Utf8.unapply(await(BufReader.readAll(rep.reader))) == Some(
           "1234" + "12345" + "123456" + "1234567"))
     }
     assert(tracer.toSeq == Nil)
@@ -175,11 +175,11 @@ class PayloadSizeFilterTest extends FunSuite with Eventually {
     val svc = streamingService(stats)
     val rep = await(svc(streamingRequest))
     assert(
-      Buf.Utf8.unapply(await(Reader.readAll(rep.reader))) == Some(
+      Buf.Utf8.unapply(await(BufReader.readAll(rep.reader))) == Some(
         "1234" + "12345" + "123456" + "1234567"))
     assert(stats.stat("stream", "request", "chunk_payload_bytes")() == Seq(1f, 2f, 3f))
     eventually {
-      Reader.readAll(rep.reader)
+      BufReader.readAll(rep.reader)
       assert(stats.stat("stream", "response", "chunk_payload_bytes")() == Seq(4f, 5f, 6f, 7f))
     }
   }

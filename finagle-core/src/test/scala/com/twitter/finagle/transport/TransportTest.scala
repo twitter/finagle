@@ -3,7 +3,7 @@ package com.twitter.finagle.transport
 import com.twitter.conversions.DurationOps._
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
-import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException}
+import com.twitter.io.{Buf, Pipe, BufReader, ReaderDiscardedException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -164,7 +164,7 @@ class TransportTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
         case Throw(exc) => reader.fail(exc)
         case _ =>
       }
-      val f = Reader.readAll(reader)
+      val f = BufReader.readAll(reader)
       assert(awaitResult(f) == Buf.Utf8(list.mkString))
       assert(done.isDefined)
     }
@@ -183,7 +183,7 @@ class TransportTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
         case Throw(exc) => reader.fail(exc)
         case _ =>
       }
-      val f = Reader.readAll(reader)
+      val f = BufReader.readAll(reader)
       val result = intercept[Exception] { awaitResult(f) }
       assert(result == exc)
       assert(done.isDefined)

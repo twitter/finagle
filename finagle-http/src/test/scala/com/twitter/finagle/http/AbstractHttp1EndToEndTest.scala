@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{ListeningServer, Service}
-import com.twitter.io.{Buf, Reader, ReaderDiscardedException}
+import com.twitter.io.{Buf, BufReader, ReaderDiscardedException}
 import com.twitter.util.{Future, Promise, Return, StorageUnit, Throw}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
@@ -274,7 +274,7 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
       // then
       val receivedRequest = await(receivedRequestFuture)
       assert(receivedRequest.isChunked == expectChunked)
-      val receivedBody = await(Reader.readAll(receivedRequest.reader))
+      val receivedBody = await(BufReader.readAll(receivedRequest.reader))
       assert(receivedBody == Buf.Utf8(body))
 
       await(server.close())
