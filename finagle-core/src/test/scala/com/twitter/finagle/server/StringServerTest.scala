@@ -10,7 +10,7 @@ import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.ssl.session.NullSslSessionInfo
 import com.twitter.io.TempFile
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
-import com.twitter.util.{Await, Future, Promise}
+import com.twitter.util.{Await, Awaitable, Future, Promise}
 import java.net.{InetAddress, InetSocketAddress, Socket}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -19,6 +19,8 @@ import scala.util.control.NonFatal
 class StringServerTest extends FunSuite with Eventually with IntegrationPatience {
 
   private[this] val svc = Service.mk[String, String](Future.value)
+
+  def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 
   test("StringServer notices when the client cuts the connection") {
     val p = Promise[String]()
@@ -49,7 +51,7 @@ class StringServerTest extends FunSuite with Eventually with IntegrationPatience
     client.close()
     eventually { assert(interrupted) }
 
-    Await.ready(server.close(), 2.seconds)
+    await(server.close())
   }
 
   test("exports listener type to registry") {
@@ -69,7 +71,7 @@ class StringServerTest extends FunSuite with Eventually with IntegrationPatience
 
     assert(registry.iterator.contains(expectedEntry))
 
-    Await.result(listeningServer.close(), 5.seconds)
+    await(listeningServer.close())
   }
 
   trait Ctx {
@@ -89,23 +91,23 @@ class StringServerTest extends FunSuite with Eventually with IntegrationPatience
     new Ctx {
       val initialRegistrySize = registry.iterator.size
 
-      assert(Await.result(client1("hello"), 1.second) == "hello")
+      assert(await(client1("hello")) == "hello")
       eventually {
         assert((registry.iterator.size - initialRegistrySize) == 1)
       }
 
-      assert(Await.result(client2("foo"), 1.second) == "foo")
+      assert(await(client2("foo")) == "foo")
       eventually {
         assert((registry.iterator.size - initialRegistrySize) == 2)
       }
 
-      Await.result(client1.close(), 5.seconds)
+      await(client1.close())
       eventually {
         assert((registry.iterator.size - initialRegistrySize) == 1)
       }
 
-      Await.result(server.close(), 5.seconds)
-      Await.result(client2.close(), 5.seconds)
+      await(server.close())
+      await(client2.close())
       eventually {
         assert((registry.iterator.size - initialRegistrySize) == 0)
       }
@@ -116,25 +118,25 @@ class StringServerTest extends FunSuite with Eventually with IntegrationPatience
     new Ctx {
       val initialState: Array[ClientConnection] = registry.iterator.toArray
 
-      assert(Await.result(client1("hello"), 1.second) == "hello")
+      assert(await(client1("hello")) == "hello")
       val clientConn1: ClientConnection = eventually {
         registry.iterator.find(!initialState.contains(_)).get
       }
 
-      assert(Await.result(client2("foo"), 1.second) == "foo")
+      assert(await(client2("foo")) == "foo")
       val clientConn2: ClientConnection = eventually {
         registry.iterator.find(a => !initialState.contains(a) && a != clientConn1).get
       }
 
-      Await.result(client2.close(), 5.seconds)
+      await(client2.close())
       eventually {
         val connections = registry.iterator.toArray
         assert(connections.contains(clientConn1))
         assert(!(connections.contains(clientConn2)))
       }
 
-      Await.result(server.close(), 5.seconds)
-      Await.result(client1.close(), 5.seconds)
+      await(server.close())
+      await(client1.close())
     }
   }
 
@@ -182,15 +184,15 @@ class StringServerTest extends FunSuite with Eventually with IntegrationPatience
     new SecureCtx {
       val initialState: Array[ClientConnection] = registry.iterator.toArray
 
-      assert(Await.result(client("hello"), 1.second) == "hello")
+      assert(await(client("hello")) == "hello")
       val clientConn: ClientConnection = eventually {
         registry.iterator.find(!initialState.contains(_)).get
       }
 
       assert(clientConn.sslSessionInfo != NullSslSessionInfo)
 
-      Await.result(server.close(), 5.seconds)
-      Await.result(client.close(), 5.seconds)
+      await(server.close())
+      await(client.close())
     }
   }
 }
