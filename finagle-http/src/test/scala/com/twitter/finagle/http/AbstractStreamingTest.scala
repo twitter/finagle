@@ -13,8 +13,12 @@ import org.scalatest.FunSuite
 
 abstract class AbstractStreamingTest extends FunSuite {
 
-  def configureClient: FinagleHttp.Client => FinagleHttp.Client = identity
-  def configureServer: FinagleHttp.Server => FinagleHttp.Server = identity
+  protected def configureClient(
+    client: FinagleHttp.Client,
+    singletonPool: Boolean
+  ): FinagleHttp.Client
+
+  protected def configureServer(server: FinagleHttp.Server): FinagleHttp.Server
 
   import StreamingTest._
 
@@ -510,8 +514,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     singletonPool: Boolean = false
   )(mod: Modifier
   ): Service[Request, Response] = {
-    configureClient(FinagleHttp.client).withSessionPool
-      .maxSize(if (singletonPool) 1 else Int.MaxValue)
+    configureClient(FinagleHttp.client, singletonPool)
       .withStreaming(0.bytes) // no aggregation
       .configured(ClientEndpointer.TransportModifier(mod))
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
@@ -556,13 +559,13 @@ object StreamingTest {
 
   val neverRespond = new ConstantService[Request, Response](Future.never)
 
-  def get(uri: String) = {
+  def get(uri: String): Request = {
     val req = Request(uri)
     req.setChunked(true)
     req
   }
 
-  def ok(readerIn: Reader[Buf]) = {
+  def ok(readerIn: Reader[Buf]): Response = {
     val res = Response(Version.Http11, Status.Ok, readerIn)
     res.headerMap.set("Connection", "close")
     res
