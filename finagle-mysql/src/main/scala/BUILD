@@ -7,6 +7,9 @@ scala_library(
         repo = artifactory,
     ),
     dependencies = [
+        "3rdparty/jvm/com/fasterxml/jackson/core:jackson-core",
+        "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
+        "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
         "finagle/finagle-core/src/main/scala",

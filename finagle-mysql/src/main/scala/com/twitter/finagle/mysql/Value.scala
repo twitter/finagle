@@ -1,10 +1,11 @@
 package com.twitter.finagle.mysql
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.twitter.finagle.mysql.transport.MysqlBuf
 import com.twitter.util.TwitterDateFormat
 import java.sql.{Date, Timestamp}
 import java.text.ParsePosition
-import java.util.logging.Logger
 import java.util.{Calendar, TimeZone}
 
 /**
@@ -103,7 +104,6 @@ object TimestampValue
       TimeZone.getTimeZone("UTC"),
       TimeZone.getTimeZone("UTC")
     ) {
-  private[this] val log = Logger.getLogger("finagle-mysql")
 
   private[mysql] def isTimestamp(value: Value): Boolean =
     value match {
@@ -325,5 +325,16 @@ object BigDecimalValue extends Injectable[BigDecimal] with Extractable[BigDecima
     case RawValue(Type.NewDecimal, MysqlCharset.Binary, _, bytes) =>
       Some(BigDecimal(new String(bytes, MysqlCharset(MysqlCharset.Binary))))
     case _ => None
+  }
+}
+
+object JsonValue {
+  type Serializer = ObjectMapper with ScalaObjectMapper
+
+  private[mysql] def fromValue(value: Value): Option[Array[Byte]] = {
+    value match {
+      case RawValue(Type.Json, _, _, bytes) => Some(bytes)
+      case _ => None
+    }
   }
 }

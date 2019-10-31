@@ -2,6 +2,7 @@ package com.twitter.finagle.mysql
 
 import java.sql.Timestamp
 import java.util.TimeZone
+import scala.util.control.NonFatal
 
 /**
  * A `Row` allows you to extract [[Value]]'s from a MySQL row.
@@ -102,6 +103,9 @@ trait Row {
 
   private[this] def unsupportedValue(columnName: String, v: Value): Nothing =
     throw new UnsupportedTypeException(columnName, v)
+
+  private[this] def invalidJsonValue(columnName: String, reason: Throwable): Nothing =
+    throw new ValueSerializationException(columnName = columnName, message = reason.getMessage)
 
   private[this] def columnNotFound(columnName: String): Nothing =
     throw new ColumnNotFoundException(columnName)
@@ -683,6 +687,73 @@ trait Row {
   def getJavaSqlDate(columnName: String): Option[java.sql.Date] =
     Option(javaSqlDateOrNull(columnName))
 
+  /**
+   * Read the value of MySQL `json` column as type `T` or `null` if the SQL value is NULL.
+   *
+   * @param columnName the case sensitive name of the column.
+   * @param objMapper the `objMapper` used to parse the json column value into type `T`.
+   *
+   * @see [[getJsonAsObject]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not MySQL `json` type.
+   * @throws ValueSerializationException if the MySQL json column value cannot be serialized as `T`.
+   */
+  def jsonAsObjectOrNull[T >: Null](
+    columnName: String,
+    objMapper: JsonValue.Serializer
+  )(
+    implicit m: Manifest[T]
+  ): T = getJsonAsObject[T](columnName, objMapper).orNull
+
+  /**
+   * Read the value of MySQL `json` column as `Some(T)` or `None` if the SQL value is NULL.
+   *
+   * @param columnName the case sensitive name of the column.
+   * @param objMapper the `objMapper` used to parse the json column value into type `T`.
+   *
+   * @see [[jsonAsObjectOrNull]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not MySQL `json` type.
+   * @throws ValueSerializationException if the MySQL json column value cannot be serialized as `T`.
+   */
+  def getJsonAsObject[T](
+    columnName: String,
+    objMapper: JsonValue.Serializer
+  )(
+    implicit m: Manifest[T]
+  ): Option[T] = {
+    Option(jsonBytesOrNull(columnName)).map { bytes =>
+      try {
+        objMapper.readValue[T](bytes)
+      } catch {
+        case NonFatal(err) => invalidJsonValue(columnName, err)
+      }
+    }
+  }
+
+  /**
+   * Read the `Array[Byte]` value of MySQL `json` column or `null` if the SQL value is NULL.
+   *
+   * @param columnName the case sensitive name of the column.
+   *
+   * @see [[jsonAsObjectOrNull]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not MySQL `json` type.
+   */
+  def jsonBytesOrNull(columnName: String): Array[Byte] = {
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n =>
+        values(n) match {
+          case NullValue => null
+          case value =>
+            JsonValue.fromValue(value) match {
+              case Some(bytes) => bytes
+              case None => unsupportedValue(columnName, value)
+            }
+        }
+    }
+  }
 }
 
 private object Row {
