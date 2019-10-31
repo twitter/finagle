@@ -21,6 +21,8 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Upgrade to Netty 4.1.43.Final and netty-tcnative 2.0.26.Final. ``PHAB_ID=D389870``
+
 * finagle: Add initial support for JDK 11 compatibility. ``PHAB_ID=D365075``
 
 * finagle: Upgrade to caffeine 2.8.0 ``PHAB_ID=D384592``
