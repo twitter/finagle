@@ -1,19 +1,22 @@
 package com.twitter.finagle.thriftmux.pushsession
 
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
-import com.twitter.finagle.{Service, Stack, Status, Thrift, mux, param}
+import com.twitter.finagle.{Dtab, Path, Service, Stack, Status, Thrift, mux, param}
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.{ClientDiscardedRequestException, ServerProcessor}
 import com.twitter.finagle.stats.Verbosity
-import com.twitter.finagle.thriftmux.ThriftEmulator
+import com.twitter.finagle.thrift.thrift.RequestHeader
+import com.twitter.finagle.thrift.{ClientId, InputBuffer, RichRequestHeader}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
 import java.util
+import org.apache.thrift.protocol.TProtocolFactory
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 /**
  * Push based implementation of a standard Thrift dispatcher
@@ -88,7 +91,7 @@ private final class VanillaThriftSession(
   private[this] def safeReceive(reader: ByteReader): Unit = {
     if (state != Closed) {
       val f = Local.let(locals) {
-        val dispatch = ThriftEmulator.thriftToMux(isTTwitter, tProtocolFactory, reader.readAll())
+        val dispatch = thriftToMux(isTTwitter, tProtocolFactory, reader.readAll())
         ServerProcessor(dispatch, service)
       }
 
@@ -195,7 +198,7 @@ private final class VanillaThriftSession(
 }
 
 private object VanillaThriftSession {
-  private val log = Logger.get
+  private val log = Logger.get(classOf[VanillaThriftSession])
 
   private sealed trait State {
     final def status: Status = this match {
@@ -208,4 +211,55 @@ private object VanillaThriftSession {
   private object Running extends State
   private case class Draining(forceCloseTask: TimerTask) extends State
   private object Closed extends State
+
+  /**
+   * Returns a `Mux.Tdispatch` from a thrift dispatch message.
+   */
+  private def thriftToMux(
+    ttwitter: Boolean,
+    protocolFactory: TProtocolFactory,
+    buf: Buf
+  ): Message.Tdispatch = {
+    // It's okay to use a static tag since we serialize messages into
+    // the dispatcher so we are ensured no tag conflicts.
+    val tag = Message.Tags.MinTag
+    if (!ttwitter) {
+      Message.Tdispatch(tag, Nil, Path.empty, Dtab.empty, buf)
+    } else {
+      val header = new RequestHeader
+      val request = InputBuffer.peelMessage(
+        Buf.ByteArray.Owned.extract(buf),
+        header,
+        protocolFactory
+      )
+      val richHeader = new RichRequestHeader(header)
+      val contextBuf =
+        new mutable.ArrayBuffer[(Buf, Buf)](
+          2 + (if (header.contexts == null) 0 else header.contexts.size)
+        )
+
+      contextBuf += (Trace.TraceIdContext.marshalId -> Trace.TraceIdContext.marshal(
+        richHeader.traceId))
+
+      richHeader.clientId match {
+        case Some(clientId) =>
+          val clientIdBuf = ClientId.clientIdCtx.marshal(Some(clientId))
+          contextBuf += ClientId.clientIdCtx.marshalId -> clientIdBuf
+        case None =>
+      }
+
+      if (header.contexts != null) {
+        val iter = header.contexts.iterator()
+        while (iter.hasNext) {
+          val c = iter.next()
+          contextBuf += (
+            Buf.ByteArray.Owned(c.getKey) -> Buf.ByteArray.Owned(c.getValue)
+          )
+        }
+      }
+
+      val requestBuf = Buf.ByteArray.Owned(request)
+      Message.Tdispatch(tag, contextBuf.toSeq, richHeader.dest, richHeader.dtab, requestBuf)
+    }
+  }
 }
