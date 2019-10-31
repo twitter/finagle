@@ -31,6 +31,9 @@ Runtime Behavior Changes
   longer surface as a RstException, instead opting for a generic Failure to be
   symmetric with the HTTP/1.x nack behavior. ``PHAB_ID=D389234``
 
+* finagle-mux: The mux handshake latency stat has be changed to Debug
+  verbosity. ``PHAB_ID=D393158``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

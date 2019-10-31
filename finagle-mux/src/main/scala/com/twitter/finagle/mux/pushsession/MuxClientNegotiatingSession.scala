@@ -66,7 +66,7 @@ private[finagle] final class MuxClientNegotiatingSession(
   }
   negotiatedSession.ensure(negotiatingGauge.remove())
 
-  private[this] val muxHandshakeLatencyStat = stats.stat("handshake_latency_us")
+  private[this] val muxHandshakeLatencyStat = stats.stat(Verbosity.Debug, "handshake_latency_us")
   // note, this needs to be volatile since it's set inside the entrypoint `negotiate`
   // which is request driven.
   @volatile private var muxHandshakeStopwatch: () => Duration = null
