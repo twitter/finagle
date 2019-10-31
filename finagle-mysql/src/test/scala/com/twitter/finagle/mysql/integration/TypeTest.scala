@@ -1,5 +1,8 @@
 package com.twitter.finagle.mysql.integration
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
@@ -535,6 +538,94 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
         case Some(ShortValue(s)) => assert(s == 2013)
         case a => fail("Expected ShortValue but got %s".format(a))
       }
+    }
+  }
+}
+
+object JsonTypeTest {
+  private val JsonTestStr = """{"attribute1": "test1", "attribute2": "test2"}"""
+
+  case class TestJson(attribute1: String, attribute2: String)
+}
+
+/**
+ * JSON Data Type is supported as of MySQL 5.7.8. Ensure the correct MySQL version in
+ * order for this integration test to work.
+ */
+class JsonTypeTest extends FunSuite with IntegrationClient {
+  import JsonTypeTest._
+
+  private val mapper = new ObjectMapper with ScalaObjectMapper
+  mapper.registerModule(DefaultScalaModule)
+
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
+  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
+
+  for (c <- client) {
+    ready(
+      c.query("""CREATE TEMPORARY TABLE `jsons` (
+        `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+        `json1` json NOT NULL,
+        `json2` json NULL,
+        `varchar` varchar(10) NOT NULL,
+        PRIMARY KEY (`id`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;""")
+    )
+
+    ready(c.query(s"""INSERT INTO `jsons` (`id`, `json1`, `json2`, `varchar`)
+        VALUES (1, '$JsonTestStr', NULL, 'test value');"""))
+
+    val row = await(c.query("SELECT * FROM `jsons`") map {
+      case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
+      case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
+    })
+
+    testRow(row)
+  }
+
+  def testRow(row: Row): Unit = {
+    test("RawValue is set the correct type") {
+      row("json1") match {
+        case Some(RawValue(Type.Json, _, _, _)) => //pass
+        case other => fail(s"Expected 'JsonValue' but got $other")
+      }
+      row("json2") match {
+        case Some(NullValue) => //pass
+        case other => fail(s"Expected 'NullValue' but got $other")
+      }
+    }
+
+    test("serialize value into the requested type T") {
+      val expected = mapper.readValue[TestJson](JsonTestStr)
+      assert(expected == row.jsonAsObjectOrNull[TestJson]("json1", mapper))
+      assert(Some(expected) == row.getJsonAsObject[TestJson]("json1", mapper))
+    }
+
+    test("return raw bytes of the json column value") {
+      assert(JsonTestStr == new String(row.jsonBytesOrNull("json1")))
+    }
+
+    test("null/None if column value is NULL") {
+      assert(null == row.jsonBytesOrNull("json2"))
+      assert(null == row.jsonAsObjectOrNull[TestJson]("json2", mapper))
+      assert(None == row.getJsonAsObject[TestJson]("json2", mapper))
+    }
+
+    test("throw UnsupportedTypeException if value type is not json") {
+      intercept[UnsupportedTypeException] { row.jsonBytesOrNull("varchar") }
+      intercept[UnsupportedTypeException] { row.jsonAsObjectOrNull[TestJson]("varchar", mapper) }
+      intercept[UnsupportedTypeException] { row.getJsonAsObject[TestJson]("varchar", mapper) }
+    }
+
+    test("throw ColumnNotFoundException if value does not exist") {
+      intercept[ColumnNotFoundException] { row.jsonBytesOrNull("unknown") }
+      intercept[ColumnNotFoundException] { row.getJsonAsObject[TestJson]("unknown", mapper) }
+      intercept[ColumnNotFoundException] { row.jsonAsObjectOrNull[TestJson]("unknown", mapper) }
+    }
+
+    test("throw ValueSerializationException if unable to read json value") {
+      intercept[ValueSerializationException] { row.jsonAsObjectOrNull[String]("json1", mapper) }
+      intercept[ValueSerializationException] { row.getJsonAsObject[String]("json1", mapper) }
     }
   }
 }

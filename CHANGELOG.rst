@@ -7,6 +7,17 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-mysql: Adding native support to finagle-mysql for MySQL JSON Data Type. A client
+  can now  use `jsonAsObjectOrNull[T]` or `getJsonAsObject[T]` APIs on `c.t.f.mysql.Row` to
+  read the underlying json value as type `T` or use `jsonBytesOrNull` API to get a raw byte
+  array of the the json column value. ``PHAB_ID=D390914``
+
+* MySQL integration tests can now run on a port other than the default (3306). Add a `port`
+  property to `.finagle-mysql/integration-test.properties` to customize the value.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

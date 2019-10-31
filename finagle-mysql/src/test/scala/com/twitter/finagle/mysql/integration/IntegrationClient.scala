@@ -14,35 +14,37 @@ trait IntegrationClient extends FunSuiteLike {
   protected val maxConcurrentPreparedStatements = 10
   private val logger = Logger.getLogger("integration-client")
 
-  // Check if default mysql port is available.
-  val isPortAvailable: Boolean = try {
-    val address = InetAddress.getByName("localhost")
-    // 50 is the connection backlog, meaningless here
-    // but this is the only constructor overload that
-    // allows us to specify an address and a port.
-    val socket = new ServerSocket(3306, 50, address)
-    socket.close()
-    logger.log(Level.WARNING, "Error mysql is not running on port 3306, skipping integration test")
-    true
-  } catch {
-    case e: BindException => false
-  }
-
+  val p: Properties = new Properties
   val propFile: File = new File(
     System.getProperty("user.home") +
       "/.finagle-mysql/integration-test.properties"
   )
 
-  val p: Properties = new Properties
   val propFileExists: Boolean = try {
     val fis = new FileInputStream(propFile)
     p.load(fis)
     fis.close()
     true
   } catch {
-    case NonFatal(e) =>
+    case NonFatal(_) =>
       logger.log(Level.WARNING, "Error loading integration.properties, skipping integration test")
       false
+  }
+
+  // Check if default mysql port is available.
+  val isPortAvailable: Boolean = try {
+    val address = InetAddress.getByName("localhost")
+    // 50 is the connection backlog, meaningless here
+    // but this is the only constructor overload that
+    // allows us to specify an address and a port.
+    val socket = new ServerSocket(port, 50, address)
+    socket.close()
+    logger.log(
+      Level.WARNING,
+      s"Error mysql is not running on port $dest, skipping integration test")
+    true
+  } catch {
+    case _: BindException => false
   }
 
   // It's likely that we can run this test
@@ -64,10 +66,12 @@ trait IntegrationClient extends FunSuiteLike {
     configureClient(username, password, db)
   }
 
-  protected def dest: String = "localhost:3306"
+  protected def dest: String = s"localhost:$port"
+
+  protected def port: Int = p.getProperty("port", "3306").toInt
 
   val client: Option[Client with Transactions] = if (isAvailable) {
-    logger.log(Level.INFO, "Attempting to connect to mysqld @ localhost:3306")
+    logger.log(Level.INFO, s"Attempting to connect to mysqld @ $dest")
     Some(configureClient().newRichClient(dest))
   } else {
     None
