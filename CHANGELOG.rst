@@ -34,6 +34,9 @@ Runtime Behavior Changes
 * finagle-mux: The mux handshake latency stat has be changed to Debug
   verbosity. ``PHAB_ID=D393158``
 
+* finagle-serversets: `finagle/serverset2/stabilizer/notify_ms` histogram has been downgraded to
+  debug verbosity. ``PHAB_ID=D392265``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

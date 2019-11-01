@@ -2,7 +2,7 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.stats.{FinagleStatsReceiver, Stat}
+import com.twitter.finagle.stats.{FinagleStatsReceiver, Stat, Verbosity}
 import com.twitter.util._
 
 /**
@@ -17,8 +17,7 @@ private[serverset2] object Epoch {
   )
 
   private val notifyMs: Stat = FinagleStatsReceiver
-    .scope("serverset2", "stabilizer")
-    .stat("notify_ms")
+    .stat(Verbosity.Debug, "serverset2", "stabilizer", "notify_ms")
 
   /**
    * Create an event of epochs for the given duration.
