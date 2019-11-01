@@ -20,7 +20,7 @@ object Uri {
 /**
  * Represents an immutable URI.
  */
-final class Uri private (host: Option[String], path: String, query: Option[String]) {
+final class Uri private (host: Option[String], val path: String, query: Option[String]) {
 
   def this(host: String, path: String, query: String) =
     this(Some(host), path, Some(query))

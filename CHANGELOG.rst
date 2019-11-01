@@ -10,6 +10,10 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-base-http: The `Uri` class now provides access publicly to its
+  `path`, which is the request uri without the query parameters.
+  ``PHAB_ID=D393893``
+
 * finagle-mysql: Adding native support to finagle-mysql for MySQL JSON Data Type. A client
   can now  use `jsonAsObjectOrNull[T]` or `getJsonAsObject[T]` APIs on `c.t.f.mysql.Row` to
   read the underlying json value as type `T` or use `jsonBytesOrNull` API to get a raw byte

@@ -27,4 +27,16 @@ class UriTest extends FunSuite {
     val uri = new Uri("twitter.com", "/whatever", "foo=bar")
     assert(uri.params.toMap == Map("foo" -> "bar"))
   }
+
+  test("Provides path when no query parameters") {
+    val req = Request("/abcdef")
+    val uri = Uri.fromRequest(req)
+    assert(uri.path == "/abcdef")
+  }
+
+  test("Provides path without query parameters") {
+    val req = Request("/abc/def?ghi=jkl&mno=pqr")
+    val uri = Uri.fromRequest(req)
+    assert(uri.path == "/abc/def")
+  }
 }
