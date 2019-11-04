@@ -22,7 +22,7 @@ class MapParamMapTest extends FunSuite {
   }
 
   test("+") {
-    val paramMap = MapParamMap().setParam("a" -> "1").setParam("b" -> "2").setParam("a" -> "3")
+    val paramMap = MapParamMap() + ("a" -> "1") + ("b" -> "2") + ("a" -> "3")
     assert(paramMap.get("a") == Some("3"))
     assert(paramMap.get("b") == Some("2"))
     assert(paramMap.getAll("a").toList == List("3"))

@@ -2,7 +2,6 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.http.util.StringUtil
 import java.util.{List => JList, Map => JMap}
-import scala.collection.immutable
 import scala.collection.JavaConverters._
 
 /**
@@ -12,8 +11,7 @@ import scala.collection.JavaConverters._
  *
  * Use `getAll()` to get all values for a key.
  */
-abstract class ParamMap
-    extends ParamMapVersionSpecific with immutable.Map[String, String] {
+abstract class ParamMap extends ParamMapVersionSpecific {
 
   /**
    * Add a key/value pair to the map, returning a new map.
@@ -25,6 +23,8 @@ abstract class ParamMap
     val mapWithKey = map.updated(key, Seq(value))
     new MapParamMap(mapWithKey, isValid)
   }
+
+  override def +[V1 >: String](kv: (String, V1)): ParamMap = setParam(kv._1, kv._2)
 
   /**
    * Removes a key from this map, returning a new map.
