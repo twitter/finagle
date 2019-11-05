@@ -7,6 +7,9 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+19.11.0
+-------
+
 New Features
 ~~~~~~~~~~~~
 
@@ -21,6 +24,7 @@ New Features
 
 * MySQL integration tests can now run on a port other than the default (3306). Add a `port`
   property to `.finagle-mysql/integration-test.properties` to customize the value.
+  ``PHAB_ID=D390914``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
