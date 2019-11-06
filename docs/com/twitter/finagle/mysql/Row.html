@@ -325,6 +325,10 @@ resources for using Finagle.
                         <a href="IsolationLevel.html" title="">IsolationLevel</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="JsonValue$.html" title=""></a>
+                        <a href="JsonValue$.html" title="">JsonValue</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="LongValue.html" title=""></a>
                         <a href="LongValue.html" title="">LongValue</a>
                       </li><li class="current-entities indented4">
@@ -447,6 +451,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="trait" href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server."></a>
                         <a href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server.">Value</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ValueSerializationException.html" title="Thrown if unable to serialize a value of the column."></a>
+                        <a href="ValueSerializationException.html" title="Thrown if unable to serialize a value of the column.">ValueSerializationException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="WithSql.html" title="Contains the SQL for a Request."></a>
@@ -1125,6 +1133,23 @@ or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL 
 or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a <code>java.sql.Date</code> for the given column name,
 or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>date</code>.
 </p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="javaSqlDateOrNull(">javaSqlDateOrNull(</span></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getJsonAsObject" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getJsonAsObject[T](columnName:String,objMapper:com.twitter.finagle.mysql.JsonValue.Serializer)(implicitm:Manifest[T]):Option[T]"></a><a id="getJsonAsObject[T](String,Serializer)(Manifest[T]):Option[T]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getJsonAsObject[T](columnName:String,objMapper:com.twitter.finagle.mysql.JsonValue.Serializer)(implicitm:Manifest[T]):Option[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getJsonAsObject</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="objMapper">objMapper: <a href="JsonValue$.html#Serializer=com.fasterxml.jackson.databind.ObjectMapperwithcom.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper" class="extmbr" name="com.twitter.finagle.mysql.JsonValue.Serializer">Serializer</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="m">m: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="com.twitter.finagle.mysql.Row.getJsonAsObject.T">T</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.mysql.Row.getJsonAsObject.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Read the value of MySQL <code>json</code> column as <code>Some(T)</code> or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Read the value of MySQL <code>json</code> column as <code>Some(T)</code> or <code>None</code> if the SQL value is NULL.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd><dt class="param">objMapper</dt><dd class="cmt"><p>the <code>objMapper</code> used to parse the json column value into type <code>T</code>.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not MySQL <code>json</code> type.</p></span><span class="cmt"><p><a href="ValueSerializationException.html" class="extype" name="com.twitter.finagle.mysql.ValueSerializationException"><code>ValueSerializationException</code></a> if the MySQL json column value cannot be serialized as <code>T</code>.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#jsonAsObjectOrNull[T&gt;:Null](columnName:String,objMapper:com.twitter.finagle.mysql.JsonValue.Serializer)(implicitm:Manifest[T]):T" class="extmbr" name="com.twitter.finagle.mysql.Row#jsonAsObjectOrNull">jsonAsObjectOrNull</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Row#getLong" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getLong(columnName:String):Option[Long]"></a><a id="getLong(String):Option[Long]"></a>
       <span class="permalink">
@@ -1295,6 +1320,40 @@ or <code>0</code> if the SQL value is NULL.</p><p>This can be used for MySQL col
 or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <code>java.sql.Date</code> for the given column name,
 or <code>null</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>date</code>.
 </p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getJavaSqlDate(columnName:String):Option[java.sql.Date]" class="extmbr" name="com.twitter.finagle.mysql.Row#getJavaSqlDate">getJavaSqlDate</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#jsonAsObjectOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="jsonAsObjectOrNull[T&gt;:Null](columnName:String,objMapper:com.twitter.finagle.mysql.JsonValue.Serializer)(implicitm:Manifest[T]):T"></a><a id="jsonAsObjectOrNull[T&gt;:Null](String,Serializer)(Manifest[T]):T"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#jsonAsObjectOrNull[T&gt;:Null](columnName:String,objMapper:com.twitter.finagle.mysql.JsonValue.Serializer)(implicitm:Manifest[T]):T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">jsonAsObjectOrNull</span><span class="tparams">[<span name="T">T &gt;: <span class="extype" name="scala.Null">Null</span></span>]</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="objMapper">objMapper: <a href="JsonValue$.html#Serializer=com.fasterxml.jackson.databind.ObjectMapperwithcom.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper" class="extmbr" name="com.twitter.finagle.mysql.JsonValue.Serializer">Serializer</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="m">m: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="com.twitter.finagle.mysql.Row.jsonAsObjectOrNull.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.mysql.Row.jsonAsObjectOrNull.T">T</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Read the value of MySQL <code>json</code> column as type <code>T</code> or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Read the value of MySQL <code>json</code> column as type <code>T</code> or <code>null</code> if the SQL value is NULL.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd><dt class="param">objMapper</dt><dd class="cmt"><p>the <code>objMapper</code> used to parse the json column value into type <code>T</code>.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not MySQL <code>json</code> type.</p></span><span class="cmt"><p><a href="ValueSerializationException.html" class="extype" name="com.twitter.finagle.mysql.ValueSerializationException"><code>ValueSerializationException</code></a> if the MySQL json column value cannot be serialized as <code>T</code>.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getJsonAsObject[T](columnName:String,objMapper:com.twitter.finagle.mysql.JsonValue.Serializer)(implicitm:Manifest[T]):Option[T]" class="extmbr" name="com.twitter.finagle.mysql.Row#getJsonAsObject">getJsonAsObject</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#jsonBytesOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="jsonBytesOrNull(columnName:String):Array[Byte]"></a><a id="jsonBytesOrNull(String):Array[Byte]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#jsonBytesOrNull(columnName:String):Array[Byte]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">jsonBytesOrNull</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Read the <code>Array[Byte]</code> value of MySQL <code>json</code> column or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Read the <code>Array[Byte]</code> value of MySQL <code>json</code> column or <code>null</code> if the SQL value is NULL.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not MySQL <code>json</code> type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#jsonAsObjectOrNull[T&gt;:Null](columnName:String,objMapper:com.twitter.finagle.mysql.JsonValue.Serializer)(implicitm:Manifest[T]):T" class="extmbr" name="com.twitter.finagle.mysql.Row#jsonAsObjectOrNull">jsonAsObjectOrNull</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Row#longOrZero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="longOrZero(columnName:String):Long"></a><a id="longOrZero(String):Long"></a>
       <span class="permalink">

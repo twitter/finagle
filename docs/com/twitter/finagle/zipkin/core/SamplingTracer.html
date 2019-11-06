@@ -290,7 +290,7 @@ resources for using Finagle.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.zipkin.core.SamplingTracer#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.zipkin.core.SamplingTracer#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(underlyingTracer:com.twitter.finagle.tracing.Tracer,initialSampleRate:Float):com.twitter.finagle.zipkin.core.SamplingTracer"></a><a id="&lt;init&gt;:SamplingTracer"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/zipkin/core/SamplingTracer.html#&lt;init&gt;(underlyingTracer:com.twitter.finagle.tracing.Tracer,initialSampleRate:Float):com.twitter.finagle.zipkin.core.SamplingTracer" title="Permalink">
@@ -305,8 +305,24 @@ resources for using Finagle.
         <span class="name">SamplingTracer</span><span class="params">(<span name="underlyingTracer">underlyingTracer: <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="initialSampleRate">initialSampleRate: <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>)</span>
       </span>
       
+      
+    </li><li name="com.twitter.finagle.zipkin.core.SamplingTracer#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(underlyingTracer:com.twitter.finagle.tracing.Tracer,sampler:com.twitter.finagle.zipkin.core.Sampler):com.twitter.finagle.zipkin.core.SamplingTracer"></a><a id="&lt;init&gt;:SamplingTracer"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/SamplingTracer.html#&lt;init&gt;(underlyingTracer:com.twitter.finagle.tracing.Tracer,sampler:com.twitter.finagle.zipkin.core.Sampler):com.twitter.finagle.zipkin.core.SamplingTracer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">SamplingTracer</span><span class="params">(<span name="underlyingTracer">underlyingTracer: <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="sampler">sampler: <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></span>)</span>
+      </span>
+      
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlyingTracer</dt><dd class="cmt"><p>Underlying tracer that accumulates the traces and sends off
-         to the collector.</p></dd><dt class="param">initialSampleRate</dt><dd class="cmt"><p>Start off with this sample rate. Can be changed later.</p></dd></dl></div>
+         to the collector.</p></dd><dt class="param">sampler</dt><dd class="cmt"><p>Sampler that decides whether to sample a trace</p></dd></dl></div>
     </li></ol>
             </div>
 

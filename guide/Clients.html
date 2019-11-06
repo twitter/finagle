@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 19.10.0 documentation</title>
+    <title>Clients &#8212; Finagle 19.11.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.10.0',
+        VERSION:     '19.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.10.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.11.0 documentation" href="index.html" />
     <link rel="next" title="Threading Model" href="ThreadingModel.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -386,7 +386,7 @@ output. To override this, use the following sample.</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>Finally, clients have built-in support for <a class="reference external" href="https://zipkin.io/">Zipkin</a>.</p>
+<p>Finally, clients have built-in support for <a class="reference external" href="Tracing.html">Tracing</a>.</p>
 </div>
 <div class="section" id="retries">
 <span id="client-retries"></span><h3>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h3>
@@ -1004,8 +1004,18 @@ to decrease the request volume to those clusters with little to no effect on a
 client&#8217;s already unhealthy success rate. The filter works by keeping a moving
 average of the fraction of requests that are <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nacked</span></a>. When
 this fraction hits a given threshold, the filter will probabilistically drop
-requests in proportion to that fraction.
-The filter can be configured with the following parameters:</p>
+requests in proportion to that fraction.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+
+<span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withAdmissionControl</span><span class="o">.</span><span class="n">nackAdmissionControl</span><span class="o">(</span>
+    <span class="n">window</span> <span class="k">=</span> <span class="mf">10.</span><span class="n">minutes</span><span class="o">,</span>
+    <span class="n">nackRateThreshold</span> <span class="k">=</span> <span class="mf">0.75</span>
+  <span class="o">)</span>
+</pre></div>
+</div>
+<p>The filter can be configured with the following parameters:</p>
 <ol class="arabic simple">
 <li><code class="docutils literal"><span class="pre">window</span></code> The duration over which the average is calculated. Default is 2
 minutes.</li>
@@ -1034,6 +1044,14 @@ about avoiding cluster overload and don’t mind dropping some innocent
 requests during mild load so they choose a window of 10 seconds and a
 threshold of 0.15 (= 15%).</li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Client-side admission control may not work well with clients that only very sporadically
+send requests to their backends. In this case, the view that each client has of the state
+of the backend is reduced drastically, and its efficiency is degraded. It&#8217;s recommended to
+disable nack admission control (via <cite>withAdmissionControl.noNackAdmissionControl</cite>) for
+clients experiencing bursty and very low volume (i.e., single digit RPS) traffic.</p>
+</div>
 </div>
 <div class="section" id="response-classification">
 <span id="id30"></span><h2>Response Classification<a class="headerlink" href="#response-classification" title="Permalink to this headline">¶</a></h2>

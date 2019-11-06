@@ -968,8 +968,8 @@ generator.
                         <a href="CancelledRequestException.html" title="Indicates that a request was cancelled.">CancelledRequestException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="ChannelBufferUsageException.html" title="Indicates that an error occurred on account of incorrect usage of a org.jboss.netty.buffer.ChannelBuffer."></a>
-                        <a href="ChannelBufferUsageException.html" title="Indicates that an error occurred on account of incorrect usage of a org.jboss.netty.buffer.ChannelBuffer.">ChannelBufferUsageException</a>
+                        <a class="class" href="ChannelBufferUsageException.html" title="Indicates that an error occurred on account of incorrect usage of a io.netty.buffer.ByteBuf."></a>
+                        <a href="ChannelBufferUsageException.html" title="Indicates that an error occurred on account of incorrect usage of a io.netty.buffer.ByteBuf.">ChannelBufferUsageException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="ChannelClosedException.html" title="Indicates that a given channel was closed, for instance if the connection was reset by a peer or a proxy."></a>
@@ -1659,7 +1659,7 @@ it returns a new failure with the given flags.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="cause">cause: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="logLevel">logLevel: <span class="extype" name="com.twitter.logging.Level">Level</span> = <span class="symbol"><span class="name"><a href="../../index.html">Level.WARNING</a></span></span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">apply</span><span class="params">(<span name="cause">cause: <a href="../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="logLevel">logLevel: <a href="https://twitter.github.io/util/docs/com/twitter/logging/Level.html#com.twitter.logging.Level" class="extype" name="com.twitter.logging.Level">Level</a> = <span class="symbol"><span class="name"><a href="../../index.html">Level.WARNING</a></span></span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a new failure with the given cause and flags.</p>

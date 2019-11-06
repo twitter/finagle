@@ -651,7 +651,11 @@ filter useful:</p><p>- Owners of Service A examine their service's nack rate ove
   threshold of 0.15 (= 15%).
 </p></div><dl class="paramcmts block"><dt class="param">window</dt><dd class="cmt"><p>Duration over which to average the ratio of nackd/non-nacked
 responses.</p></dd><dt class="param">threshold</dt><dd class="cmt"><p>The upper limit of the fraction of responses which are
-nacks before the <code>NackAdmissionFilter</code> begins to drop requests.</p></dd></dl></div>
+nacks before the <code>NackAdmissionFilter</code> begins to drop requests.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Client-side admission control may not work well with clients that only very sporadically
+      send requests to their backends. In this case, the view that each client has of the state
+      of the backend is reduced drastically, and its efficiency is degraded. It's recommended
+      to disable nack admission control (via <a href="#noNackAdmissionControl:A" class="extmbr" name="com.twitter.finagle.param.ClientAdmissionControlParams#noNackAdmissionControl">noNackAdmissionControl</a>) for clients
+      experiencing bursty and very low volume (i.e., single digit RPS) traffic.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -685,7 +689,11 @@ nacks before the <code>NackAdmissionFilter</code> begins to drop requests.</p></
       
       <p class="shortcomment cmt">Disables the <code>NackAdmissionFilter</code> if backing off during overload situations
 is not desirable behavior.</p><div class="fullcomment"><div class="comment cmt"><p>Disables the <code>NackAdmissionFilter</code> if backing off during overload situations
-is not desirable behavior. The <code>NackAdmissionFilter</code> is enabled by default.
+is not desirable behavior. The <code>NackAdmissionFilter</code> is enabled by default.</p><p>Client-side admission control may not work well with clients that only very sporadically send
+requests to their backends. In this case, the view that each client has of the state of the
+backend is reduced drastically, and its efficiency is degraded. It's recommended to disable
+nack admission control for clients experiencing bursty and very low (i.e., single digit RPS)
+volume traffic.
 </p></div></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>

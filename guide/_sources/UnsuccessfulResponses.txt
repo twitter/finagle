@@ -177,7 +177,7 @@ If a custom `Throwable` is used, only its message and `FailureFlags` (if any) wi
 propagate across multiple service boundaries. Any other information,
 such as stack traces, will be discarded. Due to Finagle's asynchronous nature,
 stack traces are not particularly useful. Instead Finagle provides built-in
-support for `Zipkin`_, the distributed tracing system.
+support for distributed tracing systems.
 
 Failure Flags
 -------------
@@ -201,5 +201,3 @@ passing them through.
 .. [#standard] "Finagle client" or "Finagle server" here refers to the typical
    stack client or server that one creates by following methods outlined in the
    user's guide.
-
-.. _zipkin: https://zipkin.io

@@ -207,7 +207,7 @@ output. To override this, use the following sample.
     .withMonitor(monitor)
     .newService("twitter.com")
 
-Finally, clients have built-in support for `Zipkin <https://zipkin.io/>`_.
+Finally, clients have built-in support for `Tracing <Tracing.html>`_.
 
 .. _client_retries:
 
@@ -951,6 +951,18 @@ client's already unhealthy success rate. The filter works by keeping a moving
 average of the fraction of requests that are :ref:`nacked <glossary_nack>`. When
 this fraction hits a given threshold, the filter will probabilistically drop
 requests in proportion to that fraction.
+
+.. code-block:: scala
+
+  import com.twitter.conversions.DurationOps._
+  import com.twitter.finagle.Http
+
+  val twitter = Http.client
+    .withAdmissionControl.nackAdmissionControl(
+      window = 10.minutes,
+      nackRateThreshold = 0.75
+    )
+
 The filter can be configured with the following parameters:
 
 1. ``window`` The duration over which the average is calculated. Default is 2
@@ -982,6 +994,13 @@ filter useful:
   about avoiding cluster overload and don’t mind dropping some innocent
   requests during mild load so they choose a window of 10 seconds and a
   threshold of 0.15 (= 15%).
+
+
+.. note:: Client-side admission control may not work well with clients that only very sporadically
+          send requests to their backends. In this case, the view that each client has of the state
+          of the backend is reduced drastically, and its efficiency is degraded. It's recommended to
+          disable nack admission control (via `withAdmissionControl.noNackAdmissionControl`) for
+          clients experiencing bursty and very low volume (i.e., single digit RPS) traffic.
 
 .. _response_classification:
 
