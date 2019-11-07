@@ -25,7 +25,7 @@ private[finagle] object CookieMap {
 class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     extends CookieMapVersionSpecific(message, cookieCodec) with mutable.Map[String, Cookie]
     {
-  
+
   def this(message: Message) =
     this(message, CookieMap.cookieCodec)
 
@@ -120,7 +120,7 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     this
   }
 
-   /**
+  /**
    * Adds the given `cookie` into this map. If there are already cookies
    * with the given `name` in the map, they will be removed.
    */

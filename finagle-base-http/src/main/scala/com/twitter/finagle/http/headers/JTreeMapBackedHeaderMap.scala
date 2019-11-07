@@ -103,7 +103,6 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
     underlying.remove(key)
     this
   }
-
 }
 
 private[http] object JTreeMapBackedHeaderMap {
