@@ -92,19 +92,6 @@ You can disable this behavior by using the :API:`MaskCancelFilter <com/twitter/f
           protocols, we need to disconnect the client to signal cancellation, which in turn
           can cause undue connection churn.
 
-Why is com.twitter.common.zookeeper#server-set not found?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Some of our libraries weren't published to maven central before finagle 6.39.0. If you add
-
-.. code-block:: scala
-
-	resolvers += "twitter" at "https://maven.twttr.com"
-
-to your sbt configuration, it will be able to pick up the libraries which were
-published externally, but weren't yet published to maven central.  Note that if you use
-finagle-thrift{,mux}, you will still need it for our patched libthrift.
-
 .. _configuring_finagle6:
 
 How do I configure clients and servers with Finagle 6 APIs?
