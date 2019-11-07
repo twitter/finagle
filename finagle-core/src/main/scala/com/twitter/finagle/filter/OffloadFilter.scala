@@ -13,10 +13,10 @@ import java.util.concurrent.{ExecutorService, Executors}
  *
  * This filter can be enabled by default through the flag `com.twitter.finagle.offload.numWorkers`.
  */
-private[finagle] object OffloadFilter {
+object OffloadFilter {
 
-  val Role = Stack.Role("OffloadWorkFromIO")
-  val Description = "Offloading computations from IO threads"
+  private[this] val Role = Stack.Role("OffloadWorkFromIO")
+  private[this] val Description = "Offloading computations from IO threads"
 
   private[this] lazy val (defautPool, defautPoolStats) = {
     numWorkers.get match {
@@ -35,8 +35,8 @@ private[finagle] object OffloadFilter {
     }
   }
 
-  sealed abstract class Param
-  object Param {
+  private[finagle] sealed abstract class Param
+  private[finagle] object Param {
 
     def apply(pool: FuturePool): Param = Enabled(pool)
     def apply(executor: ExecutorService): Param = Enabled(FuturePool(executor))
@@ -48,9 +48,11 @@ private[finagle] object OffloadFilter {
       Stack.Param(defautPool.map(Enabled(_)).getOrElse(Disabled))
   }
 
-  def client[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = new Module[Req, Rep](new Client(_))
+  private[finagle] def client[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Module[Req, Rep](new Client(_))
 
-  def server[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = new Module[Req, Rep](new Server(_))
+  private[finagle] def server[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Module[Req, Rep](new Server(_))
 
   final class Client[Req, Rep](pool: FuturePool) extends SimpleFilter[Req, Rep] {
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
