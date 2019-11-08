@@ -27,7 +27,7 @@ ServerBridge
 ChannelRequestStatsHandler
 <<<<<<<<<<<<<<<<<<<<<<<<<<
 
-**connection_requests**
+**connection_requests** `verbosity:debug`
   A histogram of the number of requests received over the lifetime of a
   connection.
 
