@@ -88,12 +88,15 @@ object OffloadFilter {
       // > Kernels are crazy.
       val response = service(request)
       val shifted = Promise.interrupts[Rep](response)
-      response.respond(t => pool(shifted.update(t)))
+      response.respond(t => {
+        pool(shifted.update(t))
 
-      val tracing = Trace()
-      if (tracing.isActivelyTracing) {
-        tracing.record(offloadAnnotation)
-      }
+        val tracing = Trace()
+        if (tracing.isActivelyTracing) {
+          tracing.record(offloadAnnotation)
+        }
+      })
+
       shifted
     }
   }
