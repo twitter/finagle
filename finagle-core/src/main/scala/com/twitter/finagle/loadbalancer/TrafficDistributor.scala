@@ -3,14 +3,14 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.service.{DelayedFactory, FailingFactory, ServiceFactoryRef}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, Verbosity}
+import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver, Verbosity}
 import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.logging.Logger
 import com.twitter.util._
 import scala.util.control.NonFatal
 
 private object TrafficDistributor {
-  val log = Logger.get()
+  val log = Logger.get(classOf[TrafficDistributor[_, _]])
 
   /**
    * A [[ServiceFactory]] and its associated weight.
@@ -78,19 +78,55 @@ private object TrafficDistributor {
    */
   private class Distributor[Req, Rep](
     classes: Iterable[WeightClass[Req, Rep]],
+    busyWeightClasses: Counter,
     rng: Rng = Rng.threadLocal)
       extends ServiceFactory[Req, Rep] {
 
-    private[this] val (balancers, drv): (IndexedSeq[ServiceFactory[Req, Rep]], Drv) = {
-      val tupled = classes.map {
-        case WeightClass(b, _, weight, size) => (b, weight * size)
+    private[this] val (balancers, weights, drv): (
+      IndexedSeq[ServiceFactory[Req, Rep]],
+      IndexedSeq[Double],
+      Drv) = {
+      val wcs = classes.toIndexedSeq.sortBy(_.weight)
+      val tupled = wcs.map {
+        case WeightClass(b, _, weight, size) => (b, weight, weight * size)
       }
-      val (bs, ws) = tupled.unzip
-      (bs.toIndexedSeq, Drv.fromWeights(ws.toSeq))
+      val (bs, w, ws) = tupled.unzip3
+
+      (bs, w, Drv.fromWeights(ws))
     }
 
-    def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-      balancers(drv(rng))(conn)
+    // Ignore the weight vector and pick the next available balancer starting at `startingIndex`
+    private[this] def firstOpen(startingIndex: Int): ServiceFactory[Req, Rep] = {
+      var i = startingIndex + 1
+
+      // walk around the vector of balancers and terminate if we fully wrap around,
+      // returning the last balancer picked
+      var b = balancers(i % balancers.size)
+      while (b.status != Status.Open && i != startingIndex) {
+        i = (i + 1) % balancers.size
+
+        b = balancers(i)
+      }
+
+      b
+    }
+
+    def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+      val index = drv(rng)
+      val balancer = balancers(index)
+
+      // If we have only a single balancer, there's no other to pick from. We must use this
+      // balancer regardless of the status
+      if (balancers.size == 1 || balancer.status == Status.Open) balancer(conn)
+      else {
+        busyWeightClasses.incr()
+        log.debug(
+          s"weight class ${weights(index)}'s endpoints all Busy. "
+            + "Ignoring the weight vector and picking the next available balancer")
+
+        firstOpen(index)(conn)
+      }
+    }
 
     private[this] def endpoints: Seq[Closable] =
       classes.toSeq.map { wc =>
@@ -280,6 +316,8 @@ private class TrafficDistributor[Req, Rep](
     statsReceiver.addGauge("num_weight_classes") { numWeightClasses }
   )
 
+  private[this] val busyWeightClasses: Counter = statsReceiver.counter("busy_weight_classes")
+
   private[this] def updateGauges(classes: Iterable[WeightClass[Req, Rep]]): Unit = {
     numWeightClasses = classes.size.toFloat
     val numEndpoints = classes.map(_.size).sum
@@ -298,7 +336,7 @@ private class TrafficDistributor[Req, Rep](
   private[this] val underlying: Event[ServiceFactory[Req, Rep]] =
     weightClasses.foldLeft(init) {
       case (_, Activity.Ok(wcs)) =>
-        val dist = new Distributor(wcs, rng)
+        val dist = new Distributor(wcs, busyWeightClasses, rng)
         updateGauges(wcs)
         pending.updateIfEmpty(Return(dist))
         dist
