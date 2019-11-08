@@ -2,6 +2,7 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle._
 import com.twitter.util.Future
+import com.twitter.logging.{HasLogLevel, Level}
 import scala.util.control.NoStackTrace
 
 /**
@@ -38,9 +39,14 @@ private[finagle] object PoisonConnection {
   class PoisonedConnectionException(val flags: Long)
       extends Exception
       with FailureFlags[PoisonedConnectionException]
-      with NoStackTrace {
+      with NoStackTrace
+      with HasLogLevel {
 
-    def this() = this(FailureFlags.Rejected | FailureFlags.Retryable)
+    // This is not a retryable failure as this exception indicates a triggered
+    // session-level circuit breaker
+    def this() = this(FailureFlags.Rejected | FailureFlags.NonRetryable)
+
+    val logLevel: Level = Level.DEBUG
 
     protected def copyWithFlags(flags: Long): PoisonedConnectionException =
       new PoisonedConnectionException(flags)
