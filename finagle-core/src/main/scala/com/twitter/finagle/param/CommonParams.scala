@@ -101,6 +101,11 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
   /**
    * Configures this server or client with given [[tracing.Tracer]]
    * (default: [[com.twitter.finagle.tracing.DefaultTracer]]).
+   *
+   * @note if you supply [[com.twitter.finagle.tracing.NullTracer]], no trace
+   * information will be written, but this does not disable Finagle from
+   * propagating trace information.  Instead, if traces are being aggregated
+   * across your fleet, it will orphan subsequent spans.
    */
   def withTracer(tracer: tracing.Tracer): A =
     self.configured(Tracer(tracer))

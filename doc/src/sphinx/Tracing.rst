@@ -30,6 +30,8 @@ Furthermore, tracers can be overridden in code, they may be specified when creat
       SystemOutTracer
     )))
 
+We also supply a `NullTracer` which will not write trace messages anywhere.  However, even if `NullTracer` is passed to `withTracer`, Finagle clients will continue to propagate trace information.  This can have the surprising side effect of orphaning traces if the traces are being aggregated in a distributed tracing service like Zipkin, so we generally discourage people from using `NullTracer` in production.
+
 Information about active traces is located within the Finagle `Context <Context>`_. The Trace API is a convenient way of accessing the currently active traces for a request and provides the ability to manipulate them with operations such as adding custom annotations.
 
 .. code-block:: scala
