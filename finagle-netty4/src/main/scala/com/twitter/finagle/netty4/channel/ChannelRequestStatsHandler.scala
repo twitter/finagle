@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.netty4.channel.ChannelRequestStatsHandler.SharedChannelRequestStats
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import io.netty.channel._
 
 private object ChannelRequestStatsHandler {
@@ -11,7 +11,7 @@ private object ChannelRequestStatsHandler {
    * or server.
    */
   class SharedChannelRequestStats(statsReceiver: StatsReceiver) {
-    val requestCount = statsReceiver.stat("connection_requests")
+    val requestCount = statsReceiver.stat(Verbosity.Debug, "connection_requests")
   }
 }
 
