@@ -116,9 +116,15 @@ classifiers can be written in terms of the Scrooge generated request type,
 .. code-block:: none
 
   exception NotFoundException { 1: string reason }
+  exception InvalidQueryException {
+    1: i32 errorCode
+  }
 
   service SocialGraph {
-    i32 follow(1: i64 follower, 2: i64 followee) throws (1: NotFoundException ex)
+    i32 follow(1: i64 follower, 2: i64 followee) throws (
+      1: NotFoundException ex1,
+      2: InvalidQueryException ex2
+    )
   }
 
 One possible classifier would be:
@@ -160,9 +166,9 @@ Classification to deal with wire level response concerns. Lastly (#4), the deser
 Other Details
 ~~~~~~~~~~~~~
 
-If you have a response classifier that categorizes ``Returns`` as
-failures, note that they will be counted in the ``StatsFilter``
-as a ``com.twitter.finagle.service.ResponseClassificationSyntheticException`` in the
-``StatsReceiver`` to indicate when this happens. See the
+If you have a response classifier that categorizes non-Exceptions as failures, this includes
+Thrift Responses (#2) or embedded Thrift Exceptions (#1), note that they will be counted in
+the ``StatsFilter`` as a ``com.twitter.finagle.service.ResponseClassificationSyntheticException``
+in the ``StatsReceiver`` to indicate when this happens. See the
 `FAQ <https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception>`_
 for more details.
