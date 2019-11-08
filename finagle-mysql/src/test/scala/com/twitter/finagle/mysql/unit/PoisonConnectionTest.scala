@@ -2,6 +2,7 @@ package com.twitter.finagle.mysql.unit
 
 import com.twitter.finagle.mysql.PoisonConnection.PoisonedConnectionException
 import com.twitter.finagle.{Service, Status}
+import com.twitter.finagle.service.{RetryPolicy, RequeueFilter}
 import com.twitter.finagle.mysql.{CloseRequest, PoisonConnectionRequest, Request, Result}
 import com.twitter.util.{Future, Promise, Throw, Time}
 import org.mockito.Matchers._
@@ -40,5 +41,15 @@ class PoisonableServiceFactoryTest extends FunSuite with MockitoSugar {
       case Some(Throw(_: PoisonedConnectionException)) => // ok
       case other => fail(s"Unexpected result: $other")
     }
+  }
+
+  test("PoisonConnectionException is not retryable or requeueable") {
+    val poisonExc = new PoisonedConnectionException
+
+    val retryableExc = RetryPolicy.RetryableWriteException.unapply(poisonExc)
+    assert(retryableExc.isEmpty)
+
+    val requeueableExc = RequeueFilter.Requeueable.unapply(poisonExc)
+    assert(requeueableExc.isEmpty)
   }
 }
