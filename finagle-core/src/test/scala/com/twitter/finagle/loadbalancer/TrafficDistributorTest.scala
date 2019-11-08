@@ -33,7 +33,7 @@ private object TrafficDistributorTest {
         WeightedAddress(WeightedTestAddr(i, w), w)
     }
 
-  val busyWeight = 2.0
+  val busyWeight = 2.2
   case class AddressFactory(address: Address) extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection) = Future.value(Service.mk(i => Future.value(i)))
     def close(deadline: Time): Future[Unit] = Future.Done
@@ -52,6 +52,7 @@ private object TrafficDistributorTest {
     var offeredLoad = 0
     var balancerIsClosed = false
     var numOfEndpoints = 0
+    var queriedStatus = 0
     def apply(conn: ClientConnection): Future[Service[Int, Int]] = {
       offeredLoad += 1
       // new hotness in load balancing
@@ -63,8 +64,17 @@ private object TrafficDistributorTest {
     def close(deadline: Time): Future[Unit] = {
       balancerIsClosed = true
       onClose()
+
       Future.Done
     }
+
+    override def status: Status = {
+      queriedStatus += 1
+
+      val addressStatus: AddressFactory => Status = a => a.status
+      Status.bestOf(endpoints.sample().toSeq, addressStatus)
+    }
+
     override def toString: String = s"Balancer($endpoints)"
   }
 
@@ -170,6 +180,41 @@ private object TrafficDistributorTest {
 
 class TrafficDistributorTest extends FunSuite {
   import TrafficDistributorTest._
+
+  test("repicks against a busy balancer")(new Ctx {
+    // weight 2.0 is the "Busy" Balancer
+    val init: Set[Address] = Seq((1.0, 10), (busyWeight, 10))
+      .flatMap(weightClass.tupled).toSet
+    val dest = Var(Activity.Ok(init))
+    val sr = new InMemoryStatsReceiver
+    val dist = newDist(dest, statsReceiver = sr)
+
+    val R = 50
+    for (_ <- 0 until R) dist()
+    assert(numWeightClasses(sr) == 2)
+
+    val busyBalancer = balancers.find(_.status == Status.Busy).get
+    assert(busyBalancer.offeredLoad == 0)
+    assert(busyBalancer.queriedStatus > 0)
+
+    // lazy endpoint construction
+    assert(busyBalancer.numOfEndpoints == 0)
+
+    // the next available balancer should have received all the traffic
+    val openBalancer = balancers.find(_.status == Status.Open).get
+    assert(openBalancer.offeredLoad == R)
+  })
+
+  test("terminates repicking strategy if all balancers are busy")(new Ctx {
+    val init: Set[Address] = Seq((busyWeight, 2))
+      .flatMap(weightClass.tupled).toSet
+    val dest = Var(Activity.Ok(init))
+    val dist = newDist(dest)
+
+    val R = 10
+    for (_ <- 0 until R) dist()
+    assert(balancers.head.offeredLoad == R)
+  })
 
   test("distributes when weights are uniform")(new Ctx {
     val init: Set[Address] = weightClass(5.0, 100)
@@ -559,5 +604,4 @@ class TrafficDistributorTest extends FunSuite {
     assert(newBalancerCalls == 4)
     assert(closeBalancerCalls == 3)
   })
-
 }
