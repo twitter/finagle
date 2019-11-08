@@ -3,6 +3,7 @@ package com.twitter.finagle.filter
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.offload.numWorkers
 import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.finagle.tracing.{Annotation, Trace}
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.util.{Future, FuturePool, Promise}
 import java.util.concurrent.{ExecutorService, Executors}
@@ -55,6 +56,12 @@ object OffloadFilter {
     new Module[Req, Rep](new Server(_))
 
   final class Client[Req, Rep](pool: FuturePool) extends SimpleFilter[Req, Rep] {
+
+    // Has to be lazy to see the number of workers in the pool at the point at which the annotation
+    // is generated.
+    private lazy val offloadAnnotation = Annotation.Message(
+      s"clnt/OffloadFilter: Offloaded continuation from IO threads to pool with ${pool.poolSize} workers")
+
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
       // What we're trying to achieve is to ensure all continuations spawn out of a future returned
       // from this method are run outside of the IO thread (in the given FuturePool).
@@ -83,19 +90,37 @@ object OffloadFilter {
       val shifted = Promise.interrupts[Rep](response)
       response.respond(t => pool(shifted.update(t)))
 
+      val tracing = Trace()
+      if (tracing.isActivelyTracing) {
+        tracing.record(offloadAnnotation)
+      }
       shifted
     }
   }
 
   final class Server[Req, Rep](pool: FuturePool) extends SimpleFilter[Req, Rep] {
-    def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
+
+    // Has to be lazy to see the number of workers in the pool at the point at which the annotation
+    // is generated.
+    private lazy val offloadAnnotation = Annotation.Message(
+      s"srv/OffloadFilter: Offloaded continuation from IO threads to pool with ${pool.poolSize} workers")
+
+    def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+
       // Offloading on the server-side is fairly straightforward: it comes down to running
       // service.apply (users' work) outside of the IO thread.
       //
       // Unfortunately, there is no (easy) way to bounce back to the IO thread as we return into
       // the stack. It's more or less fine as we will switch back to IO as we enter the pipeline
       // (Netty land).
-      pool(service(request)).flatten
+      val res = pool(service(request)).flatten
+
+      val tracing = Trace()
+      if (tracing.isActivelyTracing) {
+        tracing.record(offloadAnnotation)
+      }
+      res
+    }
   }
 
   private final class Module[Req, Rep](makeFilter: FuturePool => SimpleFilter[Req, Rep])
