@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.http.util.StringUtil
 import java.util.{List => JList, Map => JMap}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Request parameter map.
@@ -17,20 +17,24 @@ abstract class ParamMap extends ParamMapVersionSpecific {
    * Add a key/value pair to the map, returning a new map.
    * Overwrites all values if the key exists.
    */
-  def setParam[B >: String](kv: (String, B)): ParamMap = {
+  protected def setParam[B >: String](kv: (String, B)): ParamMap = {
     val (key, value) = (kv._1, kv._2.toString)
     val map = MapParamMap.tuplesToMultiMap(iterator.toSeq)
     val mapWithKey = map.updated(key, Seq(value))
     new MapParamMap(mapWithKey, isValid)
   }
 
+  /**
+   * Add a key/value pair to the map, returning a new map.
+   * Overwrites all values if the key exists.
+   */
   override def +[V1 >: String](kv: (String, V1)): ParamMap = setParam(kv._1, kv._2)
 
   /**
    * Removes a key from this map, returning a new map.
    * All values for the key are removed.
    */
-  def clearParam(name: String): ParamMap = {
+  protected def clearParam(name: String): ParamMap = {
     val map = MapParamMap.tuplesToMultiMap(iterator.toSeq)
     new MapParamMap(map - name, isValid)
   }
@@ -159,7 +163,7 @@ object EmptyParamMap extends ParamMap {
   def get(name: String): Option[String] = None
   def getAll(name: String): Iterable[String] = Nil
   def iterator: Iterator[(String, String)] = Iterator.empty
-  override def clearParam(name: String): ParamMap = this
+  protected override def clearParam(name: String): ParamMap = this
   override def +[B >: String](kv: (String, B)): ParamMap = MapParamMap(kv._1 -> kv._2.toString)
 }
 

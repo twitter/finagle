@@ -23,7 +23,7 @@ private[finagle] object CookieMap {
  * the ''message''
  */
 class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
-    extends CookieMapVersionSpecific(message, cookieCodec) with mutable.Map[String, Cookie]
+    extends CookieMapVersionSpecific(message, cookieCodec)
     {
 
   def this(message: Message) =
@@ -113,7 +113,7 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
    * and Cookie` itself) into this map. If there are already cookies
    * with the given `name` in the map, they will be removed.
    */
-  def addCookie(cookie: (String, Cookie)): this.type = {
+  protected def addCookie(cookie: (String, Cookie)): this.type = {
     val (n, c) = cookie
     setNoRewrite(n, c)
     rewriteCookieHeaders()
@@ -128,13 +128,13 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     this += ((cookie.name, cookie))
   }
 
-  def addCookies(cookies: scala.collection.TraversableOnce[(String, Cookie)]): this.type = {
+  protected def addCookies(cookies: scala.collection.TraversableOnce[(String, Cookie)]): this.type = {
     cookies.foreach { case (n, c) => setNoRewrite(n, c) }
     rewriteCookieHeaders()
     this
   }
 
-  def removeCookies(xs: TraversableOnce[String]): this.type = {
+  protected def removeCookies(xs: TraversableOnce[String]): this.type = {
     xs.foreach { n =>
       underlying -= n
     }
@@ -145,7 +145,7 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   /**
    * Deletes all cookies with the given `name` from this map.
    */
-  def removeCookie(name: String): this.type = {
+  protected def removeCookie(name: String): this.type = {
     underlying -= name
     rewriteCookieHeaders()
     this
