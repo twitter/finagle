@@ -22,7 +22,10 @@ package object service {
    * HTTP classification tools.
    *
    * @note Java does not understand the type alias and must be used as
-   * `PartialFunction` in Java.
+   * `PartialFunction` in Java. Constructing a custom ResponseClassifier in Java
+   * is achievable by implementing AbstractPartialFunction, see
+   * [[com.twitter.finagle.service.ResponseClassifierCompilationTest#testCustomResponseClassifier()]]
+   * for examples.
    *
    * @note Finagle's default classifier is
    * [[com.twitter.finagle.service.ResponseClassifier.Default]]
