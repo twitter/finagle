@@ -213,3 +213,14 @@ Timeout
 finagle.timeout (`TimeoutFilter`)
 `````````````````````````````````
 Record when a timeout occurs
+
+Offload
+~~~~~~~
+
+clnt/OffloadFilter: Offloaded continuation from IO threads to pool with ${num} workers (`OffloadFilter`)
+````````````````````````````````````````````````````````````````````````````````````````````````````````
+When a request is offloaded by a client to a different pool, contains information about the size of the pool.
+
+srv/OffloadFilter: Offloaded continuation from IO threads to pool with ${size} workers (`OffloadFilter`)
+````````````````````````````````````````````````````````````````````````````````````````````````````````
+When a request is offloaded by a server to a different pool, contains information about the size of the pool.
