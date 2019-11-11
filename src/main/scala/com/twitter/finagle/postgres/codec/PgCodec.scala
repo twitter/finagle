@@ -21,7 +21,6 @@ import io.netty.handler.ssl.{SslContext, SslHandler}
 import io.netty.util.concurrent._
 import scala.collection.mutable
 
-import com.sun.corba.se.impl.protocol.RequestCanceledException
 import com.twitter.finagle.transport.Transport
 
 /*
@@ -85,7 +84,7 @@ class AuthenticationProxy(
     if (useSsl && (optionalSslResponse contains SslNotSupportedResponse)) {
       throw Errors.server("SSL requested by server doesn't support it")
     } else {
-      Future(Unit)
+      Future({})
     }
   }
 
@@ -111,7 +110,7 @@ class AuthenticationProxy(
     response match {
       case AuthenticatedResponse(statuses, processId, secretKey) =>
         logger.ifDebug("Authenticated: %d %d\n%s".format(processId, secretKey, statuses))
-        Future(Unit)
+        Future({})
     }
   }
 }

@@ -186,7 +186,9 @@ object ValueEncoder extends LowPriorityEncoder {
     (m, c) => Option(m).map(HStores.encodeHStoreBinary(_, c))
   )
   implicit val hstoreNoNulls: ValueEncoder[Map[String, String]] = hstore.contraMap {
-    m: Map[String, String] => m.mapValues(Option(_))
+    m: Map[String, String] => m.map {
+      case (k, v) => (k, Option(v))
+    }
   }
 
   implicit val jsonb: ValueEncoder[JSONB] = instance[JSONB](

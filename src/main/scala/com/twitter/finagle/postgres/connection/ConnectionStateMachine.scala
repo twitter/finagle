@@ -2,7 +2,7 @@ package com.twitter.finagle.postgres.connection
 
 import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.postgres.codec.Errors
-import com.twitter.finagle.postgres.messages._
+import com.twitter.finagle.postgres.messages.{Terminated => _, _}
 import com.twitter.logging.Logger
 import com.twitter.util.{Promise, Return, Throw}
 

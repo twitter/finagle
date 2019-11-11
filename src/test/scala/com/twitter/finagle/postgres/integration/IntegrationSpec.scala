@@ -217,8 +217,8 @@ class IntegrationSpec extends Spec {
 
         val preparedQuery = client.prepareAndQuery(
           "SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2".format(IntegrationSpec.pgTestTable),
-          "hello",
-          true)(identity)
+          Param("hello"),
+          Param(true))(identity)
 
         val resultRows = Await.result(
           preparedQuery,
@@ -240,7 +240,7 @@ class IntegrationSpec extends Spec {
 
         val preparedQuery = client.prepareAndExecute(
           "UPDATE %s SET str_field = $1 where int_field = 4567".format(IntegrationSpec.pgTestTable),
-          "hello_updated"
+          Param("hello_updated")
         )
     
         val numRows = Await.result(preparedQuery)
@@ -300,9 +300,9 @@ class IntegrationSpec extends Spec {
 
         val preparedQuery = client.prepareAndQuery(
           "UPDATE %s SET str_field = $1 where int_field = 4567 RETURNING *".format(IntegrationSpec.pgTestTable),
-          "hello_updated"
+          Param("hello_updated")
         )(identity)
-    
+
         val resultRows = Await.result(preparedQuery)
 
         resultRows.size must equal(1)
@@ -336,8 +336,8 @@ class IntegrationSpec extends Spec {
         insertSampleData(client)
         val preparedQuery = client.prepareAndQuery(
           "UPDATE %s SET str_field = $1 where str_field = $2 RETURNING *".format(IntegrationSpec.pgTestTable),
-          "hello_updated",
-          "xxxx"
+          Param("hello_updated"),
+          Param("xxxx")
         )(identity)
     
         val resultRows = Await.result(preparedQuery)
@@ -353,7 +353,7 @@ class IntegrationSpec extends Spec {
 
         val preparedQuery = client.prepareAndQuery(
           "DELETE FROM %s WHERE str_field=$1".format(IntegrationSpec.pgTestTable),
-          "xxxx"
+          Param("xxxx")
         )(identity)
     
         val resultRows = Await.result(preparedQuery)
@@ -402,7 +402,7 @@ class IntegrationSpec extends Spec {
 
           val preparedQuery = client.prepareAndQuery(
             "SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2".format(IntegrationSpec.pgTestTable),
-            "hello"
+            Param("hello")
           )(identity)
 
           a [ServerError] must be thrownBy {

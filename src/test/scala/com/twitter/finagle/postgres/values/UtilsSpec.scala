@@ -2,10 +2,10 @@ package com.twitter.finagle.postgres.values
 
 import com.twitter.finagle.postgres.Spec
 import io.netty.buffer.{ByteBuf, Unpooled}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import com.twitter.finagle.postgres.Generators._
 
-class UtilsSpec extends Spec with GeneratorDrivenPropertyChecks {
+class UtilsSpec extends Spec with ScalaCheckDrivenPropertyChecks {
   "Buffers.readCString" should {
     def newBuffer(): (ByteBuf, String, String) = {
       val str = "Some string"

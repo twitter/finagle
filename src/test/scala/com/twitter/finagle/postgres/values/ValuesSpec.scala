@@ -18,10 +18,10 @@ import io.netty.buffer.Unpooled
 import org.scalacheck.{Arbitrary, Gen}
 import Arbitrary.arbitrary
 import com.twitter.concurrent.AsyncStream
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import io.circe.testing.instances.arbitraryJson
 
-class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
+class ValuesSpec extends Spec with ScalaCheckDrivenPropertyChecks {
 
   def test[T : Arbitrary](
     decoder: ValueDecoder[T],
