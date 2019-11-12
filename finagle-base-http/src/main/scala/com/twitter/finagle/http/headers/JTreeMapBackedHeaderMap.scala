@@ -2,7 +2,6 @@ package com.twitter.finagle.http.headers
 
 import com.twitter.finagle.http.HeaderMap
 import scala.annotation.tailrec
-import java.util.function.BiConsumer
 
 /**
  * Mutable, thread-safe [[HeaderMap]] implementation, backed by
@@ -21,15 +20,16 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
   private[this] val underlying: java.util.TreeMap[String, Header.Root] =
     new java.util.TreeMap[String, Header.Root](JTreeMapBackedHeaderMap.sharedComparator)
 
-  private def foreachConsumer[U](f: ((String, String)) => U): BiConsumer[String, Header.Root] =
-    new BiConsumer[String, Header.Root]() {
-      def accept(key: String, header: Header.Root): Unit = header.iterator.foreach(
-        nv => f((nv.name, nv.value))
-      )
+  override def foreach[U](f: ((String, String)) => U): Unit = {
+    // We need to copy to a new iterator before calling the
+    // user defined functions `f` since they can add/remove
+    // to the header map which would invalidate the iterator
+    // on the underlying TreeMap and cause a
+    // ConcurrentModificationException.
+    val iter = copyHeaders
+    iter.foreach { root =>
+      root.iterator.foreach(nv => f((nv.name, nv.value)))
     }
-
-  override def foreach[U](f: ((String, String)) => U): Unit = underlying.synchronized {
-    underlying.forEach(foreachConsumer(f))
   }
 
   // ---- HeaderMap -----
