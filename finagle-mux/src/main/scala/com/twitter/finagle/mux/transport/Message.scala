@@ -6,7 +6,7 @@ import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util.{Duration, Future, Time}
 import java.nio.charset.{StandardCharsets => Charsets}
-import scala.collection.compat.immutable.ArraySeq
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Indicates that encoding or decoding of a Mux message failed.
@@ -140,13 +140,13 @@ private[finagle] object Message {
 
     def decode(br: ByteReader): (Short, Seq[(Buf, Buf)]) = {
       val version = br.readShortBE()
-      val headers = ArraySeq.newBuilder[(Buf, Buf)]
+      val headers = new ArrayBuffer[(Buf, Buf)]
       while (br.remaining > 0) {
         val k = br.readBytes(br.readIntBE())
         val v = br.readBytes(br.readIntBE())
         headers += (k -> v)
       }
-      (version.toShort, headers.result())
+      (version.toShort, headers.toSeq)
     }
   }
 

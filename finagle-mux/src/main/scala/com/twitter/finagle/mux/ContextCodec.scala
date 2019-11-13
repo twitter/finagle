@@ -2,7 +2,6 @@ package com.twitter.finagle.mux
 
 import com.twitter.io.{Buf, ByteReader, ByteWriter}
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.compat.immutable.ArraySeq
 
 /**
  * Encoder and decoder for mux contexts
@@ -42,7 +41,7 @@ private[mux] object ContextCodec {
     // We don't know the precise size and we don't try to guess.
     val acc = new ArrayBuffer[(Buf, Buf)]()
     decodeToBuffer(br, Int.MaxValue, acc)
-    ArraySeq.unsafeWrapArray(acc.toArray)
+    acc.toSeq
   }
 
   /**
@@ -54,7 +53,7 @@ private[mux] object ContextCodec {
   def decode(br: ByteReader, count: Int): Seq[(Buf, Buf)] = {
     val acc = new ArrayBuffer[(Buf, Buf)](count)
     decodeToBuffer(br, count, acc)
-    ArraySeq.unsafeWrapArray(acc.toArray)
+    acc.toSeq
   }
 
   private def decodeToBuffer(
