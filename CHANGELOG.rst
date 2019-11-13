@@ -47,7 +47,6 @@ Runtime Behavior Changes
 
 * finagle-serversets: `finagle/serverset2/stabilizer/notify_ms` histogram has been downgraded to
   debug verbosity. ``PHAB_ID=D392265``
->>>>>>> master
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
