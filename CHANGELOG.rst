@@ -7,8 +7,17 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 * finagle-netty4: Change the 'connection_requests' metric to debug verbosity.
   ``PHAB_ID=D391289``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: The `RetryPolicy` companion object is no longer a `JavaSingleton`.
+  ``PHAB_ID=D399947``
 
 19.11.0
 -------

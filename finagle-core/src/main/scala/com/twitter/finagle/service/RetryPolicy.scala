@@ -8,14 +8,7 @@ import com.twitter.finagle.{
   TimeoutException,
   WriteException
 }
-import com.twitter.util.{
-  Duration,
-  JavaSingleton,
-  Return,
-  Throw,
-  Try,
-  TimeoutException => UtilTimeoutException
-}
+import com.twitter.util.{Duration, Return, Throw, Try, TimeoutException => UtilTimeoutException}
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConverters._
@@ -155,7 +148,7 @@ abstract class SimpleRetryPolicy[A](i: Int)
   final val never = Duration.Top
 }
 
-object RetryPolicy extends JavaSingleton {
+object RetryPolicy {
 
   /**
    * An extractor for exceptions which are known to be safe to retry.
