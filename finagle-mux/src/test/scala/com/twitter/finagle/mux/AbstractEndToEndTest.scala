@@ -35,6 +35,7 @@ abstract class AbstractEndToEndTest
   def implName: String
   def clientImpl(): ClientT
   def serverImpl(): ServerT
+  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 
   var saveBase: Dtab = Dtab.empty
 
@@ -80,8 +81,8 @@ abstract class AbstractEndToEndTest
           str.replace("\r", "") == "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
       }
     }
-    Await.result(server.close(), 5.seconds)
-    Await.result(client.close(), 5.seconds)
+    await(server.close())
+    await(client.close())
   }
 
   test(s"$implName: (no) Dtab propagation") {
@@ -98,8 +99,8 @@ abstract class AbstractEndToEndTest
 
     assert(br.remaining == 4)
     assert(br.readIntBE() == 0)
-    Await.result(server.close(), 5.seconds)
-    Await.result(client.close(), 5.seconds)
+    await(server.close())
+    await(client.close())
   }
 
   def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]): Unit = {
@@ -196,7 +197,7 @@ abstract class AbstractEndToEndTest
 
     def check(f: Failure): Unit = {
       respondWith = f
-      Await.result(client(Request.empty).liftToTry, 5.seconds) match {
+      await(client(Request.empty).liftToTry) match {
         case Throw(rep: Failure) =>
           assert(rep.isFlagged(f.flags))
         case x =>
@@ -259,17 +260,17 @@ abstract class AbstractEndToEndTest
       var server = serverImpl.serve(s"localhost:$port", echo)
 
       // Activate the client; this establishes a session.
-      Await.result(client(req), 5.seconds)
+      await(client(req))
 
       // This will stop listening, drain, and then close the session.
       Await.result(server.close(), 30.seconds)
 
       // Thus the next request should fail at session establishment.
-      intercept[Throwable] { Await.result(client(req), 5.seconds) }
+      intercept[Throwable] { await(client(req)) }
 
       // And eventually we recover.
       server = serverImpl.serve(s"localhost:$port", echo)
-      eventually { Await.result(client(req), 5.seconds) }
+      eventually { await(client(req)) }
 
       Await.result(server.close(), 30.seconds)
     }
@@ -327,7 +328,7 @@ abstract class AbstractEndToEndTest
     eventually { assert(leaseCtr() == 2) }
     eventually { assert(available() == 1) }
 
-    Closable.sequence(Await.result(fclient, 5.seconds), server, factory).close()
+    Closable.sequence(await(fclient), server, factory).close()
   }
 
   test(s"$implName: measures payload sizes") {
@@ -344,7 +345,7 @@ abstract class AbstractEndToEndTest
       .withStatsReceiver(sr)
       .newService(getName(server), "client")
 
-    Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
+    await(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))))
 
     eventually {
       assert(sr.stat("client", "request_payload_bytes")() == Seq(10.0f))
@@ -353,7 +354,7 @@ abstract class AbstractEndToEndTest
       assert(sr.stat("server", "response_payload_bytes")() == Seq(20.0f))
     }
 
-    Await.ready(Closable.all(server, client).close(), 5.seconds)
+    await(Closable.all(server, client).close())
   }
 
   test(s"$implName: correctly scopes non-mux stats") {
@@ -370,7 +371,7 @@ abstract class AbstractEndToEndTest
       .withStatsReceiver(sr)
       .newService(getName(server), "client")
 
-    Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
+    await(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))))
 
     // Stats defined in the ChannelStatsHandler
     eventually {
@@ -378,7 +379,7 @@ abstract class AbstractEndToEndTest
       assert(sr.counter("server", "connects")() > 0)
     }
 
-    Await.ready(Closable.all(server, client).close(), 5.seconds)
+    await(Closable.all(server, client).close())
   }
 
   test(s"$implName: Default client stack will add RemoteInfo on BadMessageException") {
@@ -458,7 +459,7 @@ abstract class AbstractEndToEndTest
         .withMonitor(monitor)
         .newService(s"${InetAddress.getLoopbackAddress.getHostAddress}:${server.port}")
 
-      val result = Await.result(client(Request.empty).liftToTry, 5.seconds)
+      val result = await(client(Request.empty).liftToTry)
       server.close()
 
       // The Monitor should have intercepted the Failure
@@ -523,7 +524,7 @@ abstract class AbstractEndToEndTest
     Time.withCurrentTimeFrozen(BackupRequests.mkRequestWithBackup(client))
 
     val e = intercept[ClientDiscardedRequestException] {
-      Await.result(slow, 5.seconds)
+      await(slow)
     }
 
     assert(e.getMessage == BackupRequestFilter.SupersededRequestFailureToString)

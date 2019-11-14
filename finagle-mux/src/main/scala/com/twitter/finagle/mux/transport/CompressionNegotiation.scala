@@ -18,7 +18,9 @@ private[finagle] object CompressionNegotiation {
    * @param response the compression format that will be used for responses, or
    *                 None if no compression format was negotiated.
    */
-  private[mux] case class CompressionFormats(request: Option[String], response: Option[String])
+  private[mux] case class CompressionFormats(request: Option[String], response: Option[String]) {
+    def isDisabled: Boolean = request == None && response == None
+  }
 
   /**
    * Defines encrypter keys and values exchanged as part of a
@@ -177,4 +179,9 @@ private[finagle] object CompressionNegotiation {
       case _ => None
     }
   }
+
+  /**
+   * Is unable to use compression for either the request or the response.
+   */
+  val CompressionOff: CompressionFormats = CompressionFormats(None, None)
 }

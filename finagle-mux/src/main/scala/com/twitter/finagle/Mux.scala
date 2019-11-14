@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.StorageUnitOps._
-import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
+import com.twitter.finagle.Mux.param.{CompressionPreferences, MaxFrameSize, OppTls}
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.naming.BindingFactory
@@ -26,6 +26,7 @@ import com.twitter.util.{Future, StorageUnit}
 import io.netty.channel.{Channel, ChannelPipeline}
 import java.net.SocketAddress
 import java.util.concurrent.Executor
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
@@ -120,6 +121,18 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         ServerPingManager.default(writer)
       })
     }
+
+    /**
+     * A class eligible for configuring if the client or server is willing to compress or decompress
+     * requests or responses.
+     */
+    case class CompressionPreferences(compressionPreferences: Compression.LocalPreferences) {
+      def mk(): (CompressionPreferences, Stack.Param[CompressionPreferences]) =
+        (this, CompressionPreferences.param)
+    }
+    object CompressionPreferences {
+      implicit val param = Stack.Param(CompressionPreferences(Compression.DefaultLocal))
+    }
   }
 
   object Client {
@@ -179,12 +192,20 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      */
     private[finagle] def headers(
       maxFrameSize: StorageUnit,
-      tlsLevel: OpportunisticTls.Level
-    ): Handshake.Headers =
-      Seq(
+      tlsLevel: OpportunisticTls.Level,
+      compressionPreferences: Compression.LocalPreferences
+    ): Handshake.Headers = {
+      val buffer = ArrayBuffer(
         MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt),
         OpportunisticTls.Header.KeyBuf -> tlsLevel.buf
       )
+
+      if (!compressionPreferences.isDisabled) {
+        buffer += (CompressionNegotiation.ClientHeader.KeyBuf ->
+          CompressionNegotiation.ClientHeader.encode(compressionPreferences))
+      }
+      buffer.toSeq
+    }
 
     /**
      * Check the opportunistic TLS configuration to ensure it's in a consistent state
@@ -220,8 +241,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val negotiator: Option[Headers] => Future[MuxClientSession] = { headers =>
         new Negotiation.Client(sessionParams, sessionStats).negotiateAsync(handle, headers)
       }
-      val headers = Mux.Client
-        .headers(params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
+      val headers = Mux.Client.headers(
+        params[MaxFrameSize].size,
+        params[OppTls].level.getOrElse(OpportunisticTls.Off),
+        params[CompressionPreferences].compressionPreferences
+      )
 
       Future.value(
         new MuxClientNegotiatingSession(
@@ -328,7 +352,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
           .headers(
             _: Headers,
             params[MaxFrameSize].size,
-            params[OppTls].level.getOrElse(OpportunisticTls.Off)
+            params[OppTls].level.getOrElse(OpportunisticTls.Off),
+            params[CompressionPreferences].compressionPreferences
           ),
         negotiate = (service, headers) =>
           new Negotiation.Server(scopedStatsParams, sharedStats, service)
@@ -350,12 +375,30 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[finagle] def headers(
       clientHeaders: Handshake.Headers,
       maxFrameSize: StorageUnit,
-      tlsLevel: OpportunisticTls.Level
-    ): Handshake.Headers =
-      Seq(
+      tlsLevel: OpportunisticTls.Level,
+      compressionPreferences: Compression.LocalPreferences
+    ): Handshake.Headers = {
+      val clientCompressionPreferences = Handshake
+        .valueOf(CompressionNegotiation.ClientHeader.KeyBuf, clientHeaders)
+        .map(CompressionNegotiation.ClientHeader.decode(_))
+        .getOrElse(Compression.PeerCompressionOff)
+      val compressionFormats = CompressionNegotiation.negotiate(
+        compressionPreferences,
+        clientCompressionPreferences
+      )
+
+      val withoutCompression = Seq(
         MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt),
         OpportunisticTls.Header.KeyBuf -> tlsLevel.buf
       )
+
+      if (compressionFormats.isDisabled) {
+        withoutCompression
+      } else {
+        withoutCompression :+ (CompressionNegotiation.ServerHeader.KeyBuf ->
+          CompressionNegotiation.ServerHeader.encode(compressionFormats))
+      }
+    }
 
     /**
      * Check the opportunistic TLS configuration to ensure it's in a consistent state
@@ -408,16 +451,18 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected def newSession(
       handle: PushChannelHandle[ByteReader, Buf],
       service: Service[Request, Response]
-    ): RefPushSession[ByteReader, Buf] = handle match {
-      case h: MuxChannelHandle =>
-        val ref = new RefPushSession[ByteReader, Buf](h, SentinelSession[ByteReader, Buf](h))
-        sessionFactory(ref, params, sessionStats, h, service)
-        ref
+    ): RefPushSession[ByteReader, Buf] = {
+      handle match {
+        case h: MuxChannelHandle =>
+          val ref = new RefPushSession[ByteReader, Buf](h, SentinelSession[ByteReader, Buf](h))
+          sessionFactory(ref, params, sessionStats, h, service)
+          ref
 
-      case other =>
-        throw new IllegalStateException(
-          s"Expected to find a `MuxChannelHandle` but found ${other.getClass.getSimpleName}"
-        )
+        case other =>
+          throw new IllegalStateException(
+            s"Expected to find a `MuxChannelHandle` but found ${other.getClass.getSimpleName}"
+          )
+      }
     }
 
     protected def copy1(
