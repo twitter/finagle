@@ -5,7 +5,6 @@ import com.twitter.finagle.transport.TransportContext
 import io.netty.channel.Channel
 import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
-import java.util.concurrent.Executor
 import scala.annotation.tailrec
 import scala.util.control.NonFatal
 
@@ -13,9 +12,7 @@ import scala.util.control.NonFatal
  * `TransportContext` for use with a Finagle Netty4
  * `ChannelTransport`.
  */
-private[finagle] final class ChannelTransportContext(val ch: Channel)
-    extends TransportContext
-    with HasExecutor {
+private[finagle] final class ChannelTransportContext(val ch: Channel) extends TransportContext {
 
   def localAddress: SocketAddress = ch.localAddress
 
@@ -43,6 +40,4 @@ private[finagle] final class ChannelTransportContext(val ch: Channel)
     }
 
   val sslSessionInfo: SslSessionInfo = getSslSessionInfo(ch)
-
-  def executor: Executor = ch.eventLoop
 }

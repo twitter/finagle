@@ -2,11 +2,13 @@ package com.twitter.finagle.http2.transport.client
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.MultiplexHandlerBuilder
+import com.twitter.finagle.http2.transport.client.H2Pool.OnH2Service
 import com.twitter.finagle.http2.transport.common.H2StreamChannelInit
 import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.netty4.http.{Http2CodecName, Http2MultiplexHandlerName}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.transport.Transport
 import io.netty.channel._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http.{
@@ -22,12 +24,17 @@ import scala.collection.JavaConverters.iterableAsScalaIterableConverter
  * Takes the upgrade result and marks it as something read off the wire to
  * expose it to finagle, and manipulates the pipeline to be fit for http/2.
  */
-private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec: HttpClientCodec)
+private final class UpgradeRequestHandler(
+  params: Stack.Params,
+  onH2Service: OnH2Service,
+  httpClientCodec: HttpClientCodec,
+  modifier: Transport[Any, Any] => Transport[Any, Any])
     extends ChannelDuplexHandler {
 
   import UpgradeRequestHandler._
 
-  private[this] val statsReceiver = params[Stats].statsReceiver.scope("upgrade")
+  private[this] val stats = params[Stats].statsReceiver
+  private[this] val statsReceiver = stats.scope("upgrade")
   private[this] val attemptCounter = statsReceiver.counter("attempt")
   private[this] val upgradeCounter = statsReceiver.counter("success")
   private[this] val ignoredCounter = statsReceiver.counter("ignored")
@@ -35,13 +42,7 @@ private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec:
   // Exposed for testing
   def initializeUpgradeStreamChannel(ch: Channel, parentCtx: ChannelHandlerContext): Unit = {
     val p = parentCtx.pipeline
-    p.asScala.toList
-      .dropWhile(_.getKey != HandlerName)
-      .tail
-      .takeWhile(_.getKey != ChannelTransport.HandlerName)
-      .foreach { entry =>
-        p.remove(entry.getValue)
-      }
+    cleanPipeline(p)
 
     val pingDetectionHandler = new H2ClientFilter(params)
     p.addBefore(HandlerName, H2ClientFilter.HandlerName, pingDetectionHandler)
@@ -59,10 +60,14 @@ private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec:
     ch.pipeline.addLast(streamChannelInit)
 
     val trans = clientSession.newChildTransport(ch)
+
+    // We need to make sure that if we close the session, it doesn't
+    // close everything down until the first stream has finished.
+    val session = new DeferredCloseSession(clientSession, trans.onClose.unit)
+    onH2Service(new ClientServiceImpl(session, stats, modifier))
+
     parentCtx.fireChannelRead(
-      Http2UpgradingTransport.UpgradeSuccessful(_ =>
-        new DeferredCloseSession(clientSession, trans.onClose.unit) -> new SingleDispatchTransport(
-          trans))
+      Http2UpgradingTransport.UpgradeSuccessful(new SingleDispatchTransport(trans))
     )
   }
 
@@ -141,4 +146,21 @@ private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec:
 
 private object UpgradeRequestHandler {
   val HandlerName = "pipelineUpgrader"
+
+  // Clean out the channel handlers that are only for HTTP/1.x so we don't have
+  // a bunch of noise in our main pipeline.
+  private def cleanPipeline(pipeline: ChannelPipeline): Unit = {
+    pipeline.asScala.toList
+    // We don't want to remove anything up to the pipeline upgrader which
+    // are stages like metrics, etc.
+      .dropWhile(_.getKey != HandlerName)
+      .drop(1)
+      // These will be things that operate on HTTP messages which will no longer
+      // be flowing down the main pipeline. Examples include message aggregators,
+      // compressors/decompressors, etc.
+      .takeWhile(_.getKey != ChannelTransport.HandlerName)
+      .foreach { entry =>
+        pipeline.remove(entry.getValue)
+      }
+  }
 }

@@ -3,7 +3,7 @@ package com.twitter.finagle.http2.transport.client
 import com.twitter.finagle.client.EndpointerModule
 import com.twitter.finagle.client.Transporter.EndpointAddr
 import com.twitter.finagle.http.{Request, Response, Status => HttpStatus}
-import com.twitter.finagle.http2.transport.client.H2Pool.OnH2Session
+import com.twitter.finagle.http2.transport.client.H2Pool.OnH2Service
 import com.twitter.finagle.{Address, ClientConnection, Service, ServiceFactory, Stack, Status}
 import com.twitter.util.{Await, Awaitable, Closable, Duration, Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
@@ -27,7 +27,7 @@ class H2PoolTest extends FunSuite with MockitoSugar {
     lazy val serviceFactory: ServiceFactory[Request, Response] =
       stack.make(params + EndpointAddr(Address("localhost", 0)))
 
-    def endpointer(state: OnH2Session): ServiceFactory[Request, Response]
+    def endpointer(state: OnH2Service): ServiceFactory[Request, Response]
 
     private[this] def stack: Stack[ServiceFactory[Request, Response]] = {
       val nil = com.twitter.finagle.stack.nilStack[Request, Response]
@@ -35,8 +35,8 @@ class H2PoolTest extends FunSuite with MockitoSugar {
         Nil,
         (params, _) =>
           endpointer(
-            params[H2Pool.OnH2SessionParam].onH2Session
-              .getOrElse(throw new IllegalStateException("Missing the OnH2Session!")))) +: nil)
+            params[H2Pool.OnH2ServiceParam].onH2Service
+              .getOrElse(throw new IllegalStateException("Missing the OnH2Service!")))) +: nil)
     }
   }
 
@@ -45,7 +45,7 @@ class H2PoolTest extends FunSuite with MockitoSugar {
     when(mockSvcFactory.close()).thenReturn(Future.Done)
 
     val ctx = new Ctx {
-      def endpointer(onH2Session: OnH2Session): ServiceFactory[Request, Response] =
+      def endpointer(h2Service: OnH2Service): ServiceFactory[Request, Response] =
         mockSvcFactory
     }
 
@@ -62,7 +62,7 @@ class H2PoolTest extends FunSuite with MockitoSugar {
     when(mockSvcFactory.apply()).thenReturn(Future.value(mockSvc))
 
     val ctx = new Ctx {
-      def endpointer(onH2Session: OnH2Session): ServiceFactory[Request, Response] =
+      def endpointer(onH2Service: OnH2Service): ServiceFactory[Request, Response] =
         mockSvcFactory
     }
 
@@ -89,11 +89,11 @@ class H2PoolTest extends FunSuite with MockitoSugar {
     val endpointerCount = new AtomicInteger()
 
     val ctx = new Ctx {
-      def endpointer(onH2Session: OnH2Session): ServiceFactory[Request, Response] =
+      def endpointer(onH2Service: OnH2Service): ServiceFactory[Request, Response] =
         new H2ServiceFactory {
           def apply(conn: ClientConnection): Future[Service[Request, Response]] = {
             endpointerCount.incrementAndGet()
-            onH2Session(h2svc)
+            onH2Service(h2svc)
             Future.value(h1svc)
           }
         }
@@ -135,11 +135,11 @@ class H2PoolTest extends FunSuite with MockitoSugar {
     val endpointerCount = new AtomicInteger()
 
     val ctx = new Ctx {
-      def endpointer(onH2Session: OnH2Session): ServiceFactory[Request, Response] =
+      def endpointer(onH2Service: OnH2Service): ServiceFactory[Request, Response] =
         new H2ServiceFactory {
           def apply(conn: ClientConnection): Future[Service[Request, Response]] = {
             endpointerCount.incrementAndGet()
-            onH2Session(h2svc)
+            onH2Service(h2svc)
             Future.value(h1svc)
           }
         }
@@ -181,10 +181,10 @@ class H2PoolTest extends FunSuite with MockitoSugar {
     when(h2svc.status).thenReturn(Status.Open)
 
     val ctx = new Ctx {
-      def endpointer(onH2Session: OnH2Session): ServiceFactory[Request, Response] =
+      def endpointer(onH2Service: OnH2Service): ServiceFactory[Request, Response] =
         new H2ServiceFactory {
           def apply(conn: ClientConnection): Future[Service[Request, Response]] = {
-            onH2Session(h2svc)
+            onH2Service(h2svc)
             Future.value(h1svc)
           }
         }

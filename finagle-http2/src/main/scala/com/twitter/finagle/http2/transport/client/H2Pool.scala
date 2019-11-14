@@ -14,9 +14,7 @@ import scala.annotation.tailrec
 
 private[finagle] object H2Pool {
 
-  private[transport] sealed abstract class OnH2Session {
-    def apply(h2Session: Service[Request, Response]): Unit
-  }
+  private[transport] type OnH2Service = Service[Request, Response] => Unit
 
   /**
    * A `Stack.Param` that we use to link the transporter layer with the pooling
@@ -27,10 +25,10 @@ private[finagle] object H2Pool {
    * For this we send a callback function down through the stack params during
    * the stack initialization.
    */
-  private[transport] case class OnH2SessionParam(onH2Session: Option[OnH2Session])
-  private[transport] case object OnH2SessionParam {
-    implicit val param: Stack.Param[OnH2SessionParam] =
-      Stack.Param(OnH2SessionParam(None))
+  private[transport] case class OnH2ServiceParam(onH2Service: Option[OnH2Service])
+  private[transport] case object OnH2ServiceParam {
+    implicit val param: Stack.Param[OnH2ServiceParam] =
+      Stack.Param(OnH2ServiceParam(None))
   }
 
   private sealed trait State
@@ -93,9 +91,9 @@ private final class H2Pool(params: Params, stackFragment: Stack[ServiceFactory[R
 
   private[this] val state = new AtomicReference[State](State.H1)
 
-  private[this] val onH2Session = new OnH2Session {
-    @tailrec
-    final def apply(h2Session: Service[Request, Response]): Unit = state.get match {
+  @tailrec
+  private[this] final def onH2Service(h2Session: Service[Request, Response]): Unit =
+    state.get match {
       case State.Closed =>
         h2Session.close() // Don't need it.
 
@@ -104,7 +102,7 @@ private final class H2Pool(params: Params, stackFragment: Stack[ServiceFactory[R
         // so we try to set ourselves to H1 and reuse the logic below
         if (old.status == Status.Closed && state.compareAndSet(h, State.H1)) {
           old.close()
-          apply(h2Session)
+          onH2Service(h2Session)
         } else {
           h2Session.close()
         }
@@ -118,7 +116,6 @@ private final class H2Pool(params: Params, stackFragment: Stack[ServiceFactory[R
           case Throw(_) => h2Session.close()
         }
     }
-  }
 
   // We don't make the H1 session part of the state machine to keep at least one
   // pathway stable so if our H2 session goes down we're not racing to build
@@ -128,7 +125,7 @@ private final class H2Pool(params: Params, stackFragment: Stack[ServiceFactory[R
   // This also results in a reduction in complexity of the state machine.
   private[this] val defaultPool: ServiceFactory[Request, Response] =
     (DefaultPool.module[Request, Response] +: stackFragment)
-      .make(params + OnH2SessionParam(Some(onH2Session)))
+      .make(params + OnH2ServiceParam(Some(onH2Service)))
 
   @tailrec
   def apply(conn: ClientConnection): Future[Service[Request, Response]] = {

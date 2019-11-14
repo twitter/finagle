@@ -22,7 +22,7 @@ import java.net.SocketAddress
  * the H2 session to the pooling layer. First, a connection is requested. As part of the TLS
  * establishment ALPN is used to negotiate the HTTP protocol with preference for HTTP/2. if
  * HTTP/2 is negotiated, the first stream is propagated up in the traditional style to the
- * dispatcher layer while the rest of the session is sent to the pool via the `OnH2Session`
+ * dispatcher layer while the rest of the session is sent to the pool via the `OnH2Service`
  * passed in via the params.
  */
 private[http2] class TlsTransporter private (
@@ -35,11 +35,11 @@ private[http2] class TlsTransporter private (
 
   private[this] val statsReceiver = params[Stats].statsReceiver
   private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
-  private[this] val onH2Session = params[H2Pool.OnH2SessionParam].onH2Session match {
+  private[this] val onH2Service = params[H2Pool.OnH2ServiceParam].onH2Service match {
     case Some(s) => s
     case None =>
       throw new IllegalStateException(
-        s"params are missing the ${classOf[H2Pool.OnH2Session].getSimpleName}")
+        s"params are missing the ${classOf[H2Pool.OnH2Service].getSimpleName}")
   }
 
   def remoteAddress: SocketAddress = connectionBuilder.remoteAddress
@@ -74,7 +74,7 @@ private[http2] class TlsTransporter private (
     childTransport.respond {
       case Return(t) =>
         val dSession = new DeferredCloseSession(session, t.onClose.unit)
-        onH2Session(new ClientServiceImpl(dSession, statsReceiver, modifier))
+        onH2Service(new ClientServiceImpl(dSession, statsReceiver, modifier))
 
       case Throw(_) =>
         // If we can't get a stream we're almost certainly already closed.
