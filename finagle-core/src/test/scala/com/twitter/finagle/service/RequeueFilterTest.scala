@@ -19,7 +19,6 @@ class RequeueFilterTest extends FunSuite {
       RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis),
       Backoff.constant(Duration.Zero),
       stats,
-      () => true,
       percentRequeues,
       DefaultTimer
     )
@@ -49,7 +48,6 @@ class RequeueFilterTest extends FunSuite {
       RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis),
       Backoff.constant(Duration.Zero),
       stats,
-      () => true,
       percentRequeues,
       DefaultTimer
     )
@@ -78,7 +76,6 @@ class RequeueFilterTest extends FunSuite {
       retryBudget,
       Backoff.constant(Duration.Zero),
       stats,
-      () => true,
       percentRequeues,
       DefaultTimer
     )
@@ -124,7 +121,6 @@ class RequeueFilterTest extends FunSuite {
         RetryBudget(1.second, 10, 0.0, Stopwatch.timeMillis),
         schedule,
         stats,
-        () => true,
         1.0,
         timer
       )
@@ -162,7 +158,6 @@ class RequeueFilterTest extends FunSuite {
       RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis),
       Backoff.constant(Duration.Zero),
       NullStatsReceiver,
-      () => true,
       percentRequeues,
       DefaultTimer
     )
@@ -194,6 +189,38 @@ class RequeueFilterTest extends FunSuite {
     }
   }
 
+  test("requeueable only if the service is available") {
+    val stats = new InMemoryStatsReceiver()
+    val svc = new Service[Unit, Unit] {
+      var used: Boolean = false
+      def apply(req: Unit): Future[Unit] = {
+        used = true
+        Future.exception(new ChannelWriteException(None))
+      }
+
+      override def status = if (used) Status.Closed else Status.Open
+    }
+
+    val minRetries = 10
+    val percentRequeues = 0.5
+    val retryBudget = RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis)
+    val filter = new RequeueFilter[Unit, Unit](
+      retryBudget,
+      Backoff.constant(Duration.Zero),
+      stats,
+      percentRequeues,
+      DefaultTimer
+    )
+
+    val requeueableSvc = filter.andThen(svc)
+    for (_ <- 0 until 5)
+      intercept[ChannelWriteException] {
+        Await.result(requeueableSvc(), 5.seconds)
+      }
+
+    assert(stats.counter("requeues")() == 0)
+  }
+
   test("Requeueable.unapply for retryable exceptions") {
     Seq(
       Failure.rejected("rejected"),
@@ -214,5 +241,4 @@ class RequeueFilterTest extends FunSuite {
       case _ =>
     }
   }
-
 }

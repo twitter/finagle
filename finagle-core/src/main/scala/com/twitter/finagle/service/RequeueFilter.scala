@@ -20,9 +20,6 @@ import com.twitter.util._
  *
  * @param statsReceiver for stats reporting, typically scoped to ".../retries/"
  *
- * @param canRetry Represents whether or not it is appropriate to issue a
- * retry. This is separate from `retryBudget`.
- *
  * @param maxRetriesPerReq The maximum number of retries to make for a given request
  * computed as a percentage of `retryBudget.balance`.
  * Used to prevent a single request from using up a disproportionate amount of the budget.
@@ -40,7 +37,6 @@ private[finagle] class RequeueFilter[Req, Rep](
   retryBudget: RetryBudget,
   retryBackoffs: Stream[Duration],
   statsReceiver: StatsReceiver,
-  canRetry: () => Boolean,
   maxRetriesPerReq: Double,
   timer: Timer)
     extends SimpleFilter[Req, Rep] {
@@ -69,7 +65,11 @@ private[finagle] class RequeueFilter[Req, Rep](
     Contexts.broadcast.let(context.Retries, context.Retries(attempt)) {
       service(req).transform {
         case t @ Throw(Requeueable(_)) =>
-          if (!canRetry()) {
+          // We check the service's status to determine if a retry should be issued.
+          // The status reflects the resources available, depending on the stack
+          // configuration which is protocol specific. This could be all available
+          // endpoints or a single session
+          if (service.status != Status.Open) {
             canNotRetryCounter.incr()
             responseFuture(attempt, t)
           } else if (retriesRemaining > 0 && retryBudget.tryWithdraw()) {
