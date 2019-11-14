@@ -240,9 +240,6 @@ object Retries {
       budget,
       retrySchedule,
       statsReceiver,
-      // TODO: If we ensure that the stack doesn't return restartable
-      // failures when it isn't Open, we wouldn't need to gate on status.
-      () => next.status == Status.Open,
       MaxRequeuesPerReq,
       timer
     )
@@ -289,13 +286,22 @@ object Retries {
           // to point out when a connection is dead for a reason that shouldn't
           // trigger circuit breaking
           case Return(deadSvc) if deadSvc.status == Status.Closed && n > 0 =>
-            // Since we're stopping `deadSvc` from propagating up the stack to either an application
-            // or FactoryToService wrapper and since it's not part of the Service contract that Status
-            // can only be Closed when the close method was called, we must manually close the session
-            // to forestall resource leaks.
-            deadSvc.close()
-            requeuesCounter.incr()
-            applySelf(conn, n - 1)
+            // If `this` is in an Open state we're stopping `deadSvc` from propagating up the stack
+            // to either an application or FactoryToService wrapper and since it's not part of the Service
+            // contract that Status can only be Closed when the close method was called, we must manually
+            // close the session to forestall resource leaks.
+            //
+            // However, `deadSvc` will be propogated up the stack if `this` is not in an Open state.
+            // In this case, we do not close the session here
+            if (status == Status.Open) {
+              deadSvc.close()
+              requeuesCounter.incr()
+              applySelf(conn, n - 1)
+            } else {
+              notOpenCounter.incr()
+              Future.value(deadSvc)
+            }
+
           case t => Future.const(t)
         }
 

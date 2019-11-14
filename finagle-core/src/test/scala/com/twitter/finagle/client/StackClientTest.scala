@@ -357,6 +357,10 @@ abstract class AbstractStackClientTest
     test(s"don't requeue failing requests when the stack is $status")(new RequeueCtx {
       // failing request and Busy | Closed load balancer => zero requeues
       _svcFacStatus = status
+
+      // the session should reflect the status of the stack
+      _sessionStatus = status
+
       await(cl().map(_("hi")))
       assert(requeues == Some(0))
     })
