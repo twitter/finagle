@@ -9,6 +9,7 @@ import com.twitter.finagle.mux.pushsession.{
 }
 import com.twitter.finagle._
 import com.twitter.finagle.mux.{Request, Response}
+import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, RefPushSession}
@@ -190,6 +191,11 @@ private[finagle] object MuxDowngradingNegotiator {
       extends Negotiation(params, sharedStats) {
 
     override type SessionT = VanillaThriftSession
+
+    protected def negotiateCompression(
+      handle: PushChannelHandle[ByteReader, Buf],
+      peerHeaders: Option[Headers]
+    ): Unit = ()
 
     override protected def builder(
       handle: PushChannelHandle[ByteReader, Buf],

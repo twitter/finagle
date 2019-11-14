@@ -4,6 +4,7 @@ junit_tests(
     dependencies = [
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/junit",
+        "3rdparty/jvm/org/lz4:lz4-java",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalacheck",
         "3rdparty/jvm/org/scalatest",

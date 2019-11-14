@@ -14,7 +14,11 @@ object Compression {
    * Used for configuring the local preferences for compression and
    * decompression.
    */
-  case class LocalPreferences(compression: LocalSetting, decompression: LocalSetting)
+  case class LocalPreferences(compression: LocalSetting, decompression: LocalSetting) {
+    def isDisabled: Boolean =
+      compression.level == CompressionLevel.Off &&
+        decompression.level == CompressionLevel.Off
+  }
 
   /**
    * Used for communicating the preferences of the client for compression and
@@ -86,13 +90,4 @@ object Compression {
    */
   val PeerCompressionOff: PeerPreferences =
     PeerPreferences(PeerSetting(CompressionLevel.Off, Nil), PeerSetting(CompressionLevel.Off, Nil))
-
-  /**
-   * The default preferences of the remote peer if compression format is not
-   * specified.
-   *
-   * Is unable to use compression for either the request or the response.
-   * May change in the future.
-   */
-  val DefaultPeer: PeerPreferences = PeerCompressionOff
 }

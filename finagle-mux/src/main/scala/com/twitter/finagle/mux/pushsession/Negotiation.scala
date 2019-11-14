@@ -1,10 +1,12 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.finagle.Mux.param.OppTls
+import com.twitter.finagle.Mux.param.{CompressionPreferences, OppTls}
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.transport.{
+  Compression,
+  CompressionNegotiation,
   IncompatibleNegotiationException,
   MuxFramer,
   OpportunisticTls
@@ -26,11 +28,34 @@ private[finagle] abstract class Negotiation(
 
   private[this] val log = Logger.get
 
+  /**
+   * Negotiates which compression formats will be used for the request and
+   * response streams.
+   */
+  protected def negotiateCompression(
+    handle: PushChannelHandle[ByteReader, Buf],
+    peerHeaders: Option[Headers]
+  ): Unit
+
   protected def builder(
     handle: PushChannelHandle[ByteReader, Buf],
     writer: MessageWriter,
     decoder: MuxMessageDecoder
   ): SessionT
+
+  final protected def asNegotiatingHandle(
+    handle: PushChannelHandle[ByteReader, Buf],
+    feature: String
+  ): NegotiatingHandle =
+    handle match {
+      case h: NegotiatingHandle => h
+      case other =>
+        // Should never happen when building a true client
+        throw new IllegalStateException(
+          "Expected to find a MuxChannelHandle, instead found " +
+            s"$other. Couldn't turn on $feature. ${remoteAddressString(handle)}"
+        )
+    }
 
   private[this] def remoteAddressString(handle: PushChannelHandle[_, _]): String =
     s"remote: ${handle.remoteAddress}"
@@ -41,17 +66,6 @@ private[finagle] abstract class Negotiation(
     peerHeaders: Option[Headers],
     onTlsHandshakeComplete: Try[Unit] => Unit
   ): Unit = {
-
-    def turnOnTls(): Unit = handle match {
-      case h: MuxChannelHandle => h.turnOnTls(onTlsHandshakeComplete)
-      case other =>
-        // Should never happen when building a true client
-        throw new IllegalStateException(
-          "Expected to find a MuxChannelHandle, instead found " +
-            s"$other. Couldn't turn on TLS. ${remoteAddressString(handle)}"
-        )
-    }
-
     val localEncryptLevel = params[OppTls].level.getOrElse(OpportunisticTls.Off)
     val remoteEncryptLevel = peerHeaders
       .flatMap(Handshake.valueOf(OpportunisticTls.Header.KeyBuf, _)) match {
@@ -74,7 +88,7 @@ private[finagle] abstract class Negotiation(
       }
       if (useTls) {
         sharedStats.tlsSuccess.incr()
-        turnOnTls()
+        asNegotiatingHandle(handle, "TLS").turnOnTls(onTlsHandshakeComplete)
       } else {
         // synthesize a handshake complete for `negotiateAsync`
         onTlsHandshakeComplete(Return.Unit)
@@ -132,6 +146,7 @@ private[finagle] abstract class Negotiation(
     } else {
       negotiateOppTls(handle, peerHeaders, _ => ())
     }
+    negotiateCompression(handle, peerHeaders)
     negotiateMuxSession(handle, peerHeaders)
   }
 
@@ -165,17 +180,45 @@ private[finagle] abstract class Negotiation(
       }
     }
     Try(negotiateOppTls(handle, peerHeaders, onHandshakeComplete)) match {
-      case Return(_) => p.map(_ => negotiateMuxSession(handle, peerHeaders))
+      case Return(_) =>
+        p.map { _ =>
+          negotiateCompression(handle, peerHeaders)
+          negotiateMuxSession(handle, peerHeaders)
+        }
       case Throw(t) => Future.exception(t)
     }
   }
 }
 
 private[finagle] object Negotiation {
+
   final class Client(params: Stack.Params, sharedStats: SharedNegotiationStats)
       extends Negotiation(params, sharedStats) {
 
     override type SessionT = MuxClientSession
+
+    protected def negotiateCompression(
+      handle: PushChannelHandle[ByteReader, Buf],
+      peerHeaders: Option[Headers]
+    ): Unit = {
+      val compressionFormats = peerHeaders
+        .flatMap(Handshake.valueOf(CompressionNegotiation.ServerHeader.KeyBuf, _))
+        .map(CompressionNegotiation.ServerHeader.decode(_))
+        .getOrElse(CompressionNegotiation.CompressionOff)
+
+      compressionFormats.request match {
+        case Some(compression) =>
+          val negotiatingHandle = asNegotiatingHandle(handle, "compression")
+          negotiatingHandle.turnOnCompression(compression)
+        case _ => // do nothing
+      }
+      compressionFormats.response match {
+        case Some(decompression) =>
+          val negotiatingHandle = asNegotiatingHandle(handle, "decompression")
+          negotiatingHandle.turnOnDecompression(decompression)
+        case _ => // do nothing
+      }
+    }
 
     protected def builder(
       handle: PushChannelHandle[ByteReader, Buf],
@@ -201,6 +244,34 @@ private[finagle] object Negotiation {
       extends Negotiation(params, sharedStats) {
 
     override type SessionT = MuxServerSession
+
+    protected def negotiateCompression(
+      handle: PushChannelHandle[ByteReader, Buf],
+      peerHeaders: Option[Headers]
+    ): Unit = {
+      val peerCompressionSettings = peerHeaders
+        .flatMap(Handshake.valueOf(CompressionNegotiation.ClientHeader.KeyBuf, _))
+        .map(CompressionNegotiation.ClientHeader.decode(_))
+        .getOrElse(Compression.PeerCompressionOff)
+
+      val ourCompressionSettings = params[CompressionPreferences].compressionPreferences
+
+      val compressionFormats =
+        CompressionNegotiation.negotiate(ourCompressionSettings, peerCompressionSettings)
+
+      compressionFormats.request match {
+        case Some(decompression) =>
+          val negotiatingHandle = asNegotiatingHandle(handle, "decompression")
+          negotiatingHandle.turnOnDecompression(decompression)
+        case _ => // do nothing
+      }
+      compressionFormats.response match {
+        case Some(compression) =>
+          val negotiatingHandle = asNegotiatingHandle(handle, "compression")
+          negotiatingHandle.turnOnCompression(compression)
+        case _ => // do nothing
+      }
+    }
 
     protected def builder(
       handle: PushChannelHandle[ByteReader, Buf],
