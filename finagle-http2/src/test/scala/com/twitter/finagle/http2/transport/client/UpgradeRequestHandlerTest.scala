@@ -1,8 +1,12 @@
 package com.twitter.finagle.http2.transport.client
 
-import com.twitter.finagle.Stack
+import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http2.MultiplexHandlerBuilder
+import com.twitter.finagle.{Service, Stack}
+import com.twitter.finagle.http2.transport.client.UpgradeRequestHandler.HandlerName
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.util.Promise
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -22,7 +26,14 @@ class UpgradeRequestHandlerTest extends FunSuite {
     val stats = new InMemoryStatsReceiver
     val params = Stack.Params.empty + Stats(stats)
     val clientCodec = new HttpClientCodec()
-    val upgradeRequestHandler = new UpgradeRequestHandler(params, clientCodec)
+
+    val fOnH2Service = Promise[Service[Request, Response]]()
+
+    private[this] def onH2Service(h2Service: Service[Request, Response]): Unit =
+      fOnH2Service.setValue(h2Service)
+
+    val upgradeRequestHandler =
+      new UpgradeRequestHandler(params, onH2Service, clientCodec, identity(_))
 
     val events = new mutable.Queue[Any]
     val eventCatcher = new ChannelInboundHandlerAdapter {
@@ -30,7 +41,14 @@ class UpgradeRequestHandlerTest extends FunSuite {
         events += evt
     }
 
-    val channel = new EmbeddedChannel(clientCodec, upgradeRequestHandler, eventCatcher)
+    val channel: EmbeddedChannel = {
+      val ch = new EmbeddedChannel()
+      ch.pipeline
+        .addLast(clientCodec)
+        .addLast(HandlerName, upgradeRequestHandler)
+        .addLast(eventCatcher)
+      ch
+    }
   }
 
   test("full http-requests without a body add the upgrade machinery") {
@@ -40,6 +58,21 @@ class UpgradeRequestHandlerTest extends FunSuite {
 
       assert(stats.counters.get(Seq("upgrade", "attempt")) == Some(1l))
       assert(channel.pipeline.get(classOf[HttpClientUpgradeHandler]) != null)
+    }
+  }
+
+  test("upgrades offer an `OnH2Session`") {
+    new Ctx {
+      val childChannel = new EmbeddedChannel()
+      val parentCtx = channel.pipeline.context(classOf[UpgradeRequestHandler])
+
+      // Need to add the Htt2FrameCodec so our ClientSessionImpl doesn't blow up.
+      // It has to be added at the front because otherwise it will emit messages
+      // into the `UpgradeRequestHandler`.
+      val (codec, _) = MultiplexHandlerBuilder.clientFrameCodec(params, None)
+      channel.pipeline.addFirst(codec)
+      upgradeRequestHandler.initializeUpgradeStreamChannel(childChannel, parentCtx)
+      assert(fOnH2Service.poll.isDefined)
     }
   }
 

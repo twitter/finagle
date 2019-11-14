@@ -2,37 +2,26 @@ package com.twitter.finagle.http2.transport.client
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.http2.SerialExecutor
-import com.twitter.finagle.http2.transport.client.Http2UpgradingTransport.UpgradeIgnoredException
-import com.twitter.finagle.netty4.transport.HasExecutor
-import com.twitter.finagle.transport.{QueueTransport, SimpleTransportContext, TransportContext}
+import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Stack, Status}
-import com.twitter.util.{Await, Future, Promise}
+import com.twitter.util.{Await, Future}
 import io.netty.handler.codec.http._
-import java.util.concurrent.Executor
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
 class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
   class Ctx {
     val (writeq, readq) = (new AsyncQueue[Any](), new AsyncQueue[Any]())
-    val transport = new QueueTransport[Any, Any](writeq, readq) {
-      override val context: TransportContext = new SimpleTransportContext with HasExecutor {
-        private[finagle] override val executor: Executor = new SerialExecutor
-      }
-    }
+    val transport = new QueueTransport[Any, Any](writeq, readq)
+
     val ref = new RefTransport(transport)
-    val p = Promise[Option[ClientSession]]()
-    val clientSession = mock[ClientSession]
 
     def http1Status: Status = Status.Open
 
     val upgradingTransport = new Http2UpgradingTransport(
       transport,
       ref,
-      p,
-      Stack.Params.empty,
-      () => http1Status
+      Stack.Params.empty
     )
   }
 
@@ -45,18 +34,19 @@ class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
     val ctx = new Ctx
     import ctx._
 
-    var upgradeCalled = false
-    val writeF = upgradingTransport.write(fullRequest)
+    upgradingTransport.write(fullRequest)
     assert(await(writeq.poll) == fullRequest)
+
     val readF = upgradingTransport.read()
     assert(!readF.isDefined)
-    assert(readq.offer(Http2UpgradingTransport.UpgradeSuccessful { _ =>
-      upgradeCalled = true
-      // We just give it back the same old transport.
-      clientSession -> transport
-    }))
-    assert(await(p).nonEmpty)
-    assert(readq.offer(fullResponse))
+
+    val newReadQueue = new AsyncQueue[Any]()
+    val newTransport = new QueueTransport[Any, Any](writeq, newReadQueue)
+
+    assert(readq.offer(Http2UpgradingTransport.UpgradeSuccessful(newTransport)))
+    assert(!readF.isDefined)
+
+    assert(newReadQueue.offer(fullResponse))
     assert(await(readF) == fullResponse)
   }
 
@@ -68,8 +58,10 @@ class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
     assert(await(writeq.poll) == fullRequest)
     val readF = upgradingTransport.read()
     assert(!readF.isDefined)
+
     assert(readq.offer(Http2UpgradingTransport.UpgradeRejected))
-    assert(await(p).isEmpty)
+    assert(!readF.isDefined)
+
     assert(readq.offer(fullResponse))
     assert(await(readF) == fullResponse)
   }
@@ -85,66 +77,10 @@ class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
     val readF = upgradingTransport.read()
     assert(!readF.isDefined)
     assert(readq.offer(Http2UpgradingTransport.UpgradeAborted))
-    intercept[UpgradeIgnoredException.type] {
-      await(p)
-    }
 
-    assert(readq.offer(fullResponse))
-    assert(await(readF) == fullResponse)
-  }
-
-  test("honors the status if the upgrade is rejected") {
-    var status: Status = Status.Open
-
-    val ctx = new Ctx {
-      override def http1Status: Status = status
-    }
-    import ctx._
-
-    assert(upgradingTransport.status == Status.Open)
-    status = Status.Closed
-    // Haven't finished upgrade yet
-    assert(upgradingTransport.status == Status.Open)
-
-    // Reject upgrade rejected
-    val writeF = upgradingTransport.write(fullRequest)
-    assert(await(writeq.poll) == fullRequest)
-    val readF = upgradingTransport.read()
     assert(!readF.isDefined)
-    assert(readq.offer(Http2UpgradingTransport.UpgradeRejected))
-    assert(await(p).isEmpty)
+
     assert(readq.offer(fullResponse))
     assert(await(readF) == fullResponse)
-
-    // When the upgrade is rejected we revert to the parent behavior
-    assert(upgradingTransport.status == Status.Closed)
-  }
-
-  test("honors the status if the upgrade is ignored") {
-    var status: Status = Status.Open
-
-    val ctx = new Ctx {
-      override def http1Status: Status = status
-    }
-    import ctx._
-
-    assert(upgradingTransport.status == Status.Open)
-    status = Status.Closed
-    // Haven't finished upgrade yet
-    assert(upgradingTransport.status == Status.Open)
-
-    // Reject upgrade rejected
-    val writeF = upgradingTransport.write(fullRequest)
-    assert(await(writeq.poll) == fullRequest)
-    val readF = upgradingTransport.read()
-    assert(!readF.isDefined)
-    assert(readq.offer(Http2UpgradingTransport.UpgradeAborted))
-
-    intercept[UpgradeIgnoredException.type] { await(p) }
-    assert(readq.offer(fullResponse))
-    assert(await(readF) == fullResponse)
-
-    // When the upgrade is aborted we revert to the parent behavior
-    assert(upgradingTransport.status == Status.Closed)
   }
 }

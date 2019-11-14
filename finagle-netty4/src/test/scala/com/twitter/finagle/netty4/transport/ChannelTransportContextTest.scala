@@ -43,11 +43,4 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
     val context = new ChannelTransportContext(ch)
     assert(context.sslSessionInfo.peerCertificates.nonEmpty)
   }
-
-  test("executor is the channel's event loop") {
-    val ch = new EmbeddedChannel()
-    val context = new ChannelTransportContext(ch)
-    assert(context.executor == ch.eventLoop)
-  }
-
 }
