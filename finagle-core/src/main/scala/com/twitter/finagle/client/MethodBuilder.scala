@@ -9,7 +9,7 @@ import com.twitter.finagle.service.{
   Retries,
   TimeoutFilter
 }
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{LazyStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util.{Showable, StackRegistry}
 import com.twitter.finagle.{Filter, Name, Service, ServiceFactory, Stack, param, _}
@@ -418,7 +418,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   private[this] def statsReceiver(methodName: Option[String]): StatsReceiver = {
     val clientScoped = stackParams[param.Stats].statsReceiver.scope(clientName)
     methodName match {
-      case Some(name) => clientScoped.scope(name)
+      case Some(name) => new LazyStatsReceiver(clientScoped.scope(name))
       case None => clientScoped
     }
   }

@@ -477,7 +477,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
+    assert(!sr.counters.contains(Seq("thrift", "echo", "success")))
     assert(sr.counters(Seq("thrift", "echo", "failures")) == 1)
 
     assert(sr.counters(Seq("requests")) == 1)
@@ -666,7 +666,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
+    assert(!sr.counters.contains(Seq("thrift", "echo", "success")))
     assert(sr.counters(Seq("thrift", "echo", "failures")) == 1)
 
     assert(sr.counters(Seq("requests")) == 1)
@@ -747,7 +747,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
+    assert(!sr.counters.contains(Seq("thrift", "echo", "success")))
 
     assert(sr.counters(Seq("requests")) == 1)
     assert(sr.counters(Seq("success")) == 0)
@@ -949,7 +949,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters(Seq("requests")) == 1)
     assert(sr.counters(Seq("success")) == 0)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
+    assert(!sr.counters.contains(Seq("thrift", "echo", "success")))
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe"), 10.seconds))
@@ -1072,7 +1072,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(clientStats.counters(Seq("client", "requests")) == 1)
     assert(clientStats.counters(Seq("client", "success")) == 0)
     assert(serverStats.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(serverStats.counters(Seq("thrift", "echo", "success")) == 0)
+    assert(!serverStats.counters.contains(Seq("thrift", "echo", "success")))
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe"), 10.seconds))

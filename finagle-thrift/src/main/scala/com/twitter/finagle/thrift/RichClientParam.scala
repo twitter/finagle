@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Thrift
 import com.twitter.finagle.service.ResponseClassifier
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{ClientStatsReceiver, LazyStatsReceiver, StatsReceiver}
 import com.twitter.scrooge.TReusableBuffer
 import java.util.logging.{Level, Logger}
 import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolFactory}
@@ -10,6 +10,75 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolF
 object RichClientParam {
   private val NO_THRIFT_REUSABLE_BUFFER_FACTORY: () => TReusableBuffer =
     createThriftReusableBuffer()
+
+  /**
+   * Constructs a RichClientParam from the supply parameters.
+   *
+   * @param protocolFactory A `TProtocolFactory` creates protocol objects from transports
+   * @param serviceName For client stats, (default: empty string)
+   * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
+   * @param thriftReusableBufferFactory A reusable buffer for the thrift request/response, if passed
+   *                                  maxThriftBufferSize is ignored
+   * @param responseClassifier See [[com.twitter.finagle.service.ResponseClassifier]]
+   * @param clientStats StatsReceiver for recording metrics
+   * @param perEndpointStats Whether to record per-endpoint stats, (default: false).
+   *                         By enabling this, the specific Thrift Exceptions can be recorded.
+   * See [[https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter PerEndpoint StatsFilter]]
+   */
+  def apply(
+    protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
+    serviceName: String = "",
+    @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") maxThriftBufferSize: Int =
+      Thrift.param.maxThriftBufferSize,
+    thriftReusableBufferFactory: () => TReusableBuffer =
+      RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY,
+    responseClassifier: ResponseClassifier = ResponseClassifier.Default,
+    clientStats: StatsReceiver = ClientStatsReceiver,
+    perEndpointStats: Boolean = false
+  ): RichClientParam =
+    new RichClientParam(
+      protocolFactory,
+      serviceName,
+      maxThriftBufferSize,
+      thriftReusableBufferFactory,
+      responseClassifier,
+      new LazyStatsReceiver(clientStats),
+      perEndpointStats
+    )
+
+  def apply(
+    protocolFactory: TProtocolFactory,
+    serviceName: String,
+    maxThriftBufferSize: Int,
+    responseClassifier: ResponseClassifier,
+    clientStats: StatsReceiver
+  ): RichClientParam =
+    apply(
+      protocolFactory = protocolFactory,
+      serviceName = serviceName,
+      maxThriftBufferSize = maxThriftBufferSize,
+      responseClassifier = responseClassifier,
+      clientStats = clientStats,
+      perEndpointStats = false
+    )
+
+  def apply(
+    protocolFactory: TProtocolFactory,
+    maxThriftBufferSize: Int,
+    responseClassifier: ResponseClassifier
+  ): RichClientParam =
+    apply(protocolFactory, "", maxThriftBufferSize, responseClassifier, ClientStatsReceiver)
+
+  def apply(
+    protocolFactory: TProtocolFactory,
+    responseClassifier: ResponseClassifier
+  ): RichClientParam =
+    apply(protocolFactory, Thrift.param.maxThriftBufferSize, responseClassifier)
+
+  def apply(protocolFactory: TProtocolFactory): RichClientParam =
+    apply(protocolFactory, ResponseClassifier.Default)
+
+  def apply(): RichClientParam = apply(Thrift.param.protocolFactory)
 
   /**
    * Creates a new TReusableBuffer. The function can be used to create a partially applied
@@ -28,60 +97,39 @@ object RichClientParam {
 }
 
 /**
- * Produce a client with params wrapped in RichClientParam
- *
- * @param protocolFactory A `TProtocolFactory` creates protocol objects from transports
- * @param serviceName For client stats, (default: empty string)
- * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
- * @param thriftReusableBufferFactory A reusable buffer for the thrift request/response, if passed
- *                                  maxThriftBufferSize is ignored
- * @param responseClassifier See [[com.twitter.finagle.service.ResponseClassifier]]
- * @param clientStats StatsReceiver for recording metrics
- * @param perEndpointStats Whether to record per-endpoint stats, (default: false).
- *                         By enabling this, the specific Thrift Exceptions can be recorded.
- * See [[https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter PerEndpoint StatsFilter]]
+ * Thrift-specific parameters for configuring clients.
  */
-case class RichClientParam(
-  protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
-  serviceName: String = "",
-  @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") maxThriftBufferSize: Int =
-    Thrift.param.maxThriftBufferSize,
-  thriftReusableBufferFactory: () => TReusableBuffer =
-    RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY,
-  responseClassifier: ResponseClassifier = ResponseClassifier.Default,
-  clientStats: StatsReceiver = ClientStatsReceiver,
-  perEndpointStats: Boolean = false) {
-
-  def this(
-    protocolFactory: TProtocolFactory,
-    serviceName: String,
-    maxThriftBufferSize: Int,
-    responseClassifier: ResponseClassifier,
-    clientStats: StatsReceiver
-  ) =
-    this(
-      protocolFactory = protocolFactory,
-      serviceName = serviceName,
-      maxThriftBufferSize = maxThriftBufferSize,
-      responseClassifier = responseClassifier,
-      clientStats = clientStats,
-      perEndpointStats = false
-    )
-
-  def this(
-    protocolFactory: TProtocolFactory,
-    maxThriftBufferSize: Int,
-    responseClassifier: ResponseClassifier
-  ) = this(protocolFactory, "", maxThriftBufferSize, responseClassifier, ClientStatsReceiver)
-
-  def this(protocolFactory: TProtocolFactory, responseClassifier: ResponseClassifier) =
-    this(protocolFactory, Thrift.param.maxThriftBufferSize, responseClassifier)
-
-  def this(protocolFactory: TProtocolFactory) = this(protocolFactory, ResponseClassifier.Default)
-
-  def this() = this(Thrift.param.protocolFactory)
+// TODO: We should make this a case class again once we drop support for 2.11
+class RichClientParam private (
+  val protocolFactory: TProtocolFactory,
+  val serviceName: String,
+  @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") val maxThriftBufferSize: Int,
+  val thriftReusableBufferFactory: () => TReusableBuffer,
+  val responseClassifier: ResponseClassifier,
+  val clientStats: StatsReceiver,
+  val perEndpointStats: Boolean) {
 
   import Protocols._
+
+  def copy(
+    protocolFactory: TProtocolFactory = this.protocolFactory,
+    serviceName: String = this.serviceName,
+    @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") maxThriftBufferSize: Int =
+      this.maxThriftBufferSize,
+    thriftReusableBufferFactory: () => TReusableBuffer = this.thriftReusableBufferFactory,
+    responseClassifier: ResponseClassifier = this.responseClassifier,
+    clientStats: StatsReceiver = this.clientStats,
+    perEndpointStats: Boolean = this.perEndpointStats
+  ): RichClientParam =
+    new RichClientParam(
+      protocolFactory,
+      serviceName,
+      maxThriftBufferSize,
+      thriftReusableBufferFactory,
+      responseClassifier,
+      clientStats,
+      perEndpointStats
+    )
 
   def createThriftReusableBuffer(): TReusableBuffer = {
     if (thriftReusableBufferFactory eq RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY) {
