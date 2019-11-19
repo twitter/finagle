@@ -109,6 +109,23 @@ class RichClientParam private (
   val clientStats: StatsReceiver,
   val perEndpointStats: Boolean) {
 
+  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
+  def this(protocolFactory: TProtocolFactory, responseClassifier: ResponseClassifier) = this(
+    protocolFactory,
+    "",
+    Thrift.param.maxThriftBufferSize,
+    RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY,
+    responseClassifier,
+    new LazyStatsReceiver(ClientStatsReceiver),
+    false
+  )
+
+  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
+  def this(protocolFactory: TProtocolFactory) = this(protocolFactory, ResponseClassifier.Default)
+
+  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
+  def this() = this(Thrift.param.protocolFactory, ResponseClassifier.Default)
+
   import Protocols._
 
   def copy(

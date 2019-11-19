@@ -25,8 +25,9 @@ Breaking API Changes
 * finagle-core: The `RetryPolicy` companion object is no longer a `JavaSingleton`.
   ``PHAB_ID=D399947``
 
-* finagle-thrift: The RichClientParam constructor is now private, so to construct it, you must
-  call one of the RichClientParam.apply methods.  ``PHAB_ID=D400382``
+* finagle-thrift: The RichClientParam constructors are now all either
+  deprecated, so to construct it, you must call one of the RichClientParam.apply
+  methods.  ``PHAB_ID=D400382``
 
 19.11.0
 -------
