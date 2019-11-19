@@ -21,7 +21,6 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport.{ClientSsl, ServerSsl}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Buf, ByteReader}
-import com.twitter.logging.Logger
 import com.twitter.util.{Future, StorageUnit}
 import io.netty.channel.{Channel, ChannelPipeline}
 import java.net.SocketAddress
@@ -32,7 +31,6 @@ import scala.collection.mutable.ArrayBuffer
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
 object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mux.Response] {
-  private val log = Logger.get()
 
   /**
    * The current version of the mux protocol.
