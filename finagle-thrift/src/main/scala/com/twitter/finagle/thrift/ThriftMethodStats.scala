@@ -1,16 +1,18 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.stats.{Counter, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{Counter, LazyStatsReceiver, NullStatsReceiver, StatsReceiver}
 
 object ThriftMethodStats {
 
-  def apply(stats: StatsReceiver): ThriftMethodStats =
+  def apply(stats: StatsReceiver): ThriftMethodStats = {
+    val wrapped = new LazyStatsReceiver(stats)
     ThriftMethodStats(
-      stats.counter("requests"),
-      stats.counter("success"),
-      stats.counter("failures"),
-      stats.scope("failures")
+      wrapped.counter("requests"),
+      wrapped.counter("success"),
+      wrapped.counter("failures"),
+      wrapped.scope("failures")
     )
+  }
 
   private[this] val NullThriftMethodStats = apply(NullStatsReceiver)
 
@@ -23,7 +25,7 @@ object ThriftMethodStats {
   def Null: ThriftMethodStats = NullThriftMethodStats
 }
 
-case class ThriftMethodStats(
+case class ThriftMethodStats private (
   requestsCounter: Counter,
   successCounter: Counter,
   failuresCounter: Counter,

@@ -913,7 +913,7 @@ class EndToEndTest
     assert(sr.counters(Seq("client", "query", "requests")) == 1)
     eventually {
       assert(sr.counters(Seq("client", "query", "failures")) == 1)
-      assert(sr.counters(Seq("client", "query", "success")) == 0)
+      assert(!sr.counters.contains(Seq("client", "query", "success")))
     }
 
     // test that we can examine the request as well.
@@ -962,7 +962,7 @@ class EndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "query", "success")) == Some(0))
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
 
     assert(sr.counters(Seq("thrift", "requests")) == 1)
     assert(sr.counters.get(Seq("thrift", "success")) == Some(0))
@@ -1217,7 +1217,7 @@ class EndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "query", "success")) == Some(0))
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
 
     assert(sr.counters(Seq("thrift", "requests")) == 1)
     assert(sr.counters.get(Seq("thrift", "success")) == Some(0))
@@ -1427,7 +1427,7 @@ class EndToEndTest
     assert(sr.counters(Seq("thrift", "requests")) == 1)
     assert(sr.counters.get(Seq("thrift", "success")) == Some(0))
     assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "query", "success")) == Some(0))
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == Await.result(client.query("safe"), 10.seconds))

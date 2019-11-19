@@ -13,11 +13,20 @@ Runtime Behavior Changes
 * finagle-netty4: Change the 'connection_requests' metric to debug verbosity.
   ``PHAB_ID=D391289``
 
+* finagle-thrift: Per-method metrics are now created lazily, so if you have methods on a Thrift
+  service that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
+
+* finagle-core: Per-method metrics on MethodBuilder are now created lazily, so if you have
+  methods that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
 * finagle-core: The `RetryPolicy` companion object is no longer a `JavaSingleton`.
   ``PHAB_ID=D399947``
+
+* finagle-thrift: The RichClientParam constructor is now private, so to construct it, you must
+  call one of the RichClientParam.apply methods.  ``PHAB_ID=D400382``
 
 19.11.0
 -------
@@ -34,8 +43,8 @@ New Features
   read the underlying json value as type `T` or use `jsonBytesOrNull` API to get a raw byte
   array of the the json column value. ``PHAB_ID=D390914``
 
-* MySQL integration tests can now run on a port other than the default (3306). Add a `port`
-  property to `.finagle-mysql/integration-test.properties` to customize the value.
+* finagle-mysql: MySQL integration tests can now run on a port other than the default (3306).
+  Add a `port` property to `.finagle-mysql/integration-test.properties` to customize the value.
   ``PHAB_ID=D390914``
 
 Runtime Behavior Changes

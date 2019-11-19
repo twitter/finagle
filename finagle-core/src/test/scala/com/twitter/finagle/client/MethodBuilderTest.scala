@@ -483,6 +483,30 @@ class MethodBuilderTest
     assert(!sourcedFailures)
   }
 
+  test("makes stats lazily") {
+    val stats = new InMemoryStatsReceiver()
+    val clientLabel = "the_client"
+    val params =
+      Stack.Params.empty +
+        param.Label(clientLabel) +
+        param.Stats(stats)
+
+    val failure = Failure("some reason", new RuntimeException("welp"))
+      .withSource(Failure.Source.Service, "test_service")
+    val svc: Service[Int, Int] = new FailedService(failure)
+
+    val stack = Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stackClient = TestStackClient(stack, params)
+
+    val methodBuilder = MethodBuilder.from("destination", stackClient)
+
+    val methodName = "a_method"
+    val client = methodBuilder.newService(methodName)
+
+    assert(stats.counters.keySet.filter(_.startsWith(Seq(clientLabel, methodName))).isEmpty)
+    assert(stats.stats.keySet.filter(_.startsWith(Seq(clientLabel, methodName))).isEmpty)
+  }
+
   test("underlying service is reference counted") {
     val svc: Service[Int, Int] = new Service[Int, Int] {
       private[this] var closed = false
