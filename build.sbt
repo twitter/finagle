@@ -78,6 +78,8 @@ val thriftLibs = Seq(
 val scroogeLibs = thriftLibs ++ Seq(
   "com.twitter" %% "scrooge-core" % releaseVersion)
 
+val lz4Lib = "org.lz4" % "lz4-java" % "1.6.0"
+
 def util(which: String) =
   "com.twitter" %% ("util-"+ which) % releaseVersion excludeAll(
     ExclusionRule(organization = "junit"),
@@ -712,7 +714,9 @@ lazy val finagleMux = Project(
     util("app"),
     util("core"),
     util("logging"),
-    util("stats"))
+    util("stats"),
+    lz4Lib % "test"
+  )
 ).dependsOn(
   finagleCore % "compile->compile;test->test",
   finagleNetty4,
