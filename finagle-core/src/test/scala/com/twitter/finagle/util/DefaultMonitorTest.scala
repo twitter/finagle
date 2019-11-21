@@ -6,36 +6,48 @@ import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.{Failure, TimeoutException}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Duration, TimeoutException => UtilTimeoutException}
-import java.util.logging.Handler
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.verify
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
-class DefaultMonitorTest extends FunSuite with Matchers with MockitoSugar with BeforeAndAfterEach {
+// This class exists because mockito is not good at
+// mocking Scala methods which use by-name parameters.
+// The `DefaultMonitor` class uses `Logger`'s 'logLazy'
+// method, which does use by-name parameters. Therefore
+// we create a fake class with a concrete method that
+// we can override to handle the argument capture
+// ourselves directly.
+class FakeLogger extends Logger("fake", null) {
 
-  private var handler: Handler = _
+  var capturedLevel: Level = _
+  var capturedThrown: Throwable = _
+  var capturedMessage: String = _
+
+  override def logLazy(level: Level, thrown: Throwable, message: => AnyRef): Unit = {
+    capturedLevel = level
+    capturedThrown = thrown
+    capturedMessage = message.toString
+  }
+
+}
+
+class DefaultMonitorTest extends FunSuite with BeforeAndAfterEach {
 
   private var monitor: DefaultMonitor = _
 
-  private var log: Logger = _
+  private var log: FakeLogger = _
 
   override def beforeEach(): Unit = {
-    handler = mock[Handler]
-    log = Logger.get()
-    log.setLevel(Level.TRACE)
-    log.clearHandlers()
-    log.addHandler(handler)
+    log = new FakeLogger()
     monitor = new DefaultMonitor(log, "n/a", "n/a")
   }
 
-  private def verifyPublished(expectedLevel: Level, expectedThrown: Throwable): Unit = {
-    val capture =
-      ArgumentCaptor.forClass(classOf[java.util.logging.LogRecord])
-    verify(handler).publish(capture.capture())
-
-    assert(expectedLevel == capture.getValue.getLevel)
-    assert(expectedThrown == capture.getValue.getThrown)
+  private def verifyPublished(
+    expectedLevel: Level,
+    expectedThrown: Throwable,
+    expectedMessageFragment: String = "Exception propagated to the default monitor"
+  ): Unit = {
+    assert(expectedLevel == log.capturedLevel)
+    assert(expectedThrown == log.capturedThrown)
+    assert(log.capturedMessage.contains(expectedMessageFragment))
   }
 
   private[this] class MyTimeoutException(
@@ -89,14 +101,7 @@ class DefaultMonitorTest extends FunSuite with Matchers with MockitoSugar with B
       assert(monitor.handle(f))
     }
 
-    val capture =
-      ArgumentCaptor.forClass(classOf[java.util.logging.LogRecord])
-    verify(handler).publish(capture.capture())
-
-    assert(Level.WARNING == capture.getValue.getLevel)
-    assert(f == capture.getValue.getThrown)
-
     val remoteInfo = "(upstream address: unconnected, downstream address: bar, label: foo)"
-    capture.getValue.getMessage should include(remoteInfo)
+    verifyPublished(Level.WARNING, f, remoteInfo)
   }
 }
