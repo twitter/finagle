@@ -44,13 +44,14 @@ object RequestLogger {
   private val log = Logger.get(loggerName)
 
   private[this] def withLogging[Req, Rep](
+    logger: Logger,
     label: String,
     nowNanos: () => Long,
     role: Stack.Role,
     svcFac: ServiceFactory[Req, Rep]
   ): ServiceFactory[Req, Rep] =
     new ServiceFactoryProxy[Req, Rep](svcFac) {
-      private[this] val requestLogger = new RequestLogger(label, role.name, nowNanos)
+      private[this] val requestLogger = new RequestLogger(logger, label, role.name, nowNanos)
       override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
         super.apply(conn).map { svc =>
           new ServiceProxy[Req, Rep](svc) {
@@ -68,19 +69,28 @@ object RequestLogger {
       }
     }
 
-  /**
+  // This version is only exposed for testing of `RequestLogger`.
+  private[filter] def newStackTransformer(
+    logger: Logger,
+    label: String,
+    nowNanos: () => Long
+  ): Stack.Transformer =
+    new Stack.Transformer {
+      def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
+        stack.map((hd, sf) => withLogging(logger, label, nowNanos, hd.role, sf))
+    }
+
+  /*
    * Used to [[Stack.transform transform]] a [[Stack]] to include request tracing.
    *
    * @param label the label of the client or server
+   *
+   * @param nowNanos the current time in nanoseconds
    */
   private[finagle] def newStackTransformer(
     label: String,
     nowNanos: () => Long = Stopwatch.systemNanos
-  ): Stack.Transformer =
-    new Stack.Transformer {
-      def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
-        stack.map((hd, sf) => withLogging(label, nowNanos, hd.role, sf))
-    }
+  ): Stack.Transformer = newStackTransformer(log, label, nowNanos)
 
 }
 
@@ -90,6 +100,8 @@ object RequestLogger {
  *
  * Instances are thread-safe and safe to be used by multiple threads.
  *
+ * @param log the logger to write request logs to
+ *
  * @param label the label of the client or server
  *
  * @param name used in the logs to indicate what is starting and ending.
@@ -97,16 +109,15 @@ object RequestLogger {
  * @note logs are done at `TRACE` level in the "com.twitter.finagle.request.Logger"
  *       `Logger`.
  */
-private class RequestLogger(label: String, name: String, nowNanos: () => Long) {
-  import RequestLogger._
+private class RequestLogger(logger: Logger, label: String, name: String, nowNanos: () => Long) {
 
   def shouldTrace: Boolean =
-    log.isLoggable(Level.TRACE)
+    logger.isLoggable(Level.TRACE)
 
   def start(): Long = {
     val start = nowNanos()
     val traceId = Trace.id
-    log.trace(s"traceId=$traceId $label $name begin")
+    logger.trace(s"traceId=$traceId $label $name begin")
     start
   }
 
@@ -114,14 +125,14 @@ private class RequestLogger(label: String, name: String, nowNanos: () => Long) {
     future.ensure {
       val traceId = Trace.id
       val elapsedUs = elapsedMicros(startNanos)
-      log.trace(s"traceId=$traceId $label $name end cumulative async elapsed $elapsedUs us")
+      logger.trace(s"traceId=$traceId $label $name end cumulative async elapsed $elapsedUs us")
     }
   }
 
   def endSync(startNanos: Long): Unit = {
     val traceId = Trace.id
     val elapsedUs = elapsedMicros(startNanos)
-    log.trace(s"traceId=$traceId $label $name end cumulative sync elapsed $elapsedUs us")
+    logger.trace(s"traceId=$traceId $label $name end cumulative sync elapsed $elapsedUs us")
   }
 
   private[this] def elapsedMicros(startNanos: Long): Long = {
