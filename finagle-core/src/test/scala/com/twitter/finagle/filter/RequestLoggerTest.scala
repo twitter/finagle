@@ -3,42 +3,22 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.stack.{Endpoint, nilStack}
-import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Await, Duration, Future, Stopwatch, Time}
 import java.util.concurrent.atomic.AtomicInteger
+import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Matchers.{anyObject, contains}
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatestplus.mockito.MockitoSugar
 
-class RequestLoggerTest extends FunSuite with BeforeAndAfter {
-
-  private[this] val logger = Logger.get(RequestLogger.loggerName)
-  private[this] val handler = new StringHandler(BareFormatter, None)
+class RequestLoggerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
 
   private[this] val roleName = "RequestLoggerTest"
-  private[this] val requestLogger =
-    new RequestLogger("aLabel", roleName, Stopwatch.systemNanos)
-
-  before {
-    handler.clear()
-    logger.clearHandlers()
-    logger.addHandler(handler)
-  }
-
-  after {
-    logger.setLevel(Level.INFO)
-  }
-
-  test("does not log at info level") {
-    logger.setLevel(Level.INFO)
-    assert(!requestLogger.shouldTrace)
-  }
-
-  test("logs at trace level") {
-    logger.setLevel(Level.TRACE)
-    assert(requestLogger.shouldTrace)
-  }
 
   test("StackTransformer") {
-    logger.setLevel(Level.TRACE)
+    val mockLog = mock[Logger]
+    when(mockLog.isLoggable(Level.TRACE)).thenReturn(true)
+
     Time.withCurrentTimeFrozen { tc =>
       def newModule(name: String, counter: AtomicInteger, delay: Duration) =
         new Stack.Module0[ServiceFactory[Int, Int]] {
@@ -70,7 +50,7 @@ class RequestLoggerTest extends FunSuite with BeforeAndAfter {
       builder.push(newModule("module1", module1Count, 200.microseconds))
       builder.push(newModule("module0", module0Count, 50.microseconds))
 
-      val transformer = RequestLogger.newStackTransformer("aLabel", Stopwatch.timeNanos)
+      val transformer = RequestLogger.newStackTransformer(mockLog, "aLabel", Stopwatch.timeNanos)
       val stack = transformer(builder.result ++ Stack.leaf(Endpoint, endpoint))
       val svcFac = stack.make(Stack.Params.empty)
       val svc = Await.result(svcFac(ClientConnection.nil), 5.seconds)
@@ -83,18 +63,21 @@ class RequestLoggerTest extends FunSuite with BeforeAndAfter {
       assert(1 == module2Count.get())
 
       // validate we got begin/end logs for all the modules.
-      val out = handler.get
       val names = Seq("module0", "module1", "module2", Endpoint.name)
       names.foreach { name =>
-        assert(out.contains(s"aLabel $name begin"))
-        assert(out.contains(s"aLabel $name end cumulative async"))
+        verify(mockLog, times(1)).trace(contains(s"aLabel $name begin"), anyObject())
+        verify(mockLog, times(1)).trace(contains(s"aLabel $name end cumulative async"), anyObject())
       }
 
       // validate the delays are accounted for in the right modules.
-      assert(out.contains(s"${Endpoint.name} end cumulative sync elapsed 9 us"))
-      assert(out.contains("aLabel module2 end cumulative sync elapsed 9 us"))
-      assert(out.contains("aLabel module1 end cumulative sync elapsed 209 us"))
-      assert(out.contains("aLabel module0 end cumulative sync elapsed 259 us"))
+      verify(mockLog, times(1))
+        .trace(contains(s"${Endpoint.name} end cumulative sync elapsed 9 us"), anyObject())
+      verify(mockLog, times(1))
+        .trace(contains("aLabel module2 end cumulative sync elapsed 9 us"), anyObject())
+      verify(mockLog, times(1))
+        .trace(contains("aLabel module1 end cumulative sync elapsed 209 us"), anyObject())
+      verify(mockLog, times(1))
+        .trace(contains("aLabel module0 end cumulative sync elapsed 259 us"), anyObject())
     }
   }
 
