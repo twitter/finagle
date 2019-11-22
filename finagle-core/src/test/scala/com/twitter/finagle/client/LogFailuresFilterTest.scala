@@ -3,23 +3,16 @@ package com.twitter.finagle.client
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
-import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Await, Future, Return, Stopwatch, Time}
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.mockito.Matchers.{any, anyString, anyVararg, contains}
+import org.mockito.Mockito.{never, times, verify, when}
+import org.scalatest.FunSuite
+import org.scalatestplus.mockito.MockitoSugar
 
-class LogFailuresFilterTest extends FunSuite with BeforeAndAfter {
+class LogFailuresFilterTest extends FunSuite with MockitoSugar {
 
-  private[this] val logger = Logger.get()
-  private[this] val handler = new StringHandler(BareFormatter, None)
-
-  before {
-    handler.clear()
-    logger.setLevel(Level.DEBUG)
-    logger.clearHandlers()
-    logger.addHandler(handler)
-  }
-
-  private[this] def filter(classifier: ResponseClassifier) =
+  private[this] def filter(logger: Logger, classifier: ResponseClassifier) =
     new MethodBuilderRetry.LogFailuresFilter[String, String](
       logger,
       "CoolClient/MopeyMethod",
@@ -28,53 +21,82 @@ class LogFailuresFilterTest extends FunSuite with BeforeAndAfter {
     )
 
   test("does not log successful responses") {
+    val logger = mock[Logger]
+    when(logger.isLoggable(Level.DEBUG)).thenReturn(true)
+
     val alwaysReturn = Service.const(Future.value("ok"))
-    val svc = filter(ResponseClassifier.Default).andThen(alwaysReturn)
+    val svc = filter(logger, ResponseClassifier.Default).andThen(alwaysReturn)
 
     Await.ready(svc("ok"), 5.seconds)
-    assert("" == handler.get)
+    verify(logger, never()).debug(any[Throwable](), anyString(), anyVararg())
+    verify(logger, never()).debug(anyString(), anyVararg())
   }
 
   test("logs failed Throw responses") {
+    val logger = mock[Logger]
+    when(logger.isLoggable(Level.DEBUG)).thenReturn(true)
+
     val alwaysFails = Service.const[String](Future.exception(new RuntimeException()))
-    val svc = filter(ResponseClassifier.Default).andThen(alwaysFails)
+    val svc = filter(logger, ResponseClassifier.Default).andThen(alwaysFails)
 
     Await.ready(svc("nope"), 5.seconds)
-    assert(handler.get.startsWith("Request failed for CoolClient/MopeyMethod"))
+
+    val expectedMessage = "Request failed for CoolClient/MopeyMethod"
+    verify(logger, times(1)).debug(any[Throwable](), contains(expectedMessage), anyVararg())
   }
 
   test("logs failed Return responses") {
+    val logger = mock[Logger]
+    when(logger.isLoggable(Level.DEBUG)).thenReturn(true)
+
     val alwaysReturn = Service.const(Future.value("ok"))
     val classifier = ResponseClassifier.named("returns-are-failures") {
       case ReqRep(_, Return(_)) => ResponseClass.RetryableFailure
     }
-    val svc = filter(classifier).andThen(alwaysReturn)
+    val svc = filter(logger, classifier).andThen(alwaysReturn)
 
     Await.result(svc("nope"), 5.seconds)
-    assert(handler.get.startsWith("Request failed for CoolClient/MopeyMethod"))
+
+    val expectedMessage = "Request failed for CoolClient/MopeyMethod"
+    verify(logger, times(1)).debug(any[Throwable](), contains(expectedMessage), anyVararg())
   }
 
   test("does not log failures at info level") {
+    val logger = mock[Logger]
+    // an info level logger would not log debug messages
+    when(logger.isLoggable(Level.DEBUG)).thenReturn(false)
+
     val alwaysFails = Service.const[String](Future.exception(new RuntimeException()))
-    val svc = filter(ResponseClassifier.Default).andThen(alwaysFails)
-    logger.setLevel(Level.INFO)
+    val svc = filter(logger, ResponseClassifier.Default).andThen(alwaysFails)
 
     Await.ready(svc("nope"), 5.seconds)
-    assert("" == handler.get)
+
+    verify(logger, never()).debug(any[Throwable](), anyString(), anyVararg())
+    verify(logger, never()).info(any[Throwable](), anyString(), anyVararg())
   }
 
   test("logs include request and response at trace level") {
+    val logger = mock[Logger]
+    // a trace level logger would log both debug and trace messages
+    when(logger.isLoggable(Level.DEBUG)).thenReturn(true)
+    when(logger.isLoggable(Level.TRACE)).thenReturn(true)
+
     val alwaysFails = Service.const[String](Future.exception(new RuntimeException()))
-    val svc = filter(ResponseClassifier.Default).andThen(alwaysFails)
-    logger.setLevel(Level.TRACE)
+    val svc = filter(logger, ResponseClassifier.Default).andThen(alwaysFails)
 
     Await.ready(svc("nope"), 5.seconds)
-    val log = handler.get
-    assert(log.contains("nope"))
-    assert(log.contains("RuntimeException"))
+
+    // Debug Logging is on, but we log at trace instead.
+    verify(logger, never()).debug(any[Throwable](), anyString(), anyVararg())
+
+    val expectedMessage = "(request=nope, response=Throw(java.lang.RuntimeException))"
+    verify(logger, times(1)).trace(any[Throwable](), contains(expectedMessage), anyVararg())
   }
 
   test("logs include the elapsed time") {
+    val logger = mock[Logger]
+    when(logger.isLoggable(Level.DEBUG)).thenReturn(true)
+
     Time.withCurrentTimeFrozen { tc =>
       val alwaysFails = Service.const[String](Future.exception(new RuntimeException()))
       val advanceTime = new SimpleFilter[String, String] {
@@ -83,12 +105,13 @@ class LogFailuresFilterTest extends FunSuite with BeforeAndAfter {
           service(request)
         }
       }
-      val svc = filter(ResponseClassifier.Default)
+      val svc = filter(logger, ResponseClassifier.Default)
         .andThen(advanceTime)
         .andThen(alwaysFails)
 
       Await.ready(svc("nope"), 5.seconds)
-      assert(handler.get.contains("elapsed=5 ms"))
+
+      verify(logger, times(1)).debug(any[Throwable](), contains("elapsed=5 ms"), anyVararg())
     }
   }
 
