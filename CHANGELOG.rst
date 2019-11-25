@@ -29,6 +29,11 @@ Breaking API Changes
   deprecated, so to construct it, you must call one of the RichClientParam.apply
   methods.  ``PHAB_ID=D400382``
 
+Changes
+~~~~~~~
+
+ * finagle: Upgrade Jackson dependency from version `2.9.9` to version `2.10.1` ``PHAB_ID=D402722``
+
 19.11.0
 -------
 
