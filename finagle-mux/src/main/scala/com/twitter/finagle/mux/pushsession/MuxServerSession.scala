@@ -135,14 +135,15 @@ private[finagle] final class MuxServerSession(
 
       // We set a timer to make sure we've drained within the allotted amount of time
       h_tracker.drained.by(params[param.Timer].timer, deadline).respond {
-        case Throw(_: TimeoutException) =>
+        case Throw(tt: TimeoutException) =>
+          println("debuggering")
+          tt.printStackTrace()
+          val t = new TimeoutException(
+            s"Failed to drain within the deadline $deadline. Tracker state: ${h_tracker.currentState}"
+          )
+          t.fillInStackTrace()
           exec.execute(new Runnable {
-            def run(): Unit = {
-              val t = new TimeoutException(
-                s"Failed to drain within the deadline $deadline. Tracker state: ${h_tracker.currentState}"
-              )
-              handleShutdown(Throw(t))
-            }
+            def run(): Unit = handleShutdown(Throw(t))
           })
 
         case _ => // nop: didn't timeout, so it should have already been handled
