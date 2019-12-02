@@ -72,7 +72,7 @@ object DtabFilter {
     def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
       // Log errors if a request already has dtab headers AND they
       // were not set by this filter (i.e. on a previous attempt at
-      // emiting this request).
+      // emitting this request).
       val dtabHeaders = strip(req)
       if (dtabHeaders.nonEmpty && !req.ctx(HasSetDtab)) {
         // Log an error immediately if we find any Dtab headers already in the request and report them

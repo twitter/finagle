@@ -38,13 +38,13 @@
   mux framing is enabled.
 
 **<label>/mux/framer/pending_write_streams**
-  A guage of the number of outstanding write streams when mux framing is enabled.
+  A gauge of the number of outstanding write streams when mux framing is enabled.
 
 **<label>/mux/framer/pending_read_streams**
-  A guage of the number of outstanding read streams when mux framing is enabled.
+  A gauge of the number of outstanding read streams when mux framing is enabled.
 
 **<label>/mux/framer/write_window_bytes**
-  A guage indicating the maximum size of fragments when mux framing is enabled.
+  A gauge indicating the maximum size of fragments when mux framing is enabled.
   A value of -1 means that writes are not fragmented.
 
 **<label>/mux/transport/read/failures/**
