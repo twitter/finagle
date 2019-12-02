@@ -37,7 +37,15 @@ case class Span(
     annotations: Seq[ZipkinAnnotation],
     bAnnotations: Seq[BinaryAnnotation],
     endpoint: Endpoint
-  ) = this(traceId, _serviceName, _name, annotations, bAnnotations, endpoint, created = Time.now)
+  ) =
+    this(
+      traceId,
+      _serviceName,
+      _name,
+      annotations,
+      bAnnotations,
+      endpoint,
+      created = Time.nowNanoPrecision)
 
   // If necessary, we compute the timestamp of when the span was created
   // which we serialize and send to the collector.
@@ -102,7 +110,7 @@ case class Span(
 
 object Span {
   def apply(traceId: TraceId): Span =
-    Span(traceId, None, None, Nil, Nil, Endpoint.Unknown, Time.now)
+    Span(traceId, None, None, Nil, Nil, Endpoint.Unknown, Time.nowNanoPrecision)
 
   def apply(
     traceId: TraceId,
@@ -112,5 +120,5 @@ object Span {
     bAnnotations: Seq[BinaryAnnotation],
     endpoint: Endpoint
   ): Span =
-    Span(traceId, _serviceName, _name, annotations, bAnnotations, endpoint, Time.now)
+    Span(traceId, _serviceName, _name, annotations, bAnnotations, endpoint, Time.nowNanoPrecision)
 }

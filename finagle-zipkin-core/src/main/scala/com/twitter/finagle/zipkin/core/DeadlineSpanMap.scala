@@ -61,7 +61,8 @@ private class DeadlineSpanMap(
         // it's already been flushed. copy most of it and immediately log it.
         val copy = ms.copyForImmediateLogging()
         f(copy)
-        copy.addAnnotation(ZipkinAnnotation(Time.now, "finagle.zipkin.late_arrival", ms.endpoint))
+        copy.addAnnotation(
+          ZipkinAnnotation(Time.nowNanoPrecision, "finagle.zipkin.late_arrival", ms.endpoint))
         Some(copy)
       } else {
         f(ms)

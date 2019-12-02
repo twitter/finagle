@@ -34,6 +34,9 @@ Changes
 
  * finagle: Upgrade Jackson dependency from version `2.9.9` to version `2.10.1` ``PHAB_ID=D402722``
 
+ * finagle-zipkin-core: Tracing produces microsecond resolution timestamps in JDK9 or later. 
+   ``PHAB_ID=D400661``
+
 19.11.0
 -------
 
