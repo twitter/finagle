@@ -2,7 +2,12 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, Verbosity}
+import com.twitter.finagle.stats.{
+  CounterSchema,
+  HistogramSchema,
+  InMemoryStatsReceiver,
+  MetricBuilder
+}
 import com.twitter.util.{Await, Duration, Future, Stopwatch, Time}
 import org.scalatest.FunSuite
 import org.mockito.Mockito.{spy, verify}
@@ -44,9 +49,13 @@ class StatsFilterTest extends FunSuite {
     }
 
     // Verify that the counters and stats were only created once
-    verify(receiver).counter(Verbosity.Default, "status", "404")
-    verify(receiver).counter(Verbosity.Default, "status", "4XX")
-    verify(receiver).stat(Verbosity.Default, "time", "404")
-    verify(receiver).stat(Verbosity.Default, "time", "4XX")
+    verify(receiver).counter(
+      CounterSchema(new MetricBuilder(name = Seq("status", "404"), statsReceiver = receiver)))
+    verify(receiver).counter(
+      CounterSchema(new MetricBuilder(name = Seq("status", "4XX"), statsReceiver = receiver)))
+    verify(receiver).stat(
+      HistogramSchema(new MetricBuilder(name = Seq("time", "404"), statsReceiver = receiver)))
+    verify(receiver).stat(
+      HistogramSchema(new MetricBuilder(name = Seq("time", "4XX"), statsReceiver = receiver)))
   }
 }

@@ -27,18 +27,23 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   private[this] var _gauges = Map[Seq[String], () => Float]()
   def gauges: Map[Seq[String], () => Float] = synchronized { _gauges }
 
-  def counter(verbosity: Verbosity, name: String*): Counter = new Counter {
-    counters.putIfAbsent(name, new AtomicLong(0))
-    def incr(delta: Long): Unit = counters.get(name).getAndAdd(delta)
+  def counter(schema: CounterSchema): Counter = new Counter {
+    counters.putIfAbsent(schema.metricBuilder.name, new AtomicLong(0))
+    def incr(delta: Long): Unit = counters.get(schema.metricBuilder.name).getAndAdd(delta)
   }
 
-  def stat(verbosity: Verbosity, name: String*): Stat = new Stat {
+  def stat(schema: HistogramSchema): Stat = new Stat {
     def add(value: Float): Unit = SummarizingStatsReceiver.this.synchronized {
-      stats.get(name) += value
+      stats.get(schema.metricBuilder.name) += value
     }
   }
 
-  // Ignoring gauges for now, but we may consider sampling them.
+  override def addGauge(schema: GaugeSchema)(f: => Float): Gauge =
+    synchronized {
+      _gauges += (schema.metricBuilder.name -> (() => f))
+      new Gauge { def remove(): Unit = () }
+    }
+
   protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
     synchronized {
       _gauges += (name -> (() => f))

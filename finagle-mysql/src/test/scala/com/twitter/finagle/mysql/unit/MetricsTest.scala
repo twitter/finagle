@@ -3,11 +3,13 @@ package com.twitter.finagle.mysql
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{
   Counter,
+  CounterSchema,
   Gauge,
+  GaugeSchema,
+  HistogramSchema,
   InMemoryStatsReceiver,
   Stat,
-  StatsReceiverProxy,
-  Verbosity
+  StatsReceiverProxy
 }
 import com.twitter.util.{Await, Awaitable, Future}
 import java.util.concurrent.atomic.LongAdder
@@ -24,19 +26,19 @@ class MetricsTest extends FunSuite {
     val statCounter = new LongAdder()
     val gaugeCounter = new LongAdder()
 
-    override def counter(verbosity: Verbosity, names: String*): Counter = {
+    override def counter(schema: CounterSchema): Counter = {
       counterCounter.increment()
-      super.counter(verbosity, names: _*)
+      super.counter(schema)
     }
 
-    override def stat(verbosity: Verbosity, names: String*): Stat = {
+    override def stat(schema: HistogramSchema): Stat = {
       statCounter.increment()
-      super.stat(verbosity, names: _*)
+      super.stat(schema)
     }
 
-    override def addGauge(verbosity: Verbosity, name: String*)(f: => Float): Gauge = {
+    override def addGauge(schema: GaugeSchema)(f: => Float): Gauge = {
       gaugeCounter.increment()
-      super.addGauge(verbosity, name: _*)(f)
+      super.addGauge(schema)(f)
     }
   }
 
