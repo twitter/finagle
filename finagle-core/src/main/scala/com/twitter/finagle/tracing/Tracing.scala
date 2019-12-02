@@ -162,11 +162,17 @@ abstract class Tracing {
    */
   final def isTerminal: Boolean = id.terminal
 
+  // The underlying tracing format allows us to add annotations to
+  // traces with microsecond resolution. Unfortunately Time.now only
+  // gives us millisecond resolution so we need to use a higher
+  // precision clock for our timestamps. We use a nanosecond clock,
+  // which will allow us to truncate to microseconds when
+  // we finally persist this trace.
   final def record(ann: Annotation): Unit =
-    record(Record(id, Time.now, ann, None))
+    record(Record(id, Time.nowNanoPrecision, ann, None))
 
   final def record(ann: Annotation, duration: Duration): Unit =
-    record(Record(id, Time.now, ann, Some(duration)))
+    record(Record(id, Time.nowNanoPrecision, ann, Some(duration)))
 
   final def recordWireSend(): Unit =
     record(Annotation.WireSend)
