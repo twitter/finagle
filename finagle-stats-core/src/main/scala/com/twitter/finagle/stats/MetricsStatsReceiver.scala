@@ -104,31 +104,33 @@ class MetricsStatsReceiver(val registry: Metrics)
   /**
    * Create and register a counter inside the underlying Metrics library
    */
-  def counter(verbosity: Verbosity, names: String*): Counter = {
+  def counter(schema: CounterSchema): Counter = {
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.counter on $names")
+      log.trace(s"Calling StatsReceiver.counter on $schema.metricBuilder.name")
     counterRequests.increment()
 
-    val storeCounter = registry.getOrCreateCounter(verbosity, names)
+    val storeCounter =
+      registry.getOrCreateCounter(schema.metricBuilder.verbosity, schema.metricBuilder.name)
     storeCounter.counter
   }
 
   /**
    * Create and register a stat (histogram) inside the underlying Metrics library
    */
-  def stat(verbosity: Verbosity, names: String*): Stat = {
+  def stat(schema: HistogramSchema): Stat = {
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.stat for $names")
+      log.trace(s"Calling StatsReceiver.stat for $schema.metricBuilder.name")
     statRequests.increment()
-    val storeStat = registry.getOrCreateStat(verbosity, names)
+    val storeStat =
+      registry.getOrCreateStat(schema.metricBuilder.verbosity, schema.metricBuilder.name)
     storeStat.stat
   }
 
-  override def addGauge(verbosity: Verbosity, name: String*)(f: => Float): Gauge = {
+  override def addGauge(schema: GaugeSchema)(f: => Float): Gauge = {
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.addGauge for $name")
+      log.trace(s"Calling StatsReceiver.addGauge for $schema.metricBuilder.name")
     gaugeRequests.increment()
-    super.addGauge(verbosity, name: _*)(f)
+    super.addGauge(schema)(f)
   }
 
   protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =

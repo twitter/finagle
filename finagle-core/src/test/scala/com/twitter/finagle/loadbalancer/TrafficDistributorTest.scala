@@ -158,10 +158,10 @@ private object TrafficDistributorTest {
   private class CumulativeGaugeInMemoryStatsReceiver extends StatsReceiverWithCumulativeGauges {
     private[this] val underlying = new InMemoryStatsReceiver()
     override val repr: AnyRef = this
-    override def counter(verbosity: Verbosity, name: String*): ReadableCounter =
-      underlying.counter(verbosity, name: _*)
-    override def stat(verbosity: Verbosity, name: String*): ReadableStat =
-      underlying.stat(verbosity, name: _*)
+    override def counter(schema: CounterSchema): ReadableCounter =
+      underlying.counter(schema)
+    override def stat(schema: HistogramSchema): ReadableStat =
+      underlying.stat(schema)
 
     protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
       underlying.addGauge(name: _*)(f)

@@ -15,18 +15,29 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
   // is used for debugging only.
   def this(logger: Logger) = this(logger, DefaultTimer)
 
-  def stat(verbosity: Verbosity, name: String*): Stat = new Stat {
+  def stat(schema: HistogramSchema): Stat = new Stat {
     def add(value: Float): Unit = {
-      val level = if (verbosity == Verbosity.Debug) Level.FINEST else Level.INFO
-      logger.log(level, "%s add %f".format(formatName(name), value))
+      val level =
+        if (schema.metricBuilder.verbosity == Verbosity.Debug) Level.FINEST else Level.INFO
+      val formattedName = formatName(schema.metricBuilder.name)
+      logger.log(level, s"$formattedName add $value")
     }
   }
 
-  def counter(verbosity: Verbosity, name: String*): Counter = new Counter {
+  def counter(schema: CounterSchema): Counter = new Counter {
     def incr(delta: Long): Unit = {
-      val level = if (verbosity == Verbosity.Debug) Level.FINEST else Level.INFO
-      logger.log(level, "%s incr %d".format(formatName(name), delta))
+      val level =
+        if (schema.metricBuilder.verbosity == Verbosity.Debug) Level.FINEST else Level.INFO
+      val formattedName = formatName(schema.metricBuilder.name)
+      logger.log(level, s"$formattedName incr $delta")
     }
+  }
+
+  override def addGauge(schema: GaugeSchema)(f: => Float): Gauge = {
+    registerGauge(schema.metricBuilder.verbosity, schema.metricBuilder.name, f)
+
+    // dummy gauge to make type signature happy.
+    new Gauge { def remove(): Unit = () }
   }
 
   protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
