@@ -1,7 +1,7 @@
 package com.twitter.finagle.mysql
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.ScalaObjectMapper
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.twitter.finagle.mysql.transport.MysqlBuf
 import com.twitter.util.TwitterDateFormat
 import java.sql.{Date, Timestamp}
