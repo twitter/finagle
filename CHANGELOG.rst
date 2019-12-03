@@ -19,6 +19,9 @@ Runtime Behavior Changes
 * finagle-core: Per-method metrics on MethodBuilder are now created lazily, so if you have
   methods that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
 
+ * finagle-zipkin-core: Tracing produces microsecond resolution timestamps in JDK9 or later. 
+   ``PHAB_ID=D400661``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -28,14 +31,6 @@ Breaking API Changes
 * finagle-thrift: The RichClientParam constructors are now all either
   deprecated, so to construct it, you must call one of the RichClientParam.apply
   methods.  ``PHAB_ID=D400382``
-
-Changes
-~~~~~~~
-
- * finagle: Upgrade Jackson dependency from version `2.9.9` to version `2.10.1` ``PHAB_ID=D402722``
-
- * finagle-zipkin-core: Tracing produces microsecond resolution timestamps in JDK9 or later. 
-   ``PHAB_ID=D400661``
 
 19.11.0
 -------
