@@ -2,7 +2,13 @@ package com.twitter.finagle.mysql
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.{ChannelClosedException, ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle.{
+  ChannelClosedException,
+  ClientConnection,
+  Service,
+  ServiceFactory,
+  Status
+}
 import com.twitter.util.{Await, Awaitable, Future, Time}
 import org.scalatest.FunSuite
 
@@ -123,6 +129,35 @@ class RollbackFactoryTest extends FunSuite {
     })
 
     assert(requests == Seq(QueryRequest("1"), PoisonConnectionRequest))
+    assert(closeCalled)
+  }
+
+  test("the rollback query is omitted if the underlying service already has status closed") {
+    var requests: Seq[Request] = Seq.empty
+    var closeCalled = false
+    val client: ServiceFactory[Request, Result] = new ServiceFactory[Request, Result] {
+      private[this] val svc: Service[Request, Result] = new Service[Request, Result] {
+        def apply(req: Request): Future[EOF] = {
+          requests = requests :+ req
+          Future.exception(new ChannelClosedException())
+        }
+
+        override def close(when: Time): Future[Unit] = {
+          closeCalled = true
+          Future.Done
+        }
+
+        override def status: Status = Status.Closed
+      }
+      def apply(c: ClientConnection): Future[Service[Request, Result]] = Future.value(svc)
+      def close(deadline: Time): Future[Unit] = svc.close(deadline)
+    }
+
+    val rollbackClient = new RollbackFactory(client, NullStatsReceiver)
+
+    await(rollbackClient().flatMap(_.close()))
+
+    assert(requests == Seq(PoisonConnectionRequest))
     assert(closeCalled)
   }
 }

@@ -40,7 +40,13 @@ final class RollbackFactory(client: ServiceFactory[Request, Result], statsReceiv
 
   private[this] def wrap(underlying: Service[Request, Result]): Service[Request, Result] =
     new ServiceProxy[Request, Result](underlying) {
+
       override def close(deadline: Time): Future[Unit] = {
+        if (self.status == Status.Closed) poisonAndClose(deadline)
+        else rollback(deadline)
+      }
+
+      private[this] def rollback(deadline: Time): Future[Unit] = {
         val elapsed = Stopwatch.start()
         self(RollbackQuery).transform { result =>
           rollbackLatencyStat.add(elapsed().inMillis)

@@ -10,17 +10,21 @@ Unreleased
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: Per-method metrics on MethodBuilder are now created lazily, so if you have
+  methods that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
+
+* finagle-mysql: The RollbackFactory no longer attempts to roll back if the underlying
+  session is closed since it is highly unlikely to succeed. It now simply poisons the
+  session and calls close. ``PHAB_ID=D408155``
+
 * finagle-netty4: Change the 'connection_requests' metric to debug verbosity.
   ``PHAB_ID=D391289``
 
 * finagle-thrift: Per-method metrics are now created lazily, so if you have methods on a Thrift
   service that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
 
-* finagle-core: Per-method metrics on MethodBuilder are now created lazily, so if you have
-  methods that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
-
- * finagle-zipkin-core: Tracing produces microsecond resolution timestamps in JDK9 or later. 
-   ``PHAB_ID=D400661``
+* finagle-zipkin-core: Tracing produces microsecond resolution timestamps in JDK9 or later. 
+  ``PHAB_ID=D400661``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
