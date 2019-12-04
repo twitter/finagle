@@ -4,20 +4,59 @@ Clients
 =======
 
 Finagle clients adheres to a simple :src:`interface <com/twitter/finagle/Client.scala>` for
-construction:
+construction. The following API supports the creation of both stateful and stateless clients.
+You want a stateful client if you require requests and response sequences over the same connection.
+The following illustrates the difference.
+
+Constructor for a **stateless** client:
+
+.. code-block:: scala
+
+  def newService(dest: Name, label: String): Service[Req, Rep]
+
+That is, given a logical destination and an identifier, return a function that produces
+a typed `Service` over which requests can be dispatched. Dispatched requests will be
+load balanced across all of the resolved hosts utilizing Finagle's configured load balancer.
+
+An alternative constructor for a **stateful** client producing a typed `ServiceFactory`:
 
 .. code-block:: scala
 
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep]
 
-That is, given a logical destination and an identifier, return a function
-that produces a typed `Service` over which requests can be dispatched.
-There are variants of this constructor for stateless clients that create a simple
-`Service`, for example:
+Each `Service` acquired from the returned `ServiceFactory` represents a distinct session. Requests
+dispatched on this `Service` will reuse the established connection to the picked host. Load balancing
+occurs only per-session, `ServiceFactory.apply`, while per-request on `newService`.  Depending on
+the configured `Pooling`_ strategy, `Service.close` typically returns its connection to
+the pool and does not cut the connection. As a result, it is important to close sessions after use
+to avoid resource leaks. For example:
 
 .. code-block:: scala
 
-  def newService(dest: Name, label: String): Service[Req, Rep]
+  import com.twitter.finagle.{Service, ServiceFactory}
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.http.{Request, Response}
+  import com.twitter.util.Future
+
+  val sessionFactory: ServiceFactory[Request, Response] = Http.client.newClient("example.com:80")
+
+  // we establish a session, represented by `svc`
+  sessionFactory().onSuccess { svc: Service[Request, Response] =>
+
+    // both requests will land on the same host
+    val rep1: Future[Response] = svc(Request("/some/path"))
+    val rep2: Future[Response] = svc(Request("/some/other/path"))
+
+    // clean up the session so the connection is released into the pool
+    svc.close()
+  }
+
+  // session establishment is load balanced. No guarantee as to which endpoint is selected by the load balancer
+  sessionFactory().onSuccess { ... }
+
+
+Client Protocol Implementation
+------------------------------
 
 As of :doc:`6.x <changelog>`, client implementations are encouraged to expose
 this interface on a Scala object named after the protocol implementation. This
