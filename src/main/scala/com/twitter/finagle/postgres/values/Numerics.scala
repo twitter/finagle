@@ -18,6 +18,10 @@ private object Numerics {
     (high << 8) | low
   }
 
+  private def base10exponent(in: java.math.BigDecimal) = {
+     in.round(new java.math.MathContext(1)).scale() * -1
+  }
+
   def readNumeric(buf: ByteBuf) = {
     val len = getUnsignedShort(buf)
     val weight = buf.readShort()
@@ -29,18 +33,12 @@ private object Numerics {
     val bdDigits = digits.map(BigDecimal(_))
 
     if(bdDigits.length > 0) {
-      val unscaled = bdDigits.tail.foldLeft(bdDigits.head) {
-        case (accum, digit) => BigDecimal(accum.bigDecimal.scaleByPowerOfTen(NumericDigitBaseExponent)) + digit
+      val unscaled = bdDigits.foldLeft(BigDecimal(0)) {
+        case (acc, n) => acc * 10000 + n
       }
 
-      val firstDigitSize =
-        if (digits.head < 10) 1
-        else if (digits.head < 100) 2
-        else if (digits.head < 1000) 3
-        else 4
-
-      val scaleFactor = weight * NumericDigitBaseExponent + firstDigitSize
-      val unsigned = unscaled.bigDecimal.movePointLeft(unscaled.precision).movePointRight(scaleFactor).setScale(displayScale)
+      val scaleFactor = (weight  + 1 - len) * NumericDigitBaseExponent
+      val unsigned = unscaled.bigDecimal.movePointRight(scaleFactor).setScale(displayScale)
 
       sign match {
         case NUMERIC_POS => BigDecimal(unsigned)
@@ -55,7 +53,7 @@ private object Numerics {
 
   def writeNumeric(in: BigDecimal) = {
     val minimized = BigDecimal(in.bigDecimal.stripTrailingZeros())
-    val unscaled = minimized.bigDecimal.unscaledValue()
+    val unscaled = minimized.bigDecimal.unscaledValue().abs()
     val sign = minimized.signum
 
     def findDigits(i: BigInteger, current: List[Short] = Nil): List[Short] = if(i.signum() != 0) {
@@ -63,7 +61,6 @@ private object Numerics {
       findDigits(q, r.shortValue() :: current)
     } else current
 
-    val beforeDecimal = minimized.precision - minimized.scale
     //the decimal point must align on a base-10000 digit
     val padZeroes = 4 - (minimized.scale % 4)
     val paddedUnscaled = Option(padZeroes)
@@ -74,16 +71,12 @@ private object Numerics {
 
     val digits = findDigits(paddedUnscaled, Nil)
 
-    val weight = if(digits.nonEmpty) {
-      val firstDigitSize =
-        if (digits.head < 10) 1
-        else if (digits.head < 100) 2
-        else if (digits.head < 1000) 3
-        else 4
-      (beforeDecimal - firstDigitSize) / 4
+    val weight = {
+      val powers10 = base10exponent(in.bigDecimal) - base10exponent(new java.math.BigDecimal(paddedUnscaled))
+      val mod4 = if (powers10 % 4 >= 0) powers10 % 4 else 4 + powers10 % 4
+
+      digits.length + (powers10 - mod4) / 4 - 1
     }
-    else
-      0
     val bufSize =
       2 + //digit length
       2 + //weight
@@ -92,14 +85,13 @@ private object Numerics {
       digits.length * 2 //a short for each digit
 
     val buf = Unpooled.wrappedBuffer(new Array[Byte](bufSize))
-
+    val scale = if(in.scale < 0) 0 else in.scale
     buf.resetWriterIndex()
     buf.writeShort(digits.length)
     buf.writeShort(weight)
     buf.writeShort(if(sign < 0) NUMERIC_NEG else NUMERIC_POS)
-    buf.writeShort(in.scale)
+    buf.writeShort(scale)
     digits foreach (d => buf.writeShort(d))
-
     buf
   }
 }
