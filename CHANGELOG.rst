@@ -36,6 +36,13 @@ Breaking API Changes
   deprecated, so to construct it, you must call one of the RichClientParam.apply
   methods.  ``PHAB_ID=D400382``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-core: `ClosableService` client stack module that prevents the reuse of closed services
+  when `FactoryToService` is not set. This is important for clients making use of the `newClient`
+  api. ``PHAB_ID=D407805``
+
 19.11.0
 -------
 

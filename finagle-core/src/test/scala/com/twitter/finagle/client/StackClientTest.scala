@@ -200,6 +200,37 @@ abstract class AbstractStackClientTest
     }
   }
 
+  test("closed services from newClient respect close()")(new Ctx {
+    val nilModule = new Module0[ServiceFactory[String, String]] {
+      val role = Stack.Role("yo")
+      val description = "yoo"
+
+      def make(next: ServiceFactory[String, String]): ServiceFactory[String, String] = {
+        ServiceFactory.const[String, String](
+          Service.mk[String, String](_ => Future.value(""))
+        )
+      }
+    }
+
+    val nilStack = new StackBuilder(stack.nilStack[String, String])
+      .push(nilModule)
+      .result
+
+    val svcFac = client
+      .withStack(_.concat(nilStack))
+      .newClient("/$/inet/localhost/0")
+
+    val svc = await(svcFac())
+    assert(svc.status == Status.Open)
+
+    await(svc.close())
+    assert(svc.status == Status.Closed)
+
+    intercept[ServiceReturnedToPoolException] {
+      await(svc(""))
+    }
+  })
+
   test("FactoryToService close propagated to underlying service") {
     /*
      * This test ensures that the following one doesn't succeed vacuously.

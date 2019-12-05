@@ -547,6 +547,21 @@ trait ServiceException extends Exception with SourcedException
 class ServiceClosedException extends ServiceException
 
 /**
+ * Indicates that this service was closed and returned to the underlying pool.
+ */
+class ServiceReturnedToPoolException(val flags: Long = FailureFlags.NonRetryable)
+    extends IllegalStateException
+    with ServiceException
+    with HasLogLevel
+    with FailureFlags[ServiceReturnedToPoolException] {
+
+  protected def copyWithFlags(newFlags: Long): ServiceReturnedToPoolException =
+    new ServiceReturnedToPoolException(newFlags)
+
+  def logLevel: Level = Level.WARNING
+}
+
+/**
  * Indicates that a request was applied to a [[com.twitter.finagle.Service]]
  * that is unavailable. This constitutes a fail-stop condition.
  */
