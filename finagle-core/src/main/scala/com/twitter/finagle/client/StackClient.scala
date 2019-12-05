@@ -76,6 +76,7 @@ object StackClient {
    * @see [[com.twitter.finagle.service.FailFastFactory]]
    * @see [[com.twitter.finagle.service.PendingRequestFilter]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
+   * @see [[com.twitter.finagle.service.ClosableService]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
    * @see [[com.twitter.finagle.liveness.FailureAccrualFactory]]
    * @see [[com.twitter.finagle.service.StatsServiceFactory]]
@@ -139,8 +140,13 @@ object StackClient {
      * `DefaultPool` configures connection pooling. Like the `LoadBalancerFactory`
      * module it is a potentially aggregate [[ServiceFactory]] composed of multiple
      * [[Service Services]] which represent a distinct session to the same endpoint.
+     *
+     * When the service lifecycle is managed independently of the stack. `ClosableService`
+     * ensures a closed service cannot be reused. Typically a closed service releases
+     * its connection into the configured pool.
      */
     stk.push(DefaultPool.module)
+    stk.push(ClosableService.client)
 
     /**
      * `TimeoutFilter` enforces static request timeouts and broadcast request deadlines,
