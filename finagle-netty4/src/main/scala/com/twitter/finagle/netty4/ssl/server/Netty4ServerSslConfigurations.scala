@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.ssl.server
 
-import com.twitter.finagle.netty4.ssl.Netty4SslConfigurations
+import com.twitter.finagle.netty4.ssl.{FinalizedSslContext, Netty4SslConfigurations, RefCountedSsl}
 import com.twitter.finagle.ssl.{
   ApplicationProtocols,
   Engine,
@@ -96,7 +96,11 @@ private[finagle] object Netty4ServerSslConfigurations {
       config.applicationProtocols
     )
 
-    withAppProtocols.build()
+    // We only want to use the `FinalizedSslContext` if the process is configured to do ref-counting
+    // because Netty's finalized SslContext inherits from the RefCountedSslContext. So, if it's not
+    // the JDK version it's ref-counted even if it also has a finalizer.
+    if (!forceJdk && RefCountedSsl.Enabled) new FinalizedSslContext(withAppProtocols.build())
+    else withAppProtocols.build()
   }
 
   /**

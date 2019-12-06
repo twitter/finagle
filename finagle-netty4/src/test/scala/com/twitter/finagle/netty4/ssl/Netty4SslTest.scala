@@ -7,10 +7,39 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{ChannelClosedException, Failure, Service}
 import com.twitter.util.{Await, Future}
 import com.twitter.util.{Return, Throw, Try}
-import org.scalatest.FunSuite
+import org.scalactic.source.Position
+import org.scalatest.{FunSuite, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
 class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
+
+  // We're duplicating all the tests, doing it once with reference counted on and
+  // once with it off. We do this instead of making a second instance of the class
+  // because we don't want the two sets of tests to be executed concurrently since
+  // they're mutating the same global state.
+  override protected def test(
+    testName: String,
+    testTags: Tag*
+  )(testFun: => Any
+  )(
+    implicit pos: Position
+  ): Unit = {
+    super.test("RefCounting disabled: " + testName, testTags: _*) {
+      RefCountedSsl.setRefCounting(Some(false))
+      try testFun
+      finally {
+        RefCountedSsl.setRefCounting(None)
+      }
+    }
+
+    super.test("RefCounting enabled: " + testName, testTags: _*) {
+      RefCountedSsl.setRefCounting(Some(true))
+      try testFun
+      finally {
+        RefCountedSsl.setRefCounting(None)
+      }
+    }
+  }
 
   // Timeout for blocking calls
   private val timeout = 15.seconds

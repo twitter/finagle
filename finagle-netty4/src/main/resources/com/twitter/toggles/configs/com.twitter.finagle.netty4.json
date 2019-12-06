@@ -1,0 +1,9 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.finagle.netty4.ssl.UseRefCountedSsl",
+      "description": "Use the Netty4 reference-counted TLS implementation.",
+      "fraction": 0.0
+    }
+  ]
+}
