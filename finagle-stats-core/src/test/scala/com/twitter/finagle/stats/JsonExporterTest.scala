@@ -63,15 +63,6 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     )
   }
 
-  test("empty regex filter string should not result in a regex") {
-    val registry = Metrics.createDetached()
-    val exporter = new JsonExporter(registry)
-    assert(
-      commaSeparatedRegex("").isEmpty,
-      "Empty regex filter should result in no filter regex generated"
-    )
-  }
-
   test("statsFilterFile defaults without exception") {
     val registry = Metrics.createDetached()
     val exporter1 = new JsonExporter(registry)
@@ -319,11 +310,5 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     assert(json.contains(""""qux":30"""))
     assert(json.contains(""""aux":40"""))
     assert(!json.contains(""""foo/baz":20"""))
-  }
-
-  test("escape regexp special characters in glob") {
-    assert(
-      commaSeparatedGlob("[]^$a.|?b*+()c{}d").forall(_.matcher("[]^$a.|?bcde*+()c{}d").matches)
-    )
   }
 }

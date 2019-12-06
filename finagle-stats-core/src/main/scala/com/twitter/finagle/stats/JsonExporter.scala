@@ -15,8 +15,6 @@ import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.io.IOException
-import java.util.regex.Pattern
-import scala.annotation.switch
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
 import scala.io.{Codec, Source}
@@ -56,42 +54,6 @@ object JsonExporter {
       case regexes => mergedRegex(regexes)
     }
   }
-
-  /**
-   * A simplified (only *-wildcards are supported), possibly comma-separated list of Glob
-   * expressions.
-   *
-   * @see https://en.wikipedia.org/wiki/Glob_(programming)
-   */
-  private[stats] def commaSeparatedGlob(glob: String): Option[Pattern] =
-    if (glob.isEmpty) None
-    else {
-      var i = 0
-      // We expand the resulting string to fit up to 8 regex characters w/o
-      // resizing the string builder.
-      val result = new StringBuilder(glob.length + 8)
-      while (i < glob.length) {
-        (glob.charAt(i): @switch) match {
-          case '[' => result.append("\\[")
-          case ']' => result.append("\\]")
-          case '|' => result.append("\\|")
-          case '^' => result.append("\\^")
-          case '$' => result.append("\\$")
-          case '.' => result.append("\\.")
-          case '?' => result.append("\\?")
-          case '+' => result.append("\\+")
-          case '(' => result.append("\\(")
-          case ')' => result.append("\\)")
-          case '{' => result.append("\\{")
-          case '}' => result.append("\\}")
-          case '*' => result.append(".*")
-          case c => result.append(c)
-        }
-        i += 1
-      }
-
-      commaSeparatedRegex(result.toString).map(_.pattern)
-    }
 }
 
 /**
@@ -216,7 +178,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
     }
 
     // Converting a *-wildcard expression into a regular expression so we can match on it.
-    val verbosePatten = sampleVerbose().flatMap(commaSeparatedGlob)
+    val verbosePatten = sampleVerbose().map(Glob.apply)
 
     // We have to denylist debug metrics before we apply formatting, which may change
     // the names.
@@ -247,11 +209,11 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
 
   private final def denylistDebugSample[A](
     sample: collection.Map[String, A],
-    verbose: Option[Pattern]
+    verbose: Option[String => Boolean]
   ): collection.Map[String, A] = verbose match {
     case Some(pattern) =>
       sample.filterKeys(
-        name => metrics.verbosity.get(name) != Verbosity.Debug || pattern.matcher(name).matches
+        name => metrics.verbosity.get(name) != Verbosity.Debug || pattern(name)
       )
 
     case None =>
