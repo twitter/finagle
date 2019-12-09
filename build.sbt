@@ -200,6 +200,7 @@ val sharedSettings = Seq(
 
   javaOptions ++= Seq(
     "-Djava.net.preferIPv4Stack=true",
+    "-DSKIP_SBT=1",
     "-XX:+AggressiveOpts",
     "-server"
   ),
