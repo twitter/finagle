@@ -377,7 +377,7 @@ trait BaseClient[T] extends Closable {
    * client but is in reality a string-encoded u64.
    *
    * @return a Map[String, (T, Buf, Buf)] of all the keys
-   * the server had, together with ther "cas unique" token and flags
+   * the server had, together with their "cas unique" token and flags
    * @see [[get]] if you do not need the token or the flags.
    * @see [[gets]] if you do not need the flag.
    * @see [[getWithFlag]] if you do not need the token.

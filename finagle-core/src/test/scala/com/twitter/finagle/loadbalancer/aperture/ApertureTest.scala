@@ -355,7 +355,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     // should be available due to the single endpoint
     assert(bal.status == Status.Open)
 
-    // should be moved foward on rebuild
+    // should be moved forward on rebuild
     val svc = Await.result(bal(ClientConnection.nil))
     assert(bal.rebuilds == 1)
     assert(bal.status == Status.Open)
