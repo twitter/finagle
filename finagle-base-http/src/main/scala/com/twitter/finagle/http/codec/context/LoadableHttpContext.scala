@@ -11,7 +11,7 @@ import com.twitter.util.{Base64StringEncoder, Try}
  * LoadableHttpContext will by default use [[com.twitter.finagle.context.Contexts.broadcast.Key]]'s
  * `marshal`, `tryUnmarshal` and `id` to create the header (key: String, value: String) pairs. The
  * result of `marshal` is base64 encoded. Exceptions thrown from `tryUnmarshal` or `fromHeader` will
- * be supressed and only the faulty key name will be logged (debug level).
+ * be suppressed and only the faulty key name will be logged (debug level).
  *
  *
  * Override the methods of [[HttpContext]] to define a custom scheme. All headers are prefixed with

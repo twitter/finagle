@@ -14,7 +14,7 @@ import com.twitter.finagle.Addr
  * [[com.twitter.finagle.Address]]s.
  *
  * @param weight The weight of the cache node. Default value is 1. Note that this determines where
- * data is stored in the Ketama ring and is not interchangable with the notion of weight in
+ * data is stored in the Ketama ring and is not interchangeable with the notion of weight in
  * [[com.twitter.finagle.addr.WeightedAddress]], which pertains to load balancing.
  * @param key An optional unique identifier for the cache node (e.g.  shard ID).
  */

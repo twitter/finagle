@@ -19,7 +19,7 @@ object Tracing {
   )
 
   /**
-   * Some tracing systems such as Amazon X-Ray encode the orginal timestamp in
+   * Some tracing systems such as Amazon X-Ray encode the original timestamp in
    * order to enable even partitions in the backend. As sampling only occurs on
    * low 64-bits anyway, we encode epoch seconds into high-bits to support
    * downstreams who have a timestamp requirement.

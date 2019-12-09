@@ -63,7 +63,7 @@ a :API:`ClientDiscardedRequestException <com/twitter/finagle/mux/ClientDiscarded
 is the same as above though.
 
 Server operators may prefer to measure their server side success rates excluding these classes of
-exceptions. The rationale is that these failures don't neccessarily represent a server side issue
+exceptions. The rationale is that these failures don't necessarily represent a server side issue
 and are dependent on client side configuration (e.g. timeouts). The recommended way to achieve this
 is to configure a custom `com.twitter.finagle.service.ResponseClassifier` via `$Protocol.server.withResponseClassifier(...)`.
 
