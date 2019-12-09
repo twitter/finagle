@@ -10,6 +10,8 @@ Unreleased
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Upgrade to jackson 2.9.10 and jackson-databind 2.9.10.1 ``PHAB_ID=D410846``
+
 * finagle-core: Per-method metrics on MethodBuilder are now created lazily, so if you have
   methods that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
 
