@@ -1,7 +1,7 @@
 package com.twitter.finagle.thriftmux.ssl
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{SslException, SslVerificationFailedException}
+import com.twitter.finagle.{ChannelClosedException, SslVerificationFailedException}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thriftmux.ssl.ThriftSmuxSslTestComponents._
 import com.twitter.finagle.thriftmux.thriftscala._
@@ -148,7 +148,9 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
     assertGaugeIsZero(serverStats, serverTlsConnections)
     assertGaugeIsZero(clientStats, clientTlsConnections)
 
-    intercept[SslException] {
+    // If the server rejects the handshake, it just hangs up. Therefore,
+    // we expect to get a ChannelClosedException here.
+    intercept[ChannelClosedException] {
       await(client.query("hello"))
     }
 

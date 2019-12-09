@@ -20,4 +20,7 @@ private[finagle] object IOExceptionStrings {
 
   /** Exception strings that are common for `IOException`s that don't need vocal logging */
   val FinestIOExceptionMessages: Set[String] = ChannelClosedStrings ++ ConnectionFailedStrings
+
+  /** SSLException strings that mean the channel has been closed */
+  val ChannelClosedSslExceptionMessages: Set[String] = Set("SSLEngine closed already")
 }
