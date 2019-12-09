@@ -8,7 +8,7 @@ import com.twitter.finagle.http2.param.{
   HeaderSensitivity
 }
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.stats.{Gauge, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{
   Channel,
@@ -23,7 +23,6 @@ import io.netty.handler.codec.http2.{
   Http2HeadersEncoder,
   Http2MultiplexHandler
 }
-import io.netty.util.AttributeKey
 
 /**
  * Tooling for building a `Http2MultiplexHandler` for clients and servers
@@ -52,11 +51,9 @@ private object MultiplexHandlerBuilder {
     }
     // scalafix:on StoreGaugesAsMemberVariables
 
-    // We're attaching a gauge to the channel's attributes to make sure it stays referenced
-    // as long as channel is alive.
-    channel.attr(AttributeKey.valueOf[Gauge]("streams_gauge")).set(streams)
-
-    // We're removing the gauge on channel closure.
+    // We're removing the gauge on channel closure. This ensures both eager removal of the
+    // gauge and ensures that a strong reference to the gauge is captured on the `closeFuture`
+    // which will exist for the lifetime of the channel.
     channel.closeFuture.addListener(new ChannelFutureListener {
       def operationComplete(f: ChannelFuture): Unit = streams.remove()
     })
