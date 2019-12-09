@@ -1,6 +1,10 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.IOExceptionStrings.{ChannelClosedStrings, ConnectionFailedStrings}
+import com.twitter.finagle.IOExceptionStrings.{
+  ChannelClosedStrings,
+  ConnectionFailedStrings,
+  ChannelClosedSslExceptionMessages
+}
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.Duration
@@ -266,6 +270,8 @@ object ChannelException {
       case _: java.nio.channels.UnresolvedAddressException =>
         new ConnectionFailedException(cause, remoteAddress)
       case _: java.nio.channels.ClosedChannelException =>
+        new ChannelClosedException(cause, remoteAddress)
+      case e: JSSLException if ChannelClosedSslExceptionMessages.contains(e.getMessage) =>
         new ChannelClosedException(cause, remoteAddress)
       case e: JSSLException => new SslException(e, remoteAddress)
       case e: java.io.IOException if ChannelClosedStrings.contains(e.getMessage) =>

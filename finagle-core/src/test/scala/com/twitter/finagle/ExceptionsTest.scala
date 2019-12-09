@@ -4,6 +4,7 @@ import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.tracing.{SpanId, TraceId}
 import com.twitter.util.Duration
 import java.net.{InetSocketAddress, SocketAddress}
+import javax.net.ssl.SSLException
 import org.scalatest.FunSuite
 
 class ExceptionsTest extends FunSuite {
@@ -65,6 +66,20 @@ class ExceptionsTest extends FunSuite {
     val writeEx = WriteException(null)
     writeEx match {
       case WriteException(cause) => assert(cause == null)
+    }
+  }
+
+  test(
+    "SSLExceptions with messages associated with the channel being " +
+      "closed are turned into ChannelClosedExceptions") {
+    val sslExceptions =
+      IOExceptionStrings.ChannelClosedSslExceptionMessages.map(new SSLException(_))
+
+    sslExceptions.foreach { ex =>
+      ChannelException(ex, null) match {
+        case c: ChannelClosedException => assert(c.getCause eq ex)
+        case other => fail(s"Unexpected exception: $other")
+      }
     }
   }
 
