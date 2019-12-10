@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-core, finagle-exp: Add annotations to ``DarkTrafficFilter`` to identify which span
+  is dark, as well as which light span it correlates with. ``PHAB_ID=D402864``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

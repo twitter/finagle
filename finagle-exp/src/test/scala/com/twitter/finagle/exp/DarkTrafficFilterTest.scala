@@ -1,10 +1,15 @@
 package com.twitter.finagle.exp
 
-import java.util.concurrent.atomic.AtomicBoolean
-
-import com.twitter.finagle.Service
+import com.twitter.conversions.DurationOps.RichDuration
+import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.util.{Await, Future, FutureCancelledException, Promise}
+import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
+import com.twitter.finagle.tracing.{BufferingTracer, Record}
+import com.twitter.finagle.{Address, Name, Service}
+import com.twitter.util.{Await, Future, FutureCancelledException, Promise, Time}
+import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicBoolean
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
@@ -101,5 +106,70 @@ class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
 
     assert(lightServiceCancelled.get)
     assert(darkServiceCancelled.get)
+  }
+
+  test("light and dark spans are annotated with identifier") {
+    def getAnnotation(tracer: BufferingTracer, name: String): Option[Record] = {
+      tracer.toSeq.find { record =>
+        record.annotation match {
+          case a: BinaryAnnotation if a.key == name => true
+          case _ => false
+        }
+      }
+    }
+
+    val svc = new Service[String, String] {
+      def apply(request: String): Future[String] = {
+        Future(request)
+      }
+    }
+
+    Time.withCurrentTimeFrozen { _ =>
+      val echoServer = StringServer.server.serve(new InetSocketAddress(0), svc)
+
+      val lightTracer = new BufferingTracer()
+
+      val lightClient = StringClient.client
+        .withTracer(lightTracer)
+
+      val lightService = lightClient.newService(
+        Name.bound(
+          Address(echoServer.boundAddress
+            .asInstanceOf[InetSocketAddress])),
+        "light")
+
+      val darkTracer = new BufferingTracer()
+      val darkClient = StringClient.client
+        .withTracer(darkTracer)
+
+      val darkService = darkClient.newService(
+        Name.bound(
+          Address(echoServer.boundAddress
+            .asInstanceOf[InetSocketAddress])),
+        "dark")
+
+      val darkTrafficFilter = new DarkTrafficFilter[String, String](
+        darkService,
+        _ => true,
+        NullStatsReceiver,
+        false
+      )
+
+      val service = darkTrafficFilter andThen lightService
+
+      Await.result(service("hi"), 5.seconds)
+
+      assert(getAnnotation(lightTracer, "clnt/dark_request_key").isDefined)
+      assert(getAnnotation(lightTracer, "clnt/dark_request").isEmpty)
+
+      val lightSpanId = getAnnotation(lightTracer, "clnt/dark_request_key").get.traceId.spanId
+
+      assert(getAnnotation(darkTracer, "clnt/dark_request_key").isDefined)
+      assert(getAnnotation(darkTracer, "clnt/dark_request").isDefined)
+
+      val darkSpanId = getAnnotation(darkTracer, "clnt/dark_request_key").get.traceId.spanId
+
+      assert(lightSpanId != darkSpanId)
+    }
   }
 }

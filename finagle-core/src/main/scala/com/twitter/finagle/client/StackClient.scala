@@ -397,6 +397,9 @@ object StackClient {
      *    `TraceInitializerFilter` so it delimits all tracing in the
      *    course of a request.
      *
+     *  * `ChildTraceContext` is a hook for placing tracing annotations
+     *    into the context of a child request.
+     *
      *  * `TraceInitializerFilter` allocates a new trace span per
      *    request. It must appear above all other modules so the
      *    request span encompasses all tracing in the course of a
@@ -411,6 +414,7 @@ object StackClient {
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
+    stk.push(ForwardAnnotation.module)
     stk.push(TraceInitializerFilter.clientModule)
     stk.push(RegistryEntryLifecycle.module)
     stk.push(OffloadFilter.client)
