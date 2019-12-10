@@ -48,9 +48,6 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
 
   // ---- Map/MapLike -----
 
-  def -=(key: String): this.type = removed(key)
-  def +=(kv: (String, String)): this.type = set(kv._1, kv._2)
-
   /**
    * Underlying headers eagerly copied to an array, without synchronizing
    * on the underlying collection. That means the calling method
@@ -102,7 +99,7 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
     }
   }
 
-  def removed(key: String): this.type = underlying.synchronized {
+  def removeHeader(key: String): this.type = underlying.synchronized {
     underlying.remove(key)
     this
   }
@@ -120,8 +117,8 @@ private[http] object JTreeMapBackedHeaderMap {
         def go(i: Int): Int = {
           if (i == key1.length) 0 // end, they are equal.
           else {
-            val char1 = HeadersHash.hashChar(key1.charAt(i))
-            val char2 = HeadersHash.hashChar(key2.charAt(i))
+            val char1 = HeaderMap.hashChar(key1.charAt(i))
+            val char2 = HeaderMap.hashChar(key2.charAt(i))
             val diff = char1 - char2
             if (diff == 0) go(i + 1)
             else diff
