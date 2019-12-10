@@ -22,6 +22,9 @@ Runtime Behavior Changes
 * finagle-netty4: Change the 'connection_requests' metric to debug verbosity.
   ``PHAB_ID=D391289``
 
+* finagle-serversets: Ensure `ZkSession#retrying` is resilient to ZK host resolution failure.
+  ``PHAB_ID=D403895``
+
 * finagle-thrift: Per-method metrics are now created lazily, so if you have methods on a Thrift
   service that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
 

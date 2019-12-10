@@ -86,6 +86,7 @@ private[serverset2] sealed trait WatchState
 
 private[serverset2] object WatchState {
   object Pending extends WatchState
+  case class FailedToInitialize(exc: Throwable) extends WatchState
   case class Determined(event: NodeEvent) extends WatchState
   case class SessionState(state: com.twitter.finagle.serverset2.client.SessionState)
       extends WatchState
