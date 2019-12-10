@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.http.headers.{JTreeMapBackedHeaderMap, HashBackedHeaderMap}
+import com.twitter.finagle.http.headers.JTreeMapBackedHeaderMap
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 import scala.util.Random
@@ -109,10 +109,6 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
 
   private def doIterateKeys(b: Blackhole, map: HeaderMap): Unit =
     map.keysIterator.foreach(k => b.consume(k))
-}
-
-class HashBackedHeaderMapBenchmark extends HeaderMapBenchmark {
-  protected def newMap(): HeaderMap = HashBackedHeaderMap()
 }
 
 class JTMapBackedHeaderMapBenchmark extends HeaderMapBenchmark {

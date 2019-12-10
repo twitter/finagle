@@ -103,7 +103,7 @@ object HttpDtab {
       }
     }
     if (headerArr == null) Nil
-    else headerArr
+    else headerArr.toSeq
   }
 
   /**
@@ -170,23 +170,23 @@ object HttpDtab {
    */
   private def readXDtabPairs(msg: Message): Try[Dtab] = {
     // Common case: no actual overrides.
-    var keys: ArrayBuffer[String] = null
+    var builder: ArrayBuffer[String] = null
     val headers = msg.headerMap.nameValueIterator
     while (headers.hasNext) {
       val key = headers.next().name.toLowerCase
       if (key.startsWith(Prefix)) {
-        if (keys == null) keys = ArrayBuffer[String]()
-        keys += key
+        if (builder == null) builder = new ArrayBuffer[String]()
+        builder += key
       }
     }
 
-    if (keys == null)
+    if (builder == null)
       return EmptyReturn
 
+    val keys = builder.mapResult(as => as.sorted).result
     if (keys.size % 2 != 0)
       return Throw(unmatchedFailure)
 
-    keys = keys.sorted
     val n = keys.size / 2
 
     val dentries = new Array[Dentry](n)

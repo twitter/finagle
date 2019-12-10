@@ -610,7 +610,8 @@ lazy val finagleBaseHttp = Project(
   id = "finagle-base-http",
   base = file("finagle-base-http")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-base-http",
   libraryDependencies ++= Seq(

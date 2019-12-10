@@ -21,9 +21,7 @@ import scala.collection.mutable
  * The map is a multi-map.  Use [[getAll]] to get all values for a key.  Use [[add]]
  * to append a key-value.
  */
-abstract class HeaderMap
-    extends mutable.Map[String, String]
-    with mutable.MapLike[String, String, HeaderMap] {
+abstract class HeaderMap extends HeaderMapVersionSpecific with mutable.Map[String, String] {
 
   /**
    * Retrieves all values for a given header name.
@@ -61,12 +59,12 @@ abstract class HeaderMap
   /**
    * Set a header. If an entry already exists, it is replaced.
    */
-  def set(k: String, v: String): HeaderMap
+  def set(k: String, v: String): this.type
 
   /**
    * Set or replace a header without validating the key and value.
    */
-  def setUnsafe(k: String, v: String): HeaderMap
+  def setUnsafe(k: String, v: String): this.type
 
   /**
    * Set or replace a header, as in [[set(String, String)]],
@@ -107,6 +105,10 @@ object HeaderMap {
 
   /** Create a new, empty HeaderMap. */
   def newHeaderMap: HeaderMap = apply()
+
+  def hashChar(c: Char): Int =
+    if (c >= 'A' && c <= 'Z') c + 32
+    else c
 
   private[this] val formatter = new ThreadLocal[SimpleDateFormat] {
     override protected def initialValue(): SimpleDateFormat = {

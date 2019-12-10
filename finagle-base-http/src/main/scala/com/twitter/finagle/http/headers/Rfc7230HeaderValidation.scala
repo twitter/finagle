@@ -47,7 +47,7 @@ object Rfc7230HeaderValidation {
     //                / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
     //                / DIGIT / ALPHA
     //                ; any VCHAR, except delimiters
-    ("!#$%&'*+-.^_`|~" ++
+    ("!#$%&'*+-.^_`|~".toList ++
       ('0' to '9') ++ // DIGIT
       ('a' to 'z') ++ ('A' to 'Z')).map(_.toInt) // ALPHA
   }
