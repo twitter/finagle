@@ -224,3 +224,14 @@ When a request is offloaded by a client to a different pool, contains informatio
 srv/OffloadFilter: Offloaded continuation from IO threads to pool with ${size} workers (`OffloadFilter`)
 ````````````````````````````````````````````````````````````````````````````````````````````````````````
 When a request is offloaded by a server to a different pool, contains information about the size of the pool.
+
+DarkTraffic
+~~~~~~~~~~~
+
+clnt/dark_request (`DarkTrafficFilter`)
+```````````````````````````````````````
+A binary annotation which signifies that the span is a dark request.
+
+clnt/dark_request_key (`DarkTrafficFilter`)
+```````````````````````````````````````````
+A binary annotation contained in the light and the dark request with the same id so the two requests can be identified as related.
