@@ -8,6 +8,7 @@ import com.twitter.finagle.stats._
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
+import java.net.UnknownHostException
 import scala.collection.concurrent
 
 object zkConcurrentOperations
@@ -297,8 +298,13 @@ private[serverset2] object ZkSession {
   /**
    * Produce a new `ZkSession`.
    *
+   * Note: if `ClientBuilder` throws `UnknownHostException`, we return a no-op `ZkSession`
+   * in a failed state to trigger a retry (see `ZkSession#retrying`).
+   *
+   * @param retryStream The backoff schedule for reconnecting on session expiry and retrying operations.
    * @param hosts A comma-separated "host:port" string for a ZooKeeper server.
    * @param sessionTimeout The ZooKeeper session timeout to use.
+   * @param statsReceiver A [[StatsReceiver]] for the ZooKeeper session.
    */
   private[serverset2] def apply(
     retryStream: RetryStream,
@@ -307,22 +313,37 @@ private[serverset2] object ZkSession {
     statsReceiver: StatsReceiver
   )(
     implicit timer: Timer
-  ): ZkSession =
-    new ZkSession(
-      retryStream,
+  ): ZkSession = {
+    val watchedZkReader = try {
       ClientBuilder()
         .hosts(hosts)
         .sessionTimeout(sessionTimeout)
         .statsReceiver(DefaultStatsReceiver.scope("zkclient").scope(Zk2Resolver.statsOf(hosts)))
         .readOnlyOK()
-        .reader(),
-      statsReceiver.scope(Zk2Resolver.statsOf(hosts))
-    )
+        .reader()
+    } catch {
+      case exc: UnknownHostException =>
+        Watched(NullZooKeeperReader, Var(WatchState.FailedToInitialize(exc)))
+    }
+
+    new ZkSession(retryStream, watchedZkReader, statsReceiver.scope(Zk2Resolver.statsOf(hosts)))
+  }
 
   /**
-   * Produce a `Var[ZkSession]` representing a ZooKeeper session that automatically
-   * reconnects upon session expiry. Reconnect attempts cease when any
-   * observation of the returned `Var[ZkSession]` is closed.
+   * Determine if the given `WatchState` requires a reconnect (see `ZkSession#retrying`).
+   */
+  private[serverset2] def needsReconnect(state: WatchState): Boolean = {
+    state match {
+      case WatchState.FailedToInitialize(_) | WatchState.SessionState(SessionState.Expired) => true
+      case _ => false
+    }
+  }
+
+  /**
+   * Produce a `Var[ZkSession]` representing a ZooKeeper session that automatically retries
+   * when a session fails to initialize _or_ when the current session expires.
+   *
+   * Reconnect attempts cease when any observation of the returned Var[ZkSession] is closed.
    */
   def retrying(
     backoff: RetryStream,
@@ -360,21 +381,25 @@ private[serverset2] object ZkSession {
           case _ =>
         }
 
-      // Kick off a delayed reconnection on session expiration.
+      // Kick off a delayed reconnection if the new session failed to initialize _or_ the current session expired.
       zkSession.state.changes
-        .filter {
-          _ == WatchState.SessionState(SessionState.Expired)
-        }
+        .filter(needsReconnect)
         .toFuture()
-        .unit
-        .before {
+        .flatMap { state =>
           val jitter = backoff.next()
-          logger.error(
-            s"Zookeeper session ${zkSession.sessionIdAsHex} has expired. Reconnecting in $jitter"
-          )
+          state match {
+            case WatchState.FailedToInitialize(exc) =>
+              logger.error(
+                s"Zookeeper session failed to initialize with exception: $exc. Retrying in $jitter"
+              )
+            case WatchState.SessionState(SessionState.Expired) =>
+              logger.error(
+                s"Zookeeper session ${zkSession.sessionIdAsHex} has expired. Reconnecting in $jitter"
+              )
+          }
           Future.sleep(jitter)
         }
-        .ensure { reconnect() }
+        .ensure(reconnect())
     }
 
     reconnect()

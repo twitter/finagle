@@ -167,6 +167,56 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
     }
   }
 
+  test("factory retries when ZK session fails to initialize") {
+    Time.withCurrentTimeFrozen { tc =>
+      val identity = Identities.get().head
+      val authInfo = "%s:%s".format(identity, identity)
+      implicit val timer = new MockTimer
+
+      // A normal `ZkSession` with updatable state.
+      val zkState: Var[WatchState] with Updatable[WatchState] = Var(WatchState.Pending)
+      val watchedZk = Watched(new OpqueueZkReader(), zkState)
+
+      // A failed `ZkSession`.
+      val failedZk = Watched(
+        new OpqueueZkReader(),
+        Var(WatchState.FailedToInitialize(new Exception("failed")))
+      )
+
+      // Return failed session on the first invocation.
+      var failed = true
+      val zk = ZkSession.retrying(
+        retryStream,
+        () => {
+          if (failed) {
+            failed = false
+            new ZkSession(retryStream, failedZk, NullStatsReceiver)
+          } else new ZkSession(retryStream, watchedZk, NullStatsReceiver)
+        }
+      )
+
+      zk.changes.respond {
+        case _ => ()
+      }
+
+      // The underlying session is in a failed state here. Ensure we haven't updated the `Var` yet.
+      assert(zk.sample() == ZkSession.nil)
+
+      // Advance the timer to allow `reconnect` to run.
+      tc.advance(10.seconds)
+      timer.tick()
+
+      // The underlying `ZkSession` should be set to `watchedZk` now.
+      // Update the session state to connected -- we should receive auth info.
+      zkState() = WatchState.SessionState(SessionState.SyncConnected)
+      eventually {
+        assert(
+          watchedZk.value.opq == Seq(AddAuthInfo("digest", Buf.Utf8(authInfo)))
+        )
+      }
+    }
+  }
+
   test("factory authenticates and closes on expiry") {
     Time.withCurrentTimeFrozen { tc =>
       val identity = Identities.get().head
