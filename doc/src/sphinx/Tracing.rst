@@ -7,6 +7,9 @@ Finagle generates distributed trace data for each request. Traces allow one to u
 
 Finagle tracing represents pieces of a request/response path as spans. Each span shares a single 64-bit traceid which allows them to later be aggregated and analyzed as a complete trace. Likewise span ids are shared between hops, between a client and a server, in a trace. Systems such as `Zipkin <http://zipkin.io>`_, which we use at Twitter, can be used to collect, correlate, and view this data.
 
+Configuration
+-------------
+
 By default Finagle uses a `DefaultTracer` which will load implementations from included artifacts using the Java `ServiceLoader <https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html>`_. Out of the box, adding the finagle-zipkin-scribe package to your classpath will enable sending tracing spans to zipkin via the `scribe <http://go/scribe>`_ protocol.
 
 You can replicate this functionality and globally install a tracer by including an artifact with a service loaded `Tracer`. Your implementation must implement the `Tracer <https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/tracing/Tracer.scala>`_ API and follow the requirements necessary to be loaded by the `ServiceLoader <https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html>`_.
@@ -89,6 +92,39 @@ Trace System Initialization
 ---------------------------
 
 The tracing system is initialized by the `TraceInitializationFilter`. This filter is present in the default Finagle stack for both the client and the server. The role of this filter is to set up the tracing subsystem and wrap incoming/outgoing requests with the correct tracing context, this includes either using the incoming trace id or generating a new one, the effect being a fully enabled tracing system in the current context.
+
+Tracing
+-------
+
+In general you can use any method from the `Trace` API to add annotations to the current tracing context. This allows you to annotate events or information happening at the time a request is being made or processed.
+
+Each request operates within the scope of a span, which is created when the request is received or an initial request is made. In some cases it may be advantageous to segment parts of processing a request into their own discrete events. You can do this by generating local spans; these spans exist completely within a single process. This is useful when understanding the relationship between local computation and external requests as well as relative timing and duration of these operations to each other. Local spans can be created with the `Trace#traceLocal` methods.
+
+.. code-block:: scala
+
+  import com.twitter.finagle.tracing.Trace
+
+  def chainOfEvents(): Int = ???
+
+  Trace.traceLocal("important_work") {
+    // perform within the context of a new SpanId
+    chainOfEvents()
+  }
+
+Furthermore, operations can be timed and the result recorded within the trace context:
+
+.. code-block:: scala
+
+  import com.twitter.finagle.tracing.Trace
+
+  def complexComputation(): Int = ???
+
+  val result = Trace.time("complexComputation_ns") {
+    // record how long the computation took
+    complexComputation()
+  }
+
+Combining a local span with timing information allows for comparing the performance of a local computation to other distributed computations.
 
 Standard Annotations
 --------------------

@@ -13,6 +13,9 @@ New Features
 * finagle-core, finagle-exp: Add annotations to ``DarkTrafficFilter`` to identify which span
   is dark, as well as which light span it correlates with. ``PHAB_ID=D402864``
 
+* finagle-core: Introduce `Trace#traceLocal` for creating local spans within a trace context.
+  ``PHAB_ID=D404869``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -37,6 +40,11 @@ Runtime Behavior Changes
 * finagle-zipkin-core: Tracing produces microsecond resolution timestamps in JDK9 or later. 
   ``PHAB_ID=D400661``
 
+* finagle-core: `Trace#time` and `Trace#timeFuture` no longer generate timestamped annotations or
+  silently discard timing information. They now instead generate a `BinaryAnnotation` containing
+  the timing information. In order to also get timestamped `Annotations` for when the operation
+  began and ended, use in conjunction with `Trace#traceLocal`. ``PHAB_ID=D404869``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -46,6 +54,14 @@ Breaking API Changes
 * finagle-thrift: The RichClientParam constructors are now all either
   deprecated, so to construct it, you must call one of the RichClientParam.apply
   methods.  ``PHAB_ID=D400382``
+
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-core: Deprecate `Tracing#record(message, duration)` as it does not have the intended
+  effect and silently discards any duration information in the resulting trace. Instead you should
+  use either `Tracing#recordBinary` or a combination of `Trace#traceLocal` and `Trace#time`.
+  ``PHAB_ID=D404869``
 
 Bug Fixes
 ~~~~~~~~~

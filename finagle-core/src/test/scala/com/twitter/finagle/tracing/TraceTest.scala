@@ -1,12 +1,12 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
 import com.twitter.io.Buf
-import com.twitter.util.Time
-import com.twitter.util.{Return, Throw}
+import com.twitter.util.{Await, Future, MockTimer, Return, Throw, Time}
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, times, verify, when, atLeast}
-import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
+import org.mockito.Mockito.{atLeast, never, times, verify, when}
+import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
 import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
 
@@ -165,21 +165,6 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       }
     }
   }
-
-  /* TODO temporarily disabled until we can mock stopwatches
-      "Trace.time" in Time.withCurrentTimeFrozen { tc =>
-        val tracer = new BufferingTracer()
-        val duration = 1.second
-        Trace.pushTracer(tracer)
-        Trace.time("msg") {
-          tc.advance(duration)
-        }
-        tracer.iterator foreach { r =>
-          r.annotation mustEqual Annotation.Message("msg")
-          r.duration mustEqual Some(duration)
-        }
-      }
-   */
 
   test("pass flags to next id") {
     val flags = Flags().setDebug
@@ -387,6 +372,93 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Trace.TraceIdContext.tryUnmarshal(Buf.ByteArray.Owned(bytes)) match {
       case Throw(_: IllegalArgumentException) =>
       case rv => fail(s"Got $rv")
+    }
+  }
+
+  test("trace local span") {
+    val startTime = Time.now
+    Time.withTimeAt(startTime) { ctrl =>
+      val tracer = new BufferingTracer()
+      val parentTraceId = Trace.id
+      Trace.letTracerAndId(tracer, parentTraceId) {
+        val childTraceId = Trace.traceLocal("work") {
+          ctrl.advance(1.second)
+          Trace.id
+        }
+
+        assert(
+          tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
+        assert(
+          tracer.toSeq.contains(
+            Record(childTraceId, startTime.plus(1.second), Annotation.Message("local/end"))))
+        assert(parentTraceId != childTraceId)
+      }
+    }
+  }
+
+  test("trace async local span") {
+    val mockTimer = new MockTimer()
+    val startTime = Time.now
+    Time.withTimeAt(startTime) { ctrl =>
+      val tracer = new BufferingTracer()
+      val parentTraceId = Trace.nextId
+      Trace.letTracerAndId(tracer, parentTraceId) {
+        val childTraceIdFuture = Trace.traceLocalFuture("work") {
+          Future.Done.delayed(1.second)(mockTimer).map(_ => Trace.id)
+        }
+
+        ctrl.advance(1.second)
+        mockTimer.tick()
+
+        val childTraceId = Await.result(childTraceIdFuture)
+
+        assert(
+          tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
+        assert(
+          tracer.toSeq.contains(
+            Record(childTraceId, startTime.plus(1.second), Annotation.Message("local/end"))))
+        assert(parentTraceId != childTraceId)
+      }
+    }
+  }
+
+  test("time a computation and trace it") {
+    val startTime = Time.now
+    Time.withTimeAt(startTime) { ctrl =>
+      val tracer = new BufferingTracer()
+      val traceId = Trace.nextId
+      Trace.letTracerAndId(tracer, traceId) {
+        Trace.time("duration") {
+          ctrl.advance(1.second)
+        }
+
+        assert(
+          tracer.toSeq.contains(
+            Record(traceId, startTime.plus(1.second), BinaryAnnotation("duration", 1.second))))
+      }
+    }
+  }
+
+  test("time an async computation and trace it") {
+    val mockTimer = new MockTimer()
+    val startTime = Time.now
+    Time.withTimeAt(startTime) { ctrl =>
+      val tracer = new BufferingTracer()
+      val traceId = Trace.nextId
+      val result = Trace.letTracerAndId(tracer, traceId) {
+        Trace.timeFuture("duration") {
+          Future.Done.delayed(1.second)(mockTimer)
+        }
+      }
+
+      ctrl.advance(1.second)
+      mockTimer.tick()
+
+      Await.ready(result)
+
+      assert(
+        tracer.toSeq.contains(
+          Record(traceId, startTime.plus(1.second), BinaryAnnotation("duration", 1.second))))
     }
   }
 }
