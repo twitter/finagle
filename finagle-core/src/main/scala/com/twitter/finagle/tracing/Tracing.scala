@@ -216,6 +216,8 @@ abstract class Tracing {
   final def record(message: String): Unit =
     record(Annotation.Message(message))
 
+  // NOTE: This API is broken and silently discards the duration
+  @deprecated("Use Trace#traceLocal instead", "2019-20-10")
   final def record(message: String, duration: Duration): Unit =
     record(Annotation.Message(message), duration)
 

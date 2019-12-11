@@ -206,8 +206,61 @@ object Trace extends Tracing {
     } else f
   }
 
+  private[this] def serviceName: String = {
+    TraceServiceName() match {
+      case Some(name) => name
+      case None => "local"
+    }
+  }
+
   /**
-   * Time an operation and add an annotation with that duration on it
+   * Create a span that begins right before the function is called
+   * and ends immediately after the function completes. This
+   * span will never have a corresponding remote component and is contained
+   * completely within the process it is created.
+   */
+  def traceLocal[T](name: String)(f: => T): T = {
+    letId(Trace.nextId) {
+      val trace = Trace()
+
+      // these annotations are necessary to get the
+      // zipkin ui to properly display the span.
+      trace.recordRpc(name)
+      trace.recordServiceName(serviceName)
+      trace.recordBinary("lc", name)
+
+      trace.record("local/begin")
+      val result = f
+      trace.record("local/end")
+      result
+    }
+  }
+
+  /**
+   * Create a span that begins right before the function is called
+   * and ends immediately after the async operation completes. This span will
+   * never have a corresponding remote component and is contained
+   * completely within the process it is created.
+   */
+  def traceLocalFuture[T](name: String)(f: => Future[T]): Future[T] = {
+    letId(Trace.nextId) {
+      val trace = Trace()
+
+      // these annotations are necessary to get the
+      // zipkin ui to properly display the span.
+      trace.recordRpc(name)
+      trace.recordServiceName(serviceName)
+      trace.recordBinary("lc", name)
+
+      trace.record("local/begin")
+      f.ensure(trace.record("local/end"))
+    }
+  }
+
+  /**
+   * Time an operation and add a binary annotation to the current span
+   * with the duration.
+   *
    * @param message The message describing the operation
    * @param f operation to perform
    * @tparam T return type
@@ -218,19 +271,20 @@ object Trace extends Tracing {
     if (trace.isActivelyTracing) {
       val elapsed = Stopwatch.start()
       val rv = f
-      trace.record(message, elapsed())
+      trace.recordBinary(message, elapsed())
       rv
     } else f
   }
 
   /**
-   * Runs the function f and logs that duration until the future is satisfied with the given name.
+   * Time an async operation and add a binary annotation to the current span
+   * with the duration.
    */
   def timeFuture[T](message: String)(f: Future[T]): Future[T] = {
     val trace = Trace()
     if (trace.isActivelyTracing) {
-      val start = Time.now
-      f.ensure(trace.record(message, start.untilNow))
+      val elapsed = Stopwatch.start()
+      f.ensure(trace.recordBinary(message, elapsed()))
     } else f
   }
 }
