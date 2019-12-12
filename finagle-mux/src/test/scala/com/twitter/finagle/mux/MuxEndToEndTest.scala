@@ -25,6 +25,8 @@ abstract class CompressingEndToEndTest extends AbstractEndToEndTest {
   override type ClientT = Mux.Client
   override type ServerT = Mux.Server
 
+  override def skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY_TRAVIS")
+
   private[this] val compressor = Seq(Compression.lz4Compressor(highCompression = true))
   private[this] val decompressor = Seq(Compression.lz4Decompressor())
   private[this] def preferences(level: CompressionLevel) = CompressionPreferences(
