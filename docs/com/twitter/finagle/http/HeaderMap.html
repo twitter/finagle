@@ -337,6 +337,10 @@ resources for using Finagle.
                         <a href="CookieMap.html" title="Adapt cookies of a Message to a mutable Map where cookies are indexed by their name.">CookieMap</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="CookieMapVersionSpecific.html" title=""></a>
+                        <a href="CookieMapVersionSpecific.html" title="">CookieMapVersionSpecific</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="EmptyParamMap$.html" title="Empty ParamMap"></a>
                         <a href="EmptyParamMap$.html" title="Empty ParamMap">EmptyParamMap</a>
                       </li><li class="current-entities indented4">
@@ -355,6 +359,10 @@ resources for using Finagle.
                         <a class="object" href="HeaderMap$.html" title=""></a>
                         <a class="class" href="" title="Mutable message headers map."></a>
                         <a href="" title="Mutable message headers map.">HeaderMap</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="HeaderMapVersionSpecific.html" title=""></a>
+                        <a href="HeaderMapVersionSpecific.html" title="">HeaderMapVersionSpecific</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="HttpMuxHandler.html" title="Trait HttpMuxHandler is used for service-loading HTTP handlers."></a>
@@ -395,6 +403,10 @@ resources for using Finagle.
                         <a class="object" href="ParamMap$.html" title=""></a>
                         <a class="class" href="ParamMap.html" title="Request parameter map."></a>
                         <a href="ParamMap.html" title="Request parameter map.">ParamMap</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ParamMapVersionSpecific.html" title=""></a>
+                        <a href="ParamMapVersionSpecific.html" title="">ParamMapVersionSpecific</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="ProxyCredentials$.html" title=""></a>
                         <a class="class" href="ProxyCredentials.html" title=""></a>
@@ -488,7 +500,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">HeaderMap</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] with <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/MapLike.html#scala.collection.mutable.MapLike" class="extype" name="scala.collection.mutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">HeaderMap</span><span class="result"> extends <a href="HeaderMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.HeaderMapVersionSpecific">HeaderMapVersionSpecific</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
 
@@ -500,7 +512,7 @@ to append a key-value.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/MapLike.html#scala.collection.mutable.MapLike" class="extype" name="scala.collection.mutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Cloneable.html#scala.collection.mutable.Cloneable" class="extype" name="scala.collection.mutable.Cloneable">Cloneable</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/Cloneable.html#scala.Cloneable" class="extype" name="scala.Cloneable">Cloneable</a>, <span class="extype" name="java.lang.Cloneable">Cloneable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Shrinkable.html#scala.collection.generic.Shrinkable" class="extype" name="scala.collection.generic.Shrinkable">Shrinkable</a>[<span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Builder.html#scala.collection.mutable.Builder" class="extype" name="scala.collection.mutable.Builder">Builder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Growable.html#scala.collection.generic.Growable" class="extype" name="scala.collection.generic.Growable">Growable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Clearable.html#scala.collection.generic.Clearable" class="extype" name="scala.collection.generic.Clearable">Clearable</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Map.html#scala.collection.Map" class="extype" name="scala.collection.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/MapLike.html#scala.collection.MapLike" class="extype" name="scala.collection.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Subtractable.html#scala.collection.generic.Subtractable" class="extype" name="scala.collection.generic.Subtractable">Subtractable</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenMap.html#scala.collection.GenMap" class="extype" name="scala.collection.GenMap">GenMap</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenMapLike.html#scala.collection.GenMapLike" class="extype" name="scala.collection.GenMapLike">GenMapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Iterable.html#scala.collection.mutable.Iterable" class="extype" name="scala.collection.mutable.Iterable">Iterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterable.html#scala.collection.Iterable" class="extype" name="scala.collection.Iterable">Iterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableLike.html#scala.collection.IterableLike" class="extype" name="scala.collection.IterableLike">IterableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterableLike.html#scala.collection.GenIterableLike" class="extype" name="scala.collection.GenIterableLike">GenIterableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Traversable.html#scala.collection.mutable.Traversable" class="extype" name="scala.collection.mutable.Traversable">Traversable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/Mutable.html#scala.Mutable" class="extype" name="scala.Mutable">Mutable</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Traversable.html#scala.collection.Traversable" class="extype" name="scala.collection.Traversable">Traversable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversable.html#scala.collection.GenTraversable" class="extype" name="scala.collection.GenTraversable">GenTraversable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/GenericTraversableTemplate.html#scala.collection.generic.GenericTraversableTemplate" class="extype" name="scala.collection.generic.GenericTraversableTemplate">GenericTraversableTemplate</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Iterable.html#scala.collection.mutable.Iterable" class="extype" name="scala.collection.mutable.Iterable">Iterable</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableLike.html#scala.collection.TraversableLike" class="extype" name="scala.collection.TraversableLike">TraversableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableLike.html#scala.collection.GenTraversableLike" class="extype" name="scala.collection.GenTraversableLike">GenTraversableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Parallelizable.html#scala.collection.Parallelizable" class="extype" name="scala.collection.Parallelizable">Parallelizable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/parallel/mutable/ParMap.html#scala.collection.parallel.mutable.ParMap" class="extype" name="scala.collection.parallel.mutable.ParMap">ParMap</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableOnce.html#scala.collection.TraversableOnce" class="extype" name="scala.collection.TraversableOnce">TraversableOnce</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/FilterMonadic.html#scala.collection.generic.FilterMonadic" class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/HasNewBuilder.html#scala.collection.generic.HasNewBuilder" class="extype" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>], <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/MapLike.html#scala.collection.mutable.MapLike" class="extype" name="scala.collection.mutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Cloneable.html#scala.collection.mutable.Cloneable" class="extype" name="scala.collection.mutable.Cloneable">Cloneable</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/Cloneable.html#scala.Cloneable" class="extype" name="scala.Cloneable">Cloneable</a>, <span class="extype" name="java.lang.Cloneable">Cloneable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Shrinkable.html#scala.collection.generic.Shrinkable" class="extype" name="scala.collection.generic.Shrinkable">Shrinkable</a>[<span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Builder.html#scala.collection.mutable.Builder" class="extype" name="scala.collection.mutable.Builder">Builder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Growable.html#scala.collection.generic.Growable" class="extype" name="scala.collection.generic.Growable">Growable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Clearable.html#scala.collection.generic.Clearable" class="extype" name="scala.collection.generic.Clearable">Clearable</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Map.html#scala.collection.Map" class="extype" name="scala.collection.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/MapLike.html#scala.collection.MapLike" class="extype" name="scala.collection.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Subtractable.html#scala.collection.generic.Subtractable" class="extype" name="scala.collection.generic.Subtractable">Subtractable</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenMap.html#scala.collection.GenMap" class="extype" name="scala.collection.GenMap">GenMap</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenMapLike.html#scala.collection.GenMapLike" class="extype" name="scala.collection.GenMapLike">GenMapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Iterable.html#scala.collection.mutable.Iterable" class="extype" name="scala.collection.mutable.Iterable">Iterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterable.html#scala.collection.Iterable" class="extype" name="scala.collection.Iterable">Iterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableLike.html#scala.collection.IterableLike" class="extype" name="scala.collection.IterableLike">IterableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterableLike.html#scala.collection.GenIterableLike" class="extype" name="scala.collection.GenIterableLike">GenIterableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Traversable.html#scala.collection.mutable.Traversable" class="extype" name="scala.collection.mutable.Traversable">Traversable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/Mutable.html#scala.Mutable" class="extype" name="scala.Mutable">Mutable</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Traversable.html#scala.collection.Traversable" class="extype" name="scala.collection.Traversable">Traversable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversable.html#scala.collection.GenTraversable" class="extype" name="scala.collection.GenTraversable">GenTraversable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/GenericTraversableTemplate.html#scala.collection.generic.GenericTraversableTemplate" class="extype" name="scala.collection.generic.GenericTraversableTemplate">GenericTraversableTemplate</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Iterable.html#scala.collection.mutable.Iterable" class="extype" name="scala.collection.mutable.Iterable">Iterable</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableLike.html#scala.collection.TraversableLike" class="extype" name="scala.collection.TraversableLike">TraversableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableLike.html#scala.collection.GenTraversableLike" class="extype" name="scala.collection.GenTraversableLike">GenTraversableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Parallelizable.html#scala.collection.Parallelizable" class="extype" name="scala.collection.Parallelizable">Parallelizable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/parallel/mutable/ParMap.html#scala.collection.parallel.mutable.ParMap" class="extype" name="scala.collection.parallel.mutable.ParMap">ParMap</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableOnce.html#scala.collection.TraversableOnce" class="extype" name="scala.collection.TraversableOnce">TraversableOnce</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/FilterMonadic.html#scala.collection.generic.FilterMonadic" class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/HasNewBuilder.html#scala.collection.generic.HasNewBuilder" class="extype" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]], <a href="HeaderMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.HeaderMapVersionSpecific">HeaderMapVersionSpecific</a>, <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -526,7 +538,7 @@ to append a key-value.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.http.HeaderMap"><span>HeaderMap</span></li><li class="in" name="scala.collection.mutable.Map"><span>Map</span></li><li class="in" name="scala.collection.mutable.MapLike"><span>MapLike</span></li><li class="in" name="scala.collection.mutable.Cloneable"><span>Cloneable</span></li><li class="in" name="scala.Cloneable"><span>Cloneable</span></li><li class="in" name="java.lang.Cloneable"><span>Cloneable</span></li><li class="in" name="scala.collection.generic.Shrinkable"><span>Shrinkable</span></li><li class="in" name="scala.collection.mutable.Builder"><span>Builder</span></li><li class="in" name="scala.collection.generic.Growable"><span>Growable</span></li><li class="in" name="scala.collection.generic.Clearable"><span>Clearable</span></li><li class="in" name="scala.collection.Map"><span>Map</span></li><li class="in" name="scala.collection.MapLike"><span>MapLike</span></li><li class="in" name="scala.collection.generic.Subtractable"><span>Subtractable</span></li><li class="in" name="scala.PartialFunction"><span>PartialFunction</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.collection.GenMap"><span>GenMap</span></li><li class="in" name="scala.collection.GenMapLike"><span>GenMapLike</span></li><li class="in" name="scala.collection.mutable.Iterable"><span>Iterable</span></li><li class="in" name="scala.collection.Iterable"><span>Iterable</span></li><li class="in" name="scala.collection.IterableLike"><span>IterableLike</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.collection.GenIterable"><span>GenIterable</span></li><li class="in" name="scala.collection.GenIterableLike"><span>GenIterableLike</span></li><li class="in" name="scala.collection.mutable.Traversable"><span>Traversable</span></li><li class="in" name="scala.Mutable"><span>Mutable</span></li><li class="in" name="scala.collection.Traversable"><span>Traversable</span></li><li class="in" name="scala.collection.GenTraversable"><span>GenTraversable</span></li><li class="in" name="scala.collection.generic.GenericTraversableTemplate"><span>GenericTraversableTemplate</span></li><li class="in" name="scala.collection.TraversableLike"><span>TraversableLike</span></li><li class="in" name="scala.collection.GenTraversableLike"><span>GenTraversableLike</span></li><li class="in" name="scala.collection.Parallelizable"><span>Parallelizable</span></li><li class="in" name="scala.collection.TraversableOnce"><span>TraversableOnce</span></li><li class="in" name="scala.collection.GenTraversableOnce"><span>GenTraversableOnce</span></li><li class="in" name="scala.collection.generic.FilterMonadic"><span>FilterMonadic</span></li><li class="in" name="scala.collection.generic.HasNewBuilder"><span>HasNewBuilder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.http.HeaderMap"><span>HeaderMap</span></li><li class="in" name="scala.collection.mutable.Map"><span>Map</span></li><li class="in" name="scala.collection.mutable.MapLike"><span>MapLike</span></li><li class="in" name="scala.collection.mutable.Cloneable"><span>Cloneable</span></li><li class="in" name="scala.Cloneable"><span>Cloneable</span></li><li class="in" name="java.lang.Cloneable"><span>Cloneable</span></li><li class="in" name="scala.collection.generic.Shrinkable"><span>Shrinkable</span></li><li class="in" name="scala.collection.mutable.Builder"><span>Builder</span></li><li class="in" name="scala.collection.generic.Growable"><span>Growable</span></li><li class="in" name="scala.collection.generic.Clearable"><span>Clearable</span></li><li class="in" name="scala.collection.Map"><span>Map</span></li><li class="in" name="scala.collection.MapLike"><span>MapLike</span></li><li class="in" name="scala.collection.generic.Subtractable"><span>Subtractable</span></li><li class="in" name="scala.PartialFunction"><span>PartialFunction</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.collection.GenMap"><span>GenMap</span></li><li class="in" name="scala.collection.GenMapLike"><span>GenMapLike</span></li><li class="in" name="scala.collection.mutable.Iterable"><span>Iterable</span></li><li class="in" name="scala.collection.Iterable"><span>Iterable</span></li><li class="in" name="scala.collection.IterableLike"><span>IterableLike</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.collection.GenIterable"><span>GenIterable</span></li><li class="in" name="scala.collection.GenIterableLike"><span>GenIterableLike</span></li><li class="in" name="scala.collection.mutable.Traversable"><span>Traversable</span></li><li class="in" name="scala.Mutable"><span>Mutable</span></li><li class="in" name="scala.collection.Traversable"><span>Traversable</span></li><li class="in" name="scala.collection.GenTraversable"><span>GenTraversable</span></li><li class="in" name="scala.collection.generic.GenericTraversableTemplate"><span>GenericTraversableTemplate</span></li><li class="in" name="scala.collection.TraversableLike"><span>TraversableLike</span></li><li class="in" name="scala.collection.GenTraversableLike"><span>GenTraversableLike</span></li><li class="in" name="scala.collection.Parallelizable"><span>Parallelizable</span></li><li class="in" name="scala.collection.TraversableOnce"><span>TraversableOnce</span></li><li class="in" name="scala.collection.GenTraversableOnce"><span>GenTraversableOnce</span></li><li class="in" name="scala.collection.generic.FilterMonadic"><span>FilterMonadic</span></li><li class="in" name="scala.collection.generic.HasNewBuilder"><span>HasNewBuilder</span></li><li class="in" name="com.twitter.finagle.http.HeaderMapVersionSpecific"><span>HeaderMapVersionSpecific</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -643,7 +655,7 @@ to append a key-value.
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Self</span><span class="result alias"> = <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">Self</span><span class="result alias"> = <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
@@ -668,39 +680,7 @@ to append a key-value.
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="scala.collection.mutable.MapLike#+=" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="+=(kv:(K,V)):MapLike.this.type"></a><a id="+=((String,String)):HeaderMap.this.type"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#+=(kv:(K,V)):MapLike.this.type" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $plus$eq" class="name">+=</span><span class="params">(<span name="kv">kv: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>.this.type</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → Builder → Growable</dd></dl></div>
-    </li><li name="scala.collection.mutable.MapLike#-=" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="-=(key:K):MapLike.this.type"></a><a id="-=(String):HeaderMap.this.type"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#-=(key:K):MapLike.this.type" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $minus$eq" class="name">-=</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>.this.type</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → Shrinkable</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.HeaderMap#add" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.HeaderMap#add" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="add(k:String,v:String):com.twitter.finagle.http.HeaderMap"></a><a id="add(String,String):HeaderMap"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#add(k:String,v:String):com.twitter.finagle.http.HeaderMap" title="Permalink">
@@ -782,10 +762,10 @@ key and value.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → IterableLike → GenIterableLike</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.HeaderMap#set" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="set(k:String,v:String):com.twitter.finagle.http.HeaderMap"></a><a id="set(String,String):HeaderMap"></a>
+    </li><li name="com.twitter.finagle.http.HeaderMapVersionSpecific#removeHeader" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="removeHeader(name:String):HeaderMapVersionSpecific.this.type"></a><a id="removeHeader(String):HeaderMap.this.type"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#set(k:String,v:String):com.twitter.finagle.http.HeaderMap" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#removeHeader(name:String):HeaderMapVersionSpecific.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -794,15 +774,31 @@ key and value.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">removeHeader</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>.this.type</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="HeaderMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.HeaderMapVersionSpecific">HeaderMapVersionSpecific</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HeaderMap#set" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="set(k:String,v:String):HeaderMap.this.type"></a><a id="set(String,String):HeaderMap.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#set(k:String,v:String):HeaderMap.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>.this.type</span>
       </span>
       
       <p class="shortcomment cmt">Set a header.</p><div class="fullcomment"><div class="comment cmt"><p>Set a header. If an entry already exists, it is replaced.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> → <a href="HeaderMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.HeaderMapVersionSpecific">HeaderMapVersionSpecific</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.HeaderMap#setUnsafe" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="setUnsafe(k:String,v:String):com.twitter.finagle.http.HeaderMap"></a><a id="setUnsafe(String,String):HeaderMap"></a>
+      <a id="setUnsafe(k:String,v:String):HeaderMap.this.type"></a><a id="setUnsafe(String,String):HeaderMap.this.type"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#setUnsafe(k:String,v:String):com.twitter.finagle.http.HeaderMap" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#setUnsafe(k:String,v:String):HeaderMap.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -811,7 +807,7 @@ key and value.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setUnsafe</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">setUnsafe</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>.this.type</span>
       </span>
       
       <p class="shortcomment cmt">Set or replace a header without validating the key and value.</p>
@@ -911,7 +907,7 @@ key and value.</p>
               
         </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.8.0)</i> <code>++</code> creates a new map. Use <code>++=</code> to add an element to this map and return that map itself.</p></dd></dl></div>
     </li><li name="scala.collection.TraversableLike#++" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="++[B&gt;:A,That](that:scala.collection.GenTraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="++[B&gt;:(String,String),That](GenTraversableOnce[B])(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="++[B&gt;:A,That](that:scala.collection.GenTraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="++[B&gt;:(String,String),That](GenTraversableOnce[B])(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#++[B&gt;:A,That](that:scala.collection.GenTraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -922,12 +918,12 @@ key and value.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $plus$plus" class="name">++</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[<span class="extype" name="scala.collection.TraversableLike.++.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.++.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.++.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.++.That">That</span></span>
+        <span title="gt4s: $plus$plus" class="name">++</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[<span class="extype" name="scala.collection.TraversableLike.++.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.++.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.++.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.++.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#++:" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="++:[B&gt;:A,That](that:Traversable[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="++:[B&gt;:(String,String),That](Traversable[B])(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="++:[B&gt;:A,That](that:Traversable[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="++:[B&gt;:(String,String),That](Traversable[B])(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#++:[B&gt;:A,That](that:Traversable[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -938,12 +934,12 @@ key and value.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $plus$plus$colon" class="name">++:</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Traversable.html#scala.collection.Traversable" class="extype" name="scala.collection.Traversable">Traversable</a>[<span class="extype" name="scala.collection.TraversableLike.++:.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.++:.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.++:.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.++:.That">That</span></span>
+        <span title="gt4s: $plus$plus$colon" class="name">++:</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Traversable.html#scala.collection.Traversable" class="extype" name="scala.collection.Traversable">Traversable</a>[<span class="extype" name="scala.collection.TraversableLike.++:.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.++:.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.++:.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.++:.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#++:" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="++:[B&gt;:A,That](that:scala.collection.TraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="++:[B&gt;:(String,String),That](TraversableOnce[B])(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="++:[B&gt;:A,That](that:scala.collection.TraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="++:[B&gt;:(String,String),That](TraversableOnce[B])(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#++:[B&gt;:A,That](that:scala.collection.TraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -954,7 +950,7 @@ key and value.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $plus$plus$colon" class="name">++:</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableOnce.html#scala.collection.TraversableOnce" class="extype" name="scala.collection.TraversableOnce">TraversableOnce</a>[<span class="extype" name="scala.collection.TraversableLike.++:.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.++:.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.++:.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.++:.That">That</span></span>
+        <span title="gt4s: $plus$plus$colon" class="name">++:</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableOnce.html#scala.collection.TraversableOnce" class="extype" name="scala.collection.TraversableOnce">TraversableOnce</a>[<span class="extype" name="scala.collection.TraversableLike.++:.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.++:.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.++:.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.++:.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
@@ -990,8 +986,24 @@ key and value.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Growable</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HeaderMapVersionSpecific#+=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="+=(kv:(String,String)):HeaderMapVersionSpecific.this.type"></a><a id="+=((String,String)):HeaderMap.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#+=(kv:(String,String)):HeaderMapVersionSpecific.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $plus$eq" class="name">+=</span><span class="params">(<span name="kv">kv: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>.this.type</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="HeaderMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.HeaderMapVersionSpecific">HeaderMapVersionSpecific</a></dd></dl></div>
     </li><li name="scala.collection.mutable.MapLike#-" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="-(elem1:K,elem2:K,elems:K*):This"></a><a id="-(String,String,String*):HeaderMap"></a>
+      <a id="-(elem1:K,elem2:K,elems:K*):This"></a><a id="-(String,String,String*):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#-(elem1:K,elem2:K,elems:K*):This" title="Permalink">
         <i class="material-icons"></i>
@@ -1002,7 +1014,7 @@ key and value.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $minus" class="name">-</span><span class="params">(<span name="elem1">elem1: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="elem2">elem2: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="elems">elems: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span title="gt4s: $minus" class="name">-</span><span class="params">(<span name="elem1">elem1: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="elem2">elem2: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="elems">elems: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → Subtractable</dd><dt>Annotations</dt><dd>
@@ -1010,7 +1022,7 @@ key and value.</p>
               
         </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.8.0)</i> <code>-</code> creates a new map. Use <code>-=</code> to remove an element from this map and return that map itself.</p></dd></dl></div>
     </li><li name="scala.collection.mutable.MapLike#-" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="-(key:K):This"></a><a id="-(String):HeaderMap"></a>
+      <a id="-(key:K):This"></a><a id="-(String):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#-(key:K):This" title="Permalink">
         <i class="material-icons"></i>
@@ -1021,7 +1033,7 @@ key and value.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $minus" class="name">-</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span title="gt4s: $minus" class="name">-</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → MapLike → Subtractable → GenMapLike</dd><dt>Annotations</dt><dd>
@@ -1029,7 +1041,7 @@ key and value.</p>
               
         </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.8.0)</i> <code>-</code> creates a new map. Use <code>-=</code> to remove an element from this map and return that map itself.</p></dd></dl></div>
     </li><li name="scala.collection.mutable.MapLike#--" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="--(xs:scala.collection.GenTraversableOnce[K]):This"></a><a id="--(GenTraversableOnce[String]):HeaderMap"></a>
+      <a id="--(xs:scala.collection.GenTraversableOnce[K]):This"></a><a id="--(GenTraversableOnce[String]):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#--(xs:scala.collection.GenTraversableOnce[K]):This" title="Permalink">
         <i class="material-icons"></i>
@@ -1040,7 +1052,7 @@ key and value.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $minus$minus" class="name">--</span><span class="params">(<span name="xs">xs: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span title="gt4s: $minus$minus" class="name">--</span><span class="params">(<span name="xs">xs: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → Subtractable</dd><dt>Annotations</dt><dd>
@@ -1079,6 +1091,22 @@ key and value.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Shrinkable</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HeaderMapVersionSpecific#-=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="-=(key:String):HeaderMapVersionSpecific.this.type"></a><a id="-=(String):HeaderMap.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/HeaderMap.html#-=(key:String):HeaderMapVersionSpecific.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $minus$eq" class="name">-=</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>.this.type</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="HeaderMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.HeaderMapVersionSpecific">HeaderMapVersionSpecific</a></dd></dl></div>
     </li><li name="scala.collection.TraversableOnce#/:" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="/:[B](z:B)(op:(B,A)=&gt;B):B"></a><a id="/:[B](B)((B,(String,String))⇒B):B"></a>
       <span class="permalink">
@@ -1305,7 +1333,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → Builder → Growable → Clearable</dd></dl></div>
     </li><li name="scala.collection.mutable.MapLike#clone" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="clone():This"></a><a id="clone():HeaderMap"></a>
+      <a id="clone():This"></a><a id="clone():Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#clone():This" title="Permalink">
         <i class="material-icons"></i>
@@ -1316,12 +1344,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → Cloneable → AnyRef</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#collect" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="collect[B,That](pf:PartialFunction[A,B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="collect[B,That](PartialFunction[(String,String),B])(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="collect[B,That](pf:PartialFunction[A,B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="collect[B,That](PartialFunction[(String,String),B])(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#collect[B,That](pf:PartialFunction[A,B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -1332,7 +1360,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">collect</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="pf">pf: <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <span class="extype" name="scala.collection.TraversableLike.collect.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.collect.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.collect.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.collect.That">That</span></span>
+        <span class="name">collect</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="pf">pf: <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <span class="extype" name="scala.collection.TraversableLike.collect.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.collect.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.collect.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.collect.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
@@ -1500,7 +1528,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → GenMapLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#drop" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="drop(n:Int):Repr"></a><a id="drop(Int):HeaderMap"></a>
+      <a id="drop(n:Int):Repr"></a><a id="drop(Int):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#drop(n:Int):Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -1511,12 +1539,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">drop</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">drop</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#dropRight" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="dropRight(n:Int):Repr"></a><a id="dropRight(Int):HeaderMap"></a>
+      <a id="dropRight(n:Int):Repr"></a><a id="dropRight(Int):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#dropRight(n:Int):Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -1527,12 +1555,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dropRight</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">dropRight</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#dropWhile" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="dropWhile(p:A=&gt;Boolean):Repr"></a><a id="dropWhile(((String,String))⇒Boolean):HeaderMap"></a>
+      <a id="dropWhile(p:A=&gt;Boolean):Repr"></a><a id="dropWhile(((String,String))⇒Boolean):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#dropWhile(p:A=&gt;Boolean):Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -1543,7 +1571,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dropWhile</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">dropWhile</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
@@ -1612,7 +1640,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#filter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="filter(p:A=&gt;Boolean):Repr"></a><a id="filter(((String,String))⇒Boolean):HeaderMap"></a>
+      <a id="filter(p:A=&gt;Boolean):Repr"></a><a id="filter(((String,String))⇒Boolean):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#filter(p:A=&gt;Boolean):Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -1623,7 +1651,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">filter</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">filter</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
@@ -1644,7 +1672,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → GenMapLike</dd></dl></div>
     </li><li name="scala.collection.MapLike#filterNot" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="filterNot(p:((K,V))=&gt;Boolean):This"></a><a id="filterNot(((String,String))⇒Boolean):HeaderMap"></a>
+      <a id="filterNot(p:((K,V))=&gt;Boolean):This"></a><a id="filterNot(((String,String))⇒Boolean):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#filterNot(p:((K,V))=&gt;Boolean):This" title="Permalink">
         <i class="material-icons"></i>
@@ -1655,7 +1683,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">filterNot</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">filterNot</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → TraversableLike → GenTraversableLike</dd></dl></div>
@@ -1698,7 +1726,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#flatMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="flatMap[B,That](f:A=&gt;scala.collection.GenTraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="flatMap[B,That](((String,String))⇒GenTraversableOnce[B])(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="flatMap[B,That](f:A=&gt;scala.collection.GenTraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="flatMap[B,That](((String,String))⇒GenTraversableOnce[B])(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#flatMap[B,That](f:A=&gt;scala.collection.GenTraversableOnce[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -1709,7 +1737,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[<span class="extype" name="scala.collection.TraversableLike.flatMap.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.flatMap.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.flatMap.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.flatMap.That">That</span></span>
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[<span class="extype" name="scala.collection.TraversableLike.flatMap.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.flatMap.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.flatMap.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.flatMap.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike → FilterMonadic</dd></dl></div>
@@ -1893,7 +1921,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <p class="shortcomment cmt">Retrieves the given header value or <code>null</code> if it doesn't exit.</p>
     </li><li name="scala.collection.TraversableLike#groupBy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="groupBy[K](f:A=&gt;K):scala.collection.immutable.Map[K,Repr]"></a><a id="groupBy[K](((String,String))⇒K):Map[K,HeaderMap]"></a>
+      <a id="groupBy[K](f:A=&gt;K):scala.collection.immutable.Map[K,Repr]"></a><a id="groupBy[K](((String,String))⇒K):Map[K,Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#groupBy[K](f:A=&gt;K):scala.collection.immutable.Map[K,Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -1904,12 +1932,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">groupBy</span><span class="tparams">[<span name="K">K</span>]</span><span class="params">(<span name="f">f: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <span class="extype" name="scala.collection.TraversableLike.groupBy.K">K</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/Map.html#scala.collection.immutable.Map" class="extype" name="scala.collection.immutable.Map">Map</a>[<span class="extype" name="scala.collection.TraversableLike.groupBy.K">K</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">groupBy</span><span class="tparams">[<span name="K">K</span>]</span><span class="params">(<span name="f">f: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <span class="extype" name="scala.collection.TraversableLike.groupBy.K">K</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/Map.html#scala.collection.immutable.Map" class="extype" name="scala.collection.immutable.Map">Map</a>[<span class="extype" name="scala.collection.TraversableLike.groupBy.K">K</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#grouped" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="grouped(size:Int):Iterator[Repr]"></a><a id="grouped(Int):Iterator[HeaderMap]"></a>
+      <a id="grouped(size:Int):Iterator[Repr]"></a><a id="grouped(Int):Iterator[Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#grouped(size:Int):Iterator[Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -1920,7 +1948,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">grouped</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">grouped</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
@@ -1989,7 +2017,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#init" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="init:Repr"></a><a id="init:HeaderMap"></a>
+      <a id="init:Repr"></a><a id="init:Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#init:Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -2000,12 +2028,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">init</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">init</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#inits" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="inits:Iterator[Repr]"></a><a id="inits:Iterator[HeaderMap]"></a>
+      <a id="inits:Iterator[Repr]"></a><a id="inits:Iterator[Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#inits:Iterator[Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -2016,7 +2044,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">inits</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">inits</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
@@ -2184,7 +2212,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#map" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="map[B,That](f:A=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="map[B,That](((String,String))⇒B)(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="map[B,That](f:A=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="map[B,That](((String,String))⇒B)(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#map[B,That](f:A=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -2195,12 +2223,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">map</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <span class="extype" name="scala.collection.TraversableLike.map.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.map.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.map.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.map.That">That</span></span>
+        <span class="name">map</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="f">f: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <span class="extype" name="scala.collection.TraversableLike.map.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.map.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.map.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.map.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike → FilterMonadic</dd></dl></div>
     </li><li name="scala.collection.mutable.Builder#mapResult" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mapResult[NewTo](f:To=&gt;NewTo):scala.collection.mutable.Builder[Elem,NewTo]"></a><a id="mapResult[NewTo]((HeaderMap)⇒NewTo):Builder[(String,String),NewTo]"></a>
+      <a id="mapResult[NewTo](f:To=&gt;NewTo):scala.collection.mutable.Builder[Elem,NewTo]"></a><a id="mapResult[NewTo]((Map[String,String])⇒NewTo):Builder[(String,String),NewTo]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#mapResult[NewTo](f:To=&gt;NewTo):scala.collection.mutable.Builder[Elem,NewTo]" title="Permalink">
         <i class="material-icons"></i>
@@ -2211,7 +2239,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mapResult</span><span class="tparams">[<span name="NewTo">NewTo</span>]</span><span class="params">(<span name="f">f: (<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>) ⇒ <span class="extype" name="scala.collection.mutable.Builder.mapResult.NewTo">NewTo</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Builder.html#scala.collection.mutable.Builder" class="extype" name="scala.collection.mutable.Builder">Builder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <span class="extype" name="scala.collection.mutable.Builder.mapResult.NewTo">NewTo</span>]</span>
+        <span class="name">mapResult</span><span class="tparams">[<span name="NewTo">NewTo</span>]</span><span class="params">(<span name="f">f: (<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]) ⇒ <span class="extype" name="scala.collection.mutable.Builder.mapResult.NewTo">NewTo</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Builder.html#scala.collection.mutable.Builder" class="extype" name="scala.collection.mutable.Builder">Builder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <span class="extype" name="scala.collection.mutable.Builder.mapResult.NewTo">NewTo</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Builder</dd></dl></div>
@@ -2360,7 +2388,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.collection.mutable.MapLike#newBuilder" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newBuilder:scala.collection.mutable.Builder[(K,V),This]"></a><a id="newBuilder:Builder[(String,String),HeaderMap]"></a>
+      <a id="newBuilder:scala.collection.mutable.Builder[(K,V),This]"></a><a id="newBuilder:Builder[(String,String),Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#newBuilder:scala.collection.mutable.Builder[(K,V),This]" title="Permalink">
         <i class="material-icons"></i>
@@ -2371,7 +2399,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newBuilder</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Builder.html#scala.collection.mutable.Builder" class="extype" name="scala.collection.mutable.Builder">Builder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">newBuilder</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Builder.html#scala.collection.mutable.Builder" class="extype" name="scala.collection.mutable.Builder">Builder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>MapLike → MapLike → TraversableLike → HasNewBuilder</dd></dl></div>
@@ -2478,7 +2506,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>MapLike → MapLike → TraversableLike → Parallelizable</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#partition" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="partition(p:A=&gt;Boolean):(Repr,Repr)"></a><a id="partition(((String,String))⇒Boolean):(HeaderMap,HeaderMap)"></a>
+      <a id="partition(p:A=&gt;Boolean):(Repr,Repr)"></a><a id="partition(((String,String))⇒Boolean):(Map[String,String],Map[String,String])"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#partition(p:A=&gt;Boolean):(Repr,Repr)" title="Permalink">
         <i class="material-icons"></i>
@@ -2489,7 +2517,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">partition</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: (<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>)</span>
+        <span class="name">partition</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: (<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>])</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
@@ -2638,7 +2666,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#repr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="repr:Repr"></a><a id="repr:HeaderMap"></a>
+      <a id="repr:Repr"></a><a id="repr:Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#repr:Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -2649,12 +2677,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">repr</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">repr</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.mutable.MapLike#result" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="result():This"></a><a id="result():HeaderMap"></a>
+      <a id="result():This"></a><a id="result():Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#result():This" title="Permalink">
         <i class="material-icons"></i>
@@ -2665,7 +2693,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">result</span><span class="params">()</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">result</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → Builder</dd></dl></div>
@@ -2734,7 +2762,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → GenIterableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#scan" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scan[B&gt;:A,That](z:B)(op:(B,B)=&gt;B)(implicitcbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="scan[B&gt;:(String,String),That](B)((B,B)⇒B)(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="scan[B&gt;:A,That](z:B)(op:(B,B)=&gt;B)(implicitcbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="scan[B&gt;:(String,String),That](B)((B,B)⇒B)(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#scan[B&gt;:A,That](z:B)(op:(B,B)=&gt;B)(implicitcbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -2745,12 +2773,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scan</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: <span class="extype" name="scala.collection.TraversableLike.scan.B">B</span></span>)</span><span class="params">(<span name="op">op: (<span class="extype" name="scala.collection.TraversableLike.scan.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.scan.B">B</span>) ⇒ <span class="extype" name="scala.collection.TraversableLike.scan.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cbf">cbf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.scan.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.scan.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.scan.That">That</span></span>
+        <span class="name">scan</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: <span class="extype" name="scala.collection.TraversableLike.scan.B">B</span></span>)</span><span class="params">(<span name="op">op: (<span class="extype" name="scala.collection.TraversableLike.scan.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.scan.B">B</span>) ⇒ <span class="extype" name="scala.collection.TraversableLike.scan.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cbf">cbf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.scan.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.scan.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.scan.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#scanLeft" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scanLeft[B,That](z:B)(op:(B,A)=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="scanLeft[B,That](B)((B,(String,String))⇒B)(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="scanLeft[B,That](z:B)(op:(B,A)=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="scanLeft[B,That](B)((B,(String,String))⇒B)(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#scanLeft[B,That](z:B)(op:(B,A)=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -2761,12 +2789,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scanLeft</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: <span class="extype" name="scala.collection.TraversableLike.scanLeft.B">B</span></span>)</span><span class="params">(<span name="op">op: (<span class="extype" name="scala.collection.TraversableLike.scanLeft.B">B</span>, (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <span class="extype" name="scala.collection.TraversableLike.scanLeft.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.scanLeft.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.scanLeft.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.scanLeft.That">That</span></span>
+        <span class="name">scanLeft</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: <span class="extype" name="scala.collection.TraversableLike.scanLeft.B">B</span></span>)</span><span class="params">(<span name="op">op: (<span class="extype" name="scala.collection.TraversableLike.scanLeft.B">B</span>, (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <span class="extype" name="scala.collection.TraversableLike.scanLeft.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.scanLeft.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.scanLeft.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.scanLeft.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#scanRight" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scanRight[B,That](z:B)(op:(A,B)=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="scanRight[B,That](B)(((String,String),B)⇒B)(CanBuildFrom[HeaderMap,B,That]):That"></a>
+      <a id="scanRight[B,That](z:B)(op:(A,B)=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That"></a><a id="scanRight[B,That](B)(((String,String),B)⇒B)(CanBuildFrom[Map[String,String],B,That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#scanRight[B,That](z:B)(op:(A,B)=&gt;B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,B,That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -2777,7 +2805,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scanRight</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: <span class="extype" name="scala.collection.TraversableLike.scanRight.B">B</span></span>)</span><span class="params">(<span name="op">op: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <span class="extype" name="scala.collection.TraversableLike.scanRight.B">B</span>) ⇒ <span class="extype" name="scala.collection.TraversableLike.scanRight.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <span class="extype" name="scala.collection.TraversableLike.scanRight.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.scanRight.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.scanRight.That">That</span></span>
+        <span class="name">scanRight</span><span class="tparams">[<span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="z">z: <span class="extype" name="scala.collection.TraversableLike.scanRight.B">B</span></span>)</span><span class="params">(<span name="op">op: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <span class="extype" name="scala.collection.TraversableLike.scanRight.B">B</span>) ⇒ <span class="extype" name="scala.collection.TraversableLike.scanRight.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.collection.TraversableLike.scanRight.B">B</span>, <span class="extype" name="scala.collection.TraversableLike.scanRight.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.TraversableLike.scanRight.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd><dt>Annotations</dt><dd>
@@ -2914,7 +2942,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../scala/collection/index.html" class="extype" name="scala.collection">scala.collection</a>] </dd><dt>Definition Classes</dt><dd>GenTraversableOnce</dd></dl></div>
     </li><li name="scala.collection.IterableLike#slice" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="slice(from:Int,until:Int):Repr"></a><a id="slice(Int,Int):HeaderMap"></a>
+      <a id="slice(from:Int,until:Int):Repr"></a><a id="slice(Int,Int):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#slice(from:Int,until:Int):Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -2925,12 +2953,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">slice</span><span class="params">(<span name="from">from: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="until">until: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">slice</span><span class="params">(<span name="from">from: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="until">until: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#sliding" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sliding(size:Int,step:Int):Iterator[Repr]"></a><a id="sliding(Int,Int):Iterator[HeaderMap]"></a>
+      <a id="sliding(size:Int,step:Int):Iterator[Repr]"></a><a id="sliding(Int,Int):Iterator[Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#sliding(size:Int,step:Int):Iterator[Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -2941,12 +2969,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sliding</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="step">step: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">sliding</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="step">step: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#sliding" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sliding(size:Int):Iterator[Repr]"></a><a id="sliding(Int):Iterator[HeaderMap]"></a>
+      <a id="sliding(size:Int):Iterator[Repr]"></a><a id="sliding(Int):Iterator[Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#sliding(size:Int):Iterator[Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -2957,12 +2985,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sliding</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">sliding</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#span" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="span(p:A=&gt;Boolean):(Repr,Repr)"></a><a id="span(((String,String))⇒Boolean):(HeaderMap,HeaderMap)"></a>
+      <a id="span(p:A=&gt;Boolean):(Repr,Repr)"></a><a id="span(((String,String))⇒Boolean):(Map[String,String],Map[String,String])"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#span(p:A=&gt;Boolean):(Repr,Repr)" title="Permalink">
         <i class="material-icons"></i>
@@ -2973,12 +3001,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">span</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: (<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>)</span>
+        <span class="name">span</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: (<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>])</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#splitAt" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="splitAt(n:Int):(Repr,Repr)"></a><a id="splitAt(Int):(HeaderMap,HeaderMap)"></a>
+      <a id="splitAt(n:Int):(Repr,Repr)"></a><a id="splitAt(Int):(Map[String,String],Map[String,String])"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#splitAt(n:Int):(Repr,Repr)" title="Permalink">
         <i class="material-icons"></i>
@@ -2989,7 +3017,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">splitAt</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: (<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>)</span>
+        <span class="name">splitAt</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: (<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>])</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
@@ -3042,7 +3070,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#tail" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tail:Repr"></a><a id="tail:HeaderMap"></a>
+      <a id="tail:Repr"></a><a id="tail:Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#tail:Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -3053,12 +3081,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tail</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">tail</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#tails" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tails:Iterator[Repr]"></a><a id="tails:Iterator[HeaderMap]"></a>
+      <a id="tails:Iterator[Repr]"></a><a id="tails:Iterator[Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#tails:Iterator[Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -3069,12 +3097,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tails</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">tails</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterator.html#scala.collection.Iterator" class="extype" name="scala.collection.Iterator">Iterator</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#take" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="take(n:Int):Repr"></a><a id="take(Int):HeaderMap"></a>
+      <a id="take(n:Int):Repr"></a><a id="take(Int):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#take(n:Int):Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -3085,12 +3113,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">take</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">take</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#takeRight" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="takeRight(n:Int):Repr"></a><a id="takeRight(Int):HeaderMap"></a>
+      <a id="takeRight(n:Int):Repr"></a><a id="takeRight(Int):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#takeRight(n:Int):Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -3101,12 +3129,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">takeRight</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">takeRight</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#takeWhile" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="takeWhile(p:A=&gt;Boolean):Repr"></a><a id="takeWhile(((String,String))⇒Boolean):HeaderMap"></a>
+      <a id="takeWhile(p:A=&gt;Boolean):Repr"></a><a id="takeWhile(((String,String))⇒Boolean):Map[String,String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#takeWhile(p:A=&gt;Boolean):Repr" title="Permalink">
         <i class="material-icons"></i>
@@ -3117,7 +3145,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">takeWhile</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name">takeWhile</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike</dd></dl></div>
@@ -3186,7 +3214,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
     </li><li name="scala.collection.IterableLike#toCollection" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toCollection(repr:Repr):Iterable[A]"></a><a id="toCollection(HeaderMap):Iterable[(String,String)]"></a>
+      <a id="toCollection(repr:Repr):Iterable[A]"></a><a id="toCollection(Map[String,String]):Iterable[(String,String)]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#toCollection(repr:Repr):Iterable[A]" title="Permalink">
         <i class="material-icons"></i>
@@ -3197,7 +3225,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toCollection</span><span class="params">(<span name="repr">repr: <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterable.html#scala.collection.Iterable" class="extype" name="scala.collection.Iterable">Iterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>
+        <span class="name">toCollection</span><span class="params">(<span name="repr">repr: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterable.html#scala.collection.Iterable" class="extype" name="scala.collection.Iterable">Iterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>IterableLike → TraversableLike</dd></dl></div>
@@ -3530,7 +3558,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike → GenMapLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#view" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="view(from:Int,until:Int):scala.collection.IterableView[A,Repr]"></a><a id="view(Int,Int):IterableView[(String,String),HeaderMap]"></a>
+      <a id="view(from:Int,until:Int):scala.collection.IterableView[A,Repr]"></a><a id="view(Int,Int):IterableView[(String,String),Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#view(from:Int,until:Int):scala.collection.IterableView[A,Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -3541,12 +3569,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">view</span><span class="params">(<span name="from">from: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="until">until: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableView.html#scala.collection.IterableView" class="extype" name="scala.collection.IterableView">IterableView</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">view</span><span class="params">(<span name="from">from: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="until">until: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableView.html#scala.collection.IterableView" class="extype" name="scala.collection.IterableView">IterableView</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#view" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="view:scala.collection.IterableView[A,Repr]"></a><a id="view:IterableView[(String,String),HeaderMap]"></a>
+      <a id="view:scala.collection.IterableView[A,Repr]"></a><a id="view:IterableView[(String,String),Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#view:scala.collection.IterableView[A,Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -3557,7 +3585,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">view</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableView.html#scala.collection.IterableView" class="extype" name="scala.collection.IterableView">IterableView</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">view</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableView.html#scala.collection.IterableView" class="extype" name="scala.collection.IterableView">IterableView</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike</dd></dl></div>
@@ -3662,7 +3690,7 @@ but with standard formatting for dates in HTTP headers.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Map</dd></dl></div>
     </li><li name="scala.collection.TraversableLike#withFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withFilter(p:A=&gt;Boolean):scala.collection.generic.FilterMonadic[A,Repr]"></a><a id="withFilter(((String,String))⇒Boolean):FilterMonadic[(String,String),HeaderMap]"></a>
+      <a id="withFilter(p:A=&gt;Boolean):scala.collection.generic.FilterMonadic[A,Repr]"></a><a id="withFilter(((String,String))⇒Boolean):FilterMonadic[(String,String),Map[String,String]]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#withFilter(p:A=&gt;Boolean):scala.collection.generic.FilterMonadic[A,Repr]" title="Permalink">
         <i class="material-icons"></i>
@@ -3673,12 +3701,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withFilter</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/FilterMonadic.html#scala.collection.generic.FilterMonadic" class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <span class="name">withFilter</span><span class="params">(<span name="p">p: ((<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/FilterMonadic.html#scala.collection.generic.FilterMonadic" class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → FilterMonadic</dd></dl></div>
     </li><li name="scala.collection.IterableLike#zip" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="zip[A1&gt;:A,B,That](that:scala.collection.GenIterable[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,B),That]):That"></a><a id="zip[A1&gt;:(String,String),B,That](GenIterable[B])(CanBuildFrom[HeaderMap,(A1,B),That]):That"></a>
+      <a id="zip[A1&gt;:A,B,That](that:scala.collection.GenIterable[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,B),That]):That"></a><a id="zip[A1&gt;:(String,String),B,That](GenIterable[B])(CanBuildFrom[Map[String,String],(A1,B),That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#zip[A1&gt;:A,B,That](that:scala.collection.GenIterable[B])(implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,B),That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -3689,12 +3717,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zip</span><span class="tparams">[<span name="A1">A1 &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[<span class="extype" name="scala.collection.IterableLike.zip.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, (<span class="extype" name="scala.collection.IterableLike.zip.A1">A1</span>, <span class="extype" name="scala.collection.IterableLike.zip.B">B</span>), <span class="extype" name="scala.collection.IterableLike.zip.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.IterableLike.zip.That">That</span></span>
+        <span class="name">zip</span><span class="tparams">[<span name="A1">A1 &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="B">B</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[<span class="extype" name="scala.collection.IterableLike.zip.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], (<span class="extype" name="scala.collection.IterableLike.zip.A1">A1</span>, <span class="extype" name="scala.collection.IterableLike.zip.B">B</span>), <span class="extype" name="scala.collection.IterableLike.zip.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.IterableLike.zip.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → GenIterableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#zipAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="zipAll[B,A1&gt;:A,That](that:scala.collection.GenIterable[B],thisElem:A1,thatElem:B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,B),That]):That"></a><a id="zipAll[B,A1&gt;:(String,String),That](GenIterable[B],A1,B)(CanBuildFrom[HeaderMap,(A1,B),That]):That"></a>
+      <a id="zipAll[B,A1&gt;:A,That](that:scala.collection.GenIterable[B],thisElem:A1,thatElem:B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,B),That]):That"></a><a id="zipAll[B,A1&gt;:(String,String),That](GenIterable[B],A1,B)(CanBuildFrom[Map[String,String],(A1,B),That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#zipAll[B,A1&gt;:A,That](that:scala.collection.GenIterable[B],thisElem:A1,thatElem:B)(implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,B),That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -3705,12 +3733,12 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zipAll</span><span class="tparams">[<span name="B">B</span>, <span name="A1">A1 &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[<span class="extype" name="scala.collection.IterableLike.zipAll.B">B</span>]</span>, <span name="thisElem">thisElem: <span class="extype" name="scala.collection.IterableLike.zipAll.A1">A1</span></span>, <span name="thatElem">thatElem: <span class="extype" name="scala.collection.IterableLike.zipAll.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, (<span class="extype" name="scala.collection.IterableLike.zipAll.A1">A1</span>, <span class="extype" name="scala.collection.IterableLike.zipAll.B">B</span>), <span class="extype" name="scala.collection.IterableLike.zipAll.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.IterableLike.zipAll.That">That</span></span>
+        <span class="name">zipAll</span><span class="tparams">[<span name="B">B</span>, <span name="A1">A1 &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[<span class="extype" name="scala.collection.IterableLike.zipAll.B">B</span>]</span>, <span name="thisElem">thisElem: <span class="extype" name="scala.collection.IterableLike.zipAll.A1">A1</span></span>, <span name="thatElem">thatElem: <span class="extype" name="scala.collection.IterableLike.zipAll.B">B</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], (<span class="extype" name="scala.collection.IterableLike.zipAll.A1">A1</span>, <span class="extype" name="scala.collection.IterableLike.zipAll.B">B</span>), <span class="extype" name="scala.collection.IterableLike.zipAll.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.IterableLike.zipAll.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → GenIterableLike</dd></dl></div>
     </li><li name="scala.collection.IterableLike#zipWithIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="zipWithIndex[A1&gt;:A,That](implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,Int),That]):That"></a><a id="zipWithIndex[A1&gt;:(String,String),That](CanBuildFrom[HeaderMap,(A1,Int),That]):That"></a>
+      <a id="zipWithIndex[A1&gt;:A,That](implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,Int),That]):That"></a><a id="zipWithIndex[A1&gt;:(String,String),That](CanBuildFrom[Map[String,String],(A1,Int),That]):That"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HeaderMap.html#zipWithIndex[A1&gt;:A,That](implicitbf:scala.collection.generic.CanBuildFrom[Repr,(A1,Int),That]):That" title="Permalink">
         <i class="material-icons"></i>
@@ -3721,7 +3749,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zipWithIndex</span><span class="tparams">[<span name="A1">A1 &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>, (<span class="extype" name="scala.collection.IterableLike.zipWithIndex.A1">A1</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>), <span class="extype" name="scala.collection.IterableLike.zipWithIndex.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.IterableLike.zipWithIndex.That">That</span></span>
+        <span class="name">zipWithIndex</span><span class="tparams">[<span name="A1">A1 &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>, <span name="That">That</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="bf">bf: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/CanBuildFrom.html#scala.collection.generic.CanBuildFrom" class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], (<span class="extype" name="scala.collection.IterableLike.zipWithIndex.A1">A1</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>), <span class="extype" name="scala.collection.IterableLike.zipWithIndex.That">That</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.IterableLike.zipWithIndex.That">That</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → GenIterableLike</dd></dl></div>
@@ -3763,9 +3791,9 @@ but with standard formatting for dates in HTTP headers.
         <div class="parent" name="scala.collection.mutable.Map">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</h3>
             </div><div class="parent" name="scala.collection.mutable.MapLike">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/MapLike.html#scala.collection.mutable.MapLike" class="extype" name="scala.collection.mutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/MapLike.html#scala.collection.mutable.MapLike" class="extype" name="scala.collection.mutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.mutable.Cloneable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Cloneable.html#scala.collection.mutable.Cloneable" class="extype" name="scala.collection.mutable.Cloneable">Cloneable</a>[<a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Cloneable.html#scala.collection.mutable.Cloneable" class="extype" name="scala.collection.mutable.Cloneable">Cloneable</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.Cloneable">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Cloneable.html#scala.Cloneable" class="extype" name="scala.Cloneable">Cloneable</a></h3>
             </div><div class="parent" name="java.lang.Cloneable">
@@ -3773,7 +3801,7 @@ but with standard formatting for dates in HTTP headers.
             </div><div class="parent" name="scala.collection.generic.Shrinkable">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Shrinkable.html#scala.collection.generic.Shrinkable" class="extype" name="scala.collection.generic.Shrinkable">Shrinkable</a>[<span class="extype" name="scala.Predef.String">String</span>]</h3>
             </div><div class="parent" name="scala.collection.mutable.Builder">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Builder.html#scala.collection.mutable.Builder" class="extype" name="scala.collection.mutable.Builder">Builder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Builder.html#scala.collection.mutable.Builder" class="extype" name="scala.collection.mutable.Builder">Builder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.generic.Growable">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Growable.html#scala.collection.generic.Growable" class="extype" name="scala.collection.generic.Growable">Growable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</h3>
             </div><div class="parent" name="scala.collection.generic.Clearable">
@@ -3781,9 +3809,9 @@ but with standard formatting for dates in HTTP headers.
             </div><div class="parent" name="scala.collection.Map">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Map.html#scala.collection.Map" class="extype" name="scala.collection.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</h3>
             </div><div class="parent" name="scala.collection.MapLike">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/MapLike.html#scala.collection.MapLike" class="extype" name="scala.collection.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/MapLike.html#scala.collection.MapLike" class="extype" name="scala.collection.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.generic.Subtractable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Subtractable.html#scala.collection.generic.Subtractable" class="extype" name="scala.collection.generic.Subtractable">Subtractable</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/Subtractable.html#scala.collection.generic.Subtractable" class="extype" name="scala.collection.generic.Subtractable">Subtractable</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.PartialFunction">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</h3>
             </div><div class="parent" name="scala.Function1">
@@ -3791,19 +3819,19 @@ but with standard formatting for dates in HTTP headers.
             </div><div class="parent" name="scala.collection.GenMap">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenMap.html#scala.collection.GenMap" class="extype" name="scala.collection.GenMap">GenMap</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</h3>
             </div><div class="parent" name="scala.collection.GenMapLike">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenMapLike.html#scala.collection.GenMapLike" class="extype" name="scala.collection.GenMapLike">GenMapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenMapLike.html#scala.collection.GenMapLike" class="extype" name="scala.collection.GenMapLike">GenMapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.mutable.Iterable">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Iterable.html#scala.collection.mutable.Iterable" class="extype" name="scala.collection.mutable.Iterable">Iterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</h3>
             </div><div class="parent" name="scala.collection.Iterable">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Iterable.html#scala.collection.Iterable" class="extype" name="scala.collection.Iterable">Iterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</h3>
             </div><div class="parent" name="scala.collection.IterableLike">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableLike.html#scala.collection.IterableLike" class="extype" name="scala.collection.IterableLike">IterableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/IterableLike.html#scala.collection.IterableLike" class="extype" name="scala.collection.IterableLike">IterableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.Equals">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a></h3>
             </div><div class="parent" name="scala.collection.GenIterable">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterable.html#scala.collection.GenIterable" class="extype" name="scala.collection.GenIterable">GenIterable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</h3>
             </div><div class="parent" name="scala.collection.GenIterableLike">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterableLike.html#scala.collection.GenIterableLike" class="extype" name="scala.collection.GenIterableLike">GenIterableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenIterableLike.html#scala.collection.GenIterableLike" class="extype" name="scala.collection.GenIterableLike">GenIterableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.mutable.Traversable">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Traversable.html#scala.collection.mutable.Traversable" class="extype" name="scala.collection.mutable.Traversable">Traversable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</h3>
             </div><div class="parent" name="scala.Mutable">
@@ -3815,9 +3843,9 @@ but with standard formatting for dates in HTTP headers.
             </div><div class="parent" name="scala.collection.generic.GenericTraversableTemplate">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/GenericTraversableTemplate.html#scala.collection.generic.GenericTraversableTemplate" class="extype" name="scala.collection.generic.GenericTraversableTemplate">GenericTraversableTemplate</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Iterable.html#scala.collection.mutable.Iterable" class="extype" name="scala.collection.mutable.Iterable">Iterable</a>]</h3>
             </div><div class="parent" name="scala.collection.TraversableLike">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableLike.html#scala.collection.TraversableLike" class="extype" name="scala.collection.TraversableLike">TraversableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableLike.html#scala.collection.TraversableLike" class="extype" name="scala.collection.TraversableLike">TraversableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.GenTraversableLike">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableLike.html#scala.collection.GenTraversableLike" class="extype" name="scala.collection.GenTraversableLike">GenTraversableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableLike.html#scala.collection.GenTraversableLike" class="extype" name="scala.collection.GenTraversableLike">GenTraversableLike</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.Parallelizable">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/Parallelizable.html#scala.collection.Parallelizable" class="extype" name="scala.collection.Parallelizable">Parallelizable</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/parallel/mutable/ParMap.html#scala.collection.parallel.mutable.ParMap" class="extype" name="scala.collection.parallel.mutable.ParMap">ParMap</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.TraversableOnce">
@@ -3825,9 +3853,11 @@ but with standard formatting for dates in HTTP headers.
             </div><div class="parent" name="scala.collection.GenTraversableOnce">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/GenTraversableOnce.html#scala.collection.GenTraversableOnce" class="extype" name="scala.collection.GenTraversableOnce">GenTraversableOnce</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</h3>
             </div><div class="parent" name="scala.collection.generic.FilterMonadic">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/FilterMonadic.html#scala.collection.generic.FilterMonadic" class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/FilterMonadic.html#scala.collection.generic.FilterMonadic" class="extype" name="scala.collection.generic.FilterMonadic">FilterMonadic</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
             </div><div class="parent" name="scala.collection.generic.HasNewBuilder">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/HasNewBuilder.html#scala.collection.generic.HasNewBuilder" class="extype" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/generic/HasNewBuilder.html#scala.collection.generic.HasNewBuilder" class="extype" name="scala.collection.generic.HasNewBuilder">HasNewBuilder</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>), <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</h3>
+            </div><div class="parent" name="com.twitter.finagle.http.HeaderMapVersionSpecific">
+              <h3>Inherited from <a href="HeaderMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.HeaderMapVersionSpecific">HeaderMapVersionSpecific</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

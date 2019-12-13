@@ -454,6 +454,22 @@ this value will be aggregated in the exported metrics.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#addGauge" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addGauge(schema:com.twitter.finagle.stats.GaugeSchema)(f:=&gt;Float):com.twitter.finagle.stats.Gauge"></a><a id="addGauge(GaugeSchema)(⇒Float):Gauge"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/MetricsStatsReceiver.html#addGauge(schema:com.twitter.finagle.stats.GaugeSchema)(f:=&gt;Float):com.twitter.finagle.stats.Gauge" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addGauge</span><span class="params">(<span name="schema">schema: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/GaugeSchema.html#com.twitter.finagle.stats.GaugeSchema" class="extype" name="com.twitter.finagle.stats.GaugeSchema">GaugeSchema</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Gauge.html#com.twitter.finagle.stats.Gauge" class="extype" name="com.twitter.finagle.stats.Gauge">Gauge</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiverWithCumulativeGauges → StatsReceiver</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiver#addGauge" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addGauge(verbosity:com.twitter.finagle.stats.Verbosity,name:String*)(f:=&gt;Float):com.twitter.finagle.stats.Gauge"></a><a id="addGauge(Verbosity,String*)(⇒Float):Gauge"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/stats/MetricsStatsReceiver.html#addGauge(verbosity:com.twitter.finagle.stats.Verbosity,name:String*)(f:=&gt;Float):com.twitter.finagle.stats.Gauge" title="Permalink">
@@ -468,7 +484,7 @@ this value will be aggregated in the exported metrics.
         <span class="name">addGauge</span><span class="params">(<span name="verbosity">verbosity: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Verbosity.html#com.twitter.finagle.stats.Verbosity" class="extype" name="com.twitter.finagle.stats.Verbosity">Verbosity</a></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Gauge.html#com.twitter.finagle.stats.Gauge" class="extype" name="com.twitter.finagle.stats.Gauge">Gauge</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiverWithCumulativeGauges → StatsReceiver</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#addGauge" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addGauge(name:String*)(f:=&gt;Float):com.twitter.finagle.stats.Gauge"></a><a id="addGauge(String*)(⇒Float):Gauge"></a>
       <span class="permalink">
@@ -526,9 +542,9 @@ this value will be aggregated in the exported metrics.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#counter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="counter(verbosity:com.twitter.finagle.stats.Verbosity,names:String*):com.twitter.finagle.stats.Counter"></a><a id="counter(Verbosity,String*):Counter"></a>
+      <a id="counter(schema:com.twitter.finagle.stats.CounterSchema):com.twitter.finagle.stats.Counter"></a><a id="counter(CounterSchema):Counter"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/MetricsStatsReceiver.html#counter(verbosity:com.twitter.finagle.stats.Verbosity,names:String*):com.twitter.finagle.stats.Counter" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/MetricsStatsReceiver.html#counter(schema:com.twitter.finagle.stats.CounterSchema):com.twitter.finagle.stats.Counter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -537,12 +553,31 @@ this value will be aggregated in the exported metrics.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">counter</span><span class="params">(<span name="verbosity">verbosity: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Verbosity.html#com.twitter.finagle.stats.Verbosity" class="extype" name="com.twitter.finagle.stats.Verbosity">Verbosity</a></span>, <span name="names">names: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Counter.html#com.twitter.finagle.stats.Counter" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>
+        <span class="name">counter</span><span class="params">(<span name="schema">schema: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/CounterSchema.html#com.twitter.finagle.stats.CounterSchema" class="extype" name="com.twitter.finagle.stats.CounterSchema">CounterSchema</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Counter.html#com.twitter.finagle.stats.Counter" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>
       </span>
       
       <p class="shortcomment cmt">Create and register a counter inside the underlying Metrics library
 </p><div class="fullcomment"><div class="comment cmt"><p>Create and register a counter inside the underlying Metrics library
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiver</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiver#counter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="counter(verbosity:com.twitter.finagle.stats.Verbosity,name:String*):com.twitter.finagle.stats.Counter"></a><a id="counter(Verbosity,String*):Counter"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/MetricsStatsReceiver.html#counter(verbosity:com.twitter.finagle.stats.Verbosity,name:String*):com.twitter.finagle.stats.Counter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">counter</span><span class="params">(<span name="verbosity">verbosity: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Verbosity.html#com.twitter.finagle.stats.Verbosity" class="extype" name="com.twitter.finagle.stats.Verbosity">Verbosity</a></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Counter.html#com.twitter.finagle.stats.Counter" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
+                <span class="name">@varargs</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#counter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="counter(name:String*):com.twitter.finagle.stats.Counter"></a><a id="counter(String*):Counter"></a>
       <span class="permalink">
@@ -952,9 +987,9 @@ this value will be aggregated in the exported metrics.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#stat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stat(verbosity:com.twitter.finagle.stats.Verbosity,names:String*):com.twitter.finagle.stats.Stat"></a><a id="stat(Verbosity,String*):Stat"></a>
+      <a id="stat(schema:com.twitter.finagle.stats.HistogramSchema):com.twitter.finagle.stats.Stat"></a><a id="stat(HistogramSchema):Stat"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/MetricsStatsReceiver.html#stat(verbosity:com.twitter.finagle.stats.Verbosity,names:String*):com.twitter.finagle.stats.Stat" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/MetricsStatsReceiver.html#stat(schema:com.twitter.finagle.stats.HistogramSchema):com.twitter.finagle.stats.Stat" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -963,12 +998,31 @@ this value will be aggregated in the exported metrics.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stat</span><span class="params">(<span name="verbosity">verbosity: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Verbosity.html#com.twitter.finagle.stats.Verbosity" class="extype" name="com.twitter.finagle.stats.Verbosity">Verbosity</a></span>, <span name="names">names: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Stat.html#com.twitter.finagle.stats.Stat" class="extype" name="com.twitter.finagle.stats.Stat">Stat</a></span>
+        <span class="name">stat</span><span class="params">(<span name="schema">schema: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/HistogramSchema.html#com.twitter.finagle.stats.HistogramSchema" class="extype" name="com.twitter.finagle.stats.HistogramSchema">HistogramSchema</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Stat.html#com.twitter.finagle.stats.Stat" class="extype" name="com.twitter.finagle.stats.Stat">Stat</a></span>
       </span>
       
       <p class="shortcomment cmt">Create and register a stat (histogram) inside the underlying Metrics library
 </p><div class="fullcomment"><div class="comment cmt"><p>Create and register a stat (histogram) inside the underlying Metrics library
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiver</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiver#stat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stat(verbosity:com.twitter.finagle.stats.Verbosity,name:String*):com.twitter.finagle.stats.Stat"></a><a id="stat(Verbosity,String*):Stat"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/MetricsStatsReceiver.html#stat(verbosity:com.twitter.finagle.stats.Verbosity,name:String*):com.twitter.finagle.stats.Stat" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stat</span><span class="params">(<span name="verbosity">verbosity: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Verbosity.html#com.twitter.finagle.stats.Verbosity" class="extype" name="com.twitter.finagle.stats.Verbosity">Verbosity</a></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Stat.html#com.twitter.finagle.stats.Stat" class="extype" name="com.twitter.finagle.stats.Stat">Stat</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
+                <span class="name">@varargs</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#stat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stat(name:String*):com.twitter.finagle.stats.Stat"></a><a id="stat(String*):Stat"></a>
       <span class="permalink">

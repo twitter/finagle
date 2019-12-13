@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 19.11.0 documentation</title>
+    <title>Clients &#8212; Finagle 19.12.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.11.0',
+        VERSION:     '19.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.11.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.12.0 documentation" href="index.html" />
     <link rel="next" title="Threading Model" href="ThreadingModel.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -72,17 +72,50 @@
   <div class="section" id="clients">
 <span id="finagle-clients"></span><h1>Clients<a class="headerlink" href="#clients" title="Permalink to this headline">¶</a></h1>
 <p>Finagle clients adheres to a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Client.scala">interface</a> for
-construction:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">newClient</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
-</pre></div>
-</div>
-<p>That is, given a logical destination and an identifier, return a function
-that produces a typed <cite>Service</cite> over which requests can be dispatched.
-There are variants of this constructor for stateless clients that create a simple
-<cite>Service</cite>, for example:</p>
+construction. The following API supports the creation of both stateful and stateless clients.
+You want a stateful client if you require requests and response sequences over the same connection.
+The following illustrates the difference.</p>
+<p>Constructor for a <strong>stateless</strong> client:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">newService</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
 </pre></div>
 </div>
+<p>That is, given a logical destination and an identifier, return a function that produces
+a typed <cite>Service</cite> over which requests can be dispatched. Dispatched requests will be
+load balanced across all of the resolved hosts utilizing Finagle&#8217;s configured load balancer.</p>
+<p>An alternative constructor for a <strong>stateful</strong> client producing a typed <cite>ServiceFactory</cite>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">newClient</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
+</pre></div>
+</div>
+<p>Each <cite>Service</cite> acquired from the returned <cite>ServiceFactory</cite> represents a distinct session. Requests
+dispatched on this <cite>Service</cite> will reuse the established connection to the picked host. Load balancing
+occurs only per-session, <cite>ServiceFactory.apply</cite>, while per-request on <cite>newService</cite>.  Depending on
+the configured <a class="reference internal" href="#pooling">Pooling</a> strategy, <cite>Service.close</cite> typically returns its connection to
+the pool and does not cut the connection. As a result, it is important to close sessions after use
+to avoid resource leaks. For example:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">ServiceFactory</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="k">val</span> <span class="n">sessionFactory</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">newClient</span><span class="o">(</span><span class="s">&quot;example.com:80&quot;</span><span class="o">)</span>
+
+<span class="c1">// we establish a session, represented by `svc`</span>
+<span class="n">sessionFactory</span><span class="o">().</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">svc</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=&gt;</span>
+
+  <span class="c1">// both requests will land on the same host</span>
+  <span class="k">val</span> <span class="n">rep1</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">svc</span><span class="o">(</span><span class="nc">Request</span><span class="o">(</span><span class="s">&quot;/some/path&quot;</span><span class="o">))</span>
+  <span class="k">val</span> <span class="n">rep2</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">svc</span><span class="o">(</span><span class="nc">Request</span><span class="o">(</span><span class="s">&quot;/some/other/path&quot;</span><span class="o">))</span>
+
+  <span class="c1">// clean up the session so the connection is released into the pool</span>
+  <span class="n">svc</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
+<span class="o">}</span>
+
+<span class="c1">// session establishment is load balanced. No guarantee as to which endpoint is selected by the load balancer</span>
+<span class="n">sessionFactory</span><span class="o">().</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+</pre></div>
+</div>
+<div class="section" id="client-protocol-implementation">
+<h2>Client Protocol Implementation<a class="headerlink" href="#client-protocol-implementation" title="Permalink to this headline">¶</a></h2>
 <p>As of <a class="reference internal" href="changelog.html"><span class="doc">6.x</span></a>, client implementations are encouraged to expose
 this interface on a Scala object named after the protocol implementation. This
 results in a uniform way to construct clients, <code class="docutils literal"><span class="pre">Protocol.newClient(...)</span></code> or
@@ -99,6 +132,7 @@ specific API&#8217;s. A common pattern is to expose a <code class="docutils lite
 does exactly this. For cases like Thrift, where IDLs are part of
 the rich API, a more specialized API is exposed. See the protocols section on
 <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">Thrift</span></a> for more details.</p>
+</div>
 <div class="section" id="transport">
 <h2>Transport<a class="headerlink" href="#transport" title="Permalink to this headline">¶</a></h2>
 <p>Finagle clients come with a variety of transport-level parameters that not only wire up TCP socket
@@ -1150,9 +1184,15 @@ code to deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
 <code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method&#8217;s response type. Given an IDL:</p>
 <div class="highlight-none"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }
+exception InvalidQueryException {
+  1: i32 errorCode
+}
 
 service SocialGraph {
-  i32 follow(1: i64 follower, 2: i64 followee) throws (1: NotFoundException ex)
+  i32 follow(1: i64 follower, 2: i64 followee) throws (
+    1: NotFoundException ex1,
+    2: InvalidQueryException ex2
+  )
 }
 </pre></div>
 </div>
@@ -1192,10 +1232,10 @@ Classification to deal with wire level response concerns. Lastly (#4), the deser
 </div>
 <div class="section" id="other-details">
 <h3>Other Details<a class="headerlink" href="#other-details" title="Permalink to this headline">¶</a></h3>
-<p>If you have a response classifier that categorizes <code class="docutils literal"><span class="pre">Returns</span></code> as
-failures, note that they will be counted in the <code class="docutils literal"><span class="pre">StatsFilter</span></code>
-as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code> in the
-<code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
+<p>If you have a response classifier that categorizes non-Exceptions as failures, this includes
+Thrift Responses (#2) or embedded Thrift Exceptions (#1), note that they will be counted in
+the <code class="docutils literal"><span class="pre">StatsFilter</span></code> as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code>
+in the <code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
 <a class="reference external" href="https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
 for more details.</p>
 </div>
@@ -1321,6 +1361,7 @@ Alvaro Videla&#8217;s <a class="reference external" href="https://videlalvaro.gi
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Clients</a><ul>
+<li><a class="reference internal" href="#client-protocol-implementation">Client Protocol Implementation</a></li>
 <li><a class="reference internal" href="#transport">Transport</a></li>
 <li><a class="reference internal" href="#transport-security">Transport Security</a><ul>
 <li><a class="reference internal" href="#http-proxy">HTTP Proxy</a></li>

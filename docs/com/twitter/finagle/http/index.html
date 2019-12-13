@@ -499,6 +499,10 @@ stabilized (moved elsewhere) at any time.
                         <a href="CookieMap.html" title="Adapt cookies of a Message to a mutable Map where cookies are indexed by their name.">CookieMap</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="CookieMapVersionSpecific.html" title=""></a>
+                        <a href="CookieMapVersionSpecific.html" title="">CookieMapVersionSpecific</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="EmptyParamMap$.html" title="Empty ParamMap"></a>
                         <a href="EmptyParamMap$.html" title="Empty ParamMap">EmptyParamMap</a>
                       </li><li class="current-entities indented4">
@@ -517,6 +521,10 @@ stabilized (moved elsewhere) at any time.
                         <a class="object" href="HeaderMap$.html" title=""></a>
                         <a class="class" href="HeaderMap.html" title="Mutable message headers map."></a>
                         <a href="HeaderMap.html" title="Mutable message headers map.">HeaderMap</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="HeaderMapVersionSpecific.html" title=""></a>
+                        <a href="HeaderMapVersionSpecific.html" title="">HeaderMapVersionSpecific</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="HttpMuxHandler.html" title="Trait HttpMuxHandler is used for service-loading HTTP handlers."></a>
@@ -557,6 +565,10 @@ stabilized (moved elsewhere) at any time.
                         <a class="object" href="ParamMap$.html" title=""></a>
                         <a class="class" href="ParamMap.html" title="Request parameter map."></a>
                         <a href="ParamMap.html" title="Request parameter map.">ParamMap</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ParamMapVersionSpecific.html" title=""></a>
+                        <a href="ParamMapVersionSpecific.html" title="">ParamMapVersionSpecific</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="ProxyCredentials$.html" title=""></a>
                         <a class="class" href="ProxyCredentials.html" title=""></a>
@@ -1340,9 +1352,9 @@ individual HTTP streams from child readers.
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p><code>domain</code> and <code>path</code> may be null.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.CookieMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="CookieMapextendsMap[String,com.twitter.finagle.http.Cookie]withMapLike[String,com.twitter.finagle.http.Cookie,com.twitter.finagle.http.CookieMap]"></a><a id="CookieMap:CookieMap"></a>
+      <a id="CookieMapextendsCookieMapVersionSpecific"></a><a id="CookieMap:CookieMap"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#CookieMapextendsMap[String,com.twitter.finagle.http.Cookie]withMapLike[String,com.twitter.finagle.http.Cookie,com.twitter.finagle.http.CookieMap]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#CookieMapextendsCookieMapVersionSpecific" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1351,7 +1363,7 @@ individual HTTP streams from child readers.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Adapt cookies of a Message to a mutable Map where cookies are indexed by their name." href="CookieMap.html"><span class="name">CookieMap</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>] with <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/MapLike.html#scala.collection.mutable.MapLike" class="extype" name="scala.collection.mutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>, <a href="CookieMap.html" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>]</span>
+        <a title="Adapt cookies of a Message to a mutable Map where cookies are indexed by their name." href="CookieMap.html"><span class="name">CookieMap</span></a><span class="result"> extends <a href="CookieMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.CookieMapVersionSpecific">CookieMapVersionSpecific</a></span>
       </span>
       
       <p class="shortcomment cmt">Adapt cookies of a Message to a mutable Map where cookies are indexed by
@@ -1363,6 +1375,22 @@ to retrieve all of them, otherwise only the first one is returned. If a
 cookie is removed from the CookieMap, a header is automatically removed from
 the <i>message</i>
 </p></div></div>
+    </li><li name="com.twitter.finagle.http.CookieMapVersionSpecific" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="CookieMapVersionSpecificextendsMap[String,com.twitter.finagle.http.Cookie]withMapLike[String,com.twitter.finagle.http.Cookie,com.twitter.finagle.http.CookieMap]"></a><a id="CookieMapVersionSpecific:CookieMapVersionSpecific"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#CookieMapVersionSpecificextendsMap[String,com.twitter.finagle.http.Cookie]withMapLike[String,com.twitter.finagle.http.Cookie,com.twitter.finagle.http.CookieMap]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="CookieMapVersionSpecific.html"><span class="name">CookieMapVersionSpecific</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>] with <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/MapLike.html#scala.collection.mutable.MapLike" class="extype" name="scala.collection.mutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>, <a href="CookieMap.html" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.http.FileElement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FileElementextendsFormElementwithProductwithSerializable"></a><a id="FileElement:FileElement"></a>
       <span class="permalink">
@@ -1396,9 +1424,9 @@ the <i>message</i>
       
       
     </li><li name="com.twitter.finagle.http.HeaderMap" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="HeaderMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.HeaderMap]"></a><a id="HeaderMap:HeaderMap"></a>
+      <a id="HeaderMapextendsHeaderMapVersionSpecificwithMap[String,String]"></a><a id="HeaderMap:HeaderMap"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#HeaderMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.HeaderMap]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#HeaderMapextendsHeaderMapVersionSpecificwithMap[String,String]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1407,13 +1435,29 @@ the <i>message</i>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Mutable message headers map." href="HeaderMap.html"><span class="name">HeaderMap</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] with <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/MapLike.html#scala.collection.mutable.MapLike" class="extype" name="scala.collection.mutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a>]</span>
+        <a title="Mutable message headers map." href="HeaderMap.html"><span class="name">HeaderMap</span></a><span class="result"> extends <a href="HeaderMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.HeaderMapVersionSpecific">HeaderMapVersionSpecific</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Mutable message headers map.</p><div class="fullcomment"><div class="comment cmt"><p>Mutable message headers map.</p><p>Header names are case-insensitive.  For example, <code>get(&quot;accept&quot;)</code> is the same as
 get(&quot;Accept&quot;).</p><p>The map is a multi-map.  Use <a href="HeaderMap.html#getAll(key:String):Seq[String]" class="extmbr" name="com.twitter.finagle.http.HeaderMap#getAll">getAll</a> to get all values for a key.  Use <a href="HeaderMap.html#add(k:String,date:java.util.Date):com.twitter.finagle.http.HeaderMap" class="extmbr" name="com.twitter.finagle.http.HeaderMap#add">add</a>
 to append a key-value.
 </p></div></div>
+    </li><li name="com.twitter.finagle.http.HeaderMapVersionSpecific" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="HeaderMapVersionSpecificextendsAnyRef"></a><a id="HeaderMapVersionSpecific:HeaderMapVersionSpecific"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#HeaderMapVersionSpecificextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="HeaderMapVersionSpecific.html"><span class="name">HeaderMapVersionSpecific</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.http.HttpMuxHandler" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="HttpMuxHandlerextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a><a id="HttpMuxHandler:HttpMuxHandler"></a>
       <span class="permalink">
@@ -1579,9 +1623,9 @@ Further details, including the request and response, are available at
 <code>TRACE</code> level.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="../Http$$Client.html#methodBuilder(dest:com.twitter.finagle.Name):com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.Http.Client#methodBuilder">com.twitter.finagle.Http.Client.methodBuilder</a> to construct instances.</p></span><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">user guide</a>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.ParamMap" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ParamMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.ParamMap]"></a><a id="ParamMap:ParamMap"></a>
+      <a id="ParamMapextendsParamMapVersionSpecific"></a><a id="ParamMap:ParamMap"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#ParamMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.ParamMap]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#ParamMapextendsParamMapVersionSpecific" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1590,11 +1634,27 @@ Further details, including the request and response, are available at
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Request parameter map." href="ParamMap.html"><span class="name">ParamMap</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/Map.html#scala.collection.immutable.Map" class="extype" name="scala.collection.immutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] with <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/MapLike.html#scala.collection.immutable.MapLike" class="extype" name="scala.collection.immutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a>]</span>
+        <a title="Request parameter map." href="ParamMap.html"><span class="name">ParamMap</span></a><span class="result"> extends <a href="ParamMapVersionSpecific.html" class="extype" name="com.twitter.finagle.http.ParamMapVersionSpecific">ParamMapVersionSpecific</a></span>
       </span>
       
       <p class="shortcomment cmt">Request parameter map.</p><div class="fullcomment"><div class="comment cmt"><p>Request parameter map.</p><p>This is a persistent (immutable) multi-map.</p><p>Use <code>getAll()</code> to get all values for a key.
 </p></div></div>
+    </li><li name="com.twitter.finagle.http.ParamMapVersionSpecific" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ParamMapVersionSpecificextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.ParamMap]"></a><a id="ParamMapVersionSpecific:ParamMapVersionSpecific"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#ParamMapVersionSpecificextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.ParamMap]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParamMapVersionSpecific.html"><span class="name">ParamMapVersionSpecific</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/Map.html#scala.collection.immutable.Map" class="extype" name="scala.collection.immutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] with <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/MapLike.html#scala.collection.immutable.MapLike" class="extype" name="scala.collection.immutable.MapLike">MapLike</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>, <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.http.ProxyCredentials" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ProxyCredentialsextendsProductwithSerializable"></a><a id="ProxyCredentials:ProxyCredentials"></a>
       <span class="permalink">

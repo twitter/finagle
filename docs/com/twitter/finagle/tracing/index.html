@@ -883,6 +883,10 @@ generator.
                         <a class="class" href="Flags.html" title="Represents flags that can be passed along in request headers."></a>
                         <a href="Flags.html" title="Represents flags that can be passed along in request headers.">Flags</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ForwardAnnotation$.html" title="Allow us to inject annotations into children trace contexts."></a>
+                        <a href="ForwardAnnotation$.html" title="Allow us to inject annotations into children trace contexts.">ForwardAnnotation</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="NullTracer$.html" title="A singleton instance of a no-op NullTracer."></a>
                         <a class="class" href="NullTracer.html" title="A no-op Tracer."></a>
                         <a href="NullTracer.html" title="A no-op Tracer.">NullTracer</a>
@@ -1188,7 +1192,7 @@ Includes: rpc service name, method name, client sent and client received.
       </span>
       
       <p class="shortcomment cmt">Represents flags that can be passed along in request headers.</p><div class="fullcomment"><div class="comment cmt"><p>Represents flags that can be passed along in request headers.</p></div><dl class="paramcmts block"><dt class="param">flags</dt><dd class="cmt"><p>Initial flag state. May be 0.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.NullTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.NullTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="NullTracerextendsTracer"></a><a id="NullTracer:NullTracer"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/index.html#NullTracerextendsTracer" title="Permalink">
@@ -1203,7 +1207,12 @@ Includes: rpc service name, method name, client sent and client received.
         <a title="A no-op Tracer." href="NullTracer.html"><span class="name">NullTracer</span></a><span class="result"> extends <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>
       </span>
       
-      <p class="shortcomment cmt">A no-op <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>.</p>
+      <p class="shortcomment cmt">A no-op <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A no-op <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>supplying this tracer to a finagle client or server will not prevent
+trace information from being propagated to the next peer, but it will ensure
+that the client or server does not log any trace information about this host.
+If traces are being aggregated across your fleet, it will orphan subsequent
+spans.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.Record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RecordextendsProductwithSerializable"></a><a id="Record:Record"></a>
       <span class="permalink">
@@ -1504,6 +1513,34 @@ and increase throughput.</p><pre><span class="cmt">// Performs six context looku
       </span>
       
       
+    </li><li name="com.twitter.finagle.tracing.ForwardAnnotation" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ForwardAnnotation"></a><a id="ForwardAnnotation:ForwardAnnotation"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/index.html#ForwardAnnotation" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Allow us to inject annotations into children trace contexts." href="ForwardAnnotation$.html"><span class="name">ForwardAnnotation</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Allow us to inject annotations into children trace contexts.</p><div class="fullcomment"><div class="comment cmt"><p>Allow us to inject annotations into children trace contexts. Example, with dark
+traffic or retries we want to be able to tag the produced spans from each call
+(the light/dark calls, or each individual retry) with information that allows us
+to tie them together as a single logical item: a light request paired with a dark
+request, or an initial request and a series of retries. The problem lies in the fact
+that at the time we have the information about the relationship, the
+child trace context doesn't actually yet exist. In order to trace where it is needed, we need
+to have a hook into the trace context of these children requests which don't yet exist.
+We do this by placing annotations we want each child trace context to carry inside the local
+context and accessing them when the child trace context is realized through a stack module. The
+stack module will place a filter in the correct trace context, after the Trace Initialization
+Filter, which allows us to record the annotations in the proper place.
+</p></div></div>
     </li><li name="com.twitter.finagle.tracing.NullTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullTracer"></a><a id="NullTracer:NullTracer"></a>
       <span class="permalink">

@@ -220,6 +220,10 @@ resources for using Finagle.
                         <a class="class" href="Flags.html" title="Represents flags that can be passed along in request headers."></a>
                         <a href="Flags.html" title="Represents flags that can be passed along in request headers.">Flags</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ForwardAnnotation$.html" title="Allow us to inject annotations into children trace contexts."></a>
+                        <a href="ForwardAnnotation$.html" title="Allow us to inject annotations into children trace contexts.">ForwardAnnotation</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="NullTracer$.html" title="A singleton instance of a no-op NullTracer."></a>
                         <a class="class" href="NullTracer.html" title="A no-op Tracer."></a>
                         <a href="NullTracer.html" title="A no-op Tracer.">NullTracer</a>
@@ -893,22 +897,6 @@ of request context changes.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.Tracing#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="record(message:String,duration:com.twitter.util.Duration):Unit"></a><a id="record(String,Duration):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(message:String,duration:com.twitter.util.Duration):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">record</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="duration">duration: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Tracing#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="record(message:String):Unit"></a><a id="record(String):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(message:String):Unit" title="Permalink">
@@ -1324,7 +1312,10 @@ of request context changes.
         <span class="name">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.time.T">T</span></span>
       </span>
       
-      <p class="shortcomment cmt">Time an operation and add an annotation with that duration on it</p><div class="fullcomment"><div class="comment cmt"><p>Time an operation and add an annotation with that duration on it</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>return type</p></dd><dt class="param">message</dt><dd class="cmt"><p>The message describing the operation</p></dd><dt class="param">f</dt><dd class="cmt"><p>operation to perform</p></dd><dt>returns</dt><dd class="cmt"><p>return value of the operation</p></dd></dl></div>
+      <p class="shortcomment cmt">Time an operation and add a binary annotation to the current span
+with the duration.</p><div class="fullcomment"><div class="comment cmt"><p>Time an operation and add a binary annotation to the current span
+with the duration.
+</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>return type</p></dd><dt class="param">message</dt><dd class="cmt"><p>The message describing the operation</p></dd><dt class="param">f</dt><dd class="cmt"><p>operation to perform</p></dd><dt>returns</dt><dd class="cmt"><p>return value of the operation</p></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.Trace#timeFuture" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="timeFuture[T](message:String)(f:com.twitter.util.Future[T]):com.twitter.util.Future[T]"></a><a id="timeFuture[T](String)(Future[T]):Future[T]"></a>
       <span class="permalink">
@@ -1340,7 +1331,8 @@ of request context changes.
         <span class="name">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.tracing.Trace.timeFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.tracing.Trace.timeFuture.T">T</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Runs the function f and logs that duration until the future is satisfied with the given name.</p>
+      <p class="shortcomment cmt">Time an async operation and add a binary annotation to the current span
+with the duration.</p>
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
@@ -1357,6 +1349,48 @@ of request context changes.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#traceLocal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="traceLocal[T](name:String)(f:=&gt;T):T"></a><a id="traceLocal[T](String)(⇒T):T"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#traceLocal[T](name:String)(f:=&gt;T):T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">traceLocal</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.traceLocal.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.traceLocal.T">T</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a span that begins right before the function is called
+and ends immediately after the function completes.</p><div class="fullcomment"><div class="comment cmt"><p>Create a span that begins right before the function is called
+and ends immediately after the function completes. This
+span will never have a corresponding remote component and is contained
+completely within the process it is created.
+</p></div></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#traceLocalFuture" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="traceLocalFuture[T](name:String)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]"></a><a id="traceLocalFuture[T](String)(⇒Future[T]):Future[T]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#traceLocalFuture[T](name:String)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">traceLocalFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.tracing.Trace.traceLocalFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.tracing.Trace.traceLocalFuture.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a span that begins right before the function is called
+and ends immediately after the async operation completes.</p><div class="fullcomment"><div class="comment cmt"><p>Create a span that begins right before the function is called
+and ends immediately after the async operation completes. This span will
+never have a corresponding remote component and is contained
+completely within the process it is created.
+</p></div></div>
     </li><li name="com.twitter.finagle.tracing.Trace#traceService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="traceService[T](service:String,rpc:String,hostOpt:Option[java.net.InetSocketAddress])(f:=&gt;T):T"></a><a id="traceService[T](String,String,Option[InetSocketAddress])(⇒T):T"></a>
       <span class="permalink">
@@ -1466,7 +1500,29 @@ the correct fields filled in.
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.tracing.Tracing#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="record(message:String,duration:com.twitter.util.Duration):Unit"></a><a id="record(String,Duration):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(message:String,duration:com.twitter.util.Duration):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2019-20-10) Use Trace#traceLocal instead">record</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="duration">duration: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2019-20-10)</i> Use Trace#traceLocal instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

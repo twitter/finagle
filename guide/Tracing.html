@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tracing &#8212; Finagle 19.11.0 documentation</title>
+    <title>Tracing &#8212; Finagle 19.12.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.11.0',
+        VERSION:     '19.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.11.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.12.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
    
@@ -71,9 +71,11 @@
             
   <div class="section" id="tracing">
 <h1>Tracing<a class="headerlink" href="#tracing" title="Permalink to this headline">¶</a></h1>
-<p>Finagle generates distributed trace data for each request. Traces allow one to understand and debug how distributed systems work. Traces don&#8217;t just capture timing information, they are able to hold any number of different types of information. Information such as payload sizes, serialization/deserialization times, as well as information about retries and backup requests can be logged for each request. This data is collected in segments and is sent off for storage at each hop of the request path.</p>
-<p>Finagle tracing represents pieces of a request/response path as segments. Each segment shares a single 64-bit traceid which allows them to later be aggregated and analyzed as a complete trace. Systems such as <a class="reference external" href="http://zipkin.io">Zipkin</a> can be used to collect, correlate, and view this data.</p>
-<p>By default Finagle uses a <cite>DefaultTracer</cite> which will load implementations from included artifacts using the Java <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>. Out of the box, adding the finagle-zipkin-scribe package to your classpath will enable sending tracing segments to zipkin via the <a class="reference external" href="http://go/scribe">scribe</a> protocol.</p>
+<p>Finagle generates distributed trace data for each request. Traces allow one to understand and debug how distributed systems work. Traces don&#8217;t just capture timing information, they are able to hold any number of different types of information. Information such as payload sizes, serialization/deserialization times, as well as information about retries and backup requests can be logged for each request. This data is collected as a series of causally related segments, or spans, and is sent off for storage at each hop of a request&#8217;s path.</p>
+<p>Finagle tracing represents pieces of a request/response path as spans. Each span shares a single 64-bit traceid which allows them to later be aggregated and analyzed as a complete trace. Likewise span ids are shared between hops, between a client and a server, in a trace. Systems such as <a class="reference external" href="http://zipkin.io">Zipkin</a>, which we use at Twitter, can be used to collect, correlate, and view this data.</p>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>By default Finagle uses a <cite>DefaultTracer</cite> which will load implementations from included artifacts using the Java <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>. Out of the box, adding the finagle-zipkin-scribe package to your classpath will enable sending tracing spans to zipkin via the <a class="reference external" href="http://go/scribe">scribe</a> protocol.</p>
 <p>You can replicate this functionality and globally install a tracer by including an artifact with a service loaded <cite>Tracer</cite>. Your implementation must implement the <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/tracing/Tracer.scala">Tracer</a> API and follow the requirements necessary to be loaded by the <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>.</p>
 <p>Furthermore, tracers can be overridden in code, they may be specified when creating a client or server. In the following example we replace the default tracer with our own <cite>BroadcastTracer</cite> which will send traces both to zipkin, via scribe, as well as to the console:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
@@ -92,6 +94,7 @@
   <span class="o">)))</span>
 </pre></div>
 </div>
+<p>We also supply a <cite>NullTracer</cite> which will not write trace messages anywhere.  However, even if <cite>NullTracer</cite> is passed to <cite>withTracer</cite>, Finagle clients will continue to propagate trace information.  This can have the surprising side effect of orphaning traces if the traces are being aggregated in a distributed tracing service like Zipkin, so we generally discourage people from using <cite>NullTracer</cite> in production.</p>
 <p>Information about active traces is located within the Finagle <a class="reference external" href="Context">Context</a>. The Trace API is a convenient way of accessing the currently active traces for a request and provides the ability to manipulate them with operations such as adding custom annotations.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
@@ -107,6 +110,7 @@
 <span class="o">}</span>
 </pre></div>
 </div>
+</div>
 <div class="section" id="available-tracers">
 <h2>Available Tracers<a class="headerlink" href="#available-tracers" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="nulltracer">
@@ -119,7 +123,7 @@
 </div>
 <div class="section" id="samplingtracer">
 <h3>SamplingTracer<a class="headerlink" href="#samplingtracer" title="Permalink to this headline">¶</a></h3>
-<p>A tracer that will only forward a subset of traces to the backing store. This is useful when a service has a high request rate and you do not want to overwhelm the tracing system. Sampling is determined when a new trace is created. If the trace survives sampling this decision will be recorded and passed along with the trace so that all segments along the way will also survive sampling.</p>
+<p>A tracer that will only forward a subset of traces to the backing store. This is useful when a service has a high request rate and you do not want to overwhelm the tracing system. Sampling is determined when a new trace is created. If the trace survives sampling this decision will be recorded and passed along with the trace so that all spans along the way will also survive sampling.</p>
 </div>
 <div class="section" id="rawzipkintracer">
 <h3>RawZipkinTracer<a class="headerlink" href="#rawzipkintracer" title="Permalink to this headline">¶</a></h3>
@@ -132,157 +136,239 @@
 -com.twitter.finagle.zipkin.initialSampleRate</p>
 </div>
 </div>
+<div class="section" id="annotations">
+<h2>Annotations<a class="headerlink" href="#annotations" title="Permalink to this headline">¶</a></h2>
+<p>Annotations are tied directly to a specific span and note what was going on at the time that span was active. In Finagle, the current span and it&#8217;s annotations are kept in the <a class="reference external" href="Context">Context</a>. There are primarily two types of annotations that can be used throughout a trace: annotations, and binary annotations. the main difference between the two types is that plain annotations describe a point in time event and carry a timestamp, while binary annotations only contain information about a span, a simple mapping from a string key to a binary value, and do not contain a timestamp. For example, a &#8220;Client Send&#8221; event occurs at a specific time and is accompanied by a timestamp so that it can be sequenced and compared with a &#8220;Wire Send&#8221; event. This information can be used to understand how long it takes for a request to be handed from the client to the network card for transit to a remote server. By comparison, a binary annotation might contain information with regards to what was happening with the local system at the time of the request, for instance, information about what the garbage collector (GC) was doing at the time of the request.</p>
+</div>
+<div class="section" id="trace-system-initialization">
+<h2>Trace System Initialization<a class="headerlink" href="#trace-system-initialization" title="Permalink to this headline">¶</a></h2>
+<p>The tracing system is initialized by the <cite>TraceInitializationFilter</cite>. This filter is present in the default Finagle stack for both the client and the server. The role of this filter is to set up the tracing subsystem and wrap incoming/outgoing requests with the correct tracing context, this includes either using the incoming trace id or generating a new one, the effect being a fully enabled tracing system in the current context.</p>
+</div>
+<div class="section" id="id3">
+<h2>Tracing<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>In general you can use any method from the <cite>Trace</cite> API to add annotations to the current tracing context. This allows you to annotate events or information happening at the time a request is being made or processed.</p>
+<p>Each request operates within the scope of a span, which is created when the request is received or an initial request is made. In some cases it may be advantageous to segment parts of processing a request into their own discrete events. You can do this by generating local spans; these spans exist completely within a single process. This is useful when understanding the relationship between local computation and external requests as well as relative timing and duration of these operations to each other. Local spans can be created with the <cite>Trace#traceLocal</cite> methods.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
+
+<span class="k">def</span> <span class="n">chainOfEvents</span><span class="o">()</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="o">???</span>
+
+<span class="nc">Trace</span><span class="o">.</span><span class="n">traceLocal</span><span class="o">(</span><span class="s">&quot;important_work&quot;</span><span class="o">)</span> <span class="o">{</span>
+  <span class="c1">// perform within the context of a new SpanId</span>
+  <span class="n">chainOfEvents</span><span class="o">()</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Furthermore, operations can be timed and the result recorded within the trace context:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
+
+<span class="k">def</span> <span class="n">complexComputation</span><span class="o">()</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="o">???</span>
+
+<span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="nc">Trace</span><span class="o">.</span><span class="n">time</span><span class="o">(</span><span class="s">&quot;complexComputation_ns&quot;</span><span class="o">)</span> <span class="o">{</span>
+  <span class="c1">// record how long the computation took</span>
+  <span class="n">complexComputation</span><span class="o">()</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Combining a local span with timing information allows for comparing the performance of a local computation to other distributed computations.</p>
+</div>
 <div class="section" id="standard-annotations">
 <h2>Standard Annotations<a class="headerlink" href="#standard-annotations" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
-<col width="32%" />
-<col width="68%" />
+<col width="22%" />
+<col width="49%" />
+<col width="29%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Annotation</th>
 <th class="head">Description</th>
+<th class="head">Location Traced</th>
 </tr>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>Wire Send</td>
 <td>Time a message is handed to the transport layer</td>
+<td><cite>WireTracingFilter</cite></td>
 </tr>
 <tr class="row-odd"><td>Wire Receive</td>
 <td>Time a message is received by the transport layer</td>
+<td><cite>WireTracingFilter</cite></td>
 </tr>
 <tr class="row-even"><td>Wire Receive Error</td>
 <td>Any error message generated by the transport layer</td>
+<td><cite>WireTracingFilter</cite></td>
 </tr>
 <tr class="row-odd"><td>Client Send</td>
 <td>Time a request is sent by a client</td>
+<td><cite>ClientTracingFilter</cite></td>
 </tr>
 <tr class="row-even"><td>Client Receive</td>
 <td>Time a response is received by a client</td>
+<td><cite>ClientTracingFilter</cite></td>
 </tr>
 <tr class="row-odd"><td>Client Receive Error</td>
 <td>Any error message generated by the client stack</td>
+<td><cite>ClientTracingFilter</cite></td>
 </tr>
 <tr class="row-even"><td>Server Send</td>
 <td>Time a request is received by a server</td>
+<td><cite>ServerTracingFilter</cite></td>
 </tr>
 <tr class="row-odd"><td>Server Receive</td>
 <td>Time a response is sent by a server</td>
+<td><cite>ServerTracingFilter</cite></td>
 </tr>
 <tr class="row-even"><td>Server Send Error</td>
 <td>Any error generated by the server stack</td>
-</tr>
-<tr class="row-odd"><td>Client Send Fragment</td>
-<td>UNUSED</td>
-</tr>
-<tr class="row-even"><td>Client Receive Fragment</td>
-<td>UNUSED</td>
+<td><cite>ServerTracingFilter</cite></td>
 </tr>
 <tr class="row-odd"><td>Service Name</td>
 <td>The service name where this span originated</td>
+<td><cite>TraceInitializationFilter</cite></td>
 </tr>
 <tr class="row-even"><td>RPC</td>
 <td>The RPC name and method</td>
+<td><cite>ClientRequestTracingFilter</cite></td>
 </tr>
 <tr class="row-odd"><td>Message</td>
 <td>Informational message</td>
+<td><cite>RetryFilter</cite>, <cite>TimeoutFilter</cite></td>
 </tr>
 <tr class="row-even"><td>Client Address</td>
 <td>Originating address for a request</td>
+<td><cite>ClientDispatcher</cite></td>
 </tr>
 <tr class="row-odd"><td>Server Address</td>
 <td>Terminal address for an address</td>
+<td><cite>DestinationTracing</cite></td>
 </tr>
 <tr class="row-even"><td>Local Address</td>
 <td>Address where a span is generated</td>
+<td><cite>DestinationTracing</cite></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="additional-annotations">
-<h2>Additional Annotations<a class="headerlink" href="#additional-annotations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="additional-binary-annotations">
+<h2>Additional Binary Annotations<a class="headerlink" href="#additional-binary-annotations" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="backup-requests">
 <h3>Backup Requests<a class="headerlink" href="#backup-requests" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="srv-backup-request-processing">
-<h4>srv/backup_request_processing<a class="headerlink" href="#srv-backup-request-processing" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="srv-backup-request-processing-backuprequest">
+<h4>srv/backup_request_processing (<cite>BackupRequest</cite>)<a class="headerlink" href="#srv-backup-request-processing-backuprequest" title="Permalink to this headline">¶</a></h4>
 <p>A binary annotation generated on a server when processing a backup request.</p>
 </div>
-<div class="section" id="clnt-backup-request-threshold-ms">
-<h4>clnt/backup_request_threshold_ms<a class="headerlink" href="#clnt-backup-request-threshold-ms" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="clnt-backup-request-threshold-ms-backuprequestfilter">
+<h4>clnt/backup_request_threshold_ms (<cite>BackupRequestFilter</cite>)<a class="headerlink" href="#clnt-backup-request-threshold-ms-backuprequestfilter" title="Permalink to this headline">¶</a></h4>
 <p>The configured backup request threshold in milliseconds.</p>
 </div>
-<div class="section" id="clnt-backup-request-span-id">
-<h4>clnt/backup_request_span_id<a class="headerlink" href="#clnt-backup-request-span-id" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="clnt-backup-request-span-id-backuprequestfilter">
+<h4>clnt/backup_request_span_id (<cite>BackupRequestFilter</cite>)<a class="headerlink" href="#clnt-backup-request-span-id-backuprequestfilter" title="Permalink to this headline">¶</a></h4>
 <p>The span id for the backup request, this is useful to be able to analyze which spans are responsible for the main request and which spans are responsible for the backup request.</p>
 </div>
-<div class="section" id="client-backup-request-issued">
-<h4>Client Backup Request Issued<a class="headerlink" href="#client-backup-request-issued" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="client-backup-request-issued-backuprequestfilter">
+<h4>Client Backup Request Issued (<cite>BackupRequestFilter</cite>)<a class="headerlink" href="#client-backup-request-issued-backuprequestfilter" title="Permalink to this headline">¶</a></h4>
 <p>A Message annotation generated by the <cite>BackupRequestFilter</cite> when a backup request is issued.</p>
 </div>
-<div class="section" id="client-backup-request-won">
-<h4>Client Backup Request Won<a class="headerlink" href="#client-backup-request-won" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="client-backup-request-won-backuprequestfilter">
+<h4>Client Backup Request Won (<cite>BackupRequestFilter</cite>)<a class="headerlink" href="#client-backup-request-won-backuprequestfilter" title="Permalink to this headline">¶</a></h4>
 <p>A Message type annotation generated by the <cite>BackupRequestFilter</cite> when a backup request has completed before the main request.</p>
 </div>
-<div class="section" id="client-backup-request-lost">
-<h4>Client Backup Request Lost<a class="headerlink" href="#client-backup-request-lost" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="client-backup-request-lost-backuprequestfilter">
+<h4>Client Backup Request Lost (<cite>BackupRequestFilter</cite>)<a class="headerlink" href="#client-backup-request-lost-backuprequestfilter" title="Permalink to this headline">¶</a></h4>
 <p>A Message type annotation generated by the <cite>BackupRequestFilter</cite> when a backup request completed after the main request.</p>
 </div>
 </div>
 <div class="section" id="garbage-collection">
 <h3>Garbage Collection<a class="headerlink" href="#garbage-collection" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="gc-start">
-<h4>GC Start<a class="headerlink" href="#gc-start" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="gc-start-mkjvmfilter">
+<h4>GC Start (<cite>MkJvmFilter</cite>)<a class="headerlink" href="#gc-start-mkjvmfilter" title="Permalink to this headline">¶</a></h4>
 <p>A Message type annotation generated for the current trace with the beginning timestamp of all gc events within the last minute before the request.</p>
 </div>
-<div class="section" id="gc-end">
-<h4>GC End<a class="headerlink" href="#gc-end" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="gc-end-mkjvmfilter">
+<h4>GC End (<cite>MkJvmFilter</cite>)<a class="headerlink" href="#gc-end-mkjvmfilter" title="Permalink to this headline">¶</a></h4>
 <p>A Message type annotation generated for the current trace with the timestamp of the end of all gc events within the last minute before the request.</p>
 </div>
-<div class="section" id="jvm-gc-count">
-<h4>jvm/gc_count<a class="headerlink" href="#jvm-gc-count" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="jvm-gc-count-mkjvmfilter">
+<h4>jvm/gc_count (<cite>MkJvmFilter</cite>)<a class="headerlink" href="#jvm-gc-count-mkjvmfilter" title="Permalink to this headline">¶</a></h4>
 <p>The number of gc cycles in the last minute before the request.</p>
 </div>
-<div class="section" id="jvm-gc-ms">
-<h4>jvm/gc_ms<a class="headerlink" href="#jvm-gc-ms" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="jvm-gc-ms-mkjvmfilter">
+<h4>jvm/gc_ms (<cite>MkJvmFilter</cite>)<a class="headerlink" href="#jvm-gc-ms-mkjvmfilter" title="Permalink to this headline">¶</a></h4>
 <p>The total amount of time spent on gc within the last minute before the request.</p>
 </div>
 </div>
 <div class="section" id="payload-size">
 <h3>Payload Size<a class="headerlink" href="#payload-size" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="clnt-request-payload-bytes">
-<h4>clnt/request_payload_bytes<a class="headerlink" href="#clnt-request-payload-bytes" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="clnt-request-payload-bytes-payloadsizefilter">
+<h4>clnt/request_payload_bytes (<cite>PayloadSizeFilter</cite>)<a class="headerlink" href="#clnt-request-payload-bytes-payloadsizefilter" title="Permalink to this headline">¶</a></h4>
 <p>The size of the payload for a request sent by a client.</p>
 </div>
-<div class="section" id="srv-request-payload-bytes">
-<h4>srv/request_payload_bytes<a class="headerlink" href="#srv-request-payload-bytes" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="srv-request-payload-bytes-payloadsizefilter">
+<h4>srv/request_payload_bytes (<cite>PayloadSizeFilter</cite>)<a class="headerlink" href="#srv-request-payload-bytes-payloadsizefilter" title="Permalink to this headline">¶</a></h4>
 <p>The size of the payload for a request received by a server.</p>
 </div>
-<div class="section" id="clnt-response-payload-bytes">
-<h4>clnt/response_payload_bytes<a class="headerlink" href="#clnt-response-payload-bytes" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="clnt-response-payload-bytes-payloadsizefilter">
+<h4>clnt/response_payload_bytes (<cite>PayloadSizeFilter</cite>)<a class="headerlink" href="#clnt-response-payload-bytes-payloadsizefilter" title="Permalink to this headline">¶</a></h4>
 <p>The size of the payload for a response received by a client.</p>
 </div>
-<div class="section" id="srv-response-payload-bytes">
-<h4>srv/response_payload_bytes<a class="headerlink" href="#srv-response-payload-bytes" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="srv-response-payload-bytes-payloadsizefilter">
+<h4>srv/response_payload_bytes (<cite>PayloadSizeFilter</cite>)<a class="headerlink" href="#srv-response-payload-bytes-payloadsizefilter" title="Permalink to this headline">¶</a></h4>
 <p>The size of the payload for a response sent by a server.</p>
 </div>
 </div>
 <div class="section" id="request-response-serialization">
 <h3>Request/Response Serialization<a class="headerlink" href="#request-response-serialization" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="clnt-request-serialization-ns">
-<h4>clnt/request_serialization_ns<a class="headerlink" href="#clnt-request-serialization-ns" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="clnt-request-serialization-ns-clienttraceannotationfilter">
+<h4>clnt/request_serialization_ns (<cite>ClientTraceAnnotationFilter</cite>)<a class="headerlink" href="#clnt-request-serialization-ns-clienttraceannotationfilter" title="Permalink to this headline">¶</a></h4>
 <p>The total amount of time taken by a client to serialize a request.</p>
 </div>
-<div class="section" id="clnt-response-deserialization-ns">
-<h4>clnt/response_deserialization_ns<a class="headerlink" href="#clnt-response-deserialization-ns" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="clnt-response-deserialization-ns-clienttraceannotationfilter">
+<h4>clnt/response_deserialization_ns (<cite>ClientTraceAnnotationFilter</cite>)<a class="headerlink" href="#clnt-response-deserialization-ns-clienttraceannotationfilter" title="Permalink to this headline">¶</a></h4>
 <p>The total amount of time taken by a client to deserialize a response.</p>
 </div>
-<div class="section" id="srv-request-deserialization-ns">
-<h4>srv/request_deserialization_ns<a class="headerlink" href="#srv-request-deserialization-ns" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="srv-request-deserialization-ns-generated-by-scrooge">
+<h4>srv/request_deserialization_ns (Generated by Scrooge)<a class="headerlink" href="#srv-request-deserialization-ns-generated-by-scrooge" title="Permalink to this headline">¶</a></h4>
 <p>The total amount of time taken by a server to deserialize a request.</p>
 </div>
-<div class="section" id="srv-response-serialization-ns">
-<h4>srv/response_serialization_ns<a class="headerlink" href="#srv-response-serialization-ns" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="srv-response-serialization-ns-generated-by-scrooge">
+<h4>srv/response_serialization_ns (Generated by Scrooge)<a class="headerlink" href="#srv-response-serialization-ns-generated-by-scrooge" title="Permalink to this headline">¶</a></h4>
 <p>The total amount of time taken by a server to serialize a response.</p>
+</div>
+</div>
+<div class="section" id="retry">
+<h3>Retry<a class="headerlink" href="#retry" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="finagle-retry-retryfilter">
+<h4>finagle.retry (<cite>RetryFilter</cite>)<a class="headerlink" href="#finagle-retry-retryfilter" title="Permalink to this headline">¶</a></h4>
+<p>Record when a retry has occurred</p>
+</div>
+</div>
+<div class="section" id="timeout">
+<h3>Timeout<a class="headerlink" href="#timeout" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="finagle-timeout-timeoutfilter">
+<h4>finagle.timeout (<cite>TimeoutFilter</cite>)<a class="headerlink" href="#finagle-timeout-timeoutfilter" title="Permalink to this headline">¶</a></h4>
+<p>Record when a timeout occurs</p>
+</div>
+</div>
+<div class="section" id="offload">
+<h3>Offload<a class="headerlink" href="#offload" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="clnt-offloadfilter-offloaded-continuation-from-io-threads-to-pool-with-num-workers-offloadfilter">
+<h4>clnt/OffloadFilter: Offloaded continuation from IO threads to pool with ${num} workers (<cite>OffloadFilter</cite>)<a class="headerlink" href="#clnt-offloadfilter-offloaded-continuation-from-io-threads-to-pool-with-num-workers-offloadfilter" title="Permalink to this headline">¶</a></h4>
+<p>When a request is offloaded by a client to a different pool, contains information about the size of the pool.</p>
+</div>
+<div class="section" id="srv-offloadfilter-offloaded-continuation-from-io-threads-to-pool-with-size-workers-offloadfilter">
+<h4>srv/OffloadFilter: Offloaded continuation from IO threads to pool with ${size} workers (<cite>OffloadFilter</cite>)<a class="headerlink" href="#srv-offloadfilter-offloaded-continuation-from-io-threads-to-pool-with-size-workers-offloadfilter" title="Permalink to this headline">¶</a></h4>
+<p>When a request is offloaded by a server to a different pool, contains information about the size of the pool.</p>
+</div>
+</div>
+<div class="section" id="darktraffic">
+<h3>DarkTraffic<a class="headerlink" href="#darktraffic" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="clnt-dark-request-darktrafficfilter">
+<h4>clnt/dark_request (<cite>DarkTrafficFilter</cite>)<a class="headerlink" href="#clnt-dark-request-darktrafficfilter" title="Permalink to this headline">¶</a></h4>
+<p>A binary annotation which signifies that the span is a dark request.</p>
+</div>
+<div class="section" id="clnt-dark-request-key-darktrafficfilter">
+<h4>clnt/dark_request_key (<cite>DarkTrafficFilter</cite>)<a class="headerlink" href="#clnt-dark-request-key-darktrafficfilter" title="Permalink to this headline">¶</a></h4>
+<p>A binary annotation contained in the light and the dark request with the same id so the two requests can be identified as related.</p>
 </div>
 </div>
 </div>
@@ -308,6 +394,7 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Tracing</a><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
 <li><a class="reference internal" href="#available-tracers">Available Tracers</a><ul>
 <li><a class="reference internal" href="#nulltracer">NullTracer</a></li>
 <li><a class="reference internal" href="#broadcasttracer">BroadcastTracer</a></li>
@@ -316,36 +403,57 @@
 <li><a class="reference internal" href="#scribezipkintracer">ScribeZipkinTracer</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#annotations">Annotations</a></li>
+<li><a class="reference internal" href="#trace-system-initialization">Trace System Initialization</a></li>
+<li><a class="reference internal" href="#id3">Tracing</a></li>
 <li><a class="reference internal" href="#standard-annotations">Standard Annotations</a></li>
-<li><a class="reference internal" href="#additional-annotations">Additional Annotations</a><ul>
+<li><a class="reference internal" href="#additional-binary-annotations">Additional Binary Annotations</a><ul>
 <li><a class="reference internal" href="#backup-requests">Backup Requests</a><ul>
-<li><a class="reference internal" href="#srv-backup-request-processing">srv/backup_request_processing</a></li>
-<li><a class="reference internal" href="#clnt-backup-request-threshold-ms">clnt/backup_request_threshold_ms</a></li>
-<li><a class="reference internal" href="#clnt-backup-request-span-id">clnt/backup_request_span_id</a></li>
-<li><a class="reference internal" href="#client-backup-request-issued">Client Backup Request Issued</a></li>
-<li><a class="reference internal" href="#client-backup-request-won">Client Backup Request Won</a></li>
-<li><a class="reference internal" href="#client-backup-request-lost">Client Backup Request Lost</a></li>
+<li><a class="reference internal" href="#srv-backup-request-processing-backuprequest">srv/backup_request_processing (<cite>BackupRequest</cite>)</a></li>
+<li><a class="reference internal" href="#clnt-backup-request-threshold-ms-backuprequestfilter">clnt/backup_request_threshold_ms (<cite>BackupRequestFilter</cite>)</a></li>
+<li><a class="reference internal" href="#clnt-backup-request-span-id-backuprequestfilter">clnt/backup_request_span_id (<cite>BackupRequestFilter</cite>)</a></li>
+<li><a class="reference internal" href="#client-backup-request-issued-backuprequestfilter">Client Backup Request Issued (<cite>BackupRequestFilter</cite>)</a></li>
+<li><a class="reference internal" href="#client-backup-request-won-backuprequestfilter">Client Backup Request Won (<cite>BackupRequestFilter</cite>)</a></li>
+<li><a class="reference internal" href="#client-backup-request-lost-backuprequestfilter">Client Backup Request Lost (<cite>BackupRequestFilter</cite>)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#garbage-collection">Garbage Collection</a><ul>
-<li><a class="reference internal" href="#gc-start">GC Start</a></li>
-<li><a class="reference internal" href="#gc-end">GC End</a></li>
-<li><a class="reference internal" href="#jvm-gc-count">jvm/gc_count</a></li>
-<li><a class="reference internal" href="#jvm-gc-ms">jvm/gc_ms</a></li>
+<li><a class="reference internal" href="#gc-start-mkjvmfilter">GC Start (<cite>MkJvmFilter</cite>)</a></li>
+<li><a class="reference internal" href="#gc-end-mkjvmfilter">GC End (<cite>MkJvmFilter</cite>)</a></li>
+<li><a class="reference internal" href="#jvm-gc-count-mkjvmfilter">jvm/gc_count (<cite>MkJvmFilter</cite>)</a></li>
+<li><a class="reference internal" href="#jvm-gc-ms-mkjvmfilter">jvm/gc_ms (<cite>MkJvmFilter</cite>)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#payload-size">Payload Size</a><ul>
-<li><a class="reference internal" href="#clnt-request-payload-bytes">clnt/request_payload_bytes</a></li>
-<li><a class="reference internal" href="#srv-request-payload-bytes">srv/request_payload_bytes</a></li>
-<li><a class="reference internal" href="#clnt-response-payload-bytes">clnt/response_payload_bytes</a></li>
-<li><a class="reference internal" href="#srv-response-payload-bytes">srv/response_payload_bytes</a></li>
+<li><a class="reference internal" href="#clnt-request-payload-bytes-payloadsizefilter">clnt/request_payload_bytes (<cite>PayloadSizeFilter</cite>)</a></li>
+<li><a class="reference internal" href="#srv-request-payload-bytes-payloadsizefilter">srv/request_payload_bytes (<cite>PayloadSizeFilter</cite>)</a></li>
+<li><a class="reference internal" href="#clnt-response-payload-bytes-payloadsizefilter">clnt/response_payload_bytes (<cite>PayloadSizeFilter</cite>)</a></li>
+<li><a class="reference internal" href="#srv-response-payload-bytes-payloadsizefilter">srv/response_payload_bytes (<cite>PayloadSizeFilter</cite>)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#request-response-serialization">Request/Response Serialization</a><ul>
-<li><a class="reference internal" href="#clnt-request-serialization-ns">clnt/request_serialization_ns</a></li>
-<li><a class="reference internal" href="#clnt-response-deserialization-ns">clnt/response_deserialization_ns</a></li>
-<li><a class="reference internal" href="#srv-request-deserialization-ns">srv/request_deserialization_ns</a></li>
-<li><a class="reference internal" href="#srv-response-serialization-ns">srv/response_serialization_ns</a></li>
+<li><a class="reference internal" href="#clnt-request-serialization-ns-clienttraceannotationfilter">clnt/request_serialization_ns (<cite>ClientTraceAnnotationFilter</cite>)</a></li>
+<li><a class="reference internal" href="#clnt-response-deserialization-ns-clienttraceannotationfilter">clnt/response_deserialization_ns (<cite>ClientTraceAnnotationFilter</cite>)</a></li>
+<li><a class="reference internal" href="#srv-request-deserialization-ns-generated-by-scrooge">srv/request_deserialization_ns (Generated by Scrooge)</a></li>
+<li><a class="reference internal" href="#srv-response-serialization-ns-generated-by-scrooge">srv/response_serialization_ns (Generated by Scrooge)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#retry">Retry</a><ul>
+<li><a class="reference internal" href="#finagle-retry-retryfilter">finagle.retry (<cite>RetryFilter</cite>)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#timeout">Timeout</a><ul>
+<li><a class="reference internal" href="#finagle-timeout-timeoutfilter">finagle.timeout (<cite>TimeoutFilter</cite>)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#offload">Offload</a><ul>
+<li><a class="reference internal" href="#clnt-offloadfilter-offloaded-continuation-from-io-threads-to-pool-with-num-workers-offloadfilter">clnt/OffloadFilter: Offloaded continuation from IO threads to pool with ${num} workers (<cite>OffloadFilter</cite>)</a></li>
+<li><a class="reference internal" href="#srv-offloadfilter-offloaded-continuation-from-io-threads-to-pool-with-size-workers-offloadfilter">srv/OffloadFilter: Offloaded continuation from IO threads to pool with ${size} workers (<cite>OffloadFilter</cite>)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#darktraffic">DarkTraffic</a><ul>
+<li><a class="reference internal" href="#clnt-dark-request-darktrafficfilter">clnt/dark_request (<cite>DarkTrafficFilter</cite>)</a></li>
+<li><a class="reference internal" href="#clnt-dark-request-key-darktrafficfilter">clnt/dark_request_key (<cite>DarkTrafficFilter</cite>)</a></li>
 </ul>
 </li>
 </ul>

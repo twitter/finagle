@@ -1423,7 +1423,10 @@ treat all 500 status codes as failures and can do so via a
 <a href="ResponseClass.html" class="extype" name="com.twitter.finagle.service.ResponseClass">ResponseClass</a> and as such multiple classifiers can be composed
 together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Java does not understand the type alias and must be used as
-<code>PartialFunction</code> in Java.</p></span>, <span class="cmt"><p>Finagle's default classifier is
+<code>PartialFunction</code> in Java. Constructing a custom ResponseClassifier in Java
+is achievable by implementing AbstractPartialFunction, see
+<span class="extype" name="com.twitter.finagle.service.ResponseClassifierCompilationTest#testCustomResponseClassifier()">com.twitter.finagle.service.ResponseClassifierCompilationTest#testCustomResponseClassifier()</span>
+for examples.</p></span>, <span class="cmt"><p>Finagle's default classifier is
 <a href="ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
 which is a total function fully covering the input domain.</p></span>, <span class="cmt"><p>it is a good practice for users of <code>ResponseClassifier.apply</code> to
 instead use <code>theClassifier.applyOrElse(input, ResponseClassifier.Default)</code>
@@ -1931,7 +1934,7 @@ a client.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="RetryPolicy$.html"><span class="name">RetryPolicy</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/JavaSingleton.html#com.twitter.util.JavaSingleton" class="extype" name="com.twitter.util.JavaSingleton">JavaSingleton</a></span>
+        <a title="" href="RetryPolicy$.html"><span class="name">RetryPolicy</span></a>
       </span>
       
       

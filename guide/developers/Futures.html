@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Twitter Futures &#8212; Finagle 19.11.0 documentation</title>
+    <title>Twitter Futures &#8212; Finagle 19.12.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '19.11.0',
+        VERSION:     '19.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="top" title="Finagle 19.11.0 documentation" href="../index.html" />
+    <link rel="top" title="Finagle 19.12.0 documentation" href="../index.html" />
     <link rel="next" title="Signaling Failure within Finagle" href="SignalingFailure.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -198,7 +198,7 @@ the calling thread that satisfied the <cite>Promise</cite>.</p>
 <div class="section" id="detachable">
 <h2>Detachable<a class="headerlink" href="#detachable" title="Permalink to this headline">¶</a></h2>
 <p>When more than one execution dependency depends on the result of a future, it can be dangerous to
-interrupt it, since you might inadvertantly fail other folks&#8217; work.  However, if you never interrupt
+interrupt it, since you might inadvertently fail other folks&#8217; work.  However, if you never interrupt
 it, you can end up with memory leaks if the future is never satisfied and we continuously add work
 to it.  Detachable Promises are an attempt to fix this, so that we can mark promises as &#8220;may not be
 needed later, though the underlying future they depend on will be useful&#8221;, and must be

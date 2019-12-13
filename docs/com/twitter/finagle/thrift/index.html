@@ -876,8 +876,8 @@ generator.
                         <a href="Protocols$.html" title="">Protocols</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="RichClientParam$.html" title=""></a>
-                        <a class="class" href="RichClientParam.html" title="Produce a client with params wrapped in RichClientParam"></a>
-                        <a href="RichClientParam.html" title="Produce a client with params wrapped in RichClientParam">RichClientParam</a>
+                        <a class="class" href="RichClientParam.html" title="Thrift-specific parameters for configuring clients."></a>
+                        <a href="RichClientParam.html" title="Thrift-specific parameters for configuring clients.">RichClientParam</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="RichServerParam.html" title="Produce a server with params wrapped in RichServerParam"></a>
@@ -1294,27 +1294,22 @@ was issued to a server that requires them.</p><div class="fullcomment"><div clas
 was issued to a server that requires them. See
 <a href="ClientIdRequiredFilter.html" class="extype" name="com.twitter.finagle.thrift.ClientIdRequiredFilter">com.twitter.finagle.thrift.ClientIdRequiredFilter</a> for details.
 </p></div></div>
-    </li><li name="com.twitter.finagle.thrift.RichClientParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="RichClientParamextendsProductwithSerializable"></a><a id="RichClientParam:RichClientParam"></a>
+    </li><li name="com.twitter.finagle.thrift.RichClientParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RichClientParamextendsAnyRef"></a><a id="RichClientParam:RichClientParam"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#RichClientParamextendsProductwithSerializable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#RichClientParamextendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Produce a client with params wrapped in RichClientParam" href="RichClientParam.html"><span class="name">RichClientParam</span></a><span class="params">(<span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.protocolFactory</a></span></span></span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="maxThriftBufferSize">maxThriftBufferSize: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.maxThriftBufferSize</a></span></span></span>, <span name="thriftReusableBufferFactory">thriftReusableBufferFactory: () ⇒ <span class="extype" name="com.twitter.scrooge.TReusableBuffer">TReusableBuffer</span> = <span class="defval" name='<span class="name"><a href="RichClientParam$.html">RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY</a></span>'>...</span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ResponseClassifier.Default</a></span></span></span>, <span name="clientStats">clientStats: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ClientStatsReceiver</a></span></span></span>, <span name="perEndpointStats">perEndpointStats: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Thrift-specific parameters for configuring clients." href="RichClientParam.html"><span class="name">RichClientParam</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">Produce a client with params wrapped in RichClientParam
-</p><div class="fullcomment"><div class="comment cmt"><p>Produce a client with params wrapped in RichClientParam
-</p></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For client stats, (default: empty string)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">thriftReusableBufferFactory</dt><dd class="cmt"><p>A reusable buffer for the thrift request/response, if passed
-                                 maxThriftBufferSize is ignored</p></dd><dt class="param">responseClassifier</dt><dd class="cmt"><p>See <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a></p></dd><dt class="param">clientStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd><dt class="param">perEndpointStats</dt><dd class="cmt"><p>Whether to record per-endpoint stats, (default: false).
-                        By enabling this, the specific Thrift Exceptions can be recorded.
-See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter" target="_blank">PerEndpoint StatsFilter</a></p></dd></dl></div>
+      <p class="shortcomment cmt">Thrift-specific parameters for configuring clients.</p>
     </li><li name="com.twitter.finagle.thrift.RichServerParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RichServerParamextendsProductwithSerializable"></a><a id="RichServerParam:RichServerParam"></a>
       <span class="permalink">
@@ -1445,7 +1440,7 @@ not.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ThriftMethodStats.html"><span class="name">ThriftMethodStats</span></a><span class="params">(<span name="requestsCounter">requestsCounter: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Counter.html#com.twitter.finagle.stats.Counter" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>, <span name="successCounter">successCounter: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Counter.html#com.twitter.finagle.stats.Counter" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>, <span name="failuresCounter">failuresCounter: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Counter.html#com.twitter.finagle.stats.Counter" class="extype" name="com.twitter.finagle.stats.Counter">Counter</a></span>, <span name="failuresScope">failuresScope: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="ThriftMethodStats.html"><span class="name">ThriftMethodStats</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1721,7 +1716,7 @@ for retrieving the currently set value.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="RichClientParam$.html"><span class="name">RichClientParam</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="RichClientParam$.html"><span class="name">RichClientParam</span></a>
       </span>
       
       

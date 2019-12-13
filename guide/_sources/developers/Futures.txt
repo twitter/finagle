@@ -146,7 +146,7 @@ Detachable
 ~~~~~~~~~~
 
 When more than one execution dependency depends on the result of a future, it can be dangerous to
-interrupt it, since you might inadvertantly fail other folks' work.  However, if you never interrupt
+interrupt it, since you might inadvertently fail other folks' work.  However, if you never interrupt
 it, you can end up with memory leaks if the future is never satisfied and we continuously add work
 to it.  Detachable Promises are an attempt to fix this, so that we can mark promises as "may not be
 needed later, though the underlying future they depend on will be useful", and must be

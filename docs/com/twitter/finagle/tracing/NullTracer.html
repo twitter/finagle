@@ -220,6 +220,10 @@ resources for using Finagle.
                         <a class="class" href="Flags.html" title="Represents flags that can be passed along in request headers."></a>
                         <a href="Flags.html" title="Represents flags that can be passed along in request headers.">Flags</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ForwardAnnotation$.html" title="Allow us to inject annotations into children trace contexts."></a>
+                        <a href="ForwardAnnotation$.html" title="Allow us to inject annotations into children trace contexts.">ForwardAnnotation</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="NullTracer$.html" title="A singleton instance of a no-op NullTracer."></a>
                         <a class="class" href="" title="A no-op Tracer."></a>
                         <a href="" title="A no-op Tracer.">NullTracer</a>
@@ -306,7 +310,11 @@ resources for using Finagle.
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A no-op <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>supplying this tracer to a finagle client or server will not prevent
+trace information from being propagated to the next peer, but it will ensure
+that the client or server does not log any trace information about this host.
+If traces are being aggregated across your fleet, it will orphan subsequent
+spans.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>

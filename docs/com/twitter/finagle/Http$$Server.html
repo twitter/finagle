@@ -1595,7 +1595,10 @@ maximum allowed message size.
       <p class="shortcomment cmt">Configures this server or client with given <a href="tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a>
 (default: <a href="tracing/DefaultTracer$.html" class="extype" name="com.twitter.finagle.tracing.DefaultTracer">com.twitter.finagle.tracing.DefaultTracer</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a>
 (default: <a href="tracing/DefaultTracer$.html" class="extype" name="com.twitter.finagle.tracing.DefaultTracer">com.twitter.finagle.tracing.DefaultTracer</a>).
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>Note</dt><dd><span class="cmt"><p>if you supply <a href="tracing/NullTracer.html" class="extype" name="com.twitter.finagle.tracing.NullTracer">com.twitter.finagle.tracing.NullTracer</a>, no trace
+information will be written, but this does not disable Finagle from
+propagating trace information.  Instead, if traces are being aggregated
+across your fleet, it will orphan subsequent spans.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Http.Server#withTransport" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTransport:com.twitter.finagle.param.ServerTransportParams[com.twitter.finagle.Http.Server]"></a><a id="withTransport:ServerTransportParams[Server]"></a>
       <span class="permalink">

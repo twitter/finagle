@@ -972,7 +972,7 @@ HTTP classification tools.</p></span></dd></dl></div>
       
       <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">stats.StatsReceiver</a>
 (default: <a href="../stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p>
-    </li><li name="com.twitter.finagle.param.CommonParams#withTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.param.CommonParams#withTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTracer(tracer:com.twitter.finagle.tracing.Tracer):A"></a><a id="withTracer(tracing.Tracer):A"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/param/CommonParams.html#withTracer(tracer:com.twitter.finagle.tracing.Tracer):A" title="Permalink">
@@ -988,7 +988,12 @@ HTTP classification tools.</p></span></dd></dl></div>
       </span>
       
       <p class="shortcomment cmt">Configures this server or client with given <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a>
-(default: <a href="../tracing/DefaultTracer$.html" class="extype" name="com.twitter.finagle.tracing.DefaultTracer">com.twitter.finagle.tracing.DefaultTracer</a>).</p>
+(default: <a href="../tracing/DefaultTracer$.html" class="extype" name="com.twitter.finagle.tracing.DefaultTracer">com.twitter.finagle.tracing.DefaultTracer</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a>
+(default: <a href="../tracing/DefaultTracer$.html" class="extype" name="com.twitter.finagle.tracing.DefaultTracer">com.twitter.finagle.tracing.DefaultTracer</a>).
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>if you supply <a href="../tracing/NullTracer.html" class="extype" name="com.twitter.finagle.tracing.NullTracer">com.twitter.finagle.tracing.NullTracer</a>, no trace
+information will be written, but this does not disable Finagle from
+propagating trace information.  Instead, if traces are being aggregated
+across your fleet, it will orphan subsequent spans.</p></span></dd></dl></div>
     </li>
               </ol>
             </div>

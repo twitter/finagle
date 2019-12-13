@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &#8212; Finagle 19.11.0 documentation</title>
+    <title>Servers &#8212; Finagle 19.12.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.11.0',
+        VERSION:     '19.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.11.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.12.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Aperture Load Balancers" href="ApertureLoadBalancers.html" />
    
@@ -290,9 +290,15 @@ code to deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
 <code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method&#8217;s response type. Given an IDL:</p>
 <div class="highlight-none"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }
+exception InvalidQueryException {
+  1: i32 errorCode
+}
 
 service SocialGraph {
-  i32 follow(1: i64 follower, 2: i64 followee) throws (1: NotFoundException ex)
+  i32 follow(1: i64 follower, 2: i64 followee) throws (
+    1: NotFoundException ex1,
+    2: InvalidQueryException ex2
+  )
 }
 </pre></div>
 </div>
@@ -329,10 +335,10 @@ Instead, prefer to handle request specific details at the application layer, suc
 a <a class="reference external" href="ServicesAndFilters.html#filters">Filter</a> to reject the request, and reserve Response
 Classification to deal with wire level response concerns. Lastly (#4), the deserialized
 <code class="docutils literal"><span class="pre">InvalidQueryException</span></code> can be treated as a successful response.</p>
-<p>If you have a response classifier that categorizes <code class="docutils literal"><span class="pre">Returns</span></code> as
-failures, note that they will be counted in the <code class="docutils literal"><span class="pre">StatsFilter</span></code>
-as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code> in the
-<code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
+<p>If you have a response classifier that categorizes non-Exceptions as failures, this includes
+Thrift Responses (#2) or embedded Thrift Exceptions (#1), note that they will be counted in
+the <code class="docutils literal"><span class="pre">StatsFilter</span></code> as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code>
+in the <code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
 <a class="reference external" href="https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
 for more details.</p>
 <div class="section" id="concurrency-limit">
