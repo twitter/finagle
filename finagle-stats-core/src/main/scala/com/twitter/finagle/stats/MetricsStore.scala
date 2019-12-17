@@ -57,7 +57,13 @@ private[stats] trait MetricsStore {
    *
    * Throws a [MetricCollisionException] if there's already a gauge of that name.
    */
-  def getOrCreateCounter(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreCounter
+  def getOrCreateCounter(counterSchema: CounterSchema): MetricsStore.StoreCounter
+  final def getOrCreateCounter(
+    verbosity: Verbosity,
+    names: Seq[String]
+  ): MetricsStore.StoreCounter =
+    getOrCreateCounter(
+      CounterSchema(new MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)))
 
   /**
    * Registers a new gauge, replacing the previous one if it already existed.
@@ -67,7 +73,11 @@ private[stats] trait MetricsStore {
    *
    * Throws a [MetricCollisionException] if there's already a counter of that name.
    */
-  def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit
+  def registerGauge(gaugeSchema: GaugeSchema, f: => Float): Unit
+  final def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit =
+    registerGauge(
+      GaugeSchema(new MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)),
+      f)
 
   /**
    * Deregisters a gauge.
@@ -84,7 +94,10 @@ private[stats] trait MetricsStore {
    * Deduplicates by formatted name, so that Seq("foo", "bar") and
    * Seq("foo/bar") with the separator "/" are the same name.
    */
-  def getOrCreateStat(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreStat
+  def getOrCreateStat(histogramSchema: HistogramSchema): MetricsStore.StoreStat
+  final def getOrCreateStat(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreStat =
+    getOrCreateStat(
+      HistogramSchema(new MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)))
 
   /**
    * Registers a new stat that exports the given percentiles, or gets an
@@ -96,9 +109,16 @@ private[stats] trait MetricsStore {
    * Deduplicates by formatted name, so that Seq("foo", "bar") and
    * Seq("foo/bar") with the separator "/" are the same name.
    */
-  def getOrCreateStat(
+  final def getOrCreateStat(
     verbosity: Verbosity,
     names: Seq[String],
     percentiles: IndexedSeq[Double]
-  ): MetricsStore.StoreStat
+  ): MetricsStore.StoreStat =
+    getOrCreateStat(
+      HistogramSchema(
+        new MetricBuilder(
+          name = names,
+          verbosity = verbosity,
+          percentiles = percentiles,
+          statsReceiver = null)))
 }

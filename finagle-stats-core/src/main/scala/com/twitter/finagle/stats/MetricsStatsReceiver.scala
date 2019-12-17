@@ -102,6 +102,12 @@ class MetricsStatsReceiver(val registry: Metrics)
   override def toString: String = "MetricsStatsReceiver"
 
   /**
+   * Create a MetricBuilder with good default histogram buckets.
+   */
+  override def metricBuilder(): MetricBuilder =
+    super.metricBuilder().withPercentiles(BucketedHistogram.DefaultQuantiles)
+
+  /**
    * Create and register a counter inside the underlying Metrics library
    */
   def counter(schema: CounterSchema): Counter = {
@@ -109,8 +115,7 @@ class MetricsStatsReceiver(val registry: Metrics)
       log.trace(s"Calling StatsReceiver.counter on $schema.metricBuilder.name")
     counterRequests.increment()
 
-    val storeCounter =
-      registry.getOrCreateCounter(schema.metricBuilder.verbosity, schema.metricBuilder.name)
+    val storeCounter = registry.getOrCreateCounter(schema)
     storeCounter.counter
   }
 
@@ -121,10 +126,18 @@ class MetricsStatsReceiver(val registry: Metrics)
     if (log.isLoggable(Level.TRACE))
       log.trace(s"Calling StatsReceiver.stat for $schema.metricBuilder.name")
     statRequests.increment()
-    val storeStat =
-      registry.getOrCreateStat(schema.metricBuilder.verbosity, schema.metricBuilder.name)
+    val storeStat = registry.getOrCreateStat(schema)
     storeStat.stat
   }
+
+  override def stat(verbosity: Verbosity, name: String*): Stat =
+    stat(
+      HistogramSchema(
+        new MetricBuilder(
+          verbosity = verbosity,
+          name = name,
+          statsReceiver = this,
+          percentiles = BucketedHistogram.DefaultQuantiles)))
 
   override def addGauge(schema: GaugeSchema)(f: => Float): Gauge = {
     if (log.isLoggable(Level.TRACE))
@@ -133,10 +146,18 @@ class MetricsStatsReceiver(val registry: Metrics)
     super.addGauge(schema)(f)
   }
 
-  protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
-    registry.registerGauge(verbosity, name, f)
+  protected[this] def registerGauge(gaugeSchema: GaugeSchema, f: => Float): Unit = {
+    registry.registerGauge(gaugeSchema, f)
+  }
 
-  protected[this] def deregisterGauge(name: Seq[String]): Unit = registry.unregisterGauge(name)
+  protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
+    registerGauge(
+      GaugeSchema(new MetricBuilder(verbosity = verbosity, name = name, statsReceiver = this)),
+      f)
+
+  protected[this] def deregisterGauge(name: Seq[String]): Unit = {
+    registry.unregisterGauge(name)
+  }
 
   override def metricsCollisionsLinterRule: Rule = registry.metricsCollisionsLinterRule
 }
