@@ -821,7 +821,7 @@ lazy val finagleExample = Project(
   name := "finagle-example",
   libraryDependencies ++= Seq(
     util("codec"),
-    "org.slf4j" % "slf4j-nop" % "1.7.7" % "provided"
+    "org.slf4j" % "slf4j-nop" % "1.7.30" % "provided"
   ) ++ scroogeLibs
 ).dependsOn(
   finagleCore,
