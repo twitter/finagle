@@ -128,11 +128,6 @@ private[finagle] class Metrics private (
 
   private[this] val gaugesMap = metricsMaps.gaugesMap
 
-  /**
-   * Store MetricSchemas for each metric in order to surface metric metadata to users.
-   */
-  private[this] val metricSchemas = new ConcurrentHashMap[String, MetricSchema]()
-
   private[this] val verbosityMap =
     new ConcurrentHashMap[String, Verbosity]()
 
@@ -143,27 +138,21 @@ private[finagle] class Metrics private (
   private[this] def format(names: Seq[String]): String =
     names.mkString(separator)
 
-  def getOrCreateCounter(counterSchema: CounterSchema): MetricsStore.StoreCounter = {
-    val counter = countersMap.get(counterSchema.metricBuilder.name)
+  def getOrCreateCounter(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreCounter = {
+    val counter = countersMap.get(names)
     if (counter != null)
       return counter
 
-    val formatted = format(counterSchema.metricBuilder.name)
+    val formatted = format(names)
     val curNameUsage = reservedNames.putIfAbsent(formatted, CounterRepr)
 
     if (curNameUsage == null || curNameUsage == CounterRepr) {
       val next = new Metrics.StoreCounterImpl(formatted)
-      val prev = countersMap.putIfAbsent(counterSchema.metricBuilder.name, next)
+      val prev = countersMap.putIfAbsent(names, next)
 
-      if (counterSchema.metricBuilder.verbosity != Verbosity.Default)
-        verbosityMap.put(formatted, counterSchema.metricBuilder.verbosity)
+      if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
 
-      if (prev != null) {
-        prev
-      } else {
-        metricSchemas.put(formatted, counterSchema)
-        next
-      }
+      if (prev != null) prev else next
     } else {
       throw new MetricCollisionException(
         s"A gauge with the name $formatted had already" +
@@ -172,14 +161,21 @@ private[finagle] class Metrics private (
     }
   }
 
-  def getOrCreateStat(schema: HistogramSchema): MetricsStore.StoreStat = {
-    val stat = statsMap.get(schema.metricBuilder.name)
+  def getOrCreateStat(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreStat =
+    getOrCreateStat(verbosity, names, BucketedHistogram.DefaultQuantiles)
+
+  def getOrCreateStat(
+    verbosity: Verbosity,
+    names: Seq[String],
+    percentiles: IndexedSeq[Double]
+  ): MetricsStore.StoreStat = {
+    val stat = statsMap.get(names)
     if (stat != null)
       return stat
 
-    val formatted = format(schema.metricBuilder.name)
+    val formatted = format(names)
     val doLog = loggedStats.contains(formatted)
-    val histogram = mkHistogram(formatted, schema.metricBuilder.percentiles)
+    val histogram = mkHistogram(formatted, percentiles)
 
     histogram match {
       case histo: MetricsBucketedHistogram =>
@@ -189,47 +185,34 @@ private[finagle] class Metrics private (
     }
 
     val next = new Metrics.StoreStatImpl(histogram, formatted, doLog)
-    val prev = statsMap.putIfAbsent(schema.metricBuilder.name, next)
+    val prev = statsMap.putIfAbsent(names, next)
 
-    if (schema.metricBuilder.verbosity != Verbosity.Default)
-      verbosityMap.put(formatted, schema.metricBuilder.verbosity)
+    if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
 
-    if (prev != null) {
-      prev
-    } else {
-      metricSchemas.put(formatted, schema)
-      next
-    }
+    if (prev != null) prev else next
   }
 
-  def registerGauge(gaugeSchema: GaugeSchema, f: => Float): Unit =
-    registerNumberGauge(gaugeSchema, f)
+  def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit =
+    registerNumberGauge(verbosity, names, f)
 
   def registerLongGauge(verbosity: Verbosity, names: Seq[String], f: => Long): Unit =
-    registerLongGauge(
-      GaugeSchema(new MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)),
-      f)
+    registerNumberGauge(verbosity, names, f)
 
-  def registerLongGauge(gaugeSchema: GaugeSchema, f: => Long): Unit =
-    registerNumberGauge(gaugeSchema, f)
-
-  private def registerNumberGauge(gaugeSchema: GaugeSchema, f: => Number): Unit = {
-    val formatted = format(gaugeSchema.metricBuilder.name)
+  private def registerNumberGauge(verbosity: Verbosity, names: Seq[String], f: => Number): Unit = {
+    val formatted = format(names)
     val curNameUsage = reservedNames.putIfAbsent(formatted, GaugeRepr)
 
     if (curNameUsage == null) {
       val next = new Metrics.StoreGaugeImpl(formatted, f)
-      gaugesMap.putIfAbsent(gaugeSchema.metricBuilder.name, next)
-      metricSchemas.put(formatted, gaugeSchema)
+      gaugesMap.putIfAbsent(names, next)
 
-      if (gaugeSchema.metricBuilder.verbosity != Verbosity.Default)
-        verbosityMap.put(formatted, gaugeSchema.metricBuilder.verbosity)
+      if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
     } else if (curNameUsage == GaugeRepr) {
       // it should be impossible to collide with a gauge in finagle since
       // StatsReceiverWithCumulativeGauges already protects us.
       // we replace existing gauges to support commons metrics behavior.
       val next = new Metrics.StoreGaugeImpl(formatted, f)
-      gaugesMap.put(gaugeSchema.metricBuilder.name, next)
+      gaugesMap.put(names, next)
     } else {
       throw new MetricCollisionException(
         s"A Counter with the name $formatted had already" +
@@ -240,10 +223,7 @@ private[finagle] class Metrics private (
 
   def unregisterGauge(names: Seq[String]): Unit = {
     gaugesMap.remove(names)
-    val formatted = format(names)
-    metricSchemas.remove(formatted)
-    reservedNames.remove(formatted)
-    verbosityMap.remove(formatted)
+    reservedNames.remove(format(names))
   }
 
   def gauges: util.Map[String, Number] = {
