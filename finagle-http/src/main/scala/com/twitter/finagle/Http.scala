@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.http._
@@ -8,8 +9,7 @@ import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter._
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.Http2Listener
-import com.twitter.finagle.netty4.http.Netty4HttpListener
-import com.twitter.finagle.netty4.http.Netty4ServerStreamTransport
+import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.ssl.ApplicationProtocols
@@ -97,15 +97,15 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
   val Http2: Stack.Params = Stack.Params.empty +
     HttpImpl.Http2Impl +
-    param.ProtocolLibrary("http/2") +
-    netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
+    com.twitter.finagle.param.ProtocolLibrary("http/2") +
+    com.twitter.finagle.netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
 
-  private val protocolLibrary = param.ProtocolLibrary("http")
+  private val protocolLibrary = com.twitter.finagle.param.ProtocolLibrary("http")
 
   private[this] def treatServerErrorsAsFailures: Boolean = serverErrorsAsFailures()
 
   /** exposed for testing */
-  private[finagle] val responseClassifierParam: param.ResponseClassifier = {
+  private[finagle] val responseClassifierParam: finagle.param.ResponseClassifier = {
     def filtered[A, B](predicate: () => Boolean, pf: PartialFunction[A, B]): PartialFunction[A, B] =
       new PartialFunction[A, B] {
         def isDefinedAt(a: A): Boolean = predicate() && pf.isDefinedAt(a)
@@ -119,7 +119,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       srvErrsAsFailures.orElse(ResponseClassifier.Default)
     }
 
-    param.ResponseClassifier(rc)
+    finagle.param.ResponseClassifier(rc)
   }
 
   object Client {
@@ -172,8 +172,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
     params: Stack.Params = Client.params)
       extends EndpointerStackClient[Request, Response, Client]
-      with param.WithSessionPool[Client]
-      with param.WithDefaultLoadBalancer[Client]
+      with finagle.param.WithSessionPool[Client]
+      with finagle.param.WithDefaultLoadBalancer[Client]
       with Stack.Transformable[Client] {
 
     protected type In = Any
@@ -295,20 +295,22 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
-    override val withSessionPool: param.SessionPoolingParams[Client] =
-      new param.SessionPoolingParams(this)
-    override val withLoadBalancer: param.DefaultLoadBalancingParams[Client] =
-      new param.DefaultLoadBalancingParams(this)
-    override val withSessionQualifier: param.SessionQualificationParams[Client] =
-      new param.SessionQualificationParams(this)
-    override val withAdmissionControl: param.ClientAdmissionControlParams[Client] =
-      new param.ClientAdmissionControlParams(this)
-    override val withSession: param.ClientSessionParams[Client] =
-      new param.ClientSessionParams(this)
-    override val withTransport: param.ClientTransportParams[Client] =
-      new param.ClientTransportParams(this)
+    override val withSessionPool: finagle.param.SessionPoolingParams[Client] =
+      new finagle.param.SessionPoolingParams(this)
+    override val withLoadBalancer: finagle.param.DefaultLoadBalancingParams[Client] =
+      new finagle.param.DefaultLoadBalancingParams(this)
+    override val withSessionQualifier: finagle.param.SessionQualificationParams[Client] =
+      new finagle.param.SessionQualificationParams(this)
+    override val withAdmissionControl: finagle.param.ClientAdmissionControlParams[Client] =
+      new finagle.param.ClientAdmissionControlParams(this)
+    override val withSession: finagle.param.ClientSessionParams[Client] =
+      new finagle.param.ClientSessionParams(this)
+    override val withTransport: finagle.param.ClientTransportParams[Client] =
+      new finagle.param.ClientTransportParams(this)
 
-    override def withResponseClassifier(responseClassifier: service.ResponseClassifier): Client =
+    override def withResponseClassifier(
+      responseClassifier: finagle.service.ResponseClassifier
+    ): Client =
       super.withResponseClassifier(responseClassifier)
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
     override def withRetryBackoff(backoff: Stream[Duration]): Client =
@@ -398,7 +400,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     protected type Context = TransportContext
 
     private[this] val dispatcherStats =
-      params[param.Stats].statsReceiver.scope("dispatch")
+      params[finagle.param.Stats].statsReceiver.scope("dispatch")
 
     protected def newListener(): Listener[Any, Any, TransportContext] = {
       params[HttpImpl].listener(params)
@@ -536,14 +538,16 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
-    override val withAdmissionControl: param.ServerAdmissionControlParams[Server] =
-      new param.ServerAdmissionControlParams(this)
-    override val withTransport: param.ServerTransportParams[Server] =
-      new param.ServerTransportParams(this)
-    override val withSession: param.ServerSessionParams[Server] =
-      new param.ServerSessionParams(this)
+    override val withAdmissionControl: finagle.param.ServerAdmissionControlParams[Server] =
+      new finagle.param.ServerAdmissionControlParams(this)
+    override val withTransport: finagle.param.ServerTransportParams[Server] =
+      new finagle.param.ServerTransportParams(this)
+    override val withSession: finagle.param.ServerSessionParams[Server] =
+      new finagle.param.ServerSessionParams(this)
 
-    override def withResponseClassifier(responseClassifier: service.ResponseClassifier): Server =
+    override def withResponseClassifier(
+      responseClassifier: finagle.service.ResponseClassifier
+    ): Server =
       super.withResponseClassifier(responseClassifier)
     override def withLabel(label: String): Server = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Server =

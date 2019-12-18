@@ -14,7 +14,7 @@ import io.netty.channel.{Channel, ChannelHandler, ChannelInitializer, ChannelPip
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.concurrent.GlobalEventExecutor
 import java.net.SocketAddress
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Please note that the listener cannot be used for TLS yet.

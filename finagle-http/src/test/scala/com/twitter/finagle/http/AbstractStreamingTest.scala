@@ -2,9 +2,10 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.StorageUnitOps._
-import com.twitter.finagle.{Http => FinagleHttp, _}
+import com.twitter.finagle.http.{Status => HttpStatus}
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.io._
 import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
@@ -390,7 +391,7 @@ abstract class AbstractStreamingTest extends FunSuite {
   test("end-to-end: client may process multiple streaming requests simultaneously") {
     val service = Service.mk[Request, Response] { req =>
       val writable = new Pipe[Buf]() // never gets closed
-      Future.value(Response(req.version, Status.Ok, writable))
+      Future.value(Response(req.version, HttpStatus.Ok, writable))
     }
     val server = startServer(service)
     val addr = server.boundAddress
@@ -398,12 +399,12 @@ abstract class AbstractStreamingTest extends FunSuite {
     try {
       val req0 = Request("/0")
       val rep0 = await(client(req0))
-      assert(rep0.status == Status.Ok)
+      assert(rep0.status == HttpStatus.Ok)
       assert(rep0.isChunked)
 
       val req1 = Request("/1")
       val rep1 = await(client(req1))
-      assert(rep1.status == Status.Ok)
+      assert(rep1.status == HttpStatus.Ok)
       assert(rep1.isChunked)
     } finally {
       await(Closable.all(client, server).close())
@@ -566,7 +567,7 @@ object StreamingTest {
   }
 
   def ok(readerIn: Reader[Buf]): Response = {
-    val res = Response(Version.Http11, Status.Ok, readerIn)
+    val res = Response(Version.Http11, HttpStatus.Ok, readerIn)
     res.headerMap.set("Connection", "close")
     res
   }

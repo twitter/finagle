@@ -6,7 +6,7 @@ import com.twitter.io.Buf
 import com.twitter.util.StorageUnit
 import io.netty.handler.codec.http.multipart._
 import scala.collection.mutable
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 private[finagle] class Netty4MultipartDecoder extends MultipartDecoder {
   protected def decodeFull(req: Request, maxInMemoryFileSize: StorageUnit): Option[Multipart] = {
