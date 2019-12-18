@@ -1,5 +1,7 @@
 package com.twitter.finagle.http
 
+import scala.collection.immutable
+
 object HttpTracing {
 
   /**
@@ -15,7 +17,7 @@ object HttpTracing {
     val Sampled = "X-B3-Sampled"
     val Flags = "X-B3-Flags"
 
-    val All = Seq(TraceId, SpanId, ParentSpanId, Sampled, Flags)
+    val All = immutable.Seq(TraceId, SpanId, ParentSpanId, Sampled, Flags)
     val Required = Seq(TraceId, SpanId)
 
     /** exposed for testing */

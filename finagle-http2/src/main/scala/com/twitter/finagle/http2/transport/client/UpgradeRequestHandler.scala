@@ -18,7 +18,7 @@ import io.netty.handler.codec.http.{
   HttpClientUpgradeHandler
 }
 import io.netty.handler.codec.http2.Http2ClientUpgradeCodec
-import scala.collection.JavaConverters.iterableAsScalaIterableConverter
+import scala.jdk.CollectionConverters._
 
 /**
  * Takes the upgrade result and marks it as something read off the wire to
