@@ -230,9 +230,11 @@ object Trace extends Tracing {
       trace.recordBinary("lc", name)
 
       trace.record("local/begin")
-      val result = f
-      trace.record("local/end")
-      result
+      try {
+        f
+      } finally {
+        trace.record("local/end")
+      }
     }
   }
 
