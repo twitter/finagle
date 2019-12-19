@@ -2,6 +2,7 @@ package com.twitter.finagle.tracing
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
+import com.twitter.finagle.tracing.TraceTest.TraceIdException
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, MockTimer, Return, Throw, Time}
 import org.mockito.Matchers.any
@@ -396,6 +397,33 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     }
   }
 
+  test("trace local exceptional span") {
+    val startTime = Time.now
+    Time.withTimeAt(startTime) { ctrl =>
+      val tracer = new BufferingTracer()
+      val parentTraceId = Trace.id
+      Trace.letTracerAndId(tracer, parentTraceId) {
+
+        try {
+          Trace.traceLocal("work") {
+            ctrl.advance(1.second)
+            throw TraceIdException(Trace.id)
+          }
+          fail("Expected exception to be thrown")
+        } catch {
+          case TraceIdException(childTraceId) =>
+            assert(
+              tracer.toSeq.contains(
+                Record(childTraceId, startTime, Annotation.Message("local/begin"))))
+            assert(
+              tracer.toSeq.contains(
+                Record(childTraceId, startTime.plus(1.second), Annotation.Message("local/end"))))
+            assert(parentTraceId != childTraceId)
+        }
+      }
+    }
+  }
+
   test("trace async local span") {
     val mockTimer = new MockTimer()
     val startTime = Time.now
@@ -418,6 +446,38 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
           tracer.toSeq.contains(
             Record(childTraceId, startTime.plus(1.second), Annotation.Message("local/end"))))
         assert(parentTraceId != childTraceId)
+      }
+    }
+  }
+
+  test("trace async local exceptional span") {
+    val mockTimer = new MockTimer()
+    val startTime = Time.now
+    Time.withTimeAt(startTime) { ctrl =>
+      val tracer = new BufferingTracer()
+      val parentTraceId = Trace.nextId
+      Trace.letTracerAndId(tracer, parentTraceId) {
+        val childTraceIdFuture = Trace.traceLocalFuture("work") {
+          Future.Done
+            .delayed(1.second)(mockTimer).flatMap(_ => Future.exception(TraceIdException(Trace.id)))
+        }
+
+        ctrl.advance(1.second)
+        mockTimer.tick()
+
+        try {
+          Await.result(childTraceIdFuture)
+          fail("Expected exception to be thrown")
+        } catch {
+          case TraceIdException(childTraceId) =>
+            assert(
+              tracer.toSeq.contains(
+                Record(childTraceId, startTime, Annotation.Message("local/begin"))))
+            assert(
+              tracer.toSeq.contains(
+                Record(childTraceId, startTime.plus(1.second), Annotation.Message("local/end"))))
+            assert(parentTraceId != childTraceId)
+        }
       }
     }
   }
@@ -461,4 +521,8 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
           Record(traceId, startTime.plus(1.second), BinaryAnnotation("duration", 1.second))))
     }
   }
+}
+
+object TraceTest {
+  case class TraceIdException(id: TraceId) extends Exception
 }
