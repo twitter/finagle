@@ -9,7 +9,14 @@ import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.pushsession._
 import com.twitter.finagle.mux.transport._
-import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response}
+import com.twitter.finagle.mux.{
+  ExportCompressionUsage,
+  Handshake,
+  OpportunisticTlsParams,
+  Request,
+  Response,
+  WithCompressionPreferences
+}
 import com.twitter.finagle.netty4.pushsession.{Netty4PushListener, Netty4PushTransporter}
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslChannelInitializer
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
@@ -181,6 +188,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         StackClient.Role.prepFactory,
         NackAdmissionFilter.module[mux.Request, mux.Response]
       )
+      .prepend(ExportCompressionUsage.module)
 
     /**
      * Returns the headers that a client sends to a server.
@@ -223,7 +231,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     params: Stack.Params = Mux.Client.params)
       extends PushStackClient[mux.Request, mux.Response, Client]
       with WithDefaultLoadBalancer[Client]
-      with OpportunisticTlsParams[Client] {
+      with OpportunisticTlsParams[Client]
+      with WithCompressionPreferences[Client] {
 
     private[this] val statsReceiver = params[Stats].statsReceiver
     private[this] val sessionStats = new SharedNegotiationStats(statsReceiver)
@@ -314,6 +323,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       // We remove the trace init filter and don't replace it with anything because
       // the mux codec initializes tracing.
         .remove(TraceInitializerFilter.role)
+        .prepend(ExportCompressionUsage.module)
         // Because tracing initialization happens in the mux codec, we know the service stack
         // is dispatched with proper tracing context, so the ordering of this filter isn't
         // relevant.
@@ -417,7 +427,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     params: Stack.Params = Mux.Server.params,
     sessionFactory: Server.SessionF = Server.defaultSessionFactory)
       extends PushStackServer[mux.Request, mux.Response, Server]
-      with OpportunisticTlsParams[Server] {
+      with OpportunisticTlsParams[Server]
+      with WithCompressionPreferences[Server] {
 
     protected type PipelineReq = ByteReader
     protected type PipelineRep = Buf

@@ -208,15 +208,19 @@ private[finagle] object Negotiation {
 
       compressionFormats.request match {
         case Some(compression) =>
+          sharedStats.compressionSuccess.incr()
           val negotiatingHandle = asNegotiatingHandle(handle, "compression")
           negotiatingHandle.turnOnCompression(compression)
-        case _ => // do nothing
+        case _ =>
+          sharedStats.compressionFailures.incr()
       }
       compressionFormats.response match {
         case Some(decompression) =>
+          sharedStats.decompressionSuccess.incr()
           val negotiatingHandle = asNegotiatingHandle(handle, "decompression")
           negotiatingHandle.turnOnDecompression(decompression)
-        case _ => // do nothing
+        case _ =>
+          sharedStats.decompressionFailures.incr()
       }
     }
 
@@ -261,15 +265,19 @@ private[finagle] object Negotiation {
 
       compressionFormats.request match {
         case Some(decompression) =>
+          sharedStats.decompressionSuccess.incr()
           val negotiatingHandle = asNegotiatingHandle(handle, "decompression")
           negotiatingHandle.turnOnDecompression(decompression)
-        case _ => // do nothing
+        case _ =>
+          sharedStats.decompressionFailures.incr()
       }
       compressionFormats.response match {
         case Some(compression) =>
+          sharedStats.compressionSuccess.incr()
           val negotiatingHandle = asNegotiatingHandle(handle, "compression")
           negotiatingHandle.turnOnCompression(compression)
-        case _ => // do nothing
+        case _ =>
+          sharedStats.compressionFailures.incr()
       }
     }
 

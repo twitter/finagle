@@ -28,6 +28,14 @@ private[finagle] final class SharedNegotiationStats(
   val tlsSuccess = sr.counter(tlsVerbosity, "mux", "tls", "upgrade", "success")
   val tlsFailures = sr.counter(tlsVerbosity, "mux", "tls", "upgrade", "incompatible")
 
+  val compressionSuccess = sr.counter(tlsVerbosity, "mux", "compression", "upgrade", "success")
+  val compressionFailures =
+    sr.counter(tlsVerbosity, "mux", "compression", "upgrade", "incompatible")
+
+  val decompressionSuccess = sr.counter(tlsVerbosity, "mux", "decompression", "upgrade", "success")
+  val decompressionFailures =
+    sr.counter(tlsVerbosity, "mux", "decompression", "upgrade", "incompatible")
+
   private[this] val writeStreamsGauge =
     sr.addGauge(framerVerbosity, "mux", "framer", "pending_write_streams") {
       pendingWriteStreams.floatValue()

@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.conversions.StorageUnitOps._
-import com.twitter.finagle.Mux.param.{MaxFrameSize, CompressionPreferences}
+import com.twitter.finagle.Mux.param.MaxFrameSize
 import com.twitter.finagle.mux.transport.{Compression, CompressionLevel}
 import com.twitter.finagle.Mux
 
@@ -27,57 +27,65 @@ abstract class CompressingEndToEndTest extends AbstractEndToEndTest {
 
   override def skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY_TRAVIS")
 
-  private[this] val compressor = Seq(Compression.lz4Compressor(highCompression = true))
-  private[this] val decompressor = Seq(Compression.lz4Decompressor())
-  private[this] def preferences(level: CompressionLevel) = CompressionPreferences(
-    Compression.LocalPreferences(
-      Compression.LocalSetting(
-        level,
-        compressor
-      ),
-      Compression.LocalSetting(
-        level,
-        decompressor
-      )
-    )
-  )
-
-  protected val desired = preferences(CompressionLevel.Desired)
-
-  protected val accepted = preferences(CompressionLevel.Accepted)
+  val compressor = Seq(Compression.lz4Compressor(highCompression = true))
+  val decompressor = Seq(Compression.lz4Decompressor())
 }
 
 class CompressionEnabledTest extends CompressingEndToEndTest {
   def implName: String = "compression-enabled"
 
-  def clientImpl() = Mux.client.configured(desired)
-  def serverImpl() = Mux.server.configured(desired)
+  def clientImpl() =
+    Mux.client.withCompressionPreferences
+      .compression(CompressionLevel.Desired, compressor)
+      .withCompressionPreferences.decompression(CompressionLevel.Desired, decompressor)
+  def serverImpl() =
+    Mux.server.withCompressionPreferences
+      .compression(CompressionLevel.Desired, compressor)
+      .withCompressionPreferences.decompression(CompressionLevel.Desired, decompressor)
 }
 
 class CompressionClientAcceptingTest extends CompressingEndToEndTest {
   def implName: String = "compression-client-enabled"
 
-  def clientImpl() = Mux.client.configured(accepted)
-  def serverImpl() = Mux.server.configured(desired)
+  def clientImpl() =
+    Mux.client.withCompressionPreferences
+      .compression(CompressionLevel.Accepted, compressor)
+      .withCompressionPreferences.decompression(CompressionLevel.Accepted, decompressor)
+  def serverImpl() =
+    Mux.server.withCompressionPreferences
+      .compression(CompressionLevel.Desired, compressor)
+      .withCompressionPreferences.decompression(CompressionLevel.Desired, decompressor)
 }
 
 class CompressionServerAcceptingTest extends CompressingEndToEndTest {
   def implName: String = "compression-client-enabled"
 
-  def clientImpl() = Mux.client.configured(desired)
-  def serverImpl() = Mux.server.configured(accepted)
+  def clientImpl() =
+    Mux.client.withCompressionPreferences
+      .compression(CompressionLevel.Desired, compressor)
+      .withCompressionPreferences.decompression(CompressionLevel.Desired, decompressor)
+  def serverImpl() =
+    Mux.server.withCompressionPreferences
+      .compression(CompressionLevel.Accepted, compressor)
+      .withCompressionPreferences.decompression(CompressionLevel.Accepted, decompressor)
 }
 
 class CompressionClientDisabledTest extends CompressingEndToEndTest {
   def implName: String = "compression-client-enabled"
 
   def clientImpl() = Mux.client
-  def serverImpl() = Mux.server.configured(desired)
+  def serverImpl() =
+    Mux.server.withCompressionPreferences
+      .compression(CompressionLevel.Desired, compressor)
+      .withCompressionPreferences.decompression(CompressionLevel.Desired, decompressor)
 }
 
 class CompressionServerDisabledTest extends CompressingEndToEndTest {
   def implName: String = "compression-server-enabled"
 
-  def clientImpl() = Mux.client.configured(desired)
+  def clientImpl() =
+    Mux.client.withCompressionPreferences
+      .compression(CompressionLevel.Desired, compressor)
+      .withCompressionPreferences.decompression(CompressionLevel.Desired, decompressor)
   def serverImpl() = Mux.server
 }
