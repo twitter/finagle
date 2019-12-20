@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-thriftmux: Add support for automatically negotiating compression between a client
+  and server.  Off by default, clients and servers must be configured to negotiate.
+  ``PHAB_ID=D414638``
+
 19.12.0
 -------
 

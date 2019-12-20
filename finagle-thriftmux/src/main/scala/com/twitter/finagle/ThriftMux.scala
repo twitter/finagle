@@ -8,7 +8,7 @@ import com.twitter.finagle.client.{
 }
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
-import com.twitter.finagle.mux.OpportunisticTlsParams
+import com.twitter.finagle.mux.{OpportunisticTlsParams, WithCompressionPreferences}
 import com.twitter.finagle.mux.transport.{MuxFailure, OpportunisticTls}
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
@@ -172,7 +172,8 @@ object ThriftMux
       with WithSessionQualifier[Client]
       with WithDefaultLoadBalancer[Client]
       with ThriftRichClient
-      with OpportunisticTlsParams[Client] {
+      with OpportunisticTlsParams[Client]
+      with WithCompressionPreferences[Client] {
 
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       muxer.stack
@@ -504,7 +505,8 @@ object ThriftMux
       with WithServerTransport[Server]
       with WithServerSession[Server]
       with WithServerAdmissionControl[Server]
-      with OpportunisticTlsParams[Server] {
+      with OpportunisticTlsParams[Server]
+      with WithCompressionPreferences[Server] {
 
     import Server.MuxToArrayFilter
 
