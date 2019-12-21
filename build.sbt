@@ -65,7 +65,7 @@ val netty4LibsTest = Seq(
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
 val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % netty4StaticSslVersion
-val opencensusVersion = "0.19.1"
+val opencensusVersion = "0.24.0"
 val jacksonVersion = "2.9.10"
 val jacksonDatabindVersion = "2.9.10.1"
 val jacksonLibs = Seq(
@@ -805,7 +805,8 @@ lazy val finagleOpenCensusTracing = Project(
   name := "finagle-opencensus-tracing",
   libraryDependencies ++= Seq(
     "io.opencensus" % "opencensus-api" % opencensusVersion,
-    "io.opencensus" % "opencensus-impl" % opencensusVersion
+    "io.opencensus" % "opencensus-impl" % opencensusVersion,
+    "io.opencensus" % "opencensus-contrib-http-util" % opencensusVersion % "test",
   ) ++ scroogeLibs
 ).dependsOn(
   finagleCore,

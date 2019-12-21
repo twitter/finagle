@@ -10,6 +10,10 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-opencensus-tracing: Add support for providing a custom TextFormat for header propagation.
+
+* finagle-opencensus-tracing: Fixed internal server error when invalid or no propagation headers are provided.
+
 * finagle-thriftmux: Add support for automatically negotiating compression between a client
   and server.  Off by default, clients and servers must be configured to negotiate.
   ``PHAB_ID=D414638``
