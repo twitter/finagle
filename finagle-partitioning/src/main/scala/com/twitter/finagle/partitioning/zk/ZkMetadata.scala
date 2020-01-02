@@ -13,8 +13,9 @@ import scala.util.hashing.MurmurHash3
  * the Finagle client stack.
  *
  * @param shardId The shard ID of the address.
+ * @param metadata A generic metadata container associated with the address.
  */
-case class ZkMetadata(shardId: Option[Int])
+case class ZkMetadata(shardId: Option[Int], metadata: Map[String, String] = Map.empty)
 
 object ZkMetadata {
   // visibility exposed for testing
@@ -50,12 +51,12 @@ object ZkMetadata {
     def compare(a0: Address, a1: Address): Int = (a0, a1) match {
       case (Address.Inet(_, md0), Address.Inet(_, md1)) =>
         (fromAddrMetadata(md0), fromAddrMetadata(md1)) match {
-          case (Some(ZkMetadata(Some(id0))), Some(ZkMetadata(Some(id1)))) =>
+          case (Some(ZkMetadata(Some(id0), _)), Some(ZkMetadata(Some(id1), _))) =>
             if (id0 == id1) addressHashOrder.compare(a0, a1)
             else Integer.compare(hash(id0), hash(id1))
-          case (Some(ZkMetadata(Some(_))), Some(ZkMetadata(None))) => -1
-          case (Some(ZkMetadata(None)), Some(ZkMetadata(Some(_)))) => 1
-          case (Some(ZkMetadata(None)), Some(ZkMetadata(None))) =>
+          case (Some(ZkMetadata(Some(_), _)), Some(ZkMetadata(None, _))) => -1
+          case (Some(ZkMetadata(None, _)), Some(ZkMetadata(Some(_), _))) => 1
+          case (Some(ZkMetadata(None, _)), Some(ZkMetadata(None, _))) =>
             addressHashOrder.compare(a0, a1)
           case (Some(_), None) => -1
           case (None, Some(_)) => 1
