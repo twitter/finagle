@@ -38,7 +38,14 @@ class ServiceDiscovererTest
   }
 
   def ep(port: Int) =
-    Endpoint(Array(null), "localhost", port, Int.MinValue, Endpoint.Status.Alive, port.toString)
+    Endpoint(
+      Array(null),
+      "localhost",
+      port,
+      Int.MinValue,
+      Endpoint.Status.Alive,
+      port.toString,
+      Map.empty)
   val ForeverEpoch = Epoch(Duration.Top, new MockTimer)
   val retryStream = RetryStream()
 
