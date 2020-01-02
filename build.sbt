@@ -457,7 +457,8 @@ lazy val finagleStatsCore = Project(
   id = "finagle-stats-core",
   base = file("finagle-stats-core")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-stats-core",
   libraryDependencies ++= Seq(
@@ -481,7 +482,8 @@ lazy val finagleStats = Project(
   id = "finagle-stats",
   base = file("finagle-stats")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-stats"
 ).dependsOn(
