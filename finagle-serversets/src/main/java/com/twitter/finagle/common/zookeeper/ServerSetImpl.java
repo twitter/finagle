@@ -136,7 +136,7 @@ public class ServerSetImpl implements ServerSet {
 
     LOG.log(Level.WARNING,
         "Joining a ServerSet without a shard ID is deprecated and will soon break.");
-    return join(endpoint, additionalEndpoints, Optional.empty(), new HashMap<>());
+    return join(endpoint, additionalEndpoints, Optional.empty());
   }
 
   @Override
@@ -144,29 +144,20 @@ public class ServerSetImpl implements ServerSet {
       InetSocketAddress endpoint,
       Map<String, InetSocketAddress> additionalEndpoints,
       int shardId) throws JoinException, InterruptedException {
-    return join(endpoint, additionalEndpoints, Optional.of(shardId), new HashMap<>());
-  }
 
-  @Override
-  public EndpointStatus join(
-      InetSocketAddress endpoint,
-      Map<String, InetSocketAddress> additionalEndpoints,
-      int shardId,
-      Map<String, String> metadata) throws JoinException, InterruptedException {
-    return join(endpoint, additionalEndpoints, Optional.of(shardId), metadata);
+    return join(endpoint, additionalEndpoints, Optional.of(shardId));
   }
 
   private EndpointStatus join(
       InetSocketAddress endpoint,
       Map<String, InetSocketAddress> additionalEndpoints,
-      Optional<Integer> shardId,
-      Map<String, String> metadata) throws JoinException, InterruptedException {
+      Optional<Integer> shardId) throws JoinException, InterruptedException {
 
     Objects.requireNonNull(endpoint);
     Objects.requireNonNull(additionalEndpoints);
 
     final MemberStatus memberStatus =
-        new MemberStatus(endpoint, additionalEndpoints, shardId, metadata);
+        new MemberStatus(endpoint, additionalEndpoints, shardId);
     Supplier<byte[]> serviceInstanceSupplier = new Supplier<byte[]>() {
       @Override public byte[] get() {
         return memberStatus.serializeServiceInstance();
@@ -229,18 +220,15 @@ public class ServerSetImpl implements ServerSet {
     private final InetSocketAddress endpoint;
     private final Map<String, InetSocketAddress> additionalEndpoints;
     private final Optional<Integer> shardId;
-    private final Map<String, String> metadata;
 
     private MemberStatus(
         InetSocketAddress endpoint,
         Map<String, InetSocketAddress> additionalEndpoints,
-        Optional<Integer> shardId,
-        Map<String, String> metadata) {
+        Optional<Integer> shardId) {
 
       this.endpoint = endpoint;
       this.additionalEndpoints = additionalEndpoints;
       this.shardId = shardId;
-      this.metadata = metadata;
     }
 
     synchronized void leave(Membership membership) throws UpdateException {
@@ -262,10 +250,6 @@ public class ServerSetImpl implements ServerSet {
 
       if (shardId.isPresent()) {
         serviceInstance.setShard(shardId.get());
-      }
-
-      if (metadata != null && !metadata.isEmpty()) {
-        serviceInstance.setMetadata(metadata);
       }
 
       LOG.fine("updating endpoint data to:\n\t" + serviceInstance);
@@ -496,7 +480,6 @@ public class ServerSetImpl implements ServerSet {
     private final Map<String, EndpointSchema> additionalEndpoints;
     private final Status status;
     private final Integer shard;
-    private final Map<String, String> metadata;
 
     ServiceInstanceSchema(ServiceInstance instance) {
       this.serviceEndpoint = new EndpointSchema(instance.getServiceEndpoint());
@@ -511,7 +494,6 @@ public class ServerSetImpl implements ServerSet {
       }
       this.status  = instance.getStatus();
       this.shard = instance.isSetShard() ? instance.getShard() : null;
-      this.metadata = instance.isSetMetadata() ? instance.getMetadata() : null;
     }
 
     EndpointSchema getServiceEndpoint() {
@@ -528,10 +510,6 @@ public class ServerSetImpl implements ServerSet {
 
     Integer getShard() {
       return shard;
-    }
-
-    Map<String, String> getMetadata() {
-      return metadata;
     }
   }
 
@@ -565,9 +543,6 @@ public class ServerSetImpl implements ServerSet {
           new ServiceInstance(primary, Collections.unmodifiableMap(additional), output.getStatus());
       if (output.getShard() != null) {
         instance.setShard(output.getShard());
-      }
-      if (output.getMetadata() != null) {
-        instance.setMetadata(output.getMetadata());
       }
       return instance;
     }

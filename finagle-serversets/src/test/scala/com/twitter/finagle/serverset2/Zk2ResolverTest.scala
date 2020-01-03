@@ -33,7 +33,6 @@ class Zk2ResolverTest
   val stabilizationInterval = PatienceConfiguration.Interval(5.seconds)
 
   val shardId = 42
-  val emptyMetadata = Map.empty[String, String]
 
   before {
     inst = new ZkInstance
@@ -56,12 +55,9 @@ class Zk2ResolverTest
 
   private[this] def address(
     ia: InetSocketAddress,
-    shardIdOpt: Option[Int] = Some(shardId),
-    metadata: Map[String, String] = emptyMetadata
+    shardIdOpt: Option[Int] = Some(shardId)
   ): Address =
-    WeightedAddress(
-      Address.Inet(ia, ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt, metadata))),
-      1.0)
+    WeightedAddress(Address.Inet(ia, ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt))), 1.0)
 
   test("end-to-end: service endpoint") {
     val Name.Bound(va) = zk2resolve("/foo/bar")
@@ -127,31 +123,6 @@ class Zk2ResolverTest
     eventually {
       assert(
         va.sample() == Addr.Bound(address(joinAddr, None)),
-        "resolution is not bound once the serverset exists"
-      )
-    }
-
-    status.leave()
-    eventually(stabilizationTimeout, stabilizationInterval) {
-      assert(va.sample() == Addr.Neg, "resolution is not negative after the serverset disappears")
-    }
-  }
-
-  test("end-to-end: service endpoint with metadata") {
-    val Name.Bound(va) = zk2resolve("/foo/bar")
-    eventually {
-      assert(va.sample() == Addr.Neg, "resolution is not negative before serverset exists")
-    }
-
-    val metadataMap = Map("someKey" -> "someValue")
-    val metadataJMap = metadataMap.asJava
-    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
-    val joinAddr = RandomSocket()
-    val status =
-      serverSet.join(joinAddr, Map.empty[String, InetSocketAddress].asJava, shardId, metadataJMap)
-    eventually {
-      assert(
-        va.sample() == Addr.Bound(address(joinAddr, Some(shardId), metadataMap)),
         "resolution is not bound once the serverset exists"
       )
     }

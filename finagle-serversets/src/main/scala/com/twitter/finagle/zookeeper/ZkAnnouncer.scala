@@ -39,7 +39,6 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
     serverSet: ServerSet,
     var status: Option[EndpointStatus] = None,
     var addr: Option[InetSocketAddress] = None,
-    metadata: Map[String, String] = Map.empty,
     endpoints: mutable.Map[String, InetSocketAddress] = mutable.Map.empty[String, InetSocketAddress])
 
   private[this] case class Mutation(
@@ -48,7 +47,6 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
     endpoints: Map[String, InetSocketAddress],
     onComplete: Promise[Unit])
 
-  private[this] val emptyMetadata = Map.empty[String, String]
   private[this] var serverSets = Set.empty[ServerSetConf]
   private[this] val q = new LinkedBlockingQueue[Mutation]()
   private[this] val mutator = new Thread("ZkAnnouncer Mutator") {
@@ -67,9 +65,7 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
           }
 
           change.addr foreach { addr =>
-            conf.status = Some(
-              conf.serverSet
-                .join(addr, change.endpoints.asJava, conf.shardId, conf.metadata.asJava))
+            conf.status = Some(conf.serverSet.join(addr, change.endpoints.asJava, conf.shardId))
           }
 
           change.onComplete.setDone()
@@ -92,16 +88,6 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
     shardId: Int,
     addr: InetSocketAddress,
     endpoint: Option[String]
-  ): Future[Announcement] =
-    announce(hosts, path, shardId, addr, endpoint, emptyMetadata)
-
-  def announce(
-    hosts: String,
-    path: String,
-    shardId: Int,
-    addr: InetSocketAddress,
-    endpoint: Option[String],
-    metadata: Map[String, String]
   ): Future[Announcement] = {
     val zkHosts = factory.hostSet(hosts)
     if (zkHosts.isEmpty)
@@ -109,7 +95,7 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
         new ZkAnnouncerException("ZK client address \"%s\" resolves to nothing".format(hosts))
       )
     else
-      announce(factory.get(zkHosts)._1, path, shardId, addr, endpoint, metadata)
+      announce(factory.get(zkHosts)._1, path, shardId, addr, endpoint)
   }
 
   def announce(
@@ -119,22 +105,10 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
     addr: InetSocketAddress,
     endpoint: Option[String]
   ): Future[Announcement] = {
-    announce(client, path, shardId, addr, endpoint, emptyMetadata)
-  }
-
-  def announce(
-    client: ZooKeeperClient,
-    path: String,
-    shardId: Int,
-    addr: InetSocketAddress,
-    endpoint: Option[String],
-    metadata: Map[String, String]
-  ): Future[Announcement] = {
     val conf = serverSets find { s =>
       s.client == client && s.path == path && s.shardId == shardId
     } getOrElse {
-      val serverSetConf =
-        ServerSetConf(client, path, shardId, new ServerSetImpl(client, path), metadata = metadata)
+      val serverSetConf = ServerSetConf(client, path, shardId, new ServerSetImpl(client, path))
       synchronized { serverSets += serverSetConf }
       serverSetConf
     }
@@ -166,25 +140,14 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
    * setting it to 0 is sufficient
    */
   def announce(ia: InetSocketAddress, addr: String): Future[Announcement] =
-    announce(ia, addr, emptyMetadata)
-
-  /**
-   * Requiring the shardId here is an unfortunate artifact of the implementation of ServerSets. For most uses
-   * setting it to 0 is sufficient
-   */
-  def announce(
-    ia: InetSocketAddress,
-    addr: String,
-    metadata: Map[String, String]
-  ): Future[Announcement] =
     addr.split("!") match {
       // zk!host!/full/path!shardId
       case Array(hosts, path, shardId) =>
-        announce(hosts, path, shardId.toInt, ia, None, metadata)
+        announce(hosts, path, shardId.toInt, ia, None)
 
       // zk!host!/full/path!shardId!endpoint
       case Array(hosts, path, shardId, endpoint) =>
-        announce(hosts, path, shardId.toInt, ia, Some(endpoint), metadata)
+        announce(hosts, path, shardId.toInt, ia, Some(endpoint))
 
       case _ =>
         Future.exception(new ZkAnnouncerException("Invalid addr \"%s\"".format(addr)))

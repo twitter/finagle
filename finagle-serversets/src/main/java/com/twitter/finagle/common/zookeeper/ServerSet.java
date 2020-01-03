@@ -79,23 +79,6 @@ public interface ServerSet extends DynamicHostSet<ServiceInstance> {
       int shardId) throws JoinException, InterruptedException;
 
   /**
-   * Attempts to join a server set for this logical service group.
-   *
-   * @param endpoint the primary service endpoint
-   * @param additionalEndpoints and additional endpoints keyed by their logical name
-   * @param shardId Unique shard identifier for this member of the service.
-   * @param metadata Additional metadata to be added as part of the server set.
-   * @return an EndpointStatus object that allows the endpoint to adjust its status
-   * @throws JoinException if there was a problem joining the server set
-   * @throws InterruptedException if interrupted while waiting to join the server set
-   */
-  EndpointStatus join(
-      InetSocketAddress endpoint,
-      Map<String, InetSocketAddress> additionalEndpoints,
-      int shardId,
-      Map<String, String> metadata) throws JoinException, InterruptedException;
-
-  /**
    * A handle to a service endpoint's status data that allows updating it to track current events.
    */
   public interface EndpointStatus {

@@ -41,15 +41,6 @@ private[serverset2] object DictObj {
   }
 }
 
-private[serverset2] object ExtractMetadata {
-  def unapply(o: Object): Option[Map[String, String]] = o match {
-    case m: java.util.Map[_, _] =>
-      val mm = m.asInstanceOf[java.util.Map[String, String]].asScala.toMap
-      Some(mm)
-    case _ => None
-  }
-}
-
 private[serverset2] object JsonDict {
   private[this] val m = new ObjectMapper
 

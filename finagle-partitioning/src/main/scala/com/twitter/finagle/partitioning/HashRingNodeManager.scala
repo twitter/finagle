@@ -110,7 +110,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
                       twcacheConversion(shardId, ia)
                     case _ =>
                       ZkMetadata.fromAddrMetadata(metadata) match {
-                        case Some(ZkMetadata(Some(shardId), _)) =>
+                        case Some(ZkMetadata(Some(shardId))) =>
                           (Some(shardId.toString), Addr.Bound(addr))
                         case _ =>
                           (None, Addr.Bound(addr))
