@@ -14,8 +14,9 @@ New Features
   and server.  Off by default, clients and servers must be configured to negotiate.
   ``PHAB_ID=D414638``
 
-* finagle-serversets: Add generic metadata support in ServerSet. Add support to resolve
-  the generic metadata via Zk2Resolver. ``PHAB_ID=D413698``
+* finagle-serversets: Add generic metadata support in ServerSet. Add support for announcing the
+  generic metadata via ZkAnnouncer. Add support to resolve the generic metadata via Zk2Resolver
+  ``PHAB_ID=D413698``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
