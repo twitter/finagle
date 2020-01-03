@@ -103,9 +103,4 @@ struct ServiceInstance {
    * The shard identifier for this instance.
    */
   4: optional i32 shard;
-
-  /*
-   * Metadata associated with this service instance.
-   */
-  5: optional map<string, string> metadata;
 }

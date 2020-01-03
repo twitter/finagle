@@ -164,17 +164,15 @@ class Zk2Resolver(
           case Activity.Ok(weightedEntries) =>
             val endpoint = endpointOption.orNull
             val hosts: Seq[(String, Int, Addr.Metadata)] = weightedEntries.collect {
-              case (
-                  Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _, metadata),
-                  weight)
+              case (Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _), weight)
                   if names.contains(endpoint) &&
                     host != null &&
                     shardOption.forall { s =>
                       s == shardId && shardId != Int.MinValue
                     } =>
                 val shardIdOpt = if (shardId == Int.MinValue) None else Some(shardId)
-                val zkMetadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt, metadata))
-                (host, port, zkMetadata + (WeightedAddress.weightKey -> weight))
+                val metadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt))
+                (host, port, metadata + (WeightedAddress.weightKey -> weight))
             }
 
             if (chatty()) {

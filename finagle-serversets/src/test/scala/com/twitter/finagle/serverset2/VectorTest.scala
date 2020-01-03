@@ -5,15 +5,8 @@ import org.scalatest.FunSuite
 class VectorTest extends FunSuite {
   val port = 80 // not bound
   test("Selector.matches") {
-    val ep1 = Endpoint(
-      Array(null),
-      "10.0.0.1",
-      port,
-      Int.MinValue,
-      Endpoint.Status.Alive,
-      "1234",
-      Map.empty)
-    val ep2 = Endpoint(Array(null), "1.0.0.2", port, 3, Endpoint.Status.Alive, "12345", Map.empty)
+    val ep1 = Endpoint(Array(null), "10.0.0.1", port, Int.MinValue, Endpoint.Status.Alive, "1234")
+    val ep2 = Endpoint(Array(null), "1.0.0.2", port, 3, Endpoint.Status.Alive, "12345")
 
     val host = Selector.Host("10.0.0.1", port)
     assert(host matches ep1)
@@ -37,8 +30,7 @@ class VectorTest extends FunSuite {
       )
     )
 
-    val ep1 =
-      Endpoint(Array(null), "10.0.0.2", 123, Int.MinValue, Endpoint.Status.Alive, "1111", Map.empty)
+    val ep1 = Endpoint(Array(null), "10.0.0.2", 123, Int.MinValue, Endpoint.Status.Alive, "1111")
     assert(vec.weightOf(ep1) == 1.2 * 2.1)
 
     val ep2 = ep1.copy(memberId = "9876")

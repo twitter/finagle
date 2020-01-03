@@ -14,18 +14,6 @@ New Features
   and server.  Off by default, clients and servers must be configured to negotiate.
   ``PHAB_ID=D414638``
 
-* finagle-serversets: Add generic metadata support in ServerSet. Add support for announcing the
-  generic metadata via ZkAnnouncer. Add support to resolve the generic metadata via Zk2Resolver
-  ``PHAB_ID=D413698``
-
-Breaking API Changes
-~~~~~~~~~~~~~~~~~~~~
-
-* finagle-partitioning: `ZKMetadata` case class has a new default argument breaking API for
-  Java users. ``PHAB_ID=D413698``
-
-* finagle-serversets: `Endpoint` case class has a new metadata argument. ``PHAB_ID=D413698``
-
 19.12.0
 -------
 

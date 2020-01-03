@@ -26,8 +26,6 @@ sealed trait Entry
  *
  * @param memberId The endpoint's member id,
  * used as a foreign key for endpoints.
- *
- * @param metadata The metadata associated with the endpoint.
  */
 case class Endpoint(
   names: Array[String],
@@ -35,8 +33,7 @@ case class Endpoint(
   port: Int,
   shard: Int,
   status: Endpoint.Status.Value,
-  memberId: String,
-  metadata: Map[String, String])
+  memberId: String)
     extends Entry {
 
   override def equals(that: Any) =
@@ -48,8 +45,7 @@ case class Endpoint(
           this.port == that.port &&
           this.shard == that.shard &&
           this.status == that.status &&
-          this.memberId == that.memberId &&
-          this.metadata == that.metadata
+          this.memberId == that.memberId
       case _ => super.equals(that)
     }
 }
@@ -71,8 +67,7 @@ object Entry {
 }
 
 object Endpoint {
-  val Empty =
-    Endpoint(null, null, Int.MinValue, Int.MinValue, Endpoint.Status.Unknown, "", Map.empty)
+  val Empty = Endpoint(null, null, Int.MinValue, Int.MinValue, Endpoint.Status.Unknown, "")
 
   object Status extends Enumeration {
     val Dead, Starting, Alive, Stopping, Stopped, Warning, Unknown = Value
@@ -111,17 +106,13 @@ object Endpoint {
     val d = JsonDict(json)
 
     val shard = for { IntObj(s) <- d("shard") } yield s
-    val metadata = for (ExtractMetadata(m) <- d("metadata")) yield m
     val status = {
       for {
         StringObj(s) <- d("status")
         status <- Status.ofString(s)
       } yield status
     } getOrElse Endpoint.Status.Unknown
-    val tmpl = Endpoint.Empty.copy(
-      shard = shard.getOrElse(Int.MinValue),
-      status = status,
-      metadata = metadata.getOrElse(Map.empty))
+    val tmpl = Endpoint.Empty.copy(shard = shard.getOrElse(Int.MinValue), status = status)
 
     val namesByHostPort =
       Memoize.snappable[(String, Int), ArrayBuffer[String]] {
