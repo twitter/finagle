@@ -5,6 +5,7 @@ junit_tests(
         "3rdparty/jvm/io/netty:netty4",
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
+        "3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalacheck",
