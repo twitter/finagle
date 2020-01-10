@@ -203,7 +203,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
 
   def filterSample(sample: collection.Map[String, Number]): collection.Map[String, Number] =
     statsFilterRegex match {
-      case Some(regex) => sample.filterKeys(!regex.pattern.matcher(_).matches)
+      case Some(regex) => sample.filterKeys(!regex.pattern.matcher(_).matches).toMap
       case None => sample
     }
 
@@ -214,9 +214,9 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
     case Some(pattern) =>
       sample.filterKeys(
         name => metrics.verbosity.get(name) != Verbosity.Debug || pattern(name)
-      )
+      ).toMap
 
     case None =>
-      sample.filterKeys(name => metrics.verbosity.get(name) != Verbosity.Debug)
+      sample.filterKeys(name => metrics.verbosity.get(name) != Verbosity.Debug).toMap
   }
 }
