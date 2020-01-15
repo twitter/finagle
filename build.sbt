@@ -674,7 +674,7 @@ lazy val finagleMemcached = Project(
   libraryDependencies ++= Seq(
     util("hashing"),
     util("zk-test") % "test",
-    "com.twitter" %% "bijection-core" % "0.9.4",
+    "com.twitter" %% "bijection-core" % "0.9.7",
     "org.apache.thrift" % "libthrift" % libthriftVersion
   ),
   libraryDependencies ++= jacksonLibs
