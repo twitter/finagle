@@ -16,6 +16,10 @@ New Features
   and server.  Off by default, clients and servers must be configured to negotiate.
   ``PHAB_ID=D414638``
 
+* finagle-stats: Enables cross-build for 2.13.0. ``PHAB_ID=D421449``
+
+* finagle-stats-core: Enables cross-build for 2.13.0. ``PHAB_ID=D421449``
+
 19.12.0
 -------
 
