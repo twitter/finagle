@@ -10,6 +10,8 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-opencensus-tracing: Enables cross-build for 2.13.0. ``PHAB_ID=D421452``
+
 * finagle-thriftmux: Add support for automatically negotiating compression between a client
   and server.  Off by default, clients and servers must be configured to negotiate.
   ``PHAB_ID=D414638``

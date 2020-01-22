@@ -800,7 +800,8 @@ lazy val finagleOpenCensusTracing = Project(
   id = "finagle-opencensus-tracing",
   base = file("finagle-opencensus-tracing")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-opencensus-tracing",
   libraryDependencies ++= Seq(
