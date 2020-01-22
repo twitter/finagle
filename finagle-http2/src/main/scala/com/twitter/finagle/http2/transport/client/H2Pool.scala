@@ -78,6 +78,8 @@ private final class H2Pool(params: Params, stackFragment: Stack[ServiceFactory[R
     extends ServiceFactory[Request, Response] {
 
   import H2Pool._
+      
+  private[this] val state = new AtomicReference[State](State.H1)
 
   // This gauge will be nice during the rollout for debugging but it may
   // become DEBUG scoped or removed altogether after the rollout phase.
@@ -88,8 +90,6 @@ private final class H2Pool(params: Params, stackFragment: Stack[ServiceFactory[R
         case _ => 0.0f
       }
     }
-
-  private[this] val state = new AtomicReference[State](State.H1)
 
   @tailrec
   private[this] final def onH2Service(h2Session: Service[Request, Response]): Unit =
