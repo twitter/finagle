@@ -16,6 +16,15 @@ class ZkMetadataTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     assert(addrMetadata(ZkMetadata.key) == metadata)
   }
 
+  test("ZkMetadata construction throws on large metadata size") {
+    val metadata = (for (key <- 0 to 11; value <- 0 to 11)
+      yield key.toString -> value.toString).toMap
+
+    intercept[AssertionError] {
+      ZkMetadata(Some(4), metadata)
+    }
+  }
+
   test("fromAddrMetadata") {
     val addrMetadata = ZkMetadata.toAddrMetadata(metadata)
     assert(ZkMetadata.fromAddrMetadata(addrMetadata) == Some(metadata))

@@ -13,12 +13,22 @@ import scala.util.hashing.MurmurHash3
  * the Finagle client stack.
  *
  * @param shardId The shard ID of the address.
+ * @param metadata A generic metadata container associated with the address.
  */
-case class ZkMetadata(shardId: Option[Int])
+case class ZkMetadata(shardId: Option[Int], metadata: Map[String, String] = Map.empty) {
+  assert(
+    metadata.size <= ZkMetadata.maxMetadataEntries,
+    s"Given size of metadata map: ${metadata.size} is greater than ${ZkMetadata.maxMetadataEntries}")
+}
 
 object ZkMetadata {
   // visibility exposed for testing
   private[partitioning] val key = "zk_metadata"
+
+  // The maximum size of the [[ZkMetadata.metadata]] map that is allowed.
+  // This bounds the metadata map's size that is allowed to flow through
+  // the service discovery stack.
+  private val maxMetadataEntries = 10
 
   /**
    * Orders a Finagle [[Address]] based on a deterministic hash of its shard id.
@@ -32,6 +42,9 @@ object ZkMetadata {
    * under the hood which is known to not have collisions for 32-bit inputs. However,
    * if the input collection does not have shard ids available, we fall back to
    * [[Address.hashOrdering]] which may have some caveats to this.
+   *
+   * @note We do not consider [[ZkMetadata.metadata]] while comparing the [[Address]]
+   * and only [[ZkMetadata.shardId]] portion of the [[ZkMetadata]] is considered.
    */
   def shardHashOrdering(seed: Int): Ordering[Address] = new Ordering[Address] {
     private[this] def hash(shardId: Int): Int = {
@@ -50,12 +63,12 @@ object ZkMetadata {
     def compare(a0: Address, a1: Address): Int = (a0, a1) match {
       case (Address.Inet(_, md0), Address.Inet(_, md1)) =>
         (fromAddrMetadata(md0), fromAddrMetadata(md1)) match {
-          case (Some(ZkMetadata(Some(id0))), Some(ZkMetadata(Some(id1)))) =>
+          case (Some(ZkMetadata(Some(id0), _)), Some(ZkMetadata(Some(id1), _))) =>
             if (id0 == id1) addressHashOrder.compare(a0, a1)
             else Integer.compare(hash(id0), hash(id1))
-          case (Some(ZkMetadata(Some(_))), Some(ZkMetadata(None))) => -1
-          case (Some(ZkMetadata(None)), Some(ZkMetadata(Some(_)))) => 1
-          case (Some(ZkMetadata(None)), Some(ZkMetadata(None))) =>
+          case (Some(ZkMetadata(Some(_), _)), Some(ZkMetadata(None, _))) => -1
+          case (Some(ZkMetadata(None, _)), Some(ZkMetadata(Some(_), _))) => 1
+          case (Some(ZkMetadata(None, _)), Some(ZkMetadata(None, _))) =>
             addressHashOrder.compare(a0, a1)
           case (Some(_), None) => -1
           case (None, Some(_)) => 1

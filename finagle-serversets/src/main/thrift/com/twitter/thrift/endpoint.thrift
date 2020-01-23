@@ -15,6 +15,8 @@
 // =================================================================================================
 
 namespace java com.twitter.thrift
+#@namespace scala com.twitter.thrift.endpoint.thriftscala
+namespace py gen.twitter.thrift.endpoint
 
 /*
  * Represents the status of a service.
@@ -103,4 +105,9 @@ struct ServiceInstance {
    * The shard identifier for this instance.
    */
   4: optional i32 shard;
+
+  /*
+   * Metadata associated with this service instance.
+   */
+  5: optional map<string, string> metadata;
 }

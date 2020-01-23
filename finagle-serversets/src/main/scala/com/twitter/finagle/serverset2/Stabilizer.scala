@@ -88,7 +88,7 @@ private object Stabilizer {
         case Address.Inet(inet, md) =>
           inets = inets + inet
           ZkMetadata.fromAddrMetadata(md) match {
-            case Some(ZkMetadata(Some(shardId))) =>
+            case Some(ZkMetadata(Some(shardId), _)) =>
               shards = shards + shardId
             case _ => // nop
           }
@@ -100,7 +100,7 @@ private object Stabilizer {
     val filteredPrev: Set[Address] = prev.filter {
       case Address.Inet(inet, md) =>
         ZkMetadata.fromAddrMetadata(md) match {
-          case Some(ZkMetadata(Some(shardId))) => !shards.contains(shardId)
+          case Some(ZkMetadata(Some(shardId), _)) => !shards.contains(shardId)
           case _ => !inets.contains(inet)
         }
       case _ => true
