@@ -20,16 +20,17 @@ New Features
 
 * finagle-stats-core: Enables cross-build for 2.13.0. ``PHAB_ID=D421449``
 
-* finagle-serversets: Add generic metadata support in ServerSet. Add support to resolve
-  the generic metadata via Zk2Resolver. ``PHAB_ID=D413698``
+* finagle-serversets: Add generic metadata support in ServerSet. Add support for announcing the
+  generic metadata via ZkAnnouncer. Add support to resolve the generic metadata via Zk2Resolver
+  ``PHAB_ID=D421151``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
 * finagle-partitioning: `ZKMetadata` case class has a new default argument breaking API for
-  Java users. ``PHAB_ID=D413698``
+  Java users. ``PHAB_ID=D421151``
 
-* finagle-serversets: `Endpoint` case class has a new metadata argument. ``PHAB_ID=D413698``
+* finagle-serversets: `Endpoint` case class has a new metadata argument. ``PHAB_ID=D421151``
 
 19.12.0
 -------
