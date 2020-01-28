@@ -9,6 +9,7 @@ Unreleased
 
 New Features
 ~~~~~~~~~~~~
+* finagle-memcached: Upgrade to Bijection 0.9.7. ``PHAB_ID=D426488``
 
 * finagle-opencensus-tracing: Enables cross-build for 2.13.0. ``PHAB_ID=D421452``
 
