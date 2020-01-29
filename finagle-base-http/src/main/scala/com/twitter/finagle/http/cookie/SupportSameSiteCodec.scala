@@ -7,6 +7,6 @@ import com.twitter.app.GlobalFlag
  */
 object supportSameSiteCodec
     extends GlobalFlag[Boolean](
-      false, // disabled by default
+      true, // enabled by default
       "Allow the SameSite attribute to be added to the Set-Cookie header on Responses"
     )

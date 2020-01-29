@@ -9,7 +9,7 @@ package com.twitter.finagle.http.cookie
  *
  * [0] https://tools.ietf.org/html/draft-west-first-party-cookies-07
  */
-sealed trait SameSite
+sealed abstract class SameSite private ()
 
 object SameSite {
 
