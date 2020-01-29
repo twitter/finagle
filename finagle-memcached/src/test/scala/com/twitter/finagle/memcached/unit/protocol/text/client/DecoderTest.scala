@@ -33,7 +33,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
     def decodeString(data: String): Seq[Decoding] = {
       val out = new mutable.ArrayBuffer[Decoding]()
       decoder.decodeData(Buf.Utf8(data), out)
-      out
+      out.toSeq
     }
   }
 

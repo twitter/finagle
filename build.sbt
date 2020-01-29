@@ -670,7 +670,8 @@ lazy val finagleMemcached = Project(
   id = "finagle-memcached",
   base = file("finagle-memcached")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-memcached",
   libraryDependencies ++= Seq(

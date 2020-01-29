@@ -1,7 +1,6 @@
 package com.twitter.finagle.memcached.util
 
 import com.twitter.io.Buf
-import scala.collection.breakOut
 import scala.language.implicitConversions
 
 private[finagle] object Bufs {
@@ -24,7 +23,7 @@ private[finagle] object Bufs {
     if (strings == null) {
       null
     } else {
-      strings.map(nonEmptyStringToBuf)(breakOut)
+      strings.map(nonEmptyStringToBuf).toSeq
     }
   }
 
