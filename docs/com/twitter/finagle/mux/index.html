@@ -564,6 +564,10 @@ use.</p><p> Flag          Value     Meaning
                         <a href="ClientDiscardedRequestException.html" title="Indicates that a client requested that a given request be discarded.">ClientDiscardedRequestException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="CompressionParams.html" title="A collection of methods for configuring compression for ThriftMux clients and servers."></a>
+                        <a href="CompressionParams.html" title="A collection of methods for configuring compression for ThriftMux clients and servers.">CompressionParams</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="trait" href="OpportunisticTlsParams.html" title="Mixin for supporting Opportunistic Tls on clients and servers"></a>
                         <a href="OpportunisticTlsParams.html" title="Mixin for supporting Opportunistic Tls on clients and servers">OpportunisticTlsParams</a>
                       </li><li class="current-entities indented4">
@@ -590,6 +594,10 @@ use.</p><p> Flag          Value     Meaning
                         <span class="separator"></span>
                         <a class="class" href="ServerError.html" title="Indicates that the server failed to interpret or act on the request."></a>
                         <a href="ServerError.html" title="Indicates that the server failed to interpret or act on the request.">ServerError</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="WithCompressionPreferences.html" title="Provides the withTransport (client or server transport) API entry point."></a>
+                        <a href="WithCompressionPreferences.html" title="Provides the withTransport (client or server transport) API entry point.">WithCompressionPreferences</a>
                       </li><li name="com.twitter.finagle.mysql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mysql"></a><a id="mysql:mysql"></a>
       <span class="permalink">
@@ -1184,6 +1192,23 @@ use.</p><p> Flag          Value     Meaning
       <p class="shortcomment cmt">Indicates that a client requested that a given request be discarded.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that a client requested that a given request be discarded.</p><p>This implies that the client issued a Tdiscarded message for a given tagged
 request, as per <a href="" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
 </p></div></div>
+    </li><li name="com.twitter.finagle.mux.CompressionParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CompressionParams[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef"></a><a id="CompressionParams[A&lt;:Parameterized[A]]:CompressionParams[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/index.html#CompressionParams[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A collection of methods for configuring compression for ThriftMux clients and servers." href="CompressionParams.html"><span class="name">CompressionParams</span></a><span class="tparams">[<span name="A">A &lt;: <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.mux.CompressionParams.A">A</span>]</span>]</span><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A collection of methods for configuring compression for ThriftMux clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A collection of methods for configuring compression for ThriftMux clients and servers.
+</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>a ThriftMux.Client or ThriftMux.Server to configure.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.mux.OpportunisticTlsParams" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="OpportunisticTlsParams[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef"></a><a id="OpportunisticTlsParams[A&lt;:Parameterized[A]]:OpportunisticTlsParams[A]"></a>
       <span class="permalink">
@@ -1273,6 +1298,23 @@ failure to interpret the request.
 could mean that the client sent a <a href="" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a> message type
 that the server is unable to process.
 </p></div></div>
+    </li><li name="com.twitter.finagle.mux.WithCompressionPreferences" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="WithCompressionPreferences[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef"></a><a id="WithCompressionPreferences[A&lt;:Parameterized[A]]:WithCompressionPreferences[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/index.html#WithCompressionPreferences[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Provides the withTransport (client or server transport) API entry point." href="WithCompressionPreferences.html"><span class="name">WithCompressionPreferences</span></a><span class="tparams">[<span name="A">A &lt;: <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.mux.WithCompressionPreferences.A">A</span>]</span>]</span><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Provides the <code>withTransport</code> (client or server transport) API entry point.</p><div class="fullcomment"><div class="comment cmt"><p>Provides the <code>withTransport</code> (client or server transport) API entry point.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="CompressionParams.html" class="extype" name="com.twitter.finagle.mux.CompressionParams">CompressionParams</a></p></span></dd></dl></div>
     </li></ol>
             </div>
 

@@ -208,7 +208,7 @@ resources for using Finagle.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ZkMetadata</span><span class="params">(<span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">ZkMetadata</span><span class="params">(<span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>, <span name="metadata">metadata: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../../scala/index.html">Map.empty</a></span></span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
@@ -218,7 +218,7 @@ directly by Finagle's load balancer so it is represented separately
 as <a href="../../addr/WeightedAddress$.html" class="extype" name="com.twitter.finagle.addr.WeightedAddress">com.twitter.finagle.addr.WeightedAddress</a>. Weights are treated
 specially since their interpretation requires deep integration into
 the Finagle client stack.
-</p></div><dl class="paramcmts block"><dt class="param">shardId</dt><dd class="cmt"><p>The shard ID of the address.</p></dd></dl><div class="toggleContainer block">
+</p></div><dl class="paramcmts block"><dt class="param">shardId</dt><dd class="cmt"><p>The shard ID of the address.</p></dd><dt class="param">metadata</dt><dd class="cmt"><p>A generic metadata container associated with the address.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -269,9 +269,9 @@ the Finagle client stack.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.partitioning.zk.ZkMetadata#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(shardId:Option[Int]):com.twitter.finagle.partitioning.zk.ZkMetadata"></a><a id="&lt;init&gt;:ZkMetadata"></a>
+      <a id="&lt;init&gt;(shardId:Option[Int],metadata:Map[String,String]):com.twitter.finagle.partitioning.zk.ZkMetadata"></a><a id="&lt;init&gt;:ZkMetadata"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/partitioning/zk/ZkMetadata.html#&lt;init&gt;(shardId:Option[Int]):com.twitter.finagle.partitioning.zk.ZkMetadata" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/partitioning/zk/ZkMetadata.html#&lt;init&gt;(shardId:Option[Int],metadata:Map[String,String]):com.twitter.finagle.partitioning.zk.ZkMetadata" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -280,10 +280,10 @@ the Finagle client stack.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ZkMetadata</span><span class="params">(<span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>)</span>
+        <span class="name">ZkMetadata</span><span class="params">(<span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>, <span name="metadata">metadata: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../../scala/index.html">Map.empty</a></span></span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">shardId</dt><dd class="cmt"><p>The shard ID of the address.</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">shardId</dt><dd class="cmt"><p>The shard ID of the address.</p></dd><dt class="param">metadata</dt><dd class="cmt"><p>A generic metadata container associated with the address.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -455,6 +455,22 @@ the Finagle client stack.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.partitioning.zk.ZkMetadata#metadata" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="metadata:Map[String,String]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/partitioning/zk/ZkMetadata.html#metadata:Map[String,String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">metadata</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

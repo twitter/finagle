@@ -357,6 +357,24 @@ or the main endpoint, re-join only if the main endpoint exists.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.zookeeper.ZkAnnouncer#announce" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="announce(ia:java.net.InetSocketAddress,addr:String,metadata:Map[String,String]):com.twitter.util.Future[com.twitter.finagle.Announcement]"></a><a id="announce(InetSocketAddress,String,Map[String,String]):Future[Announcement]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/zookeeper/ZkAnnouncer.html#announce(ia:java.net.InetSocketAddress,addr:String,metadata:Map[String,String]):com.twitter.util.Future[com.twitter.finagle.Announcement]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">announce</span><span class="params">(<span name="ia">ia: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>, <span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="metadata">metadata: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Requiring the shardId here is an unfortunate artifact of the implementation of ServerSets.</p><div class="fullcomment"><div class="comment cmt"><p>Requiring the shardId here is an unfortunate artifact of the implementation of ServerSets. For most uses
+setting it to 0 is sufficient
+</p></div></div>
+    </li><li name="com.twitter.finagle.zookeeper.ZkAnnouncer#announce" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="announce(ia:java.net.InetSocketAddress,addr:String):com.twitter.util.Future[com.twitter.finagle.Announcement]"></a><a id="announce(InetSocketAddress,String):Future[Announcement]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/zookeeper/ZkAnnouncer.html#announce(ia:java.net.InetSocketAddress,addr:String):com.twitter.util.Future[com.twitter.finagle.Announcement]" title="Permalink">
@@ -375,6 +393,22 @@ or the main endpoint, re-join only if the main endpoint exists.
 setting it to 0 is sufficient
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zookeeper.ZkAnnouncer">ZkAnnouncer</a> → <a href="../Announcer.html" class="extype" name="com.twitter.finagle.Announcer">Announcer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.zookeeper.ZkAnnouncer#announce" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="announce(client:com.twitter.finagle.common.zookeeper.ZooKeeperClient,path:String,shardId:Int,addr:java.net.InetSocketAddress,endpoint:Option[String],metadata:Map[String,String]):com.twitter.util.Future[com.twitter.finagle.Announcement]"></a><a id="announce(ZooKeeperClient,String,Int,InetSocketAddress,Option[String],Map[String,String]):Future[Announcement]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/zookeeper/ZkAnnouncer.html#announce(client:com.twitter.finagle.common.zookeeper.ZooKeeperClient,path:String,shardId:Int,addr:java.net.InetSocketAddress,endpoint:Option[String],metadata:Map[String,String]):com.twitter.util.Future[com.twitter.finagle.Announcement]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">announce</span><span class="params">(<span name="client">client: <span class="extype" name="com.twitter.finagle.common.zookeeper.ZooKeeperClient">ZooKeeperClient</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="addr">addr: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>, <span name="endpoint">endpoint: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="metadata">metadata: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a>]</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.zookeeper.ZkAnnouncer#announce" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="announce(client:com.twitter.finagle.common.zookeeper.ZooKeeperClient,path:String,shardId:Int,addr:java.net.InetSocketAddress,endpoint:Option[String]):com.twitter.util.Future[com.twitter.finagle.Announcement]"></a><a id="announce(ZooKeeperClient,String,Int,InetSocketAddress,Option[String]):Future[Announcement]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/zookeeper/ZkAnnouncer.html#announce(client:com.twitter.finagle.common.zookeeper.ZooKeeperClient,path:String,shardId:Int,addr:java.net.InetSocketAddress,endpoint:Option[String]):com.twitter.util.Future[com.twitter.finagle.Announcement]" title="Permalink">
@@ -387,6 +421,22 @@ setting it to 0 is sufficient
       </span>
       <span class="symbol">
         <span class="name">announce</span><span class="params">(<span name="client">client: <span class="extype" name="com.twitter.finagle.common.zookeeper.ZooKeeperClient">ZooKeeperClient</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="addr">addr: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>, <span name="endpoint">endpoint: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a>]</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.zookeeper.ZkAnnouncer#announce" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="announce(hosts:String,path:String,shardId:Int,addr:java.net.InetSocketAddress,endpoint:Option[String],metadata:Map[String,String]):com.twitter.util.Future[com.twitter.finagle.Announcement]"></a><a id="announce(String,String,Int,InetSocketAddress,Option[String],Map[String,String]):Future[Announcement]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/zookeeper/ZkAnnouncer.html#announce(hosts:String,path:String,shardId:Int,addr:java.net.InetSocketAddress,endpoint:Option[String],metadata:Map[String,String]):com.twitter.util.Future[com.twitter.finagle.Announcement]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">announce</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="addr">addr: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>, <span name="endpoint">endpoint: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="metadata">metadata: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a>]</span>
       </span>
       
       
