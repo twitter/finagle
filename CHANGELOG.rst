@@ -7,6 +7,16 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-base-http: Support for the `SameSite` cookie attribute is now on by default. This can
+  be manipulated via the `com.twitter.finagle.http.cookie.supportSameSiteCodec` flag. This means
+  that cookies that have a value other than `Unset` for the `sameSite` field will have the
+  attribute encoded (by servers) and decoded (by clients). See this
+  [Chromium blog post](https://blog.chromium.org/2019/10/developers-get-ready-for-new.html)
+  for more information about the `SameSite` attribute. ``PHAB_ID=D426349``
+
 20.1.0
 ------
 
