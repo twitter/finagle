@@ -853,7 +853,8 @@ lazy val finagleBenchmark = Project(
   id = "finagle-benchmark",
   base = file("finagle-benchmark")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).enablePlugins(
   JmhPlugin
 ).settings(
