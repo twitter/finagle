@@ -17,6 +17,12 @@ Runtime Behavior Changes
   [Chromium blog post](https://blog.chromium.org/2019/10/developers-get-ready-for-new.html)
   for more information about the `SameSite` attribute. ``PHAB_ID=D426349``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-http2: Initialize state in H2Pool before use in the gauge to avoid a
+  NullPointerException. ``PHAB_ID=D428272``
+
 20.1.0
 ------
 
