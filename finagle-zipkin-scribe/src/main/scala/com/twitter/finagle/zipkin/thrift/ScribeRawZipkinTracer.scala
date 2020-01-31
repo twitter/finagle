@@ -62,6 +62,7 @@ object ScribeRawZipkinTracer {
       .daemon(true)
       .build()
 
+    // Makes sure we don't trace the Scribe logging.
     new Scribe.FinagledClient(new TracelessFilter andThen transport, Protocols.binaryFactory())
   }
 
@@ -280,16 +281,5 @@ private[thrift] class ScribeRawZipkinTracer(
         case Throw(e) => errorReceiver.counter(e.getClass.getName).incr()
       }
       .unit
-  }
-}
-
-/**
- * Makes sure we don't trace the Scribe logging.
- */
-private class TracelessFilter[Req, Rep] extends SimpleFilter[Req, Rep] {
-  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    Trace.letClear {
-      service(request)
-    }
   }
 }

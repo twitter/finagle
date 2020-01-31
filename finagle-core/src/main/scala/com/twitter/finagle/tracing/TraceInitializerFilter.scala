@@ -283,3 +283,14 @@ private[finagle] object WireTracingFilter {
     traceMetadata = true
   )
 }
+
+/**
+ * A filter to clear tracing information
+ */
+class TracelessFilter[Req, Rep] extends SimpleFilter[Req, Rep] {
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+    Trace.letClear {
+      service(request)
+    }
+  }
+}
