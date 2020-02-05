@@ -29,7 +29,7 @@ final private[http2] class ServerNpnOrAlpnHandler(
         ctx.pipeline.replace(HttpCodecName, Http2CodecName, codec)
         ctx.pipeline.addAfter(Http2CodecName, Http2MultiplexHandlerName, handler)
 
-        Http2PipelineInitializer.setup(ctx, params)
+        Http2PipelineInitializer.setupServerPipeline(ctx.pipeline, params)
 
       case ApplicationProtocolNames.HTTP_1_1 =>
       // The Http codec is already in the pipeline, so we are good!

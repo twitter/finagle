@@ -2099,4 +2099,99 @@ abstract class AbstractEndToEndTest
       await(client.close())
       await(server.close())
     }
+
+  test(s"$implName: server read timeouts") {
+    val service = new HttpService {
+      def apply(request: Request): Future[Response] = {
+        val response = Response()
+        Future.value(response).delayed(200.milliseconds)(DefaultTimer.Implicit)
+      }
+    }
+
+    val server = serverImpl().withTransport
+      .readTimeout(300.milliseconds)
+      .serve(new InetSocketAddress(0), service)
+
+    val client = clientImpl().newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    await(client(Request("/1")))
+    Thread.sleep(200)
+    await(client(Request("/2")))
+    Thread.sleep(200)
+    await(client(Request("/3")))
+    await(client.close())
+  }
+
+  test(s"$implName: streaming client read timeouts") {
+    val service = new HttpService {
+      def apply(request: Request): Future[Response] = {
+        Future.value(Response())
+      }
+    }
+
+    val server = serverImpl().withTransport
+      .readTimeout(100.milliseconds)
+      .serve(new InetSocketAddress(0), service)
+
+    val client = clientImpl()
+      .withStreaming(true)
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    val req = Request("/1")
+    req.setChunked(true)
+
+    val flags = intercept[FailureFlags[_]] {
+      await(client(req))
+    }
+
+    assert(!flags.isFlagged(FailureFlags.Retryable))
+    await(client.close())
+    await(server.close())
+  }
+
+  test(s"$implName: streaming client and server read timeouts") {
+    val service = new HttpService {
+      def apply(request: Request): Future[Response] = {
+        Future.value(Response())
+      }
+    }
+
+    val server = serverImpl()
+      .withStreaming(true)
+      .withTransport.readTimeout(100.milliseconds)
+      .serve(new InetSocketAddress(0), service)
+
+    val client = clientImpl()
+      .withStreaming(true)
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    val req = Request("/1")
+    req.setChunked(true)
+
+    def writeLoop(remaining: Int): Future[Unit] = {
+      if (remaining <= 0) Future.Done
+      else {
+        Future
+          .sleep(50.milliseconds)(DefaultTimer.Implicit)
+          .before(req.writer.write(Buf.Utf8("foo")))
+          .before(writeLoop(remaining - 1))
+      }
+    }
+
+    // Start writing data. This should be fine.
+    writeLoop(4)
+    assert(await(client(req)).status == Status.Ok)
+
+    await(client.close())
+    await(server.close())
+  }
 }
