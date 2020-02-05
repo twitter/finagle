@@ -56,6 +56,12 @@ Breaking API Changes
 
 * finagle-serversets: `Endpoint` case class has a new metadata argument. ``PHAB_ID=D421151``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-memcached: MemcachedTracingFilter should replace StackClient.Role.protoTracing and not
+  the protocol-agnostic ClientTracingFilter ``PHAB=D427660``
+
 19.12.0
 -------
 

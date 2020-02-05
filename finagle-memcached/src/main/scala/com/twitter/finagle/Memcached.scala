@@ -24,7 +24,7 @@ import com.twitter.finagle.memcached.protocol.text.transport.{
   MemcachedNetty4ClientPipelineInit,
   Netty4ServerFramer
 }
-import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
+import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
@@ -47,70 +47,13 @@ import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.tracing._
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.{finagle, hashing}
 import java.net.SocketAddress
-import scala.collection.mutable
-
-private[finagle] object MemcachedTracingFilter {
-
-  object Module extends Stack.Module1[param.Label, ServiceFactory[Command, Response]] {
-    val role: Stack.Role = ClientTracingFilter.role
-    val description: String = "Add Memcached client specific annotations to the trace"
-
-    def make(
-      _label: param.Label,
-      next: ServiceFactory[Command, Response]
-    ): ServiceFactory[Command, Response] = {
-      val param.Label(label) = _label
-      val annotations = new AnnotatingTracingFilter[Command, Response](
-        label,
-        Annotation.ClientSend,
-        Annotation.ClientRecv
-      )
-      annotations.andThen(TracingFilter).andThen(next)
-    }
-  }
-
-  object TracingFilter extends SimpleFilter[Command, Response] {
-    def apply(command: Command, service: Service[Command, Response]): Future[Response] = {
-      val trace = Trace()
-      val response = service(command)
-      if (trace.isActivelyTracing) {
-        // Submitting rpc name here assumes there is no further tracing lower in the stack
-        trace.recordRpc(command.name)
-        command match {
-          case command: RetrievalCommand =>
-            response.respond {
-              case Return(Values(vals)) =>
-                val misses = mutable.Set.empty[String]
-                command.keys.foreach {
-                  case Buf.Utf8(key) =>
-                    misses += key
-                }
-                vals.foreach { value =>
-                  val Buf.Utf8(key) = value.key
-                  trace.recordBinary(key, "Hit")
-                  misses.remove(key)
-                }
-                misses.foreach {
-                  trace.recordBinary(_, "Miss")
-                }
-              case _ =>
-            }
-          case _ =>
-            response
-        }
-      } else {
-        response
-      }
-    }
-  }
-}
 
 /**
  * Factory methods to build a finagle-memcached client.
@@ -235,7 +178,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      */
     private val stack: Stack[ServiceFactory[Command, Response]] = StackClient.newStack
       .replace(DefaultPool.Role, SingletonPool.module[Command, Response](allowInterrupts = true))
-      .replace(ClientTracingFilter.role, MemcachedTracingFilter.Module)
+      .replace(StackClient.Role.protoTracing, MemcachedTracingFilter.Module)
 
     /**
      * The memcached client should be using fixed hosts that do not change
