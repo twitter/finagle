@@ -58,7 +58,7 @@ final private[finagle] class Http2CleartextServerInitializer(
 
             // we insert immediately after the Http2MultiplexHandler#0, which we know is the
             // last Http2 frames before they're converted to Http/1.1
-            Http2PipelineInitializer.setup(ctx, params)
+            Http2PipelineInitializer.setupServerPipeline(ctx.pipeline, params)
           }
         }
       } else null

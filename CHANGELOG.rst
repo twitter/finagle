@@ -23,6 +23,10 @@ Bug Fixes
 * finagle-http2: Initialize state in H2Pool before use in the gauge to avoid a
   NullPointerException. ``PHAB_ID=D428272``
 
+* finagle-http2: HTTP/2 servers clean out unused channel handlers when upgrading
+  from a HTTP/1.x pipeline, removing some traps such as unintended timeouts.
+  ``PHAB_ID=D429416``
+
 20.1.0
 ------
 
