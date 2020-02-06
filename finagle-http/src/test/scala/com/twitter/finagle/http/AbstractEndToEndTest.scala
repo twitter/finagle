@@ -2189,7 +2189,7 @@ abstract class AbstractEndToEndTest
 
     // Start writing data. This should be fine.
     writeLoop(4)
-    assert(await(client(req)).status == Status.Ok)
+    assert(await(client(req)).status == HttpStatus.Ok)
 
     await(client.close())
     await(server.close())
