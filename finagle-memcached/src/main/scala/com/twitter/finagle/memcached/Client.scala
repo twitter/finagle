@@ -623,7 +623,7 @@ private[memcached] object ClientConstants {
   }
 
   def hitsFromValues(values: Seq[Value]): Map[String, Value] =
-    values.map { value =>
+    values.iterator.map { value =>
       val Buf.Utf8(keyStr) = value.key
       (keyStr, value)
     }.toMap
@@ -638,7 +638,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   import ClientConstants._
 
   protected def rawGet(command: RetrievalCommand): Future[GetResult] = {
-    val keys: immutable.Set[String] = command.keys.map { case Buf.Utf8(s) => s }.toSet
+    val keys: immutable.Set[String] = command.keys.iterator.map { case Buf.Utf8(s) => s }.toSet
 
     service(command).transform{ case x => {println(s"transformed $x"); x match {
       case Return(Values(values)) =>
@@ -660,11 +660,11 @@ protected class ConnectedClient(protected val service: Service[Command, Response
           "Invalid response type from get: %s".format(other.getClass.getSimpleName)
         )
       case Throw(t: RequestException) =>
-        Future.value(GetResult(failures = keys.map { (_, t) }.toMap))
+        Future.value(GetResult(failures = keys.iterator.map { (_, t) }.toMap))
       case Throw(t: ChannelException) =>
-        Future.value(GetResult(failures = keys.map { (_, t) }.toMap))
+        Future.value(GetResult(failures = keys.iterator.map { (_, t) }.toMap))
       case Throw(t: ServiceException) =>
-        Future.value(GetResult(failures = keys.map { (_, t) }.toMap))
+        Future.value(GetResult(failures = keys.iterator.map { (_, t) }.toMap))
       case t => Future.const(t.asInstanceOf[Try[GetResult]])
     }}}
   }
@@ -858,7 +858,7 @@ trait PartitionedClient extends Client {
   )(f: (Client, Iterable[String]) => Future[A]
   ): Future[Seq[A]] = {
     Future.collect(
-      keys.groupBy(clientOf).map(Function.tupled(f)).toSeq
+      keys.groupBy(clientOf).iterator.map(Function.tupled(f)).toSeq
     )
   }
 
