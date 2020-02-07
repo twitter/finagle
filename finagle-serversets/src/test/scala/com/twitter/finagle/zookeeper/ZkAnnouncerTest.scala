@@ -44,6 +44,9 @@ class ZkAnnouncerTest
   private[this] def zk2resolve(path: String): Name =
     Resolver.eval("zk2!" + inst.zookeeperConnectString + "!" + path)
 
+  private[this] def zk2resolve(path: String, endpoint: String): Name =
+    Resolver.eval("zk2!" + inst.zookeeperConnectString + "!" + path + ":" + endpoint)
+
   def hostPath = "localhost:%d!%s".format(inst.zookeeperAddress.getPort, path)
 
   private[this] def zk2ResolvedAddress(
@@ -88,6 +91,29 @@ class ZkAnnouncerTest
     eventually {
       assert(
         va.sample() == Addr.Bound(zk2ResolvedAddress(addrInet, Some(shardId), metadata))
+      )
+    }
+  }
+
+  test("announce a primary endpoint with metadata and additional endpoints") {
+    val ann = new ZkAnnouncer(factory)
+    val metadata = Map("keyA" -> "valueA")
+    val addrInet = new InetSocketAddress(port1)
+    val addr = Address.Inet(addrInet, Addr.Metadata.empty)
+    val additionalEndpointInet = new InetSocketAddress(port2)
+    val additionalEndpointAddr = Address.Inet(additionalEndpointInet, Addr.Metadata.empty)
+    Await.result(
+      ann.announce(
+        addr.addr,
+        "%s!%d".format(hostPath, shardId),
+        metadata,
+        Map("endpoint" -> additionalEndpointAddr.addr)))
+
+    val Name.Bound(va) = zk2resolve(path, "endpoint")
+    eventually {
+      assert(
+        va.sample() ==
+          Addr.Bound(zk2ResolvedAddress(additionalEndpointInet, Some(shardId), metadata))
       )
     }
   }

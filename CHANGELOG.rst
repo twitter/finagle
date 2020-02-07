@@ -48,6 +48,9 @@ New Features
   generic metadata via ZkAnnouncer. Add support to resolve the generic metadata via Zk2Resolver
   ``PHAB_ID=D421151``
 
+* finagle-serversets: Add support for announcing additional endpoints via ZkAnnouncer
+  ``PHAB_ID=D431062``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
