@@ -2,7 +2,7 @@ package com.twitter.finagle.tracing.opencensus
 
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle._
-import com.twitter.util.Future
+import com.twitter.util.{Future, Try}
 import io.opencensus.trace.{SpanContext, Tracing}
 import io.opencensus.trace.propagation.TextFormat
 
@@ -44,18 +44,20 @@ object StackServerOps {
   }
 
   implicit final class HttpOpenCensusTracing(private val server: Http.Server) extends AnyVal {
-    def withOpenCensusTracing: Http.Server = {
+    def withOpenCensusTracing: Http.Server =
+      withOpenCensusTracing(Tracing.getPropagationComponent.getB3Format)
+
+    def withOpenCensusTracing(textFormat: TextFormat): Http.Server = {
       server.withStack { stack =>
         stack
           .prepend(ServerTraceContextFilter.module)
-          .prepend(httpDeserModule) // attach to broadcast ctx before setting OC
+          .prepend(httpDeserModule(textFormat)) // attach to broadcast ctx before setting OC
       }
     }
   }
 
-  private val httpDeserFilter: SimpleFilter[http.Request, http.Response] =
+  private def httpDeserFilter(textFormat: TextFormat): SimpleFilter[http.Request, http.Response] =
     new SimpleFilter[http.Request, http.Response] {
-      private[this] val textFormat = Tracing.getPropagationComponent.getB3Format
       private[this] val getter = new TextFormat.Getter[http.Request] {
         def get(carrier: http.Request, key: String): String =
           carrier.headerMap.getOrNull(key)
@@ -65,7 +67,7 @@ object StackServerOps {
         request: http.Request,
         service: Service[http.Request, http.Response]
       ): Future[http.Response] = {
-        val spanContext = textFormat.extract(request, getter)
+        val spanContext = Try(textFormat.extract(request, getter)).getOrElse(SpanContext.INVALID)
         if (spanContext != SpanContext.INVALID) {
           Contexts.broadcast.let(TraceContextFilter.SpanContextKey, spanContext) {
             service(request)
@@ -80,12 +82,14 @@ object StackServerOps {
   private[opencensus] val HttpDeserializationStackRole: Stack.Role =
     Stack.Role("OpenCensusHeaderDeserialization")
 
-  private val httpDeserModule: Stackable[ServiceFactory[http.Request, http.Response]] =
+  private def httpDeserModule(
+    textFormat: TextFormat
+  ): Stackable[ServiceFactory[http.Request, http.Response]] =
     new Stack.Module0[ServiceFactory[http.Request, http.Response]] {
       def make(
         next: ServiceFactory[http.Request, http.Response]
       ): ServiceFactory[http.Request, http.Response] =
-        httpDeserFilter.andThen(next)
+        httpDeserFilter(textFormat).andThen(next)
 
       def role: Stack.Role = HttpDeserializationStackRole
 
