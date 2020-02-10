@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-opencensus-tracing: Add support for providing a custom TextFormat for header
+  propagation. ``PHAB_ID=D432003``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -26,6 +32,9 @@ Bug Fixes
 * finagle-http2: HTTP/2 servers clean out unused channel handlers when upgrading
   from a HTTP/1.x pipeline, removing some traps such as unintended timeouts.
   ``PHAB_ID=D429416``
+
+* finagle-opencensus-tracing: Fixed internal server error when invalid or no propagation headers
+  are provided. ``PHAB_ID=D432003``
 
 20.1.0
 ------

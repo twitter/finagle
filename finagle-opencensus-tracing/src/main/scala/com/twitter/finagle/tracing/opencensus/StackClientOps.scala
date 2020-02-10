@@ -45,6 +45,9 @@ object StackClientOps {
 
   implicit final class HttpOpenCensusTracing(private val client: Http.Client) extends AnyVal {
     def withOpenCensusTracing: Http.Client =
+      withOpenCensusTracing(Tracing.getPropagationComponent.getB3Format)
+
+    def withOpenCensusTracing(textFormat: TextFormat): Http.Client =
       client.withStack { stack =>
         // serialization must happen after we attach the OpenCensus span
         stack
@@ -52,13 +55,14 @@ object StackClientOps {
             TraceInitializerFilter.role,
             ClientTraceContextFilter.module[http.Request, http.Response]
           )
-          .replace(TraceInitializerFilter.role, httpSerializeModule)
+          .replace(TraceInitializerFilter.role, httpSerializeModule(textFormat))
       }
   }
 
-  private[this] val httpSerializeFilter: SimpleFilter[http.Request, http.Response] =
+  private[this] def httpSerializeFilter(
+    textFormat: TextFormat
+  ): SimpleFilter[http.Request, http.Response] =
     new SimpleFilter[http.Request, http.Response] {
-      private[this] val textFormat = Tracing.getPropagationComponent.getB3Format
       private[this] val setter = new TextFormat.Setter[http.Request] {
         def put(carrier: http.Request, key: String, value: String): Unit =
           carrier.headerMap.set(key, value)
@@ -80,12 +84,14 @@ object StackClientOps {
   private[opencensus] val HttpSerializationStackRole: Stack.Role =
     Stack.Role("OpenCensusHeaderSerialization")
 
-  private[this] val httpSerializeModule: Stackable[ServiceFactory[http.Request, http.Response]] =
+  private[this] def httpSerializeModule(
+    textFormat: TextFormat
+  ): Stackable[ServiceFactory[http.Request, http.Response]] =
     new Stack.Module0[ServiceFactory[http.Request, http.Response]] {
       def make(
         next: ServiceFactory[http.Request, http.Response]
       ): ServiceFactory[http.Request, http.Response] =
-        httpSerializeFilter.andThen(next)
+        httpSerializeFilter(textFormat).andThen(next)
 
       def role: Stack.Role = HttpSerializationStackRole
 
