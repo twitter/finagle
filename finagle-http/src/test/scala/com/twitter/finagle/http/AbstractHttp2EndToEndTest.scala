@@ -1,9 +1,37 @@
 package com.twitter.finagle.http
 
+import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.{Address, Name}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.util.Future
 import java.net.InetSocketAddress
 
 // Adds some tests that are specific to the HTTP/2 transports
 abstract class AbstractHttp2EndToEndTest extends AbstractEndToEndTest {
+
+  test(s"$implName: HTTP/2 session idle times don't bork h2 sessions") {
+    val service = new HttpService {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = request.uri
+        Future.value(response).delayed(200.milliseconds)(DefaultTimer.Implicit)
+      }
+    }
+
+    val server = serverImpl().withSession
+      .maxIdleTime(300.milliseconds)
+      .serve(new InetSocketAddress(0), service)
+
+    val client = clientImpl().newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    await(client(Request("/1")))
+    await(client(Request("/2")))
+    await(server.close())
+    await(client.close())
+  }
 
   test("client closes properly when closed") {
 

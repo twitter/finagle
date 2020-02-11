@@ -27,7 +27,7 @@ private[http2] object Http2PipelineInitializer {
       .name
 
     pipeline
-      .addAfter(codecName, H2ServerFilter.HandlerName, new H2ServerFilter(timer))
+      .addAfter(codecName, H2ServerFilter.HandlerName, new H2ServerFilter(timer, pipeline.channel))
       .remove(UriValidatorHandler)
 
     pruneDeadHandlers(pipeline)
