@@ -65,19 +65,27 @@ private[http2] class Http2Listener[In, Out](
 
   // we need to find the underlying handler and tell it how long to wait to drain
   // before we actually send the `close` signal.
-  private[this] def propagateDeadline(deadline: Time): Unit = {
-    val duration = (deadline - Time.now).inMillis
-    if (duration > 0) {
-      channels.asScala.foreach { channel =>
-        val pipeline = channel.pipeline
-        val handler = pipeline.get(classOf[H2ServerFilter])
-        if (handler != null) {
-          // This is a HTTP/2 connection. Add the deadline to the `H2ServerFilter` and
-          // we'll let it take care of the rest. Note that this races with upgrades
-          // but we can't win them all.
-          handler.setDeadline(deadline)
+  private[this] def closeH2Sessions(deadline: Time): Unit = {
+    channels.asScala.foreach { channel =>
+      // By running in the event loop we can avoid some pipeline manipulation races
+      // and we also get better thread safety guarantees.
+      channel.eventLoop.execute(new Runnable {
+        def run(): Unit = {
+          val pipeline = channel.pipeline
+          val handler = pipeline.get(classOf[H2ServerFilter])
+          if (handler != null) {
+            // This is a HTTP/2 connection. Add the deadline to the `H2ServerFilter` and
+            // we'll let it take care of the rest. Note that this races with upgrades
+            // but we can't win them all.
+            handler.gracefulShutdown(deadline)
+          } else {
+            // We set the close time as a channel attribute so we can avoid races where
+            // this channel isn't yet a H2 channel, but becomes so before the standard
+            // close mechanism is used.
+            channel.attr(H2ServerFilter.CloseRequestAttribute).set(deadline)
+          }
         }
-      }
+      })
     }
   }
 
@@ -88,7 +96,7 @@ private[http2] class Http2Listener[In, Out](
     } => Unit
   ): ListeningServer = {
     val underlying = underlyingListener.listen(addr)(serveTransport)
-    new Http2ListeningServer(underlying, propagateDeadline)
+    new Http2ListeningServer(underlying, closeH2Sessions)
   }
 }
 

@@ -29,6 +29,12 @@ Bug Fixes
 * finagle-http2: Initialize state in H2Pool before use in the gauge to avoid a
   NullPointerException. ``PHAB_ID=D428272``
 
+* finagle-http2: HTTP/2 server pipeline now traps close calls to ensure that
+  events from the initial HTTP/1.x pipeline don't close the HTTP/2 session. For
+  example, the initial pipeline was subject to session timeouts even though the
+  tail of the socket pipeline was effectively dead. Closing of HTTP/2 server
+  pipelines is now handled through the `H2ServerFilter`. ``PHAB_ID=D429554``
+
 * finagle-http2: HTTP/2 servers clean out unused channel handlers when upgrading
   from a HTTP/1.x pipeline, removing some traps such as unintended timeouts.
   ``PHAB_ID=D429416``
