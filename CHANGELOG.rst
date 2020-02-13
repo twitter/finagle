@@ -42,6 +42,14 @@ Bug Fixes
 * finagle-opencensus-tracing: Fixed internal server error when invalid or no propagation headers
   are provided. ``PHAB_ID=D432003``
 
+* finagle-zipkin-scribe: export application metrics under a consistent `zipkin-scribe` scope. Finagle client
+  stats under `clnt/zipkin-scribe` ``PHAB_ID=D432274``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-zipkin-scribe: Coalesce `ScribeRawZipkinTracer` apply methods into two simple ones. ``PHAB_ID=D432274``
+
 20.1.0
 ------
 

@@ -34,7 +34,10 @@ object ZipkinTracer {
     statsReceiver: StatsReceiver = NullStatsReceiver,
     sampleRate: Float = core.Sampler.DefaultSampleRate
   ): Tracer =
-    new ZipkinTracer(ScribeRawZipkinTracer(host, port, statsReceiver), sampleRate)
+    new ZipkinTracer(
+      ScribeRawZipkinTracer(scribeHost = host, scribePort = port, statsReceiver = statsReceiver),
+      sampleRate
+    )
 
   /**
    * Util method since named parameters can't be called from Java
@@ -64,9 +67,9 @@ class ScribeZipkinTracer(tracer: ScribeRawZipkinTracer, sampler: core.Sampler)
   private[finagle] def this() =
     this(
       ScribeRawZipkinTracer(
-        Host().getHostName,
-        Host().getPort,
-        DefaultStatsReceiver.scope("zipkin")
+        scribeHost = Host().getHostName,
+        scribePort = Host().getPort,
+        statsReceiver = DefaultStatsReceiver.scope("zipkin-scribe")
       ),
       DefaultSampler
     )
