@@ -2,7 +2,7 @@ package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Service, SimpleFilter, Thrift}
+import com.twitter.finagle.Thrift
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.stats.{
   DenylistStatsReceiver,
@@ -13,6 +13,7 @@ import com.twitter.finagle.stats.{
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.zipkin.{host => Host}
 import com.twitter.finagle.zipkin.core.{RawZipkinTracer, Span, TracerCache}
 import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.scrooge.TReusableMemoryTransport
@@ -27,13 +28,10 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.control.NonFatal
 
 object ScribeRawZipkinTracer {
-  val tracerCache = new TracerCache[ScribeRawZipkinTracer]
+  private[this] val tracerCache = new TracerCache[ScribeRawZipkinTracer]
+  private[this] val clientLabel = "zipkin-scribe"
 
-  /**
-   * Only report `requests`, `success`, and `failures` (including underlying counters for
-   * individual exceptions).
-   */
-  private val statsReceiver: StatsReceiver = new DenylistStatsReceiver(
+  private[this] val clientStatsReceiver: StatsReceiver = new DenylistStatsReceiver(
     ClientStatsReceiver, {
       case Seq(_, "requests") => false
       case Seq(_, "success") => false
@@ -45,17 +43,19 @@ object ScribeRawZipkinTracer {
   private[this] def newClient(
     scribeHost: String,
     scribePort: Int,
-    name: String
+    clientName: String
   ): Scribe.FutureIface = {
+    // only report these finagle metrics (including counters for individual exceptions)
+
     val transport = ClientBuilder()
       .stack(
         Thrift.client
         // using an arbitrary, but bounded number of waiters to avoid memory leaks
         .withSessionPool.maxWaiters(250)
       )
-      .name(name)
+      .name(clientName)
       .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .reportTo(statsReceiver)
+      .reportTo(clientStatsReceiver)
       .hostConnectionLimit(5)
       // somewhat arbitrary, but bounded timeouts
       .timeout(1.second)
@@ -67,56 +67,32 @@ object ScribeRawZipkinTracer {
   }
 
   /**
-   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to scribe with the specified
-   * scribeCategory.
+   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to Zipkin via scribe.
    *
    * @param scribeHost Host to send trace data to
    * @param scribePort Port to send trace data to
-   * @param scribeCategory Category under which the trace data should be scribed
+   * @param scribeCategory scribe category under which traces will be logged
    * @param statsReceiver Where to log information about tracing success/failures
    * @param clientName Name of the scribe finagle client
+   * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
    */
   def apply(
-    scribeHost: String,
-    scribePort: Int,
-    scribeCategory: String,
-    statsReceiver: StatsReceiver,
-    timer: Timer,
-    clientName: String
+    scribeHost: String = Host().getHostName,
+    scribePort: Int = Host().getPort,
+    scribeCategory: String = "zipkin",
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    clientName: String = clientLabel,
+    timer: Timer = DefaultTimer
   ): ScribeRawZipkinTracer =
     tracerCache.getOrElseUpdate(
       scribeHost + scribePort + scribeCategory,
-      apply(
-        newClient(scribeHost, scribePort, clientName),
-        scribeCategory,
-        statsReceiver,
-        timer
-      )
+      apply(newClient(scribeHost, scribePort, clientName), scribeCategory, statsReceiver, timer)
     )
 
   /**
    * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to scribe with the specified
    * scribeCategory.
    *
-   * @param scribeHost Host to send trace data to
-   * @param scribePort Port to send trace data to
-   * @param scribeCategory Category under which the trace data should be scribed
-   * @param statsReceiver Where to log information about tracing success/failures
-   * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
-   */
-  def apply(
-    scribeHost: String,
-    scribePort: Int,
-    scribeCategory: String,
-    statsReceiver: StatsReceiver,
-    timer: Timer
-  ): ScribeRawZipkinTracer =
-    apply(scribeHost, scribePort, scribeCategory, statsReceiver, timer, s"$scribeCategory-tracer")
-
-  /**
-   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to scribe with the specified
-   * scribeCategory.
-   *
    * @param client The scribe client used to send traces to scribe
    * @param scribeCategory Category under which the trace data should be scribed
    * @param statsReceiver Where to log information about tracing success/failures
@@ -127,38 +103,15 @@ object ScribeRawZipkinTracer {
     scribeCategory: String,
     statsReceiver: StatsReceiver,
     timer: Timer
-  ): ScribeRawZipkinTracer =
-    new ScribeRawZipkinTracer(client, statsReceiver.scope(scribeCategory), scribeCategory, timer)
+  ): ScribeRawZipkinTracer = {
+    new ScribeRawZipkinTracer(
+      client,
+      statsReceiver,
+      scribeCategory,
+      timer
+    )
+  }
 
-  /**
-   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to Zipkin via scribe.
-   *
-   * @param scribeHost Host to send trace data to
-   * @param scribePort Port to send trace data to
-   * @param statsReceiver Where to log information about tracing success/failures
-   * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
-   */
-  def apply(
-    scribeHost: String = "localhost",
-    scribePort: Int = 1463,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    timer: Timer = DefaultTimer
-  ): ScribeRawZipkinTracer =
-    apply(scribeHost, scribePort, "zipkin", statsReceiver, timer, "zipkin-tracer")
-
-  /**
-   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to Zipkin via scribe.
-   *
-   * @param client The scribe client used to send traces to scribe
-   * @param statsReceiver Where to log information about tracing success/failures
-   * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
-   */
-  def apply(
-    client: Scribe.FutureIface,
-    statsReceiver: StatsReceiver,
-    timer: Timer
-  ): ScribeRawZipkinTracer =
-    apply(client, "zipkin", statsReceiver, timer)
 }
 
 /**
