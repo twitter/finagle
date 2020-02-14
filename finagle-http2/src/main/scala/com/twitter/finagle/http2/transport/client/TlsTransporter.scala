@@ -11,7 +11,7 @@ import com.twitter.finagle.netty4.{ConnectionBuilder, Netty4Transporter}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Future, Return, Throw}
-import io.netty.channel.Channel
+import io.netty.channel.{Channel, ChannelPipeline}
 import io.netty.handler.ssl.{ApplicationProtocolNames, SslHandler}
 import java.net.SocketAddress
 
@@ -49,7 +49,10 @@ private[http2] class TlsTransporter private (
     connectionBuilder.build { channel =>
       val sslHandler = channel.pipeline.get(classOf[SslHandler])
       val proto = sslHandler.applicationProtocol
-      onConnect(channel, if (proto == null) DefaultProtocol else proto)
+      val transport = onConnect(channel, if (proto == null) DefaultProtocol else proto)
+      // remove the DelayByteBufHandler to release the inbound ByteBuf
+      channel.pipeline.remove(classOf[DelayByteBufHandler])
+      transport
     }
 
   private[this] def onConnect(channel: Channel, protocol: String): Future[Transport[Any, Any]] = {
@@ -89,6 +92,11 @@ object TlsTransporter {
 
   private val DefaultProtocol = ApplicationProtocolNames.HTTP_1_1
 
+  // add the DelayByteBufHandler to hold the inbound ByteBuf
+  private[this] val addDelayer: ChannelPipeline => Unit = { pipeline =>
+    pipeline.addLast("delayByteBufHandler", new DelayByteBufHandler)
+  }
+
   def make(
     addr: SocketAddress,
     modifier: Transport[Any, Any] => Transport[Any, Any],
@@ -99,7 +107,7 @@ object TlsTransporter {
       // so we disable it for now. If we end up with a HTTP/1.x session we will honor the
       // settings specified in the params when reconfiguring as a HTTP/1.x pipeline.
       ConnectionBuilder.rawClient(
-        _ => (),
+        addDelayer,
         addr,
         params + Netty4Transporter.Backpressure(false)
       )
