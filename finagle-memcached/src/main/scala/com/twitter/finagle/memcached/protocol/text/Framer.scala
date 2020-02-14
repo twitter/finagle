@@ -143,5 +143,5 @@ private[memcached] trait Framer extends FinagleFramer {
    * return the length of data expected in the next frame, or -1
    * if the length cannot be extracted.
    */
-  def dataLength(tokens: IndexedSeq[Buf]): Int
+  def dataLength(tokens: Seq[Buf]): Int
 }
