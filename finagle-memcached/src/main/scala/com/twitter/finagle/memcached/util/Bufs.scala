@@ -19,13 +19,12 @@ private[finagle] object Bufs {
    * @return the Buf representation of non-empty and non-null Strings
    * @note returns null if input is null
    */
-  implicit def seqOfNonEmptyStringToBuf(strings: Traversable[String]): Seq[Buf] = {
+  implicit def seqOfNonEmptyStringToBuf(strings: Traversable[String]): Seq[Buf] =
     if (strings == null) {
       null
     } else {
-      strings.map(nonEmptyStringToBuf).toSeq
+      strings.toIterator.map(nonEmptyStringToBuf).toSeq
     }
-  }
 
   implicit class RichBuf(buffer: Buf) extends Seq[Byte] {
 

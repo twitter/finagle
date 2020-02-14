@@ -58,7 +58,7 @@ trait TwemcacheConnectedClient extends TwemcacheClient { self: ConnectedClient =
   def getvResult(keys: Iterable[String]): Future[GetsResult] = {
     try {
       if (keys == null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
-      val bufs = keys.map { Buf.Utf8(_) }.toSeq
+      val bufs = keys.iterator.map { Buf.Utf8(_) }.toSeq
       rawGet(Getv(bufs)).map { GetsResult(_) } // map to GetsResult as the response format are the same
     } catch {
       case t: IllegalArgumentException =>
@@ -147,7 +147,7 @@ trait TwemcachePartitionedClient extends TwemcacheClient { self: PartitionedClie
   )(f: (TwemcacheClient, Iterable[String]) => Future[A]
   ): Future[Seq[A]] = {
     Future.collect(
-      keys.groupBy(twemcacheClientOf).map(Function.tupled(f)).toSeq
+      keys.groupBy(twemcacheClientOf).iterator.map(Function.tupled(f)).toSeq
     )
   }
 }

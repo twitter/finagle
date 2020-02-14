@@ -640,7 +640,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   protected def rawGet(command: RetrievalCommand): Future[GetResult] = {
     val keys: immutable.Set[String] = command.keys.iterator.map { case Buf.Utf8(s) => s }.toSet
 
-    service(command).transform{ case x => {println(s"transformed $x"); x match {
+    service(command).transform{
       case Return(Values(values)) =>
         val hits: Map[String, Value] = hitsFromValues(values)
         val misses = muNotFound(keys, hits.keySet)
@@ -666,7 +666,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
       case Throw(t: ServiceException) =>
         Future.value(GetResult(failures = keys.iterator.map { (_, t) }.toMap))
       case t => Future.const(t.asInstanceOf[Try[GetResult]])
-    }}}
+    }
   }
 
   def getResult(keys: Iterable[String]): Future[GetResult] = {
@@ -823,7 +823,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def stats(args: Option[String]): Future[Seq[String]] = {
     val statArgs: Seq[Buf] = args match {
       case None => Seq(Buf.Empty)
-      case Some(args) => args.split(" ").map(nonEmptyStringToBuf).toSeq
+      case Some(args) => args.split(" ").iterator.map(nonEmptyStringToBuf).toSeq
     }
     service(Stats(statArgs)).flatMap {
       case InfoLines(lines) =>
@@ -1179,7 +1179,7 @@ case class RubyMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members.map { node: CacheNode =>
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: CacheNode =>
       (node.host, node.port, node.weight)
     }.toSeq)
 
@@ -1227,7 +1227,7 @@ case class PHPMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members.map { node: CacheNode =>
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: CacheNode =>
       (node.host, node.port, node.weight)
     }.toSeq)
 
