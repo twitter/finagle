@@ -1,5 +1,5 @@
 scala_library(
-    sources = rglobs("*.scala"),
+    sources = ["**/*.scala"],
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-redis",
