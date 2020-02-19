@@ -1,4 +1,5 @@
 scala_library(
+    sources = ["com/twitter/finagle/zipkin/thrift/ScribeZipkinTracer.scala"],
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-zipkin-scribe",
