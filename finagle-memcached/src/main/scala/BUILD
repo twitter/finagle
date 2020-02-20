@@ -1,5 +1,5 @@
 scala_library(
-    sources = rglobs("*.scala"),
+    sources = ["**/*.scala"],
     compiler_option_sets = {"fatal_warnings"},
     # NB: This is not an actual dependency, but is necessary to have Pants behave
     #     like SBT, throwing an error for "import java.*" statements.

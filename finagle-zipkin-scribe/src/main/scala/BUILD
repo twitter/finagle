@@ -18,7 +18,7 @@ scala_library(
 
 scala_library(
     name = "core",
-    sources = rglobs("*.scala"),
+    sources = ["**/*.scala"],
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-zipkin-scribe-core",

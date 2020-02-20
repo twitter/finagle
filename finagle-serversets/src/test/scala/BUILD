@@ -25,7 +25,7 @@ target(
 
 junit_tests(
     name = "defaultloader",
-    sources = globs("com/twitter/finagle/serverset2/client/apache/*.scala"),
+    sources = ["com/twitter/finagle/serverset2/client/apache/*.scala"],
     dependencies = [
         ":core",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
@@ -38,7 +38,7 @@ junit_tests(
 
 junit_tests(
     name = "client",
-    sources = globs("com/twitter/finagle/serverset2/client/*.scala"),
+    sources = ["com/twitter/finagle/serverset2/client/*.scala"],
     compiler_option_sets = {"fatal_warnings"},
     dependencies = [
         ":core",
