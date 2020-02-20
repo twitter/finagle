@@ -68,7 +68,7 @@ class MockClient extends Client {
             misses += key
         }
         // Needed due to compiler bug: https://github.com/scala/bug/issues/10151
-        Unit
+        ()
       }
     }
     GetResult(hits.toMap, misses.toSet)

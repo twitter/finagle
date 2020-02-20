@@ -99,7 +99,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       awaitResult(r)
       assert(false)
     } catch {
-      case e: Throwable => Unit
+      case e: Throwable => ()
     }
 
     // a second request must not be resolved yet

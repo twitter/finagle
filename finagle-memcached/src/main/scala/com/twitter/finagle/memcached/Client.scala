@@ -25,7 +25,8 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
 import com.twitter.io.Buf
 import com.twitter.util.{Command => _, Function => _, _}
-import scala.collection.{breakOut, immutable, mutable}
+import com.twitter.finagle.memcached.util.{NotFound => muNotFound}
+import scala.collection.{immutable, mutable}
 
 object Client {
 
@@ -41,14 +42,14 @@ case class GetResult private[memcached] (
   hits: Map[String, Value] = Map.empty,
   misses: immutable.Set[String] = immutable.Set.empty,
   failures: Map[String, Throwable] = Map.empty) {
-  lazy val values: Map[String, Buf] = hits.mapValues { _.value }
+  lazy val values: Map[String, Buf] = hits.mapValues { _.value }.toMap
 
   lazy val valuesWithFlags: Map[String, (Buf, Buf)] = hits.mapValues { v =>
     v.flags match {
       case Some(x) => (v.value, x)
       case None => (v.value, Buf.Empty)
     }
-  }
+  }.toMap
 
   def ++(o: GetResult): GetResult =
     GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
@@ -61,13 +62,13 @@ case class GetsResult(getResult: GetResult) {
   def values: Map[String, Buf] = getResult.values
   lazy val valuesWithTokens: Map[String, (Buf, Buf)] = hits.mapValues { v =>
     (v.value, v.casUnique.get)
-  }
+  }.toMap
   lazy val valuesWithFlagsAndTokens: Map[String, (Buf, Buf, Buf)] = hits.mapValues { v =>
     v.flags match {
       case Some(x) => (v.value, x, v.casUnique.get)
       case None => (v.value, Buf.Empty, v.casUnique.get)
     }
-  }
+  }.toMap
   def ++(o: GetsResult): GetsResult = GetsResult(getResult ++ o.getResult)
 }
 
@@ -325,7 +326,7 @@ trait BaseClient[T] extends Closable {
       if (result.failures.nonEmpty) {
         Future.exception(result.failures.values.head)
       } else {
-        Future.value(result.values.mapValues(bufferToType))
+        Future.value(result.values.mapValues(bufferToType).toMap)
       }
     }
   }
@@ -347,7 +348,7 @@ trait BaseClient[T] extends Closable {
       } else {
         Future.value(result.valuesWithTokens.mapValues {
           case (v, u) => (bufferToType(v), u)
-        })
+        }.toMap)
       }
     }
   }
@@ -366,7 +367,7 @@ trait BaseClient[T] extends Closable {
       } else {
         Future.value(result.valuesWithFlags.mapValues {
           case (v, u) => (bufferToType(v), u)
-        })
+        }.toMap)
       }
     }
   }
@@ -390,7 +391,7 @@ trait BaseClient[T] extends Closable {
       } else {
         Future.value(result.valuesWithFlagsAndTokens.mapValues {
           case (v, u, t) => (bufferToType(v), u, t)
-        })
+        }.toMap)
       }
     }
   }
@@ -622,10 +623,10 @@ private[memcached] object ClientConstants {
   }
 
   def hitsFromValues(values: Seq[Value]): Map[String, Value] =
-    values.map { value =>
+    values.iterator.map { value =>
       val Buf.Utf8(keyStr) = value.key
       (keyStr, value)
-    }(breakOut)
+    }.toMap
 }
 
 /**
@@ -637,12 +638,12 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   import ClientConstants._
 
   protected def rawGet(command: RetrievalCommand): Future[GetResult] = {
-    val keys: immutable.Set[String] = command.keys.map { case Buf.Utf8(s) => s }(breakOut)
+    val keys: immutable.Set[String] = command.keys.iterator.map { case Buf.Utf8(s) => s }.toSet
 
     service(command).transform {
       case Return(Values(values)) =>
         val hits: Map[String, Value] = hitsFromValues(values)
-        val misses = util.NotFound(keys, hits.keySet)
+        val misses = muNotFound(keys, hits.keySet)
         Future.value(GetResult(hits, misses))
       case Return(Error(e)) => throw e
       case Return(ValuesAndErrors(values, errors)) =>
@@ -652,18 +653,18 @@ protected class ConnectedClient(protected val service: Service[Command, Response
             val Buf.Utf8(keyStr) = buf
             (keyStr, e)
         }
-        val misses = util.NotFound(keys, hits.keySet ++ failures.keySet)
+        val misses = muNotFound(keys, hits.keySet ++ failures.keySet)
         Future.value(GetResult(hits, misses, failures))
       case Return(other) =>
         throw new IllegalStateException(
           "Invalid response type from get: %s".format(other.getClass.getSimpleName)
         )
       case Throw(t: RequestException) =>
-        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+        Future.value(GetResult(failures = keys.iterator.map { (_, t) }.toMap))
       case Throw(t: ChannelException) =>
-        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+        Future.value(GetResult(failures = keys.iterator.map { (_, t) }.toMap))
       case Throw(t: ServiceException) =>
-        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+        Future.value(GetResult(failures = keys.iterator.map { (_, t) }.toMap))
       case t => Future.const(t.asInstanceOf[Try[GetResult]])
     }
   }
@@ -822,7 +823,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def stats(args: Option[String]): Future[Seq[String]] = {
     val statArgs: Seq[Buf] = args match {
       case None => Seq(Buf.Empty)
-      case Some(args) => args.split(" ").map(nonEmptyStringToBuf)(breakOut)
+      case Some(args) => args.split(" ").iterator.map(nonEmptyStringToBuf).toSeq
     }
     service(Stats(statArgs)).flatMap {
       case InfoLines(lines) =>
@@ -857,7 +858,7 @@ trait PartitionedClient extends Client {
   )(f: (Client, Iterable[String]) => Future[A]
   ): Future[Seq[A]] = {
     Future.collect(
-      keys.groupBy(clientOf).map(Function.tupled(f))(breakOut)
+      keys.groupBy(clientOf).iterator.map(Function.tupled(f)).toSeq
     )
   }
 
@@ -1044,11 +1045,11 @@ private[finagle] class KetamaPartitionedClient(
   private[this] def rebuildDistributor(): Unit = self.synchronized {
     keyRingRedistributeCount.incr()
 
-    val liveNodes = nodes.collect({ case (_, Node(node, NodeState.Live)) => node })(breakOut)
+    val liveNodes = nodes.collect({ case (_, Node(node, NodeState.Live)) => node })
 
     currentDistributor =
       if (liveNodes.isEmpty) shardNotAvailableDistributor
-      else new KetamaDistributor(liveNodes, numReps, oldLibMemcachedVersionComplianceMode)
+      else new KetamaDistributor(liveNodes.toSeq, numReps, oldLibMemcachedVersionComplianceMode)
   }
 
   private[this] def updateNodes(
@@ -1138,7 +1139,7 @@ private[finagle] class KetamaPartitionedClient(
     val closables = mutable.ArrayBuffer[Closable]()
     closables ++= nodes.values.map(_.node.handle)
     closables += listener
-    Closables.all(closables.result(): _*).close(deadline)
+    Closables.all(closables.result().toSeq: _*).close(deadline)
   }
 }
 
@@ -1178,9 +1179,9 @@ case class RubyMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members.map { node: CacheNode =>
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: CacheNode =>
       (node.host, node.port, node.weight)
-    }(breakOut))
+    }.toSeq)
 
   def clientBuilder(
     clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]
@@ -1226,9 +1227,9 @@ case class PHPMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members.map { node: CacheNode =>
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: CacheNode =>
       (node.host, node.port, node.weight)
-    }(breakOut))
+    }.toSeq)
 
   def hashName(hashName: String): PHPMemCacheClientBuilder =
     copy(_hashName = Some(hashName))

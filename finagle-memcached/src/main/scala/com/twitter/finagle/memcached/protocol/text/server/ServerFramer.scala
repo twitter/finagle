@@ -7,7 +7,7 @@ import com.twitter.io.Buf
 private[finagle] class ServerFramer(storageCommands: Set[Buf]) extends Framer {
 
   // The data length is the 5th token, interpreted as an Int.
-  def dataLength(tokens: IndexedSeq[Buf]): Int =
+  def dataLength(tokens: Seq[Buf]): Int =
     if (tokens.nonEmpty) {
       val commandName = tokens.head
       if (storageCommands.contains(commandName) && tokens.length >= 5) {

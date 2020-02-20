@@ -19,7 +19,7 @@ class MemcachedClientDecoderTest extends FunSuite {
     private def decodeBuf(data: Buf): Seq[Response] = {
       val out = new mutable.ArrayBuffer[Response]()
       decoder.decodeData(data, out)
-      out
+      out.toSeq
     }
   }
 
