@@ -670,7 +670,8 @@ lazy val finagleMemcached = Project(
   id = "finagle-memcached",
   base = file("finagle-memcached")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-memcached",
   libraryDependencies ++= Seq(
@@ -853,7 +854,8 @@ lazy val finagleBenchmark = Project(
   id = "finagle-benchmark",
   base = file("finagle-benchmark")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).enablePlugins(
   JmhPlugin
 ).settings(

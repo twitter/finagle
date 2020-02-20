@@ -3,8 +3,9 @@ package com.twitter.finagle.memcached.integration.external
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, RandomSocket, Stopwatch}
 import java.net.{BindException, InetAddress, InetSocketAddress, ServerSocket}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters
 import scala.collection._
+import scala.collection.immutable.Stream
 import scala.util.control.NonFatal
 
 object TestMemcachedServer {
@@ -73,7 +74,7 @@ private[memcached] object ExternalMemcached { self =>
 
   def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
     def exec(address: InetSocketAddress): Process = {
-      val cmd = Seq("memcached", "-l", address.getHostName, "-p", address.getPort.toString)
+      val cmd = List("memcached", "-l", address.getHostName, "-p", address.getPort.toString)
       val builder = new ProcessBuilder(cmd: _*)
       builder.start()
     }

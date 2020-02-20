@@ -24,7 +24,7 @@ object ParserUtils {
     if (buf.isEmpty) false
     else -1 == buf.process(isDigitProcessor)
 
-  private[memcached] def splitOnWhitespace(bytes: Buf): IndexedSeq[Buf] = {
+  private[memcached] def splitOnWhitespace(bytes: Buf): Seq[Buf] = {
     val len = bytes.length
     val split = new ArrayBuffer[Buf](6)
     var segmentStart = 0
@@ -44,7 +44,7 @@ object ParserUtils {
         segmentStart = segmentEnd + 1
       }
     }
-    split
+    split.toSeq
   }
 
   /**
