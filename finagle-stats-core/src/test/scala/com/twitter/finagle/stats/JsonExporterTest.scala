@@ -129,8 +129,20 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
 
   test("end-to-end fetching stats works") {
     val registry = Metrics.createDetached()
-    val viewsCounter = registry.getOrCreateCounter(Verbosity.Default, Seq("views")).counter
-    val gcCounter = registry.getOrCreateCounter(Verbosity.Default, Seq("jvm_gcs")).counter
+    val viewsCounter = registry
+      .getOrCreateCounter(
+        CounterSchema(
+          new MetricBuilder(
+            verbosity = Verbosity.Default,
+            name = Seq("views"),
+            statsReceiver = null))).counter
+    val gcCounter = registry
+      .getOrCreateCounter(
+        CounterSchema(
+          new MetricBuilder(
+            verbosity = Verbosity.Default,
+            name = Seq("jvm_gcs"),
+            statsReceiver = null))).counter
     viewsCounter.incr()
     gcCounter.incr()
     val exporter = new JsonExporter(registry) {
@@ -177,7 +189,14 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
 
     val name = "anCounter"
     val registry = Metrics.createDetached()
-    val counter = registry.getOrCreateCounter(Verbosity.Default, Seq(name)).counter
+    val counter =
+      registry
+        .getOrCreateCounter(
+          CounterSchema(
+            new MetricBuilder(
+              verbosity = Verbosity.Default,
+              name = Seq(name),
+              statsReceiver = null))).counter
 
     val timer = new MockTimer()
     val exporter = new JsonExporter(registry, timer)
@@ -232,7 +251,13 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val reqWithPeriod = Request("/admin/metrics.json?period=60")
 
     val registry = Metrics.createDetached()
-    val counter = registry.getOrCreateCounter(Verbosity.Default, Seq("anCounter")).counter
+    val counter = registry
+      .getOrCreateCounter(
+        CounterSchema(
+          new MetricBuilder(
+            verbosity = Verbosity.Default,
+            name = Seq("anCounter"),
+            statsReceiver = null))).counter
     counter.incr(11)
 
     val timer = new MockTimer()
@@ -283,7 +308,13 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   test("deadly gauge") {
     val registry = Metrics.createDetached()
     val sr =
-      registry.registerGauge(Verbosity.Default, Seq("boom"), throw new RuntimeException("loolool"))
+      registry.registerGauge(
+        GaugeSchema(
+          new MetricBuilder(
+            verbosity = Verbosity.Default,
+            name = Seq("boom"),
+            statsReceiver = null)),
+        throw new RuntimeException("loolool"))
 
     val exporter = new JsonExporter(registry)
     val json = exporter.json(pretty = true, filtered = false)
