@@ -57,7 +57,7 @@ private[stats] trait MetricsStore {
    *
    * Throws a [MetricCollisionException] if there's already a gauge of that name.
    */
-  def getOrCreateCounter(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreCounter
+  def getOrCreateCounter(schema: CounterSchema): MetricsStore.StoreCounter
 
   /**
    * Registers a new gauge, replacing the previous one if it already existed.
@@ -67,7 +67,7 @@ private[stats] trait MetricsStore {
    *
    * Throws a [MetricCollisionException] if there's already a counter of that name.
    */
-  def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit
+  def registerGauge(schema: GaugeSchema, f: => Float): Unit
 
   /**
    * Deregisters a gauge.
@@ -84,21 +84,5 @@ private[stats] trait MetricsStore {
    * Deduplicates by formatted name, so that Seq("foo", "bar") and
    * Seq("foo/bar") with the separator "/" are the same name.
    */
-  def getOrCreateStat(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreStat
-
-  /**
-   * Registers a new stat that exports the given percentiles, or gets an
-   * existing one of that name if it already exists.
-   *
-   * If a stat already exists, there is no guarantee that `percentiles` will be
-   * respected.
-   *
-   * Deduplicates by formatted name, so that Seq("foo", "bar") and
-   * Seq("foo/bar") with the separator "/" are the same name.
-   */
-  def getOrCreateStat(
-    verbosity: Verbosity,
-    names: Seq[String],
-    percentiles: IndexedSeq[Double]
-  ): MetricsStore.StoreStat
+  def getOrCreateStat(schema: HistogramSchema): MetricsStore.StoreStat
 }
