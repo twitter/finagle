@@ -1,5 +1,8 @@
 scala_library(
-    sources = rglobs("scala/*.scala", "scala-2.12-/*.scala"),
+    sources = [
+        "scala-2.12-/**/*.scala",
+        "scala/**/*.scala",
+    ],
     compiler_option_sets = {"fatal_warnings"},
     provides = scala_artifact(
         org = "com.twitter",
