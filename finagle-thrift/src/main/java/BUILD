@@ -1,5 +1,5 @@
 java_library(
-    sources = rglobs("*.java"),
+    sources = ["**/*.java"],
     provides = artifact(
         org = "com.twitter",
         name = "finagle-thrift-java",
