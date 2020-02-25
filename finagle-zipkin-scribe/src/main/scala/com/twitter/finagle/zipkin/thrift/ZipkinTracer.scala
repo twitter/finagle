@@ -67,6 +67,6 @@ class ZipkinTracer(tracer: ScribeRawZipkinTracer, sampleRate: Float)
     this(tracer, sampler.sampleRate)
 
   def this(tracer: ScribeRawZipkinTracer) =
-    this(tracer, DefaultSampler)
+    this(tracer, core.DefaultSampler)
 
 }

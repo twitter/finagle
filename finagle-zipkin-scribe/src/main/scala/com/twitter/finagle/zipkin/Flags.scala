@@ -1,7 +1,6 @@
 package com.twitter.finagle.zipkin
 
 import com.twitter.app.GlobalFlag
-import com.twitter.finagle.zipkin.core.Sampler
 import java.net.InetSocketAddress
 
 object host
@@ -9,5 +8,3 @@ object host
       new InetSocketAddress("localhost", 1463),
       "Host to scribe traces to"
     )
-
-object initialSampleRate extends GlobalFlag[Float](Sampler.DefaultSampleRate, "Initial sample rate")
