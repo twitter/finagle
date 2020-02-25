@@ -26,6 +26,10 @@ Runtime Behavior Changes
   [Chromium blog post](https://blog.chromium.org/2019/10/developers-get-ready-for-new.html)
   for more information about the `SameSite` attribute. ``PHAB_ID=D426349``
 
+* finagle-core: The default NullTracer for ClientBuilder has been removed. Affected clients may
+  now see tracing enabled by default via the Java ServiceLoader, as described in the
+  [Finagle User's Guide](http://twitter.github.io/finagle/guide/Tracing.html). ``PHAB_ID=D437948``
+
 Bug Fixes
 ~~~~~~~~~
 
