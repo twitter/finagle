@@ -1,5 +1,5 @@
 junit_tests(
-    sources = rglobs("*.scala"),
+    sources = ["**/*.scala"],
     compiler_option_sets = {"fatal_warnings"},
     dependencies = [
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
