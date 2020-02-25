@@ -19,6 +19,6 @@ class ScribeZipkinTracer(tracer: ScribeRawZipkinTracer, sampler: core.Sampler)
         scribePort = Host().getPort,
         statsReceiver = DefaultStatsReceiver.scope("zipkin-scribe")
       ),
-      DefaultSampler
+      core.DefaultSampler
     )
 }

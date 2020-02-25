@@ -57,6 +57,11 @@ Breaking API Changes
 
 * finagle-zipkin-scribe: Coalesce `ScribeRawZipkinTracer` apply methods into two simple ones. ``PHAB_ID=D432274``
 
+* finagle-zipkin-scribe: `DefaultSampler` moved to `c.t.f.zipkin.core` in finagle-zipkin-core. ``PHAB_ID=D439456``
+
+* finagle-zipkin-scribe: `initialSampleRate` GlobalFlag is moved to finagle-zipkin-core, under the same package
+  scope `c.t.f.zipkin`. ``PHAB_ID=D439456``
+
 20.1.0
 ------
 

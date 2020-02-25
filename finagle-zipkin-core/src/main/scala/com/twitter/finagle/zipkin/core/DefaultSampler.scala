@@ -1,4 +1,4 @@
-package com.twitter.finagle.zipkin.thrift
+package com.twitter.finagle.zipkin.core
 
 import com.twitter.finagle.zipkin.core.Sampler
 import com.twitter.finagle.zipkin.initialSampleRate
@@ -34,7 +34,7 @@ object DefaultSampler extends Sampler {
     case None => Sampler.DefaultSampleRate
   }
 
-  private[thrift] def reset(): Unit = {
+  private[zipkin] def reset(): Unit = {
     defaultSampleRate = initialSampleRate.get
   }
 }
