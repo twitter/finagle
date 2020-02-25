@@ -20,7 +20,6 @@ import com.twitter.finagle.ssl.client.{
 }
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util
@@ -126,7 +125,6 @@ object ClientConfig {
       idleTime = 5.seconds,
       maxWaiters = Int.MaxValue
     ) +
-    param.Tracer(NullTracer) +
     param.Monitor(NullMonitor) +
     param.Reporter(NullReporterFactory) +
     Daemonize(false)
