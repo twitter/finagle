@@ -1,6 +1,6 @@
 java_thrift_library(
     name = "thrift-scala",
-    sources = rglobs("*.thrift"),
+    sources = ["**/*.thrift"],
     compiler = "scrooge",
     language = "scala",
     provides = artifact(
@@ -12,7 +12,7 @@ java_thrift_library(
 
 java_thrift_library(
     name = "thrift-java",
-    sources = rglobs("*.thrift"),
+    sources = ["**/*.thrift"],
     compiler = "scrooge",
     language = "java",
     provides = artifact(

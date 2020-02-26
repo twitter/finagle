@@ -1,5 +1,5 @@
 scala_library(
-    sources = rglobs("*.scala"),
+    sources = ["**/*.scala"],
     dependencies = [
         "3rdparty/jvm/org/apache/curator:curator-framework",
         "3rdparty/jvm/org/apache/curator:curator-test",

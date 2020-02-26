@@ -1,5 +1,5 @@
 java_library(
-    sources = rglobs("*.java"),
+    sources = ["**/*.java"],
     compiler_option_sets = {"fatal_warnings"},
     zinc_file_manager = False,  # java.lang.IllegalArgumentException is thrown without this:
     dependencies = [

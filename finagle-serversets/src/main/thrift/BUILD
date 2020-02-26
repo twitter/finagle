@@ -16,7 +16,7 @@
 
 java_thrift_library(
     name = "thrift-java",
-    sources = globs("com/twitter/thrift/endpoint.thrift"),
+    sources = ["com/twitter/thrift/endpoint.thrift"],
     compiler = "scrooge",
     language = "java",
     provides = artifact(
@@ -28,18 +28,18 @@ java_thrift_library(
 
 java_thrift_library(
     name = "thrift-scala",
-    sources = globs("com/twitter/thrift/endpoint.thrift"),
+    sources = ["com/twitter/thrift/endpoint.thrift"],
     compiler = "scrooge",
     language = "scala",
 )
 
 python_thrift_library(
     name = "thrift-python",
-    sources = globs("com/twitter/thrift/endpoint.thrift"),
+    sources = ["com/twitter/thrift/endpoint.thrift"],
 )
 
 python_thrift_library(
     name = "py-thrift",
-    sources = globs("com/twitter/thrift/endpoint.thrift"),
+    sources = ["com/twitter/thrift/endpoint.thrift"],
     compatibility = ["CPython>=2.7,<4"],
 )
