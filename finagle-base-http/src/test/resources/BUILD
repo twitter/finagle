@@ -1,5 +1,3 @@
 resources(
-    sources = rglobs(
-        "*",
-    ),
+    sources = ["**/*"],
 )

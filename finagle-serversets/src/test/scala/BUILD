@@ -50,13 +50,13 @@ junit_tests(
 
 junit_tests(
     name = "serversets",
-    sources = globs(
+    sources = [
         "com/twitter/*.scala",
         "com/twitter/finagle/serverset2/*.scala",
         "com/twitter/finagle/serverset2/addr/*.scala",
         "com/twitter/finagle/serverset2/naming/*.scala",
         "com/twitter/finagle/zookeeper/*.scala",
-    ),
+    ],
     dependencies = [
         ":core",
         "3rdparty/jvm/com/google/inject:guice",
