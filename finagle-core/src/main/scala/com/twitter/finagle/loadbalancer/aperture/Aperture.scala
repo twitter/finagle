@@ -1,10 +1,12 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle.loadbalancer.p2c.P2CPick
 import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT}
 import com.twitter.finagle.util.Rng
+import com.twitter.finagle.util.DefaultTimer.Implicit
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Time}
 import scala.collection.immutable.VectorBuilder
@@ -111,6 +113,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected def useDeterministicOrdering: Option[Boolean]
 
   /**
+   * Indicator if the endpoints within the aperture should be connected to eagerly
+   */
+  protected def eagerConnections: Boolean
+
+  /**
    * Adjust the aperture by `n` serving units.
    *
    * Calls to this method are intrinsically racy with respect to updates and rebuilds
@@ -189,6 +196,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     statsReceiver.addGauge("physical_aperture") { dist.physicalAperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
       if (dapertureActive) 1F else 0F
+    },
+    statsReceiver.addGauge("eager_connections") {
+      if (eagerConnections) 1F else 0F
     },
     statsReceiver.addGauge("vector_hash") { _vectorHash }
   )
@@ -275,11 +285,18 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       _logicalAperture = math.max(min, math.min(max, _logicalAperture + n))
     }
 
+    /**
+     * A flag indicating that this distributor has been discarded due to a rebuild.
+     */
+    @volatile private var rebuilt: Boolean = false
+
     final def rebuild(): This = rebuild(vector)
 
     final def rebuild(vec: Vector[Node]): This = {
+      rebuilt = true
+
       updateVectorHash(vec)
-      if (vec.isEmpty) {
+      val dist = if (vec.isEmpty) {
         new EmptyVector(initAperture)
       } else if (dapertureActive) {
         ProcessCoordinate() match {
@@ -293,6 +310,42 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         }
       } else {
         new RandomAperture(vec, initAperture)
+      }
+
+      if (self.eagerConnections) {
+        dist.doEagerlyConnect()
+      }
+
+      dist
+    }
+
+    // A TLS handshake can take anywhere between [250, 1000]ms. A 500ms jitter was picked as an intermediate
+    // value based on this range
+    private final val connectJitterMs: Int = 500
+
+    /**
+     * Eagerly connects to the endpoints within the aperture. Connection establishment with
+     * each endpoint is jittered picking a random duration between [0, `connectJitterMs`] milliseconds
+     */
+    private def doEagerlyConnect(): Unit = {
+      val is = indices
+      if (rebuildLog.isLoggable(Level.DEBUG)) {
+        rebuildLog.debug(s"establishing ${is.size} eager connections")
+      }
+
+      for (i <- is) {
+        // jitter the time to connect.
+        val timeToSleep = rng.nextInt(connectJitterMs).milliseconds
+
+        // the connection will be kicked off by the timer's thread.
+        Future.sleep(timeToSleep).onSuccess { _ =>
+          // short circuit if this distributor has been discarded
+          if (!rebuilt) {
+            vector(i).apply().flatMap { svc =>
+              svc.close()
+            }
+          }
+        }
       }
     }
 

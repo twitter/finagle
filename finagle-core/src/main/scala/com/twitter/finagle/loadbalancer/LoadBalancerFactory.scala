@@ -335,6 +335,8 @@ object LoadBalancerFactory {
  */
 abstract class LoadBalancerFactory {
 
+  protected[twitter] def supportsEagerConnections: Boolean = false
+
   /**
    * Returns a new balancer which is represented by a [[com.twitter.finagle.ServiceFactory]].
    *
@@ -361,6 +363,8 @@ abstract class LoadBalancerFactory {
  */
 object FlagBalancerFactory extends LoadBalancerFactory {
   private val log = Logger.getLogger(getClass.getName)
+
+  override def supportsEagerConnections: Boolean = underlying.supportsEagerConnections
 
   /**
    * Java friendly getter.

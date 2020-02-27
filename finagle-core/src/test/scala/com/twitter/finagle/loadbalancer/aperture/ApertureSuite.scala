@@ -16,6 +16,7 @@ private[loadbalancer] trait ApertureSuite {
   trait TestBal extends Aperture[Unit, Unit] {
     protected val rng = Rng(12345L)
     protected val emptyException = new Empty
+    protected val eagerConnections = false
     protected def maxEffort = 5
     protected def minAperture = 1
     protected def useDeterministicOrdering: Option[Boolean] = None
