@@ -7,6 +7,16 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-zipkin-scribe: add a logical retry mechanism to scribe's TRY_LATER response ``PHAB_ID=D441366``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-zipkin-scribe: update the deprecated `FutureIface` to `MethodPerEndpoint` ``PHAB_ID=D441366``
+
 20.2.1
 ------
 
