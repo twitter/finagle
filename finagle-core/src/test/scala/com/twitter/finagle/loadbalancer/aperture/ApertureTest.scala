@@ -79,7 +79,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
         label = "",
         timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
-        useDeterministicOrdering = None
+        useDeterministicOrdering = None,
+        eagerConnections = false
       )
     }
   }
@@ -99,7 +100,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
       label = "",
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
-      useDeterministicOrdering = Some(true)
+      useDeterministicOrdering = Some(true),
+      eagerConnections = false
     )
 
     assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -122,7 +124,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
       label = "",
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
-      useDeterministicOrdering = Some(false)
+      useDeterministicOrdering = Some(false),
+      eagerConnections = false
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -146,7 +149,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
       label = "",
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
-      useDeterministicOrdering = Some(false)
+      useDeterministicOrdering = Some(false),
+      eagerConnections = false
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))

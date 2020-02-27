@@ -4,10 +4,12 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.factory.ServiceFactoryCache
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.param
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.{CachedHashCode, Showable}
+import com.twitter.logging.Logger
 import com.twitter.util._
 
 /**
@@ -134,6 +136,7 @@ private[finagle] class BindingFactory[Req, Rep](
 }
 
 private[finagle] object BindingFactory {
+  private val log = Logger.get()
 
   private case class Dtabs(base: Dtab, local: Dtab) extends CachedHashCode.ForClass {
     override protected def computeHashCode: Int = {
@@ -193,6 +196,7 @@ private[finagle] object BindingFactory {
     val parameters: Seq[Stack.Param[_]] = Seq(
       implicitly[Stack.Param[BaseDtab]],
       implicitly[Stack.Param[Dest]],
+      implicitly[Stack.Param[LoadBalancerFactory.Param]],
       implicitly[Stack.Param[param.Label]],
       implicitly[Stack.Param[param.Stats]],
       implicitly[Stack.Param[param.Timer]]
@@ -211,8 +215,25 @@ private[finagle] object BindingFactory {
     ): Stack[ServiceFactory[Req, Rep]] = {
       val param.Label(label) = params[param.Label]
       val param.Stats(stats) = params[param.Stats]
-      val Dest(dest) = params[Dest]
       val param.Timer(timer) = params[param.Timer]
+      val Dest(dest) = params[Dest]
+      val LoadBalancerFactory.Param(balancer) = params[LoadBalancerFactory.Param]
+
+      // we check if the stack has been explictly configured to detect misconfiguration
+      // and the underlying balancer supports eagerly connecting to endpoints
+      val eagerlyConnect: Boolean =
+        if (params.contains[EagerConnections]) {
+          if (balancer.supportsEagerConnections) params[EagerConnections].enabled
+          else {
+            // misconfiguration
+            log.warning(
+              "EagerlyConnect is only supported for the aperture load balancer. " +
+                s"stack param found for ${label}.")
+            false
+          }
+        } else {
+          balancer.supportsEagerConnections && params[EagerConnections].enabled
+        }
 
       def newStack(errorLabel: String, bound: Name.Bound) = {
         val client = next.make(
@@ -222,7 +243,12 @@ private[finagle] object BindingFactory {
             // (2) it seems disingenuous not to.
             Dest(bound) +
             LoadBalancerFactory.Dest(bound.addr) +
-            LoadBalancerFactory.ErrorLabel(errorLabel)
+            LoadBalancerFactory.ErrorLabel(errorLabel) +
+            // replace `EagerlyConnect` because (1) we need a way to disable eager connection
+            // establishment for local dtab overrides. Request-level overrides can vary unpredicably,
+            // resulting in wasteful connections and (2) the feature can be enabled for all clients
+            // via the experimental global flag until this becomes default behavior
+            EagerConnections(eagerlyConnect && Dtab.local.isEmpty)
         )
 
         boundPathFilter(bound.path) andThen client
@@ -234,6 +260,12 @@ private[finagle] object BindingFactory {
         case Name.Path(path) =>
           val BaseDtab(baseDtab) = params[BaseDtab]
           new BindingFactory(path, newStack(path.show, _), timer, baseDtab, stats.scope("namer"))
+      }
+
+      // if enabled, eagerly bind the name in order to trigger the creation of the load balancer,
+      // which in turn will eagerly create connections.
+      if (eagerlyConnect) {
+        factory().onSuccess(_.close())
       }
 
       Stack.leaf(role, factory)

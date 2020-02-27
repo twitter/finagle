@@ -47,4 +47,13 @@ package exp {
         "leastReq",
         "Metric used to measure load across endpoints (leastReq | ewma)"
       )
+
+  object apertureEagerConnections
+      extends GlobalFlag[Boolean](
+        false,
+        "enable aperture eager connections\n" +
+          "\tWhen enabled, the aperture load balancer will eagerly establish connections with\n" +
+          "\tall endpoints in the aperture. This does not apply for hosts resolved in result of request-level\n" +
+          "\tdtab overrides."
+      )
 }
