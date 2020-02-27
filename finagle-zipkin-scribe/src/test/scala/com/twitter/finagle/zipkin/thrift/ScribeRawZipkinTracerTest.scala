@@ -1,11 +1,13 @@
 package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.{Service, WriteException}
+import com.twitter.finagle.service.{RetryBudget, RetryFilter, TimeoutFilter}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.zipkin.core.{BinaryAnnotation, Endpoint, Span, ZipkinAnnotation}
 import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
@@ -14,13 +16,41 @@ class ScribeRawZipkinTracerTest extends FunSuite {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
-  class ScribeClient extends Scribe.FutureIface {
+  class ScribeClient extends Scribe.MethodPerEndpoint {
     var messages: Seq[LogEntry] = Seq.empty[LogEntry]
     var response: Future[ResultCode] = Future.value(ResultCode.Ok)
     def log(msgs: scala.collection.Seq[LogEntry]): Future[ResultCode] = {
       messages ++= msgs
       response
     }
+  }
+
+  test("logical retry mechanism") {
+    val stats = new InMemoryStatsReceiver
+    val retryFilter = new RetryFilter(
+      ScribeRawZipkinTracer.retryPolicy,
+      DefaultTimer,
+      stats,
+      RetryBudget.Infinite
+    )
+
+    @volatile var throwExc = false
+    val svc = retryFilter.andThen(Service.mk { _: Scribe.Log.Args =>
+      if (throwExc) Future.exception(WriteException(new Exception))
+      else Future.value(ResultCode.TryLater)
+    })
+
+    // MethodBuilder maximum 3 tries. 2 retries including the original request
+    Await.result(svc(Scribe.Log.Args(Seq.empty)), 5.second)
+    assert(stats.stat("retries")().map(_.toInt) == Seq(2))
+
+    // The retry filter will not retry what the requeue filter should handle
+    stats.clear()
+    throwExc = true
+    intercept[WriteException] {
+      Await.result(svc(Scribe.Log.Args(Seq.empty)), 5.second)
+    }
+    assert(stats.stat("retries")().map(_.toInt) == Seq(0))
   }
 
   test("formulate scribe log message correctly") {

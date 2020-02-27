@@ -3,7 +3,15 @@ package com.twitter.finagle.zipkin.thrift
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Thrift
-import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.service.{
+  ResponseClassifier,
+  ResponseClass,
+  RetryBudget,
+  RetryFilter,
+  RetryPolicy,
+  ReqRep,
+  RequeueFilter
+}
 import com.twitter.finagle.stats.{
   DenylistStatsReceiver,
   ClientStatsReceiver,
@@ -11,14 +19,13 @@ import com.twitter.finagle.stats.{
   StatsReceiver
 }
 import com.twitter.finagle.thrift.Protocols
-import com.twitter.finagle.tracing._
+import com.twitter.finagle.tracing.TracelessFilter
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.zipkin.{host => Host}
 import com.twitter.finagle.zipkin.core.{RawZipkinTracer, Span, TracerCache}
 import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.scrooge.TReusableMemoryTransport
 import com.twitter.util._
-import java.net.InetSocketAddress
 import java.nio.charset.StandardCharsets
 import java.util.{Arrays, Base64}
 import java.util.concurrent.ArrayBlockingQueue
@@ -31,39 +38,71 @@ object ScribeRawZipkinTracer {
   private[this] val tracerCache = new TracerCache[ScribeRawZipkinTracer]
   private[this] val clientLabel = "zipkin-scribe"
 
+  // only report these finagle metrics (including counters for individual exceptions)
   private[this] val clientStatsReceiver: StatsReceiver = new DenylistStatsReceiver(
     ClientStatsReceiver, {
       case Seq(_, "requests") => false
       case Seq(_, "success") => false
       case Seq(_, "failures", _*) => false
+      case Seq(_, "retries", _*) => false
       case _ => true
     }
+  )
+
+  // we must use a response classifer as the finagle Thrift client deals with raw
+  // bytes and not the scrooge generated types.
+  private[finagle] val responseClassifier: ResponseClassifier = {
+    case ReqRep(_, Return(ResultCode.TryLater)) => ResponseClass.RetryableFailure
+  }
+
+  private[this] val shouldRetry: PartialFunction[
+    (Scribe.Log.Args, Try[Scribe.Log.SuccessType]),
+    Boolean] = {
+    // We don't retry failures that the RequeueFilter will handle
+    case (_, Throw(RequeueFilter.Requeueable(_))) => false
+    case tup if responseClassifier.isDefinedAt(ReqRep(tup._1, tup._2)) =>
+      responseClassifier(ReqRep(tup._1, tup._2)) match {
+        case ResponseClass.Failed(retryable) => retryable
+        case _ => false
+      }
+  }
+
+  // exposed for testing
+  private[thrift] val retryPolicy = RetryPolicy.tries(
+    numTries = 3, // MethodBuilder default
+    shouldRetry = shouldRetry
   )
 
   private[this] def newClient(
     scribeHost: String,
     scribePort: Int,
-    clientName: String
-  ): Scribe.FutureIface = {
-    // only report these finagle metrics (including counters for individual exceptions)
+    clientName: String,
+    timer: Timer
+  ): Scribe.MethodPerEndpoint = {
+    // share the retryBudget between the retry and requeue filter
+    val retryBudget = RetryBudget()
+    val retryFilter = new RetryFilter(
+      retryPolicy = retryPolicy,
+      retryBudget = retryBudget,
+      timer = timer,
+      statsReceiver = clientStatsReceiver
+    )
 
-    val transport = ClientBuilder()
-      .stack(
-        Thrift.client
-        // using an arbitrary, but bounded number of waiters to avoid memory leaks
-        .withSessionPool.maxWaiters(250)
-      )
-      .name(clientName)
-      .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .reportTo(clientStatsReceiver)
-      .hostConnectionLimit(5)
-      // somewhat arbitrary, but bounded timeouts
-      .timeout(1.second)
-      .daemon(true)
-      .build()
+    val transport = Thrift.client
+      .withResponseClassifier(responseClassifier)
+      .withRetryBudget(retryBudget)
+      .withSessionPool.maxSize(5)
+      .withSessionPool.maxWaiters(250)
+      .withSessionQualifier.noFailFast
+      .withSessionQualifier.noFailureAccrual
+      .withStatsReceiver(clientStatsReceiver)
+      .withRequestTimeout(1.second) // each "logical" retry will have this timeout
+      .servicePerEndpoint[Scribe.ServicePerEndpoint](s"inet!$scribeHost:$scribePort", clientName)
 
-    // Makes sure we don't trace the Scribe logging.
-    new Scribe.FinagledClient(new TracelessFilter andThen transport, Protocols.binaryFactory())
+    val filteredTransport = transport
+      .withLog(log = (new TracelessFilter).andThen(retryFilter).andThen(transport.log))
+
+    Thrift.Client.methodPerEndpoint(filteredTransport)
   }
 
   /**
@@ -86,7 +125,11 @@ object ScribeRawZipkinTracer {
   ): ScribeRawZipkinTracer =
     tracerCache.getOrElseUpdate(
       scribeHost + scribePort + scribeCategory,
-      apply(newClient(scribeHost, scribePort, clientName), scribeCategory, statsReceiver, timer)
+      apply(
+        newClient(scribeHost, scribePort, clientName, timer),
+        scribeCategory,
+        statsReceiver,
+        timer)
     )
 
   /**
@@ -99,7 +142,7 @@ object ScribeRawZipkinTracer {
    * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
    */
   def apply(
-    client: Scribe.FutureIface,
+    client: Scribe.MethodPerEndpoint,
     scribeCategory: String,
     statsReceiver: StatsReceiver,
     timer: Timer
@@ -127,7 +170,7 @@ object ScribeRawZipkinTracer {
  * they grow beyond `maxBufferSize`
  */
 private[thrift] class ScribeRawZipkinTracer(
-  client: Scribe.FutureIface,
+  client: Scribe.MethodPerEndpoint,
   statsReceiver: StatsReceiver,
   scribeCategory: String = "zipkin",
   timer: Timer = DefaultTimer,
