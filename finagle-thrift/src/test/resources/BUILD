@@ -1,6 +1,6 @@
 resources(
-    sources = rglobs(
-        "*",
-        exclude = [rglobs("BUILD")],
-    ),
+    sources = [
+        "!BUILD",
+        "**/*",
+    ],
 )

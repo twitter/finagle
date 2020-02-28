@@ -1,6 +1,7 @@
 resources(
-    sources = globs(
+    sources = [
+        "!*.pyc",
+        "!BUILD*",
         "*",
-        exclude = [globs("BUILD*", "*.pyc")],
-    ),
+    ],
 )

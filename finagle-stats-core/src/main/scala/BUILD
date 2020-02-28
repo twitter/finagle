@@ -12,10 +12,10 @@ scala_library(
 )
 
 scala_library(
-    sources = rglobs(
-        "*.scala",
-        exclude = ["com/twitter/finagle/stats/StatsFilterFlags.scala"],
-    ),
+    sources = [
+        "!com/twitter/finagle/stats/StatsFilterFlags.scala",
+        "**/*.scala",
+    ],
     compiler_option_sets = {"fatal_warnings"},
     provides = scala_artifact(
         org = "com.twitter",
