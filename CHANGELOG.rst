@@ -40,6 +40,10 @@ Runtime Behavior Changes
   now see tracing enabled by default via the Java ServiceLoader, as described in the
   [Finagle User's Guide](http://twitter.github.io/finagle/guide/Tracing.html). ``PHAB_ID=D437948``
 
+* finagle-http2: The HTTP/2 frame logging tools now log at level INFO. This is symmetric with
+  the behavior of the `ChannelSnooper` tooling which serves a similar purpose which is to aid
+  in debugging data flow and isn't intended to be enabled in production. ``PHAB_ID=D441876``
+
 Bug Fixes
 ~~~~~~~~~
 
