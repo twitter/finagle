@@ -227,6 +227,7 @@ val sharedSettings = Seq(
   publishArtifact in Test := false,
   pomIncludeRepository := { _ => false },
   publishMavenStyle := true,
+  publishConfiguration := publishConfiguration.value.withOverwrite(true),
   autoAPIMappings := true,
   apiURL := Some(url("https://twitter.github.io/finagle/docs/")),
   pomExtra :=
