@@ -19,10 +19,8 @@ scala_library(
 )
 
 junit_tests(
-    sources = rglobs(
-        "*.scala",
-        exclude = [EXTERNAL_SOURCES],
-    ),
+    sources = ["**/*.scala"] + exclude_globs(EXTERNAL_SOURCES),
+    name = "scala",
     compiler_option_sets = {"fatal_warnings"},
     dependencies = [
         ":external",
