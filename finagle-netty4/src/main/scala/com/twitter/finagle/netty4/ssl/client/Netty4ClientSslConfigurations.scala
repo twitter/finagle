@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.Address
-import com.twitter.finagle.netty4.ssl.{FinalizedSslContext, Netty4SslConfigurations, RefCountedSsl}
+import com.twitter.finagle.netty4.ssl.{FinalizedSslContext, Netty4SslConfigurations}
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine, KeyCredentials}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
 import com.twitter.util.Return
@@ -90,10 +90,8 @@ private[finagle] object Netty4ClientSslConfigurations {
     val withAppProtocols =
       configureClientApplicationProtocols(withTrust, config.applicationProtocols)
 
-    // We only want to use the `FinalizedSslContext` if the process is configured to do ref-counting
-    // because Netty's finalized SslContext inherits from the RefCountedSslContext. So, if it's not
-    // the JDK version it's ref-counted even if it also has a finalizer.
-    if (!forceJdk && RefCountedSsl.Enabled) new FinalizedSslContext(withAppProtocols.build())
+    // We only want to use the `FinalizedSslContext` if we're using the non-JDK implementation.
+    if (!forceJdk) new FinalizedSslContext(withAppProtocols.build())
     else withAppProtocols.build()
   }
 

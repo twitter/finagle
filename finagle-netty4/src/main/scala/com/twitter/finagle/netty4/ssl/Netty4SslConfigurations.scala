@@ -75,8 +75,7 @@ private[finagle] object Netty4SslConfigurations {
    */
   def configureProvider(builder: SslContextBuilder, forceJdk: Boolean): SslContextBuilder =
     if (forceJdk) builder.sslProvider(SslProvider.JDK)
-    else if (RefCountedSsl.Enabled) builder.sslProvider(SslProvider.OPENSSL_REFCNT)
-    else builder
+    else builder.sslProvider(SslProvider.OPENSSL_REFCNT)
 
   /**
    * Unwraps the `Try[SslContextBuilder]` and throws an `SslConfigurationException` for
