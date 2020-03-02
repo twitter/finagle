@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-netty4: When not using the JDK implementation, the Netty reference counted SSL
+  types are used which move SSL cleanup out of the GC cycle, reducing pause durations.
+  ``PHAB_ID=D442409``
+
 Bug Fixes
 ~~~~~~~~~
 
