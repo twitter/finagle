@@ -136,7 +136,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
         Protocols.binaryFactory(),
         "server",
         Int.MaxValue,
-        NullStatsReceiver,
+        NullStatsReceiver
       )
     )
 
@@ -187,7 +187,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
         Protocols.binaryFactory(),
         "serverB",
         Int.MaxValue,
-        NullStatsReceiver,
+        NullStatsReceiver
       )
     )
 
@@ -216,7 +216,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
         Protocols.binaryFactory(),
         "serverA",
         Int.MaxValue,
-        NullStatsReceiver,
+        NullStatsReceiver
       )
     )
 
