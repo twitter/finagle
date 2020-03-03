@@ -361,7 +361,8 @@ lazy val finagleIntegration = Project(
   id = "finagle-integration",
   base = file("finagle-integration")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  withTwoThirteen
 ).settings(
   name := "finagle-integration",
   libraryDependencies ++= Seq(util("core")) ++ scroogeLibs
