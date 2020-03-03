@@ -142,7 +142,7 @@ def jdk11GcJavaOptions: Seq[String] = {
 }
 
 val withTwoThirteen = Seq(
-  crossScalaVersions += "2.13.0",
+  crossScalaVersions += "2.13.1",
   libraryDependencies += scalaCollectionCompat
 )
 
