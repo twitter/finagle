@@ -10,7 +10,8 @@ import com.twitter.finagle.service.{
   RetryFilter,
   RetryPolicy,
   ReqRep,
-  RequeueFilter
+  RequeueFilter,
+  StatsFilter
 }
 import com.twitter.finagle.stats.{
   DenylistStatsReceiver,
@@ -28,7 +29,7 @@ import com.twitter.scrooge.TReusableMemoryTransport
 import com.twitter.util._
 import java.nio.charset.StandardCharsets
 import java.util.{Arrays, Base64}
-import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 import org.apache.thrift.TByteArrayOutputStream
 import org.apache.thrift.protocol.TProtocol
 import scala.collection.mutable.ArrayBuffer
@@ -41,10 +42,16 @@ object ScribeRawZipkinTracer {
   // only report these finagle metrics (including counters for individual exceptions)
   private[this] val clientStatsReceiver: StatsReceiver = new DenylistStatsReceiver(
     ClientStatsReceiver, {
+      // StatsFilter
       case Seq(_, "requests") => false
       case Seq(_, "success") => false
+      case Seq(_, "pending") => false
       case Seq(_, "failures", _*) => false
+      case Seq(_, "logical", _*) => false // MethodBuilder StatsFilter
+
+      // RetryFilter
       case Seq(_, "retries", _*) => false
+
       case _ => true
     }
   )
@@ -88,8 +95,14 @@ object ScribeRawZipkinTracer {
       statsReceiver = clientStatsReceiver
     )
 
+    val statsFilter = StatsFilter.typeAgnostic(
+      clientStatsReceiver.scope(clientName).scope("logical"),
+      responseClassifier,
+      StatsFilter.DefaultExceptions,
+      TimeUnit.MILLISECONDS
+    )
+
     val transport = Thrift.client
-      .withResponseClassifier(responseClassifier)
       .withRetryBudget(retryBudget)
       .withSessionPool.maxSize(5)
       .withSessionPool.maxWaiters(250)
@@ -100,7 +113,11 @@ object ScribeRawZipkinTracer {
       .servicePerEndpoint[Scribe.ServicePerEndpoint](s"inet!$scribeHost:$scribePort", clientName)
 
     val filteredTransport = transport
-      .withLog(log = (new TracelessFilter).andThen(retryFilter).andThen(transport.log))
+      .withLog(
+        log = (new TracelessFilter)
+          .andThen(statsFilter)
+          .andThen(retryFilter)
+          .andThen(transport.log))
 
     Thrift.Client.methodPerEndpoint(filteredTransport)
   }

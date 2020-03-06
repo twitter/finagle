@@ -287,10 +287,12 @@ private[finagle] object WireTracingFilter {
 /**
  * A filter to clear tracing information
  */
-class TracelessFilter[Req, Rep] extends SimpleFilter[Req, Rep] {
-  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    Trace.letClear {
-      service(request)
+class TracelessFilter extends Filter.TypeAgnostic {
+  override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
+    def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+      Trace.letClear {
+        service(request)
+      }
     }
   }
 }

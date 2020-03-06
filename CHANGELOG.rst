@@ -22,6 +22,8 @@ Bug Fixes
 
 * finagle-zipkin-scribe: add a logical retry mechanism to scribe's TRY_LATER response ``PHAB_ID=D441366``
 
+* finagle-zipkin-scribe: scope logical stats under "logical" ``PHAB_ID=D445075``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
