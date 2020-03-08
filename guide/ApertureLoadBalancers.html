@@ -1,32 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Aperture Load Balancers &#8212; Finagle 20.1.0 documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Aperture Load Balancers &#8212; Finagle 20.3.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '20.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 20.1.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Configuration" href="Configuration.html" />
    
@@ -43,8 +31,7 @@
 
   </script>
 
-  </head>
-  <body role="document">
+  </head><body>
   
   
 
@@ -82,7 +69,7 @@ hosts.</p>
 will establish when talking to large clusters. It does so by selecting a random subset of backends
 to talk do under normal conditions with some slight changes under extraordinary conditions. This a
 positive effect for both clients and servers by reducing the connections between them but comes with
-the cost of load banding. Because clients choose which servers they talk randomly, it&#8217;s possible
+the cost of load banding. Because clients choose which servers they talk randomly, it’s possible
 that some choices of the minimum number of peers to talk to will cause some servers to have more
 clients than others. Assuming that clients in a cluster produce the same amount of load, this means
 that some servers will have more or less load than others. This makes it harder to reason about a
@@ -92,7 +79,7 @@ uniformly loaded.</p>
 <img alt="_images/random-aperture.png" src="_images/random-aperture.png" />
 <p class="caption"><span class="caption-text">Service A connecting to Service B using random aperture. The number of connections are reduced
 but there is an uneven number of connections per service B host due to the statistical nature of
-service A picking hosts randomly.</span></p>
+service A picking hosts randomly.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 <div class="section" id="minimizing-banding-in-random-aperture">
 <h3>Minimizing Banding in Random Aperture<a class="headerlink" href="#minimizing-banding-in-random-aperture" title="Permalink to this headline">¶</a></h3>
@@ -102,14 +89,14 @@ a client represents a uniform amount of load. A binomial distribution can be cha
 parameters, n and p, where n is the number of edges (trials) between the clients and the servers,
 and p is the probability that a given server is chosen when a client chooses an edge. In a
 client/server relationship,</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>n = (# client) * (# remote peers per client)
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>n = (# client) * (# remote peers per client)
 p = 1 / (# servers)
 </pre></div>
 </div>
 <p>The distribution can be used as a guide for how to choose the number of remote peers per client.
 Since the binomial distribution starts to turn Gaussian as the increase the number of trials,
 properties of Gaussian distributions can be used to reason about the binomial distribution (note
-that it&#8217;s worth checking that the graph looks reasonably Gaussian before using these rules of
+that it’s worth checking that the graph looks reasonably Gaussian before using these rules of
 thumb). In a Gaussian distribution, approximately 1/3 of the servers will be &lt; (mean - stddev), and
 approximately 1/3 of the servers will be &gt; (mean + stddev). This can be used to extrapolate the
 distribution of connections per host. Wolfram Alpha is a good resource for visualizing the behavior
@@ -117,9 +104,9 @@ of a binomial distribution for different parameters.</p>
 </div>
 <div class="section" id="example">
 <h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
-<p>Let&#8217;s say that there exists a service called &#8220;Brooklyn&#8221; that has 1000 nodes in its cluster which is
+<p>Let’s say that there exists a service called “Brooklyn” that has 1000 nodes in its cluster which is
 configured to use the aperture load balancer to connect with a service consisting of 5000 nodes
-called &#8220;GadgetDuck&#8221;. The goal is to pick the minimum number of connections that will result in a
+called “GadgetDuck”. The goal is to pick the minimum number of connections that will result in a
 ~20% or less difference between the low and high load bands. As an initial value for exploring the
 distributions, the asymptotic value of 1 is used as the aperture size. Using <a class="reference external" href="https://www.wolframalpha.com/input/?i=binomial+distribution(5000,+0.001)">Wolfram Alpha</a>, the mean is found
 to be 5, and the stddev will be 2.5. This distribution is too wide to satisfy the 20% difference
@@ -150,13 +137,13 @@ aperture to determinstic aperture</em></p>
 <div class="figure align-center" id="id4">
 <img alt="_images/t-to-g-daperturerolloutrps.png" src="_images/t-to-g-daperturerolloutrps.png" />
 <p class="caption"><span class="caption-text">The variance in requests per second (RPS) is significantly diminished after the service A deploy
-due to the deterministic load distribution.</span></p>
+due to the deterministic load distribution.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </div>
 <p><em>Connections from service A to service B during a rolling restart of service A which changed the
 load balancer from random aperture to determinstic aperture</em></p>
 <div class="figure align-center" id="id5">
 <img alt="_images/t-to-g-daperturerolloutconnections.png" src="_images/t-to-g-daperturerolloutconnections.png" />
-<p class="caption"><span class="caption-text">The total number of connections from A to B was significantly reduced.</span></p>
+<p class="caption"><span class="caption-text">The total number of connections from A to B was significantly reduced.</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
 </div>
 <div class="section" id="deterministic-subsetting">
 <h3>Deterministic Subsetting<a class="headerlink" href="#deterministic-subsetting" title="Permalink to this headline">¶</a></h3>
@@ -165,27 +152,27 @@ cluster information for the service at hand and partitions connections to backen
 way that favors equal load and minimal connections (with a lower bound of 12 to satisfy
 common concurrency and redundancy needs). It does this by letting each member of a cluster
 compute a subset of weighted backends to talk to based on information about each cluster.
-This can be visually represented as a pair of overlapping rings: The outer ring, or &#8220;peer ring&#8221;,
+This can be visually represented as a pair of overlapping rings: The outer ring, or “peer ring”,
 represents the cluster of peers (Service A) which are acting in concert to offer load to the
-&#8220;destination ring&#8221; which represents the cluster of backends (Service B).</p>
+“destination ring” which represents the cluster of backends (Service B).</p>
 <div class="figure align-center" id="id6">
 <img alt="_images/daperture-ringdiagram1.png" src="_images/daperture-ringdiagram1.png" />
-<p class="caption"><span class="caption-text">Each instance of Service A determines which &#8220;slice&#8221; of the backend ring to talk to and
-directs its traffic to those specific instances.</span></p>
+<p class="caption"><span class="caption-text">Each instance of Service A determines which “slice” of the backend ring to talk to and
+directs its traffic to those specific instances.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-center" id="id7">
 <img alt="_images/daperture-ringdiagram2.png" src="_images/daperture-ringdiagram2.png" />
 <p class="caption"><span class="caption-text">Since each client instance is doing the same thing, except picking the slice that belongs
 to them, we can evenly load the backend cluster (Service B).
 Note that this requires the load balancer to respect the continuous ring representation
-since peer slices may cover fractional portions of the destination ring.</span></p>
+since peer slices may cover fractional portions of the destination ring.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
 </div>
 </div>
 <div class="section" id="traffic-patterns">
 <h3>Traffic Patterns<a class="headerlink" href="#traffic-patterns" title="Permalink to this headline">¶</a></h3>
 <p>The deterministic aperture model, and subsetting models in general, works well when the
-traffic pattern between service A and B is &#8220;smooth&#8221; meaning that for each instance of
-Service A the request pattern doesn&#8217;t consists of significant bursts with respect to the
+traffic pattern between service A and B is “smooth” meaning that for each instance of
+Service A the request pattern doesn’t consists of significant bursts with respect to the
 average request rate and that requests are roughly equal cost, both in resource usage of
 the backend and in terms of latency. If the traffic pattern is characterized by
 large bursts of traffic, say invalidation of a cache based on a timer, then small chunks
@@ -197,28 +184,28 @@ of Service A.</p>
 <div class="section" id="peer-information">
 <h3>Peer Information<a class="headerlink" href="#peer-information" title="Permalink to this headline">¶</a></h3>
 <p>In order for deterministic aperture to be deterministic it needs to know some additional
-information. This is important for computing the &#8220;slice&#8221; of backends that the load balancer
+information. This is important for computing the “slice” of backends that the load balancer
 will utilize. To know how large of slice to use the client needs information about both the
 backends, or the serverset, and it needs to know some information about its peers, also
 known as the peerset. The peerset is the only new information needed since knowing about
 the backends is a requirement for any client side load balancer. In regard to the peerset
 we need two different pieces of information:</p>
 <ul class="simple">
-<li>How many replicas are there in the peerset. This is used to compute how large each clients
-slice of the backends will be.</li>
-<li>What is the position of this instance in the peerset. This is required to compute which
-slice that this client should take.</li>
+<li><p>How many replicas are there in the peerset. This is used to compute how large each clients
+slice of the backends will be.</p></li>
+<li><p>What is the position of this instance in the peerset. This is required to compute which
+slice that this client should take.</p></li>
 </ul>
 <p>This information can be configured in the <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate.scala">ProcessCoordinate</a>
 object by setting the processes instance number and the total number of instances. The current
-implementation requires that all instances in the cluster have unique and contiguous instance id&#8217;s
+implementation requires that all instances in the cluster have unique and contiguous instance id’s
 starting at 0.</p>
 </div>
 <div class="section" id="key-metrics">
 <h3>Key Metrics<a class="headerlink" href="#key-metrics" title="Permalink to this headline">¶</a></h3>
 <p>Success rates and exceptions should not be affected by the new load balancer. Other
 important metrics to consider are request latency and connection count.</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>$clientName/request_latency_ms.p*
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$clientName/request_latency_ms.p*
 
 $clientName/connections
 
@@ -248,7 +235,7 @@ finagle/aperture/coordinate
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Aperture Load Balancers</a><ul>
 <li><a class="reference internal" href="#random-aperture">Random Aperture</a><ul>

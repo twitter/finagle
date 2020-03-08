@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -751,7 +751,7 @@ finagle clients and servers.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withRetryBackoff</span><span class="params">(<span name="backoff">backoff: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientParams.A">A</span></span>
+        <span class="name">withRetryBackoff</span><span class="params">(<span name="backoff">backoff: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientParams.A">A</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures the requeue backoff policy of this client (default: no delay).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the requeue backoff policy of this client (default: no delay).</p><p>The <code>backoff</code> policy is represented by a stream of delays (i.e.,

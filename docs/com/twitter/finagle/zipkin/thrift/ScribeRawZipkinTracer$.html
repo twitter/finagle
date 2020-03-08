@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -180,10 +180,6 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.zipkin">zipkin</a></dd></dl></div>
     </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="DefaultSampler$.html" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer."></a>
-                        <a href="DefaultSampler$.html" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer.">DefaultSampler</a>
-                      </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="" title=""></a>
                         <a href="" title="">ScribeRawZipkinTracer</a>
@@ -329,9 +325,9 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(client:com.twitter.finagle.zipkin.thriftscala.Scribe.FutureIface,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer"></a><a id="apply(FutureIface,StatsReceiver,Timer):ScribeRawZipkinTracer"></a>
+      <a id="apply(client:com.twitter.finagle.zipkin.thriftscala.Scribe.MethodPerEndpoint,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer"></a><a id="apply(MethodPerEndpoint,String,StatsReceiver,Timer):ScribeRawZipkinTracer"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/ScribeRawZipkinTracer$.html#apply(client:com.twitter.finagle.zipkin.thriftscala.Scribe.FutureIface,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/thrift/ScribeRawZipkinTracer$.html#apply(client:com.twitter.finagle.zipkin.thriftscala.Scribe.MethodPerEndpoint,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -340,41 +336,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="client">client: <a href="../thriftscala/Scribe$$FutureIface.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.FutureIface">FutureIface</a></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer">ScribeRawZipkinTracer</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to Zipkin via scribe.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to Zipkin via scribe.
-</p></div><dl class="paramcmts block"><dt class="param">client</dt><dd class="cmt"><p>The scribe client used to send traces to scribe</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Where to log information about tracing success/failures</p></dd><dt class="param">timer</dt><dd class="cmt"><p>A Timer used for timing out spans in the <span class="extype" name="DeadlineSpanMap">DeadlineSpanMap</span></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(scribeHost:String,scribePort:Int,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer"></a><a id="apply(String,Int,StatsReceiver,Timer):ScribeRawZipkinTracer"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/ScribeRawZipkinTracer$.html#apply(scribeHost:String,scribePort:Int,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="scribeHost">scribeHost: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;localhost&quot;</span></span>, <span name="scribePort">scribePort: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol">1463</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../../index.html">NullStatsReceiver</a></span></span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a> = <span class="symbol"><span class="name"><a href="../../../../index.html">DefaultTimer</a></span></span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer">ScribeRawZipkinTracer</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to Zipkin via scribe.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to Zipkin via scribe.
-</p></div><dl class="paramcmts block"><dt class="param">scribeHost</dt><dd class="cmt"><p>Host to send trace data to</p></dd><dt class="param">scribePort</dt><dd class="cmt"><p>Port to send trace data to</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Where to log information about tracing success/failures</p></dd><dt class="param">timer</dt><dd class="cmt"><p>A Timer used for timing out spans in the <span class="extype" name="DeadlineSpanMap">DeadlineSpanMap</span></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(client:com.twitter.finagle.zipkin.thriftscala.Scribe.FutureIface,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer"></a><a id="apply(FutureIface,String,StatsReceiver,Timer):ScribeRawZipkinTracer"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/ScribeRawZipkinTracer$.html#apply(client:com.twitter.finagle.zipkin.thriftscala.Scribe.FutureIface,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="client">client: <a href="../thriftscala/Scribe$$FutureIface.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.FutureIface">FutureIface</a></span>, <span name="scribeCategory">scribeCategory: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer">ScribeRawZipkinTracer</span></span>
+        <span class="name">apply</span><span class="params">(<span name="client">client: <a href="../thriftscala/Scribe$$MethodPerEndpoint.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.MethodPerEndpoint">MethodPerEndpoint</a></span>, <span name="scribeCategory">scribeCategory: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer">ScribeRawZipkinTracer</span></span>
       </span>
       
       <p class="shortcomment cmt">Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to scribe with the specified
@@ -382,9 +344,9 @@ scribeCategory.</p><div class="fullcomment"><div class="comment cmt"><p>Creates 
 scribeCategory.
 </p></div><dl class="paramcmts block"><dt class="param">client</dt><dd class="cmt"><p>The scribe client used to send traces to scribe</p></dd><dt class="param">scribeCategory</dt><dd class="cmt"><p>Category under which the trace data should be scribed</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Where to log information about tracing success/failures</p></dd><dt class="param">timer</dt><dd class="cmt"><p>A Timer used for timing out spans in the <span class="extype" name="DeadlineSpanMap">DeadlineSpanMap</span></p></dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(scribeHost:String,scribePort:Int,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer"></a><a id="apply(String,Int,String,StatsReceiver,Timer):ScribeRawZipkinTracer"></a>
+      <a id="apply(scribeHost:String,scribePort:Int,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,clientName:String,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer"></a><a id="apply(String,Int,String,StatsReceiver,String,Timer):ScribeRawZipkinTracer"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/ScribeRawZipkinTracer$.html#apply(scribeHost:String,scribePort:Int,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/thrift/ScribeRawZipkinTracer$.html#apply(scribeHost:String,scribePort:Int,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,clientName:String,timer:com.twitter.util.Timer):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -393,32 +355,11 @@ scribeCategory.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="scribeHost">scribeHost: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="scribePort">scribePort: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="scribeCategory">scribeCategory: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer">ScribeRawZipkinTracer</span></span>
+        <span class="name">apply</span><span class="params">(<span name="scribeHost">scribeHost: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol"><span class="name"><a href="../../../../index.html">Host().getHostName</a></span></span></span>, <span name="scribePort">scribePort: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol"><span class="name"><a href="../../../../index.html">Host().getPort</a></span></span></span>, <span name="scribeCategory">scribeCategory: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;zipkin&quot;</span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="symbol"><span class="name"><a href="../../../../index.html">NullStatsReceiver</a></span></span></span>, <span name="clientName">clientName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">clientLabel</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> = <span class="symbol"><span class="name"><a href="../../../../index.html">DefaultTimer</a></span></span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer">ScribeRawZipkinTracer</span></span>
       </span>
       
-      <p class="shortcomment cmt">Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to scribe with the specified
-scribeCategory.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to scribe with the specified
-scribeCategory.
-</p></div><dl class="paramcmts block"><dt class="param">scribeHost</dt><dd class="cmt"><p>Host to send trace data to</p></dd><dt class="param">scribePort</dt><dd class="cmt"><p>Port to send trace data to</p></dd><dt class="param">scribeCategory</dt><dd class="cmt"><p>Category under which the trace data should be scribed</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Where to log information about tracing success/failures</p></dd><dt class="param">timer</dt><dd class="cmt"><p>A Timer used for timing out spans in the <span class="extype" name="DeadlineSpanMap">DeadlineSpanMap</span></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(scribeHost:String,scribePort:Int,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer,clientName:String):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer"></a><a id="apply(String,Int,String,StatsReceiver,Timer,String):ScribeRawZipkinTracer"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/ScribeRawZipkinTracer$.html#apply(scribeHost:String,scribePort:Int,scribeCategory:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver,timer:com.twitter.util.Timer,clientName:String):com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="scribeHost">scribeHost: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="scribePort">scribePort: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="scribeCategory">scribeCategory: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>, <span name="clientName">clientName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer">ScribeRawZipkinTracer</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to scribe with the specified
-scribeCategory.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to scribe with the specified
-scribeCategory.
-</p></div><dl class="paramcmts block"><dt class="param">scribeHost</dt><dd class="cmt"><p>Host to send trace data to</p></dd><dt class="param">scribePort</dt><dd class="cmt"><p>Port to send trace data to</p></dd><dt class="param">scribeCategory</dt><dd class="cmt"><p>Category under which the trace data should be scribed</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Where to log information about tracing success/failures</p></dd><dt class="param">clientName</dt><dd class="cmt"><p>Name of the scribe finagle client</p></dd></dl></div>
+      <p class="shortcomment cmt">Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to Zipkin via scribe.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> that sends traces to Zipkin via scribe.
+</p></div><dl class="paramcmts block"><dt class="param">scribeHost</dt><dd class="cmt"><p>Host to send trace data to</p></dd><dt class="param">scribePort</dt><dd class="cmt"><p>Port to send trace data to</p></dd><dt class="param">scribeCategory</dt><dd class="cmt"><p>scribe category under which traces will be logged</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>Where to log information about tracing success/failures</p></dd><dt class="param">clientName</dt><dd class="cmt"><p>Name of the scribe finagle client</p></dd><dt class="param">timer</dt><dd class="cmt"><p>A Timer used for timing out spans in the <span class="extype" name="DeadlineSpanMap">DeadlineSpanMap</span></p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -653,22 +594,6 @@ scribeCategory.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer#tracerCache" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="tracerCache:com.twitter.finagle.zipkin.core.TracerCache[com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer]"></a><a id="tracerCache:TracerCache[ScribeRawZipkinTracer]"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/ScribeRawZipkinTracer$.html#tracerCache:com.twitter.finagle.zipkin.core.TracerCache[com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">tracerCache</span><span class="result">: <span class="extype" name="com.twitter.finagle.zipkin.core.TracerCache">TracerCache</span>[<span class="extype" name="com.twitter.finagle.zipkin.thrift.ScribeRawZipkinTracer">ScribeRawZipkinTracer</span>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

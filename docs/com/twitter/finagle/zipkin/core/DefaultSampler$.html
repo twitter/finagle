@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -163,10 +163,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="thrift"></a><a id="thrift:thrift"></a>
+    </li><li name="com.twitter.finagle.zipkin.core" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="core"></a><a id="core:core"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/zipkin/index.html#thrift" title="Permalink">
+      <a href="../../../../com/twitter/finagle/zipkin/index.html#core" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -175,26 +175,42 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="index.html"><span class="name">thrift</span></a>
+        <a title="" href="index.html"><span class="name">core</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.zipkin">zipkin</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="BinaryAnnotation.html" title=""></a>
+                        <a href="BinaryAnnotation.html" title="">BinaryAnnotation</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="object" href="" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer."></a>
                         <a href="" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer.">DefaultSampler</a>
                       </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="ScribeRawZipkinTracer$.html" title=""></a>
-                        <a href="ScribeRawZipkinTracer$.html" title="">ScribeRawZipkinTracer</a>
+                        <a class="object" href="Endpoint$.html" title=""></a>
+                        <a class="class" href="Endpoint.html" title="Endpoints describe a TCP endpoint that terminates RPC communication."></a>
+                        <a href="Endpoint.html" title="Endpoints describe a TCP endpoint that terminates RPC communication.">Endpoint</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="ScribeZipkinTracer.html" title="Receives the Finagle generated traces and sends a sample of them off to Zipkin via Scribe"></a>
-                        <a href="ScribeZipkinTracer.html" title="Receives the Finagle generated traces and sends a sample of them off to Zipkin via Scribe">ScribeZipkinTracer</a>
+                        <a class="class" href="RawZipkinTracer.html" title="Receives the Finagle generated traces and sends them off to Zipkin"></a>
+                        <a href="RawZipkinTracer.html" title="Receives the Finagle generated traces and sends them off to Zipkin">RawZipkinTracer</a>
                       </li><li class="current-entities indented5">
-                        <a class="object" href="ZipkinTracer$.html" title=""></a>
-                        <a class="class" href="ZipkinTracer.html" title="Receives the Finagle generated traces and sends a sample of them off to Zipkin via Scribe"></a>
-                        <a href="ZipkinTracer.html" title="Receives the Finagle generated traces and sends a sample of them off to Zipkin via Scribe">ZipkinTracer</a>
+                        <a class="object" href="Sampler$.html" title=""></a>
+                        <a class="class" href="Sampler.html" title="Decide if we should sample a particular trace or not."></a>
+                        <a href="Sampler.html" title="Decide if we should sample a particular trace or not.">Sampler</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="SamplingTracer.html" title="Tracer that supports sampling."></a>
+                        <a href="SamplingTracer.html" title="Tracer that supports sampling.">SamplingTracer</a>
+                      </li><li class="current-entities indented5">
+                        <a class="object" href="Span$.html" title=""></a>
+                        <a class="class" href="Span.html" title="The span itself is an immutable datastructure."></a>
+                        <a href="Span.html" title="The span itself is an immutable datastructure.">Span</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="ZipkinAnnotation.html" title="Annotation for a span."></a>
+                        <a href="ZipkinAnnotation.html" title="Annotation for a span.">ZipkinAnnotation</a>
                       </li>
               </ul>
             </div>
@@ -203,9 +219,9 @@ resources for using Finagle.
             <body class="object value">
       <div id="definition">
         <div class="big-circle object">o</div>
-        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.zipkin">zipkin</a>.<a href="index.html" class="extype" name="com.twitter.finagle.zipkin.thrift">thrift</a></p>
+        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.zipkin">zipkin</a>.<a href="index.html" class="extype" name="com.twitter.finagle.zipkin.core">core</a></p>
         <h1>DefaultSampler<span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -218,7 +234,7 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">DefaultSampler</span><span class="result"> extends <a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></span>
+        <span class="name">DefaultSampler</span><span class="result"> extends <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></span>
       </span>
       </h4>
 
@@ -230,7 +246,7 @@ the Tracer.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a>, <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a>, <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -256,7 +272,7 @@ the Tracer.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.zipkin.thrift.DefaultSampler"><span>DefaultSampler</span></li><li class="in" name="com.twitter.finagle.zipkin.core.Sampler"><span>Sampler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.zipkin.core.DefaultSampler"><span>DefaultSampler</span></li><li class="in" name="com.twitter.finagle.zipkin.core.Sampler"><span>Sampler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -286,7 +302,7 @@ the Tracer.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -302,7 +318,7 @@ the Tracer.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html###():Int" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -318,7 +334,7 @@ the Tracer.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -334,7 +350,7 @@ the Tracer.
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -350,7 +366,7 @@ the Tracer.
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#clone():Object" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -371,10 +387,10 @@ the Tracer.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift.DefaultSampler#defaultSampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.zipkin.core.DefaultSampler#defaultSampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="defaultSampleRate:Option[Float]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#defaultSampleRate:Option[Float]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#defaultSampleRate:Option[Float]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -390,7 +406,7 @@ the Tracer.
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -406,7 +422,7 @@ the Tracer.
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -422,7 +438,7 @@ the Tracer.
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -444,7 +460,7 @@ the Tracer.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -463,7 +479,7 @@ the Tracer.
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#hashCode():Int" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -482,7 +498,7 @@ the Tracer.
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -498,7 +514,7 @@ the Tracer.
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -514,7 +530,7 @@ the Tracer.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#notify():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -533,7 +549,7 @@ the Tracer.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -549,10 +565,10 @@ the Tracer.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift.DefaultSampler#sampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.zipkin.core.DefaultSampler#sampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sampleRate:Float"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#sampleRate:Float" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#sampleRate:Float" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -564,11 +580,11 @@ the Tracer.
         <span class="name">sampleRate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the current sample rate, 0.0-1.0</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.thrift.DefaultSampler">DefaultSampler</a> → <a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the current sample rate, 0.0-1.0</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.core.DefaultSampler">DefaultSampler</a> → <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.core.Sampler#sampleRecord" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sampleRecord(record:com.twitter.finagle.tracing.Record):Boolean"></a><a id="sampleRecord(Record):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#sampleRecord(record:com.twitter.finagle.tracing.Record):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#sampleRecord(record:com.twitter.finagle.tracing.Record):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -582,11 +598,11 @@ the Tracer.
       
       <p class="shortcomment cmt">Decides if we should record this record or not.</p><div class="fullcomment"><div class="comment cmt"><p>Decides if we should record this record or not.
 If this trace is marked as not sampled we just throw away all the records
-If this trace is marked as None (no decision has been made), consult the sampleTrace impl</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if we should keep it, false for throw away</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+If this trace is marked as None (no decision has been made), consult the sampleTrace impl</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if we should keep it, false for throw away</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.core.Sampler#sampleTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sampleTrace(traceId:com.twitter.finagle.tracing.TraceId,sampleRate:Float):Option[Boolean]"></a><a id="sampleTrace(TraceId,Float):Option[Boolean]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#sampleTrace(traceId:com.twitter.finagle.tracing.TraceId,sampleRate:Float):Option[Boolean]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#sampleTrace(traceId:com.twitter.finagle.tracing.TraceId,sampleRate:Float):Option[Boolean]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -601,11 +617,11 @@ If this trace is marked as None (no decision has been made), consult the sampleT
       <p class="shortcomment cmt">Should we drop this particular trace or send it on to Scribe?
 True means keep.</p><div class="fullcomment"><div class="comment cmt"><p>Should we drop this particular trace or send it on to Scribe?
 True means keep.
-False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>check if this trace id passes the sampler</p></dd><dt class="param">sampleRate</dt><dd class="cmt"><p>don't use the sampler's sample rate, instead use this one directly</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>check if this trace id passes the sampler</p></dd><dt class="param">sampleRate</dt><dd class="cmt"><p>don't use the sampler's sample rate, instead use this one directly</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.core.Sampler#sampleTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sampleTrace(traceId:com.twitter.finagle.tracing.TraceId):Option[Boolean]"></a><a id="sampleTrace(TraceId):Option[Boolean]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#sampleTrace(traceId:com.twitter.finagle.tracing.TraceId):Option[Boolean]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#sampleTrace(traceId:com.twitter.finagle.tracing.TraceId):Option[Boolean]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -620,11 +636,11 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
       <p class="shortcomment cmt">Should we drop this particular trace or send it on to Scribe?
 True means keep.</p><div class="fullcomment"><div class="comment cmt"><p>Should we drop this particular trace or send it on to Scribe?
 True means keep.
-False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>check if this trace id passes the sampler</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.thrift.DefaultSampler#setSampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>check if this trace id passes the sampler</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.zipkin.core.DefaultSampler#setSampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setSampleRate(sampleRate:Float):Unit"></a><a id="setSampleRate(Float):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#setSampleRate(sampleRate:Float):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#setSampleRate(sampleRate:Float):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -636,11 +652,11 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
         <span class="name">setSampleRate</span><span class="params">(<span name="sampleRate">sampleRate: <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Default sample rate may be explicitly overridden unless the initialSampleRate flag is set.</p><div class="fullcomment"><div class="comment cmt"><p>Default sample rate may be explicitly overridden unless the initialSampleRate flag is set.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.thrift.DefaultSampler">DefaultSampler</a> → <a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+      <p class="shortcomment cmt">Default sample rate may be explicitly overridden unless the initialSampleRate flag is set.</p><div class="fullcomment"><div class="comment cmt"><p>Default sample rate may be explicitly overridden unless the initialSampleRate flag is set.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.core.DefaultSampler">DefaultSampler</a> → <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.core.Sampler#sr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sr:Float"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#sr:Float" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#sr:Float" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -652,11 +668,11 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
         <span class="name">sr</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -672,7 +688,7 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#toString():String" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -688,7 +704,7 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
     </li><li name="com.twitter.finagle.zipkin.core.Sampler#validSampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="validSampleRate(sampleRate:Float):Boolean"></a><a id="validSampleRate(Float):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#validSampleRate(sampleRate:Float):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#validSampleRate(sampleRate:Float):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -700,11 +716,11 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
         <span class="name">validSampleRate</span><span class="params">(<span name="sampleRate">sampleRate: <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">sampleRate</dt><dd class="cmt"><p>is this sample rate valid (0-1f range)?</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">sampleRate</dt><dd class="cmt"><p>is this sample rate valid (0-1f range)?</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#wait():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -726,7 +742,7 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -748,7 +764,7 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/thrift/DefaultSampler$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -780,7 +796,7 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.zipkin.core.Sampler">
-              <h3>Inherited from <a href="../core/Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></h3>
+              <h3>Inherited from <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

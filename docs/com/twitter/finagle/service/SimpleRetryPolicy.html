@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -322,7 +322,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">SimpleRetryPolicy</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>] with (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
+        <span class="name">SimpleRetryPolicy</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>] with (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
       </span>
       </h4>
 
@@ -333,7 +333,7 @@ the two abstract methods <code>shouldRetry</code> and <code>backoffAt</code> and
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>], (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])], <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>], (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])], <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -430,7 +430,7 @@ the two abstract methods <code>shouldRetry</code> and <code>backoffAt</code> and
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">backoffAt</span><span class="params">(<span name="retry">retry: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>
+        <span class="name">backoffAt</span><span class="params">(<span name="retry">retry: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>
       </span>
       
       <p class="shortcomment cmt">Given a number of retries, return how long to wait till the next retry.</p><div class="fullcomment"><div class="comment cmt"><p>Given a number of retries, return how long to wait till the next retry. Note that this is
@@ -520,7 +520,7 @@ zero-indexed. To implement a finite number of retries, implement a method like:
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="that">that: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]) ⇒ <span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.andThen.B">B</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.andThen.B">B</span></span>
+        <span class="name">andThen</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="that">that: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]) ⇒ <span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.andThen.B">B</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.andThen.B">B</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy">SimpleRetryPolicy</a> → Function1</dd></dl></div>
@@ -536,7 +536,7 @@ zero-indexed. To implement a finite number of retries, implement a method like:
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="e">e: <span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
+        <span class="name">apply</span><span class="params">(<span name="e">e: <span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy">SimpleRetryPolicy</a> → Function1</dd></dl></div>
@@ -592,7 +592,7 @@ zero-indexed. To implement a finite number of retries, implement a method like:
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="that">that: (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.compose.B">B</span>) ⇒ <span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.compose.B">B</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
+        <span class="name">compose</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="that">that: (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.compose.B">B</span>) ⇒ <span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.compose.B">B</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy">SimpleRetryPolicy</a> → Function1</dd></dl></div>
@@ -810,7 +810,7 @@ based upon backpressure signals such as failure rate or request latency.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">never</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>
+        <span class="name">never</span><span class="result">: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>
       </span>
       
       <p class="shortcomment cmt">A convenience method to access Duration.Top from Java.</p><div class="fullcomment"><div class="comment cmt"><p>A convenience method to access Duration.Top from Java. This is a sentinel value that
@@ -967,7 +967,7 @@ signals no-further-retries.
         <div class="parent" name="com.twitter.finagle.service.RetryPolicy">
               <h3>Inherited from <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>]</h3>
             </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</h3>
+              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

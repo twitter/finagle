@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -597,7 +597,7 @@ methods, though only one set of methods should be used.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">chunkReader</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a>[<a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>]</span>
+        <span class="name">chunkReader</span><span class="result">: <span class="extype" name="com.twitter.io.Reader">Reader</span>[<a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A read-only handle to a stream of <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>, representing the message body.</p><div class="fullcomment"><div class="comment cmt"><p>A read-only handle to a stream of <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>, representing the message body. This stream is only
@@ -618,7 +618,7 @@ can be retrieved via <a href="Chunk.html#trailers:com.twitter.finagle.http.Heade
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">chunkWriter</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Writer.html#com.twitter.io.Writer" class="extype" name="com.twitter.io.Writer">Writer</a>[<a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>]</span>
+        <span class="name">chunkWriter</span><span class="result">: <span class="extype" name="com.twitter.io.Writer">Writer</span>[<a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A write-only handle to a stream of <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>, representing the message body.</p><div class="fullcomment"><div class="comment cmt"><p>A write-only handle to a stream of <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>, representing the message body. Only chunked
@@ -938,7 +938,7 @@ Trailers are transmitted in the very last chunk of the stream and can be populat
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: cacheControl_$eq" class="name">cacheControl_=</span><span class="params">(<span name="maxAge">maxAge: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span title="gt4s: cacheControl_$eq" class="name">cacheControl_=</span><span class="params">(<span name="maxAge">maxAge: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <p class="shortcomment cmt">Set Cache-Control header with a max-age (and must-revalidate).</p>
@@ -1042,7 +1042,7 @@ Trailers are transmitted in the very last chunk of the stream and can be populat
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <p class="shortcomment cmt">End the response stream.</p>
@@ -1058,7 +1058,7 @@ Trailers are transmitted in the very last chunk of the stream and can be populat
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">content</span><span class="params">(<span name="content">content: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.Message">Message</a>.this.type</span>
+        <span class="name">content</span><span class="params">(<span name="content">content: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.Message">Message</a>.this.type</span>
       </span>
       
       <p class="shortcomment cmt">Set the content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Set the content of this <code>Message</code>.</p><p>Any existing content is discarded. If this <code>Message</code> is set to chunked,
@@ -1082,7 +1082,7 @@ an <code>IllegalStateException</code> is thrown.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">content</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>
+        <span class="name">content</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <p class="shortcomment cmt">Retrieve the current content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the current content of this <code>Message</code>.</p><p>If this message is chunked, the resulting <code>Buf</code> will always be empty.
@@ -1233,7 +1233,7 @@ Codec, but this method allows you to override that.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: content_$eq" class="name">content_=</span><span class="params">(<span name="content">content: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span title="gt4s: content_$eq" class="name">content_=</span><span class="params">(<span name="content">content: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <p class="shortcomment cmt">Set the content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Set the content of this <code>Message</code>.</p><p>Any existing content is discarded. If this <code>Message</code> is set to chunked,
@@ -1882,7 +1882,7 @@ preserved, though may not be appropriate for the new media type.
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">reader</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
+        <span class="name">reader</span><span class="result">: <span class="extype" name="com.twitter.io.Reader">Reader</span>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A read-only handle to a stream of <span class="extype" name="Buf">Buf</span>, representing the message body.</p><div class="fullcomment"><div class="comment cmt"><p>A read-only handle to a stream of <span class="extype" name="Buf">Buf</span>, representing the message body. This stream is only
@@ -2385,7 +2385,7 @@ using the <code>write(Buf)</code> method.</p><p>An <code>IllegalStateException</
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">write</span><span class="params">(<span name="buf">buf: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <p class="shortcomment cmt">Append a Buf to content.</p><div class="fullcomment"><div class="comment cmt"><p>Append a Buf to content.</p><p>An <code>IllegalStateException</code> is thrown if this message is chunked.
@@ -2431,7 +2431,7 @@ using the <code>write(Buf)</code> method.</p><p>An <code>IllegalStateException</
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">writer</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Writer.html#com.twitter.io.Writer" class="extype" name="com.twitter.io.Writer">Writer</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
+        <span class="name">writer</span><span class="result">: <span class="extype" name="com.twitter.io.Writer">Writer</span>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A write-only handle to the stream of <span class="extype" name="Buf">Buf</span>, representing the message body.</p><div class="fullcomment"><div class="comment cmt"><p>A write-only handle to the stream of <span class="extype" name="Buf">Buf</span>, representing the message body. Only chunked

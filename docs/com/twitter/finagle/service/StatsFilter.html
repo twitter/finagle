@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -335,7 +335,7 @@ number successful and request latency to the given <span class="extype" name="St
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>], (<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>], <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>], (<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>], <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -393,7 +393,7 @@ number successful and request latency to the given <span class="extype" name="St
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
+        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span>
       </span>
       
       <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
@@ -410,7 +410,7 @@ number successful and request latency to the given <span class="extype" name="St
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</a></span>)</span>
+        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>)</span>
       </span>
       
       <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
@@ -427,7 +427,7 @@ number successful and request latency to the given <span class="extype" name="St
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</a></span>, <span name="timeUnit">timeUnit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>)</span>
+        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>, <span name="timeUnit">timeUnit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>)</span>
       </span>
       
       <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
@@ -450,7 +450,7 @@ it will be &quot;request_latency_ms&quot;.</p></dd></dl></div>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="responseClassifier">responseClassifier: <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</a></span>, <span name="timeUnit">timeUnit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>)</span>
+        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="responseClassifier">responseClassifier: <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>, <span name="timeUnit">timeUnit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>)</span>
       </span>
       
       <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
@@ -620,7 +620,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>
       </span>
       
       <p class="shortcomment cmt">This is the method to override/implement to create your own Filter.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Filter.
@@ -677,7 +677,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">curried</span><span class="result">: (<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>) ⇒ (<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>
+        <span class="name">curried</span><span class="result">: (<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>) ⇒ (<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -890,7 +890,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tupled</span><span class="result">: ((<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>])) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>
+        <span class="name">tupled</span><span class="result">: ((<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>])) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -980,7 +980,7 @@ on a configuration file, for instance.
             </div><div class="parent" name="com.twitter.finagle.Filter">
               <h3>Inherited from <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.Function2">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</h3>
+              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

@@ -1,32 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Concurrent Programming with Futures &#8212; Finagle 20.1.0 documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Concurrent Programming with Futures &#8212; Finagle 20.3.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '20.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 20.1.0 documentation" href="index.html" />
     <link rel="next" title="Services &amp; Filters" href="ServicesAndFilters.html" />
     <link rel="prev" title="Quickstart" href="Quickstart.html" />
    
@@ -43,8 +31,7 @@
 
   </script>
 
-  </head>
-  <body role="document">
+  </head><body>
   
   
 
@@ -71,9 +58,9 @@
             
   <div class="section" id="concurrent-programming-with-futures">
 <h1>Concurrent Programming with Futures<a class="headerlink" href="#concurrent-programming-with-futures" title="Permalink to this headline">¶</a></h1>
-<p>Finagle uses <em>futures</em> <a class="footnote-reference" href="#futures" id="id1">[1]</a> to encapsulate and compose
+<p>Finagle uses <em>futures</em> <a class="footnote-reference brackets" href="#futures" id="id1">1</a> to encapsulate and compose
 concurrent operations such as network RPCs. Futures are directly
-analogous to threads —&nbsp;they provide independent and overlapping
+analogous to threads — they provide independent and overlapping
 threads of control — and can be thought of as <em>featherweight
 threads</em>. They are cheap in construction, so the economies of
 traditional threads do not apply. It is no problem to maintain
@@ -82,28 +69,28 @@ represented by futures.</p>
 <p>Futures also decouple Finagle from the operating system and runtime
 thread schedulers. This is used in important ways; for example,
 Finagle uses thread biasing to reduce context switching costs.</p>
-<p>The harmony of this analogy has one discordant caveat: <em>don&#8217;t
-perform blocking operations in a Future</em>. Futures aren&#8217;t
-preemptive; they must yield control via <code class="docutils literal"><span class="pre">flatMap</span></code>. Blocking
+<p>The harmony of this analogy has one discordant caveat: <em>don’t
+perform blocking operations in a Future</em>. Futures aren’t
+preemptive; they must yield control via <code class="docutils literal notranslate"><span class="pre">flatMap</span></code>. Blocking
 operations disrupt this, halting the progress of other asynchronous
 operations, and cause your application to experience unexpected
 slowness, a decrease in throughput, and potentially deadlocks. But
-of course it&#8217;s possible for blocking operations to be combined safely
-with Futures as we&#8217;ll see.</p>
+of course it’s possible for blocking operations to be combined safely
+with Futures as we’ll see.</p>
 <div class="section" id="blocking-or-synchronous-work">
 <h2>Blocking or synchronous work<a class="headerlink" href="#blocking-or-synchronous-work" title="Permalink to this headline">¶</a></h2>
 <p id="future-pools">When you have work that is blocking, say I/O or a library
 not written in an asynchronous style, you should use a
-<code class="docutils literal"><span class="pre">com.twitter.util.FuturePool</span></code>. FuturePool manages a pool of
-threads that don&#8217;t do any other work, which means that blocking
-operations won&#8217;t halt other asynchronous work.</p>
-<p>In the code below, <code class="docutils literal"><span class="pre">someIO</span></code> is an operation that waits for
+<code class="docutils literal notranslate"><span class="pre">com.twitter.util.FuturePool</span></code>. FuturePool manages a pool of
+threads that don’t do any other work, which means that blocking
+operations won’t halt other asynchronous work.</p>
+<p>In the code below, <code class="docutils literal notranslate"><span class="pre">someIO</span></code> is an operation that waits for
 I/O and returns a string (e.g., reading from a file). Wrapping
-<code class="docutils literal"><span class="pre">someIO():</span> <span class="pre">String</span></code> in <code class="docutils literal"><span class="pre">FuturePool.unboundedPool</span></code> returns a
-<code class="docutils literal"><span class="pre">Future[String]</span></code>, which allows us to combine this blocking
+<code class="docutils literal notranslate"><span class="pre">someIO():</span> <span class="pre">String</span></code> in <code class="docutils literal notranslate"><span class="pre">FuturePool.unboundedPool</span></code> returns a
+<code class="docutils literal notranslate"><span class="pre">Future[String]</span></code>, which allows us to combine this blocking
 operation with other Futures in a safe way.</p>
 <p>Scala:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Future</span><span class="o">,</span> <span class="nc">FuturePool</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Future</span><span class="o">,</span> <span class="nc">FuturePool</span><span class="o">}</span>
 
 <span class="k">def</span> <span class="n">someIO</span><span class="o">()</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span>
   <span class="c1">// does some blocking I/O and returns a string</span>
@@ -114,13 +101,13 @@ operation with other Futures in a safe way.</p>
 </pre></div>
 </div>
 <p>Java:</p>
-<div class="highlight-java"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.util.Future</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.util.FuturePools</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">static</span> <span class="n">com</span><span class="o">.</span><span class="na">twitter</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">Function</span><span class="o">.</span><span class="na">func0</span><span class="o">;</span>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.util.Future</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.util.FuturePools</span><span class="p">;</span>
+<span class="kn">import static</span> <span class="nn">com.twitter.util.Function.func0</span><span class="p">;</span>
 
-<span class="n">Future</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">futureResult</span> <span class="o">=</span> <span class="n">FuturePools</span><span class="o">.</span><span class="na">unboundedPool</span><span class="o">().</span><span class="na">apply</span><span class="o">(</span>
-  <span class="n">func0</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="n">someIO</span><span class="o">());</span>
-<span class="o">);</span>
+<span class="n">Future</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">futureResult</span> <span class="o">=</span> <span class="n">FuturePools</span><span class="p">.</span><span class="na">unboundedPool</span><span class="p">().</span><span class="na">apply</span><span class="p">(</span>
+  <span class="n">func0</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="n">someIO</span><span class="p">());</span>
+<span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -128,22 +115,22 @@ operation with other Futures in a safe way.</p>
 <h2>Futures as containers<a class="headerlink" href="#futures-as-containers" title="Permalink to this headline">¶</a></h2>
 <p>Common examples of operations that are represented by futures are:</p>
 <ul class="simple">
-<li>an RPC to a remote host</li>
-<li>a long computation in another thread</li>
-<li>reading from disk</li>
+<li><p>an RPC to a remote host</p></li>
+<li><p>a long computation in another thread</p></li>
+<li><p>reading from disk</p></li>
 </ul>
 <p>Note that these operations are all fallible: remote hosts could
 crash, computations might throw an exception, disks could fail, etc.
-A <code class="docutils literal"><span class="pre">Future[T]</span></code>, then, occupies exactly one of three states:</p>
+A <code class="docutils literal notranslate"><span class="pre">Future[T]</span></code>, then, occupies exactly one of three states:</p>
 <ul class="simple">
-<li>Empty (pending)</li>
-<li>Succeeded (with a result of type <code class="docutils literal"><span class="pre">T</span></code>)</li>
-<li>Failed (with a <code class="docutils literal"><span class="pre">Throwable</span></code>)</li>
+<li><p>Empty (pending)</p></li>
+<li><p>Succeeded (with a result of type <code class="docutils literal notranslate"><span class="pre">T</span></code>)</p></li>
+<li><p>Failed (with a <code class="docutils literal notranslate"><span class="pre">Throwable</span></code>)</p></li>
 </ul>
 <p>While it is possible to directly query this state, this is rarely useful.
 Instead, a callback may be registered to receive the results once
 they are made available:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
 
@@ -154,7 +141,7 @@ they are made available:</p>
 </div>
 <p>which will be invoked only on success. Callbacks may also be registered
 to account for failures:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
 
@@ -174,18 +161,18 @@ operations.</p>
 <p>Consider the simple example of fetching a representative thumbnail
 from a website (ala Pinterest). This typically involves:</p>
 <ol class="arabic simple">
-<li>Fetching the homepage</li>
-<li>Parsing that page to find the first image link</li>
-<li>Fetching the image link</li>
+<li><p>Fetching the homepage</p></li>
+<li><p>Parsing that page to find the first image link</p></li>
+<li><p>Fetching the image link</p></li>
 </ol>
 <p>This is an example of <em>sequential</em> composition: in order to do the
 next step, we must have successfully completed the previous one. With
-Futures, this is called <code class="docutils literal"><span class="pre">flatMap</span></code> <a class="footnote-reference" href="#flatmap" id="id2">[3]</a>. The result of <code class="docutils literal"><span class="pre">flatMap</span></code> is a Future
+Futures, this is called <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> <a class="footnote-reference brackets" href="#flatmap" id="id2">3</a>. The result of <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> is a Future
 representing the result of this composite operation. Given some helper
-methods —&nbsp;<code class="docutils literal"><span class="pre">fetchUrl</span></code> fetches the given URL, <code class="docutils literal"><span class="pre">findImageUrls</span></code> parses an HTML
-page to find image links —&nbsp;we can implement our Pinterest-style thumbnail
+methods — <code class="docutils literal notranslate"><span class="pre">fetchUrl</span></code> fetches the given URL, <code class="docutils literal notranslate"><span class="pre">findImageUrls</span></code> parses an HTML
+page to find image links — we can implement our Pinterest-style thumbnail
 extract like this:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">def</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
 <span class="k">def</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">])</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
@@ -205,24 +192,24 @@ extract like this:</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p><code class="docutils literal"><span class="pre">f</span></code> represents the <em>composite</em> operation. It is the result of first
+<p><code class="docutils literal notranslate"><span class="pre">f</span></code> represents the <em>composite</em> operation. It is the result of first
 retrieving the web page, and then the first image link. If either of
-the smaller operations fail (the first or second <code class="docutils literal"><span class="pre">fetchUrl</span></code> or if
-<code class="docutils literal"><span class="pre">findImageUrls</span></code> doesn&#8217;t successfully find any images), the composite
+the smaller operations fail (the first or second <code class="docutils literal notranslate"><span class="pre">fetchUrl</span></code> or if
+<code class="docutils literal notranslate"><span class="pre">findImageUrls</span></code> doesn’t successfully find any images), the composite
 operation also fails.</p>
 <p>The astute reader may have noticed something peculiar: this is
 typically the job of the semicolon! That is not far from the truth:
 semicolons sequence two statements, and with traditional I/O
-operations, have the same effect as <code class="docutils literal"><span class="pre">flatMap</span></code> does above (the
+operations, have the same effect as <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> does above (the
 exception mechanism takes the role of a failed future). Futures
-are much more versatile, however, as we&#8217;ll see.</p>
+are much more versatile, however, as we’ll see.</p>
 </div>
 <div class="section" id="concurrent-composition">
 <h2>Concurrent composition<a class="headerlink" href="#concurrent-composition" title="Permalink to this headline">¶</a></h2>
 <p>It is also possible to compose Futures <em>concurrently</em>. We can extend
-our above example to demonstrate: let&#8217;s fetch <em>all</em> the images.
-Concurrent composition is provided by <code class="docutils literal"><span class="pre">Future.collect</span></code>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+our above example to demonstrate: let’s fetch <em>all</em> the images.
+Concurrent composition is provided by <code class="docutils literal notranslate"><span class="pre">Future.collect</span></code>:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">val</span> <span class="n">collected</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]]</span> <span class="k">=</span>
   <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">bytes</span> <span class="k">=&gt;</span>
@@ -235,8 +222,8 @@ Concurrent composition is provided by <code class="docutils literal"><span class
 first we fetch the web page, then we collect the results of fetching
 all of the underlying images.</p>
 <p>As with sequential composition, concurrent composition propagates
-failures: the future <code class="docutils literal"><span class="pre">collected</span></code> will fail if any of the underlying
-futures do <a class="footnote-reference" href="#collecttotry" id="id3">[2]</a>.</p>
+failures: the future <code class="docutils literal notranslate"><span class="pre">collected</span></code> will fail if any of the underlying
+futures do <a class="footnote-reference brackets" href="#collecttotry" id="id3">2</a>.</p>
 <p>It is also simple to write your own combinators that operate over
 Futures. This is quite useful, and gives rise to a great amount of
 modularity in distributed systems as common patterns can be cleanly
@@ -246,21 +233,21 @@ abstracted.</p>
 <span id="future-failure"></span><h2>Recovering from failure<a class="headerlink" href="#recovering-from-failure" title="Permalink to this headline">¶</a></h2>
 <p>Composed futures fail whenever any of their constituent futures
 fail. However it is often useful to recover from such failures. The
-<code class="docutils literal"><span class="pre">rescue</span></code> combinator on <code class="docutils literal"><span class="pre">Future</span></code> is the dual to <code class="docutils literal"><span class="pre">flatMap</span></code>: whereas
-<code class="docutils literal"><span class="pre">flatMap</span></code> operates over <em>values</em>, <code class="docutils literal"><span class="pre">rescue</span></code> operates over <em>exceptions</em>. They
+<code class="docutils literal notranslate"><span class="pre">rescue</span></code> combinator on <code class="docutils literal notranslate"><span class="pre">Future</span></code> is the dual to <code class="docutils literal notranslate"><span class="pre">flatMap</span></code>: whereas
+<code class="docutils literal notranslate"><span class="pre">flatMap</span></code> operates over <em>values</em>, <code class="docutils literal notranslate"><span class="pre">rescue</span></code> operates over <em>exceptions</em>. They
 are otherwise identical. It is often desirable to handle only a subset
-of possible exceptions. To accommodate for this <code class="docutils literal"><span class="pre">rescue</span></code> accepts
-a <code class="docutils literal"><span class="pre">PartialFunction</span></code>, mapping a <code class="docutils literal"><span class="pre">Throwable</span></code> to a <code class="docutils literal"><span class="pre">Future</span></code>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="o">{</span>
+of possible exceptions. To accommodate for this <code class="docutils literal notranslate"><span class="pre">rescue</span></code> accepts
+a <code class="docutils literal notranslate"><span class="pre">PartialFunction</span></code>, mapping a <code class="docutils literal notranslate"><span class="pre">Throwable</span></code> to a <code class="docutils literal notranslate"><span class="pre">Future</span></code>:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="o">{</span>
   <span class="o">..</span>
-  <span class="k">def</span> <span class="n">rescue</span><span class="o">[</span><span class="kt">B</span> <span class="k">&gt;:</span> <span class="kt">A</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">PartialFunction</span><span class="o">[</span><span class="kt">Throwable</span>, <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span>
+  <span class="k">def</span> <span class="n">rescue</span><span class="o">[</span><span class="kt">B</span> <span class="k">&gt;:</span> <span class="kt">A</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">PartialFunction</span><span class="o">[</span><span class="kt">Throwable</span><span class="p">,</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span>
   <span class="o">..</span>
 <span class="o">}</span>
 </pre></div>
 </div>
 <p>The following retries a request infinitely should it fail with a
-<code class="docutils literal"><span class="pre">TimeoutException</span></code>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<code class="docutils literal notranslate"><span class="pre">TimeoutException</span></code>:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.TimeoutException</span>
 
@@ -276,41 +263,34 @@ a <code class="docutils literal"><span class="pre">PartialFunction</span></code>
 <div class="section" id="other-resources">
 <h2>Other resources<a class="headerlink" href="#other-resources" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://twitter.github.com/effectivescala/">Effective Scala</a> contains a <a class="reference external" href="https://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures">section discussing futures</a></li>
-<li>As of Scala 2.10, the Scala standard library has its own futures
+<li><p><a class="reference external" href="https://twitter.github.com/effectivescala/">Effective Scala</a> contains a <a class="reference external" href="https://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures">section discussing futures</a></p></li>
+<li><p>As of Scala 2.10, the Scala standard library has its own futures
 implementation and API, described <a class="reference external" href="https://docs.scala-lang.org/overviews/core/futures.html">here</a>. Note that
 this is largely similar to the API used in Finagle
 (<em>com.twitter.util.Future</em>), but there are still some naming
-differences.</li>
-<li><a class="reference external" href="https://akka.io/">Akka</a>’s documentation also has a <a class="reference external" href="https://doc.akka.io/docs/akka/2.1.0/scala/futures.html">section dedicated to futures</a>.</li>
-<li><a class="reference external" href="https://finagle.github.io/blog/2016/09/01/block-party/">Finagle Block Party</a> details why blocking is bad, and more
-importantly how to detect and fix it.</li>
+differences.</p></li>
+<li><p><a class="reference external" href="https://akka.io/">Akka</a>’s documentation also has a <a class="reference external" href="https://doc.akka.io/docs/akka/2.1.0/scala/futures.html">section dedicated to futures</a>.</p></li>
+<li><p><a class="reference external" href="https://finagle.github.io/blog/2016/09/01/block-party/">Finagle Block Party</a> details why blocking is bad, and more
+importantly how to detect and fix it.</p></li>
 </ul>
 <p class="rubric">Footnotes</p>
-<table class="docutils footnote" frame="void" id="futures" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Finagle uses its own <code class="docutils literal"><span class="pre">Future</span></code> implementation by a variety of reasons
+<dl class="footnote brackets">
+<dt class="label" id="futures"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Finagle uses its own <code class="docutils literal notranslate"><span class="pre">Future</span></code> implementation by a variety of reasons
 (fewer context switches, interruptibility, support for continuation-local variables,
-tail-call elimination), but mostly because it&#8217;s preceded <a class="reference external" href="https://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="collecttotry" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Use <code class="docutils literal"><span class="pre">Future.collectToTry</span></code> to concurrently collect a sequence of
-futures while accumulating errors instead of failing fast.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="flatmap" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[3]</a></td><td>The name <code class="docutils literal"><span class="pre">flatMap</span></code> may seem strange and unrelated to our present
+tail-call elimination), but mostly because it’s preceded <a class="reference external" href="https://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</p>
+</dd>
+<dt class="label" id="collecttotry"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
+<dd><p>Use <code class="docutils literal notranslate"><span class="pre">Future.collectToTry</span></code> to concurrently collect a sequence of
+futures while accumulating errors instead of failing fast.</p>
+</dd>
+<dt class="label" id="flatmap"><span class="brackets"><a class="fn-backref" href="#id2">3</a></span></dt>
+<dd><p>The name <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> may seem strange and unrelated to our present
 discussion, but its etymology is impeccable: it derives from a deeper relationship
 between the sort of sequential composition we do with futures, to a similar sort of
-composition we can perform over collections. See the <a class="reference external" href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">this</a> page for more details.</td></tr>
-</tbody>
-</table>
+composition we can perform over collections. See the <a class="reference external" href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">this</a> page for more details.</p>
+</dd>
+</dl>
 </div>
 </div>
 
@@ -331,7 +311,7 @@ composition we can perform over collections. See the <a class="reference externa
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Concurrent Programming with Futures</a><ul>
 <li><a class="reference internal" href="#blocking-or-synchronous-work">Blocking or synchronous work</a></li>

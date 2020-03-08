@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -432,6 +432,22 @@ Http.Client clientWithOpenCensusTracing =
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.opencensus.StackClientOps.HttpOpenCensusTracing#withOpenCensusTracing" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withOpenCensusTracing(textFormat:io.opencensus.trace.propagation.TextFormat):com.twitter.finagle.Http.Client"></a><a id="withOpenCensusTracing(TextFormat):Http.Client"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/tracing/opencensus/StackClientOps$$HttpOpenCensusTracing.html#withOpenCensusTracing(textFormat:io.opencensus.trace.propagation.TextFormat):com.twitter.finagle.Http.Client" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withOpenCensusTracing</span><span class="params">(<span name="textFormat">textFormat: <span class="extype" name="io.opencensus.trace.propagation.TextFormat">TextFormat</span></span>)</span><span class="result">: <a href="../../Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Http.Client</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.tracing.opencensus.StackClientOps.HttpOpenCensusTracing#withOpenCensusTracing" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="withOpenCensusTracing:com.twitter.finagle.Http.Client"></a><a id="withOpenCensusTracing:Http.Client"></a>
       <span class="permalink">

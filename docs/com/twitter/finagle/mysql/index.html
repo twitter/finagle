@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1374,7 +1374,7 @@ generator.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases." href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
+        <a title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases." href="Client.html"><span class="name">Client</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">A MySQL client that is not <code>Service</code>-based like <a href="../Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">com.twitter.finagle.Mysql.Client</a> is,
@@ -1453,7 +1453,7 @@ and has a cmd byte associated with it.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A closable async stream of projected rows from a CursoredStatement." href="CursorResult.html"><span class="name">CursorResult</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
+        <a title="A closable async stream of projected rows from a CursoredStatement." href="CursorResult.html"><span class="name">CursorResult</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">A closable async stream of projected rows from a CursoredStatement.</p>
@@ -1491,7 +1491,7 @@ a lazy stream of rows.</p><p>These are SQL statements with <code>?</code>'s used
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A decoder for Results contained in a single packet." href="Decoder.html"><span class="name">Decoder</span></a><span class="tparams">[<span name="T">T &lt;: <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a></span>]</span><span class="result"> extends (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<span class="extype" name="com.twitter.finagle.mysql.Decoder.T">T</span>]</span>
+        <a title="A decoder for Results contained in a single packet." href="Decoder.html"><span class="name">Decoder</span></a><span class="tparams">[<span name="T">T &lt;: <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a></span>]</span><span class="result"> extends (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="com.twitter.finagle.mysql.Decoder.T">T</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A decoder for Results contained in a single packet.</p>

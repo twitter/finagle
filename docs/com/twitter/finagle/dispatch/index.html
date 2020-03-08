@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1041,7 +1041,7 @@ in the same order as requests were sent.</p><div class="fullcomment"><div class=
 respect normal pipelining semantics, and that replies will be sent
 in the same order as requests were sent.  Exploits
 <a href="GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a> to serialize requests.</p><p>Because many requests might be sharing the same transport,
-<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">Futures</a> returned by GenPipeliningDispatcher#apply
+<span class="extype" name="com.twitter.util.Future">Futures</span> returned by GenPipeliningDispatcher#apply
 are masked, and will only propagate the interrupt if the future doesn't
 return after a configurable amount of time after the interruption.
 This ensures that interrupting a Future in one request won't change the
@@ -1077,7 +1077,7 @@ configure this timeout.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A generic version of SerialServerDispatcher, allowing the implementor to furnish custom dispatchers &amp; handlers." href="GenSerialServerDispatcher.html"><span class="name">GenSerialServerDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
+        <a title="A generic version of SerialServerDispatcher, allowing the implementor to furnish custom dispatchers &amp; handlers." href="GenSerialServerDispatcher.html"><span class="name">GenSerialServerDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">A generic version of
@@ -1147,11 +1147,11 @@ released after any error.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a timeout com.twitter.util.Duration to consider a pipeline to have stalled (stopped making progress after an initial interruption)." href="StalledPipelineTimeout.html"><span class="name">StalledPipelineTimeout</span></a><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a timeout com.twitter.util.Duration to consider a pipeline to have stalled (stopped making progress after an initial interruption)." href="StalledPipelineTimeout.html"><span class="name">StalledPipelineTimeout</span></a><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a timeout
-<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html" class="extype" name="com.twitter.util.Duration">com.twitter.util.Duration</a> to consider a pipeline to have stalled
+<span class="extype" name="com.twitter.util.Duration">com.twitter.util.Duration</span> to consider a pipeline to have stalled
 (stopped making progress after an initial interruption).</p>
     </li></ol>
             </div>

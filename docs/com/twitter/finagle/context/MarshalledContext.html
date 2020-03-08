@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -729,7 +729,7 @@ precedent over keys earlier in the collection.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">letUnmarshal</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="contexts">contexts: <a href="../../../../scala/index.html#Iterable[+A]=Iterable[A]" class="extmbr" name="scala.Iterable">Iterable</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letUnmarshal.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letUnmarshal.R">R</span></span>
+        <span class="name">letUnmarshal</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="contexts">contexts: <a href="../../../../scala/index.html#Iterable[+A]=Iterable[A]" class="extmbr" name="scala.Iterable">Iterable</a>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letUnmarshal.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letUnmarshal.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Store into the current environment a set of marshalled
@@ -748,7 +748,7 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">marshal</span><span class="params">()</span><span class="result">: <a href="../../../../scala/index.html#Iterable[+A]=Iterable[A]" class="extmbr" name="scala.Iterable">Iterable</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</span>
+        <span class="name">marshal</span><span class="params">()</span><span class="result">: <a href="../../../../scala/index.html#Iterable[+A]=Iterable[A]" class="extmbr" name="scala.Iterable">Iterable</a>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)]</span>
       </span>
       
       <p class="shortcomment cmt">Marshal the current environment into a set of (id, value) pairs.</p>

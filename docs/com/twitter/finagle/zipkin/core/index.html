@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -183,6 +183,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="class" href="BinaryAnnotation.html" title=""></a>
                         <a href="BinaryAnnotation.html" title="">BinaryAnnotation</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="object" href="DefaultSampler$.html" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer."></a>
+                        <a href="DefaultSampler$.html" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer.">DefaultSampler</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Endpoint$.html" title=""></a>
                         <a class="class" href="Endpoint.html" title="Endpoints describe a TCP endpoint that terminates RPC communication."></a>
@@ -395,7 +399,7 @@ communication.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="The span itself is an immutable datastructure." href="Span.html"><span class="name">Span</span></a><span class="params">(<span name="traceId">traceId: <a href="../../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="_serviceName">_serviceName: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_name">_name: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="annotations">annotations: <a href="../../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="ZipkinAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.core.ZipkinAnnotation">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: <a href="../../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="BinaryAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.core.BinaryAnnotation">BinaryAnnotation</a>]</span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.core.Endpoint">Endpoint</a></span>, <span name="created">created: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="The span itself is an immutable datastructure." href="Span.html"><span class="name">Span</span></a><span class="params">(<span name="traceId">traceId: <a href="../../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="_serviceName">_serviceName: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_name">_name: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="annotations">annotations: <a href="../../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="ZipkinAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.core.ZipkinAnnotation">ZipkinAnnotation</a>]</span>, <span name="bAnnotations">bAnnotations: <a href="../../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="BinaryAnnotation.html" class="extype" name="com.twitter.finagle.zipkin.core.BinaryAnnotation">BinaryAnnotation</a>]</span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.core.Endpoint">Endpoint</a></span>, <span name="created">created: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">The span itself is an immutable datastructure.</p><div class="fullcomment"><div class="comment cmt"><p>The span itself is an immutable datastructure. Mutations are done
@@ -414,7 +418,7 @@ rpc call) and parent id (links to the parent span in this trace, if None this is
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Annotation for a span." href="ZipkinAnnotation.html"><span class="name">ZipkinAnnotation</span></a><span class="params">(<span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.core.Endpoint">Endpoint</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Annotation for a span." href="ZipkinAnnotation.html"><span class="name">ZipkinAnnotation</span></a><span class="params">(<span name="timestamp">timestamp: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <a href="Endpoint.html" class="extype" name="com.twitter.finagle.zipkin.core.Endpoint">Endpoint</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Annotation for a span.</p><div class="fullcomment"><div class="comment cmt"><p>Annotation for a span. An event that happened at a particular time at a particular node.
@@ -427,7 +431,25 @@ rpc call) and parent id (links to the parent span in this trace, if None this is
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.zipkin.core.Endpoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.zipkin.core.DefaultSampler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultSampler"></a><a id="DefaultSampler:DefaultSampler"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/core/index.html#DefaultSampler" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer." href="DefaultSampler$.html"><span class="name">DefaultSampler</span></a><span class="result"> extends <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The DefaultSampler provides a default sample rate that can be overridden
+To override the default, pass this singleton as the Sampler when constructing
+the Tracer.</p>
+    </li><li name="com.twitter.finagle.zipkin.core.Endpoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Endpoint"></a><a id="Endpoint:Endpoint"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/zipkin/core/index.html#Endpoint" title="Permalink">

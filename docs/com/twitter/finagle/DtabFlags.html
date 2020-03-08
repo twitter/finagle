@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1394,9 +1394,9 @@ generator.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Defines a <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html" class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</a> for specifying a supplemental <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a>
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Defines a <span class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</span> for specifying a supplemental <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a>
 to append to the <a href="Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">com.twitter.finagle.Dtab.base</a> delegation table.
-</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.DtabFlags">DtabFlags</a> with <a href="https://twitter.github.io/util/docs/com/twitter/app/App.html#com.twitter.app.App" class="extype" name="com.twitter.app.App">App</a></dd></dl><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.DtabFlags">DtabFlags</a> with <span class="extype" name="com.twitter.app.App">App</span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -1570,11 +1570,11 @@ either <a href="Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="c
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">dtabAddBaseFlag</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html#com.twitter.app.Flag" class="extype" name="com.twitter.app.Flag">Flag</a>[<a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
+        <span class="name">dtabAddBaseFlag</span><span class="result">: <span class="extype" name="com.twitter.app.Flag">Flag</span>[<a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">A <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html" class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</a> for appending a <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> to
-the <a href="Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">com.twitter.finagle.Dtab.base</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html" class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</a> for appending a <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> to
+      <p class="shortcomment cmt">A <span class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</span> for appending a <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> to
+the <a href="Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">com.twitter.finagle.Dtab.base</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <span class="extype" name="com.twitter.app.Flag">com.twitter.app.Flag</span> for appending a <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> to
 the <a href="Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">com.twitter.finagle.Dtab.base</a>.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The base, or &quot;system&quot;, or &quot;global&quot;, delegation table applies to every
       request in this process.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">com.twitter.finagle.Dtab.base</a></p></span></dd></dl></div>

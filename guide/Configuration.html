@@ -1,32 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Configuration &#8212; Finagle 20.1.0 documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Configuration &#8212; Finagle 20.3.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '20.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 20.1.0 documentation" href="index.html" />
     <link rel="next" title="Aperture Load Balancers" href="ApertureLoadBalancers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -43,8 +31,7 @@
 
   </script>
 
-  </head>
-  <body role="document">
+  </head><body>
   
   
 
@@ -73,15 +60,15 @@
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="clients-and-servers">
 <h2>Clients and Servers<a class="headerlink" href="#clients-and-servers" title="Permalink to this headline">¶</a></h2>
-<p id="finagle6apis">Prior to <a class="reference internal" href="changelog.html"><span class="doc">version 6.0</span></a>, the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API was the
+<p id="finagle6apis">Prior to <a class="reference internal" href="changelog.html"><span class="doc">version 6.0</span></a>, the <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal notranslate"><span class="pre">ServerBuilder</span></code> API was the
 primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a>
 or <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a>. We are moving away from this model for various
 <a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">reasons</span></a>.</p>
 <p>The modern way of configuring Finagle clients or servers is to use the Finagle 6 API,
-which is generally available via the <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods. For example, the following
+which is generally available via the <code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods. For example, the following
 code snippet creates a new HTTP client altered with two extra parameters: label and transport
 verbosity.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;my-http-client&quot;</span><span class="o">)</span>
@@ -93,21 +80,21 @@ verbosity.</p>
 the client, providing logical success rate metrics, application-level retry
 policies, per-attempt timeouts, and total timeouts.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">All the examples in this user guide use the Finagle 6 API as a main configuration
+<p class="admonition-title">Note</p>
+<p>All the examples in this user guide use the Finagle 6 API as a main configuration
 method and we encourage all the Finagle users to follow this pattern given that
-the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API will eventually be deprecated.
+the <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal notranslate"><span class="pre">ServerBuilder</span></code> API will eventually be deprecated.
 For help migrating, see <a class="reference internal" href="MethodBuilder.html#mb-cb-migration"><span class="std std-ref">MethodBuilder migration</span></a>,
 <a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">the FAQ</span></a> as well as
 <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a> and <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a> configuration.</p>
 </div>
-<p>In addition to <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods that provide easy-to-use and safe-to-configure
+<p>In addition to <code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods that provide easy-to-use and safe-to-configure
 parameters of Finagle clients and servers, there is an expert-level <cite>Stack API</cite>.</p>
-<p>The Stack API is available via the <code class="docutils literal"><span class="pre">configured</span></code> method on a Finagle client/server
+<p>The Stack API is available via the <code class="docutils literal notranslate"><span class="pre">configured</span></code> method on a Finagle client/server
 that takes a stack param: a value of arbitrary type for which there is an implicit instance
-of <code class="docutils literal"><span class="pre">Stack.Param</span></code> type-class available in the scope. For example, the following code
-demonstrates how to use <code class="docutils literal"><span class="pre">.configured</span></code> to override TCP socket options provided by default.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+of <code class="docutils literal notranslate"><span class="pre">Stack.Param</span></code> type-class available in the scope. For example, the following code
+demonstrates how to use <code class="docutils literal notranslate"><span class="pre">.configured</span></code> to override TCP socket options provided by default.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.transport.Transport</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -116,36 +103,36 @@ demonstrates how to use <code class="docutils literal"><span class="pre">.config
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The expert-level API requires deep knowledge of Finagle internals and
-it&#8217;s recommended to avoid it unless you&#8217;re sure of what
-you&#8217;re doing or the corresponding configuration has not yet
-been exposed through <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods.</p>
+<p class="admonition-title">Note</p>
+<p>The expert-level API requires deep knowledge of Finagle internals and
+it’s recommended to avoid it unless you’re sure of what
+you’re doing or the corresponding configuration has not yet
+been exposed through <code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods.</p>
 </div>
 <div class="section" id="design-principles">
 <h3>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h3>
 <p>Finagle has many different components and we tried to faithfully model our configuration
 to help understand the constituents and the resulting behavior. For the sake of consistency,
-the current version of the <code class="docutils literal"><span class="pre">with</span></code> API is designed with the following principles in mind.</p>
+the current version of the <code class="docutils literal notranslate"><span class="pre">with</span></code> API is designed with the following principles in mind.</p>
 <ol class="arabic simple">
-<li><strong>Reasonable grouping of parameters</strong>: We target for the fine grained API so most of the
-<code class="docutils literal"><span class="pre">with</span></code>-prefixed methods take a single argument. Although, there is a common sense driven
+<li><p><strong>Reasonable grouping of parameters</strong>: We target for the fine grained API so most of the
+<code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods take a single argument. Although, there is a common sense driven
 exception from this rule: some of the parameters only make sense when viewed as a group
 rather than separately (e.g. it makes no sense to specify SOCKS proxy credentials when
-the proxy itself is disabled).</li>
-<li><strong>No boolean flags (i.e., enabled, yesOrNo)</strong>: Boolean values are usually hard to
-reason about because their type doesn&#8217;t encode it&#8217;s mission in the domain (e.g. in
-most of the cases it&#8217;s impossible to tell what <code class="docutils literal"><span class="pre">true</span></code> or <code class="docutils literal"><span class="pre">false</span></code> means in a function
-call). Instead of boolean flags, we use a pair of methods <code class="docutils literal"><span class="pre">x</span></code> and <code class="docutils literal"><span class="pre">noX</span></code> to indicate
-whether the <code class="docutils literal"><span class="pre">x</span></code> feature is enabled or disabled.</li>
-<li><strong>Less primitive number types in the API</strong>: We promote a sane level of type-full
+the proxy itself is disabled).</p></li>
+<li><p><strong>No boolean flags (i.e., enabled, yesOrNo)</strong>: Boolean values are usually hard to
+reason about because their type doesn’t encode it’s mission in the domain (e.g. in
+most of the cases it’s impossible to tell what <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code> means in a function
+call). Instead of boolean flags, we use a pair of methods <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">noX</span></code> to indicate
+whether the <code class="docutils literal notranslate"><span class="pre">x</span></code> feature is enabled or disabled.</p></li>
+<li><p><strong>Less primitive number types in the API</strong>: We promote a sane level of type-full
 programming, where a reasonable level of guarantees is encoded into a type-system.
 Thus, we never use primitive number types for durations and storage units given that
-there are utility types: <code class="docutils literal"><span class="pre">Duration</span></code> and <code class="docutils literal"><span class="pre">StorageUnit</span></code>.</li>
-<li><strong>No experimental and/or advanced features</strong>: While, it&#8217;s relatively safe to configure
-parameters exposed via <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods, you should never assume the same about
-the <cite>Stack API</cite> (i.e., <code class="docutils literal"><span class="pre">.configured</span></code>). It&#8217;s <em>easy</em> to configure basic parameters; it&#8217;s
-<em>possible</em> to configure expert-level parameters.</li>
+there are utility types: <code class="docutils literal notranslate"><span class="pre">Duration</span></code> and <code class="docutils literal notranslate"><span class="pre">StorageUnit</span></code>.</p></li>
+<li><p><strong>No experimental and/or advanced features</strong>: While, it’s relatively safe to configure
+parameters exposed via <code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods, you should never assume the same about
+the <cite>Stack API</cite> (i.e., <code class="docutils literal notranslate"><span class="pre">.configured</span></code>). It’s <em>easy</em> to configure basic parameters; it’s
+<em>possible</em> to configure expert-level parameters.</p></li>
 </ol>
 </div>
 </div>
@@ -172,7 +159,7 @@ Various basic implementations exist on the <cite>ToggleMap</cite> companion obje
 a member variable to avoid unnecessary overhead on the common path. If the <cite>Toggle</cite> is
 used only at startup this is unnecessary.</p>
 <p>Here is an example <a class="reference internal" href="ServicesAndFilters.html#filters"><span class="std std-ref">Filter</span></a> which uses a <cite>Toggle</cite> on the request path:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
 
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">SimpleFilter</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
@@ -181,12 +168,12 @@ used only at startup this is unnecessary.</p>
 
 <span class="k">class</span> <span class="nc">ExampleFilter</span><span class="o">(</span>
     <span class="n">toggleMap</span><span class="k">:</span> <span class="kt">ToggleMap</span><span class="o">,</span>
-    <span class="n">newBackend</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span>
-  <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
+    <span class="n">newBackend</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span><span class="p">,</span> <span class="kt">Response</span><span class="o">])</span>
+  <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Request</span><span class="p">,</span> <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
 
   <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">useNewBackend</span><span class="k">:</span> <span class="kt">Toggle</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="n">toggleMap</span><span class="o">(</span><span class="s">&quot;com.example.service.UseNewBackend&quot;</span><span class="o">)</span>
 
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span><span class="p">,</span> <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
     <span class="k">if</span> <span class="o">(</span><span class="n">useNewBackend</span><span class="o">(</span><span class="nc">Rng</span><span class="o">.</span><span class="n">threadLocal</span><span class="o">.</span><span class="n">nextInt</span><span class="o">()))</span>
       <span class="n">newBackend</span><span class="o">(</span><span class="n">req</span><span class="o">)</span>
     <span class="k">else</span>
@@ -197,7 +184,7 @@ used only at startup this is unnecessary.</p>
 </div>
 <p>Note that we pass a <cite>ToggleMap</cite> into the constructor and typically this would be
 the instance created via
-<cite>StandardToggleMap.apply(&#8220;com.example.service&#8221;, com.twitter.finagle.stats.DefaultStatsReceiver)</cite>.
+<cite>StandardToggleMap.apply(“com.example.service”, com.twitter.finagle.stats.DefaultStatsReceiver)</cite>.
 This allows for testing of the code with control of whether the <cite>Toggle</cite> is
 enabled or disabled by using <cite>ToggleMap.On</cite> or <cite>ToggleMap.Off</cite>. This could have also been
 achieved by passing the <cite>Toggle</cite> into the constructor and then using <cite>Toggle.on</cite> or
@@ -214,10 +201,10 @@ allows for descriptions and comments.</p>
 <p>Dynamically changing the values across a cluster is specific to a particular deployment
 and can be wired in via a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ServiceLoadedToggleMap.scala">service-loaded ToggleMap</a>.</p>
-<p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>&#8216;s settings via
+<p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>’s settings via
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/flag/overrides.scala">flag overrides</a>
 using:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.flag</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.flag</span>
 
 <span class="n">flag</span><span class="o">.</span><span class="n">overrides</span><span class="o">.</span><span class="n">let</span><span class="o">(</span><span class="s">&quot;your.toggle.id.here&quot;</span><span class="o">,</span> <span class="n">fractionToUse</span><span class="o">)</span> <span class="o">{</span>
   <span class="c1">// code that uses the flag in this block will have the</span>
@@ -228,8 +215,8 @@ using:</p>
 </div>
 <div class="section" id="service-owners">
 <h4>Service Owners<a class="headerlink" href="#service-owners" title="Permalink to this headline">¶</a></h4>
-<p>At runtime, the in-process <cite>Toggle</cite> values can be modified using TwitterServer&#8217;s
-&#8220;/admin/toggles&#8221; <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-toggles">API endpoint</a>.
+<p>At runtime, the in-process <cite>Toggle</cite> values can be modified using TwitterServer’s
+“/admin/toggles” <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-toggles">API endpoint</a>.
 This provides a quick way to try out a change in a limited fashion.</p>
 <p>For setting more permanent <cite>Toggle</cite> values, include a JSON configuration file at
 <cite>resources/com/twitter/toggles/configs/$libraryName-service.json</cite>.
@@ -263,11 +250,11 @@ have a separate <cite>TunableMap</cite> that is used for configuration, and the 
 <h3>Usage<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>Accessing the <cite>TunableMap</cite> for a given id is done via
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-tunable/src/main/scala/com/twitter/finagle/tunable/StandardTunableMap.scala">StandardTunableMap</a>,
-using <cite>StandardTunableMap.apply(&#8220;myId&#8221;)</cite>.
+using <cite>StandardTunableMap.apply(“myId”)</cite>.
 The returned map composes in-memory, service-loaded configurations and local files.</p>
 <p>Here is an example of configuring the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a>
 on an HTTP client with a <cite>Tunable</cite>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
 
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.tunable.StandardTunableMap</span>
@@ -299,9 +286,9 @@ be used. If the in-memory configuration is then set, those new values will be us
 <h4>In-Memory<a class="headerlink" href="#in-memory" title="Permalink to this headline">¶</a></h4>
 <p>In-memory configuration is provided through a
 <a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>. The Tunable values used
-by a given instance can be modified using TwitterServer&#8217;s <cite>/admin/tunables</cite>
+by a given instance can be modified using TwitterServer’s <cite>/admin/tunables</cite>
 <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-tunables">API endpoint</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">map</span> <span class="k">=</span> <span class="nc">TunableMap</span><span class="o">.</span><span class="n">newMutable</span><span class="o">(</span><span class="n">source</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">map</span> <span class="k">=</span> <span class="nc">TunableMap</span><span class="o">.</span><span class="n">newMutable</span><span class="o">(</span><span class="n">source</span><span class="o">)</span>
 </pre></div>
 </div>
 </div>
@@ -314,10 +301,10 @@ composed from files located at <cite>resources/com/twitter/tunables/</cite>
 (ensure that the <cite>resources</cite> directory is properly packaged with your application) in the following
 order:</p>
 <ol class="arabic simple">
-<li>$id/$env/instance-$instance.json</li>
-<li>$id/$env/instances.json</li>
-<li>$id/instance-$instance.json</li>
-<li>$id/instances.json</li>
+<li><p>$id/$env/instance-$instance.json</p></li>
+<li><p>$id/$env/instances.json</p></li>
+<li><p>$id/instance-$instance.json</p></li>
+<li><p>$id/instances.json</p></li>
 </ol>
 <p>Where $env and $instance are the environment and instance id given by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>.</p>
@@ -351,7 +338,7 @@ with a matching id.</p>
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Configuration</a><ul>
 <li><a class="reference internal" href="#clients-and-servers">Clients and Servers</a><ul>

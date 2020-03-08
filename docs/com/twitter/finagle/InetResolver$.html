@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1512,7 +1512,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="unscopedStatsReceiver">unscopedStatsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="pollIntervalOpt">pollIntervalOpt: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>, <span name="resolvePool">resolvePool: <a href="https://twitter.github.io/util/docs/com/twitter/util/FuturePool.html#com.twitter.util.FuturePool" class="extype" name="com.twitter.util.FuturePool">FuturePool</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.InetResolver">InetResolver</span></span>
+        <span class="name">apply</span><span class="params">(<span name="unscopedStatsReceiver">unscopedStatsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="pollIntervalOpt">pollIntervalOpt: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>, <span name="resolvePool">resolvePool: <span class="extype" name="com.twitter.util.FuturePool">FuturePool</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.InetResolver">InetResolver</span></span>
       </span>
       
       
@@ -1528,7 +1528,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="unscopedStatsReceiver">unscopedStatsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="resolvePool">resolvePool: <a href="https://twitter.github.io/util/docs/com/twitter/util/FuturePool.html#com.twitter.util.FuturePool" class="extype" name="com.twitter.util.FuturePool">FuturePool</a></span>)</span><span class="result">: <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
+        <span class="name">apply</span><span class="params">(<span name="unscopedStatsReceiver">unscopedStatsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="resolvePool">resolvePool: <span class="extype" name="com.twitter.util.FuturePool">FuturePool</span></span>)</span><span class="result">: <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
       </span>
       
       
@@ -1544,7 +1544,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="unscopedStatsReceiver">unscopedStatsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
+        <span class="name">apply</span><span class="params">(<span name="unscopedStatsReceiver">unscopedStatsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
       </span>
       
       
@@ -1560,7 +1560,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="resolvePool">resolvePool: <a href="https://twitter.github.io/util/docs/com/twitter/util/FuturePool.html#com.twitter.util.FuturePool" class="extype" name="com.twitter.util.FuturePool">FuturePool</a></span>)</span><span class="result">: <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
+        <span class="name">apply</span><span class="params">(<span name="resolvePool">resolvePool: <span class="extype" name="com.twitter.util.FuturePool">FuturePool</span></span>)</span><span class="result">: <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
       </span>
       
       

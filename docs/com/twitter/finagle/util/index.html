@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1176,7 +1176,7 @@ delivered in the order received.</p><p>They can be thought of as featherweight a
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="ReporterFactory.html"><span class="name">ReporterFactory</span></a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">Monitor</a></span>
+        <a title="" href="ReporterFactory.html"><span class="name">ReporterFactory</span></a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]) ⇒ <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>
       </span>
       
       
@@ -1249,7 +1249,7 @@ dynamic introspection.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Sliding window of numBuckets histograms." href="WindowedPercentileHistogram.html"><span class="name">WindowedPercentileHistogram</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
+        <a title="Sliding window of numBuckets histograms." href="WindowedPercentileHistogram.html"><span class="name">WindowedPercentileHistogram</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">Sliding window of <code>numBuckets</code> histograms.</p><div class="fullcomment"><div class="comment cmt"><p>Sliding window of <code>numBuckets</code> histograms. Each bucket covers a <code>bucketSize</code> interval and must
@@ -1323,7 +1323,7 @@ be full before being counted in <code>percentile</code>.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Finagle's default Timer that's intended to be shared across a number of servers/clients." href="DefaultTimer$.html"><span class="name">DefaultTimer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/ProxyTimer.html#com.twitter.util.ProxyTimer" class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</a></span>
+        <a title="Finagle's default Timer that's intended to be shared across a number of servers/clients." href="DefaultTimer$.html"><span class="name">DefaultTimer</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</span></span>
       </span>
       
       <p class="shortcomment cmt">Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><p>The default <span class="extype" name="Timer">Timer</span> is intended for scheduling tasks that will finish very quickly and
@@ -1541,7 +1541,7 @@ more resilient to varying Java packaging configurations than ServiceLoader.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Configures whether to probe for slow tasks executing in the default Timer." href="defaultTimerProbeSlowTasks$.html"><span class="name">defaultTimerProbeSlowTasks</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="Configures whether to probe for slow tasks executing in the default Timer." href="defaultTimerProbeSlowTasks$.html"><span class="name">defaultTimerProbeSlowTasks</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Configures whether to probe for slow tasks executing in the default <code>Timer</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures whether to probe for slow tasks executing in the default <code>Timer</code>.</p><p>When enabled, tasks are monitored to detect tasks that are slow to complete. A counter of
@@ -1564,7 +1564,7 @@ using the global flags <code>c.t.f.u.defaultTimerSlowTaskMaxRuntime</code> and
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Configures the minimum duration between logging stack traces when a slow task is detected in the default Timer." href="defaultTimerSlowTaskLogMinInterval$.html"><span class="name">defaultTimerSlowTaskLogMinInterval</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>
+        <a title="Configures the minimum duration between logging stack traces when a slow task is detected in the default Timer." href="defaultTimerSlowTaskLogMinInterval$.html"><span class="name">defaultTimerSlowTaskLogMinInterval</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Configures the minimum duration between logging stack traces when a slow task is
@@ -1581,7 +1581,7 @@ detected in the default <code>Timer</code>.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Configures the maximum allowed runtime for tasks executing in the default Timer." href="defaultTimerSlowTaskMaxRuntime$.html"><span class="name">defaultTimerSlowTaskMaxRuntime</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>
+        <a title="Configures the maximum allowed runtime for tasks executing in the default Timer." href="defaultTimerSlowTaskMaxRuntime$.html"><span class="name">defaultTimerSlowTaskMaxRuntime</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Configures the maximum allowed runtime for tasks executing in the default <code>Timer</code>.</p>

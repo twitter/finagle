@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1000,12 +1000,12 @@ about its implementation at runtime.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
+        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures this server or client with given
-<a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">exception stats handler</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
-<a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">exception stats handler</a>.
+<span class="extype" name="stats.ExceptionStatsHandler">exception stats handler</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
+<span class="extype" name="stats.ExceptionStatsHandler">exception stats handler</span>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withExecutionOffloaded" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withExecutionOffloaded(executor:java.util.concurrent.ExecutorService):A"></a><a id="withExecutionOffloaded(ExecutorService):This"></a>
@@ -1022,8 +1022,8 @@ about its implementation at runtime.
         <span class="name">withExecutionOffloaded</span><span class="params">(<span name="executor">executor: <span class="extype" name="java.util.concurrent.ExecutorService">ExecutorService</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client to shift user-defined computation (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>
-callbacks and transformations) off of IO threads into a given <span class="extype" name="ExecutorService">ExecutorService</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client to shift user-defined computation (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>
+      <p class="shortcomment cmt">Configures this server or client to shift user-defined computation (<span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span>
+callbacks and transformations) off of IO threads into a given <span class="extype" name="ExecutorService">ExecutorService</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client to shift user-defined computation (<span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span>
 callbacks and transformations) off of IO threads into a given <span class="extype" name="ExecutorService">ExecutorService</span>.</p><p>By default, Finagle executes all futures in the IO threads, minimizing context switches. Given
 there is usually a fixed number of IO threads shared across a JVM process, it's critically
 important to ensure they aren't being blocked by the application code, affecting system's
@@ -1042,11 +1042,11 @@ responsiveness. Shifting application-level work onto a dedicated <span class="ex
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withExecutionOffloaded</span><span class="params">(<span name="pool">pool: <a href="https://twitter.github.io/util/docs/com/twitter/util/FuturePool.html#com.twitter.util.FuturePool" class="extype" name="com.twitter.util.FuturePool">FuturePool</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
+        <span class="name">withExecutionOffloaded</span><span class="params">(<span name="pool">pool: <span class="extype" name="com.twitter.util.FuturePool">FuturePool</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client to shift user-defined computation (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>
-callbacks and transformations) off of IO threads into a given <span class="extype" name="FuturePool">FuturePool</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client to shift user-defined computation (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>
+      <p class="shortcomment cmt">Configures this server or client to shift user-defined computation (<span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span>
+callbacks and transformations) off of IO threads into a given <span class="extype" name="FuturePool">FuturePool</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client to shift user-defined computation (<span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span>
 callbacks and transformations) off of IO threads into a given <span class="extype" name="FuturePool">FuturePool</span>.</p><p>By default, Finagle executes all futures in the IO threads, minimizing context switches. Given
 there is usually a fixed number of IO threads shared across a JVM process, it's critically
 important to ensure they aren't being blocked by the application code, affecting system's
@@ -1099,11 +1099,11 @@ from different clients/servers to a single stats receiver.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">Monitor</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
+        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">util.Monitor</a>
-(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">util.Monitor</a>
+      <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
+(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
 (default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><p>Monitors are Finagle's out-of-band exception reporters. Whenever an exception is thrown
 on a request path, it's reported to the monitor. The default monitor implementation,
 <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>, logs these exceptions.</p><p>Monitors are wired into the server or client stacks via
@@ -1151,13 +1151,13 @@ exceptions are propagated down to the next monitor.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/tunable/Tunable.html#com.twitter.util.tunable.Tunable" class="extype" name="com.twitter.util.tunable.Tunable">Tunable</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
 <span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
 <span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><p>If the request has not completed within the <span class="extype" name="Duration">Duration</span> resulting from <code>timeout.apply()</code>,
- the pending work will be interrupted via <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#raise(interrupt:Throwable):Unit" class="extype" name="com.twitter.util.Future">com.twitter.util.Future.raise</a>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+ the pending work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
 (if there are retries, they each get a fresh request timeout). The timeout is applied
 only after a connection has been acquired. That is: it is applied to the interval
 between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
@@ -1178,11 +1178,11 @@ times out.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><p>If the request has not completed within the given <code>timeout</code>, the pending
-work will be interrupted via <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#raise(interrupt:Throwable):Unit" class="extype" name="com.twitter.util.Future">com.twitter.util.Future.raise</a>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
 (if there are retries, they each get a fresh request timeout). The timeout is applied
 only after a connection has been acquired. That is: it is applied to the interval
 between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
@@ -1234,7 +1234,7 @@ HTTP classification tools.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withRetryBackoff</span><span class="params">(<span name="backoff">backoff: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
+        <span class="name">withRetryBackoff</span><span class="params">(<span name="backoff">backoff: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures the requeue backoff policy of this client (default: no delay).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the requeue backoff policy of this client (default: no delay).</p><p>The <code>backoff</code> policy is represented by a stream of delays (i.e.,
@@ -1357,11 +1357,11 @@ Http.client().withStack(func(stack -&gt; stack.prepend(MyStackModule)));</pre></
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
+        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">stats.StatsReceiver</a>
-(default: <a href="../stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">stats.StatsReceiver</a>
+      <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="stats.StatsReceiver">stats.StatsReceiver</span>
+(default: <a href="../stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <span class="extype" name="stats.StatsReceiver">stats.StatsReceiver</span>
 (default: <a href="../stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
