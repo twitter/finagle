@@ -5,11 +5,12 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.thrift.{Protocols, ThriftUtil}
+import com.twitter.finagle.thrift.{Protocols, RichServerParam, ThriftUtil}
 import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Return}
 import java.net.{InetAddress, InetSocketAddress}
+
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -25,7 +26,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
   trait ThriftMuxTestServer {
     val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
           (Contexts.broadcast.get(testContext), Dtab.local) match {
             case (None, Dtab.empty) =>
@@ -70,7 +71,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
   test("thriftmux server + thriftmux client: propagate Contexts") {
     new ThriftMuxTestServer {
-      val client = ThriftMux.client.newIface[TestService.FutureIface](
+      val client = ThriftMux.client.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -88,7 +89,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
   test("thriftmux server + Finagle thrift client: propagate Contexts") {
     new ThriftMuxTestServer {
       val client =
-        Thrift.client.newIface[TestService.FutureIface](
+        Thrift.client.build[TestService.MethodPerEndpoint](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
@@ -106,7 +107,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
   test("thriftmux server + Finagle thrift client: propagate Dtab.local") {
     new ThriftMuxTestServer {
       val client =
-        Thrift.client.newIface[TestService.FutureIface](
+        Thrift.client.build[TestService.MethodPerEndpoint](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
@@ -123,7 +124,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
   }
 
   test("thriftmux server + thriftmux client: server sees Retries set by client") {
-    val iface = new TestService.FutureIface {
+    val iface = new TestService.MethodPerEndpoint {
       def query(x: String) = Future.value(x)
       def question(y: String): Future[String] = Future.value(y)
       def inquiry(z: String): Future[String] = Future.value(z)
@@ -131,10 +132,12 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
     val service = ThriftUtil.serverFromIface(
       iface,
-      Protocols.binaryFactory(),
-      NullStatsReceiver,
-      Int.MaxValue,
-      "server"
+      RichServerParam(
+        Protocols.binaryFactory(),
+        "server",
+        Int.MaxValue,
+        NullStatsReceiver
+      )
     )
 
     val assertRetriesFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
@@ -150,7 +153,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
     )
 
     val client = Thrift.client
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -172,7 +175,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
     // clientA -> ServerA:clientB -> ServerB
     // client B has had its Retry module removed.
 
-    val ifaceB = new TestService.FutureIface {
+    val ifaceB = new TestService.MethodPerEndpoint {
       def query(x: String) = Future.value(x)
       def question(y: String): Future[String] = Future.value(y)
       def inquiry(z: String): Future[String] = Future.value(z)
@@ -180,10 +183,12 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
     val serviceB = ThriftUtil.serverFromIface(
       ifaceB,
-      Protocols.binaryFactory(),
-      NullStatsReceiver,
-      Int.MaxValue,
-      "serverB"
+      RichServerParam(
+        Protocols.binaryFactory(),
+        "serverB",
+        Int.MaxValue,
+        NullStatsReceiver
+      )
     )
 
     val serverB = ThriftMux.server
@@ -194,12 +199,12 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
     val clientB = Thrift.client
       .withStack(_.remove(Retries.Role))
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(serverB.boundAddress.asInstanceOf[InetSocketAddress])),
         "clientB"
       )
 
-    val ifaceA = new TestService.FutureIface {
+    val ifaceA = new TestService.MethodPerEndpoint {
       def query(x: String) = clientB.query(x)
       def question(y: String): Future[String] = clientB.question(y)
       def inquiry(z: String): Future[String] = clientB.inquiry(z)
@@ -207,17 +212,19 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
     val serviceA = ThriftUtil.serverFromIface(
       ifaceA,
-      Protocols.binaryFactory(),
-      NullStatsReceiver,
-      Int.MaxValue,
-      "serverA"
+      RichServerParam(
+        Protocols.binaryFactory(),
+        "serverA",
+        Int.MaxValue,
+        NullStatsReceiver
+      )
     )
 
     val serverA = ThriftMux.server
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), serviceA)
 
     val clientA = Thrift.client
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(serverA.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
