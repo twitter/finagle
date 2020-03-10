@@ -29,6 +29,8 @@ Breaking API Changes
 
 * finagle-zipkin-scribe: update the deprecated `FutureIface` to `MethodPerEndpoint` ``PHAB_ID=D441366``
 
+* finagle-core: Removed `c.t.finagle.service.ShardingService`. ``PHAB_ID=D445176``
+
 20.2.1
 ------
 

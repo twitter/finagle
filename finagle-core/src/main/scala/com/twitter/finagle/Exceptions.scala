@@ -249,15 +249,8 @@ class FailedFastException(message: String, cause: Throwable, val flags: Long = F
 class NotServableException extends RequestException
 
 /**
- * Indicates that the client failed to distribute a given request according to
- * some sharding strategy. See [[com.twitter.finagle.service.ShardingService]]
- * for details on this behavior.
- */
-class NotShardableException extends NotServableException
-
-/**
  * Indicates that the shard to which a request was assigned was not available.
- * See [[com.twitter.finagle.service.ShardingService]] for details on this
+ * See [[com.twitter.finagle.partitioning.PartitioningService]] for details on this
  * behavior.
  */
 class ShardNotAvailableException extends NotServableException
