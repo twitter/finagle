@@ -281,6 +281,29 @@ v33
     assert(builder4.buildPost(BODY0).headerMap.getAll(A) == triple)
   }
 
+  test("headers should be case insensitive") {
+    val key1 = "KEY"
+    val key2 = "key"
+    val A = "A"
+    val B = "B"
+    val builder0 = RequestBuilder()
+      .url(URL0)
+      .setHeader(key1, Seq(A))
+      .setHeader(key2, Seq(A, B))
+
+    val pair = Seq(A, B)
+    assert(builder0.buildGet.headerMap.getAll(key1) == pair)
+    assert(builder0.buildGet.headerMap.getAll(key2) == pair)
+    assert(builder0.buildHead.headerMap.getAll(key1) == pair)
+    assert(builder0.buildHead.headerMap.getAll(key2) == pair)
+    assert(builder0.buildDelete.headerMap.getAll(key1) == pair)
+    assert(builder0.buildDelete.headerMap.getAll(key2) == pair)
+    assert(builder0.buildPut(BODY0).headerMap.getAll(key1) == pair)
+    assert(builder0.buildPut(BODY0).headerMap.getAll(key2) == pair)
+    assert(builder0.buildPost(BODY0).headerMap.getAll(key1) == pair)
+    assert(builder0.buildPost(BODY0).headerMap.getAll(key2) == pair)
+  }
+
   test("build form") {
     val builder0 = RequestBuilder()
       .url(URL0)

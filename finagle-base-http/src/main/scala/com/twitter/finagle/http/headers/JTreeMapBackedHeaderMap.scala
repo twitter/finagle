@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.headers
 
 import com.twitter.finagle.http.HeaderMap
-import scala.annotation.tailrec
+import com.twitter.finagle.http.util.HeaderKeyOrdering
 
 /**
  * Mutable, thread-safe [[HeaderMap]] implementation, backed by
@@ -18,7 +18,7 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
   // accesses to avoid this. In the common case of no concurrent access,
   // this should be cheap.
   private[this] val underlying: java.util.TreeMap[String, Header.Root] =
-    new java.util.TreeMap[String, Header.Root](JTreeMapBackedHeaderMap.sharedComparator)
+    new java.util.TreeMap[String, Header.Root](HeaderKeyOrdering)
 
   override def foreach[U](f: ((String, String)) => U): Unit = {
     // We need to copy to a new iterator before calling the
@@ -106,29 +106,6 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
 }
 
 private[http] object JTreeMapBackedHeaderMap {
-
-  private val sharedComparator = new java.util.Comparator[String] {
-    def compare(key1: String, key2: String): Int = {
-      // Shorter strings are always less, regardless of their content
-      val lenthDiff = key1.length - key2.length
-      if (lenthDiff != 0) lenthDiff
-      else {
-        @tailrec
-        def go(i: Int): Int = {
-          if (i == key1.length) 0 // end, they are equal.
-          else {
-            val char1 = HeaderMap.hashChar(key1.charAt(i))
-            val char2 = HeaderMap.hashChar(key2.charAt(i))
-            val diff = char1 - char2
-            if (diff == 0) go(i + 1)
-            else diff
-          }
-        }
-        go(0)
-      }
-    }
-  }
-
   def apply(headers: (String, String)*): HeaderMap = {
     val result = new JTreeMapBackedHeaderMap
     headers.foreach(t => result.add(t._1, t._2))

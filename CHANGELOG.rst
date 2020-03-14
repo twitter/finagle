@@ -13,6 +13,12 @@ Breaking API Changes
 * finagle-partitioning: Rename `c.t.finagle.partitioning.CacheNode` and `CacheNodeMetadata`
   to `c.t.finagle.partitioning.PartitionNode` and `PartitionNodeMetadata`. ``PHAB_ID=D448015``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-base-http: RequestBuilder headers use SortedMap to equalize keys in different caps.
+  `setHeader` keys are case insensitive, the last one wins. ``PHAB_ID=D449255``
+
 20.3.0
 ------
 
