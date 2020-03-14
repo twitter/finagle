@@ -1,11 +1,13 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.http.util.HeaderKeyOrdering
 import java.net.URL
+import scala.collection.immutable.SortedMap
 
 /** Immutable representation of a [[Request]] used by `RequestBuilder` */
 private[finagle] final case class RequestConfig(
   url: Option[URL] = None,
-  headers: Map[String, Seq[String]] = Map.empty,
+  headers: SortedMap[String, Seq[String]] = SortedMap.empty(HeaderKeyOrdering),
   formElements: Seq[FormElement] = Nil,
   version: Version = Version.Http11,
   proxied: Boolean = false)

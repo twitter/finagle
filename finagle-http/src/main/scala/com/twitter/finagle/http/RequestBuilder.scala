@@ -1,12 +1,13 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.netty4.http.Netty4FormPostEncoder
-import com.twitter.util.Base64StringEncoder
 import com.twitter.io.Buf
-import java.net.{URI => JURI, URL}
+import com.twitter.util.Base64StringEncoder
+import java.net.{URL, URI => JURI}
 import java.nio.charset.StandardCharsets
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConverters._
+import scala.collection.immutable.SortedMap
 
 /**
  * Provides a class for building [[Request]]s.
@@ -122,9 +123,7 @@ object RequestBuilder {
     builder.buildFormPost(multipart)(PostRequestEvidence.FullyConfigured)
 }
 
-class RequestBuilder[HasUrl, HasForm] private[http] (
-  config: RequestConfig
-) {
+class RequestBuilder[HasUrl, HasForm] private[http] (config: RequestConfig) {
   import RequestBuilder._
 
   type This = RequestBuilder[HasUrl, HasForm]
@@ -258,7 +257,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
    * Proxy-Authorization header using the provided {{ProxyCredentials}}.
    */
   def proxied(credentials: Option[ProxyCredentials]): This = {
-    val headers: Map[String, Seq[String]] = credentials map { creds =>
+    val headers: SortedMap[String, Seq[String]] = credentials map { creds =>
       config.headers.updated(Fields.ProxyAuthorization, Seq(creds.basicAuthorization))
     } getOrElse config.headers
 
@@ -268,7 +267,10 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
   /**
    * Construct an HTTP request with a specified method.
    */
-  def build(method: Method, content: Option[Buf])(
+  def build(
+    method: Method,
+    content: Option[Buf]
+  )(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
@@ -283,7 +285,8 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
   /**
    * Construct an HTTP GET request.
    */
-  def buildGet()(
+  def buildGet(
+  )(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
@@ -293,7 +296,8 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
   /**
    * Construct an HTTP HEAD request.
    */
-  def buildHead()(
+  def buildHead(
+  )(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
@@ -303,7 +307,8 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
   /**
    * Construct an HTTP DELETE request.
    */
-  def buildDelete()(
+  def buildDelete(
+  )(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
@@ -313,7 +318,9 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
   /**
    * Construct an HTTP POST request.
    */
-  def buildPost(content: Buf)(
+  def buildPost(
+    content: Buf
+  )(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
@@ -323,7 +330,9 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
   /**
    * Construct an HTTP PUT request.
    */
-  def buildPut(content: Buf)(
+  def buildPut(
+    content: Buf
+  )(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
@@ -333,7 +342,9 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
   /**
    * Construct a form post request.
    */
-  def buildFormPost(multipart: Boolean = false)(
+  def buildFormPost(
+    multipart: Boolean = false
+  )(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.PostRequestEvidence[
       HasUrl,
       HasForm
