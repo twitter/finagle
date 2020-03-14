@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-partitioning: Rename `c.t.finagle.partitioning.CacheNode` and `CacheNodeMetadata`
+  to `c.t.finagle.partitioning.PartitionNode` and `PartitionNodeMetadata`. ``PHAB_ID=D448015``
+
 20.3.0
 ------
 

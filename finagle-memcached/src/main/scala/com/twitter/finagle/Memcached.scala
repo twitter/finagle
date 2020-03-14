@@ -38,10 +38,10 @@ import com.twitter.finagle.param.{
 }
 import com.twitter.finagle.partitioning.param.{EjectFailedHost, KeyHasher, NumReps}
 import com.twitter.finagle.partitioning.{
-  CacheNode,
   KetamaClientKey,
   KetamaFailureAccrualFactory,
-  NodeHealth
+  NodeHealth,
+  PartitionNode
 }
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
@@ -273,7 +273,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
         val scopedSr = sr.scope(label0)
         val healthBroker = new Broker[NodeHealth]
 
-        def newService(node: CacheNode): Service[Command, Response] = {
+        def newService(node: PartitionNode): Service[Command, Response] = {
           val key = KetamaClientKey.fromCacheNode(node)
           val stk = stack.replace(
             FailureAccrualFactory.role,

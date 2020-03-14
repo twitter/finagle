@@ -13,12 +13,12 @@ import com.twitter.finagle.memcached.util.Bufs.{
   seqOfNonEmptyStringToBuf
 }
 import com.twitter.finagle.partitioning.{
-  CacheNode,
-  CacheNodeMetadata,
   KetamaClientKey,
   NodeHealth,
   NodeMarkedDead,
-  NodeRevived
+  NodeRevived,
+  PartitionNode,
+  PartitionNodeMetadata
 }
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
@@ -937,7 +937,7 @@ private[finagle] object KetamaPartitionedClient {
  */
 private[finagle] class KetamaPartitionedClient(
   addrs: Var[Addr],
-  newService: CacheNode => Service[Command, Response],
+  newService: PartitionNode => Service[Command, Response],
   nodeHealthBroker: Broker[NodeHealth] = new Broker[NodeHealth],
   statsReceiver: StatsReceiver = NullStatsReceiver,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
@@ -983,10 +983,10 @@ private[finagle] class KetamaPartitionedClient(
           mapped ++= (currAddrs &~ prevAddrs).collect {
             case addr @ Address.Inet(ia, cn) =>
               val node = cn match {
-                case CacheNodeMetadata(w, k) =>
-                  CacheNode(ia.getHostName, ia.getPort, w, k)
+                case PartitionNodeMetadata(w, k) =>
+                  PartitionNode(ia.getHostName, ia.getPort, w, k)
                 case _ =>
-                  CacheNode(ia.getHostName, ia.getPort, 1, None)
+                  PartitionNode(ia.getHostName, ia.getPort, 1, None)
               }
               val key = KetamaClientKey.fromCacheNode(node)
               val service = TwemcacheClient(newService(node))
@@ -1179,7 +1179,7 @@ case class RubyMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: CacheNode =>
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: PartitionNode =>
       (node.host, node.port, node.weight)
     }.toSeq)
 
@@ -1227,7 +1227,7 @@ case class PHPMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: CacheNode =>
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: PartitionNode =>
       (node.host, node.port, node.weight)
     }.toSeq)
 
