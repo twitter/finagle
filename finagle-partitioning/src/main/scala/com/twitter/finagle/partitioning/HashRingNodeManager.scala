@@ -105,7 +105,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
               case weightedAddr @ WeightedAddress(addr @ Address.Inet(ia, metadata), w) =>
                 val (shardIdOpt: Option[String], boundAddress: Addr) =
                   metadata match {
-                    case CacheNodeMetadata(_, shardId) =>
+                    case PartitionNodeMetadata(_, shardId) =>
                       // This means the destination was resolved by TwitterCacheResolver.
                       twcacheConversion(shardId, ia)
                     case _ =>
@@ -116,7 +116,8 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
                           (None, Addr.Bound(addr))
                       }
                   }
-                val node = CacheNode(ia.getHostName, ia.getPort, w.asInstanceOf[Int], shardIdOpt)
+                val node =
+                  PartitionNode(ia.getHostName, ia.getPort, w.asInstanceOf[Int], shardIdOpt)
                 val key = KetamaClientKey.fromCacheNode(node)
                 val service = mkService(boundAddress, key)
 
@@ -143,7 +144,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
 
   /**
    * This code is needed to support the old "twcache" scheme. The TwitterCacheResolver uses
-   * CacheNodeMetadata instead of ZkMetadata for shardId. Also address is unresolved. Therefore
+   * PartitionNodeMetadata instead of ZkMetadata for shardId. Also address is unresolved. Therefore
    * doing the necessary conversions here.
    */
   private[this] def twcacheConversion(
@@ -155,7 +156,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
     } else {
       ia
     }
-    // Convert CacheNodeMetadata to ZkMetadata
+    // Convert PartitionNodeMetadata to ZkMetadata
     (
       shardId,
       Addr.Bound(

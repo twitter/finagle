@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached
 import _root_.java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.finagle.{Addr, Address, Group, Resolver}
 import com.twitter.finagle.common.zookeeper._
-import com.twitter.finagle.partitioning.{CacheNode, CacheNodeMetadata}
+import com.twitter.finagle.partitioning.{PartitionNode, PartitionNodeMetadata}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.zookeeper.{DefaultZkClientFactory, ZkGroup}
 import com.twitter.thrift.Status.ALIVE
@@ -48,12 +48,12 @@ class TwitterCacheResolver extends Resolver {
     }
   }
 
-  private def toUnresolvedAddr(g: Set[CacheNode]): Addr = {
+  private def toUnresolvedAddr(g: Set[PartitionNode]): Addr = {
     val set: Set[Address] = g.map {
-      case CacheNode(host, port, weight, key) =>
+      case PartitionNode(host, port, weight, key) =>
         val ia = InetSocketAddress.createUnresolved(host, port)
-        val metadata = CacheNodeMetadata(weight, key)
-        Address.Inet(ia, CacheNodeMetadata.toAddrMetadata(metadata))
+        val metadata = PartitionNodeMetadata(weight, key)
+        Address.Inet(ia, PartitionNodeMetadata.toAddrMetadata(metadata))
     }
     Addr.Bound(set)
   }
@@ -75,51 +75,51 @@ object CacheNodeGroup {
       }
 
     newStaticGroup(hostSeq.map {
-      case (host, port, weight, key) => new CacheNode(host, port, weight, key)
+      case (host, port, weight, key) => new PartitionNode(host, port, weight, key)
     }.toSet)
   }
 
   def apply(group: Group[SocketAddress], useOnlyResolvedAddress: Boolean = false) = group collect {
-    case node: CacheNode => node
+    case node: PartitionNode => node
     // Note: we ignore weights here
     case ia: InetSocketAddress if useOnlyResolvedAddress && !ia.isUnresolved =>
       //Note: unresolvedAddresses won't be added even if they are able
       // to be resolved after added
       val key = ia.getAddress.getHostAddress + ":" + ia.getPort
-      new CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
+      new PartitionNode(ia.getHostName, ia.getPort, 1, Some(key))
     case ia: InetSocketAddress if !useOnlyResolvedAddress =>
-      new CacheNode(ia.getHostName, ia.getPort, 1, None)
+      new PartitionNode(ia.getHostName, ia.getPort, 1, None)
   }
 
-  def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet.toSeq: _*)
+  def newStaticGroup(cacheNodeSet: Set[PartitionNode]) = Group(cacheNodeSet.toSeq: _*)
 
   def newZkCacheNodeGroup(
     path: String,
     zkClient: ZooKeeperClient,
     statsReceiver: StatsReceiver = NullStatsReceiver
-  ): Group[CacheNode] = {
+  ): Group[PartitionNode] = {
     new ZkGroup(new ServerSetImpl(zkClient, path), path) collect {
       case inst if inst.getStatus == ALIVE =>
         val ep = inst.getServiceEndpoint
         val shardInfo = if (inst.isSetShard) Some(inst.getShard.toString) else None
-        CacheNode(ep.getHost, ep.getPort, 1, shardInfo)
+        PartitionNode(ep.getHost, ep.getPort, 1, shardInfo)
     }
   }
 
   private[finagle] def fromVarAddr(va: Var[Addr], useOnlyResolvedAddress: Boolean = false) =
-    new Group[CacheNode] {
-      protected[finagle] val set: Var[Set[CacheNode]] = va map {
+    new Group[PartitionNode] {
+      protected[finagle] val set: Var[Set[PartitionNode]] = va map {
         case Addr.Bound(addrs, _) =>
           addrs.collect {
-            case Address.Inet(ia, CacheNodeMetadata(weight, key)) =>
-              CacheNode(ia.getHostName, ia.getPort, weight, key)
+            case Address.Inet(ia, PartitionNodeMetadata(weight, key)) =>
+              PartitionNode(ia.getHostName, ia.getPort, weight, key)
             case Address.Inet(ia, _) if useOnlyResolvedAddress && !ia.isUnresolved =>
               val key = ia.getAddress.getHostAddress + ":" + ia.getPort
-              CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
+              PartitionNode(ia.getHostName, ia.getPort, 1, Some(key))
             case Address.Inet(ia, _) if !useOnlyResolvedAddress =>
-              CacheNode(ia.getHostName, ia.getPort, 1, None)
+              PartitionNode(ia.getHostName, ia.getPort, 1, None)
           }
-        case _ => Set[CacheNode]()
+        case _ => Set[PartitionNode]()
       }
     }
 }

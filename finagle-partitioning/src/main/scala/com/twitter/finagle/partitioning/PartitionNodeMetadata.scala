@@ -7,10 +7,10 @@ import com.twitter.finagle.Addr
  * [[com.twitter.finagle.partitioning.ConsistentHashPartitioningService]]).
  *
  * This class and its companion object are private because they are only an implementation detail for
- * converting between [[com.twitter.finagle.partitioning.CacheNode]] and
+ * converting between [[com.twitter.finagle.partitioning.PartitionNode]] and
  * [[com.twitter.finagle.Address]]. We need to convert between these types for backwards
  * compatibility: [[com.twitter.finagle.partitioning.ConsistentHashPartitioningService]] consumes
- * [[CacheNode]]s but [[com.twitter.finagle.Resolver]]s return
+ * [[PartitionNode]]s but [[com.twitter.finagle.Resolver]]s return
  * [[com.twitter.finagle.Address]]s.
  *
  * @param weight The weight of the cache node. Default value is 1. Note that this determines where
@@ -18,36 +18,36 @@ import com.twitter.finagle.Addr
  * [[com.twitter.finagle.addr.WeightedAddress]], which pertains to load balancing.
  * @param key An optional unique identifier for the cache node (e.g.  shard ID).
  */
-private[finagle] case class CacheNodeMetadata(weight: Int, key: Option[String])
+private[finagle] case class PartitionNodeMetadata(weight: Int, key: Option[String])
 
-private[finagle] object CacheNodeMetadata {
+private[finagle] object PartitionNodeMetadata {
   private val key = "cache_node_metadata"
 
   /**
-   * Convert [[CacheNodeMetadata]] to an instance of
+   * Convert [[PartitionNodeMetadata]] to an instance of
    * [[com.twitter.finagle.Addr.Metadata]].
    */
-  def toAddrMetadata(metadata: CacheNodeMetadata): Addr.Metadata =
+  def toAddrMetadata(metadata: PartitionNodeMetadata): Addr.Metadata =
     Addr.Metadata(key -> metadata)
 
   /**
    * Convert [[com.twitter.finagle.Addr.Metadata]] to an instance of
-   * [[CacheNodeMetadata]].
+   * [[PartitionNodeMetadata]].
    */
-  def fromAddrMetadata(metadata: Addr.Metadata): Option[CacheNodeMetadata] =
+  def fromAddrMetadata(metadata: Addr.Metadata): Option[PartitionNodeMetadata] =
     metadata.get(key) match {
-      case some @ Some(metadata: CacheNodeMetadata) =>
-        some.asInstanceOf[Option[CacheNodeMetadata]]
+      case some @ Some(metadata: PartitionNodeMetadata) =>
+        some.asInstanceOf[Option[PartitionNodeMetadata]]
       case _ => None
     }
 
   /**
    * A variant of `fromAddrMetadata` that pattern matches against weight
-   * and key of the [[CacheNodeMetadata]].
+   * and key of the [[PartitionNodeMetadata]].
    */
   def unapply(metadata: Addr.Metadata): Option[(Int, Option[String])] =
     fromAddrMetadata(metadata).map {
-      case CacheNodeMetadata(weight, key) =>
+      case PartitionNodeMetadata(weight, key) =>
         (weight, key)
     }
 }

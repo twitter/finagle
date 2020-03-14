@@ -10,11 +10,11 @@ import com.twitter.util.{Await, Awaitable, Future, ReadWriteVar}
 import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
 import com.twitter.finagle.partitioning.{
-  CacheNode,
   KetamaClientKey,
   NodeHealth,
   NodeMarkedDead,
-  NodeRevived
+  NodeRevived,
+  PartitionNode
 }
 import org.mockito.Matchers._
 import org.mockito.Mockito.{RETURNS_SMART_NULLS, times, verify, verifyZeroInteractions, when}
@@ -49,18 +49,18 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       s
     }
     val clients = Map(
-      CacheNode("10.0.1.1", 11211, 600) -> newMock(),
-      CacheNode("10.0.1.2", 11211, 300) -> newMock(),
-      CacheNode("10.0.1.3", 11211, 200) -> newMock(),
-      CacheNode("10.0.1.4", 11211, 350) -> newMock(),
-      CacheNode("10.0.1.5", 11211, 1000) -> newMock(),
-      CacheNode("10.0.1.6", 11211, 800) -> newMock(),
-      CacheNode("10.0.1.7", 11211, 950) -> newMock(),
-      CacheNode("10.0.1.8", 11211, 100) -> newMock()
+      PartitionNode("10.0.1.1", 11211, 600) -> newMock(),
+      PartitionNode("10.0.1.2", 11211, 300) -> newMock(),
+      PartitionNode("10.0.1.3", 11211, 200) -> newMock(),
+      PartitionNode("10.0.1.4", 11211, 350) -> newMock(),
+      PartitionNode("10.0.1.5", 11211, 1000) -> newMock(),
+      PartitionNode("10.0.1.6", 11211, 800) -> newMock(),
+      PartitionNode("10.0.1.7", 11211, 950) -> newMock(),
+      PartitionNode("10.0.1.8", 11211, 100) -> newMock()
     )
 
-    def newService(node: CacheNode) = clients.get(node).get
-    val name = Name.bound(clients.keys.toSeq.map(CacheNode.toAddress): _*)
+    def newService(node: PartitionNode) = clients.get(node).get
+    val name = Name.bound(clients.keys.toSeq.map(PartitionNode.toAddress): _*)
     val ketamaClient = new KetamaPartitionedClient(name.addr, newService)
 
     info("pick the correct node")
@@ -85,8 +85,8 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
 
   test("interrupted request does not change ready") {
     val mockService = mock[Service[Command, Response]]
-    val client1 = CacheNode("10.0.1.1", 11211, 600)
-    def newService(node: CacheNode) = mockService
+    val client1 = PartitionNode("10.0.1.1", 11211, 600)
+    def newService(node: PartitionNode) = mockService
     // create a client with no members (yet)
     val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Pending)
     val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService)
@@ -109,14 +109,14 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     // resolve the group: request proceeds
     verifyZeroInteractions(mockService)
     when(mockService.apply(any[Incr])) thenReturn Future.value(Number(42))
-    mutableAddrs.update(Addr.Bound(CacheNode.toAddress(client1)))
+    mutableAddrs.update(Addr.Bound(PartitionNode.toAddress(client1)))
     assert(awaitResult(r2).get == 42)
   }
 
   test("client fails requests if initial serverset is empty") {
     val mockService = mock[Service[Command, Response]]
-    val client1 = CacheNode("10.0.1.1", 11211, 600)
-    def newService(node: CacheNode) = mockService
+    val client1 = PartitionNode("10.0.1.1", 11211, 600)
+    def newService(node: PartitionNode) = mockService
     // create a client with no members (yet)
     val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound())
     val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService)
@@ -127,7 +127,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
 
     // resolve the group: request succeed
     when(mockService.apply(any[Incr])) thenReturn Future.value(Number(42))
-    mutableAddrs.update(Addr.Bound(CacheNode.toAddress(client1)))
+    mutableAddrs.update(Addr.Bound(PartitionNode.toAddress(client1)))
     val r2 = ketamaClient.incr("key")
     assert(awaitResult(r2).get == 42)
   }
@@ -136,8 +136,8 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     trait KetamaClientBuilder {
       val serviceA = mock[Service[Command, Response]](RETURNS_SMART_NULLS)
       val serviceB = mock[Service[Command, Response]](RETURNS_SMART_NULLS)
-      val nodeA = CacheNode("10.0.1.1", 11211, 100)
-      val nodeB = CacheNode("10.0.1.2", 11211, 100)
+      val nodeA = PartitionNode("10.0.1.1", 11211, 100)
+      val nodeB = PartitionNode("10.0.1.2", 11211, 100)
       val nodeKeyA = KetamaClientKey(nodeA.host, nodeA.port, nodeA.weight)
       val nodeKeyB = KetamaClientKey(nodeB.host, nodeB.port, nodeB.weight)
       val services = Map(
@@ -145,7 +145,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
         nodeB -> serviceB
       )
       val mutableAddrs: ReadWriteVar[Addr] =
-        new ReadWriteVar(Addr.Bound(services.keys.toSeq.map(CacheNode.toAddress): _*))
+        new ReadWriteVar(Addr.Bound(services.keys.toSeq.map(PartitionNode.toAddress): _*))
 
       val key = Buf.Utf8("foo")
       val value = mock[Value](RETURNS_SMART_NULLS)
@@ -153,7 +153,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       when(serviceA(any())) thenReturn Future.value(Values(Seq(value)))
 
       val broker = new Broker[NodeHealth]
-      def newService(node: CacheNode) = services.get(node).get
+      def newService(node: PartitionNode) = services.get(node).get
       val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService, broker)
 
       awaitResult(ketamaClient.get("foo"))
@@ -188,12 +188,13 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
 
     info("primary leaves and rejoins")
     new KetamaClientBuilder {
-      mutableAddrs.update(Addr.Bound(CacheNode.toAddress(nodeB))) // nodeA leaves
+      mutableAddrs.update(Addr.Bound(PartitionNode.toAddress(nodeB))) // nodeA leaves
       when(serviceB(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
       awaitResult(ketamaClient.get("foo"))
       verify(serviceB, times(1)).apply(any())
 
-      mutableAddrs.update(Addr.Bound(CacheNode.toAddress(nodeA), CacheNode.toAddress(nodeB))) // nodeA joins
+      mutableAddrs.update(
+        Addr.Bound(PartitionNode.toAddress(nodeA), PartitionNode.toAddress(nodeB))) // nodeA joins
       when(serviceA(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
       awaitResult(ketamaClient.get("foo"))
       verify(serviceA, times(2)).apply(any())

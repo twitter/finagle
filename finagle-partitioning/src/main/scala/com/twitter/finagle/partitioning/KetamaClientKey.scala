@@ -16,7 +16,7 @@ object KetamaClientKey {
 
   def apply(id: String): CustomKey = CustomKey(id)
 
-  def fromCacheNode(node: CacheNode): KetamaClientKey = node.key match {
+  def fromCacheNode(node: PartitionNode): KetamaClientKey = node.key match {
     case Some(id) => KetamaClientKey(id)
     case None => KetamaClientKey(node.host, node.port, node.weight)
   }
