@@ -29,6 +29,8 @@ Runtime Behavior Changes
   types are used which move SSL cleanup out of the GC cycle, reducing pause durations.
   ``PHAB_ID=D442409``
 
+* finagle-netty4: Upgraded to Netty 4.1.47.Finale and netty-tcnative 2.0.29.Final. ``PHAB_ID=D444065``
+
 Bug Fixes
 ~~~~~~~~~
 
