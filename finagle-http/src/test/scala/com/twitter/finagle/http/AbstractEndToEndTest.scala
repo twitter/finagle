@@ -2194,4 +2194,59 @@ abstract class AbstractEndToEndTest
     await(client.close())
     await(server.close())
   }
+
+  test("Proxy large streaming responses") {
+    val messageSize = 28.megabytes
+
+    def getSocket(server: ListeningServer): String = {
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      s"${addr.getHostName}:${addr.getPort}"
+    }
+
+    val originServer: ListeningServer = {
+      val chunk = Buf.Utf8("a" * 16.kilobytes.bytes.toInt)
+      val service = Service.mk { _: Request =>
+        val resp = Response()
+        resp.setChunked(true)
+        def drip(sentBytes: Int): Future[Unit] = {
+          if (sentBytes >= messageSize.bytes) resp.writer.close()
+          else {
+            val toSend = math.min(messageSize.bytes - sentBytes, chunk.length).toInt
+            resp.writer
+              .write(chunk.slice(0, toSend))
+              .before(drip(sentBytes + toSend))
+          }
+        }
+        // Start writing.
+        drip(sentBytes = 0)
+
+        Future.value(resp)
+      }
+
+      serverImpl()
+        .serve("localhost:*", service)
+    }
+
+    val proxyServer: ListeningServer = {
+      val client =
+        clientImpl()
+          .withStreaming(true)
+          .withStatsReceiver(NullStatsReceiver)
+          .newService(getSocket(originServer))
+
+      serverImpl()
+        .withStreaming(true)
+        .serve("localhost:*", client)
+    }
+
+    val userClient: Service[Request, Response] = {
+      clientImpl()
+        .withMaxResponseSize(50.megabytes)
+        .newService(getSocket(proxyServer))
+    }
+
+    val resp = Await.result(userClient(Request()), 15.seconds)
+    assert(resp.content.length == messageSize.bytes)
+    await(Closable.all(userClient, proxyServer, originServer).close())
+  }
 }
