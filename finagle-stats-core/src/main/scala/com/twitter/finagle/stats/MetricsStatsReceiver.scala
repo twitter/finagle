@@ -152,13 +152,25 @@ private object MetricsExporter {
 class MetricsExporter(val registry: Metrics, val logger: Logger)
     extends JsonExporter(registry)
     with HttpMuxHandler
-    with MetricsRegistry {
+    with MetricsRegistry
+    with SchemaRegistry {
 
   def this(registry: Metrics) = this(registry, MetricsExporter.defaultLogger)
 
   def this(logger: Logger) = this(MetricsStatsReceiver.defaultRegistry, logger)
 
   def this() = this(MetricsExporter.defaultLogger)
+
+  /**
+   * Indicates use of latched or unlatched counters for SchemaRegistry.
+   */
+  def hasLatchedCounters: Boolean = useCounterDeltas()
+
+  /**
+   * Exposes MetricSchemas for SchemaRegistry.
+   * @return a map of metric names to their full MetricSchemas.
+   */
+  override def schemas(): Map[String, MetricSchema] = registry.schemas.asScala.toMap
 
   val pattern = "/admin/metrics.json"
 
