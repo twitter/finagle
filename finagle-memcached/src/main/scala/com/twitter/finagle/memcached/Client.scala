@@ -13,7 +13,7 @@ import com.twitter.finagle.memcached.util.Bufs.{
   seqOfNonEmptyStringToBuf
 }
 import com.twitter.finagle.partitioning.{
-  KetamaClientKey,
+  HashNodeKey,
   NodeHealth,
   NodeMarkedDead,
   NodeRevived,
@@ -916,7 +916,7 @@ private[finagle] object KetamaPartitionedClient {
     val Live, Ejected = Value
   }
 
-  private case class Node(node: KetamaNode[Client], var state: NodeState.Value)
+  private case class Node(node: HashNode[Client], var state: NodeState.Value)
 
   val DefaultNumReps = 160
 
@@ -952,21 +952,20 @@ private[finagle] class KetamaPartitionedClient(
   // Note: Volatile-read from `clientOf` safety (not raciness) is guaranteed by JMM.
   @volatile private[this] var currentDistributor: Distributor[Client] =
     shardNotAvailableDistributor
-  @volatile private[this] var snapshot: immutable.Set[(KetamaClientKey, KetamaNode[Client])] =
+  @volatile private[this] var snapshot: immutable.Set[(HashNodeKey, HashNode[Client])] =
     immutable.Set.empty
 
   /** exposed for testing */
-  private[memcached] def ketamaNodes: immutable.Set[(KetamaClientKey, KetamaNode[Client])] =
+  private[memcached] def ketamaNodes: immutable.Set[(HashNodeKey, HashNode[Client])] =
     snapshot
 
-  private[this] val nodes = mutable.Map[KetamaClientKey, Node]()
+  private[this] val nodes = mutable.Map[HashNodeKey, Node]()
 
-  private[this] val ketamaNodesChanges: Event[
-    immutable.Set[(KetamaClientKey, KetamaNode[Client])]] = {
+  private[this] val ketamaNodesChanges: Event[immutable.Set[(HashNodeKey, HashNode[Client])]] = {
 
     // Addresses in the current serverset that have been processed and have associated cache nodes.
     // Access synchronized on `self`
-    var mapped: Map[Address, (KetamaClientKey, KetamaNode[Client])] = Map.empty
+    var mapped: Map[Address, (HashNodeKey, HashNode[Client])] = Map.empty
 
     // Last set Addrs that have been processed.
     // Access synchronized on `self`
@@ -975,7 +974,7 @@ private[finagle] class KetamaPartitionedClient(
     // `map` is called on updates to `addrs`.
     // Cache nodes must only be created for new additions to the set of addresses; therefore
     // we must keep track of addresses in the current set that already have associated nodes
-    val nodes: Var[Option[immutable.Set[(KetamaClientKey, KetamaNode[Client])]]] = addrs.map {
+    val nodes: Var[Option[immutable.Set[(HashNodeKey, HashNode[Client])]]] = addrs.map {
       case Addr.Bound(currAddrs, _) =>
         self.synchronized {
 
@@ -988,9 +987,9 @@ private[finagle] class KetamaPartitionedClient(
                 case _ =>
                   PartitionNode(ia.getHostName, ia.getPort, 1, None)
               }
-              val key = KetamaClientKey.fromCacheNode(node)
+              val key = HashNodeKey.fromPartitionNode(node)
               val service = TwemcacheClient(newService(node))
-              addr -> (key -> KetamaNode[Client](key.identifier, node.weight, service))
+              addr -> (key -> HashNode[Client](key.identifier, node.weight, service))
           }
 
           // Remove old nodes no longer in the serverset
@@ -1049,12 +1048,14 @@ private[finagle] class KetamaPartitionedClient(
 
     currentDistributor =
       if (liveNodes.isEmpty) shardNotAvailableDistributor
-      else new KetamaDistributor(liveNodes.toSeq, numReps, oldLibMemcachedVersionComplianceMode)
+      else
+        new ConsistentHashingDistributor(
+          liveNodes.toSeq,
+          numReps,
+          oldLibMemcachedVersionComplianceMode)
   }
 
-  private[this] def updateNodes(
-    current: immutable.Set[(KetamaClientKey, KetamaNode[Client])]
-  ): Unit =
+  private[this] def updateNodes(current: immutable.Set[(HashNodeKey, HashNode[Client])]): Unit =
     self.synchronized {
       val old = snapshot
       // remove old nodes and release clients
@@ -1076,7 +1077,7 @@ private[finagle] class KetamaPartitionedClient(
       rebuildDistributor()
     }
 
-  private[this] def ejectNode(key: KetamaClientKey) = self.synchronized {
+  private[this] def ejectNode(key: HashNodeKey) = self.synchronized {
     nodes.get(key) match {
       case Some(node) if node.state == NodeState.Live =>
         node.state = NodeState.Ejected
@@ -1086,7 +1087,7 @@ private[finagle] class KetamaPartitionedClient(
     }
   }
 
-  private[this] def reviveNode(key: KetamaClientKey) = self.synchronized {
+  private[this] def reviveNode(key: HashNodeKey) = self.synchronized {
     nodes.get(key) match {
       case Some(node) if node.state == NodeState.Ejected =>
         node.state = NodeState.Live

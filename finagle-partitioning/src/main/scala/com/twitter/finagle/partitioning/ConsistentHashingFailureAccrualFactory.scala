@@ -10,22 +10,22 @@ import com.twitter.finagle.partitioning.{param => partitioningParam}
 import com.twitter.logging.Logger
 import com.twitter.util.{Duration, Future, Return, Throw, Timer}
 
-private[finagle] object KetamaFailureAccrualFactory {
+private[finagle] object ConsistentHashingFailureAccrualFactory {
   private[this] val logger = Logger.get(this.getClass.getName)
 
   /**
-   * Configures a stackable KetamaFailureAccrual factory with the given
+   * Configures a stackable HashRingFailureAccrual factory with the given
    * `key` and `healthBroker`. The rest of the context is extracted from
    * Stack.Params.
    */
   def module[Req, Rep](
-    key: KetamaClientKey,
+    key: HashNodeKey,
     healthBroker: Broker[NodeHealth]
   ): Stackable[ServiceFactory[Req, Rep]] =
     new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
       import FailureAccrualFactory.Param
       val role: Stack.Role = FailureAccrualFactory.role
-      val description: String = "Memcached ketama failure accrual"
+      val description: String = "Memcached hash ring failure accrual"
       override def parameters: Seq[Stack.Param[_]] = Seq(
         implicitly[Stack.Param[finagleParam.Stats]],
         implicitly[Stack.Param[FailureAccrualFactory.Param]],
@@ -47,7 +47,7 @@ private[finagle] object KetamaFailureAccrualFactory {
             val failureAccrualPolicy: FailureAccrualPolicy = policy()
             val endpoint = params[Transporter.EndpointAddr].addr
 
-            new KetamaFailureAccrualFactory[Req, Rep](
+            new ConsistentHashingFailureAccrualFactory[Req, Rep](
               underlying = next,
               policy = failureAccrualPolicy,
               responseClassifier = classifier,
@@ -85,13 +85,13 @@ private[finagle] object KetamaFailureAccrualFactory {
  * `healthBroker`. The broker is shared between the `KetamaPartitionedClient` and
  * allows for unhealthy nodes to be ejected from the ring if ejectFailedHost is true.
  */
-private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
+private[finagle] class ConsistentHashingFailureAccrualFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
   policy: FailureAccrualPolicy,
   responseClassifier: ResponseClassifier,
   timer: Timer,
   statsReceiver: StatsReceiver,
-  key: KetamaClientKey,
+  key: HashNodeKey,
   healthBroker: Broker[NodeHealth],
   ejectFailedHost: Boolean,
   label: String)
@@ -141,7 +141,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
     getState match {
       case Alive | ProbeOpen => super.apply(conn)
-      // One finagle client presents one node on the Ketama ring,
+      // One finagle client presents one node on the hash ring,
       // the load balancer has one cache client. When the client
       // is in a busy state, continuing to dispatch requests is likely
       // to fail again. Thus we fail immediately if failureAccrualFactory
