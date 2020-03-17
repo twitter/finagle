@@ -38,8 +38,8 @@ import com.twitter.finagle.param.{
 }
 import com.twitter.finagle.partitioning.param.{EjectFailedHost, KeyHasher, NumReps}
 import com.twitter.finagle.partitioning.{
-  KetamaClientKey,
-  KetamaFailureAccrualFactory,
+  ConsistentHashingFailureAccrualFactory,
+  HashNodeKey,
   NodeHealth,
   PartitionNode
 }
@@ -274,10 +274,10 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
         val healthBroker = new Broker[NodeHealth]
 
         def newService(node: PartitionNode): Service[Command, Response] = {
-          val key = KetamaClientKey.fromCacheNode(node)
+          val key = HashNodeKey.fromPartitionNode(node)
           val stk = stack.replace(
             FailureAccrualFactory.role,
-            KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker)
+            ConsistentHashingFailureAccrualFactory.module[Command, Response](key, healthBroker)
           )
           withStack(stk).newService(Client.mkDestination(node.host, node.port), label0)
         }
@@ -325,8 +325,8 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     /**
      * Duplicate each node across the hash ring according to `reps`.
      *
-     * @see [[com.twitter.hashing.KetamaDistributor]] for more
-     * details.
+     * @see [[com.twitter.hashing.ConsistentHashingDistributor]] for more
+     *      details.
      */
     def withNumReps(reps: Int): Client =
       configured(NumReps(reps))

@@ -14,7 +14,7 @@ import java.net.InetSocketAddress
 import scala.collection.mutable
 
 /**
- * Helper class for managing the nodes in the Ketama ring. Note that it tracks all addresses
+ * Helper class for managing the nodes in the hash ring. Note that it tracks all addresses
  * as weighted addresses, which means a weight change for a given node will be considered a
  * node restart. This way implementations can adjust their partitions if weight is a factor
  * in partitioning.
@@ -34,8 +34,8 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   private[this] val nodeJoinCount = statsReceiver.counter("joins")
   private[this] val keyRingRedistributeCount = statsReceiver.counter("redistributes")
 
-  // nodes in the ketama ring, representing the backend services
-  private[this] val nodes = mutable.Map[KetamaClientKey, Node]()
+  // nodes in the hashing ring, representing the backend services
+  private[this] val nodes = mutable.Map[HashNodeKey, Node]()
 
   private[this] val liveNodesGauge = statsReceiver.addGauge("live_nodes") {
     self.synchronized { nodes.count { case (_, Node(_, state)) => state == NodeState.Live } }
@@ -55,14 +55,14 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   @volatile private[this] var currentDistributor: Distributor[Future[Service[Req, Rep]]] =
     shardNotAvailableDistributor
 
-  private[this] type KetamaKeyAndNode = (KetamaClientKey, KetamaNode[Future[Service[Req, Rep]]])
+  private[this] type HashNodeKeyAndNode = (HashNodeKey, HashNode[Future[Service[Req, Rep]]])
 
   // snapshot is used to detect new nodes when there is a change in bound addresses
-  @volatile private[this] var snapshot: Set[KetamaKeyAndNode] = Set.empty
+  @volatile private[this] var snapshot: Set[HashNodeKeyAndNode] = Set.empty
 
   // The nodeHealthBroker is use to track health of the nodes. Optionally, when the param
   // 'param.EjectFailedHost' is true, unhealthy nodes are removed from the hash ring. It
-  // connects the KetamaFailureAccrualFactory with the partition service to communicate the
+  // connects the ConsistentHashingFailureAccrualFactory with the partition service to communicate the
   // health events.
   private[this] val nodeHealthBroker = new Broker[NodeHealth]
 
@@ -79,13 +79,13 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   }
 
   // Node represents backend partition
-  private[this] case class Node(node: KetamaNode[Future[Service[Req, Rep]]], var state: NodeState)
+  private[this] case class Node(node: HashNode[Future[Service[Req, Rep]]], var state: NodeState)
 
-  private[this] val ketamaNodesChanges: Event[Set[KetamaKeyAndNode]] = {
+  private[this] val hashRingNodesChanges: Event[Set[HashNodeKeyAndNode]] = {
 
     // Addresses in the current serverset that have been processed and have associated cache nodes.
     // Access synchronized on `self`
-    var mapped: Map[Address, KetamaKeyAndNode] = Map.empty
+    var mapped: Map[Address, HashNodeKeyAndNode] = Map.empty
 
     // Last set Addrs that have been processed.
     // Access synchronized on `self`
@@ -94,7 +94,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
     // `map` is called on updates to `addrs`.
     // Cache nodes must only be created for new additions to the set of addresses; therefore
     // we must keep track of addresses in the current set that already have associated nodes
-    val nodes: Var[Set[KetamaKeyAndNode]] = {
+    val nodes: Var[Set[HashNodeKeyAndNode]] = {
       // Intercept the params meant for Loadbalancer inserted by the BindingFactory
       val LoadBalancerFactory.Dest(dest: Var[Addr]) = params[LoadBalancerFactory.Dest]
       dest.map {
@@ -118,11 +118,11 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
                   }
                 val node =
                   PartitionNode(ia.getHostName, ia.getPort, w.asInstanceOf[Int], shardIdOpt)
-                val key = KetamaClientKey.fromCacheNode(node)
+                val key = HashNodeKey.fromPartitionNode(node)
                 val service = mkService(boundAddress, key)
 
                 weightedAddr -> (
-                  key -> KetamaNode[Future[Service[Req, Rep]]](
+                  key -> HashNode[Future[Service[Req, Rep]]](
                     key.identifier,
                     node.weight,
                     service
@@ -166,15 +166,15 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   }
 
   // We listen for changes to the set of nodes to update the cache ring.
-  private[this] val nodeWatcher: Closable = ketamaNodesChanges.respond(updateNodes)
+  private[this] val nodeWatcher: Closable = hashRingNodesChanges.respond(updateNodes)
 
-  private[this] def mkService(addr: Addr, key: KetamaClientKey): Future[Service[Req, Rep]] = {
+  private[this] def mkService(addr: Addr, key: HashNodeKey): Future[Service[Req, Rep]] = {
     val modifiedParams = params + LoadBalancerFactory.Dest(Var.value(addr))
 
     val next = underlying
       .replace(
         FailureAccrualFactory.role,
-        KetamaFailureAccrualFactory.module[Req, Rep](key, nodeHealthBroker)
+        ConsistentHashingFailureAccrualFactory.module[Req, Rep](key, nodeHealthBroker)
       )
       .make(modifiedParams)
 
@@ -195,11 +195,14 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
     currentDistributor = if (liveNodes.isEmpty) {
       shardNotAvailableDistributor
     } else {
-      new KetamaDistributor(liveNodes, numReps, false /*oldLibMemcachedVersionComplianceMode*/ )
+      new ConsistentHashingDistributor(
+        liveNodes,
+        numReps,
+        false /*oldLibMemcachedVersionComplianceMode*/ )
     }
   }
 
-  private[this] def updateNodes(current: Set[KetamaKeyAndNode]): Unit = {
+  private[this] def updateNodes(current: Set[HashNodeKeyAndNode]): Unit = {
     self.synchronized {
       val old = snapshot
       // remove old nodes and release clients
@@ -214,7 +217,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
 
       // new joined node appears as Live state
       nodes ++= (current &~ old).collect {
-        case (key, node: KetamaNode[Future[Service[Req, Rep]]]) =>
+        case (key, node: HashNode[Future[Service[Req, Rep]]]) =>
           nodeJoinCount.incr()
           key -> Node(node, NodeState.Live)
       }
@@ -224,7 +227,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
     }
   }
 
-  private[this] def ejectNode(key: KetamaClientKey) = self.synchronized {
+  private[this] def ejectNode(key: HashNodeKey) = self.synchronized {
     nodes.get(key) match {
       case Some(node) if node.state == NodeState.Live =>
         node.state = NodeState.Ejected
@@ -234,7 +237,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
     }
   }
 
-  private[this] def reviveNode(key: KetamaClientKey) = self.synchronized {
+  private[this] def reviveNode(key: HashNodeKey) = self.synchronized {
     nodes.get(key) match {
       case Some(node) if node.state == NodeState.Ejected =>
         node.state = NodeState.Live

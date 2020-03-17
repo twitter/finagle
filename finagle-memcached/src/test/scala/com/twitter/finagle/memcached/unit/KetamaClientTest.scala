@@ -10,7 +10,7 @@ import com.twitter.util.{Await, Awaitable, Future, ReadWriteVar}
 import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
 import com.twitter.finagle.partitioning.{
-  KetamaClientKey,
+  HashNodeKey,
   NodeHealth,
   NodeMarkedDead,
   NodeRevived,
@@ -138,8 +138,8 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       val serviceB = mock[Service[Command, Response]](RETURNS_SMART_NULLS)
       val nodeA = PartitionNode("10.0.1.1", 11211, 100)
       val nodeB = PartitionNode("10.0.1.2", 11211, 100)
-      val nodeKeyA = KetamaClientKey(nodeA.host, nodeA.port, nodeA.weight)
-      val nodeKeyB = KetamaClientKey(nodeB.host, nodeB.port, nodeB.weight)
+      val nodeKeyA = HashNodeKey(nodeA.host, nodeA.port, nodeA.weight)
+      val nodeKeyB = HashNodeKey(nodeB.host, nodeB.port, nodeB.weight)
       val services = Map(
         nodeA -> serviceA,
         nodeB -> serviceB

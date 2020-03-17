@@ -13,6 +13,9 @@ Breaking API Changes
 * finagle-partitioning: Rename `c.t.finagle.partitioning.CacheNode` and `CacheNodeMetadata`
   to `c.t.finagle.partitioning.PartitionNode` and `PartitionNodeMetadata`. ``PHAB_ID=D448015``
 
+* finagle-partitioning: Rename `c.t.finagle.partitioning.KetamaClientKey` to `HashNodeKey`
+  ``PHAB_ID=D449929``
+
 Bug Fixes
 ~~~~~~~~~
 

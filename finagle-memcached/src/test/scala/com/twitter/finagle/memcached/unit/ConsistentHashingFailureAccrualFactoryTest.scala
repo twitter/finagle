@@ -5,9 +5,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.liveness.FailureAccrualPolicy
 import com.twitter.finagle.partitioning.{
+  ConsistentHashingFailureAccrualFactory,
   FailureAccrualException,
-  KetamaClientKey,
-  KetamaFailureAccrualFactory,
+  HashNodeKey,
   NodeHealth,
   NodeMarkedDead,
   NodeRevived
@@ -21,7 +21,7 @@ import org.mockito.Matchers._
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
-class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
+class ConsistentHashingFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
   val TimeOut = 15.seconds
 
@@ -41,13 +41,13 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     when(underlying.status) thenReturn underlyingStatus
     when(underlying()) thenReturn Future.value(underlyingService)
 
-    val key = mock[KetamaClientKey]
+    val key = mock[HashNodeKey]
     val broker = new Broker[NodeHealth]
 
     val timer = new MockTimer
     val label = "test"
     val factory =
-      new KetamaFailureAccrualFactory[Int, Int](
+      new ConsistentHashingFailureAccrualFactory[Int, Int](
         underlying = underlying,
         policy = FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(10.seconds)),
         responseClassifier = ResponseClassifier.Default,
