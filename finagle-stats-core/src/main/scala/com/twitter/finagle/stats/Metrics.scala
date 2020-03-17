@@ -289,6 +289,9 @@ private[finagle] class Metrics private (
   def verbosity: util.Map[String, Verbosity] =
     util.Collections.unmodifiableMap(verbosityMap)
 
+  def schemas: util.Map[String, MetricSchema] =
+    util.Collections.unmodifiableMap(metricSchemas)
+
   def metricsCollisionsLinterRule: Rule =
     Rule(
       Category.Configuration,
