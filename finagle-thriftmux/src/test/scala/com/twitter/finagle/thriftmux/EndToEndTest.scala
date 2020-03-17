@@ -1830,35 +1830,6 @@ class EndToEndTest
     await(server.close())
   }
 
-  // This test uses excessive memory so skip on SBT builds
-  if (!sys.props.contains("SKIP_SBT"))
-    test("ThriftMux client to Thrift server ") {
-      val iface = new TestService.MethodPerEndpoint {
-        def query(x: String): Future[String] = Future.value(x + x)
-        def question(y: String): Future[String] = Future.value(y + y)
-        def inquiry(z: String): Future[String] = Future.value(z + z)
-      }
-      val mem = new InMemoryStatsReceiver
-      val server = Thrift.server
-        .withStatsReceiver(mem)
-        .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
-
-      val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
-      val clientSvc = clientImpl
-        .withStatsReceiver(mem)
-        .withLabel("client")
-        .newService(s"localhost:$port")
-      val client = new TestService.FinagledClient(clientSvc)
-
-      // the thrift server doesn't understand the protocol of the request,
-      // so it does its usual thing and closes the connection.
-      intercept[ChannelClosedException] {
-        await(client.query("ethics"))
-      }
-
-      await(clientSvc.close() join server.close())
-    }
-
   test("drain downgraded connections") {
     val latch = Promise[Unit]()
     val response = new Promise[String]()
