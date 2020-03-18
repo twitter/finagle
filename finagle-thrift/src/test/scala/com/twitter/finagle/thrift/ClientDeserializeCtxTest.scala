@@ -1,13 +1,12 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.service.ReqRep
 import com.twitter.scrooge.ThriftStruct
 import com.twitter.util.Return
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
-class DeserializeCtxTest extends FunSuite with MockitoSugar {
+class ClientDeserializeCtxTest extends FunSuite with MockitoSugar {
 
   test("ClientDeserializeCtx only deserializes once") {
     val times = new AtomicInteger()
@@ -37,15 +36,24 @@ class DeserializeCtxTest extends FunSuite with MockitoSugar {
     assert(Return(0) == deserCtx.deserialize(Array(9.toByte)))
   }
 
-  test("ServerToReqRep only set the ReqRep once") {
-    val reqRep1 = ReqRep(1, Return(1))
-    val reqRep2 = ReqRep(2, Return(2))
-    val deserCtx = new ServerToReqRep
-    deserCtx.setReqRep(reqRep1)
-    assert(reqRep1 == deserCtx(Array.empty))
+  test("deserialized can be called multiple times when batched") {
+    val times = new AtomicInteger()
 
-    deserCtx.setReqRep(reqRep2)
-    assert(reqRep1 == deserCtx(Array.empty))
+    val deserializer = { bytes: Array[Byte] =>
+      times.incrementAndGet()
+      Return(bytes.length)
+    }
+
+    val deserCtx = new ClientDeserializeCtx(mock[ThriftStruct], deserializer)
+
+    val mergedResponse = (0 to 9).map { i =>
+      deserCtx.deserializeFromBatched(Array.fill(i)(i.toByte))
+    }.last
+
+    deserCtx.mergedDeserializedResponse(mergedResponse)
+    assert(deserCtx.deserialize(Array.empty) == Return(9))
+    // the deserCtx.deserialize wont deserialize the response
+    // total number is 10 instead of 11
+    assert(times.get == 10)
   }
-
 }
