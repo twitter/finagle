@@ -41,9 +41,9 @@ class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte]
   /**
    * Deserialize the given bytes.
    *
-   * Ensures that deserialization will only happen once regardless of future
-   * inputs. If different bytes are seen on future calls, this will still
-   * return the first deserialized result.
+   * Ensures that deserialization will only happen once for non fan-out responses
+   * regardless of future inputs. If different bytes are seen on future calls,
+   * this will still return the first deserialized result.
    */
   def deserialize(responseBytes: Array[Byte]): Try[Rep] = synchronized {
     if (deserialized == null) {
@@ -73,6 +73,21 @@ class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte]
    */
   def rpcName: Option[String] = synchronized {
     _rpcName
+  }
+
+  /**
+   * Applies deserializer to one response from bathed responses
+   * @note: This won't update the `deserialized` content
+   */
+  private[finagle] def deserializeFromBatched(responseBytes: Array[Byte]): Try[Rep] = synchronized {
+    replyDeserializer(responseBytes)
+  }
+
+  /**
+   * Sets the merged deserialized response
+   */
+  private[finagle] def mergedDeserializedResponse(response: Try[Rep]): Unit = synchronized {
+    deserialized = response
   }
 
   /**
