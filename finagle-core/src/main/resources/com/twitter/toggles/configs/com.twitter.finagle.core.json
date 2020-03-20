@@ -1,0 +1,9 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.finagle.loadbalancer.exp.apertureEagerConnections",
+      "description": "Eagerly connect to the downstream endpoints in the Aperture load balancer",
+      "fraction": 0.0
+    }
+  ]
+}

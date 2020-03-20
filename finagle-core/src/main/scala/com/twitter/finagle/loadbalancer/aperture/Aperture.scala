@@ -113,7 +113,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected def useDeterministicOrdering: Option[Boolean]
 
   /**
-   * Indicator if the endpoints within the aperture should be connected to eagerly
+   * Indicator if the endpoints within the aperture should be connected to eagerly. This is a Function0
+   * to allow the capability to switch off the feature without having to reconstruct the client stack.
    */
   protected def eagerConnections: Boolean
 
