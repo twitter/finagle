@@ -31,6 +31,7 @@ import com.twitter.finagle.thriftmux.pushsession.MuxDowngradingNegotiator
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.{TraceInitializerFilter, Tracer}
 import com.twitter.io.Buf
+import com.twitter.scrooge.TReusableBuffer
 import com.twitter.util._
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
@@ -249,10 +250,20 @@ object ThriftMux
      * allocated for the next thrift response.
      * The default max size is 16Kb.
      *
+     * @note MaxReusableBufferSize will be ignored if TReusableBufferFactory is set.
+     *
      * @param size Max size of the reusable buffer for thrift responses in bytes.
      */
     def withMaxReusableBufferSize(size: Int): Client =
       configured(Thrift.param.MaxReusableBufferSize(size))
+
+    /**
+     * Produce a [[com.twitter.finagle.ThriftMux.Client]] with a factory creates new
+     * TReusableBuffer, the TReusableBuffer can be shared with other client instance.
+     * If set, the MaxReusableBufferSize will be ignored.
+     */
+    def withTReusableBufferFactory(tReusableBufferFactory: () => TReusableBuffer): Client =
+      configured(Thrift.param.TReusableBufferFactory(tReusableBufferFactory))
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Client]] with per-endpoint stats filters
