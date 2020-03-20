@@ -3,12 +3,19 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.Thrift
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats.{ClientStatsReceiver, LazyStatsReceiver, StatsReceiver}
+import com.twitter.finagle.thrift.Protocols.{
+  NoLimit,
+  SysPropContainerLengthLimit,
+  SysPropStringLengthLimit,
+  limitToOption,
+  minLimit
+}
 import com.twitter.scrooge.TReusableBuffer
 import java.util.logging.{Level, Logger}
 import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolFactory}
 
 object RichClientParam {
-  private val NO_THRIFT_REUSABLE_BUFFER_FACTORY: () => TReusableBuffer =
+  private[finagle] val NO_THRIFT_REUSABLE_BUFFER_FACTORY: () => TReusableBuffer =
     createThriftReusableBuffer()
 
   /**
@@ -94,68 +101,6 @@ object RichClientParam {
     TReusableBuffer(initialSize = thriftBufferSize, maxThriftBufferSize = thriftBufferSize)
   }
 
-}
-
-/**
- * Thrift-specific parameters for configuring clients.
- */
-// TODO: We should make this a case class again once we drop support for 2.11
-class RichClientParam private (
-  val protocolFactory: TProtocolFactory,
-  val serviceName: String,
-  @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") val maxThriftBufferSize: Int,
-  val thriftReusableBufferFactory: () => TReusableBuffer,
-  val responseClassifier: ResponseClassifier,
-  val clientStats: StatsReceiver,
-  val perEndpointStats: Boolean) {
-
-  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
-  def this(protocolFactory: TProtocolFactory, responseClassifier: ResponseClassifier) = this(
-    protocolFactory,
-    "",
-    Thrift.param.maxThriftBufferSize,
-    RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY,
-    responseClassifier,
-    new LazyStatsReceiver(ClientStatsReceiver),
-    false
-  )
-
-  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
-  def this(protocolFactory: TProtocolFactory) = this(protocolFactory, ResponseClassifier.Default)
-
-  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
-  def this() = this(Thrift.param.protocolFactory, ResponseClassifier.Default)
-
-  import Protocols._
-
-  def copy(
-    protocolFactory: TProtocolFactory = this.protocolFactory,
-    serviceName: String = this.serviceName,
-    @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") maxThriftBufferSize: Int =
-      this.maxThriftBufferSize,
-    thriftReusableBufferFactory: () => TReusableBuffer = this.thriftReusableBufferFactory,
-    responseClassifier: ResponseClassifier = this.responseClassifier,
-    clientStats: StatsReceiver = this.clientStats,
-    perEndpointStats: Boolean = this.perEndpointStats
-  ): RichClientParam =
-    new RichClientParam(
-      protocolFactory,
-      serviceName,
-      maxThriftBufferSize,
-      thriftReusableBufferFactory,
-      responseClassifier,
-      clientStats,
-      perEndpointStats
-    )
-
-  def createThriftReusableBuffer(): TReusableBuffer = {
-    if (thriftReusableBufferFactory eq RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY) {
-      RichClientParam.createThriftReusableBuffer(maxThriftBufferSize)()
-    } else {
-      thriftReusableBufferFactory()
-    }
-  }
-
   /**
    * Apply system-wide read limit on TBinaryProtocol and TCompactProtocol if
    * any of the following System Properties are set:
@@ -163,7 +108,9 @@ class RichClientParam private (
    *   com.twitter.finagle.thrift.stringLengthLimit
    *   com.twitter.finagle.thrift.containerLengthLimit
    */
-  val restrictedProtocolFactory: TProtocolFactory = {
+  private[thrift] def restrictedProtocolFactory(
+    protocolFactory: TProtocolFactory
+  ): TProtocolFactory = {
     // alter the TProtocol.Factory if system property of readLength is set
     if (SysPropStringLengthLimit.isDefined || SysPropContainerLengthLimit.isDefined) {
       protocolFactory match {
@@ -257,4 +204,73 @@ class RichClientParam private (
       }
     }
   }
+}
+
+/**
+ * Thrift-specific parameters for configuring clients.
+ */
+// TODO: We should make this a case class again once we drop support for 2.11
+class RichClientParam private (
+  val protocolFactory: TProtocolFactory,
+  val serviceName: String,
+  @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") val maxThriftBufferSize: Int,
+  val thriftReusableBufferFactory: () => TReusableBuffer,
+  val responseClassifier: ResponseClassifier,
+  val clientStats: StatsReceiver,
+  val perEndpointStats: Boolean) {
+
+  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
+  def this(protocolFactory: TProtocolFactory, responseClassifier: ResponseClassifier) = this(
+    protocolFactory,
+    "",
+    Thrift.param.maxThriftBufferSize,
+    RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY,
+    responseClassifier,
+    new LazyStatsReceiver(ClientStatsReceiver),
+    false
+  )
+
+  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
+  def this(protocolFactory: TProtocolFactory) = this(protocolFactory, ResponseClassifier.Default)
+
+  @deprecated("Use RichClientParam#apply instead", "2019-11-19")
+  def this() = this(Thrift.param.protocolFactory, ResponseClassifier.Default)
+
+  def copy(
+    protocolFactory: TProtocolFactory = this.protocolFactory,
+    serviceName: String = this.serviceName,
+    @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") maxThriftBufferSize: Int =
+      this.maxThriftBufferSize,
+    thriftReusableBufferFactory: () => TReusableBuffer = this.thriftReusableBufferFactory,
+    responseClassifier: ResponseClassifier = this.responseClassifier,
+    clientStats: StatsReceiver = this.clientStats,
+    perEndpointStats: Boolean = this.perEndpointStats
+  ): RichClientParam =
+    new RichClientParam(
+      protocolFactory,
+      serviceName,
+      maxThriftBufferSize,
+      thriftReusableBufferFactory,
+      responseClassifier,
+      clientStats,
+      perEndpointStats
+    )
+
+  def createThriftReusableBuffer(): TReusableBuffer = {
+    if (thriftReusableBufferFactory eq RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY) {
+      RichClientParam.createThriftReusableBuffer(maxThriftBufferSize)()
+    } else {
+      thriftReusableBufferFactory()
+    }
+  }
+
+  /**
+   * Apply system-wide read limit on TBinaryProtocol and TCompactProtocol if
+   * any of the following System Properties are set:
+   *   org.apache.thrift.readLength (deprecated)
+   *   com.twitter.finagle.thrift.stringLengthLimit
+   *   com.twitter.finagle.thrift.containerLengthLimit
+   */
+  val restrictedProtocolFactory: TProtocolFactory =
+    RichClientParam.restrictedProtocolFactory(protocolFactory)
 }

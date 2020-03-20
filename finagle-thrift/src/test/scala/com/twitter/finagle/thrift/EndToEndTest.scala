@@ -1060,6 +1060,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .withMaxReusableBufferSize(15)
       .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
       .withStatsReceiver(clientStats)
+      .withTReusableBufferFactory(RichClientParam.createThriftReusableBuffer(20))
       .build[Echo.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"

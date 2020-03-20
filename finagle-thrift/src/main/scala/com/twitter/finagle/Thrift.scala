@@ -19,6 +19,7 @@ import com.twitter.finagle.thrift.transport.ThriftClientPreparer
 import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.scrooge.TReusableBuffer
 import com.twitter.util.{Closable, Duration, Future, Monitor}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
@@ -183,6 +184,16 @@ object Thrift
     }
 
     /**
+     * A `Param` that sets a factory to create a TReusableBuffer, the TReusableBuffer can be
+     * shared with other client instances.
+     * If this is set, MaxReusableBufferSize will be ignored.
+     */
+    case class TReusableBufferFactory(tReusableBufferFactory: () => TReusableBuffer)
+    implicit object TReusableBufferFactory extends Stack.Param[TReusableBufferFactory] {
+      val default = TReusableBufferFactory(RichClientParam.NO_THRIFT_REUSABLE_BUFFER_FACTORY)
+    }
+
+    /**
      * A `Param` to control whether to record per-endpoint stats.
      * If this is set to true, per-endpoint stats will be counted.
      *
@@ -244,6 +255,8 @@ object Thrift
     protected val clientParam: RichClientParam = RichClientParam(
       protocolFactory = params[param.ProtocolFactory].protocolFactory,
       maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
+      thriftReusableBufferFactory =
+        params[Thrift.param.TReusableBufferFactory].tReusableBufferFactory,
       clientStats = params[Stats].statsReceiver,
       responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier,
       perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
@@ -292,10 +305,20 @@ object Thrift
      * allocated for the next thrift response.
      * The default max size is 16Kb.
      *
+     * @note MaxReusableBufferSize will be ignored if TReusableBufferFactory is set.
+     *
      * @param size Max size of the reusable buffer for thrift responses in bytes.
      */
     def withMaxReusableBufferSize(size: Int): Client =
       configured(param.MaxReusableBufferSize(size))
+
+    /**
+     * Produce a [[com.twitter.finagle.Thrift.Client]] with a factory creates new
+     * TReusableBuffer, the TReusableBuffer can be shared with other client instance.
+     * If set, the MaxReusableBufferSize will be ignored.
+     */
+    def withTReusableBufferFactory(tReusableBufferFactory: () => TReusableBuffer): Client =
+      configured(param.TReusableBufferFactory(tReusableBufferFactory))
 
     /**
      * Produce a [[com.twitter.finagle.Thrift.Client]] with per-endpoint stats filters

@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-thrift/thriftmux: Thrift and ThriftMux client side can set a sharable
+  TReusableBuffer by `withTReusableBufferFactory`. ``PHAB_ID=D452763``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
