@@ -20,4 +20,14 @@ class ParamsTest extends FunSuite {
 
     apertureEagerConnections.reset()
   }
+
+  test("EagerConnections can change its value") {
+    var enabled = false
+
+    val eagerConnections = EagerConnections(() => enabled)
+    assert(eagerConnections.enabled == false)
+
+    enabled = true
+    assert(eagerConnections.enabled == true)
+  }
 }

@@ -218,39 +218,42 @@ private[finagle] object BindingFactory {
       val param.Timer(timer) = params[param.Timer]
       val Dest(dest) = params[Dest]
       val LoadBalancerFactory.Param(balancer) = params[LoadBalancerFactory.Param]
+      val eagerConnections = params[EagerConnections].enabled
 
       // we check if the stack has been explictly configured to detect misconfiguration
-      // and the underlying balancer supports eagerly connecting to endpoints
+      // and make sure that the underlying balancer supports eagerly connecting to endpoints
       val eagerlyConnect: Boolean =
         if (params.contains[EagerConnections]) {
-          if (balancer.supportsEagerConnections) params[EagerConnections].enabled
-          else {
+          if (eagerConnections && !balancer.supportsEagerConnections) {
             // misconfiguration
             log.warning(
-              "EagerlyConnect is only supported for the aperture load balancer. " +
+              "EagerConnections is only supported for the aperture load balancer. " +
                 s"stack param found for ${label}.")
             false
-          }
+          } else eagerConnections
         } else {
-          balancer.supportsEagerConnections && params[EagerConnections].enabled
+          eagerConnections && balancer.supportsEagerConnections
         }
 
       def newStack(errorLabel: String, bound: Name.Bound) = {
-        val client = next.make(
+        val updatedParams =
           params +
             // replace the possibly unbound Dest with the definitely bound
             // Dest because (1) it's needed by AddrMetadataExtraction and
             // (2) it seems disingenuous not to.
             Dest(bound) +
             LoadBalancerFactory.Dest(bound.addr) +
-            LoadBalancerFactory.ErrorLabel(errorLabel) +
-            // replace `EagerlyConnect` because (1) we need a way to disable eager connection
-            // establishment for local dtab overrides. Request-level overrides can vary unpredicably,
-            // resulting in wasteful connections and (2) the feature can be enabled for all clients
-            // via the experimental global flag until this becomes default behavior
-            EagerConnections(eagerlyConnect && Dtab.local.isEmpty)
-        )
+            LoadBalancerFactory.ErrorLabel(errorLabel)
 
+        // Explictly disable `EagerConnections` if (1) `eagerlyConnect` is false, indicating that
+        // the feature was explictly disabled or the underlying balancer does not support the eager connections
+        // feature or (2) If request-level dtab overrides are present due to their unpredictable nature,
+        // resulting in wasteful connections.
+        val finalParams =
+          if (!eagerlyConnect || !Dtab.local.isEmpty) updatedParams + EagerConnections(false)
+          else updatedParams
+
+        val client = next.make(finalParams)
         boundPathFilter(bound.path) andThen client
       }
 
