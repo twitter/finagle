@@ -65,7 +65,7 @@ object BijectionsTest {
     headers.foreach { case (k, v) => req.headerMap.add(k, v) }
     req.setChunked(false)
     req.contentString = body
-    req.headerMap.set(Fields.ContentLength, body.length.toString)
+    req.contentLength = req.content.length
     (req, body)
   }
 
@@ -190,7 +190,7 @@ class BijectionsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   test("finagle http request -> netty") {
     forAll(arbRequest) {
       case (in: Request, body: String) =>
-        val out = Bijections.finagle.requestToNetty(in)
+        val out = Bijections.finagle.requestToNetty(in, in.contentLength)
         assert(HttpUtil.isTransferEncodingChunked(out) == false)
         assert(out.protocolVersion == Bijections.finagle.versionToNetty(in.version))
         assert(out.method == Bijections.finagle.methodToNetty(in.method))
@@ -208,12 +208,40 @@ class BijectionsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     }
   }
 
+  test("incorrect content-length header is fixed on non-chunked requests") {
+    val in = Request()
+    in.contentString = "foo"
+    in.contentLength = 10
+
+    val out = Bijections.finagle.requestToNetty(in, in.contentLength)
+    assert(out.headers.get(Fields.ContentLength) == "3")
+  }
+
+  test("strips the transfer-encoding header if a content-length header is present") {
+    val in = Request()
+    in.contentString = "foo"
+    in.contentLength = 3
+    in.headerMap.set(Fields.TransferEncoding, "chunked")
+
+    val out = Bijections.finagle.requestToNetty(in, in.contentLength)
+    assert(out.headers.get(Fields.ContentLength) == "3")
+    assert(!HttpUtil.isTransferEncodingChunked(out))
+  }
+
+  test("requests that don't have a body don't get an auto-added content-length header") {
+    val in = Request()
+
+    val out = Bijections.finagle.requestToNetty(in, in.contentLength)
+    assert(!out.headers.contains(Fields.ContentLength))
+  }
+
   test("finagle http request with chunked and content-length set -> netty") {
     val in = Request()
     in.setChunked(true)
     in.contentLength = 10
+    in.headerMap.set(Fields.TransferEncoding, "chunked")
 
-    val out = Bijections.finagle.requestToNetty(in)
+    val out = Bijections.finagle.requestToNetty(in, in.contentLength)
     assert(!HttpUtil.isTransferEncodingChunked(out))
     assert(out.headers.get(Fields.ContentLength) == "10")
   }
@@ -222,7 +250,7 @@ class BijectionsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     val in = Request()
     in.setChunked(true)
 
-    val out = Bijections.finagle.requestToNetty(in)
+    val out = Bijections.finagle.requestToNetty(in, in.contentLength)
     assert(HttpUtil.isTransferEncodingChunked(out))
     assert(!out.headers.contains(Fields.ContentLength))
   }

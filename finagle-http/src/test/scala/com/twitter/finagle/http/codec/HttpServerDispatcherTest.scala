@@ -27,7 +27,8 @@ import org.scalatest.FunSuite
 class HttpServerDispatcherTest extends FunSuite {
   import HttpServerDispatcherTest._
 
-  private[this] def from(req: Request): HttpRequest = Bijections.finagle.requestToNetty(req)
+  private[this] def from(req: Request): HttpRequest =
+    Bijections.finagle.requestToNetty(req, req.contentLength)
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 15.seconds)
 

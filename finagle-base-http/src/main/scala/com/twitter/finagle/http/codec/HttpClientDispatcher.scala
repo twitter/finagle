@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.http.{Fields, Request, Response}
+import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.exp.{Multi, StreamTransport}
 import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, StatsReceiver}
 import com.twitter.logging.Logger
@@ -18,14 +18,6 @@ private[finagle] object HttpClientDispatcher {
     req: Request,
     p: Promise[Response]
   ): Future[Unit] = {
-    if (!req.isChunked && !req.headerMap.contains(Fields.ContentLength)) {
-      val len = req.content.length
-      // Only set the content length if we are sure there is content. This
-      // behavior complies with the specification that user agents should not
-      // set the content length header for messages without a payload body.
-      if (len > 0) req.headerMap.setUnsafe(Fields.ContentLength, len.toString)
-    }
-
     // wait on these concurrently:
     trans
       .write(req).joinWith(
