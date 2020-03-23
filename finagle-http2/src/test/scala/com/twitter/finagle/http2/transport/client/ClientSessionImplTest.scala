@@ -80,7 +80,7 @@ class ClientSessionImplTest extends FunSuite {
 
       assert(multiplexCodec.connection.local.lastStreamCreated == 0)
 
-      val req = Bijections.finagle.requestToNetty(Request())
+      val req = Bijections.finagle.requestToNetty(Request(), None)
       await(stream.write(req))
 
       assert(multiplexCodec.connection.local.lastStreamCreated == 3)

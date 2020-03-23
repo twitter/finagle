@@ -180,7 +180,7 @@ private[finagle] object Bijections {
     def methodToNetty(m: Method): NettyHttp.HttpMethod =
       NettyHttp.HttpMethod.valueOf(m.toString)
 
-    def requestToNetty(r: Request): NettyHttp.HttpRequest = {
+    def requestToNetty(r: Request, contentLengthHeader: Option[Long]): NettyHttp.HttpRequest = {
       if (r.isChunked) {
         val result = new NettyHttp.DefaultHttpRequest(
           versionToNetty(r.version),
@@ -194,10 +194,13 @@ private[finagle] object Bijections {
         if (!r.headerMap.contains(Fields.ContentLength)) {
           result.headers
             .add(NettyHttp.HttpHeaderNames.TRANSFER_ENCODING, NettyHttp.HttpHeaderValues.CHUNKED)
+        } else {
+          // Make sure we don't have a `Transfer-Encooding: chunked` header and `Content-Length` headers
+          result.headers.remove(NettyHttp.HttpHeaderNames.TRANSFER_ENCODING)
         }
         result
       } else {
-        new NettyHttp.DefaultFullHttpRequest(
+        val result = new NettyHttp.DefaultFullHttpRequest(
           versionToNetty(r.version),
           methodToNetty(r.method),
           r.uri,
@@ -205,6 +208,29 @@ private[finagle] object Bijections {
           headersToNetty(r.headerMap),
           NettyHttp.EmptyHttpHeaders.INSTANCE // trailers are only propagated from chunked messages
         )
+
+        if (contentLengthHeader.isDefined) {
+          result.headers.remove(NettyHttp.HttpHeaderNames.TRANSFER_ENCODING)
+        }
+
+        val realLength = r.content.length
+        contentLengthHeader match {
+          case Some(l) if realLength != l =>
+            // need to clean up the content length header
+            result.headers.set(NettyHttp.HttpHeaderNames.CONTENT_LENGTH, realLength.toString)
+
+          case None if realLength > 0 =>
+            // Only set the content length if we are sure there is content. This
+            // behavior complies with the specification that user agents should not
+            // set the content length header for messages without a payload body.
+            result.headers.set(NettyHttp.HttpHeaderNames.CONTENT_LENGTH, realLength.toString)
+
+          case _ =>
+          // NOP. Either the content length header already matches or
+          // it doesn't exist and there was no content, so there is nothing to do.
+        }
+
+        result
       }
     }
   }

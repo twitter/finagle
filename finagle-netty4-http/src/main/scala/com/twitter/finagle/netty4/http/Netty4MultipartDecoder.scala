@@ -12,7 +12,7 @@ private[finagle] class Netty4MultipartDecoder extends MultipartDecoder {
   protected def decodeFull(req: Request, maxInMemoryFileSize: StorageUnit): Option[Multipart] = {
     val decoder = new HttpPostMultipartRequestDecoder(
       new DefaultHttpDataFactory(maxInMemoryFileSize.inBytes),
-      Bijections.finagle.requestToNetty(req)
+      Bijections.finagle.requestToNetty(req, req.contentLength)
     )
 
     val attrs = new mutable.HashMap[String, mutable.ListBuffer[String]]()

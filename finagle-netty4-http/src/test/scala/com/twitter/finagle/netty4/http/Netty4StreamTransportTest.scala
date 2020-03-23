@@ -29,7 +29,7 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
 
   test("streamOut: writes through (no trailers)") {
     val rw = new Pipe[Chunk]
-    val out = streamOut(transport, rw)
+    val out = streamOut(transport, rw, None)
 
     rw.write(Chunk.fromString("foo"))
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "foo")
@@ -43,7 +43,7 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
 
   test("streamOut: writes through (trailers; empty last content)") {
     val rw = new Pipe[Chunk]
-    val out = streamOut(transport, rw)
+    val out = streamOut(transport, rw, None)
 
     rw.write(Chunk.fromString("foo"))
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "foo")
@@ -62,7 +62,7 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
 
   test("streamOut: writes through (trailers; non-empty last content)") {
     val rw = new Pipe[Chunk]
-    val out = streamOut(transport, rw)
+    val out = streamOut(transport, rw, None)
 
     rw.write(Chunk.fromString("foo"))
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "foo")
@@ -83,7 +83,7 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
 
   test("streamOut: fails when not terminated with trailers") {
     val rw = new Pipe[Chunk]
-    val out = streamOut(transport, rw)
+    val out = streamOut(transport, rw, None)
 
     rw.write(Chunk.last(HeaderMap("foo" -> "bar")))
     val trailers = write.poll()
@@ -91,6 +91,56 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
 
     rw.write(Chunk.last(HeaderMap("bar" -> "baz")))
     intercept[IllegalStateException](await(out))
+  }
+
+  test("streamOut: fails if more data is written than specified by the content length header") {
+    val rw = new Pipe[Chunk]
+    val out = streamOut(transport, rw, Some(1))
+
+    await(rw.write(Chunk.fromString("foo")))
+    intercept[IllegalStateException](await(out))
+    await(rw.onClose)
+  }
+
+  test(
+    "streamOut: fails if more data is written than specified by the content length header (trailers)") {
+    val rw = new Pipe[Chunk]
+    val out = streamOut(transport, rw, Some(1))
+
+    await(rw.write(Chunk.last(Buf.Utf8("foo"), HeaderMap.newHeaderMap)))
+    intercept[IllegalStateException](await(out))
+    await(rw.onClose)
+  }
+
+  test("streamOut: fails if less data is written than specified by the content length header") {
+    val rw = new Pipe[Chunk]
+    val out = streamOut(transport, rw, Some(100))
+
+    await(rw.write(Chunk.fromString("foo")))
+    await(rw.close())
+    intercept[IllegalStateException](await(out))
+    await(rw.onClose)
+  }
+
+  test(
+    "streamOut: fails if less data is written than specified by the content length header (trailers)") {
+    val rw = new Pipe[Chunk]
+    val out = streamOut(transport, rw, Some(100))
+
+    await(rw.write(Chunk.last(Buf.Utf8("foo"), HeaderMap.newHeaderMap)))
+    intercept[IllegalStateException](await(out))
+    await(rw.onClose)
+  }
+
+  test(
+    "streamOut: fails if less data is written than specified by the content length header + trailers") {
+    val rw = new Pipe[Chunk]
+    val out = streamOut(transport, rw, Some(100))
+
+    await(rw.write(Chunk.fromString("foo")))
+    await(rw.write(Chunk.last(HeaderMap.newHeaderMap)))
+    intercept[IllegalStateException](await(out))
+    await(rw.onClose)
   }
 
   test("streamIn: reads through (no trailers; empty last content)") {

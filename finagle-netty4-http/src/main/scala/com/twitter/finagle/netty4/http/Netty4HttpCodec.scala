@@ -26,7 +26,7 @@ private[finagle] object Netty4HttpCodec {
       new HttpRequestEncoder
     )
 
-    ch.writeOneOutbound(Bijections.finagle.requestToNetty(request))
+    ch.writeOneOutbound(Bijections.finagle.requestToNetty(request, request.contentLength))
     ch.flushOutbound()
     val acc = ch.alloc.compositeBuffer()
 

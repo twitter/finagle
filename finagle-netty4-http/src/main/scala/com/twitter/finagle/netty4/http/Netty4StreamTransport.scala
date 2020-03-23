@@ -80,26 +80,69 @@ private[http] object Netty4StreamTransport {
   /**
    * Drain a [[Reader]] into a [[Transport]]. The inverse of collation.
    */
-  def streamOut(trans: Transport[Any, Any], r: Reader[Chunk]): Future[Unit] = {
-    def continue(): Future[Unit] = r.read().flatMap {
-      case None =>
-        trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
+  def streamOut(
+    trans: Transport[Any, Any],
+    r: Reader[Chunk],
+    contentLength: Option[Long]
+  ): Future[Unit] = {
 
-      case Some(chunk) if chunk.isLast =>
-        // Chunk.trailers produces an empty last content so we check against it here
-        // and potentially short-circuit to termination.
-        if (chunk.content.isEmpty) terminate(chunk.trailers)
-        else
+    // A helper to ensure that we don't send netty more (or less) data that the
+    // content-length header requires.
+    def verifyContentLength(chunk: Option[Chunk], written: Long): Unit = contentLength match {
+      case None => // nop: we don't have a content-length header so no constraints
+      case Some(contentLength) =>
+        chunk match {
+          // Short write case: the reader doesn't contain as much data is its
+          // content-length header advertised which is an illegal message. We
+          // handle this by surfacing an exception that will close the channel.
+          case None if contentLength != written =>
+            r.discard()
+            throw new IllegalStateException(
+              s"HTTP stream terminated before enough content was written. " +
+                s"Provided content length: ${contentLength}, observed: $written.")
+
+          // Attempting to write trailers which don't honor the content-length
+          // header, either too little or too much data.
+          case Some(chunk) if chunk.isLast && chunk.content.length + written != contentLength =>
+            r.discard()
+            throw new IllegalStateException(
+              s"HTTP stream terminated with incorrect amount of data written. " +
+                s"Provided content length: ${contentLength}, observed: ${chunk.content.length + written}.")
+
+          // Attempting to write a chunk that overflows the length
+          // dictated by the content-length header
+          case Some(chunk) if contentLength < written + chunk.content.length =>
+            r.discard()
+            throw new IllegalStateException(
+              s"HTTP stream attempted to write more data than the content-length header allows. " +
+                s"Provided content length: ${contentLength}, observed (so far): ${written + chunk.content.length}")
+
+          case _ => // nop: nothing illegal observed with this chunk.
+        }
+    }
+
+    def continue(written: Long): Future[Unit] = r.read().flatMap { chunk =>
+      verifyContentLength(chunk, written)
+      chunk match {
+        case None =>
+          trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
+
+        case Some(chunk) if chunk.isLast =>
+          // Chunk.trailers produces an empty last content so we check against it here
+          // and potentially short-circuit to termination.
+          if (chunk.content.isEmpty) terminate(chunk.trailers)
+          else
+            trans
+              .write(
+                new DefaultHttpContent(ByteBufConversion.bufAsByteBuf(chunk.content))
+              ).before(terminate(chunk.trailers))
+
+        case Some(chunk) =>
           trans
             .write(
               new DefaultHttpContent(ByteBufConversion.bufAsByteBuf(chunk.content))
-            ).before(terminate(chunk.trailers))
-
-      case Some(chunk) =>
-        trans
-          .write(
-            new DefaultHttpContent(ByteBufConversion.bufAsByteBuf(chunk.content))
-          ).before(continue())
+            ).before(continue(written + chunk.content.length))
+      }
     }
 
     // We need to read one more time before writing trailers to ensure HTTP stream isn't malformed.
@@ -125,7 +168,8 @@ private[http] object Netty4StreamTransport {
         )
     }
 
-    continue()
+    // Begin the loop.
+    continue(written = 0l)
   }
 }
 
@@ -147,7 +191,7 @@ private[finagle] class Netty4ServerStreamTransport(rawTransport: Transport[Any, 
       case Throw(exc) =>
         wrapWriteException(exc)
       case Return(_) =>
-        if (in.isChunked) streamOut(rawTransport, in.chunkReader)
+        if (in.isChunked) streamOut(rawTransport, in.chunkReader, in.contentLength)
         else Future.Done
     }
   }
@@ -196,12 +240,13 @@ private[finagle] class Netty4ClientStreamTransport(rawTransport: Transport[Any, 
   import Netty4StreamTransport._
 
   def write(in: Request): Future[Unit] = {
-    val nettyReq = Bijections.finagle.requestToNetty(in)
+    val contentLengthHeader = in.contentLength
+    val nettyReq = Bijections.finagle.requestToNetty(in, contentLengthHeader)
     rawTransport.write(nettyReq).transform {
       case Throw(exc) =>
         wrapWriteException(exc)
       case Return(_) =>
-        if (in.isChunked) streamOut(rawTransport, in.chunkReader)
+        if (in.isChunked) streamOut(rawTransport, in.chunkReader, contentLengthHeader)
         else Future.Done
     }
   }
