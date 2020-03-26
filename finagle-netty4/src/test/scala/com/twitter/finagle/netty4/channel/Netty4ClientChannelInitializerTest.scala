@@ -68,7 +68,7 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
     })
 
     val bytes = Array(1.toByte, 2.toByte, 3.toByte)
-    channel.write(Unpooled.wrappedBuffer(bytes))
+    channel.writeAndFlush(Unpooled.wrappedBuffer(bytes))
 
     val seen = new Array[Byte](3)
     Await.result(msgSeen, 5.seconds).readBytes(seen)
