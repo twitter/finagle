@@ -59,7 +59,8 @@ private object TrafficDistributor {
   private def safelyScanLeft[T, U](
     init: U,
     stream: Event[Activity.State[T]]
-  )(f: (U, T) => U
+  )(
+    f: (U, T) => U
   ): Event[Activity.State[U]] = {
     val initState: Activity.State[U] = Activity.Ok(init)
     stream.foldLeft(initState) {
@@ -308,8 +309,8 @@ private class TrafficDistributor[Req, Rep](
   private[this] val pending = new Promise[ServiceFactory[Req, Rep]]
   private[this] val init: ServiceFactory[Req, Rep] = new DelayedFactory(pending)
 
-  @volatile private[this] var meanWeight = 0.0F
-  @volatile private[this] var numWeightClasses = 0.0F
+  @volatile private[this] var meanWeight = 0.0f
+  @volatile private[this] var numWeightClasses = 0.0f
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge(Verbosity.Debug, "meanweight") { meanWeight },
@@ -322,12 +323,10 @@ private class TrafficDistributor[Req, Rep](
     numWeightClasses = classes.size.toFloat
     val numEndpoints = classes.map(_.size).sum
     meanWeight =
-      if (numEndpoints == 0) 0.0F
+      if (numEndpoints == 0) 0.0f
       else {
         classes
-          .map { c =>
-            c.weight * c.size
-          }.sum.toFloat / numEndpoints
+          .map { c => c.weight * c.size }.sum.toFloat / numEndpoints
       }
   }
 

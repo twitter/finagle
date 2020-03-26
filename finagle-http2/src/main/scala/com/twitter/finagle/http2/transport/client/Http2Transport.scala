@@ -46,9 +46,7 @@ private[finagle] final class Http2Transport[In <: Message, Out <: Message](
   private[this] def observeMessage(message: Message, onFinish: Future[Unit]): Unit = {
     if (onFinish.isDefined) endHalfStream()
     else
-      onFinish.respond { _ =>
-        endHalfStream()
-      }
+      onFinish.respond { _ => endHalfStream() }
   }
 
   private[this] def endHalfStream(): Unit = {

@@ -22,8 +22,8 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     // these numbers were picked by observation and are used to
     // make sure they stay consistent across code changes.
     val initial = 0f
-    val state1 = 1.19006272E9f
-    val state2 = 3.58052019E9f
+    val state1 = 1.19006272e9f
+    val state2 = 3.58052019e9f
 
     // run it twice to make sure the checksum remains consistent
     // without changes
@@ -78,9 +78,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
 
     // start out empty
     val toggle = m(id)
-    forAll(IntGen) { i =>
-      assert(!toggle.isDefinedAt(i))
-    }
+    forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
 
     // update that toggle
     m.put(id, 1.0)
@@ -158,14 +156,10 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
 
   test("ToggleMap.fractional") {
     val on = ToggleMap.fractional("com.toggle.on", 1.0)
-    forAll(IntGen) { i =>
-      assert(on(i))
-    }
+    forAll(IntGen) { i => assert(on(i)) }
 
     val off = ToggleMap.fractional("com.toggle.off", 0.0)
-    forAll(IntGen) { i =>
-      assert(!off(i))
-    }
+    forAll(IntGen) { i => assert(!off(i)) }
 
     // given a big enough list of inputs, we should
     // get approximately the right `true` percentage as a result
@@ -226,9 +220,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
 
       forAll(ToggleGenerator.Id) { s =>
         val toggle = ToggleMap.flags(s)
-        forAll(IntGen) { i =>
-          assert(!toggle.isDefinedAt(i))
-        }
+        forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
       }
     }
   }
@@ -304,9 +296,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     // make sure we start out cleared and using the flag returns false
     assert(!containsFlagId("com.toggle.on", ToggleMap.flags.iterator))
     val toggle = ToggleMap.flags("com.toggle.on")
-    forAll(IntGen) { i =>
-      assert(!toggle.isDefinedAt(i))
-    }
+    forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
 
     // now modify the flags and set it to 100%
     flag.overrides.let("com.toggle.on", 1.0) {
@@ -328,9 +318,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
       // then remove it via letClear
       flag.overrides.letClear("com.toggle.on") {
         assert(!containsFlagId("com.toggle.on", ToggleMap.flags.iterator))
-        forAll(IntGen) { i =>
-          assert(!toggle.isDefinedAt(i))
-        }
+        forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
       }
     }
     assert(!containsFlagId("com.toggle.on", ToggleMap.flags.iterator))
@@ -353,24 +341,14 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
 
     val mds01 = tm01.iterator.toSeq
     assert(mds01.size == 2)
-    assert(mds01.exists { md =>
-      md.id == "com.toggle.t0" && md.fraction == 0.0
-    })
-    assert(mds01.exists { md =>
-      md.id == "com.toggle.t1" && md.fraction == 1.0
-    })
+    assert(mds01.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 })
+    assert(mds01.exists { md => md.id == "com.toggle.t1" && md.fraction == 1.0 })
 
     val mds012 = tm012.iterator.toSeq
     assert(mds012.size == 3)
-    assert(mds012.exists { md =>
-      md.id == "com.toggle.t0" && md.fraction == 0.0
-    })
-    assert(mds012.exists { md =>
-      md.id == "com.toggle.t1" && md.fraction == 1.0
-    })
-    assert(mds012.exists { md =>
-      md.id == "com.toggle.t2" && md.fraction == 0.3
-    })
+    assert(mds012.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 })
+    assert(mds012.exists { md => md.id == "com.toggle.t1" && md.fraction == 1.0 })
+    assert(mds012.exists { md => md.id == "com.toggle.t2" && md.fraction == 0.3 })
   }
 
   test("ToggleMap.orElse.iterator uses Toggles from earlier ToggleMaps") {
@@ -383,9 +361,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     val tm01 = NullToggleMap.orElse(tm0).orElse(tm1)
     val mds = tm01.iterator.toSeq
     assert(mds.size == 1)
-    assert(mds.exists { md =>
-      md.id == "com.toggle.t0" && md.fraction == 0.0
-    }, mds)
+    assert(mds.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 }, mds)
   }
 
   test("ToggleMap.orElse.apply") {
@@ -395,9 +371,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     val toggle = tm01("com.toggle.t")
 
     // the toggle doesn't exist in either underlying map
-    forAll(IntGen) { i =>
-      assert(!toggle.isDefinedAt(i))
-    }
+    forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
 
     // the toggle doesn't yet exist in tm0
     // so we should use the value from tm1 (true)

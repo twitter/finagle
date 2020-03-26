@@ -69,9 +69,7 @@ class ThreadUsageTest extends FunSuite with BeforeAndAfter {
           if (!latch.await(5, TimeUnit.SECONDS)) {
             Future.exception(new Exception("never latched"))
           } else {
-            0.until(count).foreach { _ =>
-              usage.increment()
-            }
+            0.until(count).foreach { _ => usage.increment() }
             Future.Done
           }
         }

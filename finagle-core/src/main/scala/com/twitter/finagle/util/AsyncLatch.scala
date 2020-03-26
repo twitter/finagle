@@ -37,9 +37,7 @@ class AsyncLatch(initialCount: Int = 0) {
     if (count == 0)
       f
     else
-      waiters = { () =>
-        f
-      } :: waiters
+      waiters = { () => f } :: waiters
   }
 
   /**

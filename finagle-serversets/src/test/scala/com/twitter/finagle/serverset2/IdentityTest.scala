@@ -24,11 +24,9 @@ class IdentityTest extends FunSuite {
     assert(
       Identities
         .get()
-        .filter(
-          identity =>
-            (identity.startsWith("/%s/".format(testIdent.scheme)) ||
-              identity.startsWith("/%s/".format(userIdent.scheme)))
-        ) == Seq(
+        .filter(identity =>
+          (identity.startsWith("/%s/".format(testIdent.scheme)) ||
+            identity.startsWith("/%s/".format(userIdent.scheme)))) == Seq(
         "/%s/%s".format(testIdent.scheme, testIdent.id.get),
         "/%s/%s".format(userIdent.scheme, userIdent.id.get)
       )

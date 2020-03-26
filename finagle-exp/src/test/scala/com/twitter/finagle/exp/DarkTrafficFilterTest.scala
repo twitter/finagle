@@ -91,12 +91,8 @@ class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
     val darkPromise = new Promise[String]
     darkPromise.setInterruptHandler { case t: Throwable => darkServiceCancelled.set(true) }
 
-    val service = Service.mk { s: String =>
-      lightPromise
-    }
-    val darkService = Service.mk { s: String =>
-      darkPromise
-    }
+    val service = Service.mk { s: String => lightPromise }
+    val darkService = Service.mk { s: String => darkPromise }
 
     val filter = new DarkTrafficFilter(darkService, Function.const(true), NullStatsReceiver)
     val chainedService = filter.andThen(service)

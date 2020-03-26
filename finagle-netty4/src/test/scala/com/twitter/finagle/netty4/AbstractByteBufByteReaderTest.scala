@@ -20,9 +20,7 @@ object CopyingByteBufByteReaderTest {
     wrapByteBufInReader(buf)
   }
 
-  def readerWith(bytes: Byte*): ByteReader = newReader { bb =>
-    bytes.foreach(bb.writeByte(_))
-  }
+  def readerWith(bytes: Byte*): ByteReader = newReader { bb => bytes.foreach(bb.writeByte(_)) }
 }
 
 class CopyingByteBufByteReaderTest extends AbstractByteBufByteReaderTest {
@@ -218,12 +216,12 @@ abstract class AbstractByteBufByteReaderTest extends FunSuite with ScalaCheckDri
 
   test("readUnsignedIntBE")(forAll { i: Int =>
     val br = newReader(_.writeInt(i))
-    assert(br.readUnsignedIntBE() == (i & 0xffffffffL))
+    assert(br.readUnsignedIntBE() == (i & 0xFFFFFFFFL))
   })
 
   test("readUnsignedIntLE")(forAll { i: Int =>
     val br = newReader(_.writeIntLE(i))
-    assert(br.readUnsignedIntLE() == (i & 0xffffffffL))
+    assert(br.readUnsignedIntLE() == (i & 0xFFFFFFFFL))
   })
 
   val uInt64s: Gen[BigInt] = Gen

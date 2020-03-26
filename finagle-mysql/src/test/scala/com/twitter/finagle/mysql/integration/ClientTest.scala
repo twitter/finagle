@@ -34,26 +34,26 @@ object SwimmingRecord {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""
 
   val allRecords: List[SwimmingRecord] = List[SwimmingRecord](
-    SwimmingRecord("50 m freestyle", 20.91F, "Cesar Cielo", "Brazil", Date.valueOf("2009-12-18")),
-    SwimmingRecord("100 m freestyle", 46.91F, "Cesar Cielo", "Brazil", Date.valueOf("2009-08-02")),
+    SwimmingRecord("50 m freestyle", 20.91f, "Cesar Cielo", "Brazil", Date.valueOf("2009-12-18")),
+    SwimmingRecord("100 m freestyle", 46.91f, "Cesar Cielo", "Brazil", Date.valueOf("2009-08-02")),
     SwimmingRecord(
       "50 m backstroke",
-      24.04F,
+      24.04f,
       "Liam Tancock",
       "Great Britain",
       Date.valueOf("2009-08-02")
     ),
     SwimmingRecord(
       "100 m backstroke",
-      51.94F,
+      51.94f,
       "Aaron Peirsol",
       "United States",
       Date.valueOf("2009-07-08")
     ),
-    SwimmingRecord("50 m butterfly", 22.43F, "Rafael Munoz", "Spain", Date.valueOf("2009-05-05")),
+    SwimmingRecord("50 m butterfly", 22.43f, "Rafael Munoz", "Spain", Date.valueOf("2009-05-05")),
     SwimmingRecord(
       "100 m butterfly",
-      49.82F,
+      49.82f,
       "Michael Phelps",
       "United States",
       Date.valueOf("2009-07-29")
@@ -61,7 +61,7 @@ object SwimmingRecord {
     // this record is used to check how empty strings are handled.
     SwimmingRecord(
       "",
-      100.0F,
+      100.0f,
       "",
       "",
       Date.valueOf("2009-08-02")
@@ -162,16 +162,12 @@ class ClientTest extends FunSuite with IntegrationClient with BeforeAndAfterAll 
   }
 
   test("can execute more prepared statements than allowed in cache") {
-    val queryStrings = (0 to (maxConcurrentPreparedStatements * 2)).map { i =>
-      s"SELECT $i"
-    }
+    val queryStrings = (0 to (maxConcurrentPreparedStatements * 2)).map { i => s"SELECT $i" }
     val queryResults = Future.collect(queryStrings.map { query =>
       c.prepare(query)().map(_ => "ok")
     })
     val results = await(queryResults)
-    results.map { result =>
-      assert(result == "ok")
-    }
+    results.map { result => assert(result == "ok") }
   }
 
   test("prepared statement") {
@@ -348,9 +344,7 @@ class ClientTest extends FunSuite with IntegrationClient with BeforeAndAfterAll 
     await(c.query(createProcedure))
 
     val result = await(
-      c.select(executeProcedure) { row =>
-        row.stringOrNull("name")
-      }
+      c.select(executeProcedure) { row => row.stringOrNull("name") }
     )
 
     assert(result == List("Cesar Cielo"))

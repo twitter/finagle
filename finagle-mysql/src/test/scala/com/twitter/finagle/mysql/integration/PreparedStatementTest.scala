@@ -69,9 +69,7 @@ class PreparedStatementTest extends FunSuite with IntegrationClient with BeforeA
   private[this] def selectBigDecimal(id: Long): BigDecimal = {
     val selectSql = "SELECT big_decimal FROM prepared_stmt WHERE id = ?"
     val stmt = c.prepare(selectSql)
-    val bds = await(stmt.select(id) { row =>
-      row.bigDecimalOrNull("big_decimal")
-    })
+    val bds = await(stmt.select(id) { row => row.bigDecimalOrNull("big_decimal") })
     assert(bds.size == 1)
     assert(bds.head == readBigDecimal(id))
 

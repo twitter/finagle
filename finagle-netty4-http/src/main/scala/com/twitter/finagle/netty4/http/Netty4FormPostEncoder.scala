@@ -30,9 +30,7 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
     // Copy the headers to the Netty request.
     config.headers.foreach {
       case (field, values) =>
-        values.foreach { v =>
-          request.headers.add(field, v)
-        }
+        values.foreach { v => request.headers.add(field, v) }
     }
     request
   }

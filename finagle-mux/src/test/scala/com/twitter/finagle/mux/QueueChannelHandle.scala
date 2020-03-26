@@ -48,7 +48,8 @@ private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out]
       protected def handle(elem: Runnable): Unit = {
         inLocalExecutor.set(true)
         try elem.run()
-        catch { case NonFatal(t) => closed.updateIfEmpty(Throw(t)) } finally inLocalExecutor.set(
+        catch { case NonFatal(t) => closed.updateIfEmpty(Throw(t)) }
+        finally inLocalExecutor.set(
           false
         )
       }

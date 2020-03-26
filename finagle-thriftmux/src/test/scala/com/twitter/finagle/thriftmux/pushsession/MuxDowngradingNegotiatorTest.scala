@@ -71,7 +71,7 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
       // Should be an echo of the marker Rerr if the standard mux handshake kicked in
       val handle.SendAndForgetOne(msg) = handle.pendingWrites.dequeue()
       assert(Message.decode(msg) == MuxClientNegotiatingSession.MarkerRerr)
-      assert(statsReceiver.counters(Seq("thriftmux", "connects")) == 1l)
+      assert(statsReceiver.counters(Seq("thriftmux", "connects")) == 1L)
     }
   }
 
@@ -94,7 +94,7 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
       // Should be an echo of the marker Rerr if the standard mux handshake kicked in
       val handle.SendOne(msg, _) = handle.pendingWrites.dequeue()
       assert(msg == thriftMsg)
-      assert(statsReceiver.counters(Seq("thriftmux", "downgraded_connects")) == 1l)
+      assert(statsReceiver.counters(Seq("thriftmux", "downgraded_connects")) == 1L)
     }
   }
 
@@ -118,7 +118,7 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
       refSession.receive(ByteReader(thriftMsg))
 
       assert(handle.closedCalled)
-      assert(statsReceiver.counters(Seq("mux", "tls", "upgrade", "incompatible")) == 1l)
+      assert(statsReceiver.counters(Seq("mux", "tls", "upgrade", "incompatible")) == 1L)
     }
   }
 }

@@ -82,9 +82,7 @@ class ToggleTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     val undef1 = Toggle.Undefined
     val undef2 = Toggle.Undefined
     val undef12 = undef1.orElse(undef2)
-    forAll(IntGen) { i =>
-      assert(!undef12.isDefinedAt(i))
-    }
+    forAll(IntGen) { i => assert(!undef12.isDefinedAt(i)) }
 
     val t = undef12.orElse(on)
     forAll(IntGen) { i =>
@@ -129,9 +127,7 @@ class ToggleTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     Toggle.Metadata("com.toggle..", 0.0, None, "test")
     Toggle.Metadata("com.toggle.-", 0.0, None, "test")
 
-    forAll(ToggleGenerator.Id) { id =>
-      Toggle.validateId(id)
-    }
+    forAll(ToggleGenerator.Id) { id => Toggle.validateId(id) }
   }
 
   test("Toggle.Metadata constructor checks fraction") {

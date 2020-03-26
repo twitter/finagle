@@ -89,11 +89,11 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
             n,
             xs(0),
             xs(n / 2),
-            xs(idx(.9D)),
-            xs(idx(.95D)),
-            xs(idx(.99D)),
-            xs(idx(.999D)),
-            xs(idx(.9999D)),
+            xs(idx(.9d)),
+            xs(idx(.95d)),
+            xs(idx(.99d)),
+            xs(idx(.999d)),
+            xs(idx(.9999d)),
             xs(n - 1)
           )
         )
@@ -107,7 +107,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
           val start = math.ceil(end - ((1.0 - ptile) * n)).toInt
           for (i <- start to end) yield xs(i)
         }
-        (variableName(k), "p999=%s, p9999=%s".format(slice(.999D), slice(.9999D)))
+        (variableName(k), "p999=%s, p9999=%s".format(slice(.999d), slice(.9999d)))
     }.toSeq
 
     val sortedCounters = counterLines.sortBy { case (k, _) => k }
@@ -115,9 +115,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
     val sortedStats = statLines.sortBy { case (k, _) => k }
     lazy val sortedTails = tailValues.sortBy { case (k, _) => k }
 
-    val fmt = Function.tupled { (k: String, v: String) =>
-      "%-30s %s".format(k, v)
-    }
+    val fmt = Function.tupled { (k: String, v: String) => "%-30s %s".format(k, v) }
     val fmtCounters = sortedCounters.map(fmt)
     val fmtGauges = gaugeValues.map(fmt)
     val fmtStats = sortedStats.map(fmt)

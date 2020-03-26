@@ -53,9 +53,7 @@ class ExpirationTest extends FunSuite with ApertureSuite {
 
   case class FixtureParam(tc: TimeControl)
   def withFixture(test: OneArgTest) =
-    Time.withCurrentTimeFrozen { tc =>
-      test(FixtureParam(tc))
-    }
+    Time.withCurrentTimeFrozen { tc => test(FixtureParam(tc)) }
 
   test("does not expire uninitialized nodes") { f =>
     val bal = new ExpiryBal
@@ -75,9 +73,7 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     bal.adjustx(1)
     assert(bal.aperturex == 2)
 
-    (0 to 10).foreach { _ =>
-      Await.result(bal(), 5.seconds).close()
-    }
+    (0 to 10).foreach { _ => Await.result(bal(), 5.seconds).close() }
     bal.adjustx(-1)
     assert(bal.aperturex == 1)
 
@@ -100,18 +96,14 @@ class ExpirationTest extends FunSuite with ApertureSuite {
   test("expires nodes outside of aperture") { f =>
     val bal = new ExpiryBal
 
-    val eps = Vector.tabulate(10) { i =>
-      Factory(i)
-    }
+    val eps = Vector.tabulate(10) { i => Factory(i) }
     bal.update(eps.map(newLazyEndpointFactory))
     bal.adjustx(eps.size)
     assert(bal.aperturex == eps.size)
 
     // we rely on p2c to ensure that each endpoint gets
     // a request for service acquisition.
-    def checkoutLoop(): Unit = (0 to 100).foreach { _ =>
-      Await.result(bal(), 5.seconds).close()
-    }
+    def checkoutLoop(): Unit = (0 to 100).foreach { _ => Await.result(bal(), 5.seconds).close() }
 
     checkoutLoop()
     assert(eps.filter(_.total > 0).size == eps.size)

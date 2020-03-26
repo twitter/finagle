@@ -7,7 +7,8 @@ import com.twitter.util.Activity
 /**
  * Indicates an error in Namer lookup
  */
-class NamerExceededMaxDepthException private[finagle](description: String) extends Exception(description)
+class NamerExceededMaxDepthException private[finagle] (description: String)
+    extends Exception(description)
 
 /**
  * Interpret names against a Dtab. Differs from
@@ -23,10 +24,10 @@ trait NameInterpreter {
 }
 
 object namerMaxDepth
-  extends GlobalFlag[Int](
-    100,
-    "Maximum recursion level depth for Finagle namer."
-  )
+    extends GlobalFlag[Int](
+      100,
+      "Maximum recursion level depth for Finagle namer."
+    )
 
 object NameInterpreter extends NameInterpreter {
 

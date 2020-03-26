@@ -228,9 +228,7 @@ trait RedisRequestTest extends RedisTest with ScalaCheckDrivenPropertyChecks wit
   }
 
   def checkSingleKey(c: String, f: Buf => Command): Unit = {
-    forAll { key: Buf =>
-      assert(encodeCommand(f(key)) == c.split(" ").toSeq ++ Seq(key.asString))
-    }
+    forAll { key: Buf => assert(encodeCommand(f(key)) == c.split(" ").toSeq ++ Seq(key.asString)) }
 
     intercept[ClientError](f(Buf.Empty))
   }
@@ -337,7 +335,8 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
   override protected def test(
     testName: String,
     testTags: Tag*
-  )(f: => Any
+  )(
+    f: => Any
   )(
     implicit pos: Position
   ): Unit = {
@@ -357,7 +356,8 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
   protected def withRedisClient(testCode: Client => Any): Unit = {
     val client = Redis.newRichClient(RedisCluster.hostAddresses())
     Await.result(client.flushAll())
-    try { testCode(client) } finally { client.close() }
+    try { testCode(client) }
+    finally { client.close() }
   }
 
   protected def assertMBulkReply(
@@ -445,13 +445,15 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
 
   protected def withRedisClient(from: Int, until: Int)(testCode: TransactionalClient => Any) = {
     val client = Redis.newTransactionalClient(RedisCluster.hostAddresses(from, until))
-    try { testCode(client) } finally { client.close() }
+    try { testCode(client) }
+    finally { client.close() }
   }
 
   protected def withSentinelClient(index: Int)(testCode: SentinelClient => Any): Unit = {
     val client = SentinelClient(
       Redis.client.newClient(RedisCluster.hostAddresses(from = index, until = index + 1))
     )
-    try { testCode(client) } finally { client.close() }
+    try { testCode(client) }
+    finally { client.close() }
   }
 }

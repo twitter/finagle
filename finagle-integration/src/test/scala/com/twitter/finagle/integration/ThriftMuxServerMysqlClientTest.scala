@@ -61,9 +61,7 @@ class ThriftMuxServerMysqlClientTest
                 mysqlLatch
               }.flatMap { _ =>
                 // run another query that should fail, given the prior timeout.
-                mc.query("SELECT id FROM txn_test").flatMap { _ =>
-                  Future.value(x.toString)
-                }
+                mc.query("SELECT id FROM txn_test").flatMap { _ => Future.value(x.toString) }
               }
           }
         }
@@ -104,9 +102,7 @@ class ThriftMuxServerMysqlClientTest
       // the number of rows in the table. which should be 0, as the
       // insert should get rolled back.
       val ids: Seq[Int] = await(
-        mysqlClient.select("SELECT id FROM txn_test") { row =>
-          row.intOrZero("id")
-        }
+        mysqlClient.select("SELECT id FROM txn_test") { row => row.intOrZero("id") }
       )
       assert(Seq.empty == ids)
     }

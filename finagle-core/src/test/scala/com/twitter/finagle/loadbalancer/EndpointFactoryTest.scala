@@ -27,7 +27,7 @@ class EndpointFactoryTest extends FunSuite with OneInstancePerTest {
       }
 
       override def status = if (closed) Status.Closed else Status.Open
-  }
+    }
 
   private[this] val ef = new LazyEndpointFactory(make, address)
 

@@ -138,8 +138,7 @@ object StatsFilter {
     case TimeUnit.MICROSECONDS => Stopwatch.systemMicros
     case TimeUnit.MILLISECONDS => Stopwatch.systemMillis
     case _ =>
-      () =>
-        timeUnit.convert(System.nanoTime(), TimeUnit.NANOSECONDS)
+      () => timeUnit.convert(System.nanoTime(), TimeUnit.NANOSECONDS)
   }
 
 }
@@ -254,12 +253,13 @@ class StatsFilter[Req, Rep] private[service] (
 
     outstandingRequestCount.increment()
 
-    val result = try {
-      service(request)
-    } catch {
-      case NonFatal(e) =>
-        Future.exception(e)
-    }
+    val result =
+      try {
+        service(request)
+      } catch {
+        case NonFatal(e) =>
+          Future.exception(e)
+      }
 
     result.respond { response =>
       outstandingRequestCount.decrement()
@@ -308,6 +308,6 @@ private[finagle] object StatsServiceFactory {
 class StatsServiceFactory[Req, Rep](factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver)
     extends ServiceFactoryProxy[Req, Rep](factory) {
   private[this] val availableGauge = statsReceiver.addGauge("available") {
-    if (isAvailable) 1F else 0F
+    if (isAvailable) 1f else 0f
   }
 }

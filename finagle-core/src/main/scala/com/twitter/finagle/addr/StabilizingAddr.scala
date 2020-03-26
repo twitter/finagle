@@ -109,9 +109,7 @@ private[finagle] object StabilizingAddr {
         else {
           // Note: remq is ordered by 'until' time.
           val ((elem, until), nextq) = remq.dequeue
-          Offer.timeout(until - Time.now) map { _ =>
-            loop(nextq, h, active - elem, true, srcAddr)
-          }
+          Offer.timeout(until - Time.now) map { _ => loop(nextq, h, active - elem, true, srcAddr) }
         },
         if (!needPush) Offer.never
         else {
@@ -124,9 +122,7 @@ private[finagle] object StabilizingAddr {
           val addr =
             if (active.nonEmpty) Addr.Bound(active, attrs)
             else srcAddr
-          stabilized.send(addr) map { _ =>
-            loop(remq, h, active, false, srcAddr)
-          }
+          stabilized.send(addr) map { _ => loop(remq, h, active, false, srcAddr) }
         }
       )
     }

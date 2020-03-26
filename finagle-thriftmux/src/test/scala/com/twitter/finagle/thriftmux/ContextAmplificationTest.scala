@@ -81,9 +81,7 @@ class ContextAmplificationTest extends FunSuite with OneInstancePerTest {
       )
 
     Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("foo"))) {
-      assert(await(client.query("ok").map { s =>
-        s
-      }) == "success")
+      assert(await(client.query("ok").map { s => s }) == "success")
     }
 
     await(originServer.close(3.seconds))

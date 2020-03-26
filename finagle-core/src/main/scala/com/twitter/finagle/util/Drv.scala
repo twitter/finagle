@@ -80,7 +80,7 @@ object Drv {
       prob(s) = p(s)
       alias(s) = l
 
-      p(l) = (p(s) + p(l)) - 1D // Same as p(l)-(1-p(s)), but more stable
+      p(l) = (p(s) + p(l)) - 1d // Same as p(l)-(1-p(s)), but more stable
       if (p(l) < 1) small.enqueue(l)
       else large.enqueue(l)
     }
@@ -114,7 +114,7 @@ object Drv {
     require(weights.nonEmpty)
     val sum = weights.sum
     if (sum == 0)
-      Drv(Seq.fill(weights.size) { 1D / weights.size })
+      Drv(Seq.fill(weights.size) { 1d / weights.size })
     else
       Drv(weights.map(_ / sum))
   }

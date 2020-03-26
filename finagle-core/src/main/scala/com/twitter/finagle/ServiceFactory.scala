@@ -40,7 +40,7 @@ abstract class ServiceFactory[-Req, +Rep]
           f(service).respond {
             case Return(_) => ()
             case Throw(_) => service.close()
-        }
+          }
 
       def apply(conn: ClientConnection): Future[Service[Req1, Rep1]] =
         self(conn).flatMap(svcFn)
@@ -55,9 +55,7 @@ abstract class ServiceFactory[-Req, +Rep]
    * styles of factory wrappers.
    */
   def map[Req1, Rep1](f: Service[Req, Rep] => Service[Req1, Rep1]): ServiceFactory[Req1, Rep1] =
-    flatMap { s =>
-      Future.value(f(s))
-    }
+    flatMap { s => Future.value(f(s)) }
 
   /**
    * Make a service that after dispatching a request on that service,

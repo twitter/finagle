@@ -67,7 +67,7 @@ private[finagle] class BindingFactory[Req, Rep](
             Trace.recordBinary("namer.name", boundShow)
             super.apply(conn)
           }
-      },
+        },
       timer,
       statsReceiver.scope("namecache"),
       maxNameCacheSize,
@@ -83,7 +83,7 @@ private[finagle] class BindingFactory[Req, Rep](
             Trace.recordBinary("namer.tree", treeShow)
             super.apply(conn)
           }
-      },
+        },
       timer,
       statsReceiver.scope("nametreecache"),
       maxNameTreeCacheSize,

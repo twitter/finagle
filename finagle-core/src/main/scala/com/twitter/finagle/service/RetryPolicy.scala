@@ -45,9 +45,7 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
    * in the chain.
    */
   def filter[B <: A](pred: B => Boolean): RetryPolicy[B] =
-    RetryPolicy { e =>
-      if (!pred(e)) None else this(e)
-    }
+    RetryPolicy { e => if (!pred(e)) None else this(e) }
 
   /**
    * Similar to `filter`, but the predicate is applied to each `RetryPolicy` in the chain
@@ -283,7 +281,8 @@ object RetryPolicy {
    */
   def backoff[A](
     backoffs: Stream[Duration]
-  )(shouldRetry: PartialFunction[A, Boolean]
+  )(
+    shouldRetry: PartialFunction[A, Boolean]
   ): RetryPolicy[A] = {
     RetryPolicy { e =>
       if (shouldRetry.applyOrElse(e, AlwaysFalse)) {

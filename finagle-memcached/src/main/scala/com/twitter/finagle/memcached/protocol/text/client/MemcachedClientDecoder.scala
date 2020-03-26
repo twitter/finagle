@@ -26,9 +26,7 @@ private[finagle] final class MemcachedClientDecoder extends ClientDecoder[Respon
   }
 
   protected def parseStatLines(lines: Seq[Tokens]): Response = {
-    val l = lines.map { tokens =>
-      Info(tokens(0), tokens.drop(1))
-    }
+    val l = lines.map { tokens => Info(tokens(0), tokens.drop(1)) }
     InfoLines(l)
   }
 

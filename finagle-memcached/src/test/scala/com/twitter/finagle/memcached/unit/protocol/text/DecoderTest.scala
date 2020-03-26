@@ -10,9 +10,7 @@ class DecoderTest extends FunSuite {
     val buffer = Buf.Utf8("I'M ALL DONE")
     val needsData: Seq[Buf] => Int = _ => -1
     val awaitData: (Seq[Buf], Int) => Unit = (_, _) => ()
-    val continue: Seq[Buf] => Decoding = { tokens =>
-      Tokens(tokens)
-    }
+    val continue: Seq[Buf] => Decoding = { tokens => Tokens(tokens) }
     assert(
       Decoder.decodeLine(buffer, needsData, awaitData)(continue) ==
         Tokens(Seq(Buf.Utf8("I'M"), Buf.Utf8("ALL"), Buf.Utf8("DONE")))
@@ -26,9 +24,7 @@ class DecoderTest extends FunSuite {
     val awaitData: (Seq[Buf], Int) => Unit = (_, _) => {
       awaitDataCalled.setDone()
     }
-    val continue: Seq[Buf] => Decoding = { tokens =>
-      Tokens(tokens)
-    }
+    val continue: Seq[Buf] => Decoding = { tokens => Tokens(tokens) }
     Decoder.decodeLine(buffer, needsData, awaitData)(continue)
     assert(!awaitDataCalled.isDefined)
   }
@@ -37,9 +33,7 @@ class DecoderTest extends FunSuite {
     val buffer = Buf.Utf8("WAITING")
     val needsData: Seq[Buf] => Int = _ => 3
     val awaitData: (Seq[Buf], Int) => Unit = (_, _) => ()
-    val continue: Seq[Buf] => Decoding = { tokens =>
-      Tokens(tokens)
-    }
+    val continue: Seq[Buf] => Decoding = { tokens => Tokens(tokens) }
     assert(Decoder.decodeLine(buffer, needsData, awaitData)(continue) == null)
   }
 
@@ -50,9 +44,7 @@ class DecoderTest extends FunSuite {
     val awaitData: (Seq[Buf], Int) => Unit = (_, _) => {
       awaitDataCalled.setDone()
     }
-    val continue: Seq[Buf] => Decoding = { tokens =>
-      Tokens(tokens)
-    }
+    val continue: Seq[Buf] => Decoding = { tokens => Tokens(tokens) }
     Decoder.decodeLine(buffer, needsData, awaitData)(continue)
     assert(awaitDataCalled.isDefined)
   }

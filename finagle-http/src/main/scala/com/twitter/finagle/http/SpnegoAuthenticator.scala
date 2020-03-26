@@ -29,9 +29,7 @@ object SpnegoAuthenticator {
   private object AuthHeader {
     val SchemePrefixLength = AuthScheme.length + 1
     def apply(token: Option[Token]): Option[String] =
-      token map { t =>
-        AuthScheme + " " + Base64StringEncoder.encode(t)
-      }
+      token map { t => AuthScheme + " " + Base64StringEncoder.encode(t) }
 
     /** If the header represents a valid spnego negotiation, return it. */
     def unapply(header: String): Option[Token] =
@@ -348,9 +346,7 @@ object SpnegoAuthenticator {
     def authorizationHeader(req: Request): Option[String] =
       req.headerMap.get(Fields.Authorization)
     def authorizationHeader(req: Request, token: Token): Unit =
-      AuthHeader(Some(token)).foreach { header =>
-        req.headerMap.set(Fields.Authorization, header)
-      }
+      AuthHeader(Some(token)).foreach { header => req.headerMap.set(Fields.Authorization, header) }
     def protocolVersion(req: Request): Version = req.version
     def authenticated(req: Request, context: GSSContext): Authenticated[Request] =
       Authenticated.Http(req, context)

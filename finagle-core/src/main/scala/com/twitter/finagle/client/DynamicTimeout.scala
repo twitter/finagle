@@ -146,9 +146,7 @@ object DynamicTimeout {
     val compensation = params[LatencyCompensation.Compensation].howlong
     val timer = params[param.Timer].timer
     val timeoutFunc = timeoutFn(TotalKey, tunableTimeout, defaultTimeout, compensation)
-    val exceptionFn = { d: Duration =>
-      new GlobalRequestTimeoutException(d)
-    }
+    val exceptionFn = { d: Duration => new GlobalRequestTimeoutException(d) }
     TimeoutFilter.typeAgnostic(timeoutFunc, exceptionFn, timer)
   }
 

@@ -193,9 +193,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
       n
     }
 
-    node.factory(conn) map { new Wrapped(node, _) } onFailure { _ =>
-      put(node)
-    }
+    node.factory(conn) map { new Wrapped(node, _) } onFailure { _ => put(node) }
   }
 
   def close(deadline: Time): Future[Unit] = {

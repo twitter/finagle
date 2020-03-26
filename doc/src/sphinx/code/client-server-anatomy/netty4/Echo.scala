@@ -111,14 +111,10 @@ object BasicClient {
     Netty4Transporter[String, String](StringClientPipeline, addr, StackClient.defaultParams)
 
   val bridge: Future[Service[String, String]] =
-    transporter(addr) map { transport =>
-      new SerialClientDispatcher(transport)
-    }
+    transporter(addr) map { transport => new SerialClientDispatcher(transport) }
 
   val client = new Service[String, String] {
-    def apply(req: String) = bridge flatMap { svc =>
-      svc(req) ensure svc.close()
-    }
+    def apply(req: String) = bridge flatMap { svc => svc(req) ensure svc.close() }
   }
   //#explicitbridge
 }

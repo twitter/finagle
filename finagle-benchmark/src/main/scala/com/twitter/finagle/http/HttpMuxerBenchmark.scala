@@ -8,16 +8,12 @@ import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
 @State(Scope.Benchmark)
 class HttpMuxerBenchmark extends StdBenchAnnotations {
 
-  private[this] val svc = Service.mk { _: Request =>
-    Future.value(Response())
-  }
+  private[this] val svc = Service.mk { _: Request => Future.value(Response()) }
   private[this] val muxerRequests = IndexedSeq(
     Request("/what/up"),
     Request("/its/cool")
   )
-  private[this] val routes = muxerRequests.map { req =>
-    Route(req.path, svc)
-  }
+  private[this] val routes = muxerRequests.map { req => Route(req.path, svc) }
   private[this] val muxer = new HttpMuxer(routes)
 
   private[this] var i = 0

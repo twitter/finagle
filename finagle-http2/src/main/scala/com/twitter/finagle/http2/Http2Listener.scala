@@ -91,7 +91,8 @@ private[http2] class Http2Listener[In, Out](
 
   def listen(
     addr: SocketAddress
-  )(serveTransport: Transport[In, Out] {
+  )(
+    serveTransport: Transport[In, Out] {
       type Context <: TransportContext
     } => Unit
   ): ListeningServer = {

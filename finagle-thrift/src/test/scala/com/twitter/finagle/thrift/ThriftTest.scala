@@ -39,7 +39,8 @@ trait ThriftTest { self: FunSuite =>
   def testThrift(
     label: String,
     clientIdOpt: Option[ClientId] = None
-  )(theTest: (Iface, BufferingTracer) => Unit
+  )(
+    theTest: (Iface, BufferingTracer) => Unit
   ): Unit = {
     thriftTests += ThriftTestDefinition(label, clientIdOpt, theTest)
   }
@@ -47,7 +48,8 @@ trait ThriftTest { self: FunSuite =>
   def skipTestThrift(
     label: String,
     clientIdOpt: Option[ClientId] = None
-  )(theTest: (Iface, BufferingTracer) => Unit
+  )(
+    theTest: (Iface, BufferingTracer) => Unit
   ): Unit = {
     () // noop
   }
@@ -66,7 +68,7 @@ trait ThriftTest { self: FunSuite =>
       def close(): Unit = {
         server.close()
       }
-  }
+    }
 
   private val newBuilderClient = (
     protocolFactory: TProtocolFactory,
@@ -93,7 +95,7 @@ trait ThriftTest { self: FunSuite =>
       def close(): Unit = {
         service.close()
       }
-  }
+    }
 
   private def newAPIServer(): NewServer =
     (protocolFactory: TProtocolFactory) =>
@@ -107,7 +109,7 @@ trait ThriftTest { self: FunSuite =>
         def close(): Unit = {
           server.close()
         }
-    }
+      }
 
   private def newAPIClient(): NewClient =
     (
@@ -130,7 +132,7 @@ trait ThriftTest { self: FunSuite =>
         }
 
         def close() = ()
-    }
+      }
 
   private val protocols = Map(
     // Commenting out due to flakiness - see DPT-175 and DPT-181

@@ -32,7 +32,8 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
   protected def newListeningServer(
     serviceFactory: ServiceFactory[Req, Rep],
     addr: SocketAddress
-  )(trackSession: ClientConnection => Unit
+  )(
+    trackSession: ClientConnection => Unit
   ): ListeningServer
 
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =

@@ -107,9 +107,9 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
       }
     }
 
-    testCase(testName, scripts, { client => (s, keys, argv) =>
-      client.eval(s, keys, argv) map cast
-    })
+    testCase(
+      testName,
+      scripts, { client => (s, keys, argv) => client.eval(s, keys, argv) map cast })
 
     test(
       "In " + testName + ", scriptExists should return true for executed scripts; and return false after scriptFlush"
@@ -126,9 +126,7 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
       "In " + testName + ", scriptLoad should return SHA1 hex string of scripts; and make scriptExists return true"
     ) {
       withRedisClient { client =>
-        val digests = Await.result(Future.collect(scripts map { s =>
-          client.scriptLoad(s)
-        }))
+        val digests = Await.result(Future.collect(scripts map { s => client.scriptLoad(s) }))
         assert(digests == sha1s)
 
         allSha1sExist(client)

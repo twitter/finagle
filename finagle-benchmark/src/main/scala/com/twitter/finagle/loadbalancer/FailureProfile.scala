@@ -23,12 +23,10 @@ private object FailureProfile {
    * the next response type is synchronized across threads
    */
   def fromFile(path: java.net.URL): () => Boolean = {
-    val responses = Source.fromURL(path).getLines.toIndexedSeq.map { line: String =>
-      line.toBoolean
-    }
+    val responses =
+      Source.fromURL(path).getLines.toIndexedSeq.map { line: String => line.toBoolean }
 
-    () =>
-      responses(rng.nextInt(responses.size))
+    () => responses(rng.nextInt(responses.size))
   }
 }
 

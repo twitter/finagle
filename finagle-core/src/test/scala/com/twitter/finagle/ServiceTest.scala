@@ -57,18 +57,14 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
   test("Service.rescue should wrap NonFatal exceptions in a failed Future") {
     val exc = new IllegalArgumentException
-    val service = Service.mk[String, String] { _ =>
-      throw exc
-    }
+    val service = Service.mk[String, String] { _ => throw exc }
     val rescuedService = Service.rescue(service)
 
     val result = Await.result(rescuedService("ok").liftToTry)
     assert(result.throwable == exc)
 
     val fatalExc = new InterruptedException
-    val service2 = Service.mk[String, String] { _ =>
-      throw fatalExc
-    }
+    val service2 = Service.mk[String, String] { _ => throw fatalExc }
     val rescuedService2 = Service.rescue(service2)
 
     intercept[InterruptedException] {
@@ -94,9 +90,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
     assert(NilService.toString == "com.twitter.finagle.service.NilService$")
 
-    val mkSvc = Service.mk[Int, Int] { x: Int =>
-      Future.value(x + 1)
-    }
+    val mkSvc = Service.mk[Int, Int] { x: Int => Future.value(x + 1) }
     assert(mkSvc.toString == "com.twitter.finagle.Service$$anon$2")
 
     val proxied = new ServiceProxy(constSvc) {}

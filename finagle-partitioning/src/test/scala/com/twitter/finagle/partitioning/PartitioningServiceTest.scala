@@ -244,7 +244,7 @@ private[this] class SimplePartitioningService(
         Map.empty
     }
     serviceMapVar.changes.register(Witness({ _: Map[_ <: String, Future[Service[String, String]]] =>
-      }))
+    }))
   }
 
   private[this] def mkService(addr: Address.Inet): Future[Service[String, String]] = {

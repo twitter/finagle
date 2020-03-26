@@ -180,9 +180,7 @@ trait FailureFlags[T <: FailureFlags[T]] extends Exception { this: T =>
       if (getCause != null && copied.getCause == null) {
         copied.initCause(getCause)
       }
-      getSuppressed.toSeq.foreach { t =>
-        copied.addSuppressed(t)
-      }
+      getSuppressed.toSeq.foreach { t => copied.addSuppressed(t) }
       copied
     }
 

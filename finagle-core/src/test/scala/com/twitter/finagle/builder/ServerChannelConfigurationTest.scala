@@ -11,9 +11,7 @@ import org.scalatest.FunSuite
 
 class ServerChannelConfigurationTest extends FunSuite {
 
-  val identityService = Service.mk[String, String] { req =>
-    Future.value(req)
-  }
+  val identityService = Service.mk[String, String] { req => Future.value(req) }
 
   test("close connection after max life time duration") {
     val lifeTime = 100.millis

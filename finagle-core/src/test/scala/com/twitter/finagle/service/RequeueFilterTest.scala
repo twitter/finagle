@@ -168,9 +168,7 @@ class RequeueFilterTest extends FunSuite {
 
     val svcFactory = ServiceFactory.const(
       filter.andThen(Service.mk[Throwable, Int] { req =>
-        context.Retries.current.foreach { retries =>
-          retriesStat.add(retries.attempt)
-        }
+        context.Retries.current.foreach { retries => retriesStat.add(retries.attempt) }
         Future.exception(req)
       })
     )

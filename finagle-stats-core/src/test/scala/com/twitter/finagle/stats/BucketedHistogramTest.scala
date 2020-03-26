@@ -178,9 +178,7 @@ class BucketedHistogramTest extends FunSuite with ScalaCheckDrivenPropertyChecks
         //
         whenever(samples.nonEmpty && samples.forall(_ >= 0)) {
           val h = BucketedHistogram()
-          samples.foreach { s =>
-            h.add(s.toLong)
-          }
+          samples.foreach { s => h.add(s.toLong) }
 
           val sorted = samples.sorted.toIndexedSeq
           val index = (Math.round(sorted.size * p).toInt - 1).max(0)

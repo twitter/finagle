@@ -105,9 +105,7 @@ object StatsReceiverBenchmark {
     val repr = self.repr
 
     private[this] lazy val scopeMemo =
-      Memoize[String, StatsReceiver] { name =>
-        new Memoizing(self.scope(name))
-      }
+      Memoize[String, StatsReceiver] { name => new Memoizing(self.scope(name)) }
 
     private[this] lazy val counterMemo =
       Memoize[(Seq[String], Verbosity), Counter] {

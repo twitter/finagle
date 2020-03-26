@@ -66,9 +66,7 @@ class ServerSetResolver {
 
     // For the lifetime of this test, monitor changes to all N serversets
     // (The resolver is always monitoring changes)
-    serverSetPaths.foreach { path =>
-      monitorServersetChanges(resolver, path)
-    }
+    serverSetPaths.foreach { path => monitorServersetChanges(resolver, path) }
 
     // The resolver is always updating as its zk-backed serverset is changing.
     // Run this test for `testRuntimeSec` seconds to see the impact over

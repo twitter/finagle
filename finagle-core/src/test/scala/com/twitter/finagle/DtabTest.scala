@@ -89,12 +89,13 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
   }
 
   test("Allows trailing semicolon") {
-    val dtab = try {
-      Dtab.read("""
+    val dtab =
+      try {
+        Dtab.read("""
           /b => /c;
           /a => /b;
           """)
-    } catch { case _: IllegalArgumentException => Dtab.empty }
+      } catch { case _: IllegalArgumentException => Dtab.empty }
     assert(dtab.length == 2)
   }
 

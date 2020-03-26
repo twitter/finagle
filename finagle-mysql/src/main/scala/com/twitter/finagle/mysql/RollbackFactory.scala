@@ -73,9 +73,7 @@ final class RollbackFactory(client: ServiceFactory[Request, Result], statsReceiv
       }
 
       private[this] def poisonAndClose(deadline: Time): Future[Unit] = {
-        self(PoisonConnectionRequest).transform { _ =>
-          self.close(deadline)
-        }
+        self(PoisonConnectionRequest).transform { _ => self.close(deadline) }
       }
     }
 

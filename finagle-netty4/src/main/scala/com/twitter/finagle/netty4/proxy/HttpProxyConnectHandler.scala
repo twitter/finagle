@@ -85,9 +85,8 @@ private[netty4] class HttpProxyConnectHandler(
           // Create new connect HTTP proxy connect request.
           val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, host)
           req.headers().set(HttpHeaderNames.HOST, host)
-          credentialsOption.foreach(
-            c => req.headers().add(HttpHeaderNames.PROXY_AUTHORIZATION, proxyAuthorizationHeader(c))
-          )
+          credentialsOption.foreach(c =>
+            req.headers().add(HttpHeaderNames.PROXY_AUTHORIZATION, proxyAuthorizationHeader(c)))
 
           ctx.writeAndFlush(req)
           readIfNeeded(ctx)

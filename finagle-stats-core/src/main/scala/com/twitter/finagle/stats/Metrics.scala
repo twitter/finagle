@@ -268,9 +268,7 @@ private[finagle] class Metrics private (
     val cs = countersMap
       .elements()
       .asScala
-      .map { sc =>
-        sc.name -> Long.box(sc.count)
-      }
+      .map { sc => sc.name -> Long.box(sc.count) }
       .toMap
     util.Collections.unmodifiableMap(cs.asJava)
   }
@@ -279,9 +277,7 @@ private[finagle] class Metrics private (
     val snaps = statsMap
       .elements()
       .asScala
-      .map { ss =>
-        ss.name -> ss.snapshot
-      }
+      .map { ss => ss.name -> ss.snapshot }
       .toMap
     util.Collections.unmodifiableMap(snaps.asJava)
   }

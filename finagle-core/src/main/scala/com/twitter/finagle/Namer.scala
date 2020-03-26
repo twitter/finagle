@@ -172,9 +172,7 @@ object Namer {
     lookup: Path => Activity[NameTree[Name]],
     tree: NameTree[Path]
   ): Activity[NameTree[Name.Bound]] =
-    bind(lookup, 0, None)(tree map { path =>
-      Name.Path(path)
-    })
+    bind(lookup, 0, None)(tree map { path => Name.Path(path) })
 
   private[this] def bindUnion(
     lookup: Path => Activity[NameTree[Name]],
@@ -215,7 +213,8 @@ object Namer {
     lookup: Path => Activity[NameTree[Name]],
     depth: Int,
     weight: Option[Double]
-  )(tree: NameTree[Name]
+  )(
+    tree: NameTree[Name]
   ): Activity[NameTree[Name.Bound]] =
     if (depth > namerMaxDepth())
       Activity.exception(

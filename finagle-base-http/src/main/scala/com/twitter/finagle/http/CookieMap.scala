@@ -136,9 +136,7 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   }
 
   protected def removeCookies(xs: TraversableOnce[String]): this.type = {
-    xs.foreach { n =>
-      underlying -= n
-    }
+    xs.foreach { n => underlying -= n }
     rewriteCookieHeaders()
     this
   }

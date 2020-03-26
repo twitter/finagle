@@ -36,9 +36,7 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
 
   test("cache, evict")(Time.withCurrentTimeFrozen { tc =>
     new Ctx {
-      val newFactory: Int => ServiceFactory[String, String] = { i =>
-        SF(i)
-      }
+      val newFactory: Int => ServiceFactory[String, String] = { i => SF(i) }
       val cache =
         new ServiceFactoryCache[Int, String, String](newFactory, Timer.Nil, maxCacheSize = 2)
 
@@ -80,9 +78,7 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
 
   test("active eviction")(Time.withCurrentTimeFrozen { tc =>
     new Ctx {
-      val newFactory: Int => ServiceFactory[String, String] = { i =>
-        SF(i)
-      }
+      val newFactory: Int => ServiceFactory[String, String] = { i => SF(i) }
       val tti = 1.minute
       val timer = new MockTimer
       val cache =
@@ -134,9 +130,7 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
 
   test("close")(Time.withCurrentTimeFrozen { tc =>
     new Ctx {
-      val newFactory: Int => ServiceFactory[String, String] = { i =>
-        SF(i)
-      }
+      val newFactory: Int => ServiceFactory[String, String] = { i => SF(i) }
       val tti = 1.minute
       val timer = new MockTimer
       val cache =

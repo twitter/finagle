@@ -50,8 +50,8 @@ trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with 
     size: Int,
     startingIndex: Int = 0
   ): Seq[(ListeningServer, InetSocketAddress, Int, Int)] = {
-    def echoService(servername: String): Service[String, String] = Service.mk[String, String](
-      req => {
+    def echoService(servername: String): Service[String, String] =
+      Service.mk[String, String](req => {
         if (failingHosts.contains(servername)) {
           Future.exception(new RuntimeException(s"$servername failed!"))
         } else if (slowHosts.contains(servername)) {
@@ -73,8 +73,7 @@ trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with 
             case None =>
           }
         }
-      }
-    )
+      })
 
     // create a cluster of multiple servers, listening on unique port numbers
     startingIndex until (startingIndex + size) map { i =>

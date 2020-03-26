@@ -18,7 +18,8 @@ class CoordinatorTest extends FunSuite with LocalConductors with MockitoSugar {
   override def test(
     testName: String,
     testTags: Tag*
-  )(testFun: => Any
+  )(
+    testFun: => Any
   )(
     implicit pos: Position
   ): Unit = {
@@ -107,9 +108,7 @@ class CoordinatorTest extends FunSuite with LocalConductors with MockitoSugar {
     Time.withCurrentTimeFrozen { ctl =>
       localThread(conductor) {
         coord.sleepUntilGc(
-          { () =>
-            when(nfo.generation()).thenReturn(x)
-          },
+          { () => when(nfo.generation()).thenReturn(x) },
           20.milliseconds
         )
       }

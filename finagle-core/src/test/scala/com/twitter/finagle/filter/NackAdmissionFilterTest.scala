@@ -117,9 +117,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
   def testEnabled(desc: String)(f: TimeControl => Unit): Unit = {
     test(desc) {
-      Time.withCurrentTimeFrozen { ctl =>
-        f(ctl)
-      }
+      Time.withCurrentTimeFrozen { ctl => f(ctl) }
     }
   }
 
@@ -188,7 +186,7 @@ class NackAdmissionFilterTest extends FunSuite {
     }
 
     val successRate = filter.emaValue
-    val multiplier = 1D / DefaultAcceptRateThreshold
+    val multiplier = 1d / DefaultAcceptRateThreshold
 
     assert(0 < successRate && successRate < 1)
     assert(1 <= multiplier * successRate)
@@ -210,7 +208,7 @@ class NackAdmissionFilterTest extends FunSuite {
     }
 
     val successRate = filter.emaValue
-    val multiplier = 1D / DefaultAcceptRateThreshold
+    val multiplier = 1d / DefaultAcceptRateThreshold
 
     assert(0 < successRate && successRate < 1)
     assert(1 > multiplier * successRate)
@@ -233,7 +231,7 @@ class NackAdmissionFilterTest extends FunSuite {
     }
 
     val successRate = filter.emaValue
-    val multiplier = 1D / DefaultAcceptRateThreshold
+    val multiplier = 1d / DefaultAcceptRateThreshold
 
     assert(0 < successRate && successRate < 1)
     assert(1 > multiplier * successRate)
@@ -265,7 +263,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
     // Nack until EMA is so low that it would not be likely for any requests to
     // get through without the MaxDropProbability.
-    while (filter.emaValue > 10E-10) {
+    while (filter.emaValue > 10e-10) {
       ctl.advance(1.second)
       nackWithoutTest()
     }

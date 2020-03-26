@@ -199,7 +199,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
       (handle, hs) =>
         Future.value(
           new Negotiation.Client(fragmentingParams, sharedStats).negotiate(handle, hs)
-      )
+        )
 
     val (handle, negotiatingSession, stats) = withMockHandle(negotiate, fragmentingParams)
     assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)

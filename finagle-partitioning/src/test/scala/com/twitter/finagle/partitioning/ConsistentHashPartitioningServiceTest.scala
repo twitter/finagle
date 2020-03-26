@@ -82,9 +82,7 @@ class ConsistentHashPartitioningServiceTest extends PartitioningServiceTestBase 
     val numKeys = 25
     // first send numKeys requests to the cluster and find the nodes they stick with.
     // ensure they stick to the same node subsequently to verify hashing behavior
-    val keys = 1 to numKeys map { _ =>
-      randomString(5)
-    }
+    val keys = 1 to numKeys map { _ => randomString(5) }
     val batchedRequest: String = keys.mkString(RequestDelimiter)
 
     // capture the request distribution (request -> server) for asserting stickiness

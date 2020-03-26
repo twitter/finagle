@@ -618,7 +618,7 @@ object Stack {
           Leaf(
             this,
             make(prms[P1], prms[P2], prms[P3], prms[P4], prms[P5], prms[P6], next.make(prms))
-        ),
+          ),
         next
       )
   }
@@ -658,7 +658,7 @@ object Stack {
               prms[P6],
               prms[P7],
               next.make(prms))
-        ),
+          ),
         next
       )
   }

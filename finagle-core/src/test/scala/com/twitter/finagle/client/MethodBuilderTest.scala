@@ -16,9 +16,7 @@ import org.scalatestplus.mockito.MockitoSugar
 
 private object MethodBuilderTest {
   private val neverSvc: Service[Int, Int] =
-    Service.mk { _ =>
-      Future.never
-    }
+    Service.mk { _ => Future.never }
 
   val totalTimeoutStack: Stack[ServiceFactory[Int, Int]] = {
     val svcFactory = ServiceFactory.const(neverSvc)
@@ -305,9 +303,7 @@ class MethodBuilderTest
         Seq("client", protocolLib, clientName, addr, "methods", name) ++ suffix
 
       def filteredRegistry: Set[Entry] =
-        registry.filter { entry =>
-          entry.key.head == "client"
-        }.toSet
+        registry.filter { entry => entry.key.head == "client" }.toSet
 
       val totalSvc = methodBuilder.newService
       val totalSvcEntries = Set(
@@ -340,9 +336,7 @@ class MethodBuilderTest
         Seq("client", protocolLib, clientName, addr, "methods", name) ++ suffix
 
       def filteredRegistry: Set[Entry] =
-        registry.filter { entry =>
-          entry.key.head == "client"
-        }.toSet
+        registry.filter { entry => entry.key.head == "client" }.toSet
 
       // test a "vanilla" one
       val vanillaSvc = methodBuilder.newService("vanilla")
@@ -904,9 +898,7 @@ class MethodBuilderTest
       case ReqRep(_, Throw(_)) => ResponseClass.NonRetryableFailure
     }
     val myException = new Exception("boom!")
-    val svc: Service[Int, Int] = Service.mk { i =>
-      throw myException
-    }
+    val svc: Service[Int, Int] = Service.mk { i => throw myException }
     val stack = Retries
       .moduleRequeueable[Int, Int]
       .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
@@ -936,9 +928,7 @@ class MethodBuilderTest
       case ReqRep(_, Throw(_)) => ResponseClass.RetryableFailure
     }
     val myException = new Exception("boom!")
-    val svc: Service[Int, Int] = Service.mk { i =>
-      throw myException
-    }
+    val svc: Service[Int, Int] = Service.mk { i => throw myException }
     val stack = Retries
       .moduleRequeueable[Int, Int]
       .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))

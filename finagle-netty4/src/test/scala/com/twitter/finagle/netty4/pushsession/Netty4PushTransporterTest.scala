@@ -214,9 +214,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
 
       val latch = Promise[Unit]
 
-      latch.onSuccess { _ =>
-        if (ctx != null) ctx.fireExceptionCaught(ex)
-      }
+      latch.onSuccess { _ => if (ctx != null) ctx.fireExceptionCaught(ex) }
 
       override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
         this.ctx = ctx

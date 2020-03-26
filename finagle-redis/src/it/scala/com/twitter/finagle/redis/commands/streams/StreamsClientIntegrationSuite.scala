@@ -15,7 +15,8 @@ final class StreamsClientIntegrationSuite extends RedisClientTest with Inside {
   override protected def test(
     testName: String,
     testTags: Tag*
-  )(f: => Any
+  )(
+    f: => Any
   )(
     implicit pos: Position
   ): Unit = {

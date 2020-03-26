@@ -81,9 +81,7 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
   private[this] def makePartitionedRequests(req: Req): Seq[Future[(Req, Try[Rep])]] =
     partitionRequest(req).map {
       case (pReq, service) =>
-        partitionRequestFn((pReq, service)).transform { t =>
-          Future.value((pReq, t))
-        }
+        partitionRequestFn((pReq, service)).transform { t => Future.value((pReq, t)) }
     }
 
   private[this] def doMergeResponses(request: Req)(results: Seq[(Req, Try[Rep])]): Rep = {

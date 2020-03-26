@@ -48,12 +48,13 @@ object Protocols {
   private val unsafe: Option[sun.misc.Unsafe] = Option(getUnsafe)
 
   // JDK9 Strings are no longer backed by Array[Char] - https://openjdk.java.net/jeps/254
-  private val StringsBackedByCharArray = try {
-    // Versioning changes between 8 and 9 - https://openjdk.java.net/jeps/223
-    System.getProperty("java.specification.version").replace("1.", "").toInt < 9
-  } catch {
-    case _: Throwable => false
-  }
+  private val StringsBackedByCharArray =
+    try {
+      // Versioning changes between 8 and 9 - https://openjdk.java.net/jeps/223
+      System.getProperty("java.specification.version").replace("1.", "").toInt < 9
+    } catch {
+      case _: Throwable => false
+    }
 
   private[thrift] def limitToOption(limit: Long): Option[Long] =
     if (limit > NoLimit) Some(limit) else None

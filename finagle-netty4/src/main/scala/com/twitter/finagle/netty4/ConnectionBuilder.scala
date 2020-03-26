@@ -196,7 +196,10 @@ private[finagle] object ConnectionBuilder {
       // Turning off AUTO_READ causes SSL/TLS errors in Finagle when using `LocalChannel`.
       // So skip setting it at all.
       bootstrap
-        .option[JBool](ChannelOption.AUTO_READ, !backpressure) // backpressure! no reads on transport => no reads on the socket
+        .option[JBool](
+          ChannelOption.AUTO_READ,
+          !backpressure
+        ) // backpressure! no reads on transport => no reads on the socket
     }
 
     val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]

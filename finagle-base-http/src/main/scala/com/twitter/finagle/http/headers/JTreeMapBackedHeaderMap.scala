@@ -27,9 +27,7 @@ final private class JTreeMapBackedHeaderMap extends HeaderMap {
     // on the underlying TreeMap and cause a
     // ConcurrentModificationException.
     val iter = copyHeaders
-    iter.foreach { root =>
-      root.iterator.foreach(nv => f((nv.name, nv.value)))
-    }
+    iter.foreach { root => root.iterator.foreach(nv => f((nv.name, nv.value))) }
   }
 
   // ---- HeaderMap -----

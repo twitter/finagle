@@ -37,9 +37,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
   class Ctx {
     val N = 10
     val statsReceiver = new InMemoryStatsReceiver
-    val half1, half2 = 0 until N / 2 map { i =>
-      new LoadedFactory(i.toString)
-    }
+    val half1, half2 = 0 until N / 2 map { i => new LoadedFactory(i.toString) }
     val factories = half1 ++ half2
     val mutableFactories = new ReadWriteVar(factories)
     val nonRng = new Random {

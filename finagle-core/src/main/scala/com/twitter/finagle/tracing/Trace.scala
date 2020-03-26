@@ -184,7 +184,8 @@ object Trace extends Tracing {
     service: String,
     rpc: String,
     hostOpt: Option[InetSocketAddress] = None
-  )(f: => T
+  )(
+    f: => T
   ): T = Trace.letId(Trace.nextId) {
     val trace = Trace()
     if (trace.isActivelyTracing) {

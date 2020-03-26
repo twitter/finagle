@@ -80,9 +80,7 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
   // Dispatch serialization is guaranteed by GenSerialClientDispatcher so we
   // leverage that property to sequence `q` offers.
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
-    pipeline(req, p).flatMap { toQueue =>
-      q.offer(Pending(toQueue, p)); Future.Done
-    }
+    pipeline(req, p).flatMap { toQueue => q.offer(Pending(toQueue, p)); Future.Done }
 
   override def apply(req: Req): Future[Rep] = {
     val f = super.apply(req)

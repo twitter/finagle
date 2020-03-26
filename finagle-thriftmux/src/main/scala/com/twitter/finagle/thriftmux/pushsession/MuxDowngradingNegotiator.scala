@@ -63,8 +63,9 @@ private[finagle] final class MuxDowngradingNegotiator(
   private[this] def closeNow(): Future[Unit] = Closable.all(handle, service).close()
 
   def receive(reader: ByteReader): Unit = {
-    val buf = try reader.readAll()
-    finally reader.close()
+    val buf =
+      try reader.readAll()
+      finally reader.close()
     checkDowngrade(buf)
   }
 

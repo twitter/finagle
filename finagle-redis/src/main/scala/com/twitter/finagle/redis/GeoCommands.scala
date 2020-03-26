@@ -75,14 +75,11 @@ private[redis] trait GeoCommands {
         optionalResults
           .map {
             case IntegerReply(hash) =>
-              (r: GeoRadiusResult) =>
-                r.copy(hash = Some(hash.toInt))
+              (r: GeoRadiusResult) => r.copy(hash = Some(hash.toInt))
             case BulkReply(Buf.Utf8(dist)) =>
-              (r: GeoRadiusResult) =>
-                r.copy(dist = Some(dist.toDouble))
+              (r: GeoRadiusResult) => r.copy(dist = Some(dist.toDouble))
             case MBulkReply(BulkReply(Buf.Utf8(lon)) :: BulkReply(Buf.Utf8(lat)) :: Nil) =>
-              (r: GeoRadiusResult) =>
-                r.copy(coord = Some((lon.toDouble, lat.toDouble)))
+              (r: GeoRadiusResult) => r.copy(coord = Some((lon.toDouble, lat.toDouble)))
           }
           .foldRight(GeoRadiusResult(member))((m, r) => m(r))
       )

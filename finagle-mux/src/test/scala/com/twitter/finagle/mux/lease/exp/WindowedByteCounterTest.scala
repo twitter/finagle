@@ -19,7 +19,8 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
   private[this] def withCounter(
     fakeBean: FakeGarbageCollectorMXBean,
     fakePool: FakeMemoryPool
-  )(fn: (ByteCounter, () => Any) => Unit
+  )(
+    fn: (ByteCounter, () => Any) => Unit
   ): Unit = {
     Time.withCurrentTimeFrozen { ctl =>
       val nfo = new JvmInfo(fakePool, fakeBean)

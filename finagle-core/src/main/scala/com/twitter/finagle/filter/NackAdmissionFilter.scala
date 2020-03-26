@@ -184,7 +184,7 @@ class NackAdmissionFilter[Req, Rep] private[filter] (
   require(nackRateThreshold > 0, s"nackRateThreshold must lie in (0, 1): $nackRateThreshold")
 
   private[this] val acceptRateThreshold: Double = 1.0 - nackRateThreshold
-  private[this] val multiplier: Double = 1D / acceptRateThreshold
+  private[this] val multiplier: Double = 1d / acceptRateThreshold
 
   // Tracks the number of requests attempted during the previous 1000 ms. In
   // other words, tracks the client's rps. We arbitrarily give the Adder 10
@@ -211,7 +211,8 @@ class NackAdmissionFilter[Req, Rep] private[filter] (
       if (sufficientRps) rep match {
         case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Rejected) => 0
         case _ => 1
-      } else {
+      }
+      else {
         // Bump up the ema value if the rps is too low to drop the request.
         // The ema value will start off high when the rps rises, protecting
         // against prematurely dropping requests (e.g., during warmup).

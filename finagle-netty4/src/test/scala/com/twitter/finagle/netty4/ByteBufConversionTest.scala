@@ -691,9 +691,7 @@ class ByteBufConversionTest extends FunSuite with BeforeAndAfter {
     0.until(Capacity - BlockSize + 1, BlockSize).foreach { i =>
       random.nextBytes(expectedValueContent)
       wrappedBuf.getBytes(i, value)
-      0.until(BlockSize).foreach { j =>
-        assertEquals(expectedValue.getByte(j), value(j))
-      }
+      0.until(BlockSize).foreach { j => assertEquals(expectedValue.getByte(j), value(j)) }
     }
   }
 
@@ -743,9 +741,7 @@ class ByteBufConversionTest extends FunSuite with BeforeAndAfter {
       wrappedBuf.getBytes(i, value)
       assertEquals(0, value.readerIndex)
       assertEquals(BlockSize, value.writerIndex())
-      0.until(BlockSize).foreach { j =>
-        assertEquals(expectedValue.getByte(j), value.getByte(j))
-      }
+      0.until(BlockSize).foreach { j => assertEquals(expectedValue.getByte(j), value.getByte(j)) }
     }
   }
 
@@ -843,9 +839,7 @@ class ByteBufConversionTest extends FunSuite with BeforeAndAfter {
       assert(i == wrappedBuf.readerIndex)
       assertEquals(Capacity, wrappedBuf.writerIndex())
       wrappedBuf.readBytes(value)
-      0.until(BlockSize).foreach { j =>
-        assertEquals(expectedValue(j), value(j))
-      }
+      0.until(BlockSize).foreach { j => assertEquals(expectedValue(j), value(j)) }
     }
   }
 
@@ -1189,9 +1183,7 @@ class ByteBufConversionTest extends FunSuite with BeforeAndAfter {
     val wrapped = Unpooled.wrappedBuffer(bytes)
     val wrappedBuf = ByteBufConversion.bufAsByteBuf(Buf.ByteArray.Owned(bytes))
     wrapped.writerIndex(0)
-    0.until(Capacity, 4).foreach { i =>
-      wrapped.writeInt(i)
-    }
+    0.until(Capacity, 4).foreach { i => wrapped.writeInt(i) }
     wrappedBuf.readByte()
     intercept[ReadOnlyBufferException] {
       wrappedBuf.discardReadBytes()

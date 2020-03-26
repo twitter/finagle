@@ -42,9 +42,7 @@ class MemcachedTest extends FunSuite with MockitoSugar with Eventually with Inte
 
     val FailureAccrualFactory.Param.Configured(policy) = params[FailureAccrualFactory.Param]
     assert(policy() == failureAccrualPolicy)
-    assert(markDeadFor.take(10).force === (0 until 10 map { _ =>
-      1.second
-    }))
+    assert(markDeadFor.take(10).force === (0 until 10 map { _ => 1.second }))
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))
     assert(params[pparam.EjectFailedHost] == pparam.EjectFailedHost(false))
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))

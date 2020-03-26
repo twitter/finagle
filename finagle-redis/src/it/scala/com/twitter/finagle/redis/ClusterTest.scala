@@ -48,7 +48,8 @@ trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
   protected def assertEqualInfo(
     clients: Seq[ClusterClient],
     expected: Seq[(String, String)]
-  )(f: ClusterClient => Future[Map[String, String]]
+  )(
+    f: ClusterClient => Future[Map[String, String]]
   ): Unit = {
     for (client <- clients) {
       val info = Await.result(f(client))
@@ -159,7 +160,8 @@ trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
     aId: String,
     b: ClusterClient,
     bNode: ClusterNode
-  )(slot: Int
+  )(
+    slot: Int
   ): Future[Unit] =
     for {
       // The protocol has four steps:
@@ -194,12 +196,14 @@ trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
 
   protected def withClusterClient(index: Int)(testCode: ClusterClient => Any) {
     val client = newClusterClient(index)
-    try { testCode(client) } finally { client.close() }
+    try { testCode(client) }
+    finally { client.close() }
   }
 
   protected def withClusterClients(indices: Int*)(testCode: Seq[ClusterClient] => Any) {
     val clients = indices.map(newClusterClient)
-    try { testCode(clients) } finally { clients.foreach(_.close()) }
+    try { testCode(clients) }
+    finally { clients.foreach(_.close()) }
   }
 
 }

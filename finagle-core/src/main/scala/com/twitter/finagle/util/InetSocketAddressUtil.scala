@@ -13,10 +13,11 @@ object InetSocketAddressUtil {
   def toPublic(bound: SocketAddress): SocketAddress = {
     bound match {
       case addr: InetSocketAddress if addr.getAddress().isAnyLocalAddress() =>
-        val host = try InetAddress.getLocalHost()
-        catch {
-          case _: UnknownHostException => InetAddress.getLoopbackAddress
-        }
+        val host =
+          try InetAddress.getLocalHost()
+          catch {
+            case _: UnknownHostException => InetAddress.getLoopbackAddress
+          }
         new InetSocketAddress(host, addr.getPort())
       case _ => bound
     }
@@ -59,9 +60,7 @@ object InetSocketAddressUtil {
         InetAddress
           .getAllByName(host)
           .iterator
-          .map { addr =>
-            new InetSocketAddress(addr, port)
-          }
+          .map { addr => new InetSocketAddress(addr, port) }
           .toSeq
     }
 

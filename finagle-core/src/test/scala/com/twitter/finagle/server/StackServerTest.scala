@@ -33,9 +33,7 @@ class StackServerTest extends FunSuite with Eventually {
     val modified = StringServer.server.withStack(_.prepend(module)).stack
     assert(modified.contains(module.role))
 
-    init.tails.map(_.head).foreach { stackHead =>
-      assert(modified.contains(stackHead.role))
-    }
+    init.tails.map(_.head).foreach { stackHead => assert(modified.contains(stackHead.role)) }
   }
 
   test("Deadline isn't changed until after it's recorded") {
@@ -64,9 +62,7 @@ class StackServerTest extends FunSuite with Eventually {
   test("StackServer uses ExpiringService") {
     @volatile var closed = false
     val connSF = new ServiceFactory[Int, Int] {
-      val svc = Service.mk[Int, Int] { i =>
-        Future.value(i)
-      }
+      val svc = Service.mk[Int, Int] { i => Future.value(i) }
       def apply(conn: ClientConnection) = {
         conn.onClose.ensure { closed = true }
         Future.value(svc)
@@ -157,9 +153,7 @@ class StackServerTest extends FunSuite with Eventually {
       def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
         service(req)
       }
-      onServerClose.onSuccess { _ =>
-        wasPromiseSatisfied.setDone()
-      }
+      onServerClose.onSuccess { _ => wasPromiseSatisfied.setDone() }
     }
 
     object ClosingFilter2 {

@@ -106,13 +106,9 @@ class Rfc7230HeaderValidationTest extends FunSuite with ScalaCheckDrivenProperty
   }
 
   test("validates header names (failure)") {
-    forAll(genInvalidHeaderName) { h =>
-      assertProhibited(Rfc7230HeaderValidation.validateName(h))
-    }
+    forAll(genInvalidHeaderName) { h => assertProhibited(Rfc7230HeaderValidation.validateName(h)) }
 
-    forAll(genNonAsciiHeaderName) { h =>
-      assertProhibited(Rfc7230HeaderValidation.validateName(h))
-    }
+    forAll(genNonAsciiHeaderName) { h => assertProhibited(Rfc7230HeaderValidation.validateName(h)) }
   }
 
   test("validates header values (failure)") {
@@ -132,9 +128,7 @@ class Rfc7230HeaderValidationTest extends FunSuite with ScalaCheckDrivenProperty
       second <- Seq("", "bar")
     } yield (first + sep + second)
 
-    invalid.foreach { key =>
-      assertProhibited(Rfc7230HeaderValidation.validateName(key))
-    }
+    invalid.foreach { key => assertProhibited(Rfc7230HeaderValidation.validateName(key)) }
   }
 
   // The following two tests are non-RFC compliant but we see them enough

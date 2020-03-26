@@ -18,9 +18,7 @@ abstract class AbstractHttp2PriorKnowledgeTest extends AbstractHttp2EndToEndTest
   def featureImplemented(feature: Feature): Boolean = true
 
   test("A prior knowledge connection counts as one upgrade for stats") {
-    val client = nonStreamingConnect(Service.mk { _: Request =>
-      Future.value(Response())
-    })
+    val client = nonStreamingConnect(Service.mk { _: Request => Future.value(Response()) })
 
     await(client(Request("/")))
 

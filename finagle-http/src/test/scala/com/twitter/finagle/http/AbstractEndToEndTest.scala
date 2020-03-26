@@ -131,7 +131,8 @@ abstract class AbstractEndToEndTest
   override def test(
     testName: String,
     testTags: Tag*
-  )(testFun: => Any
+  )(
+    testFun: => Any
   )(
     implicit pos: Position
   ): Unit = {
@@ -741,9 +742,7 @@ abstract class AbstractEndToEndTest
       val req = Request("/")
       req.headerMap.set("accept-encoding", "gzip")
 
-      val content = await(client(req).flatMap { rep =>
-        BufReader.readAll(rep.reader)
-      })
+      val content = await(client(req).flatMap { rep => BufReader.readAll(rep.reader) })
       assert(Buf.Utf8.unapply(content).get == "raw content")
       await(client.close())
     }
@@ -791,9 +790,7 @@ abstract class AbstractEndToEndTest
       s"$implName (streaming)" +
         ": transport closure propagates to request stream producer"
     ) {
-      val s = Service.mk[Request, Response] { _ =>
-        Future.value(Response())
-      }
+      val s = Service.mk[Request, Response] { _ => Future.value(Response()) }
       val client = connect(s)
       val req = Request()
       req.setChunked(true)
@@ -828,9 +825,7 @@ abstract class AbstractEndToEndTest
 
       await(req.writer.write(buf("hello")))
 
-      val contentf = resf flatMap { res =>
-        BufReader.readAll(res.reader)
-      }
+      val contentf = resf flatMap { res => BufReader.readAll(res.reader) }
       assert(await(contentf) == Buf.Utf8("hello"))
 
       // drip should terminate because the request is discarded.
@@ -869,9 +864,7 @@ abstract class AbstractEndToEndTest
     }
 
     test(s"$implName (streaming)" + ": two fixed-length requests") {
-      val svc = Service.mk[Request, Response] { _ =>
-        Future.value(Response())
-      }
+      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
       val client = connect(svc)
       await(client(Request()))
       await(client(Request()))
@@ -1374,9 +1367,7 @@ abstract class AbstractEndToEndTest
   test("obs-fold sequences are 'fixed' when received by servers") {
     val service = nonStreamingConnect(Service.mk { req =>
       val resp = Response()
-      req.headerMap.get("foo").foreach { v =>
-        resp.contentString = v
-      }
+      req.headerMap.get("foo").foreach { v => resp.contentString = v }
       Future.value(resp)
     })
 
@@ -1585,9 +1576,7 @@ abstract class AbstractEndToEndTest
   }
 
   test(s"$implName client handles cut connection properly") {
-    val svc = Service.mk[Request, Response] { _: Request =>
-      Future.value(Response())
-    }
+    val svc = Service.mk[Request, Response] { _: Request => Future.value(Response()) }
     val server1 = serverImpl()
       .serve("localhost:*", svc)
     val addr = server1.boundAddress.asInstanceOf[InetSocketAddress]
@@ -1609,9 +1598,7 @@ abstract class AbstractEndToEndTest
   }
 
   test("Does not retry service acquisition many times when not using FactoryToService") {
-    val svc = Service.mk[Request, Response] { _: Request =>
-      Future.value(Response())
-    }
+    val svc = Service.mk[Request, Response] { _: Request => Future.value(Response()) }
     val sr = new InMemoryStatsReceiver
     val server = serverImpl()
       .serve("localhost:*", svc)
@@ -1671,9 +1658,8 @@ abstract class AbstractEndToEndTest
         val response = Response()
         response.contentString = request.uri
 
-        if (holdResponses) p.map { _ =>
-          response
-        } else Future.value(response)
+        if (holdResponses) p.map { _ => response }
+        else Future.value(response)
       }
     }
 

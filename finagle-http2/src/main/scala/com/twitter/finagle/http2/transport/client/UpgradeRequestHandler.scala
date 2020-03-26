@@ -159,8 +159,6 @@ private object UpgradeRequestHandler {
       // be flowing down the main pipeline. Examples include message aggregators,
       // compressors/decompressors, etc.
       .takeWhile(_.getKey != ChannelTransport.HandlerName)
-      .foreach { entry =>
-        pipeline.remove(entry.getValue)
-      }
+      .foreach { entry => pipeline.remove(entry.getValue) }
   }
 }

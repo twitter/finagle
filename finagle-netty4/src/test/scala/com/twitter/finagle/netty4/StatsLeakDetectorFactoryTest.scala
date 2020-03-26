@@ -13,9 +13,7 @@ class StatsLeakDetectorFactoryTest extends FunSuite with MockitoSugar {
 
     val fac = new StatsLeakDetectorFactory(
       mock[ResourceLeakDetectorFactory], // not actually used
-      { () =>
-        leaks += 1
-      }
+      { () => leaks += 1 }
     )
     val detector = fac.newResourceLeakDetector(classOf[ByteBuf])
 

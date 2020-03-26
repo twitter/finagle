@@ -93,13 +93,9 @@ object BroadcastTracer {
     }
 
     def sampleTrace(traceId: TraceId): Option[Boolean] = {
-      if (tracers.exists { t =>
-          containsBool(true, t.sampleTrace(traceId))
-        })
+      if (tracers.exists { t => containsBool(true, t.sampleTrace(traceId)) })
         Tracer.SomeTrue
-      else if (tracers.forall { t =>
-          containsBool(false, t.sampleTrace(traceId))
-        })
+      else if (tracers.forall { t => containsBool(false, t.sampleTrace(traceId)) })
         Tracer.SomeFalse
       else
         None

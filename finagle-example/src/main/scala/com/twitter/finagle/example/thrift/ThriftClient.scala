@@ -8,9 +8,7 @@ object ThriftClient {
   def main(args: Array[String]): Unit = {
     //#thriftclientapi
     val client = Thrift.client.build[Hello.MethodPerEndpoint]("localhost:8080")
-    val response = client.hi().onSuccess { response =>
-      println("Received response: " + response)
-    }
+    val response = client.hi().onSuccess { response => println("Received response: " + response) }
     Await.result(response)
     //#thriftclientapi
   }

@@ -29,8 +29,8 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("pick2") {
     val ring = new Ring(10, rng)
-    val offset = 3 / 4D
-    val width = 1 / 2D
+    val offset = 3 / 4d
+    val width = 1 / 2d
 
     val histo0 = run {
       val (a, b) = ring.pick2(offset, width)
@@ -60,12 +60,12 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("pick2: no range") {
     val ring = new Ring(10, rng)
-    val (a, b) = ring.pick2(3 / 4D, 0D)
+    val (a, b) = ring.pick2(3 / 4d, 0d)
     assert(a == 7)
     assert(a == b)
 
     for (_ <- 0 to 100) {
-      val (a, b) = ring.pick2(rng.nextDouble, 0D)
+      val (a, b) = ring.pick2(rng.nextDouble, 0d)
       assert(a == b)
     }
   }
@@ -112,26 +112,26 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     }
 
     // aligned with ring units
-    val h0 = histo(offset = .1D, width = .3D)
-    val r0 = ring.range(offset = .1D, width = .3D)
+    val h0 = histo(offset = .1d, width = .3d)
+    val r0 = ring.range(offset = .1d, width = .3d)
     assert(h0.keys == Set(1, 2, 3))
     assert(r0 == h0.keys.size)
 
     // misaligned at end
-    val h1 = histo(offset = .1D, width = .35D)
-    val r1 = ring.range(offset = .1D, width = .35D)
+    val h1 = histo(offset = .1d, width = .35d)
+    val r1 = ring.range(offset = .1d, width = .35d)
     assert(h1.keys == Set(1, 2, 3, 4))
     assert(r1 == h1.keys.size)
 
     // misaligned at start
-    val h2 = histo(offset = .35D, width = .15D)
-    val r2 = ring.range(offset = .35D, width = .15D)
+    val h2 = histo(offset = .35d, width = .15d)
+    val r2 = ring.range(offset = .35d, width = .15d)
     assert(h2.keys == Set(3, 4))
     assert(r2 == h2.keys.size)
 
     // misaligned at both
-    val h3 = histo(offset = .25D, width = .2D)
-    val r3 = ring.range(offset = .25D, width = .2D)
+    val h3 = histo(offset = .25d, width = .2d)
+    val r3 = ring.range(offset = .25d, width = .2d)
     assert(h3.keys == Set(2, 3, 4))
     assert(r3 == h3.keys.size)
   }
@@ -139,15 +139,13 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   test("pick2: wraps around and respects weights") {
     val ring = new Ring(10, rng)
     val histo = run {
-      val (a, b) = ring.pick2(3 / 4D, 1 / 2D)
+      val (a, b) = ring.pick2(3 / 4d, 1 / 2d)
       Seq(a, b)
     }
-    assert(ring.range(3 / 4D, 1 / 2D) == histo.keys.size)
+    assert(ring.range(3 / 4d, 1 / 2d) == histo.keys.size)
     assert(histo.keys == Set(7, 8, 9, 0, 1, 2))
     // 7 and 2 get a fraction of the traffic
-    val f: ((Int, Int)) => Boolean = { kv =>
-      kv._1 == 2 || kv._1 == 7
-    }
+    val f: ((Int, Int)) => Boolean = { kv => kv._1 == 2 || kv._1 == 7 }
     assertBalanced(histo.filter(f))
     assertBalanced(histo.filterNot(f))
     // We know that index 2 and 7 should get ~50% of picks relative
@@ -159,27 +157,27 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("indices") {
     val ring = new Ring(10, rng)
-    assert(ring.range(1 / 4D, 1 / 4D) == 3)
-    assert(ring.indices(1 / 4D, 1 / 4D) == Seq(2, 3, 4))
+    assert(ring.range(1 / 4d, 1 / 4d) == 3)
+    assert(ring.indices(1 / 4d, 1 / 4d) == Seq(2, 3, 4))
 
     // wrap around
-    assert(ring.range(3 / 4D, 1 / 2D) == 6)
-    assert(ring.indices(3 / 4D, 1 / 2D) == Seq(7, 8, 9, 0, 1, 2))
+    assert(ring.range(3 / 4d, 1 / 2d) == 6)
+    assert(ring.indices(3 / 4d, 1 / 2d) == Seq(7, 8, 9, 0, 1, 2))
 
     // walk the indices
     for (i <- 0 to 10) {
-      withClue(s"offset=${i / 10D} width=${1 / 10D}") {
-        assert(ring.range(i / 10D, 1 / 10D) == 1)
-        assert(ring.indices(i / 10D, 1 / 10D) == Seq(i % 10))
+      withClue(s"offset=${i / 10d} width=${1 / 10d}") {
+        assert(ring.range(i / 10d, 1 / 10d) == 1)
+        assert(ring.indices(i / 10d, 1 / 10d) == Seq(i % 10))
       }
     }
   }
 
   test("weight") {
     val ring = new Ring(10, rng)
-    assert(1.0 - ring.weight(5, 1 / 2D, 1 / 10D) <= 1e-6)
-    assert(1.0 - ring.weight(5, 1 / 2D, 1.0) <= 1e-6)
+    assert(1.0 - ring.weight(5, 1 / 2d, 1 / 10d) <= 1e-6)
+    assert(1.0 - ring.weight(5, 1 / 2d, 1.0) <= 1e-6)
     // wrap around: intersection between [0.0, 0.1) and [0.75, 1.25)
-    assert(1.0 - ring.weight(0, 3 / 4D, 1 / 2D) <= 1e-6)
+    assert(1.0 - ring.weight(0, 3 / 4d, 1 / 2d) <= 1e-6)
   }
 }

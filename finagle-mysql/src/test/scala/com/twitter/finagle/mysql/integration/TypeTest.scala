@@ -174,11 +174,11 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
 
     test("extract %s from %s".format("float", rowType)) {
       row("float") match {
-        case Some(FloatValue(f)) => assert(f === 1.61F)
+        case Some(FloatValue(f)) => assert(f === 1.61f)
         case v => fail("expected FloatValue but got %s".format(v))
       }
-      assert(1.61F === row.floatOrZero("float"))
-      assert(1.61F === row.getFloat("float").get)
+      assert(1.61f === row.floatOrZero("float"))
+      assert(1.61f === row.getFloat("float").get)
       assert(1.61 === row.doubleOrZero("float"))
       assert(1.61 === row.getDouble("float").get)
       assert(BigDecimal(1.61) == row.bigDecimalOrNull("float"))

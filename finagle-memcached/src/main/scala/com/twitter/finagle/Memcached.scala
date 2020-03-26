@@ -283,7 +283,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
         }
 
         new KetamaPartitionedClient(va, newService, healthBroker, scopedSr, hasher, numReps)
-        with TwemcachePartitionedClient
+          with TwemcachePartitionedClient
       }
 
       if (UsePartitioningMemcachedClient) {

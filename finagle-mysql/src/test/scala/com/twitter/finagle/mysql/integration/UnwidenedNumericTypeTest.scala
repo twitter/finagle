@@ -91,7 +91,7 @@ class UnwidenedNumericTypeTest extends FunSuite with IntegrationClient {
 
     test(s"extract ${rowName("bigint")} from $rowType") {
       row("bigint") match {
-        case Some(LongValue(l)) => assert(l == 9223372036854775807l)
+        case Some(LongValue(l)) => assert(l == 9223372036854775807L)
         case v => fail("expected LongValue but got %s".format(v))
       }
     }

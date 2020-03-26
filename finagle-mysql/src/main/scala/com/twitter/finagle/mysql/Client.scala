@@ -334,7 +334,8 @@ private class StdClient(
       def apply[T](
         rowsPerFetch: Int,
         params: Parameter*
-      )(f: (Row) => T
+      )(
+        f: (Row) => T
       ): Future[CursorResult[T]] = {
         assert(rowsPerFetch > 0, s"rowsPerFetch must be positive: $rowsPerFetch")
 
@@ -372,35 +373,31 @@ private class StdClient(
       def close(deadline: Time): Future[Unit] = svc.close(deadline)
     }
 
-    val client = new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery)
-    with Session {
+    val client =
+      new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery) with Session {
 
-      // This provides continuing support for nested transactions.  The nested transaction
-      // requires a new mutex to gain access to the underlying `svc`.   The parent transaction
-      // cannot use the underlying `svc` until the nested transaction is complete.
-      // Note, this only provides support for 1 level of nested transactions.
-      override protected def session(): Future[Client with Transactions with Session] =
-        Future.value(
-          new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery) with Session {
-            def discard(): Future[Unit] = {
-              singleton().flatMap { svc =>
-                svc(PoisonConnectionRequest)
-              }.unit
-            }
+        // This provides continuing support for nested transactions.  The nested transaction
+        // requires a new mutex to gain access to the underlying `svc`.   The parent transaction
+        // cannot use the underlying `svc` until the nested transaction is complete.
+        // Note, this only provides support for 1 level of nested transactions.
+        override protected def session(): Future[Client with Transactions with Session] =
+          Future.value(
+            new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery) with Session {
+              def discard(): Future[Unit] = {
+                singleton().flatMap { svc => svc(PoisonConnectionRequest) }.unit
+              }
 
-            override def session(): Future[Client with Transactions with Session] =
-              Future.exception(
-                new IllegalStateException("Multiple nested transactions are not supported"))
+              override def session(): Future[Client with Transactions with Session] =
+                Future.exception(
+                  new IllegalStateException("Multiple nested transactions are not supported"))
 
-            override def close(deadline: Time): Future[Unit] = Future.Done
-          })
+              override def close(deadline: Time): Future[Unit] = Future.Done
+            })
 
-      def discard(): Future[Unit] = {
-        singleton().flatMap { svc =>
-          svc(PoisonConnectionRequest)
-        }.unit
+        def discard(): Future[Unit] = {
+          singleton().flatMap { svc => svc(PoisonConnectionRequest) }.unit
+        }
       }
-    }
 
     client
   }
@@ -416,7 +413,8 @@ private class StdClient(
 
   def transactionWithIsolation[T](
     isolationLevel: IsolationLevel
-  )(f: Client => Future[T]
+  )(
+    f: Client => Future[T]
   ): Future[T] = {
     transact(Some(isolationLevel), f)
   }
@@ -471,9 +469,7 @@ private class StdClient(
               // to the next usage of the connection. issue a "poisoned" request to close
               // the underlying connection. this is necessary due to the connection
               // pooling underneath. then, close the service.
-              client.discard().transform { _ =>
-                Future.exception(e)
-              }
+              client.discard().transform { _ => Future.exception(e) }
           }
       }
     }

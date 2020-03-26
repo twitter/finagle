@@ -38,15 +38,16 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
 
   private[this] def assertGaugeIsNonZero(
     value: Float
-  )(statsReceiver: InMemoryStatsReceiver,
+  )(
+    statsReceiver: InMemoryStatsReceiver,
     name: Array[String]
   ): Unit = statsReceiver.gauges.get(name.toIndexedSeq) match {
     case Some(f) => assert(f() == value)
     case None => fail()
   }
 
-  private[this] val assertGaugeIsOne = assertGaugeIsNonZero(1.0F) _
-  private[this] val assertGaugeIsTwo = assertGaugeIsNonZero(2.0F) _
+  private[this] val assertGaugeIsOne = assertGaugeIsNonZero(1.0f) _
+  private[this] val assertGaugeIsTwo = assertGaugeIsNonZero(2.0f) _
 
   private[this] def mkSuccessfulHelloRequest(client: Service[String, String]): Unit = {
     val response = Await.result(client("hello"), timeout)

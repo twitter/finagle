@@ -40,7 +40,7 @@ class HttpStatsFilterBenchmark extends StdBenchAnnotations {
   private[this] val randSvc = filter.andThen(Service.mk[Request, Response](_ =>
     Future.value {
       Response(statusCodes(Random.nextInt(statusCodes.size)))
-  }))
+    }))
 
   @Benchmark
   def constantStatusCode(): Response = {

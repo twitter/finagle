@@ -105,9 +105,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
 
   def pUnsubscribeAndAssert(channels: Buf*)(implicit ctx: TestContext) {
     ctx.pUnsubscribe(channels)
-    channels.foreach { channel =>
-      the[TimeoutException] thrownBy ctx.publish(channel)
-    }
+    channels.foreach { channel => the[TimeoutException] thrownBy ctx.publish(channel) }
   }
 
   def ensureMasterReplica() {

@@ -51,14 +51,10 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
           case p @ Path.Utf8(elems @ _*) =>
             acts.get(p) match {
               case Some((a, _)) =>
-                a map { tree =>
-                  tree.map(Name(_))
-                }
+                a map { tree => tree.map(Name(_)) }
               case None =>
                 val (act, _) = addPath(p)
-                act map { tree =>
-                  tree.map(Name(_))
-                }
+                act map { tree => tree.map(Name(_)) }
             }
           case _ => Activity.value(NameTree.Neg)
         }
@@ -310,9 +306,7 @@ class TestNamer extends Namer {
 
 class PathServiceNamer extends ServiceNamer[Path, Path] {
   def lookupService(pfx: Path) = {
-    val svc = Service.mk[Path, Path] { req =>
-      Future.value(pfx ++ req)
-    }
+    val svc = Service.mk[Path, Path] { req => Future.value(pfx ++ req) }
     Some(svc)
   }
 }

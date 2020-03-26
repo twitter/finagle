@@ -297,7 +297,8 @@ private object ResultSetBuilder {
   def apply(
     isBinaryEncoded: Boolean,
     supportUnsigned: Boolean
-  )(header: Packet,
+  )(
+    header: Packet,
     fieldPackets: Seq[Packet],
     rowPackets: Seq[Packet]
   ): Try[ResultSet] =
@@ -306,7 +307,8 @@ private object ResultSetBuilder {
   def decode(
     isBinaryEncoded: Boolean,
     supportUnsigned: Boolean
-  )(header: Packet,
+  )(
+    header: Packet,
     fieldPackets: Seq[Packet],
     rowPackets: Seq[Packet]
   ): ResultSet = {

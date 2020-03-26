@@ -84,7 +84,12 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
 
       assert(
         result == Map(
-          "foos" -> (("xyz", "1")), // the "cas unique" values are predictable from a fresh memcached
+          "foos" -> (
+            (
+              "xyz",
+              "1"
+            )
+          ), // the "cas unique" values are predictable from a fresh memcached
           "bazs" -> (("zyx", "3"))
         )
       )
@@ -138,9 +143,7 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       val stats = awaitResult(client.stats())
       assert(stats != null)
       assert(!stats.isEmpty)
-      stats.foreach { stat =>
-        assert(stat.startsWith("STAT"))
-      }
+      stats.foreach { stat => assert(stat.startsWith("STAT")) }
     }
   }
 
@@ -155,7 +158,8 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
     intercept[ClientError] { awaitResult(client.set(null: String, Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.set("    ", Buf.Utf8("bar"))) }
 
-    try { awaitResult(client.set("\t", Buf.Utf8("bar"))) } catch {
+    try { awaitResult(client.set("\t", Buf.Utf8("bar"))) }
+    catch {
       case _: ClientError => fail("\t is allowed")
     }
 

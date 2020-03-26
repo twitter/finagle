@@ -8,20 +8,16 @@ import java.lang.{Long => JLong}
 case class ZAdd(key: Buf, members: Seq[ZMember]) extends StrictKeyCommand {
   RequireClientProtocol(members.nonEmpty, "Members set must not be empty")
 
-  members.foreach { member =>
-    RequireClientProtocol(member != null, "Empty member found")
-  }
+  members.foreach { member => RequireClientProtocol(member != null, "Empty member found") }
 
   def name: Buf = Command.ZADD
   override def body: Seq[Buf] = {
     val membersWithScores =
-      members.flatMap(
-        member =>
-          Seq(
-            Buf.Utf8(member.score.toString),
-            member.member
-        )
-      )
+      members.flatMap(member =>
+        Seq(
+          Buf.Utf8(member.score.toString),
+          member.member
+        ))
 
     key +: membersWithScores
   }
@@ -189,9 +185,7 @@ object ZUnionStore {
  */
 case class ZRangeResults(entries: Array[Buf], scores: Array[Double]) {
   def asTuples(): Seq[(Buf, Double)] =
-    (entries, scores).zipped.map { (entry, score) =>
-      (entry, score)
-    }.toSeq
+    (entries, scores).zipped.map { (entry, score) => (entry, score) }.toSeq
 }
 object ZRangeResults {
   def apply(tuples: Seq[(Buf, Buf)]): ZRangeResults = {

@@ -161,9 +161,7 @@ class TracingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   test("hasAllRequiredHeaders with all") {
     forAll(Gen.someOf(Header.Required :+ "lol")) { headers =>
       val hm = HeaderMap()
-      headers.foreach { h =>
-        hm.add(h, "1")
-      }
+      headers.foreach { h => hm.add(h, "1") }
       val forall = Header.Required.forall { headers.contains(_) }
       val hasReqd = Header.hasAllRequired(hm)
       assert(forall == hasReqd)

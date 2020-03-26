@@ -3,7 +3,8 @@ package com.twitter.finagle.http
 import scala.collection.IterableOnce
 import scala.collection.mutable
 
-protected abstract class CookieMapVersionSpecific(message: Message, cookieCodec: CookieCodec) extends mutable.Map[String, Cookie] {
+protected abstract class CookieMapVersionSpecific(message: Message, cookieCodec: CookieCodec)
+    extends mutable.Map[String, Cookie] {
   def this(message: Message) = this(message, CookieMap.cookieCodec)
 
   protected def addCookie(cookie: (String, Cookie)): this.type

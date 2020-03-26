@@ -27,8 +27,7 @@ private object exportNetty4MetricsAndRegistryEntries {
   private[this] val gauges = mutable.Set.empty[Gauge]
 
   private[this] def buildAccumulator(f: PoolArenaMetric => Long) = {
-    (acc: Float, pa: PoolArenaMetric) =>
-      acc + f(pa)
+    (acc: Float, pa: PoolArenaMetric) => acc + f(pa)
   }
 
   private[this] val sumHugeAllocations = buildAccumulator(_.numHugeAllocations())

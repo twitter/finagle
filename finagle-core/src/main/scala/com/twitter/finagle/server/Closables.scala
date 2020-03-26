@@ -39,14 +39,15 @@ private final class Closables extends Closable with CloseAwaitably {
     // synchronized block so we don't invoke the arbitrary `close` method while holding
     // the lock.
     readLock.lock()
-    val deadline = try {
-      if (closeDeadline.isEmpty) {
-        registeredClosables.add(closable)
+    val deadline =
+      try {
+        if (closeDeadline.isEmpty) {
+          registeredClosables.add(closable)
+        }
+        closeDeadline
+      } finally {
+        readLock.unlock()
       }
-      closeDeadline
-    } finally {
-      readLock.unlock()
-    }
 
     deadline match {
       case Some(deadline) => closable.close(deadline)
@@ -75,14 +76,15 @@ private final class Closables extends Closable with CloseAwaitably {
 
   def close(deadline: Time): Future[Unit] = closeAwaitably {
     writeLock.lock()
-    val toClose = try {
-      closeDeadline = Some(deadline)
-      val allClosables = registeredClosables.asScala.toVector
-      registeredClosables.clear()
-      allClosables
-    } finally {
-      writeLock.unlock()
-    }
+    val toClose =
+      try {
+        closeDeadline = Some(deadline)
+        val allClosables = registeredClosables.asScala.toVector
+        registeredClosables.clear()
+        allClosables
+      } finally {
+        writeLock.unlock()
+      }
 
     Closable.all(toClose: _*).close(deadline)
   }

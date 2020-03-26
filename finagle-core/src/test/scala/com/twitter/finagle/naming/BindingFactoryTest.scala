@@ -15,9 +15,7 @@ import scala.collection.JavaConverters._
 
 object BindingFactoryTest {
   object TestNamer {
-    var f: Path => Activity[NameTree[Name]] = { _ =>
-      Activity.value(NameTree.Neg)
-    }
+    var f: Path => Activity[NameTree[Name]] = { _ => Activity.value(NameTree.Neg) }
   }
   class TestNamer extends Namer {
     def lookup(path: Path): Activity[NameTree[Name]] = TestNamer.f(path)
@@ -39,9 +37,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   after {
     Dtab.base = saveBase
     NameInterpreter.global = DefaultInterpreter
-    TestNamer.f = { _ =>
-      Activity.value(NameTree.Neg)
-    }
+    TestNamer.f = { _ => Activity.value(NameTree.Neg) }
   }
 
   trait Ctx {
@@ -70,16 +66,14 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
           news += 1
           def apply(conn: ClientConnection) = {
             tcOpt.foreach(_.advance(1234.microseconds))
-            Future.value(Service.mk { _ =>
-              Future.value(bound.addr)
-            })
+            Future.value(Service.mk { _ => Future.value(bound.addr) })
           }
 
           def close(deadline: Time) = {
             closes += 1
             Future.Done
           }
-      }
+        }
 
     lazy val factory = new BindingFactory(
       path,
@@ -102,12 +96,10 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     (bound: Name.Bound) =>
       new ServiceFactory[Unit, Var[Addr]] {
         def apply(conn: ClientConnection) =
-          Future.value(Service.mk { _ =>
-            Future.exception(new Exception("nup"))
-          })
+          Future.value(Service.mk { _ => Future.exception(new Exception("nup")) })
         def close(deadline: Time) = Future.Done
         override def status = st
-    }
+      }
 
   test("BindingFactory reflects status of underlying cached service factory")(
     for (status <- Seq(Status.Busy, Status.Open, Status.Closed)) {
@@ -130,9 +122,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       override val tcOpt = Some(tc)
 
       val v = Var[Activity.State[NameTree[Name]]](Activity.Pending)
-      TestNamer.f = { _ =>
-        Activity(v)
-      }
+      TestNamer.f = { _ => Activity(v) }
       val f =
         Dtab.unwind {
           Dtab.local =
@@ -379,9 +369,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   test("BindingFactory.Module: filters with bound residual paths") {
     val module = new BindingFactory.Module[Path, Path] {
       protected[this] def boundPathFilter(path: Path) =
-        Filter.mk { (in, service) =>
-          service(path ++ in)
-        }
+        Filter.mk { (in, service) => service(path ++ in) }
     }
 
     val name = Name.Bound(Var(Addr.Pending), "id", Path.read("/alpha"))

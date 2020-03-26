@@ -160,11 +160,7 @@ class NameTreeTest extends FunSuite {
     )
 
     for ((tree, res) <- cases) {
-      val expect = res map { set =>
-        set map { el: String =>
-          Path.read(el)
-        }
-      }
+      val expect = res map { set => set map { el: String => Path.read(el) } }
 
       assert(NameTree.read(tree).eval == expect)
       assert(NameTree.read(tree).simplified.eval == expect)

@@ -185,9 +185,7 @@ class ServiceFactoryCache[Key, Req, Rep](
     factory(conn).map { service =>
       new ServiceProxy(service) {
         override def close(deadline: Time): Future[Unit] =
-          super.close(deadline).transform { _ =>
-            factory.close(deadline)
-          }
+          super.close(deadline).transform { _ => factory.close(deadline) }
       }
     }
 
@@ -211,20 +209,21 @@ class ServiceFactoryCache[Key, Req, Rep](
 
   def close(deadline: Time): Future[Unit] = {
     val writeStamp = lock.writeLock()
-    val svcFacs = try {
-      val values = List.newBuilder[Closable]
-      val it = cache.values.iterator
-      // Clear the cache to avoid racing with the timer task. If the
-      // task is invoked after releasing this lock but before it has
-      // a chance to close, it will be a noop.
-      while (it.hasNext) {
-        values += it.next()
-        it.remove()
+    val svcFacs =
+      try {
+        val values = List.newBuilder[Closable]
+        val it = cache.values.iterator
+        // Clear the cache to avoid racing with the timer task. If the
+        // task is invoked after releasing this lock but before it has
+        // a chance to close, it will be a noop.
+        while (it.hasNext) {
+          values += it.next()
+          it.remove()
+        }
+        values
+      } finally {
+        lock.unlockWrite(writeStamp)
       }
-      values
-    } finally {
-      lock.unlockWrite(writeStamp)
-    }
     svcFacs += expiryTask
     Closable.all(svcFacs.result: _*).close(deadline)
   }

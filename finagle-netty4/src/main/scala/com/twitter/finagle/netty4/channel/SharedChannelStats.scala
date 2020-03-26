@@ -56,7 +56,7 @@ private[finagle] class SharedChannelStats(params: Stack.Params) {
     tlsConnectionCount.sum()
   }
   private val pendingIoEvents = statsReceiver.addGauge("pending_io_events") {
-    eventLoops.foldLeft(0.0F)((acc, el) => acc + el.pendingTasks())
+    eventLoops.foldLeft(0.0f)((acc, el) => acc + el.pendingTasks())
   }
 }
 

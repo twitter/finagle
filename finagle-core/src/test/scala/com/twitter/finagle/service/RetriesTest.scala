@@ -35,9 +35,7 @@ class RetriesTest extends FunSuite {
   private val end: Stack[ServiceFactory[Exception, Int]] = Stack.leaf(
     Stack.Role("test"),
     ServiceFactory.const(
-      Service.mk[Exception, Int] { req =>
-        Future.exception(req)
-      }
+      Service.mk[Exception, Int] { req => Future.exception(req) }
     )
   )
 
@@ -290,9 +288,7 @@ class RetriesTest extends FunSuite {
   }
 
   private def nRetries(retriesStat: Seq[Float]): Int = {
-    retriesStat.foldLeft(0) { (sum, next) =>
-      sum + next.toInt
-    }
+    retriesStat.foldLeft(0) { (sum, next) => sum + next.toInt }
   }
 
   test("moduleWithRetryPolicy end to end to end with RetryBudget") {

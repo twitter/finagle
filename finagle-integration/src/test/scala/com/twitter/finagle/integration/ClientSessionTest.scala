@@ -73,8 +73,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
         timer = mock[Timer]
       )
 
-      () =>
-        session.status
+      () => session.status
     }
   )
 
@@ -88,8 +87,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
         new IdentityStreamTransport(Transport.cast[http.Request, http.Response](tr)),
         manager
       )
-      () =>
-        wrappedT.status
+      () => wrappedT.status
     }
   )
 
@@ -99,8 +97,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
         new IdentityStreamTransport(Transport.cast[http.Request, http.Response](tr)),
         NullStatsReceiver
       )
-      () =>
-        dispatcher.status
+      () => dispatcher.status
     }
   )
 
@@ -122,8 +119,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
     "memcached-session", { handle: PushChannelHandle[memcached.Response, memcached.Command] =>
       val cl: MyPushClient = new MyPushClient
       val svc = cl.toSvc(handle)
-      () =>
-        svc.status
+      () => svc.status
     }
   )
 
@@ -131,8 +127,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
     "mysql-dispatcher", { tr: Transport[mysql.transport.Packet, mysql.transport.Packet] =>
       val params = Stack.Params.empty
       val dispatcher = new mysql.ClientDispatcher(tr, params)
-      () =>
-        dispatcher.status
+      () => dispatcher.status
     }
   )
 }

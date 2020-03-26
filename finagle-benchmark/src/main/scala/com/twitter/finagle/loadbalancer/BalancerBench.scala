@@ -25,9 +25,7 @@ object BalancerBench {
 
   def newActivity(num: Int): Activity[Vector[EndpointFactory[Unit, Unit]]] = {
     val underlying = Var((0 until num).map(_ => newFactory()).toVector)
-    Activity(underlying.map { facs =>
-      Activity.Ok(facs)
-    })
+    Activity(underlying.map { facs => Activity.Ok(facs) })
   }
 
   private case class NullNode(factory: EndpointFactory[Unit, Unit])

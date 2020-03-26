@@ -38,7 +38,8 @@ trait AbstractDarkTrafficFilter {
   protected def serviceConcurrently[Req, Rep](
     service: Service[Req, Rep],
     request: Req
-  )(shouldInvoke: Req => Boolean,
+  )(
+    shouldInvoke: Req => Boolean,
     invokeDarkService: Req => Future[_]
   ): Future[Rep] = {
 
@@ -57,7 +58,8 @@ trait AbstractDarkTrafficFilter {
 
   protected def sendDarkRequest[Req](
     request: Req
-  )(shouldInvoke: Req => Boolean,
+  )(
+    shouldInvoke: Req => Boolean,
     invokeDarkService: Req => Future[_]
   ): Future[_] = {
     ForwardAnnotation.let(DarkRequestAnnotation) {

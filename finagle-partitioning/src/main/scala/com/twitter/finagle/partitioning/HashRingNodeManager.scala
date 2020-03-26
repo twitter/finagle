@@ -208,9 +208,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
       // remove old nodes and release clients
       nodes --= (old &~ current).collect {
         case (key, node) =>
-          node.handle.map { (service: Service[Req, Rep]) =>
-            service.close()
-          }
+          node.handle.map { (service: Service[Req, Rep]) => service.close() }
           nodeLeaveCount.incr()
           key
       }

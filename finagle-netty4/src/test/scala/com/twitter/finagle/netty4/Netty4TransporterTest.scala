@@ -133,9 +133,7 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
   }
 
   test("end to end: asymmetric protocol") {
-    val enc = { i: Int =>
-      Buf.ByteArray.Owned(Array(i.toByte))
-    }
+    val enc = { i: Int => Buf.ByteArray.Owned(Array(i.toByte)) }
 
     new Ctx(Netty4Transporter.framedBuf(Some(framer), _, _), defaultDec, enc) {
       connect()
@@ -155,9 +153,10 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
   test("listener pipeline emits byte bufs with refCnt == 1") {
     val server = new ServerSocket(0, 50, InetAddress.getLoopbackAddress)
     val transporter =
-      Netty4Transporter.raw[ByteBuf, ByteBuf]({ _: ChannelPipeline =>
-        ()
-      }, new InetSocketAddress(InetAddress.getLoopbackAddress, server.getLocalPort), Params.empty)
+      Netty4Transporter.raw[ByteBuf, ByteBuf](
+        { _: ChannelPipeline => () },
+        new InetSocketAddress(InetAddress.getLoopbackAddress, server.getLocalPort),
+        Params.empty)
     val transFuture =
       transporter()
     val acceptedSocket = server.accept()
@@ -184,9 +183,10 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
     }
     new Ctx(
       { (addr, params) =>
-        Netty4Transporter.raw({ pipeline: ChannelPipeline =>
-          pipeline.addLast(exnSnooper)
-        }, addr, params + Transport.Liveness(readTimeout = 1.millisecond, Duration.Top, None))
+        Netty4Transporter.raw(
+          { pipeline: ChannelPipeline => pipeline.addLast(exnSnooper) },
+          addr,
+          params + Transport.Liveness(readTimeout = 1.millisecond, Duration.Top, None))
       },
       defaultDec,
       defaultEnc

@@ -27,9 +27,7 @@ class ClientDeserializeCtxTest extends FunSuite with MockitoSugar {
   }
 
   test("ClientDeserializeCtx deserialize ignores input after first deserialize") {
-    val deserializer = { bytes: Array[Byte] =>
-      Return(bytes.length)
-    }
+    val deserializer = { bytes: Array[Byte] => Return(bytes.length) }
     val deserCtx = new ClientDeserializeCtx(mock[ThriftStruct], deserializer)
 
     assert(Return(0) == deserCtx.deserialize(Array.empty))

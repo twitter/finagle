@@ -35,9 +35,7 @@ class LoggingFilterTest extends FunSuite {
     }
     val filter = (new LoggingFilter(logger, formatter)).andThen(service)
 
-    Time.withTimeAt(Time.fromSeconds(1302121932)) { _ =>
-      Await.result(filter(request), 1.second)
-    }
+    Time.withTimeAt(Time.fromSeconds(1302121932)) { _ => Await.result(filter(request), 1.second) }
 
     stringHandler.get == ("""127\.0\.0\.1 - - \[06/Apr/2011:20:32:12 \+0000\] "GET /search\.json HTTP/1\.1" 123 5 [0-9]+ "User Agent"""" + "\n")
   }
