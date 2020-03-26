@@ -54,9 +54,7 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
   def featureImplemented(feature: Feature): Boolean = !unimplementedFeatures(feature)
 
   test("An alpn connection counts as one upgrade for stats") {
-    val client = nonStreamingConnect(Service.mk { req: Request =>
-      Future.value(Response())
-    })
+    val client = nonStreamingConnect(Service.mk { req: Request => Future.value(Response()) })
 
     await(client(Request("/")))
 
@@ -67,8 +65,8 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
 
   test("Upgrades to HTTP/2 only if both have the toggle on and it's H2, not H2C") {
     for {
-      clientUseHttp2 <- Seq(1D, 0D)
-      serverUseHttp2 <- Seq(1D, 0D)
+      clientUseHttp2 <- Seq(1d, 0d)
+      serverUseHttp2 <- Seq(1d, 0d)
       clientToggleName <- Seq(
         "com.twitter.finagle.http.UseH2",
         "com.twitter.finagle.http.UseH2CClients2"
@@ -127,9 +125,7 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
     val sr = new InMemoryStatsReceiver()
     val server = finagle.Http.server
       .configured(Transport.ServerSsl(Some(serverConfiguration())))
-      .serve("localhost:*", Service.mk { req: Request =>
-        Future.value(Response())
-      })
+      .serve("localhost:*", Service.mk { req: Request => Future.value(Response()) })
 
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()

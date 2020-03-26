@@ -141,9 +141,7 @@ class ClientRegistryTest
       val c = stackClient.newClient(Name.Path(path), "foo")
       val prefix =
         Seq("client", "fancy", "foo", "/$/com.twitter.finagle.client.crtnamer/foo", "Pool")
-      val filtered = GlobalRegistry.get.toSet.filter { e =>
-        e.key.startsWith(prefix)
-      }
+      val filtered = GlobalRegistry.get.toSet.filter { e => e.key.startsWith(prefix) }
       val expected = Seq(
         "high" -> "2147483647",
         "low" -> "0",
@@ -151,9 +149,7 @@ class ClientRegistryTest
         "maxWaiters" -> "2147483647"
       ).map { case (key, value) => Entry(prefix :+ key, value) }
 
-      expected.foreach { entry =>
-        assert(filtered.contains(entry))
-      }
+      expected.foreach { entry => assert(filtered.contains(entry)) }
     }
   })
 

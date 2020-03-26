@@ -57,9 +57,7 @@ class QueryParamCodecTest
   }
 
   test("arbitrary keys and values") {
-    forAll(genParams) { params =>
-      roundTrip(params)
-    }
+    forAll(genParams) { params => roundTrip(params) }
   }
 
   test("Decode a uri without a query string") {

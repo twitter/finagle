@@ -28,16 +28,12 @@ class ConcurrentRequestFilterTest extends FunSuite {
 
     val factory = stk.make(params)
 
-    0.until(max).foreach { _ =>
-      factory().flatMap(_(1))
-    }
+    0.until(max).foreach { _ => factory().flatMap(_(1)) }
 
     assert(sr.gauges(Seq("request_concurrency"))() == max)
     assert(sr.gauges(Seq("request_queue_size"))() == 0.0)
 
-    0.until(max).foreach { _ =>
-      factory().flatMap(_(1))
-    }
+    0.until(max).foreach { _ => factory().flatMap(_(1)) }
 
     assert(sr.gauges(Seq("request_concurrency"))() == max)
     assert(sr.gauges(Seq("request_queue_size"))() == 0.0)
@@ -53,15 +49,11 @@ class ConcurrentRequestFilterTest extends FunSuite {
 
     val factory = stk.make(params)
 
-    0.until(max).foreach { _ =>
-      factory().flatMap(_(1))
-    }
+    0.until(max).foreach { _ => factory().flatMap(_(1)) }
 
     assert(sr.gauges(Seq("request_concurrency"))() == max)
 
-    0.until(max).foreach { _ =>
-      factory().flatMap(_(1))
-    }
+    0.until(max).foreach { _ => factory().flatMap(_(1)) }
 
     assert(sr.gauges(Seq("request_concurrency"))() == max)
 
@@ -79,16 +71,12 @@ class ConcurrentRequestFilterTest extends FunSuite {
 
     val factory = stk.make(params)
 
-    0.until(max).foreach { _ =>
-      factory().flatMap(_(1))
-    }
+    0.until(max).foreach { _ => factory().flatMap(_(1)) }
 
     assert(sr.gauges(Seq("request_concurrency"))() == max)
     assert(sr.gauges(Seq("request_queue_size"))() == 0.0)
 
-    0.until(max).foreach { _ =>
-      factory().flatMap(_(1))
-    }
+    0.until(max).foreach { _ => factory().flatMap(_(1)) }
 
     assert(sr.gauges(Seq("request_concurrency"))() == max)
 

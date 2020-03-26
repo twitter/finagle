@@ -116,9 +116,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val dest = s"localhost:$port"
 
     var clientStack = Thrift.client.withProtocolFactory(pf)
-    clientId.foreach { cId =>
-      clientStack = clientStack.withClientId(cId)
-    }
+    clientId.foreach { cId => clientStack = clientStack.withClientId(cId) }
 
     val builder = ClientBuilder()
       .stack(clientStack)
@@ -1114,85 +1112,64 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)] =
     Seq(
       "Thrift.server" ->
-        (
-          (
-            sr,
-            fi
-          ) =>
-            Thrift.server
-              .withLabel("server")
-              .withStatsReceiver(sr)
-              .serve("localhost:*", new Echo.FinagledService(fi, Protocols.binaryFactory()))
-        ),
+        ((sr, fi) =>
+          Thrift.server
+            .withLabel("server")
+            .withStatsReceiver(sr)
+            .serve("localhost:*", new Echo.FinagledService(fi, Protocols.binaryFactory()))),
       "ServerBuilder(stack)" ->
-        (
-          (
-            sr,
-            fi
-          ) =>
-            ServerBuilder()
-              .stack(Thrift.server)
-              .name("server")
-              .reportTo(sr)
-              .bindTo(new InetSocketAddress(0))
-              .build(new Echo.FinagledService(fi, Protocols.binaryFactory()))
-        )
+        ((sr, fi) =>
+          ServerBuilder()
+            .stack(Thrift.server)
+            .name("server")
+            .reportTo(sr)
+            .bindTo(new InetSocketAddress(0))
+            .build(new Echo.FinagledService(fi, Protocols.binaryFactory())))
     )
 
   private[this] val clients: Seq[(String, (StatsReceiver, Address) => Echo.MethodPerEndpoint)] =
     Seq(
       "Thrift.client" ->
-        (
-          (
-            sr,
-            addr
-          ) =>
-            Thrift.client
-              .withStatsReceiver(sr)
-              .build[Echo.MethodPerEndpoint](Name.bound(addr), "client")
-        ),
+        ((sr, addr) =>
+          Thrift.client
+            .withStatsReceiver(sr)
+            .build[Echo.MethodPerEndpoint](Name.bound(addr), "client")),
       "ClientBuilder(stack)" ->
-        (
-          (
-            sr,
-            addr
-          ) =>
-            new Echo.FinagledClient(
-              ClientBuilder()
-                .stack(Thrift.client)
-                .name("client")
-                .hostConnectionLimit(1)
-                .reportTo(sr)
-                .dest(Name.bound(addr))
-                .build()
-            )
-        )
+        ((sr, addr) =>
+          new Echo.FinagledClient(
+            ClientBuilder()
+              .stack(Thrift.client)
+              .name("client")
+              .hostConnectionLimit(1)
+              .reportTo(sr)
+              .dest(Name.bound(addr))
+              .build()
+          ))
     )
 
   for {
     (s, server) <- servers
     (c, client) <- clients
-  } yield
-    test(s"measures payload sizes: $s :: $c") {
-      val sr = new InMemoryStatsReceiver
+  } yield test(s"measures payload sizes: $s :: $c") {
+    val sr = new InMemoryStatsReceiver
 
-      val fi = new Echo.MethodPerEndpoint {
-        def echo(x: String) = Future.value(x + x)
-      }
-
-      val ss = server(sr, fi)
-      val cc = client(sr, Address(ss.boundAddress.asInstanceOf[InetSocketAddress]))
-
-      Await.ready(cc.echo("." * 10))
-
-      // 40 bytes messages are from protocol negotiation made by TTwitter*Filter
-      assert(sr.stat("client", "request_payload_bytes")() == Seq(40.0f, 209.0f))
-      assert(sr.stat("client", "response_payload_bytes")() == Seq(40.0f, 45.0f))
-      assert(sr.stat("server", "request_payload_bytes")() == Seq(40.0f, 209.0f))
-      assert(sr.stat("server", "response_payload_bytes")() == Seq(40.0f, 45.0f))
-
-      Await.ready(ss.close())
+    val fi = new Echo.MethodPerEndpoint {
+      def echo(x: String) = Future.value(x + x)
     }
+
+    val ss = server(sr, fi)
+    val cc = client(sr, Address(ss.boundAddress.asInstanceOf[InetSocketAddress]))
+
+    Await.ready(cc.echo("." * 10))
+
+    // 40 bytes messages are from protocol negotiation made by TTwitter*Filter
+    assert(sr.stat("client", "request_payload_bytes")() == Seq(40.0f, 209.0f))
+    assert(sr.stat("client", "response_payload_bytes")() == Seq(40.0f, 45.0f))
+    assert(sr.stat("server", "request_payload_bytes")() == Seq(40.0f, 209.0f))
+    assert(sr.stat("server", "response_payload_bytes")() == Seq(40.0f, 45.0f))
+
+    Await.ready(ss.close())
+  }
 
   test("clientId is not sent and prep stats are not recorded when TTwitter upgrading is disabled") {
     val pf = Protocols.binaryFactory()

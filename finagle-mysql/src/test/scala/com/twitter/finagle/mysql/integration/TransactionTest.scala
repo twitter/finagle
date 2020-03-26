@@ -18,11 +18,7 @@ class TransactionTest
   test("Simple transaction") {
     for (c <- client) {
       assertResult(Seq(Seq(LongValue(1)))) {
-        await(c.transaction { client =>
-          client.select("SELECT 1") { row =>
-            row.values
-          }
-        })
+        await(c.transaction { client => client.select("SELECT 1") { row => row.values } })
       }
     }
   }
@@ -39,9 +35,7 @@ class TransactionTest
       for (iso <- isolationLevels) {
         assertResult(Seq(Seq(LongValue(1)))) {
           await(c.transactionWithIsolation(iso) { client =>
-            client.select("SELECT 1") { row =>
-              row.values
-            }
+            client.select("SELECT 1") { row => row.values }
           })
         }
       }

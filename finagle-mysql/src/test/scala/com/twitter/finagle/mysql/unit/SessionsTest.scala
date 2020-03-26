@@ -86,11 +86,7 @@ class SessionsTest extends FunSuite with MockitoSugar {
         tx1.query(sqlQuery).flatMap { _ =>
           tx1.transaction {
             case tx2: Client with Transactions =>
-              tx2.query(sqlQuery).flatMap { _ =>
-                tx2.transaction { tx3 =>
-                  tx3.query(sqlQuery2)
-                }
-              }
+              tx2.query(sqlQuery).flatMap { _ => tx2.transaction { tx3 => tx3.query(sqlQuery2) } }
             case _ => fail("Client is assumed to have transactions")
           }
         }

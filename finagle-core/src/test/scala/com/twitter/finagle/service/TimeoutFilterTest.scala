@@ -35,9 +35,7 @@ private object TimeoutFilterTest {
     val timer = new MockTimer()
     val tunable = Tunable.emptyMutable[Duration]("id")
 
-    val svc = Service.mk { _: String =>
-      Future.never
-    }
+    val svc = Service.mk { _: String => Future.never }
     val svcFactory = ServiceFactory.const(svc)
     val stack = TimeoutFilter
       .clientModule[String, String]
@@ -143,9 +141,7 @@ class TimeoutFilterTest extends FunSuite with Matchers with MockitoSugar {
   }
 
   private def verifyFilterAddedOrNot(timoutModule: Stackable[ServiceFactory[Int, Int]]) = {
-    val svc = Service.mk { i: Int =>
-      Future.value(i)
-    }
+    val svc = Service.mk { i: Int => Future.value(i) }
     val svcFactory = ServiceFactory.const(svc)
     val stack = timoutModule.toStack(Stack.leaf(Stack.Role("test"), svcFactory))
 

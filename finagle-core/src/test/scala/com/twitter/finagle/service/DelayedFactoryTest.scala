@@ -6,9 +6,7 @@ import org.scalatest.FunSuite
 
 class DelayedFactoryTest extends FunSuite {
   trait DelayedHelper {
-    val service = Service.mk[Int, Int] { int: Int =>
-      Future.value(int)
-    }
+    val service = Service.mk[Int, Int] { int: Int => Future.value(int) }
     val future = Promise[ServiceFactory[Int, Int]]()
     val failed = new Exception("failed")
 

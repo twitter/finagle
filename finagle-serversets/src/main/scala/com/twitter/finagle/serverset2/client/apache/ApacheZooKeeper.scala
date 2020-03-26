@@ -355,9 +355,7 @@ private[serverset2] object ApacheZooKeeper {
       val logger = Logger.get(getClass)
       Watched(new ChattyRW {
         protected val underlying: ZooKeeperRW = wrappedZk
-        protected val print = { m: String =>
-          logger.info(m)
-        }
+        protected val print = { m: String => logger.info(m) }
       }, statsWatcher)
     } else
       Watched(wrappedZk, statsWatcher)

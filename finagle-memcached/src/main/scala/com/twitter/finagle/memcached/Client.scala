@@ -855,7 +855,8 @@ trait PartitionedClient extends Client {
 
   private[this] def withKeysGroupedByClient[A](
     keys: Iterable[String]
-  )(f: (Client, Iterable[String]) => Future[A]
+  )(
+    f: (Client, Iterable[String]) => Future[A]
   ): Future[Seq[A]] = {
     Future.collect(
       keys.groupBy(clientOf).iterator.map(Function.tupled(f)).toSeq

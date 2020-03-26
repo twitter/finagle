@@ -73,9 +73,7 @@ package object http {
   private[finagle] def initClientBefore(
     role: String,
     params: Stack.Params
-  ): ChannelPipeline => Unit = { pipeline =>
-    initClientFn(params, pipeline.addBefore(role, _, _))
-  }
+  ): ChannelPipeline => Unit = { pipeline => initClientFn(params, pipeline.addBefore(role, _, _)) }
 
   /** Initialize the client pipeline by adding elements to the end of the pipeline
    *
@@ -140,7 +138,7 @@ package object http {
           pipelineInit = ClientPipelineInit(params),
           addr = addr,
           params = params
-    )
+        )
 
   private[finagle] def initServer(params: Stack.Params): ChannelPipeline => Unit = {
     val autoContinue = params[AutomaticContinue].enabled
@@ -218,5 +216,5 @@ package object http {
       Netty4Listener[Any, Any](
         pipelineInit = ServerPipelineInit(params),
         params = params
-    )
+      )
 }

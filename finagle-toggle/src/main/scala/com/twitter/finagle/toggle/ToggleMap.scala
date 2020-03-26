@@ -87,9 +87,7 @@ abstract class ToggleMap { self =>
 
       def iterator: Iterator[Metadata] = {
         val byName = mutable.Map.empty[String, Toggle.Metadata]
-        that.iterator.foreach { md =>
-          byName.put(md.id, md)
-        }
+        that.iterator.foreach { md => byName.put(md.id, md) }
         self.iterator.foreach { md =>
           val mdWithDesc = md.description match {
             case Some(_) => md
@@ -345,9 +343,7 @@ object ToggleMap {
   class Immutable(metadata: immutable.Seq[Toggle.Metadata]) extends ToggleMap {
 
     private[this] val toggles: immutable.Map[String, Toggle[Int]] =
-      metadata.map { md =>
-        md.id -> fractional(md.id, md.fraction)
-      }.toMap
+      metadata.map { md => md.id -> fractional(md.id, md.fraction) }.toMap
 
     override def toString: String =
       s"ToggleMap.Immutable@${System.identityHashCode(this)}"

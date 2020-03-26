@@ -78,9 +78,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
 
     info("release")
     awaitResult(ketamaClient.close())
-    clients.values foreach { client =>
-      verify(client, times(1)).close(any())
-    }
+    clients.values foreach { client => verify(client, times(1)).close(any()) }
   }
 
   test("interrupted request does not change ready") {
@@ -194,7 +192,8 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       verify(serviceB, times(1)).apply(any())
 
       mutableAddrs.update(
-        Addr.Bound(PartitionNode.toAddress(nodeA), PartitionNode.toAddress(nodeB))) // nodeA joins
+        Addr.Bound(PartitionNode.toAddress(nodeA), PartitionNode.toAddress(nodeB))
+      ) // nodeA joins
       when(serviceA(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
       awaitResult(ketamaClient.get("foo"))
       verify(serviceA, times(2)).apply(any())

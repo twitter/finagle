@@ -141,9 +141,7 @@ object Path {
    */
   object Utf8 {
     def apply(elems: String*): Path = {
-      val elems8 = elems map { el =>
-        Buf.Utf8(el)
-      }
+      val elems8 = elems map { el => Buf.Utf8(el) }
       Path(elems8: _*)
     }
 

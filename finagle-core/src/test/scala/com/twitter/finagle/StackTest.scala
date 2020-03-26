@@ -36,7 +36,7 @@ class StackTest extends FunSuite {
 
     assert(stack.make(empty) == Seq(30, 20, 0, 10, 1, 2, 3, 4))
   }
-  
+
   test("Stack.insertBefore") {
     val stack = newStack()
     val module = new Stack.Module0[List[Int]] {
@@ -142,16 +142,12 @@ class StackTest extends FunSuite {
     val stk0 = newStack()
     assert(stk0.make(empty) == Seq(20, 10, 1, 2, 3, 4))
 
-    val fn1: List[Int] => List[Int] = { ints =>
-      30 :: ints
-    }
+    val fn1: List[Int] => List[Int] = { ints => 30 :: ints }
 
     val stk1 = stk0.prepend(testRole1, fn1)
     assert(stk1.make(empty) == Seq(30, 20, 10, 1, 2, 3, 4))
 
-    val fn2: List[Int] => List[Int] = { ints =>
-      40 :: ints
-    }
+    val fn2: List[Int] => List[Int] = { ints => 40 :: ints }
 
     val stk2 = stk1.prepend(testRole1, fn2)
     assert(stk2.make(empty) == Seq(40, 30, 20, 10, 1, 2, 3, 4))

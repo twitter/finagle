@@ -20,7 +20,8 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
 
   private[this] def withScoresHelper(
     withScores: JBoolean
-  )(messages: List[Reply]
+  )(
+    messages: List[Reply]
   ): Either[ZRangeResults, Seq[Buf]] = {
     val chanBufs = ReplyFormat.toBuf(messages)
     if (withScores)
@@ -46,9 +47,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
    * @return The number of elements added to sorted set.
    */
   def zAddMulti(key: Buf, members: Seq[(JDouble, Buf)]): Future[JLong] = {
-    doRequest(ZAdd(key, members.map { m =>
-      ZMember(m._1, m._2)
-    })) {
+    doRequest(ZAdd(key, members.map { m => ZMember(m._1, m._2) })) {
       case IntegerReply(n) => Future.value(n)
     }
   }

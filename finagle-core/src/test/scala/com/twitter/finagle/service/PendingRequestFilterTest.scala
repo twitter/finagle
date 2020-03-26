@@ -9,9 +9,7 @@ import org.scalatest.OneInstancePerTest
 
 class PendingRequestFilterTest extends FunSuite with OneInstancePerTest {
 
-  val svc = Service.mk { p: Future[Unit] =>
-    p
-  }
+  val svc = Service.mk { p: Future[Unit] => p }
   val sr = new InMemoryStatsReceiver
   val filteredSvc = new PendingRequestFilter(
     3,

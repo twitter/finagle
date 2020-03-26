@@ -43,9 +43,7 @@ private[mysql] class PrepareCache(svc: Service[Request, Result], cache: Caffeine
       .removalListener(listener)
       .build[Request, Future[Result]]()
 
-    CaffeineCache.fromCache(Service.mk { req: Request =>
-      svc(req)
-    }, underlying)
+    CaffeineCache.fromCache(Service.mk { req: Request => svc(req) }, underlying)
   }
 
   /**
@@ -161,9 +159,7 @@ private[finagle] final class ClientDispatcher(
         // synthesize an empty FetchResult
         signal.setDone()
 
-        const(EOF(packet).flatMap { eof =>
-          FetchResult(Nil, eof)
-        })
+        const(EOF(packet).flatMap { eof => FetchResult(Nil, eof) })
 
       case Some(Packet.OkByte) if cmd == Command.COM_STMT_PREPARE =>
         // decode PrepareOk Result: A header packet potentially followed
@@ -173,12 +169,8 @@ private[finagle] final class ClientDispatcher(
           ok <- const(PrepareOK(packet))
           (seq1, _) <- readTx(req, ok.numOfParams)
           (seq2, _) <- readTx(req, ok.numOfCols)
-          ps <- Future.collect(seq1.map { p =>
-            const(Field(p))
-          })
-          cs <- Future.collect(seq2.map { p =>
-            const(Field(p))
-          })
+          ps <- Future.collect(seq1.map { p => const(Field(p)) })
+          cs <- Future.collect(seq2.map { p => const(Field(p)) })
         } yield ok.copy(params = ps, columns = cs)
 
         result.ensure { signal.setDone() }
@@ -191,9 +183,7 @@ private[finagle] final class ClientDispatcher(
       // decode Error result
       case Some(Packet.ErrorByte) =>
         signal.setDone()
-        const(Error(packet)).flatMap { err =>
-          Future.exception(errorToServerError(req, err))
-        }
+        const(Error(packet)).flatMap { err => Future.exception(errorToServerError(req, err)) }
 
       case Some(byte) =>
         val isBinaryEncoded = cmd != Command.COM_QUERY
@@ -254,13 +244,9 @@ private[finagle] final class ClientDispatcher(
         trans.read().flatMap { packet =>
           MysqlBuf.peek(packet.body) match {
             case Some(Packet.EofByte) =>
-              const(EOF(packet)).map { eof =>
-                (xs.reverse, eof)
-              }
+              const(EOF(packet)).map { eof => (xs.reverse, eof) }
             case Some(Packet.ErrorByte) =>
-              const(Error(packet)).flatMap { err =>
-                Future.exception(errorToServerError(req, err))
-              }
+              const(Error(packet)).flatMap { err => Future.exception(errorToServerError(req, err)) }
             case Some(_) => aux(numRead + 1, packet :: xs)
             case None => LostSyncException.AsFuture
           }

@@ -43,9 +43,7 @@ trait ListeningServer extends Closable with Awaitable[Unit] {
     val collected = Future.collect(announcements)
     Future.join(
       Seq(
-        collected.flatMap { list =>
-          Closable.all(list: _*).close(deadline)
-        },
+        collected.flatMap { list => Closable.all(list: _*).close(deadline) },
         // StackServer assumes that closeServer is called synchronously, so we must be
         // careful that it doesn't get scheduled for later.
         closeServer(deadline)

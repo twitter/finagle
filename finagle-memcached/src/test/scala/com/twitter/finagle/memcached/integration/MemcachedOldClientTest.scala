@@ -30,32 +30,26 @@ class MemcachedOldClientTest extends MemcachedTest {
       .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
       .configured(param.EjectFailedHost(true))
       .withStatsReceiver(sr)
-      .newRichClient(Name.bound(servers.map { s =>
-        Address(s.address)
-      }: _*), clientName)
+      .newRichClient(Name.bound(servers.map { s => Address(s.address) }: _*), clientName)
     testRehashUponEject(client, sr)
     client.close()
   }
 
   test("host comes back into ring after being ejected") {
-    testRingReEntryAfterEjection(
-      (timer, cacheServer, statsReceiver) =>
-        Memcached.client
-          .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-          .configured(EjectFailedHost(true))
-          .configured(Timer(timer))
-          .configured(Stats(statsReceiver))
-          .newRichClient(
-            Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])),
-            clientName
-        )
-    )
+    testRingReEntryAfterEjection((timer, cacheServer, statsReceiver) =>
+      Memcached.client
+        .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
+        .configured(EjectFailedHost(true))
+        .configured(Timer(timer))
+        .configured(Stats(statsReceiver))
+        .newRichClient(
+          Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])),
+          clientName
+        ))
   }
 
   test("Add and remove nodes") {
-    val addrs = servers.map { s =>
-      Address(s.address)
-    }
+    val addrs = servers.map { s => Address(s.address) }
 
     // Start with 3 backends
     val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound(addrs.toSet.drop(2)))

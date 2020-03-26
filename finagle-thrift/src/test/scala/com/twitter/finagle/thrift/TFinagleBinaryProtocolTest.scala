@@ -96,9 +96,7 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
     val offset = 2
 
     val bbuf = ByteBuffer.allocate(len)
-    0 until len foreach { i =>
-      bbuf.put(i.toByte)
-    }
+    0 until len foreach { i => bbuf.put(i.toByte) }
     bbuf.position(offset)
     val withOffset = bbuf.slice()
     withOffset.arrayOffset() should be(offset)
@@ -123,9 +121,7 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
     val limit = 18
 
     val buffer = ByteBuffer.allocate(len)
-    0.until(len).foreach { i =>
-      buffer.put(i.toByte)
-    }
+    0.until(len).foreach { i => buffer.put(i.toByte) }
     buffer.position(offset)
     buffer.limit(limit)
 
@@ -147,9 +143,7 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
     val len = 24
 
     val buffer = ByteBuffer.allocate(len)
-    0.until(len).foreach { i =>
-      buffer.put(i.toByte)
-    }
+    0.until(len).foreach { i => buffer.put(i.toByte) }
     buffer.position(0)
 
     val trans = new TMemoryBuffer(128)

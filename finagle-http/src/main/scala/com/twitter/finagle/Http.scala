@@ -33,9 +33,7 @@ trait HttpRichClient { self: Client[Request, Response] =>
     }
     val req = http.RequestBuilder().url(url).buildGet()
     val service = newService(Name.bound(addr), "")
-    service(req).respond { _ =>
-      service.close()
-    }
+    service(req).respond { _ => service.close() }
   }
 }
 

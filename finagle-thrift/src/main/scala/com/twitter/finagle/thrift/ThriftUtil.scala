@@ -135,9 +135,7 @@ private[twitter] object ThriftUtil {
           serviceCls,
           baseClass,
           classOf[RichServerParam]
-        ).map { cons =>
-          cons.newInstance(impl, serverParam)
-        }
+        ).map { cons => cons.newInstance(impl, serverParam) }
       }).flatten
 
     def tryClass(cls: Class[_]): Option[BinaryService] =

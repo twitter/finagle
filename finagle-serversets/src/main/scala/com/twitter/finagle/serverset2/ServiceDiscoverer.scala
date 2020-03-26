@@ -151,9 +151,7 @@ private[serverset2] class ServiceDiscoverer(
             Future
               .collectToTry(paths.map { path =>
                 // note if any failed
-                cache.get(path).onFailure { _ =>
-                  seenFailures = true
-                }
+                cache.get(path).onFailure { _ => seenFailures = true }
               })
               // We end up with a Seq[Seq[Entity]] here, b/c cache.get() returns a Seq[Entity]
               // flatten() to fix this (see the comment on ZkNodeDataCache for why we get a Seq[])

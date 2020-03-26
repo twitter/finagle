@@ -53,7 +53,8 @@ trait PushStackServer[Req, Rep, This <: PushStackServer[Req, Rep, This]]
   final protected def newListeningServer(
     serviceFactory: ServiceFactory[Req, Rep],
     addr: SocketAddress
-  )(trackSession: ClientConnection => Unit
+  )(
+    trackSession: ClientConnection => Unit
   ): ListeningServer = {
 
     val listener = newListener()

@@ -21,7 +21,8 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
 
   private[this] def assertGaugeIsNonZero(
     value: Float
-  )(statsReceiver: InMemoryStatsReceiver,
+  )(
+    statsReceiver: InMemoryStatsReceiver,
     name: Array[String]
   ): Unit = statsReceiver.gauges.get(name) match {
     case Some(f) => assert(f() == value)
@@ -31,8 +32,8 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
   def await[T](a: Awaitable[T], d: Duration = 2.seconds): T =
     Await.result(a, d)
 
-  private[this] val assertGaugeIsOne = assertGaugeIsNonZero(1.0F) _
-  private[this] val assertGaugeIsTwo = assertGaugeIsNonZero(2.0F) _
+  private[this] val assertGaugeIsOne = assertGaugeIsNonZero(1.0f) _
+  private[this] val assertGaugeIsTwo = assertGaugeIsNonZero(2.0f) _
 
   private[this] def mkSuccessfulHelloRequest(client: TestService.MethodPerEndpoint): Unit = {
     val response = await(client.query("hello"))

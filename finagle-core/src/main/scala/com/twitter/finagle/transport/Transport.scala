@@ -236,7 +236,8 @@ object Transport {
   private[finagle] def copyToWriter[A](
     trans: Transport[_, A],
     w: Writer[Buf]
-  )(f: A => Future[Option[Buf]]
+  )(
+    f: A => Future[Option[Buf]]
   ): Future[Unit] = {
     trans.read().flatMap(f).flatMap {
       case None => Future.Done
@@ -383,9 +384,7 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   }
 
   def read(): Future[Out] =
-    readq.poll() onFailure { exc =>
-      closep.updateIfEmpty(Throw(exc))
-    }
+    readq.poll() onFailure { exc => closep.updateIfEmpty(Throw(exc)) }
 
   def status: Status = if (closep.isDefined) Status.Closed else Status.Open
 

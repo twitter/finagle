@@ -211,9 +211,7 @@ private[mysql] sealed abstract class HandshakeResponse(
     md.update(hash2)
 
     val digest = md.digest()
-    (0 until digest.length) foreach { i =>
-      digest(i) = (digest(i) ^ hash1(i)).toByte
-    }
+    (0 until digest.length) foreach { i => digest(i) = (digest(i) ^ hash1(i)).toByte }
     digest
   }
 }

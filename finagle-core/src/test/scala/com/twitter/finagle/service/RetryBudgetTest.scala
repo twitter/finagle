@@ -127,9 +127,7 @@ class RetryBudgetTest extends FunSuite with Matchers {
     assert(!rb.tryWithdraw())
 
     val nReqs = 10000
-    0.until(nReqs).foreach { _ =>
-      rb.deposit()
-    }
+    0.until(nReqs).foreach { _ => rb.deposit() }
 
     val expectedRetries = (nReqs * percent).toInt
     assert(expectedRetries == rb.balance)

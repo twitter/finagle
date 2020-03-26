@@ -94,14 +94,14 @@ class ParameterTest extends FunSuite {
   }
 
   test("Float") {
-    val value = 3.0F
+    val value = 3.0f
     val param: Parameter = value
     assert(param.evidence == CanBeParameter.floatCanBeParameter)
     assert(param.value == value)
   }
 
   test("java.lang.Float") {
-    val value = Float.box(3.0F)
+    val value = Float.box(3.0f)
     val param: Parameter = value
     assert(param.evidence == CanBeParameter.javaLangFloatCanBeParameter)
     assert(param.value == value)

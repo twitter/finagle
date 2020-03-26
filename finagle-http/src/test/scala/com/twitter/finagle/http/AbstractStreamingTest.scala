@@ -131,9 +131,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
   test("client: client closes transport after server disconnects") {
     val clientClosed = new Promise[Unit]
-    val service = Service.mk[Request, Response] { _ =>
-      Future.value(Response())
-    }
+    val service = Service.mk[Request, Response] { _ => Future.value(Response()) }
     val server = startServer(service)
     val client = connectWithModifier(server.boundAddress) { transport =>
       clientClosed.become(transport.onClose.unit)
@@ -187,9 +185,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     // note: while the server is configured with a max concurrency of 1,
     // the requests flow through the transport before that. this means
     // that these requests must be sequenced.
-    val f2 = f1.flatMap { _ =>
-      client2(req2)
-    }
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -238,9 +234,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     // note: while the server is configured with a max concurrency of 1,
     // the requests flow through the transport before that. this means
     // that these requests must be sequenced.
-    val f2 = f1.flatMap { _ =>
-      client2(req2)
-    }
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -284,9 +278,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = f1.flatMap { _ =>
-      client2(req2)
-    }
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -327,9 +319,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val req1 = get("/")
     val req2 = get("abc")
     val f1 = client1(req1)
-    val f2 = f1.flatMap { _ =>
-      client2(req2)
-    }
+    val f2 = f1.flatMap { _ => client2(req2) }
 
     val res = await(f1)
 
@@ -513,7 +503,8 @@ abstract class AbstractStreamingTest extends FunSuite {
     addr: SocketAddress,
     name: String = "client",
     singletonPool: Boolean = false
-  )(mod: Modifier
+  )(
+    mod: Modifier
   ): Service[Request, Response] = {
     configureClient(FinagleHttp.client, singletonPool)
       .withStreaming(0.bytes) // no aggregation

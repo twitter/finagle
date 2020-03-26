@@ -53,7 +53,8 @@ class StreamingStatsFilterTest extends FunSuite {
       await(streamingRequest.reader.onClose)
     }
 
-    val filteredService = new StreamingStatsFilter(receiver, exceptionStatsHandler) andThen streamingService
+    val filteredService =
+      new StreamingStatsFilter(receiver, exceptionStatsHandler) andThen streamingService
 
     await(filteredService(streamingRequest))
 
@@ -67,7 +68,8 @@ class StreamingStatsFilterTest extends FunSuite {
     val exceptionStatsHandler = new CategorizingExceptionStatsHandler
     val streamingRequest = Request()
 
-    val filteredService = new StreamingStatsFilter(receiver, exceptionStatsHandler) andThen failedStreamingService
+    val filteredService =
+      new StreamingStatsFilter(receiver, exceptionStatsHandler) andThen failedStreamingService
 
     await(filteredService(streamingRequest))
 
@@ -84,7 +86,8 @@ class StreamingStatsFilterTest extends FunSuite {
     val streamingRequest2 = Request()
     streamingRequest2.setChunked(true)
 
-    val filteredService = new StreamingStatsFilter(receiver, exceptionStatsHandler) andThen streamingService
+    val filteredService =
+      new StreamingStatsFilter(receiver, exceptionStatsHandler) andThen streamingService
 
     val response1 = await(filteredService(streamingRequest1))
 

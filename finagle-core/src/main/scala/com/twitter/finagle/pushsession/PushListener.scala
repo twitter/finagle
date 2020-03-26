@@ -20,6 +20,7 @@ trait PushListener[In, Out] {
    */
   def listen(
     addr: SocketAddress
-  )(sessionBuilder: PushChannelHandle[In, Out] => Future[PushSession[In, Out]]
+  )(
+    sessionBuilder: PushChannelHandle[In, Out] => Future[PushSession[In, Out]]
   ): ListeningServer
 }

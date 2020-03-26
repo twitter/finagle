@@ -168,9 +168,7 @@ object Toggle {
 
   /** Return `Some(ErrorMessage)` when invalid. */
   private def checkId(id: String): Option[String] = {
-    val invalidCh = id.find { ch =>
-      !AllowedIdChars.contains(ch)
-    }
+    val invalidCh = id.find { ch => !AllowedIdChars.contains(ch) }
     invalidCh match {
       case Some(ch) =>
         Some(s"invalid char '$ch' in id: '$id'")

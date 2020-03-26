@@ -130,8 +130,7 @@ private[finagle] object RegistryEntryLifecycle {
           case Name.Path(path) => Namer.resolve(baseDtab(), path)
         }
         // prevent closing this Var producer during the lifetime of this client.
-        val observation = va.changes.respond { _ =>
-          }
+        val observation = va.changes.respond { _ => }
 
         val shown = Showable.show(dest)
         val registeredParams = params + LoadBalancerFactory.Dest(va)

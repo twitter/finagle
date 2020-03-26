@@ -89,9 +89,7 @@ private[twitter] object Init {
       "finagle-core_2.12",
       "finagle-core_2.13"
     )
-    candidates.flatMap { c =>
-      tryProps(s"/com/twitter/$c/build.properties")
-    }.headOption
+    candidates.flatMap { c => tryProps(s"/com/twitter/$c/build.properties") }.headOption
   }
 
   private[this] val once = Once {
@@ -111,9 +109,7 @@ private[twitter] object Init {
     _finagleVersion.set(p.getProperty("version", unknownVersion))
     _finagleBuildRevision.set(p.getProperty("build_revision", unknownVersion))
 
-    LoadService[StackTransformer]().foreach { nt =>
-      StackServer.DefaultTransformer.append(nt)
-    }
+    LoadService[StackTransformer]().foreach { nt => StackServer.DefaultTransformer.append(nt) }
 
     log.info(
       "Finagle version %s (rev=%s) built at %s".format(

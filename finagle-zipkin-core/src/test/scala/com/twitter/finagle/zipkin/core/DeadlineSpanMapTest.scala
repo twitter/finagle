@@ -43,9 +43,7 @@ class DeadlineSpanMapTest extends FunSuite with Eventually with IntegrationPatie
       var spansLoggedCount = 0
       var annotationCount = 0
       val logger: Seq[Span] => Future[Unit] = { spans =>
-        spans.foreach { span =>
-          annotationCount += span.annotations.length
-        }
+        spans.foreach { span => annotationCount += span.annotations.length }
         spansLoggedCount += spans.size
         Future.Done
       }
@@ -94,9 +92,7 @@ class DeadlineSpanMapTest extends FunSuite with Eventually with IntegrationPatie
       var spansLoggedCount = 0
       var annotationCount = 0
       val logger: Seq[Span] => Future[Unit] = { spans =>
-        spans.foreach { span =>
-          annotationCount += span.annotations.length
-        }
+        spans.foreach { span => annotationCount += span.annotations.length }
         spansLoggedCount += 1
         Future.Done
       }

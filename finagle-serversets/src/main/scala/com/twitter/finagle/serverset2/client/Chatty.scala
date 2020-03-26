@@ -16,9 +16,7 @@ private[serverset2] trait ChattyClient extends ZooKeeperClient {
 
   protected def printOp[U](name: String, op: => Future[U], args: String*): Future[U] = {
     print("->" + name + "(" + (args mkString ",") + ")")
-    op respond { t =>
-      print("<-" + name + "(" + (args mkString ",") + ") = " + t)
-    }
+    op respond { t => print("<-" + name + "(" + (args mkString ",") + ") = " + t) }
   }
 
   def addAuthInfo(scheme: String, auth: Buf): Future[Unit] =

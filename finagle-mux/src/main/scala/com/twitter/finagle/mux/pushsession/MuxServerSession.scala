@@ -22,7 +22,10 @@ private[finagle] final class MuxServerSession(
   params: Stack.Params,
   h_decoder: MuxMessageDecoder,
   h_messageWriter: MessageWriter,
-  handle: PushChannelHandle[ByteReader, Buf], // Maybe we should refine into a PushClientConnection...
+  handle: PushChannelHandle[
+    ByteReader,
+    Buf
+  ], // Maybe we should refine into a PushClientConnection...
   service: Service[Request, Response])
     extends PushSession[ByteReader, Buf](handle) {
   import MuxServerSession._
@@ -41,7 +44,7 @@ private[finagle] final class MuxServerSession(
           Local.save()
         }
       }
-  }
+    }
 
   private[this] val exec = handle.serialExecutor
   private[this] val lessor = params[Lessor.Param].lessor

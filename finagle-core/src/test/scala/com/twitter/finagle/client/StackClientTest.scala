@@ -153,9 +153,7 @@ abstract class AbstractStackClientTest
       var stack = ctx.client
         .configured(param.Label(name))
         .withStack(_.concat(alwaysFailStack))
-      failFastOn.foreach { ffOn =>
-        stack = stack.configured(FailFast(ffOn))
-      }
+      failFastOn.foreach { ffOn => stack = stack.configured(FailFast(ffOn)) }
       val client = stack.newClient("/$/inet/localhost/0")
       new FactoryToService[String, String](client)
     }
@@ -195,9 +193,7 @@ abstract class AbstractStackClientTest
     val modified = ctx.client.withStack(_.prepend(module)).stack
     assert(modified.contains(module.role))
 
-    init.tails.map(_.head).foreach { stackHead =>
-      assert(modified.contains(stackHead.role))
-    }
+    init.tails.map(_.head).foreach { stackHead => assert(modified.contains(stackHead.role)) }
   }
 
   test("closed services from newClient respect close()")(new Ctx {
@@ -484,8 +480,8 @@ abstract class AbstractStackClientTest
         assert(dtab == baseDtab)
         Activity.value(
           NameTree.Union(
-            NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr1))),
-            NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr2)))
+            NameTree.Weighted(1d, NameTree.Leaf(Name.bound(addr1))),
+            NameTree.Weighted(1d, NameTree.Leaf(Name.bound(addr2)))
           )
         )
       }
@@ -493,7 +489,6 @@ abstract class AbstractStackClientTest
 
     val stack = StackClient
       .newStack[Unit, Unit]
-
       // direct the two addresses to the two service factories instead
       // of trying to connect to them
       .replace(
@@ -556,9 +551,7 @@ abstract class AbstractStackClientTest
   }
 
   test("StackClient binds to a local service via Address.ServiceFactory") {
-    val reverser = Service.mk[String, String] { in =>
-      Future.value(in.reverse)
-    }
+    val reverser = Service.mk[String, String] { in => Future.value(in.reverse) }
     val sf = ServiceFactory(() => Future.value(reverser))
     val addr = Address(sf)
     val name = Name.bound(addr)
@@ -569,9 +562,7 @@ abstract class AbstractStackClientTest
   }
 
   test("filtered composes filters atop the stack") {
-    val echoServer = Service.mk[String, String] { in =>
-      Future.value(in)
-    }
+    val echoServer = Service.mk[String, String] { in => Future.value(in) }
     val sf = ServiceFactory(() => Future.value(echoServer))
     val addr = Address(sf)
     val name = Name.bound(addr)

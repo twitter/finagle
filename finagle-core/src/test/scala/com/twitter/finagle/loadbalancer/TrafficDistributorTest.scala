@@ -28,10 +28,7 @@ private object TrafficDistributorTest {
   }
 
   val weightClass: (Double, Int) => Set[Address] =
-    (w, size) =>
-      (0 until size).toSet.map { i: Int =>
-        WeightedAddress(WeightedTestAddr(i, w), w)
-    }
+    (w, size) => (0 until size).toSet.map { i: Int => WeightedAddress(WeightedTestAddr(i, w), w) }
 
   val busyWeight = 2.2
   case class AddressFactory(address: Address) extends ServiceFactory[Int, Int] {
@@ -141,9 +138,7 @@ private object TrafficDistributorTest {
         // since this is a circular dependency. Instead, we can rely
         // on the fact that we are serialized since the same thread
         // that updates `dest` will call this closure as well.
-        dest.changes.respond { _ =>
-          for (_ <- 0 to 100) { dist() }
-        }
+        dest.changes.respond { _ => for (_ <- 0 to 100) { dist() } }
       }
 
       dist
@@ -298,9 +293,7 @@ class TrafficDistributorTest extends FunSuite {
   })
 
   test("partition endpoints into weight classes")(new Ctx {
-    val init: Set[Address] = (1 to 5).map { i =>
-      WeightedAddress(Address(i), i)
-    }.toSet
+    val init: Set[Address] = (1 to 5).map { i => WeightedAddress(Address(i), i) }.toSet
     val dest = Var(Activity.Ok(init))
     val sr = new InMemoryStatsReceiver
     newDist(dest, statsReceiver = sr, autoPrime = true)
@@ -510,9 +503,8 @@ class TrafficDistributorTest extends FunSuite {
     }
 
   test("close a client") {
-    val server = StringServer.server.serve(":*", Service.mk { r: String =>
-      Future.value(r.reverse)
-    })
+    val server =
+      StringServer.server.serve(":*", Service.mk { r: String => Future.value(r.reverse) })
     val sr = new InMemoryStatsReceiver
     val addr = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
     val va = Var[Addr](Addr.Bound(addr))

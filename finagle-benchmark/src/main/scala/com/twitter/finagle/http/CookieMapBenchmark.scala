@@ -14,9 +14,7 @@ class CookieMapBenchmark extends StdBenchAnnotations {
   private val map = Iterator
     .fill(10 * 2)(Random.alphanumeric.take(14).mkString)
     .grouped(2)
-    .foldLeft(newMap()) { (map, h) =>
-      map += h.head -> new Cookie(h.head, h.last)
-    }
+    .foldLeft(newMap()) { (map, h) => map += h.head -> new Cookie(h.head, h.last) }
 
   @Benchmark
   def iterate(b: Blackhole): Unit = map.foreach(c => b.consume(c))

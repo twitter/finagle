@@ -17,9 +17,7 @@ class PayloadSizeFilterTest extends FunSuite with Eventually with IntegrationPat
     rep => rep // use the response as the size
   )
   private def service(sr: StatsReceiver) = filter(sr).andThen {
-    Service.mk[Int, Int] { req =>
-      Future.value(req + 1)
-    }
+    Service.mk[Int, Int] { req => Future.value(req + 1) }
   }
 
   test("traces sizes when actively tracing") {

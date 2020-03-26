@@ -126,18 +126,14 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
       verify(underlying, times(3))()
 
-      ss.foreach { s =>
-        when(s.status).thenReturn(Status.Open)
-      }
+      ss.foreach { s => when(s.status).thenReturn(Status.Open) }
 
       fs.foreach { f =>
         timeControl.advance(5.second)
         f.close()
       }
 
-      ss.foreach { s =>
-        verify(s, never()).close(any[Time])
-      }
+      ss.foreach { s => verify(s, never()).close(any[Time]) }
 
       timer.tick()
 

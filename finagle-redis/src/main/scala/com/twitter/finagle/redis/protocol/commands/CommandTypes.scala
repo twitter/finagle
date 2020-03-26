@@ -18,9 +18,7 @@ trait KeysCommand extends Command {
   def keys: Seq[Buf]
   protected def validate(): Unit = {
     RequireClientProtocol(keys != null && keys.nonEmpty, "Empty KeySet found")
-    keys.foreach { key =>
-      RequireClientProtocol(key != null && key.length > 0, "Empty key found")
-    }
+    keys.foreach { key => RequireClientProtocol(key != null && key.length > 0, "Empty key found") }
   }
 
   override def body: Seq[Buf] = keys

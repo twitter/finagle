@@ -117,9 +117,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
     val busySvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
       override def status: Status = Status.Busy
       def apply(clientConnection: ClientConnection): Future[Service[String, String]] = {
-        val svc = Service.mk { _: String =>
-          Future.value("closed after this")
-        }
+        val svc = Service.mk { _: String => Future.value("closed after this") }
         Future.value(svc)
       }
       def close(deadline: Time): Future[Unit] = ???
@@ -149,9 +147,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
     val busySvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
       override def status: Status = Status.Busy
       def apply(clientConnection: ClientConnection): Future[Service[String, String]] = {
-        val svc = Service.mk { _: String =>
-          Future.value("closed after this")
-        }
+        val svc = Service.mk { _: String => Future.value("closed after this") }
         Future.value(svc)
       }
       def close(deadline: Time): Future[Unit] = ???
@@ -176,9 +172,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
   test("default address ordering") {
     val ordering = LoadBalancerFactory.AddressOrdering.param.default.ordering
 
-    val ips: Seq[Array[Byte]] = (10 until 0 by -1).map { i =>
-      Array[Byte](10, 0, 0, i.toByte)
-    }
+    val ips: Seq[Array[Byte]] = (10 until 0 by -1).map { i => Array[Byte](10, 0, 0, i.toByte) }
 
     val addresses: Seq[Address.Inet] = ips.map { ip =>
       val inet = InetAddress.getByAddress(ip)
@@ -194,9 +188,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
     assert(Vector(addr1, addr0).sorted(ordering).last == addr1)
 
     val sorted = addresses.sorted(ordering)
-    assert(sorted.indices.exists { i =>
-      sorted(i) != addresses(i)
-    })
+    assert(sorted.indices.exists { i => sorted(i) != addresses(i) })
 
     val failed = Address.Failed(new Exception)
     val withFailed = failed +: addresses
@@ -259,9 +251,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
 
     assert(orderCalled)
     val sortedAddresses: Seq[String] = addresses.sortBy(_.toString).map(_.toString)
-    eps.indices.foreach { i =>
-      assert(eps(i) == sortedAddresses(i))
-    }
+    eps.indices.foreach { i => assert(eps(i) == sortedAddresses(i)) }
   }
 
   test("Respects ReplicateAddresses param") {
@@ -280,9 +270,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
         emptyException: NoBrokersAvailableException,
         params: Stack.Params
       ): ServiceFactory[Req, Rep] = {
-        eps = endpoints.sample().toSet.map { ep: EndpointFactory[_, _] =>
-          ep.address
-        }
+        eps = endpoints.sample().toSet.map { ep: EndpointFactory[_, _] => ep.address }
         ServiceFactory.const(Service.mk(_ => ???))
       }
     }

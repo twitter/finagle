@@ -25,30 +25,22 @@ object BytesToString {
   def apply(arg: Array[Byte], charset: Charset = StandardCharsets.UTF_8) = new String(arg, charset)
 
   def fromList(args: Seq[Array[Byte]], charset: Charset = StandardCharsets.UTF_8) =
-    args.map { arg =>
-      BytesToString(arg, charset)
-    }
+    args.map { arg => BytesToString(arg, charset) }
 
   def fromTuples(args: Seq[(Array[Byte], Array[Byte])], charset: Charset = StandardCharsets.UTF_8) =
-    args map { arg =>
-      (BytesToString(arg._1), BytesToString(arg._2))
-    }
+    args map { arg => (BytesToString(arg._1), BytesToString(arg._2)) }
 
   def fromTuplesWithDoubles(
     args: Seq[(Array[Byte], Double)],
     charset: Charset = StandardCharsets.UTF_8
   ) =
-    args map { arg =>
-      (BytesToString(arg._1, charset), arg._2)
-    }
+    args map { arg => (BytesToString(arg._1, charset), arg._2) }
 }
 
 object StringToBytes {
   def apply(arg: String, charset: Charset = StandardCharsets.UTF_8) = arg.getBytes(charset)
   def fromList(args: List[String], charset: Charset = StandardCharsets.UTF_8) =
-    args.map { arg =>
-      arg.getBytes(charset)
-    }
+    args.map { arg => arg.getBytes(charset) }
 }
 
 object StringToBuf {

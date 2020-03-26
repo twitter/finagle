@@ -55,7 +55,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
   override protected def test(
     testName: String,
     testTags: Tag*
-  )(testFun: => Any
+  )(
+    testFun: => Any
   )(
     implicit pos: Position
   ): Unit =
@@ -419,9 +420,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     val order = bal.distx.vector
     for (_ <- 0 to 100) {
       bal.rebuildx()
-      assert(order.indices.forall { i =>
-        order(i) == bal.distx.vector(i)
-      })
+      assert(order.indices.forall { i => order(i) == bal.distx.vector(i) })
     }
   }
 

@@ -46,7 +46,8 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
     var status: Option[EndpointStatus] = None,
     var addr: Option[InetSocketAddress] = None,
     metadata: Map[String, String] = Map.empty,
-    endpoints: mutable.Map[String, InetSocketAddress] = mutable.Map.empty[String, InetSocketAddress])
+    endpoints: mutable.Map[String, InetSocketAddress] =
+      mutable.Map.empty[String, InetSocketAddress])
 
   private[this] case class Mutation(
     conf: ServerSetConf,

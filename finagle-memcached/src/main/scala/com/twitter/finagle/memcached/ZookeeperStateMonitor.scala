@@ -132,7 +132,7 @@ trait ZookeeperStateMonitor {
           .getData(zkPath, true, null)
 
         applyZKData(data)
-    }
+      }
 
   /**
    * Load the zookeeper node children as well as leaving a children watch, then invoke the
@@ -150,7 +150,7 @@ trait ZookeeperStateMonitor {
           .getChildren(zkPath, true, null)
 
         applyZKChildren(children.asScala.toList)
-    }
+      }
 
   /**
    * Reconnect to the zookeeper, this maybe invoked when zookeeper connection expired and the
@@ -168,7 +168,7 @@ trait ZookeeperStateMonitor {
         val children = zkClient
           .get(DefaultZKWaitTimeout)
           .getChildren(zkPath, true, null)
-    }
+      }
 
   // Register top-level connection watcher to monitor zk change.
   // This watcher will live across different zk connection

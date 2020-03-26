@@ -244,7 +244,7 @@ class ServerTrackerTest extends FunSuite {
 
       // Nothing to be done: tag wasn't occupied
       assert(messageWriter.messages.isEmpty)
-      assert(statsReceiver.counters(Seq("orphaned_tdiscard")) == 1l)
+      assert(statsReceiver.counters(Seq("orphaned_tdiscard")) == 1L)
     }
   }
 

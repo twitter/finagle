@@ -115,9 +115,7 @@ class MetricsBucketedHistogram(
 
       override def toString: String = {
         val _ps = ps
-          .map { p =>
-            s"p${p.quantile}=${p.value}"
-          }
+          .map { p => s"p${p.quantile}=${p.value}" }
           .mkString("[", ", ", "]")
         s"Snapshot(count=${_count}, max=${_max}, min=${_min}, avg=${_avg}, sum=${_sum}, %s=${_ps})"
       }

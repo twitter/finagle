@@ -145,9 +145,7 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
     )
 
     val v = Var[Addr](Addr.Pending)
-    stable foreach { newAddr =>
-      v() = newAddr
-    }
+    stable foreach { newAddr => v() = newAddr }
 
     v
   }

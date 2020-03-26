@@ -20,9 +20,7 @@ class ParamMapBenchmark extends StdBenchAnnotations {
   @Setup
   def prepare(): Unit = {
     queryString = (0 until size)
-      .map { i =>
-        s"key$i=value$i"
-      }.mkString("?", "&", "")
+      .map { i => s"key$i=value$i" }.mkString("?", "&", "")
 
     params = (0 until size).map { i =>
       // TODO: this is a bit of a cheat since we fastpath values without a space in the new impl

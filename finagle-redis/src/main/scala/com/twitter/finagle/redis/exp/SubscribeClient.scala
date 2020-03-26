@@ -95,7 +95,8 @@ trait SubscribeCommands {
    */
   def subscribe(
     channels: Seq[Buf]
-  )(handler: subManager.typ.MessageHandler
+  )(
+    handler: subManager.typ.MessageHandler
   ): Future[Map[Buf, Throwable]] = {
     val notSubscribed = subManager.uniquify(channels, handler)
     val subscriptions = notSubscribed.map(subManager.subscribe)
@@ -130,7 +131,8 @@ trait SubscribeCommands {
    */
   def pSubscribe(
     patterns: Seq[Buf]
-  )(handler: pSubManager.typ.MessageHandler
+  )(
+    handler: pSubManager.typ.MessageHandler
   ): Future[Map[Buf, Throwable]] = {
     val notSubscribed = pSubManager.uniquify(patterns, handler)
     val subscriptions = notSubscribed.map(pSubManager.subscribe)

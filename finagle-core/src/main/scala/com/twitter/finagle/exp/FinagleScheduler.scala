@@ -44,7 +44,7 @@ private[finagle] object FinagleScheduler {
             TimeUnit.MILLISECONDS,
             queue,
             threadFactory
-        )
+          )
       )
     )
 

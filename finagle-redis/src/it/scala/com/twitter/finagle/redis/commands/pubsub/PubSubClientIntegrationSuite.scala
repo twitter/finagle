@@ -94,9 +94,7 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
   }
 
   def runTest(test: TestContext => Unit) {
-    withRedisClient { c =>
-      test(new TestContext(c))
-    }
+    withRedisClient { c => test(new TestContext(c)) }
   }
 
   class TestContext(val c: Client) {

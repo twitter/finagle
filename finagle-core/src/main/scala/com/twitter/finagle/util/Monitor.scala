@@ -115,9 +115,7 @@ object LoadedReporterFactory extends ReporterFactory {
   private[this] val factories = LoadService[ReporterFactory]()
 
   def apply(name: String, addr: Option[SocketAddress]): Monitor =
-    factories.map(_(name, addr)).foldLeft(NullMonitor: Monitor) { (a, m) =>
-      a andThen m
-    }
+    factories.map(_(name, addr)).foldLeft(NullMonitor: Monitor) { (a, m) => a andThen m }
 
   val get: ReporterFactory = this
 

@@ -91,9 +91,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
   test("uses ResponseClassifier for determining success") {
     val svcFactory = ServiceFactory.const {
-      Service.mk { i: Int =>
-        Future.exception[Int](new IllegalArgumentException(i.toString))
-      }
+      Service.mk { i: Int => Future.exception[Int](new IllegalArgumentException(i.toString)) }
     }
     val classifier: ResponseClassifier = {
       case ReqRep(in: Int, Throw(_)) if in < 0 => ResponseClass.Success
@@ -122,9 +120,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
   ignorableFailures.foreach { ignorableFailure =>
     test(s"does not count ignorable failure ($ignorableFailure) as failure") {
       val svcFactory = ServiceFactory.const {
-        Service.mk { i: Int =>
-          Future.exception[Int](ignorableFailure)
-        }
+        Service.mk { i: Int => Future.exception[Int](ignorableFailure) }
       }
       val stats = new InMemoryStatsReceiver()
       val faf = new FailureAccrualFactory[Int, Int](
@@ -144,9 +140,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     test(s"does not count ignorable failure ($ignorableFailure) as success") {
       var ret = Future.exception[Int](new Exception("boom!"))
       val svcFactory = ServiceFactory.const {
-        Service.mk { i: Int =>
-          ret
-        }
+        Service.mk { i: Int => ret }
       }
       val stats = new InMemoryStatsReceiver()
       val faf = new FailureAccrualFactory[Int, Int](
@@ -182,9 +176,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       var ret = Future.exception[Int](new Exception("boom!"))
       Time.withCurrentTimeFrozen { timeControl =>
         val svcFactory = ServiceFactory.const {
-          Service.mk { i: Int =>
-            ret
-          }
+          Service.mk { i: Int => ret }
         }
         val stats = new InMemoryStatsReceiver()
         val timer = new MockTimer

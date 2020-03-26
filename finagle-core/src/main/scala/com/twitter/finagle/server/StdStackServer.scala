@@ -69,7 +69,8 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
   final protected def newListeningServer(
     serviceFactory: ServiceFactory[Req, Rep],
     addr: SocketAddress
-  )(trackSession: ClientConnection => Unit
+  )(
+    trackSession: ClientConnection => Unit
   ): ListeningServer = {
 
     // Listen over `addr` and serve traffic from incoming transports to

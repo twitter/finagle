@@ -26,8 +26,8 @@ class PlainHandshakeTest extends FunSuite {
     readq.offer(Buf.ByteArray.Owned(initialBytes))
     readq.offer(Buf.ByteArray.Owned(handshakeResponseResult))
 
-    val params = Stack.Params.empty + Credentials(Some("username"), Some("password")) + Database(
-      Some("test"))
+    val params =
+      Stack.Params.empty + Credentials(Some("username"), Some("password")) + Database(Some("test"))
     val handshake = new PlainHandshake(params, trans)
 
     val result = Await.result(handshake.connectionPhase, Duration.fromSeconds(1))

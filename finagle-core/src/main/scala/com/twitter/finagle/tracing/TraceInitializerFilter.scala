@@ -63,9 +63,11 @@ class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean)
     extends SimpleFilter[Req, Rep] {
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
     if (tracer.isNull) {
-      if (newId) Trace.letId(Trace.nextId) { service(request) } else service(request)
+      if (newId) Trace.letId(Trace.nextId) { service(request) }
+      else service(request)
     } else {
-      if (newId) Trace.letTracerAndNextId(tracer) { service(request) } else
+      if (newId) Trace.letTracerAndNextId(tracer) { service(request) }
+      else
         Trace.letTracer(tracer) { service(request) }
     }
 }

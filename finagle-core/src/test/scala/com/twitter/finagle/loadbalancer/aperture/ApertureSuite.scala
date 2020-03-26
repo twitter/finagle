@@ -124,9 +124,7 @@ private[loadbalancer] trait ApertureSuite {
     def apply(i: Int) = factories.getOrElseUpdate(i, Factory(i))
 
     def range(n: Int): IndexedSeq[EndpointFactory[Unit, Unit]] =
-      Vector.tabulate(n) { i =>
-        apply(i)
-      }
+      Vector.tabulate(n) { i => apply(i) }
   }
 
 }

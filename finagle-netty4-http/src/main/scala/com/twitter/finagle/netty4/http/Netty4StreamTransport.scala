@@ -169,7 +169,7 @@ private[http] object Netty4StreamTransport {
     }
 
     // Begin the loop.
-    continue(written = 0l)
+    continue(written = 0L)
   }
 }
 

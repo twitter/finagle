@@ -36,9 +36,9 @@ object StabilizerTest {
 
   // Note, weights are stored as metadata in the
   // original addrs.
-  def addr1w1: Address = WeightedAddress(addr1, 1D)
-  def addr1w2: Address = WeightedAddress(addr1, 2D)
-  def addr2w2: Address = WeightedAddress(addr2, 2D)
+  def addr1w1: Address = WeightedAddress(addr1, 1d)
+  def addr1w2: Address = WeightedAddress(addr1, 2d)
+  def addr2w2: Address = WeightedAddress(addr2, 2d)
 
   def shard1: Address = newAddress(1, Some(1))
   def shard2: Address = newAddress(2, Some(2))

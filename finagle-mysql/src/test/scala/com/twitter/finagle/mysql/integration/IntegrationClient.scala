@@ -20,32 +20,34 @@ trait IntegrationClient extends FunSuiteLike {
       "/.finagle-mysql/integration-test.properties"
   )
 
-  val propFileExists: Boolean = try {
-    val fis = new FileInputStream(propFile)
-    p.load(fis)
-    fis.close()
-    true
-  } catch {
-    case NonFatal(_) =>
-      logger.log(Level.WARNING, "Error loading integration.properties, skipping integration test")
-      false
-  }
+  val propFileExists: Boolean =
+    try {
+      val fis = new FileInputStream(propFile)
+      p.load(fis)
+      fis.close()
+      true
+    } catch {
+      case NonFatal(_) =>
+        logger.log(Level.WARNING, "Error loading integration.properties, skipping integration test")
+        false
+    }
 
   // Check if default mysql port is available.
-  val isPortAvailable: Boolean = try {
-    val address = InetAddress.getByName("localhost")
-    // 50 is the connection backlog, meaningless here
-    // but this is the only constructor overload that
-    // allows us to specify an address and a port.
-    val socket = new ServerSocket(port, 50, address)
-    socket.close()
-    logger.log(
-      Level.WARNING,
-      s"Error mysql is not running on port $dest, skipping integration test")
-    true
-  } catch {
-    case _: BindException => false
-  }
+  val isPortAvailable: Boolean =
+    try {
+      val address = InetAddress.getByName("localhost")
+      // 50 is the connection backlog, meaningless here
+      // but this is the only constructor overload that
+      // allows us to specify an address and a port.
+      val socket = new ServerSocket(port, 50, address)
+      socket.close()
+      logger.log(
+        Level.WARNING,
+        s"Error mysql is not running on port $dest, skipping integration test")
+      true
+    } catch {
+      case _: BindException => false
+    }
 
   // It's likely that we can run this test
   // if a mysql instance is running and a valid

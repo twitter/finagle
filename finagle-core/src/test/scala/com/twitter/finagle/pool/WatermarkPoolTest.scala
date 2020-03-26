@@ -277,17 +277,11 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
     it("should return the cached connections for the next 100 apply calls") {
       // We can now fetch them again, incurring no additional object
       // creation.
-      0 until 100 foreach { _ =>
-        Await.result(pool())
-      }
-      mocks foreach { service =>
-        verify(service, times(2)).status
-      }
+      0 until 100 foreach { _ => Await.result(pool()) }
+      mocks foreach { service => verify(service, times(2)).status }
 
       verify(factory, times(100))()
-      mocks foreach { service =>
-        verify(service, never()).close(any[Time])
-      }
+      mocks foreach { service => verify(service, never()).close(any[Time]) }
     }
   }
 
@@ -455,16 +449,12 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
       val maxWaiters = 3
       val pool = new WatermarkPool(factory, lowWatermark, highWatermark, maxWaiters = maxWaiters)
 
-      val services = 0 until highWatermark map { _ =>
-        new Promise[Service[Int, Int]]
-      }
+      val services = 0 until highWatermark map { _ => new Promise[Service[Int, Int]] }
       val wrappedServices = services map { s =>
         when(factory()).thenReturn(s)
         pool()
       }
-      0 until maxWaiters map { _ =>
-        pool()
-      }
+      0 until maxWaiters map { _ => pool() }
       val f = pool()
       assert(f.isDefined)
       intercept[TooManyWaitersException] { Await.result(f) }

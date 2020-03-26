@@ -102,7 +102,9 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     Await.result(client.bMergeEx(bufFoo, Map(bufBaz -> bufBoo, bufMoo -> bufBoo), 90000), TIMEOUT)
     result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
     ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
-    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) //baz's value is unchanged
+    assert(
+      result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")
+    ) //baz's value is unchanged
     assert(ttl > 10000 && ttl <= 90000) // ttl is updated only if a field was added
     Await.result(client.flushAll(), TIMEOUT) //clear the keys
   }
@@ -123,7 +125,9 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
     var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
     assert(ttl == -1)
-    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) //moo->boo added, baz's value is unchanged
+    assert(
+      result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")
+    ) //moo->boo added, baz's value is unchanged
     Await.result(client.flushAll(), TIMEOUT) //clear the keys
   }
 
@@ -147,14 +151,18 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     Await.result(client.bMergeEx(bufFoo, Map(bufBaz -> bufMoo, bufMoo -> bufBoo), 30000), TIMEOUT)
     result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
     ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
-    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) // only moo->boo is added
+    assert(
+      result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")
+    ) // only moo->boo is added
     assert(ttl > 10000 && ttl <= 30000) // ttl updated.
 
     //merge foo -> baz,bar  moo,bar
     Await.result(client.bMergeEx(bufFoo, Map(bufBaz -> bufBar, bufMoo -> bufBar), 30000), TIMEOUT)
     result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
     ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
-    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) // values not updated
+    assert(
+      result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")
+    ) // values not updated
     assert(ttl > 10000 && ttl <= 30000) // ttl was not updated updated.
     Await.result(client.flushAll(), TIMEOUT) //clear the keys
   }

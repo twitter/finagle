@@ -63,12 +63,12 @@ class NameTreeParsersTest extends FunSuite with AssertionsForJUnit {
       NameTreeParsers.parseNameTree("1 * /foo & 2 * /bar | .5 * /bar & .5 * /baz") ==
         NameTree.Alt(
           NameTree.Union(
-            NameTree.Weighted(1D, NameTree.Leaf(Path.Utf8("foo"))),
-            NameTree.Weighted(2D, NameTree.Leaf(Path.Utf8("bar")))
+            NameTree.Weighted(1d, NameTree.Leaf(Path.Utf8("foo"))),
+            NameTree.Weighted(2d, NameTree.Leaf(Path.Utf8("bar")))
           ),
           NameTree.Union(
-            NameTree.Weighted(0.5D, NameTree.Leaf(Path.Utf8("bar"))),
-            NameTree.Weighted(0.5D, NameTree.Leaf(Path.Utf8("baz")))
+            NameTree.Weighted(0.5d, NameTree.Leaf(Path.Utf8("bar"))),
+            NameTree.Weighted(0.5d, NameTree.Leaf(Path.Utf8("baz")))
           )
         )
     )

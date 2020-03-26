@@ -169,9 +169,7 @@ class Zk2Resolver(
                   weight)
                   if names.contains(endpoint) &&
                     host != null &&
-                    shardOption.forall { s =>
-                      s == shardId && shardId != Int.MinValue
-                    } =>
+                    shardOption.forall { s => s == shardId && shardId != Int.MinValue } =>
                 val shardIdOpt = if (shardId == Int.MinValue) None else Some(shardId)
                 val zkMetadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt, metadata))
                 (host, port, zkMetadata + (WeightedAddress.weightKey -> weight))

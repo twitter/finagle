@@ -215,9 +215,7 @@ class ResponseConformanceFilterTest extends FunSuite {
   }
 
   def runFilter(req: Request, res: Response): Response = {
-    val service = ResponseConformanceFilter andThen Service.mk { _: Request =>
-      Future.value(res)
-    }
+    val service = ResponseConformanceFilter andThen Service.mk { _: Request => Future.value(res) }
     Await.result(service(req), 5.seconds)
   }
 

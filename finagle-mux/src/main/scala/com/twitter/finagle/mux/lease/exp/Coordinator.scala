@@ -27,17 +27,14 @@ private[lease] class Coordinator(val counter: ByteCounter, verbose: Boolean = fa
       new BytesAlarm(
         counter, {
           val saved = counter.info.remaining()
-          () =>
-            saved - 1.byte
+          () => saved - 1.byte
         }
       )
     }
   }
 
   def sleepUntilGc(gc: () => Unit, interval: Duration): Unit = {
-    Alarm.armAndExecute({ () =>
-      new GenerationAlarm(counter) min new IntervalAlarm(interval)
-    }, gc)
+    Alarm.armAndExecute({ () => new GenerationAlarm(counter) min new IntervalAlarm(interval) }, gc)
   }
 
   // TODO: given that discount should be consistent for a generation, it doesn't
@@ -51,9 +48,7 @@ private[lease] class Coordinator(val counter: ByteCounter, verbose: Boolean = fa
     //
     // TODO: wake up more often to see if the target
     // has changed.
-    Alarm.armAndExecute({ () =>
-      new BytesAlarm(counter, () => space.discount())
-    }, fn)
+    Alarm.armAndExecute({ () => new BytesAlarm(counter, () => space.discount()) }, fn)
   }
 
   def sleepUntilFinishedDraining(

@@ -63,9 +63,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar {
     val p1 = Promise[Unit]
     val p2 = Promise[Int]
     val svc = Service.mk[Int, Int] { num: Int =>
-      p1.onSuccess { _ =>
-        throw new Exception("boom!")
-      }
+      p1.onSuccess { _ => throw new Exception("boom!") }
       p1.before(p2)
     }
     val filter = new MonitorFilter[Int, Int](monitor)

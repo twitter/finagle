@@ -19,7 +19,8 @@ class BadRequestHandlerTest extends FunSuite {
   def genInvalidRequest(
     maxRequestLineLen: Int,
     maxHeaderSize: Int
-  )(req: HttpRequest
+  )(
+    req: HttpRequest
   ): HttpRequest = {
     val encodeChannel = new EmbeddedChannel(new HttpRequestEncoder())
     val decodeChannel = new EmbeddedChannel(

@@ -12,13 +12,13 @@ class NameTreeFactoryTest extends FunSuite {
     val tree =
       NameTree.Union(
         NameTree.Weighted(
-          1D,
+          1d,
           NameTree.Union(
-            NameTree.Weighted(1D, NameTree.Leaf("foo")),
-            NameTree.Weighted(1D, NameTree.Leaf("bar"))
+            NameTree.Weighted(1d, NameTree.Leaf("foo")),
+            NameTree.Weighted(1d, NameTree.Leaf("bar"))
           )
         ),
-        NameTree.Weighted(1D, NameTree.Leaf("baz"))
+        NameTree.Weighted(1d, NameTree.Leaf("baz"))
       )
 
     val counts = mutable.HashMap[String, Int]()
@@ -32,7 +32,7 @@ class NameTreeFactoryTest extends FunSuite {
             Future.value(null)
           }
           def close(deadline: Time) = Future.Done
-      },
+        },
       Timer.Nil
     )
 
@@ -79,7 +79,7 @@ class NameTreeFactoryTest extends FunSuite {
               def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(null)
               def close(deadline: Time) = Future.Done
               override def status = key
-          },
+            },
           Timer.Nil
         )
       ).isAvailable
@@ -88,13 +88,13 @@ class NameTreeFactoryTest extends FunSuite {
       isAvailable(
         NameTree.Union(
           NameTree.Weighted(
-            1D,
+            1d,
             NameTree.Union(
-              NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-              NameTree.Weighted(1D, NameTree.Leaf(Status.Open))
+              NameTree.Weighted(1d, NameTree.Leaf(Status.Open)),
+              NameTree.Weighted(1d, NameTree.Leaf(Status.Open))
             )
           ),
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open))
+          NameTree.Weighted(1d, NameTree.Leaf(Status.Open))
         )
       )
     )
@@ -103,13 +103,13 @@ class NameTreeFactoryTest extends FunSuite {
       !isAvailable(
         NameTree.Union(
           NameTree.Weighted(
-            1D,
+            1d,
             NameTree.Union(
-              NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-              NameTree.Weighted(1D, NameTree.Leaf(Status.Closed))
+              NameTree.Weighted(1d, NameTree.Leaf(Status.Open)),
+              NameTree.Weighted(1d, NameTree.Leaf(Status.Closed))
             )
           ),
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open))
+          NameTree.Weighted(1d, NameTree.Leaf(Status.Open))
         )
       )
     )
@@ -118,13 +118,13 @@ class NameTreeFactoryTest extends FunSuite {
       !isAvailable(
         NameTree.Union(
           NameTree.Weighted(
-            1D,
+            1d,
             NameTree.Union(
-              NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-              NameTree.Weighted(1D, NameTree.Leaf(Status.Open))
+              NameTree.Weighted(1d, NameTree.Leaf(Status.Open)),
+              NameTree.Weighted(1d, NameTree.Leaf(Status.Open))
             )
           ),
-          NameTree.Weighted(1D, NameTree.Empty)
+          NameTree.Weighted(1d, NameTree.Empty)
         )
       )
     )

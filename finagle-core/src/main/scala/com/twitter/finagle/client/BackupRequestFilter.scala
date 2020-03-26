@@ -295,7 +295,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
           lowestDiscernibleMsValue,
           highestTrackableMsValue,
           timer
-      )
+        )
     )
   @volatile private[this] var backupRequestRetryBudget: RetryBudget =
     newRetryBudget(getAndValidateMaxExtraLoad(maxExtraLoadTunable), nowMs)
@@ -443,9 +443,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
               val tracing = Trace()
               val backupTraceId = tracing.nextId
               val backup = issueBackup(req, service, tracing, backupTraceId)
-              orig.select(backup).transform { _ =>
-                pickWinner(req, orig, backup, tracing)
-              }
+              orig.select(backup).transform { _ => pickWinner(req, orig, backup, tracing) }
             } else {
               budgetExhausted.incr()
               orig

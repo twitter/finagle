@@ -14,9 +14,7 @@ import org.scalatest.FunSuite
 class StackTest extends FunSuite {
   class TestCtx {
     val failService =
-      Service.mk[String, String] { s: String =>
-        Future.exception(Failure.rejected("unhappy"))
-      }
+      Service.mk[String, String] { s: String => Future.exception(Failure.rejected("unhappy")) }
 
     val newClientStack =
       StackClient

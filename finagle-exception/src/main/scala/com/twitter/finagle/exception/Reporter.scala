@@ -135,12 +135,8 @@ sealed case class Reporter(
   def createEntry(e: Throwable): LogEntry = {
     var se = new ServiceException(serviceName, e, Time.now, Trace.id.traceId.toLong)
 
-    sourceAddress.foreach { sa =>
-      se = se.withSource(sa)
-    }
-    clientAddress.foreach { ca =>
-      se = se.withClient(ca)
-    }
+    sourceAddress.foreach { sa => se = se.withSource(sa) }
+    clientAddress.foreach { ca => se = se.withClient(ca) }
 
     LogEntry(Reporter.scribeCategory, GZIPStringEncoder.encodeString(se.toJson))
   }

@@ -140,9 +140,7 @@ private[finagle] object Bijections {
   object finagle {
 
     def writeFinagleHeadersToNetty(in: HeaderMap, out: NettyHttp.HttpHeaders): Unit =
-      in.nameValueIterator.foreach { nv =>
-        out.add(nv.name, nv.value)
-      }
+      in.nameValueIterator.foreach { nv => out.add(nv.name, nv.value) }
 
     def headersToNetty(h: HeaderMap): NettyHttp.HttpHeaders = {
       // We don't want to validate headers here since they are already validated

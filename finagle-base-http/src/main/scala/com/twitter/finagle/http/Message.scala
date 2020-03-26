@@ -58,10 +58,9 @@ abstract class Message {
    *
    * @see [[Reader]]
    **/
-  final lazy val reader: Reader[Buf] = chunkReader.flatMap(
-    chunk =>
-      if (chunk.isLast && chunk.content.isEmpty) Reader.empty
-      else Reader.value(chunk.content))
+  final lazy val reader: Reader[Buf] = chunkReader.flatMap(chunk =>
+    if (chunk.isLast && chunk.content.isEmpty) Reader.empty
+    else Reader.value(chunk.content))
 
   /**
    * A write-only handle to the stream of [[Buf]], representing the message body. Only chunked
@@ -490,11 +489,12 @@ abstract class Message {
 
   /** Get the content as a string. */
   def contentString: String = {
-    val encoding = try {
-      Charset.forName(charset.getOrElse("UTF-8"))
-    } catch {
-      case _: Throwable => StandardCharsets.UTF_8
-    }
+    val encoding =
+      try {
+        Charset.forName(charset.getOrElse("UTF-8"))
+      } catch {
+        case _: Throwable => StandardCharsets.UTF_8
+      }
     Buf.decodeString(content, encoding)
   }
 

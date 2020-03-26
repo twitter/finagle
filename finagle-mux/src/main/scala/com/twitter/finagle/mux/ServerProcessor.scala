@@ -17,9 +17,7 @@ import com.twitter.util.{Future, Return, Throw}
 private[finagle] object ServerProcessor extends Filter[Message, Message, Request, Response] {
   import Message._
 
-  private[this] val AlwaysEmpty = { _: Throwable =>
-    MuxFailure.Empty
-  }
+  private[this] val AlwaysEmpty = { _: Throwable => MuxFailure.Empty }
 
   private[this] def dispatch(
     tdispatch: Message.Tdispatch,

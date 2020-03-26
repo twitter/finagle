@@ -38,9 +38,8 @@ private[serverset2] class ZkSession(
   /** The dynamic `WatchState` of this `ZkSession` instance. */
   val state: Var[WatchState] = watchedZk.state
 
-  private[this] val unexpectedExceptions = new CategorizingExceptionStatsHandler(
-    _ => Some("unexpected_exceptions")
-  )
+  private[this] val unexpectedExceptions = new CategorizingExceptionStatsHandler(_ =>
+    Some("unexpected_exceptions"))
 
   private val zkr: ZooKeeperReader = watchedZk.value
 
@@ -187,9 +186,7 @@ private[serverset2] class ZkSession(
       }
     })
 
-  private val existsWatchOp = Memoize { path: String =>
-    watchedOperation { zkr.existsWatch(path) }
-  }
+  private val existsWatchOp = Memoize { path: String => watchedOperation { zkr.existsWatch(path) } }
 
   private val getChildrenWatchOp = Memoize { path: String =>
     watchedOperation { zkr.getChildrenWatch(path) }
@@ -314,17 +311,18 @@ private[serverset2] object ZkSession {
   )(
     implicit timer: Timer
   ): ZkSession = {
-    val watchedZkReader = try {
-      ClientBuilder()
-        .hosts(hosts)
-        .sessionTimeout(sessionTimeout)
-        .statsReceiver(DefaultStatsReceiver.scope("zkclient").scope(Zk2Resolver.statsOf(hosts)))
-        .readOnlyOK()
-        .reader()
-    } catch {
-      case exc: UnknownHostException =>
-        Watched(NullZooKeeperReader, Var(WatchState.FailedToInitialize(exc)))
-    }
+    val watchedZkReader =
+      try {
+        ClientBuilder()
+          .hosts(hosts)
+          .sessionTimeout(sessionTimeout)
+          .statsReceiver(DefaultStatsReceiver.scope("zkclient").scope(Zk2Resolver.statsOf(hosts)))
+          .readOnlyOK()
+          .reader()
+      } catch {
+        case exc: UnknownHostException =>
+          Watched(NullZooKeeperReader, Var(WatchState.FailedToInitialize(exc)))
+      }
 
     new ZkSession(retryStream, watchedZkReader, statsReceiver.scope(Zk2Resolver.statsOf(hosts)))
   }

@@ -1,4 +1,3 @@
-
 package com.twitter.finagle.http
 
 import scala.collection.immutable

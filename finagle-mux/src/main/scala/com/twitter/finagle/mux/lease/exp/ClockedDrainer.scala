@@ -77,14 +77,14 @@ private[finagle] class ClockedDrainer(
     val openForGauge = statsReceiver.addGauge("openfor_ms") {
       openFor() match {
         case Duration.Finite(d) => d.inMilliseconds.toFloat
-        case _ => -1F
+        case _ => -1f
       }
     }
 
     val closedForGauge = statsReceiver.addGauge("closedfor_ms") {
       closedFor() match {
         case Duration.Finite(d) => d.inMilliseconds.toFloat
-        case _ => -1F
+        case _ => -1f
       }
     }
 

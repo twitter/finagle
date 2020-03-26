@@ -76,9 +76,7 @@ private[threading] class EventLoopGroupExecutionDelayTrackingRunnable(
                 .append(
                   s"THREAD: $threadName EXECUTION DELAY exceeded configured dump threshold. Thread stack trace:\n"
                 )
-              executorThread.getStackTrace.foreach { element =>
-                builder.append(s"    $element\n")
-              }
+              executorThread.getStackTrace.foreach { element => builder.append(s"    $element\n") }
               dumpLogger.warning(builder.toString())
             }
           },

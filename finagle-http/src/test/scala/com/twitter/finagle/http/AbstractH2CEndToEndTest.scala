@@ -44,17 +44,13 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
     }
   }
 
-  override def initService: HttpService = Service.mk { _: Request =>
-    Future.value(Response())
-  }
+  override def initService: HttpService = Service.mk { _: Request => Future.value(Response()) }
 
   def featureImplemented(feature: Feature): Boolean = true
 
   test("Upgrade stats are properly recorded") {
     Contexts.local.let(ShouldUpgrade, false) {
-      val client = nonStreamingConnect(Service.mk { _: Request =>
-        Future.value(Response())
-      })
+      val client = nonStreamingConnect(Service.mk { _: Request => Future.value(Response()) })
 
       await(client(Request("/"))) // Should be an upgrade request
 
@@ -69,9 +65,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
     req.contentString = "body"
 
     Contexts.local.let(ShouldUpgrade, false) {
-      val client = nonStreamingConnect(Service.mk { _: Request =>
-        Future.value(Response())
-      })
+      val client = nonStreamingConnect(Service.mk { _: Request => Future.value(Response()) })
 
       await(client(req))
       // Should have been ignored by upgrade mechanisms since the request has a body
@@ -83,9 +77,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
     }
 
     Contexts.local.let(ShouldUpgrade, false) {
-      val client = nonStreamingConnect(Service.mk { _: Request =>
-        Future.value(Response())
-      })
+      val client = nonStreamingConnect(Service.mk { _: Request => Future.value(Response()) })
 
       // Spoof the upgrade: the client won't attempt it but the Upgrade header should
       // still cause the server to consider it an upgrade request and tick the counter.
@@ -140,9 +132,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
     })
 
     val rh = await(client(Request("/"))).headerMap
-    connectionHeaders.foreach { header =>
-      assert(rh.get(header).isEmpty)
-    }
+    connectionHeaders.foreach { header => assert(rh.get(header).isEmpty) }
     assert(rh.get("ok-header").get == ":)")
   }
 
@@ -185,8 +175,8 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
 
   test("Upgrades to HTTP/2 only if both have the toggle on, and it's H2C, not H2") {
     for {
-      clientUseHttp2 <- Seq(1D, 0D)
-      serverUseHttp2 <- Seq(1D, 0D)
+      clientUseHttp2 <- Seq(1d, 0d)
+      serverUseHttp2 <- Seq(1d, 0d)
       clientToggleName <- Seq(
         "com.twitter.finagle.http.UseH2",
         "com.twitter.finagle.http.UseH2CClients2"
@@ -241,7 +231,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
 
   test("Configuration params take precedence over the toggle for the client") {
     for {
-      clientUseHttp2 <- Seq(1D, 0D)
+      clientUseHttp2 <- Seq(1d, 0d)
     } {
       val sr = new InMemoryStatsReceiver()
       val server = serverImpl
@@ -279,7 +269,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
 
   test("Configuration params take precedence over the toggle for the server") {
     for {
-      serverUseHttp2 <- Seq(1D, 0D)
+      serverUseHttp2 <- Seq(1d, 0d)
     } {
       val sr = new InMemoryStatsReceiver()
       val server = overrides.let(Map("com.twitter.finagle.http.UseH2CServers" -> serverUseHttp2)) {

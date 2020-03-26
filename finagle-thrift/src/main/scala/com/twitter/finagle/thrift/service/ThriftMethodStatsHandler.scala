@@ -9,7 +9,8 @@ private[thrift] object ThriftMethodStatsHandler {
 
   def apply(
     method: ThriftMethod
-  )(responseClassifier: ResponseClassifier,
+  )(
+    responseClassifier: ResponseClassifier,
     thriftMethodStats: ThriftMethodStats,
     args: method.Args,
     response: Try[method.SuccessType]

@@ -18,20 +18,21 @@ private[http] object SameSiteCodec {
   private val initFailureCounter =
     LoadedStatsReceiver.scope("http").scope("cookie").counter(Verbosity.Debug, "samesite_failures")
 
-  private val _extractKeyValuePairs: Option[Method] = try {
-    val method = cookieDecoderClass.getDeclaredMethod(
-      "extractKeyValuePairs",
-      classOf[String],
-      classOf[JList[String]],
-      classOf[JList[String]]
-    )
-    method.setAccessible(true)
-    Some(method)
-  } catch {
-    case t: Throwable =>
-      log.error(t, "Failed to initialize `_extractKeyValuePairs`.")
-      None
-  }
+  private val _extractKeyValuePairs: Option[Method] =
+    try {
+      val method = cookieDecoderClass.getDeclaredMethod(
+        "extractKeyValuePairs",
+        classOf[String],
+        classOf[JList[String]],
+        classOf[JList[String]]
+      )
+      method.setAccessible(true)
+      Some(method)
+    } catch {
+      case t: Throwable =>
+        log.error(t, "Failed to initialize `_extractKeyValuePairs`.")
+        None
+    }
 
   /**
    * Provides access to `CookieDecoder.extractKeyValuePairs` within Netty. It is

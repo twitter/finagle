@@ -123,14 +123,10 @@ class MemcachedPartitioningServiceTest
     assert(statsReceiver.counters(Seq(clientName, "partitioner", "redistributes")) == 1)
 
     val numKeys = 500
-    val kvMap = (1 to numKeys).map { i =>
-      s"key-$i" -> s"value-$i"
-    }.toMap
+    val kvMap = (1 to numKeys).map { i => s"key-$i" -> s"value-$i" }.toMap
 
     val values = Values(
-      (1 to numKeys).map { i =>
-        Value(Buf.Utf8(s"key-$i"), Buf.Utf8(s"value-$i"))
-      }
+      (1 to numKeys).map { i => Value(Buf.Utf8(s"key-$i"), Buf.Utf8(s"value-$i")) }
     )
 
     when(mockService.apply(any[Get])).thenReturn(Future.value(values))

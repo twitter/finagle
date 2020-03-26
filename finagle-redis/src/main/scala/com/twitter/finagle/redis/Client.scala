@@ -46,8 +46,7 @@ trait NormalCommands
     with ServerCommands
     with ScriptCommands
     with ConnectionCommands
-    with StreamCommands { self: BaseClient =>
-}
+    with StreamCommands { self: BaseClient => }
 
 trait Transactions { self: Client =>
   private[this] def singletonFactory(): ServiceFactory[Command, Reply] =
@@ -97,7 +96,8 @@ abstract class BaseClient(protected val factory: ServiceFactory[Command, Reply])
    */
   private[redis] def doRequest[T](
     cmd: Command
-  )(handler: PartialFunction[Reply, Future[T]]
+  )(
+    handler: PartialFunction[Reply, Future[T]]
   ): Future[T] = {
     factory.toService
       .apply(cmd)

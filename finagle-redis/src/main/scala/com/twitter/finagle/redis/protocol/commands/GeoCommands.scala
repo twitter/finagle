@@ -68,22 +68,18 @@ object GeoCommands {
   case class GeoAdd(key: Buf, members: Seq[GeoMember]) extends StrictKeyCommand {
     RequireClientProtocol(members.nonEmpty, "Members set must not be empty")
 
-    members.foreach { member =>
-      RequireClientProtocol(member != null, "Empty member found")
-    }
+    members.foreach { member => RequireClientProtocol(member != null, "Empty member found") }
 
     def name: Buf = Command.GEOADD
 
     override def body: Seq[Buf] = {
       val membersWithLonLat =
-        members.flatMap(
-          member =>
-            Seq(
-              Buf.Utf8(member.longitude.toString),
-              Buf.Utf8(member.latitute.toString),
-              member.member
-          )
-        )
+        members.flatMap(member =>
+          Seq(
+            Buf.Utf8(member.longitude.toString),
+            Buf.Utf8(member.latitute.toString),
+            member.member
+          ))
 
       key +: membersWithLonLat
     }

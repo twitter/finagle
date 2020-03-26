@@ -19,9 +19,7 @@ class EntryTest extends FunSuite {
   test("Endpoint.parseJson: ok input") {
     val eps = Endpoint.parseJson(exampleJson)
     assert(eps.size == 3)
-    val epByName = eps.flatMap { ep =>
-      ep.names.map(_ -> ep)
-    }.toMap
+    val epByName = eps.flatMap { ep => ep.names.map(_ -> ep) }.toMap
     assert(epByName.size == 3)
 
     assert(
@@ -44,9 +42,7 @@ class EntryTest extends FunSuite {
     val eps = Endpoint.parseJson(exampleJsonWithMetadata)
     val metadata = Map(metadataKeyA -> metadataValueA)
     assert(eps.size == 3)
-    val epByName = eps.flatMap { ep =>
-      ep.names.map(_ -> ep)
-    }.toMap
+    val epByName = eps.flatMap { ep => ep.names.map(_ -> ep) }.toMap
     assert(epByName.size == 3)
 
     assert(

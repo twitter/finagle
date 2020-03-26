@@ -54,9 +54,7 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Balances evenly") {
-    val init = Vector.tabulate(N) { i =>
-      LoadedFactory(i)
-    }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val bal = newBal(Var.value(init))
     for (_ <- 0 until R) bal()
     assertEven(init)
@@ -64,9 +62,7 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
 
   test("Balance evenly when load varies") {
     val rng = Rng(12345L)
-    val init = Vector.tabulate(N) { i =>
-      LoadedFactory(i)
-    }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     var pending = Set[Service[Unit, Int]]()
     val bal = newBal(Var.value(init))
 
@@ -88,9 +84,7 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Dynamically incorporates updates") {
-    val init = Vector.tabulate(N) { i =>
-      LoadedFactory(i)
-    }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val vec = Var(init)
     val bal = newBal(vec)
 
@@ -114,13 +108,11 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Skip downed nodes; revive them") {
-    val init = Vector.tabulate(N) { i =>
-      LoadedFactory(i)
-    }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val bal = newBal(Var.value(init))
 
     val byIndex = new mutable.HashMap[Int, mutable.Set[Closable]]
-    with mutable.MultiMap[Int, Closable]
+      with mutable.MultiMap[Int, Closable]
 
     def run(n: Int): Unit = {
       for (_ <- 0 until n) {
@@ -170,9 +162,7 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Balance all-downed nodes.") {
-    val init = Vector.tabulate(N) { i =>
-      LoadedFactory(i)
-    }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val bal = newBal(Var.value(init))
 
     for (_ <- 0 until R) bal()
@@ -243,9 +233,7 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Closes") {
-    val init = Vector.tabulate(N) { i =>
-      LoadedFactory(i)
-    }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val bal = newBal(Var.value(init))
     // Give it some traffic.
     for (_ <- 0 until R) bal()

@@ -23,7 +23,8 @@ private[finagle] case class ThriftClientPreparer(
 
   private def prepareService(
     params: Stack.Params
-  )(service: Service[ThriftClientRequest, Array[Byte]]
+  )(
+    service: Service[ThriftClientRequest, Array[Byte]]
   ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
     val payloadSize = new PayloadSizeFilter[ThriftClientRequest, Array[Byte]](
       params[param.Stats].statsReceiver,
@@ -42,9 +43,7 @@ private[finagle] case class ThriftClientPreparer(
         Future.value(payloadSizeService)
       }
 
-    upgradedService.map { upgraded =>
-      new ValidateThriftService(upgraded, protocolFactory)
-    }
+    upgradedService.map { upgraded => new ValidateThriftService(upgraded, protocolFactory) }
   }
 
   def prepare(

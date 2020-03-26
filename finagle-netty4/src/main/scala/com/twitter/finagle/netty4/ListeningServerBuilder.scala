@@ -204,9 +204,7 @@ private class ListeningServerBuilder(
         // Don't rely on netty to satisfy the promise and transform all results to
         // success because we don't want the non-deterministic lifecycle of external
         // resources to affect application success.
-        p.raiseWithin(timeout)(timer).transform { _ =>
-          Future.Done
-        }
+        p.raiseWithin(timeout)(timer).transform { _ => Future.Done }
       }
 
       def boundAddress: SocketAddress = ch.localAddress()

@@ -14,7 +14,8 @@ object MetricsStatsReceiverTest {
       statsReceiver: StatsReceiver,
       name: Seq[String],
       verbosity: Verbosity = Verbosity.Default
-    )(f: => Float
+    )(
+      f: => Float
     ): Gauge
     def addHisto(
       statsReceiver: StatsReceiver,
@@ -44,7 +45,8 @@ object MetricsStatsReceiverTest {
       statsReceiver: StatsReceiver,
       name: Seq[String],
       verbosity: Verbosity = Verbosity.Default
-    )(f: => Float
+    )(
+      f: => Float
     ) = statsReceiver.addGauge(verbosity, name: _*)(f)
     def addHisto(
       statsReceiver: StatsReceiver,
@@ -67,7 +69,8 @@ object MetricsStatsReceiverTest {
       statsReceiver: StatsReceiver,
       name: Seq[String],
       verbosity: Verbosity = Verbosity.Default
-    )(f: => Float
+    )(
+      f: => Float
     ) =
       statsReceiver.addGauge(
         GaugeSchema(statsReceiver.metricBuilder().withName(name).withVerbosity(verbosity)))(f)

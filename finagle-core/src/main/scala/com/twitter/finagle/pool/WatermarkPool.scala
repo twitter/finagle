@@ -229,16 +229,12 @@ final class WatermarkPool[Req, Rep](
     }
 
     // Fail the existing waiters.
-    toFail.foreach { waiter =>
-      waiter.setException(new ServiceClosedException)
-    }
+    toFail.foreach { waiter => waiter.setException(new ServiceClosedException) }
 
     // Drain the pool. All `queue` access first tests `isOpen` mediated by `thePool` lock
     // so we don't need to hold the lock while clearing it since we've flipped the `isOpen`
     // bit.
-    queue.asScala.foreach { svc =>
-      (new ServiceWrapper(svc)).close()
-    }
+    queue.asScala.foreach { svc => (new ServiceWrapper(svc)).close() }
     queue.clear()
 
     // Clear out the gauges

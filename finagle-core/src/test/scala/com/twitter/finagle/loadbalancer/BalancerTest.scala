@@ -175,9 +175,7 @@ class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropert
 
     val update0 = Vector(f1, f2, f3)
     bal.update(update0)
-    assert(bal._dist().vector.indices.forall { i =>
-      update0(i) eq bal._dist().vector(i).factory
-    })
+    assert(bal._dist().vector.indices.forall { i => update0(i) eq bal._dist().vector(i).factory })
 
     val update1 = Vector(f1, f2, f3, newFac(), newFac())
     bal.update(update1)
@@ -185,9 +183,7 @@ class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropert
     assert(bal._dist().vector(0).factory eq f1)
     assert(bal._dist().vector(1).factory eq f2)
     assert(bal._dist().vector(2).factory eq f3)
-    assert(bal._dist().vector.indices.forall { i =>
-      update1(i) eq bal._dist().vector(i).factory
-    })
+    assert(bal._dist().vector.indices.forall { i => update1(i) eq bal._dist().vector(i).factory })
   }
 
   test("close unregisters from the registry") {

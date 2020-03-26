@@ -44,9 +44,7 @@ object RedisCluster { self =>
   def address: Option[InetSocketAddress] = instanceStack.head.address
   def address(i: Int) = instanceStack(i).address
   def addresses: Seq[Option[InetSocketAddress]] =
-    instanceStack.map { i =>
-      i.address
-    }.toList
+    instanceStack.map { i => i.address }.toList
 
   def hostAddresses(from: Int = 0, until: Int = instanceStack.size): String = {
     require(instanceStack.nonEmpty)
@@ -61,9 +59,7 @@ object RedisCluster { self =>
   }
 
   def start(count: Int = 1, mode: RedisMode = RedisMode.Standalone): Seq[ExternalRedis] = {
-    (0 until count).map { i =>
-      start(new ExternalRedis(mode))
-    }
+    (0 until count).map { i => start(new ExternalRedis(mode)) }
   }
 
   def start(instance: ExternalRedis): ExternalRedis = {
@@ -79,9 +75,7 @@ object RedisCluster { self =>
   }
 
   def stopAll(): Unit = {
-    instanceStack.foreach { i =>
-      i.stop()
-    }
+    instanceStack.foreach { i => i.stop() }
     instanceStack.clear
   }
 
@@ -90,9 +84,7 @@ object RedisCluster { self =>
     .getRuntime()
     .addShutdownHook(new Thread {
       override def run(): Unit = {
-        self.instanceStack.foreach { instance =>
-          instance.stop()
-        }
+        self.instanceStack.foreach { instance => instance.stop() }
       }
     })
 }

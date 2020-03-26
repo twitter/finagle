@@ -12,7 +12,8 @@ import org.scalatest.FunSuite
 class ClientTest extends FunSuite {
   def withServer(
     factory: ServiceFactory[Request, Response]
-  )(spec: ClientBuilder.Complete[Request, Response] => Unit
+  )(
+    spec: ClientBuilder.Complete[Request, Response] => Unit
   ): Unit = {
     val server = Http.serve(new InetSocketAddress(0), factory)
     val serverAddress = server.boundAddress.asInstanceOf[InetSocketAddress]

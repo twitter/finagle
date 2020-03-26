@@ -140,9 +140,8 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   private[stats] def readBooleanParam(params: ParamMap, name: String, default: Boolean): Boolean = {
     val vals = params.getAll(name)
     if (vals.nonEmpty)
-      vals.exists { v =>
-        v == "1" || v == "true"
-      } else
+      vals.exists { v => v == "1" || v == "true" }
+    else
       default
   }
 
@@ -161,15 +160,16 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   }
 
   def json(pretty: Boolean, filtered: Boolean, counterDeltasOn: Boolean = false): String = {
-    val gauges = try metrics.gauges.asScala
-    catch {
-      case NonFatal(e) =>
-        // because gauges run arbitrary user code, we want to protect ourselves here.
-        // while the underlying registry should protect against individual misbehaving
-        // gauges, an extra level of belt-and-suspenders seemed worthwhile.
-        log.error(e, "exception while collecting gauges")
-        Map.empty[String, Number]
-    }
+    val gauges =
+      try metrics.gauges.asScala
+      catch {
+        case NonFatal(e) =>
+          // because gauges run arbitrary user code, we want to protect ourselves here.
+          // while the underlying registry should protect against individual misbehaving
+          // gauges, an extra level of belt-and-suspenders seemed worthwhile.
+          log.error(e, "exception while collecting gauges")
+          Map.empty[String, Number]
+      }
     val histos = metrics.histograms.asScala
     val counters = if (counterDeltasOn && useCounterDeltas()) {
       getOrRegisterLatchedStats().deltas
@@ -213,9 +213,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   ): collection.Map[String, A] = verbose match {
     case Some(pattern) =>
       sample
-        .filterKeys(
-          name => metrics.verbosity.get(name) != Verbosity.Debug || pattern(name)
-        ).toMap
+        .filterKeys(name => metrics.verbosity.get(name) != Verbosity.Debug || pattern(name)).toMap
 
     case None =>
       sample.filterKeys(name => metrics.verbosity.get(name) != Verbosity.Debug).toMap

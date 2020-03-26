@@ -93,7 +93,8 @@ case class Netty4Listener[In, Out, Ctx <: TransportContext](
    */
   def listen(
     addr: SocketAddress
-  )(serveTransport: Transport[In, Out] { type Context <: Ctx } => Unit
+  )(
+    serveTransport: Transport[In, Out] { type Context <: Ctx } => Unit
   ): ListeningServer = {
     val mkTrans = transportFactory
       .andThen(Transport.cast[In, Out])

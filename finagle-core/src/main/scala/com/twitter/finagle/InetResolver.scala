@@ -103,9 +103,7 @@ private[finagle] class InetResolver(
       .collectToTry(hp.map {
         case (host, port, meta) =>
           resolveHost(host).map { inetAddrs =>
-            inetAddrs.map { inetAddr =>
-              Address.Inet(new InetSocketAddress(inetAddr, port), meta)
-            }
+            inetAddrs.map { inetAddr => Address.Inet(new InetSocketAddress(inetAddr, port), meta) }
           }
       })
       .flatMap { seq: Seq[Try[Seq[Address]]] =>

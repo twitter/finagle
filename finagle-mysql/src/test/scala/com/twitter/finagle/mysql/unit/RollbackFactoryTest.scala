@@ -34,9 +34,7 @@ class RollbackFactoryTest extends FunSuite {
       }
     })
 
-    await(rollbackClient().flatMap { svc =>
-      svc(QueryRequest("3")).ensure { svc.close() }
-    })
+    await(rollbackClient().flatMap { svc => svc(QueryRequest("3")).ensure { svc.close() } })
 
     val expected = Seq(
       "1",
@@ -66,9 +64,7 @@ class RollbackFactoryTest extends FunSuite {
 
     val rollbackClient = new RollbackFactory(client, NullStatsReceiver)
 
-    await(rollbackClient().flatMap { svc =>
-      svc(QueryRequest("1")).ensure { svc.close() }
-    })
+    await(rollbackClient().flatMap { svc => svc(QueryRequest("1")).ensure { svc.close() } })
     assert(closeCalled)
   }
 
@@ -94,9 +90,7 @@ class RollbackFactoryTest extends FunSuite {
 
     val rollbackClient = new RollbackFactory(client, NullStatsReceiver)
 
-    await(rollbackClient().flatMap { svc =>
-      svc(QueryRequest("1")).ensure { svc.close() }
-    })
+    await(rollbackClient().flatMap { svc => svc(QueryRequest("1")).ensure { svc.close() } })
 
     assert(requests == Seq(QueryRequest("1"), PoisonConnectionRequest))
     assert(closeCalled)
@@ -124,9 +118,7 @@ class RollbackFactoryTest extends FunSuite {
 
     val rollbackClient = new RollbackFactory(client, NullStatsReceiver)
 
-    await(rollbackClient().flatMap { svc =>
-      svc(QueryRequest("1")).ensure { svc.close() }
-    })
+    await(rollbackClient().flatMap { svc => svc(QueryRequest("1")).ensure { svc.close() } })
 
     assert(requests == Seq(QueryRequest("1"), PoisonConnectionRequest))
     assert(closeCalled)

@@ -58,9 +58,7 @@ private object Simulation extends com.twitter.app.App {
         .toSet
     )
 
-    val activityServers = Activity(servers.map { srvs =>
-      Activity.Ok(srvs.toVector)
-    })
+    val activityServers = Activity(servers.map { srvs => Activity.Ok(srvs.toVector) })
 
     var clientCount: Int = 0
     val genClientId: () => String = () => {
@@ -114,9 +112,7 @@ private object Simulation extends com.twitter.app.App {
 
     val query: () => Future[Unit] = () => {
       Future
-        .collect(clients.map { clnt =>
-          clnt(())
-        })
+        .collect(clients.map { clnt => clnt(()) })
         .unit
     }
 
@@ -191,8 +187,9 @@ private object Simulation extends com.twitter.app.App {
         println("-" * 100)
         println(s"Requests at ${elapsed()}")
 
-        val lines = for ((name, fn) <- stats.gauges.toSeq)
-          yield (name.mkString("/"), fn())
+        val lines =
+          for ((name, fn) <- stats.gauges.toSeq)
+            yield (name.mkString("/"), fn())
         for ((name, value) <- lines.sortBy(_._1))
           println(s"$name $value")
       }

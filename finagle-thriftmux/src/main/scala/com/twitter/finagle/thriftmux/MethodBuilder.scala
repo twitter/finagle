@@ -345,7 +345,8 @@ class MethodBuilder(
 
   final private class ClientServicePerEndpointBuilder[
     ServicePerEndpoint <: Filterable[ServicePerEndpoint]
-  ](builder: ServicePerEndpointBuilder[ServicePerEndpoint])
+  ](
+    builder: ServicePerEndpointBuilder[ServicePerEndpoint])
       extends client.ServicePerEndpointBuilder[
         ThriftClientRequest,
         Array[Byte],

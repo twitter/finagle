@@ -220,7 +220,7 @@ object TimeoutFilter {
       timeoutTunable() match {
         case Some(duration) => duration
         case None => TimeoutFilter.Param.Default
-    }
+      }
     typeAgnostic(timeoutFn, exceptionFn, timer)
   }
 

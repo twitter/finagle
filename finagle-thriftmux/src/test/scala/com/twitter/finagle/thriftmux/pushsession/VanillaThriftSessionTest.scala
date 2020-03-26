@@ -153,9 +153,7 @@ class VanillaThriftSessionTest extends FunSuite {
     Time.withCurrentTimeFrozen { timeControl =>
       new Ctx {
         val p = Promise[Response]()
-        override lazy val service = Service.mk[Request, Response] { _ =>
-          p
-        }
+        override lazy val service = Service.mk[Request, Response] { _ => p }
 
         session.receive(ByteReader(data))
         handle.serialExecutor.executeAll()
@@ -174,7 +172,9 @@ class VanillaThriftSessionTest extends FunSuite {
         handle.onClosePromise.setDone()
         handle.serialExecutor.executeAll()
 
-        assert(statsReceiver.gauges.get(Seq("pending")).isEmpty) // should have been removed in the close
+        assert(
+          statsReceiver.gauges.get(Seq("pending")).isEmpty
+        ) // should have been removed in the close
         assert(handle.pendingWrites.isEmpty)
         p.isInterrupted match {
           case Some(_: ClientDiscardedRequestException) => // nop OK

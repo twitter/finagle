@@ -48,9 +48,7 @@ case class ServerStatus(mask: Int) {
   def has(flag: Int) = (flag & mask) > 0
 
   override def toString = {
-    val cs = (ServerStatus.ServerStatusMap filter { t =>
-      has(t._2)
-    }).keys mkString (", ")
+    val cs = (ServerStatus.ServerStatusMap filter { t => has(t._2) }).keys mkString (", ")
     "ServerStatus(" + mask + ": " + cs + ")"
   }
 }

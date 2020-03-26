@@ -34,7 +34,8 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
       new Listener[Unit, Unit, TransportContext] {
         override def listen(
           addr: SocketAddress
-        )(serveTransport: (Transport[Unit, Unit] { type Context <: Server.this.Context }) => Unit
+        )(
+          serveTransport: (Transport[Unit, Unit] { type Context <: Server.this.Context }) => Unit
         ): ListeningServer = {
           val trans = mock[Transport[Unit, Unit]]
           val context = mock[TransportContext]

@@ -10,9 +10,7 @@ class NullToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("apply") {
     val toggle = NullToggleMap("hi")
-    forAll(IntGen) { i =>
-      assert(!toggle.isDefinedAt(i))
-    }
+    forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
   }
 
   test("iterator") {

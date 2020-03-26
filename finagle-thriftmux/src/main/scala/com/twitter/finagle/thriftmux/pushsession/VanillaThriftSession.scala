@@ -56,9 +56,7 @@ private final class VanillaThriftSession(
   private[this] val respond: Try[Message] => Unit = {
     // Since it's stateless we can reuse the Runnable!
     val runnable = new Runnable { def run = handleResponseComplete() }
-    { _ =>
-      exec.execute(runnable)
-    }
+    { _ => exec.execute(runnable) }
   }
 
   // These are the locals we need to have set on each dispatch

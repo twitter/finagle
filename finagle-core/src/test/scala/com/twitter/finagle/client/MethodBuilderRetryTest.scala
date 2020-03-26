@@ -120,9 +120,7 @@ class MethodBuilderRetryTest extends FunSuite {
 
   test("retries do not apply to failures handled by the RequeueFilter") {
     val stats = new InMemoryStatsReceiver()
-    val svc = Service.mk[Int, Int] { _ =>
-      Future.exception(Failure.rejected("nuh uh"))
-    }
+    val svc = Service.mk[Int, Int] { _ => Future.exception(Failure.rejected("nuh uh")) }
     val methodBuilder = retryMethodBuilder(svc, stats)
     val client = methodBuilder.withRetry
       .forClassifier {

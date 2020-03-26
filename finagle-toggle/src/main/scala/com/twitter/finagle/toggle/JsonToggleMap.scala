@@ -191,9 +191,7 @@ object JsonToggleMap {
 
   private[this] def toLibraryToggles(toggleMap: ToggleMap): Seq[LibraryToggle] = {
     // create a map of id to metadata for faster lookups
-    val idToMetadata = toggleMap.iterator.map { md =>
-      md.id -> md
-    }.toMap
+    val idToMetadata = toggleMap.iterator.map { md => md.id -> md }.toMap
 
     // create a mapping of id to a seq of its components.
     val idToComponents = mutable.Map.empty[String, List[Component]]

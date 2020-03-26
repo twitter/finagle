@@ -130,11 +130,11 @@ object ThriftMux
     // byte arrays. see CSL-1351
     ThriftMuxUtil.protocolRecorder +:
       Mux.server.stack
-      .insertBefore(StackServer.Role.preparer, Server.ServerToReqRepPreparer)
-      .replace(StackServer.Role.preparer, Server.ExnHandler)
-      // this filter adds tracing annotations and as such must come after trace initialization.
-      // however, mux removes the `TraceInitializerFilter` as it happens in the mux codec.
-      .prepend(BackupRequest.traceAnnotationModule[mux.Request, mux.Response])
+        .insertBefore(StackServer.Role.preparer, Server.ServerToReqRepPreparer)
+        .replace(StackServer.Role.preparer, Server.ExnHandler)
+        // this filter adds tracing annotations and as such must come after trace initialization.
+        // however, mux removes the `TraceInitializerFilter` as it happens in the mux codec.
+        .prepend(BackupRequest.traceAnnotationModule[mux.Request, mux.Response])
 
   /**
    * Base [[com.twitter.finagle.Stack.Params]] for ThriftMux servers.

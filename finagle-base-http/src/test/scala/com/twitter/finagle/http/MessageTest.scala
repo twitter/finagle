@@ -285,9 +285,7 @@ class MessageTest extends FunSuite {
 
   test("withOutputStream") {
     val response = Response()
-    response.withOutputStream { outputStream =>
-      outputStream.write("hello".getBytes)
-    }
+    response.withOutputStream { outputStream => outputStream.write("hello".getBytes) }
 
     assert(response.contentString == "hello")
     assert(response.length == 5)
@@ -308,9 +306,7 @@ class MessageTest extends FunSuite {
 
   test("withWriter") {
     val response = Response()
-    response.withWriter { writer =>
-      writer.write("hello")
-    }
+    response.withWriter { writer => writer.write("hello") }
 
     assert(response.contentString == "hello")
     assert(response.length == 5)

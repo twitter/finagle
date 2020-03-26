@@ -49,9 +49,7 @@ class LengthFieldFramerTest extends FunSuite with ScalaCheckDrivenPropertyChecks
     val frames = rand.nextInt(MaxTestFrames) + 1
     val frameSizes = (1 to frames).map(_ => rand.nextInt(MaxTestFrameSize))
     val stream = frameSizes
-      .map { size =>
-        mkTestFrame(size)
-      }
+      .map { size => mkTestFrame(size) }
       .foldLeft(Buf.Empty)(_.concat(_))
     (frameSizes, stream)
   }

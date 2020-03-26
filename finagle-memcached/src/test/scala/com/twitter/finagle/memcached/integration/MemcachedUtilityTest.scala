@@ -43,9 +43,7 @@ class MemcachedUtilityTest extends MemcachedTest {
 
   test("re-hash when a bad host is ejected") {
     val sr = new InMemoryStatsReceiver
-    val dest = Name.bound(servers.map { s =>
-      Address(s.address)
-    }: _*)
+    val dest = Name.bound(servers.map { s => Address(s.address) }: _*)
     val client = newPartitioningClient(
       dest,
       clientName,
@@ -62,31 +60,27 @@ class MemcachedUtilityTest extends MemcachedTest {
   }
 
   test("host comes back into ring after being ejected") {
-    testRingReEntryAfterEjection(
-      (timer, cacheServer, statsReceiver) => {
-        val dest: Name =
-          Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress]))
-        val client: Client = newPartitioningClient(
-          dest,
-          clientName,
-          (dest, clientName) => {
-            Memcached.client
-              .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-              .configured(param.EjectFailedHost(true))
-              .configured(ctfparam.Timer(timer))
-              .configured(ctfparam.Stats(statsReceiver))
-              .newRichClient(dest, clientName)
-          }
-        )
-        client
-      }
-    )
+    testRingReEntryAfterEjection((timer, cacheServer, statsReceiver) => {
+      val dest: Name =
+        Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress]))
+      val client: Client = newPartitioningClient(
+        dest,
+        clientName,
+        (dest, clientName) => {
+          Memcached.client
+            .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
+            .configured(param.EjectFailedHost(true))
+            .configured(ctfparam.Timer(timer))
+            .configured(ctfparam.Stats(statsReceiver))
+            .newRichClient(dest, clientName)
+        }
+      )
+      client
+    })
   }
 
   test("Add and remove nodes") {
-    val addrs = servers.map { s =>
-      Address(s.address)
-    }
+    val addrs = servers.map { s => Address(s.address) }
 
     // Start with 3 backends
     val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound(addrs.toSet.drop(2)))

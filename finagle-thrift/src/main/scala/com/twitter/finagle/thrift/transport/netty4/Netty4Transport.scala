@@ -19,27 +19,27 @@ import java.net.SocketAddress
  */
 private[finagle] object Netty4Transport {
 
-  val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit = { params: Stack.Params =>
-    { pipeline: ChannelPipeline =>
-      addFramerAtLast(pipeline, params)
-      pipeline.addLast("clientByteCodec", ClientByteBufCodec())
-      ()
-    }
+  val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit = {
+    params: Stack.Params =>
+      { pipeline: ChannelPipeline =>
+        addFramerAtLast(pipeline, params)
+        pipeline.addLast("clientByteCodec", ClientByteBufCodec())
+        ()
+      }
   }
 
   val Client: Stack.Params => SocketAddress => Transporter[
     ThriftClientRequest,
     Array[Byte],
-    TransportContext] = { params =>
-    Netty4Transporter.raw(ClientPipelineInit(params), _, params)
-  }
+    TransportContext] = { params => Netty4Transporter.raw(ClientPipelineInit(params), _, params) }
 
-  val ServerPipelineInit: Stack.Params => ChannelPipeline => Unit = { params =>
-    { pipeline: ChannelPipeline =>
-      addFramerAtLast(pipeline, params)
-      pipeline.addLast("serverByteCodec", ServerByteBufCodec())
-      ()
-    }
+  val ServerPipelineInit: Stack.Params => ChannelPipeline => Unit = {
+    params =>
+      { pipeline: ChannelPipeline =>
+        addFramerAtLast(pipeline, params)
+        pipeline.addLast("serverByteCodec", ServerByteBufCodec())
+        ()
+      }
   }
 
   val Server: Stack.Params => Listener[Array[Byte], Array[Byte], TransportContext] = { params =>

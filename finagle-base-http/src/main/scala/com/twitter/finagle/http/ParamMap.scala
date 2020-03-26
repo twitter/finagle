@@ -252,9 +252,7 @@ class RequestParamMap(val request: Request) extends ParamMap {
   // Get iterable for JMap, which might be null
   private def jiterator(params: JMap[String, JList[String]]): Iterator[(String, String)] =
     params.entrySet.asScala.flatMap { entry =>
-      entry.getValue.asScala map { value =>
-        (entry.getKey, value)
-      }
+      entry.getValue.asScala map { value => (entry.getKey, value) }
     }.toIterator
 }
 
@@ -270,16 +268,8 @@ object ParamMap {
 
   private[http] val EmptyJMap = new java.util.HashMap[String, JList[String]]
 
-  private val ToShort = { s: String =>
-    StringUtil.toSomeShort(s)
-  }
-  private val ToInt = { s: String =>
-    StringUtil.toSomeInt(s)
-  }
-  private val ToLong = { s: String =>
-    StringUtil.toSomeLong(s)
-  }
-  private val ToBoolean = { s: String =>
-    StringUtil.toBoolean(s)
-  }
+  private val ToShort = { s: String => StringUtil.toSomeShort(s) }
+  private val ToInt = { s: String => StringUtil.toSomeInt(s) }
+  private val ToLong = { s: String => StringUtil.toSomeLong(s) }
+  private val ToBoolean = { s: String => StringUtil.toBoolean(s) }
 }

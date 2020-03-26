@@ -10,9 +10,7 @@ private[finagle] class IdentityStreamTransport[A, B](self: Transport[A, B])
 }
 
 private[http] object IdentityStreamTransport {
-  private[this] val _readFn: Any => Multi[Any] = { item =>
-    Multi(item, Future.Done)
-  }
+  private[this] val _readFn: Any => Multi[Any] = { item => Multi(item, Future.Done) }
 
   def readFn[B]: B => Multi[B] = _readFn.asInstanceOf[B => Multi[B]]
 }

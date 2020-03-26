@@ -196,10 +196,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     statsReceiver.addGauge("logical_aperture") { logicalAperture },
     statsReceiver.addGauge("physical_aperture") { dist.physicalAperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
-      if (dapertureActive) 1F else 0F
+      if (dapertureActive) 1f else 0f
     },
     statsReceiver.addGauge("eager_connections") {
-      if (eagerConnections) 1F else 0F
+      if (eagerConnections) 1f else 0f
     },
     statsReceiver.addGauge("vector_hash") { _vectorHash }
   )
@@ -342,9 +342,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         Future.sleep(timeToSleep).onSuccess { _ =>
           // short circuit if this distributor has been discarded
           if (!rebuilt) {
-            vector(i).apply().flatMap { svc =>
-              svc.close()
-            }
+            vector(i).apply().flatMap { svc => svc.close() }
           }
         }
       }

@@ -96,7 +96,8 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
   private[this] lazy val resolvers = {
     val rs = f()
     val log = Logger()
-    val resolvers = Seq(inetResolver, fixedInetResolver, NegResolver, NilResolver, FailResolver) ++ rs
+    val resolvers =
+      Seq(inetResolver, fixedInetResolver, NegResolver, NilResolver, FailResolver) ++ rs
 
     val dups = resolvers
       .groupBy(_.scheme)

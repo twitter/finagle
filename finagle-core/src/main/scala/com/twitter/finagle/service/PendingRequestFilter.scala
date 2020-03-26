@@ -82,9 +82,7 @@ private[finagle] final class PendingRequestFilter[Req, Rep](
   private[this] val requestConcurrency =
     stats.addGauge("request_concurrency") { pending.floatValue() }
 
-  private[this] val decFn: Any => Unit = { _: Any =>
-    pending.decrementAndGet()
-  }
+  private[this] val decFn: Any => Unit = { _: Any => pending.decrementAndGet() }
 
   @tailrec
   final def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {

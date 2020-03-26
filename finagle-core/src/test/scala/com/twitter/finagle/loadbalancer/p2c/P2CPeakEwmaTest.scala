@@ -48,7 +48,7 @@ class P2CPeakEwmaTest extends FunSuite with P2CSuite {
   }
 
   case class LatentFactory(which: Int, latency: Any => Int) extends P2CServiceFactory {
-    val weight = 1D
+    val weight = 1d
     var load = 0
     var sum = 0
     def meanLoad: Double = if (load == 0) 0.0 else sum.toDouble / load.toDouble
@@ -65,17 +65,13 @@ class P2CPeakEwmaTest extends FunSuite with P2CSuite {
   }
 
   test("Balances evenly across identical nodes") {
-    val init = Vector.tabulate(N) { i =>
-      LatentFactory(i, Function.const(5))
-    }
+    val init = Vector.tabulate(N) { i => LatentFactory(i, Function.const(5)) }
     run(init, R)
     assertEven(init)
   }
 
   test("Probe a node without latency history at most once") {
-    val init = Vector.tabulate(N) { i =>
-      LatentFactory(i, Function.const(1))
-    }
+    val init = Vector.tabulate(N) { i => LatentFactory(i, Function.const(1)) }
     val vec = init :+ LatentFactory(N + 1, Function.const(R * 2))
     run(vec, R)
     assertEven(vec.init)
@@ -84,9 +80,7 @@ class P2CPeakEwmaTest extends FunSuite with P2CSuite {
 
   test("Balances proportionally across nodes with varying latencies") {
     val latency = 5
-    val init = Vector.tabulate(N) { i =>
-      LatentFactory(i, Function.const(latency))
-    }
+    val init = Vector.tabulate(N) { i => LatentFactory(i, Function.const(latency)) }
     // This is dependent on decayTime for N+1 to receive 1/2 the the load of the rest.
     // There is probably an elegant way to normalize our load as a function of decayTime,
     // but it wasn't obvious to me. This also verifies that we are actually decaying

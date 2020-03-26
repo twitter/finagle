@@ -108,9 +108,7 @@ private[finagle] class ExceptionRemoteInfoFactory[Req, Rep](
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
     underlying(conn)
-      .map { service =>
-        filter.andThen(service)
-      }
+      .map { service => filter.andThen(service) }
       .rescue(connectionAddRemoteInfo)
 
 }

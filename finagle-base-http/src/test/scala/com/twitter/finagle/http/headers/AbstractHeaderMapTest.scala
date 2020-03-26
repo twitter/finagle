@@ -301,25 +301,17 @@ abstract class AbstractHeaderMapTest
   test("does not validate header names or values with addUnsafe") {
     val headerMap = newHeaderMap()
 
-    forAll(genInvalidHeaderName) { k =>
-      headerMap.addUnsafe(k, "foo")
-    }
+    forAll(genInvalidHeaderName) { k => headerMap.addUnsafe(k, "foo") }
 
-    forAll(genInvalidHeaderValue) { v =>
-      headerMap.addUnsafe("foo", v)
-    }
+    forAll(genInvalidHeaderValue) { v => headerMap.addUnsafe("foo", v) }
   }
 
   test("does not validate header names or values with setUnsafe") {
     val headerMap = newHeaderMap()
 
-    forAll(genInvalidHeaderName) { k =>
-      headerMap.setUnsafe(k, "foo")
-    }
+    forAll(genInvalidHeaderName) { k => headerMap.setUnsafe(k, "foo") }
 
-    forAll(genInvalidHeaderValue) { v =>
-      headerMap.setUnsafe("foo", v)
-    }
+    forAll(genInvalidHeaderValue) { v => headerMap.setUnsafe("foo", v) }
   }
 
   test("getOrNull acts as get().orNull") {
@@ -351,9 +343,7 @@ abstract class AbstractHeaderMapTest
 
       val hs = newHeaderMap()
 
-      (0 until num).foreach { _ =>
-        hs.add("key", "value")
-      }
+      (0 until num).foreach { _ => hs.add("key", "value") }
       assert(hs.size == num)
 
       assert(stopwatch() < 10.seconds)

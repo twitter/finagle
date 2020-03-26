@@ -63,14 +63,12 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
   private[this] val serverset = Var(Vector.empty[EndpointFactory[Unit, Unit]])
 
   private[this] def newClients(n: Int): Vector[ServiceFactory[Unit, Unit]] =
-    Vector.tabulate(n)(
-      i =>
-        newBalancerFactory(Rng(i)).newBalancer(
-          Activity(serverset.map(Activity.Ok(_))),
-          new NoBrokersAvailableException(),
-          Stack.Params.empty
-      )
-    )
+    Vector.tabulate(n)(i =>
+      newBalancerFactory(Rng(i)).newBalancer(
+        Activity(serverset.map(Activity.Ok(_))),
+        new NoBrokersAvailableException(),
+        Stack.Params.empty
+      ))
 
   private[this] def newServers(n: Int): Vector[Server] =
     Vector.fill(n)(new Server)
@@ -153,6 +151,5 @@ class P2CPeakEmwaLoadDistributionTest
     extends LoadDistributionTest(notSoRandom => Balancers.p2cPeakEwma(rng = notSoRandom))
 
 class ApertureLoadDistributionTest
-    extends LoadDistributionTest(
-      notSoRandom => Balancers.aperture(rng = notSoRandom, minAperture = 5)
-    )
+    extends LoadDistributionTest(notSoRandom =>
+      Balancers.aperture(rng = notSoRandom, minAperture = 5))

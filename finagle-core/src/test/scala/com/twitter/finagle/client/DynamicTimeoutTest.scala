@@ -15,9 +15,7 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
   private[this] val timer = new MockTimer()
 
   private def mkSvc(): Service[Int, Int] =
-    Service.mk { _ =>
-      Future.never
-    }
+    Service.mk { _ => Future.never }
 
   private val perReqStack: Stack[ServiceFactory[Int, Int]] = {
     val svc = mkSvc()
@@ -231,9 +229,7 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
         Retries.Policy(retryOnTimeout) +
         param.Stats(stats)
 
-    val svrSvc = Service.mk { _: Int =>
-      new Promise[Int]()
-    }
+    val svrSvc = Service.mk { _: Int => new Promise[Int]() }
     val svcFactory = ServiceFactory.const(svrSvc)
 
     // build a stack with requests flowing top to bottom (though StackBuilder.push

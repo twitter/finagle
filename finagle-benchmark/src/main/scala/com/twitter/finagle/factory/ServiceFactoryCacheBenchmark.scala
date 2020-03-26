@@ -22,9 +22,7 @@ class ServiceFactoryCacheBenchmark extends StdBenchAnnotations {
 object ServiceFactoryCacheBenchmark {
 
   private[this] val newFactory: Int => ServiceFactory[Int, Int] = key => {
-    val svc = Service.mk[Int, Int] { in =>
-      Future.value(key + in)
-    }
+    val svc = Service.mk[Int, Int] { in => Future.value(key + in) }
     ServiceFactory.const(svc)
   }
 

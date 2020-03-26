@@ -87,11 +87,12 @@ private final class LazyEndpointFactory[Req, Rep](
     state.get match {
       case Init =>
         if (state.compareAndSet(Init, Making)) {
-          val underlying = try mk()
-          catch {
-            case NonFatal(exc) =>
-              new FailingFactory[Req, Rep](exc)
-          }
+          val underlying =
+            try mk()
+            catch {
+              case NonFatal(exc) =>
+                new FailingFactory[Req, Rep](exc)
+            }
           // This is the only place where we can transition from `Making`
           // to any other state so this is safe. All other spin loops wait
           // for the thread that has entered here to exit the `Making`

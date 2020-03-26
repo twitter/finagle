@@ -185,9 +185,7 @@ class EndToEndTest
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
-      1 to 5 foreach { _ =>
-        assert(await(client.query("ok")) == "okok")
-      }
+      1 to 5 foreach { _ => assert(await(client.query("ok")) == "okok") }
 
       await(server.close())
     }
@@ -270,9 +268,7 @@ class EndToEndTest
       for {
         (clientWhich, clientIface, clientClosable) <- clients(pf, port)
       } withClue(s"Server ($serverWhich), Client ($clientWhich) client with protocolFactory $pf") {
-        1.to(5).foreach { _ =>
-          assert(await(clientIface.query("ok")) == "okok")
-        }
+        1.to(5).foreach { _ => assert(await(clientIface.query("ok")) == "okok") }
         assert(await(clientIface.query("")) == clientId.name)
         await(clientClosable.close())
       }
@@ -529,9 +525,7 @@ class EndToEndTest
         "client"
       )
 
-    1 to 5 foreach { _ =>
-      assert(await(client.query("ok")) == clientId)
-    }
+    1 to 5 foreach { _ => assert(await(client.query("ok")) == clientId) }
 
     await(server.close())
   }
@@ -1533,9 +1527,7 @@ class EndToEndTest
       )()
     )
     val client = new TestService.FinagledClient(service, Protocols.binaryFactory())
-    val reqs = 1 to nreqs map { i =>
-      client.query("ok" + i)
-    }
+    val reqs = 1 to nreqs map { i => client.query("ok" + i) }
     // Although the requests are pipelined in the client, they must be
     // received by the service serially.
     1 to nreqs foreach { i =>
@@ -1544,9 +1536,7 @@ class EndToEndTest
       assert(testService.nReqReceived == i)
       servicePromises(i - 1).setValue(req + req)
     }
-    1 to nreqs foreach { i =>
-      assert(await(reqs(i - 1)) == "ok" + i + "ok" + i)
-    }
+    1 to nreqs foreach { i => assert(await(reqs(i - 1)) == "ok" + i + "ok" + i) }
     await(server.close())
   }
 

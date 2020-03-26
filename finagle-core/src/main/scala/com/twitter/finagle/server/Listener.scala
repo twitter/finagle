@@ -16,7 +16,8 @@ import java.net.SocketAddress
 trait Listener[In, Out, Ctx <: TransportContext] {
   def listen(
     addr: SocketAddress
-  )(serveTransport: Transport[In, Out] {
+  )(
+    serveTransport: Transport[In, Out] {
       type Context <: Ctx
     } => Unit
   ): ListeningServer
@@ -28,7 +29,8 @@ trait Listener[In, Out, Ctx <: TransportContext] {
 object NullListener extends Listener[Any, Any, TransportContext] {
   def listen(
     addr: SocketAddress
-  )(serveTransport: Transport[Any, Any] {
+  )(
+    serveTransport: Transport[Any, Any] {
       type Context <: TransportContext
     } => Unit
   ) = NullServer

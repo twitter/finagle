@@ -126,7 +126,8 @@ object RetryFilter {
   def apply[Req, Rep](
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  )(shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean]
+  )(
+    shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean]
   )(
     implicit timer: Timer
   ): RetryFilter[Req, Rep] =
@@ -196,7 +197,8 @@ object RetryExceptionsFilter {
   def apply[Req, Rep](
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  )(shouldRetry: PartialFunction[Try[Nothing], Boolean]
+  )(
+    shouldRetry: PartialFunction[Try[Nothing], Boolean]
   )(
     implicit timer: Timer
   ): RetryExceptionsFilter[Req, Rep] =

@@ -25,9 +25,7 @@ class NotFoundBenchmark extends StdBenchAnnotations {
   private[this] val Keys: Set[String] = Text.split(" ").toSet.take(25)
 
   private[this] val KVs: Map[String, String] =
-    Keys.map { k =>
-      k -> k
-    }.toMap
+    Keys.map { k => k -> k }.toMap
 
   private def pick(percent: Double): Set[String] = {
     val num = (Keys.size * percent).toInt

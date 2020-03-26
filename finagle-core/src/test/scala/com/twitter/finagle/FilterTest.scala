@@ -305,18 +305,14 @@ class FilterTest extends FunSuite {
   }
 
   test("Filter.andThen(Filter): lifts synchronous exceptions into Future.exception") {
-    val fail = Filter.mk[Int, Int, Int, Int] { (_, _) =>
-      throw new Exception
-    }
+    val fail = Filter.mk[Int, Int, Int, Int] { (_, _) => throw new Exception }
     val svc = (new PassThruFilter).andThen(fail).andThen(constSvc)
     val result = await(svc(4).liftToTry)
     assert(result.isThrow)
   }
 
   test("Filter.andThen(Service): can rescue synchronous exceptions from Service") {
-    val throwSvc = Service.mk[Int, Int] { _ =>
-      throw new IllegalArgumentException("bummer")
-    }
+    val throwSvc = Service.mk[Int, Int] { _ => throw new IllegalArgumentException("bummer") }
     val filter = new SimpleFilter[Int, Int] {
       def apply(request: Int, service: Service[Int, Int]): Future[Int] = {
         service(request).rescue {

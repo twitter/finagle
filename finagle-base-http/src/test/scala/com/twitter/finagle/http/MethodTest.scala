@@ -27,9 +27,7 @@ class MethodTest extends FunSuite {
   }
 
   test("apply(..) is case insensitive for known method names") {
-    knownMethods.foreach { m =>
-      assert(Method(m.name.toUpperCase) eq Method(m.name.toLowerCase))
-    }
+    knownMethods.foreach { m => assert(Method(m.name.toUpperCase) eq Method(m.name.toLowerCase)) }
   }
 
   test("case sensitive for unknown method names") {

@@ -120,25 +120,19 @@ class HttpClientDispatcherTest extends FunSuite {
     val c = res.reader.read()
     assert(!c.isDefined)
     req.writer.write(Buf.Utf8("a"))
-    out.read() flatMap { c =>
-      out.write(c)
-    }
+    out.read() flatMap { c => out.write(c) }
     assert(await(c) === Some(Buf.Utf8("a")))
 
     val cc = res.reader.read()
     assert(!cc.isDefined)
     req.writer.write(Buf.Utf8("some other thing"))
-    out.read() flatMap { c =>
-      out.write(c)
-    }
+    out.read() flatMap { c => out.write(c) }
     assert(await(cc) === Some(Buf.Utf8("some other thing")))
 
     val last = res.reader.read()
     assert(!last.isDefined)
     req.close()
-    out.read() flatMap { c =>
-      out.write(c)
-    }
+    out.read() flatMap { c => out.write(c) }
     assert(await(last).isEmpty)
   }
 

@@ -185,7 +185,7 @@ class ExecuteRequestTest extends FunSuite {
   val shortVal = 2.toShort
   val intVal = 3
   val longVal = 4L
-  val floatVal = 1.5F
+  val floatVal = 1.5f
   val doubleVal = 2.345
   val cal = Calendar.getInstance()
   val millis = cal.getTimeInMillis

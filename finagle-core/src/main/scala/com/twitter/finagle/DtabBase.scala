@@ -21,9 +21,7 @@ private[finagle] trait DtabBase extends IndexedSeq[Dentry] { self: Dtab =>
     val matches = dentries.collect {
       case Dentry(prefix, dst) if prefix.matches(path) =>
         val suff = path.drop(prefix.size)
-        dst.map { pfx =>
-          Name.Path(pfx ++ suff)
-        }
+        dst.map { pfx => Name.Path(pfx ++ suff) }
     }
 
     matches.size match {

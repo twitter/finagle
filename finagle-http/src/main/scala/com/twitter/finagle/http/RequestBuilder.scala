@@ -186,9 +186,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (config: RequestConfig) {
    */
   def add(elems: Seq[FormElement]): RequestBuilder[HasUrl, Valid] = {
     val first = this.add(elems.head)
-    elems.tail.foldLeft(first) { (b, elem) =>
-      b.add(elem)
-    }
+    elems.tail.foldLeft(first) { (b, elem) => b.add(elem) }
   }
 
   /**
@@ -379,9 +377,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (config: RequestConfig) {
 
     config.headers.foreach {
       case (field, values) =>
-        values.foreach { v =>
-          req.headerMap.add(field, v)
-        }
+        values.foreach { v => req.headerMap.add(field, v) }
     }
 
     req

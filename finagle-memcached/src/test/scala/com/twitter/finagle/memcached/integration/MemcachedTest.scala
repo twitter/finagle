@@ -45,9 +45,7 @@ abstract class MemcachedTest
 
     if (serversOpt.forall(_.isDefined)) {
       servers = serversOpt.flatten
-      val dest = Name.bound(servers.map { s =>
-        Address(s.address)
-      }: _*)
+      val dest = Name.bound(servers.map { s => Address(s.address) }: _*)
       client = createClient(dest, clientName)
     }
   }
@@ -218,9 +216,7 @@ abstract class MemcachedTest
       val stats = awaitResult(connectedClient.stats())
       assert(stats != null)
       assert(stats.nonEmpty)
-      stats.foreach { stat =>
-        assert(stat.startsWith("STAT"))
-      }
+      stats.foreach { stat => assert(stat.startsWith("STAT")) }
       service.close()
     }
   }
@@ -276,9 +272,7 @@ abstract class MemcachedTest
     // set values
     awaitResult(
       Future.collect(
-        (0 to max).map { i =>
-          client.set(s"foo$i", Buf.Utf8(s"bar$i"))
-        }
+        (0 to max).map { i => client.set(s"foo$i", Buf.Utf8(s"bar$i")) }
       )
     )
 
@@ -434,12 +428,8 @@ abstract class MemcachedTest
   def writeKeys(client: Client, numKeys: Int, keyLength: Int): Seq[String] = {
     // creating multiple random strings so that we get a uniform distribution of keys the
     // ketama ring and thus the Memcached shards
-    val keys = 1 to numKeys map { _ =>
-      randomString(keyLength)
-    }
-    val writes = keys map { key =>
-      client.set(key, Buf.Utf8(s"$key$ValueSuffix"))
-    }
+    val keys = 1 to numKeys map { _ => randomString(keyLength) }
+    val writes = keys map { key => client.set(key, Buf.Utf8(s"$key$ValueSuffix")) }
     awaitResult(Future.join(writes))
     keys
   }
@@ -463,9 +453,7 @@ abstract class MemcachedTest
 
     val newClient = client
     val oldClient = {
-      val dest = Name.bound(servers.map { s =>
-        Address(s.address)
-      }: _*)
+      val dest = Name.bound(servers.map { s => Address(s.address) }: _*)
       Memcached.client.newRichClient(dest, clientName)
     }
 
