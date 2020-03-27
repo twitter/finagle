@@ -1,8 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.util.{Future, Time}
-import java.util.concurrent.atomic.AtomicBoolean
+import com.twitter.util.{CloseOnce, Future, Time}
 
 private[finagle] object ClosableService {
   val role = Stack.Role("ClosableService")
@@ -36,25 +35,20 @@ private[finagle] object ClosableService {
  * `.close`.
  */
 private[service] abstract class ClosableService[Req, Rep](underlying: Service[Req, Rep])
-    extends Service[Req, Rep] {
-  private val closed = new AtomicBoolean(false)
+    extends Service[Req, Rep]
+    with CloseOnce {
 
   protected def closedException: Exception
 
   override def apply(req: Req): Future[Rep] = {
-    if (closed.get) Future.exception(closedException)
+    if (isClosed) Future.exception(closedException)
     else underlying(req)
   }
 
-  override def close(deadline: Time): Future[Unit] = {
-    val closeUnderlying: Boolean = closed.compareAndSet(false, true)
-
-    if (closeUnderlying) underlying.close(deadline)
-    else Future.Done
-  }
+  override protected final def closeOnce(deadline: Time): Future[Unit] = underlying.close(deadline)
 
   override def status: Status = {
-    if (closed.get) Status.Closed
+    if (isClosed) Status.Closed
     else underlying.status
   }
 }

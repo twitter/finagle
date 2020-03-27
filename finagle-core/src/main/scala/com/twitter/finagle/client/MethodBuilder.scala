@@ -14,8 +14,7 @@ import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util.{Showable, StackRegistry}
 import com.twitter.finagle.{Filter, Name, Service, ServiceFactory, Stack, param, _}
 import com.twitter.util.tunable.Tunable
-import com.twitter.util.{Future, Promise, Time}
-import java.util.concurrent.atomic.AtomicBoolean
+import com.twitter.util.{CloseOnce, Future, Time}
 
 object MethodBuilder {
 
@@ -514,27 +513,21 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       refCounted.get
     )
 
-    new ServiceProxy[Req, Rep](underlying) {
-      private[this] val isClosed = new AtomicBoolean(false)
-      private[this] val closedP = new Promise[Unit]()
-
+    new ServiceProxy[Req, Rep](underlying) with CloseOnce {
       override def apply(request: Req): Future[Rep] =
-        if (isClosed.get) Future.exception(new ServiceClosedException())
+        if (isClosed) Future.exception(new ServiceClosedException())
         else super.apply(request)
 
       override def status: Status =
-        if (isClosed.get) Status.Closed
+        if (isClosed) Status.Closed
         else underlying.status
 
-      override def close(deadline: Time): Future[Unit] = {
-        if (isClosed.compareAndSet(false, true)) {
-          // remove our method builder's entries from the registry
-          ClientRegistry.unregisterPrefixes(registryEntry(), registryKeyPrefix(name))
-          // call refCounted.close to decrease the ref count. `underlying.close` is only
-          // called when the closable underlying `refCounted` is closed.
-          closedP.become(refCounted.close(deadline).transform(_ => underlying.close(deadline)))
-        }
-        closedP
+      override protected def closeOnce(deadline: Time): Future[Unit] = {
+        // remove our method builder's entries from the registry
+        ClientRegistry.unregisterPrefixes(registryEntry(), registryKeyPrefix(name))
+        // call refCounted.close to decrease the ref count. `underlying.close` is only
+        // called when the closable underlying `refCounted` is closed.
+        refCounted.close(deadline).transform(_ => underlying.close(deadline))
       }
     }
   }

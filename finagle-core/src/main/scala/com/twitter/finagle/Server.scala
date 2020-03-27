@@ -10,7 +10,7 @@ import java.net.{InetSocketAddress, SocketAddress}
  * server. Closing a server instance unbinds the port and
  * relinquishes resources that are associated with the server.
  */
-trait ListeningServer extends Closable with Awaitable[Unit] {
+trait ListeningServer extends ClosableOnce with Awaitable[Unit] {
 
   /**
    * The address to which this server is bound.
@@ -21,7 +21,6 @@ trait ListeningServer extends Closable with Awaitable[Unit] {
 
   protected def closeServer(deadline: Time): Future[Unit]
 
-  private[this] var isClosed = false
   private[this] var announcements = List.empty[Future[Announcement]]
 
   /**
@@ -38,8 +37,7 @@ trait ListeningServer extends Closable with Awaitable[Unit] {
     }
   }
 
-  final def close(deadline: Time): Future[Unit] = synchronized {
-    isClosed = true
+  protected final def closeOnce(deadline: Time): Future[Unit] = synchronized {
     val collected = Future.collect(announcements)
     Future.join(
       Seq(
