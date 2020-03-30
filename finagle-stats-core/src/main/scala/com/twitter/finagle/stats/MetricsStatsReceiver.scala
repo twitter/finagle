@@ -6,6 +6,7 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, FuturePool, Time}
 import com.twitter.util.lint.{Category, GlobalRules, Issue, Rule}
+import java.util.concurrent.Executor
 import java.util.concurrent.atomic.LongAdder
 import scala.collection.JavaConverters._
 
@@ -52,6 +53,12 @@ class MetricsStatsReceiver(val registry: Metrics)
     extends StatsReceiverWithCumulativeGauges
     with CollisionTrackingStatsReceiver
     with WithHistogramDetails {
+
+  /**
+   * Overrides the executor that manages cumulative gauges to use the same
+   * executor that backs FuturePool.unboundedPool.
+   */
+  override def executor: Executor = FuturePool.defaultExecutor
 
   import MetricsStatsReceiver._
 
