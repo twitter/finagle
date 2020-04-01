@@ -28,10 +28,6 @@ All Balancers
   a fresh instance of the client's load balancer and receives traffic proportional
   to its weight.
 
-**busy_weight_classes**
-  A counter of the number of times a weight class in the loadbalancer was found busy or
-  closed.
-
 **adds**
   A counter of the number of hosts added to the loadbalancer.
 
