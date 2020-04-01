@@ -1,6 +1,6 @@
 scala_library(
     sources = ["**/*.scala"],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     # NB: This is not an actual dependency, but is necessary to have Pants behave
     #     like SBT, throwing an error for "import java.*" statements.
     java_sources = ["finagle/finagle-memcached/src/main/java"],

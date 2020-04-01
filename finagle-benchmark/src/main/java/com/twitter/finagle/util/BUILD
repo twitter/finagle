@@ -1,6 +1,6 @@
 java_library(
     sources = ["**/*.java"],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     zinc_file_manager = False,  # java.lang.IllegalArgumentException is thrown without this:
     dependencies = [
         "3rdparty/jvm/org/hdrhistogram",

@@ -1,6 +1,6 @@
 junit_tests(
     sources = ["**/*.scala"],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
         "3rdparty/jvm/io/netty:netty4-codec-http2",

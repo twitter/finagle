@@ -21,7 +21,7 @@ scala_library(
 junit_tests(
     sources = ["**/*.scala"] + exclude_globs(EXTERNAL_SOURCES),
     name = "scala",
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         ":external",
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",

@@ -3,7 +3,7 @@ scala_library(
         "scala-2.12-/**/*.scala",
         "scala/**/*.scala",
     ],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-base-http",

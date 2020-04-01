@@ -3,7 +3,7 @@ scala_library(
         "com/twitter/finagle/toggle/*.scala",
         "com/twitter/finagle/toggle/flag/*.scala",
     ],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-toggle",

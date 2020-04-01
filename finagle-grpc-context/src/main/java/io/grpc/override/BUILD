@@ -1,5 +1,5 @@
 java_library(
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     provides = artifact(
         org = "com.twitter",
         name = "finagle-grpc-context",

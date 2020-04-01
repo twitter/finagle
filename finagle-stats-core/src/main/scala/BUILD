@@ -16,7 +16,7 @@ scala_library(
         "!com/twitter/finagle/stats/StatsFilterFlags.scala",
         "**/*.scala",
     ],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-stats-core",

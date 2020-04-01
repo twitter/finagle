@@ -6,7 +6,7 @@ scala_library(
         "com/twitter/finagle/client/utils/StringClient.scala",
         "com/twitter/finagle/server/utils/StringServer.scala",
     ],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "finagle/finagle-core",
         "finagle/finagle-netty4",
@@ -22,7 +22,7 @@ scala_library(
         "com/twitter/finagle/pushsession/utils/MockChannelHandle.scala",
         "com/twitter/finagle/pushsession/utils/MockPushSession.scala",
     ],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "finagle/finagle-core/src/main/scala",
     ],
@@ -30,7 +30,7 @@ scala_library(
 
 junit_tests(
     sources = ["**/*.scala"],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         ":pushsession-utils",
         ":stringprotocol",

@@ -1,5 +1,5 @@
 scala_library(
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "3rdparty/jvm/io/opencensus:opencensus-api",
         "finagle/finagle-core",

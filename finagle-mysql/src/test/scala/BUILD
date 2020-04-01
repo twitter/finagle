@@ -3,7 +3,7 @@ scala_library(
     sources = [
         "com/twitter/finagle/mysql/integration/IntegrationClient.scala",
     ],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "3rdparty/jvm/org/scalatest",
         "finagle/finagle-mysql/src/main/scala",
@@ -12,7 +12,7 @@ scala_library(
 
 junit_tests(
     sources = ["**/*.scala"],
-    compiler_option_sets = {"fatal_warnings"},
+    compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/junit",
