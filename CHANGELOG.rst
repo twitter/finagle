@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Requeued reqeuests due to the `c.t.finagle.service.RequeueFilter` will generate
+their own spanId. ``PHAB_ID=D459106``
+
 20.4.0
 ------
 

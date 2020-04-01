@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.context
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.tracing.{Annotation, Trace, TraceId}
 import com.twitter.util._
 
 /**
@@ -40,7 +41,7 @@ private[finagle] class RequeueFilter[Req, Rep](
   maxRetriesPerReq: Double,
   timer: Timer)
     extends SimpleFilter[Req, Rep] {
-  import RequeueFilter.Requeueable
+  import RequeueFilter._
 
   require(maxRetriesPerReq >= 0, s"maxRetriesPerReq must be non-negative: $maxRetriesPerReq")
 
@@ -55,7 +56,7 @@ private[finagle] class RequeueFilter[Req, Rep](
     Future.const(t)
   }
 
-  private[this] def applyService(
+  private[this] def issueRequest(
     req: Req,
     service: Service[Req, Rep],
     attempt: Int,
@@ -63,8 +64,20 @@ private[finagle] class RequeueFilter[Req, Rep](
     backoffs: Stream[Duration]
   ): Future[Rep] = {
     Contexts.broadcast.let(context.Retries, context.Retries(attempt)) {
+      val trace = Trace()
+      // If a requeued request, add the attempt and annotation
+      if (trace.isActivelyTracing && attempt > 0) {
+        trace.record(RequeuedAnnotation)
+        trace.recordBinary("clnt/requeue_attempt", attempt)
+      }
+
       service(req).transform {
         case t @ Throw(Requeueable(_)) =>
+          // We also annotate the failure
+          if (trace.isActivelyTracing) {
+            trace.recordBinary("clnt/requeue_exc", t.throwable.getClass.getName)
+          }
+
           // We check the service's status to determine if a retry should be issued.
           // The status reflects the resources available, depending on the stack
           // configuration which is protocol specific. This could be all available
@@ -104,6 +117,26 @@ private[finagle] class RequeueFilter[Req, Rep](
     }
   }
 
+  private[this] def applyService(
+    req: Req,
+    service: Service[Req, Rep],
+    attempt: Int,
+    retriesRemaining: Int,
+    backoffs: Stream[Duration]
+  ): Future[Rep] = {
+    // If we've requeued a request, `attempt > 0`, we want the child request to subsequently
+    // generate a new spanId for this requeust. The original requeust, `attempt == 0` should
+    // retain the original span
+    if (attempt > 0) {
+      val requeueTraceId: TraceId = Trace.nextId
+      Trace.letId(requeueTraceId) {
+        issueRequest(req, service, attempt, retriesRemaining, backoffs)
+      }
+    } else {
+      issueRequest(req, service, attempt, retriesRemaining, backoffs)
+    }
+  }
+
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     retryBudget.deposit()
     val maxRetries = Math.ceil(maxRetriesPerReq * retryBudget.balance).toInt
@@ -112,6 +145,7 @@ private[finagle] class RequeueFilter[Req, Rep](
 }
 
 object RequeueFilter {
+  private val RequeuedAnnotation = Annotation.Message("Requeued Request")
 
   /**
    * An extractor for exceptions which are known to be safe to retry.

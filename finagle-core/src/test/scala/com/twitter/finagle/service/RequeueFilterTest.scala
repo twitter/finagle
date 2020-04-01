@@ -2,6 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
+import com.twitter.finagle.tracing.{Trace, TraceId}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
@@ -184,6 +185,81 @@ class RequeueFilterTest extends FunSuite {
       val retriesInContext = List(0, 1, 2, 3, 4, 5)
 
       assert(stats.stat("retry_context_retries")().map(_.toInt) == retriesInContext)
+    }
+  }
+
+  test("requeued requests generate a new span") {
+    val minRetries = 10
+    val percentRequeues = 0.5
+    val filter = new RequeueFilter[Throwable, Int](
+      RetryBudget(1.second, minRetries, percentRequeues, Stopwatch.timeMillis),
+      Backoff.constant(Duration.Zero),
+      NullStatsReceiver,
+      percentRequeues,
+      DefaultTimer
+    )
+
+    var recordedTraces: Seq[TraceId] = Seq.empty
+    val svcFactory = ServiceFactory.const(
+      filter.andThen(Service.mk[Throwable, Int] { req =>
+        // capture the trace for this requeust
+        recordedTraces = recordedTraces :+ Trace.id
+        Future.exception(req)
+      })
+    )
+
+    val svc = Await.result(svcFactory(), 5.seconds)
+    val rootTrace = Trace.nextId
+    Time.withCurrentTimeFrozen { _ =>
+      intercept[FailedFastException] {
+        // set the root trace
+        Trace.letId(rootTrace) {
+          Await.result(svc(new FailedFastException("boom")), 5.seconds)
+        }
+      }
+    }
+
+    val triedRequests = 6
+    assert(recordedTraces.size == triedRequests)
+    assert(recordedTraces.head == rootTrace)
+    assert(recordedTraces.map(_.spanId.toLong).distinct.size == triedRequests)
+  }
+
+  test("requeued requests have their parent trace ids set correctly") {
+    val minRetries = 10
+    val percentRequeues = 0.5
+    val filter = new RequeueFilter[Throwable, Int](
+      RetryBudget(1.second, minRetries, percentRequeues, Stopwatch.timeMillis),
+      Backoff.constant(Duration.Zero),
+      NullStatsReceiver,
+      percentRequeues,
+      DefaultTimer
+    )
+
+    var recordedTraces: Seq[TraceId] = Seq.empty
+    val svcFactory = ServiceFactory.const(
+      filter.andThen(Service.mk[Throwable, Int] { req =>
+        // capture the trace for this requeust
+        recordedTraces = recordedTraces :+ Trace.id
+        Future.exception(req)
+      })
+    )
+
+    val svc = Await.result(svcFactory(), 5.seconds)
+    Time.withCurrentTimeFrozen { _ =>
+      intercept[FailedFastException] {
+        // set the root trace
+        Trace.letId(Trace.nextId) {
+          Await.result(svc(new FailedFastException("boom")), 5.seconds)
+        }
+      }
+    }
+
+    // the root trace does not have a parent.
+    for (i <- 1 until 6) {
+      val span = recordedTraces(i)
+      val parentSpan = recordedTraces(i - 1)
+      assert(span.parentId == parentSpan.spanId)
     }
   }
 
