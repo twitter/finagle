@@ -13,7 +13,7 @@ import io.netty.channel.{
 }
 
 /**
- * Codec that converts outbount client requests to `ByteBuf`s
+ * Codec that converts outbound client requests to `ByteBuf`s
  * and inbound `ByteBuf`s to arrays of type `Array[Byte]`.
  */
 private[netty4] object ClientByteBufCodec {
