@@ -68,8 +68,9 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     when(context.sslSessionInfo).thenReturn(mockSslSessionInfo)
     when(mockSslSessionInfo.peerCertificates).thenReturn(Seq(mockCert))
     val service = new Service[String, String] {
-      override def apply(request: String): Future[String] = Future.value {
-        if (Contexts.local.get(Transport.peerCertCtx) == Some(mockCert)) "ok" else "not ok"
+      def apply(request: String): Future[String] = {
+        val responseBody = if (Transport.peerCertificate == Some(mockCert)) "ok" else "not ok"
+        Future.value(responseBody)
       }
     }
 

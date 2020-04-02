@@ -35,12 +35,11 @@ private[finagle] final class MuxServerSession(
     Local.letClear {
       val remoteAddressLocal = Contexts.local
         .KeyValuePair(RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
-      val peerCertLocal =
-        handle.sslSessionInfo.peerCertificates.headOption
-          .map(Contexts.local.KeyValuePair(Transport.peerCertCtx, _))
+      val peerCertLocal = Contexts.local
+        .KeyValuePair(Transport.sslSessionInfoCtx, handle.sslSessionInfo)
 
       Trace.letTracer(params[param.Tracer].tracer) {
-        Contexts.local.let(Seq(remoteAddressLocal) ++ peerCertLocal) {
+        Contexts.local.let(Seq(remoteAddressLocal, peerCertLocal)) {
           Local.save()
         }
       }

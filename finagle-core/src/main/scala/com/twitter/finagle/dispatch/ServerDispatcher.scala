@@ -69,14 +69,12 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
       val save = Local.save()
       val dispatched =
         try {
-          Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.context.remoteAddress) {
-            val peerCertificates = trans.context.sslSessionInfo.peerCertificates
-            if (peerCertificates.isEmpty) dispatch(req, eos)
-            else
-              Contexts.local.let(Transport.peerCertCtx, peerCertificates.head) {
-                dispatch(req, eos)
-              }
-          }
+          Contexts.local.let(
+            RemoteInfo.Upstream.AddressCtx, // key 1
+            trans.context.remoteAddress, // value 1
+            Transport.sslSessionInfoCtx, // key 2
+            trans.context.sslSessionInfo // value 2
+          )(dispatch(req, eos))
         } finally Local.restore(save)
 
       val handled = dispatched.flatMap(handleFn)

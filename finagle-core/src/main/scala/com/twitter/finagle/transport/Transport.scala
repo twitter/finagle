@@ -5,7 +5,7 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
-import com.twitter.finagle.ssl.session.NullSslSessionInfo
+import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer, StreamTermination}
 import com.twitter.util._
 import java.net.SocketAddress
@@ -100,13 +100,23 @@ trait Transport[In, Out] extends Closable { self =>
  */
 object Transport {
 
-  private[finagle] val peerCertCtx = new Contexts.local.Key[Certificate]
+  private[finagle] val sslSessionInfoCtx = new Contexts.local.Key[SslSessionInfo]
 
   /**
-   * Retrieve the transport's SSLSession (if any) from
-   * [[com.twitter.finagle.context.Contexts.local]]
+   * Retrieve the [[Transport]]'s [[SslSessionInfo]] from
+   * [[com.twitter.finagle.context.Contexts.local]] if available. If none exists,
+   * a [[NullSslSessionInfo]] is returned instead.
    */
-  def peerCertificate: Option[Certificate] = Contexts.local.get(peerCertCtx)
+  def sslSessionInfo: SslSessionInfo = Contexts.local.get(sslSessionInfoCtx) match {
+    case Some(info) => info
+    case None => NullSslSessionInfo
+  }
+
+  /**
+   * Retrieve the peer certificate of the [[Transport]], if
+   * one exists.
+   */
+  def peerCertificate: Option[Certificate] = sslSessionInfo.peerCertificates.headOption
 
   /**
    * $param the buffer sizes of a `Transport`.

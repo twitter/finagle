@@ -19,6 +19,10 @@ their own spanId. ``PHAB_ID=D459106``
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: Add `Transport.sslSessionInfo` local context which provides access to
+  the `SSLSession`, session id, cipher suite, and local and peer certificates.
+  ``PHAB_ID=D459854``
+
 * finagle-thrift/thriftmux: Thrift and ThriftMux client side can set a sharable
   TReusableBuffer by `withTReusableBufferFactory`. ``PHAB_ID=D452763``
 
