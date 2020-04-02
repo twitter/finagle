@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -361,7 +361,7 @@ for construction if you don't need to specify passthrough fields.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="Scribe$FinagleClient.html"><span class="name">Scribe$FinagleClient</span></a><span class="result"> extends <a href="Scribe.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe">Scribe</a>[<span class="extype" name="com.twitter.util.Future">Future</span>]</span>
+        <a title="" href="Scribe$FinagleClient.html"><span class="name">Scribe$FinagleClient</span></a><span class="result"> extends <a href="Scribe.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>

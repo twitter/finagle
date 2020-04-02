@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1154,7 +1154,7 @@ it proxies data from a <span class="extype" name="Balancer">Balancer</span> whic
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="While this exception is safe to retry, the assumption used here is that the underlying situation will not change soon enough to make a retry worthwhile as retrying is most likely to eat up the entire budget." href="NoNodesOpenException.html"><span class="name">NoNodesOpenException</span></a><span class="result"> extends <a href="../../../../scala/index.html#RuntimeException=RuntimeException" class="extmbr" name="scala.RuntimeException">RuntimeException</a> with <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="NoNodesOpenException.html" class="extype" name="com.twitter.finagle.loadbalancer.NoNodesOpenException">NoNodesOpenException</a>] with <span class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</span> with <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a title="While this exception is safe to retry, the assumption used here is that the underlying situation will not change soon enough to make a retry worthwhile as retrying is most likely to eat up the entire budget." href="NoNodesOpenException.html"><span class="name">NoNodesOpenException</span></a><span class="result"> extends <a href="../../../../scala/index.html#RuntimeException=RuntimeException" class="extmbr" name="scala.RuntimeException">RuntimeException</a> with <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="NoNodesOpenException.html" class="extype" name="com.twitter.finagle.loadbalancer.NoNodesOpenException">NoNodesOpenException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
       </span>
       
       <p class="shortcomment cmt">While this exception is safe to retry, the assumption used here is
@@ -1395,7 +1395,7 @@ represents a changing collection of addresses that is load balanced over.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="A GlobalFlag that changes the default balancer for every client in the process." href="defaultBalancer$.html"><span class="name">defaultBalancer</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="java.lang.String">String</span>]</span>
+        <a title="A GlobalFlag that changes the default balancer for every client in the process." href="defaultBalancer$.html"><span class="name">defaultBalancer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A <span class="extype" name="GlobalFlag">GlobalFlag</span> that changes the default balancer for every client in the process.</p><div class="fullcomment"><div class="comment cmt"><p>A <span class="extype" name="GlobalFlag">GlobalFlag</span> that changes the default balancer for every client in the process.
@@ -1421,7 +1421,7 @@ To configure the load balancer on a per-client granularity instead, use the
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="A GlobalFlag which allows the configuration of per host (or endpoint) stats to be toggled." href="perHostStats$.html"><span class="name">perHostStats</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="A GlobalFlag which allows the configuration of per host (or endpoint) stats to be toggled." href="perHostStats$.html"><span class="name">perHostStats</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A <span class="extype" name="GlobalFlag">GlobalFlag</span> which allows the configuration of per host (or endpoint)

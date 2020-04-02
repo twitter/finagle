@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Extending Finagle &#8212; Finagle 20.3.0 documentation</title>
+    <title>Extending Finagle &#8212; Finagle 20.4.0 documentation</title>
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -502,14 +502,10 @@ two and create a client. We’ll create a client that uses Netty 4:</p>
   <span class="nc">Netty4Transporter</span><span class="o">[</span><span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="o">](</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">addr</span><span class="o">,</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
 
 <span class="k">val</span> <span class="n">bridge</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Service</span><span class="o">[</span><span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span>
-  <span class="n">transporter</span><span class="o">(</span><span class="n">addr</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">transport</span> <span class="k">=&gt;</span>
-    <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">)</span>
-  <span class="o">}</span>
+  <span class="n">transporter</span><span class="o">(</span><span class="n">addr</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">transport</span> <span class="k">=&gt;</span> <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">)</span> <span class="o">}</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span><span class="p">,</span> <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="n">bridge</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">svc</span> <span class="k">=&gt;</span>
-    <span class="n">svc</span><span class="o">(</span><span class="n">req</span><span class="o">)</span> <span class="n">ensure</span> <span class="n">svc</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
-  <span class="o">}</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="n">bridge</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">svc</span> <span class="k">=&gt;</span> <span class="n">svc</span><span class="o">(</span><span class="n">req</span><span class="o">)</span> <span class="n">ensure</span> <span class="n">svc</span><span class="o">.</span><span class="n">close</span><span class="o">()</span> <span class="o">}</span>
 <span class="o">}</span>
 </pre></div>
 </div>

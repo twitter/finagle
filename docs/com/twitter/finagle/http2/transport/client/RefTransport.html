@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -239,7 +239,7 @@ change when the underlying transport changes.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../../../transport/TransportProxy.html" class="extype" name="com.twitter.finagle.transport.TransportProxy">TransportProxy</a>[<span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.In">In</span>, <span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.Out">Out</span>], <a href="../../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.In">In</span>, <span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.Out">Out</span>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, <a href="../../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../../transport/TransportProxy.html" class="extype" name="com.twitter.finagle.transport.TransportProxy">TransportProxy</a>[<span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.In">In</span>, <span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.Out">Out</span>], <a href="../../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.In">In</span>, <span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.Out">Out</span>], <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a>, <a href="../../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -430,7 +430,7 @@ change when the underlying transport changes.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Closes the mapped transport, and prevents future updates to the
@@ -449,7 +449,7 @@ underlying transport.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -465,7 +465,7 @@ underlying transport.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -610,7 +610,7 @@ underlying transport.
       </span>
       
       <p class="shortcomment cmt">Maps this transport to <code>Transport[In1, Out2]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Maps this transport to <code>Transport[In1, Out2]</code>. Note, exceptions
-in <code>f</code> and <code>g</code> are lifted to a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span>.
+in <code>f</code> and <code>g</code> are lifted to a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>.
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The function applied to <code>write</code>s input.</p></dd><dt class="param">g</dt><dd class="cmt"><p>The function applied to the result of a <code>read</code></p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
@@ -678,7 +678,7 @@ in <code>f</code> and <code>g</code> are lifted to a <span class="extype" name="
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">onClose</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../../../../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a>]</span>
+        <span class="name">onClose</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../../../../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a>]</span>
       </span>
       
       <p class="shortcomment cmt">The channel closed with the given exception.</p><div class="fullcomment"><div class="comment cmt"><p>The channel closed with the given exception. This is the
@@ -698,7 +698,7 @@ close events.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">read</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.Out">Out</span>]</span>
+        <span class="name">read</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.Out">Out</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Read a message from the transport.</p><div class="fullcomment"><div class="comment cmt"><p>Read a message from the transport.
@@ -872,7 +872,7 @@ updated to.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="msg">msg: <span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.In">In</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">write</span><span class="params">(<span name="msg">msg: <span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.In">In</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Write <code>req</code> to this transport; the returned future
@@ -937,7 +937,7 @@ acknowledges write completion.
             </div><div class="parent" name="com.twitter.finagle.transport.Transport">
               <h3>Inherited from <a href="../../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.In">In</span>, <span class="extype" name="com.twitter.finagle.http2.transport.client.RefTransport.Out">Out</span>]</h3>
             </div><div class="parent" name="com.twitter.util.Closable">
-              <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

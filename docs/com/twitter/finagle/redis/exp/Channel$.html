@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -230,7 +230,7 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Channel</span><span class="result"> extends <a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)] with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">Channel</span><span class="result"> extends <a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)] with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
@@ -239,7 +239,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)], <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)], <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -299,7 +299,7 @@ resources for using Finagle.
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">MessageHandler</span><span class="result alias"> = ((<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">MessageHandler</span><span class="result alias"> = ((<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a></dd></dl></div>
@@ -554,7 +554,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">subscribeCommand</span><span class="params">(<span name="channel">channel: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="handler">handler: <a href="SubscribeHandler.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeHandler">SubscribeHandler</a></span>)</span><span class="result">: <a href="../protocol/Subscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.Subscribe">Subscribe</a></span>
+        <span class="name">subscribeCommand</span><span class="params">(<span name="channel">channel: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="handler">handler: <a href="SubscribeHandler.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeHandler">SubscribeHandler</a></span>)</span><span class="result">: <a href="../protocol/Subscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.Subscribe">Subscribe</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.exp.Channel">Channel</a> → <a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a></dd></dl></div>
@@ -586,7 +586,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsubscribeCommand</span><span class="params">(<span name="channel">channel: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="handler">handler: <a href="SubscribeHandler.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeHandler">SubscribeHandler</a></span>)</span><span class="result">: <a href="../protocol/Unsubscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.Unsubscribe">Unsubscribe</a></span>
+        <span class="name">unsubscribeCommand</span><span class="params">(<span name="channel">channel: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="handler">handler: <a href="SubscribeHandler.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeHandler">SubscribeHandler</a></span>)</span><span class="result">: <a href="../protocol/Unsubscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.Unsubscribe">Unsubscribe</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.exp.Channel">Channel</a> → <a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a></dd></dl></div>
@@ -677,7 +677,7 @@ resources for using Finagle.
             </div><div class="parent" name="scala.Equals">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a></h3>
             </div><div class="parent" name="com.twitter.finagle.redis.exp.SubscriptionType">
-              <h3>Inherited from <a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a>[(<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>)]</h3>
+              <h3>Inherited from <a href="SubscriptionType.html" class="extype" name="com.twitter.finagle.redis.exp.SubscriptionType">SubscriptionType</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1162,7 +1162,7 @@ generator.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A friendly client to talk to a Memcached server." href="BaseClient.html"><span class="name">BaseClient</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <a title="A friendly client to talk to a Memcached server." href="BaseClient.html"><span class="name">BaseClient</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
       </span>
       
       <p class="shortcomment cmt">A friendly client to talk to a Memcached server.</p><div class="fullcomment"><div class="comment cmt"><p>A friendly client to talk to a Memcached server.
@@ -1198,7 +1198,7 @@ generator.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
+        <a title="" href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
       </span>
       
       
@@ -1247,7 +1247,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="Entry.html"><span class="name">Entry</span></a><span class="params">(<span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Entry.html"><span class="name">Entry</span></a><span class="params">(<span name="value">value: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -748,10 +748,6 @@ finagle clients and servers.
                         <a href="Filterable.html" title="Allows filtering of a ServicePerEndpoint when constructing new ServicePerEndpoint through MethodBuilder">Filterable</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="KetamaShardingServiceBuilder.html" title=""></a>
-                        <a href="KetamaShardingServiceBuilder.html" title="">KetamaShardingServiceBuilder</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="class" href="LocalRateLimitingStrategy.html" title="Strategy responsible for tracking requests and computing rate per client."></a>
                         <a href="LocalRateLimitingStrategy.html" title="Strategy responsible for tracking requests and computing rate per client.">LocalRateLimitingStrategy</a>
                       </li><li class="current-entities indented4">
@@ -822,10 +818,6 @@ finagle clients and servers.
                         <span class="separator"></span>
                         <a class="object" href="RetryingService$.html" title=""></a>
                         <a href="RetryingService$.html" title="">RetryingService</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="ShardingService.html" title="ShardingService takes a Distributor where the handle is a service."></a>
-                        <a href="ShardingService.html" title="ShardingService takes a Distributor where the handle is a service.">ShardingService</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="SimpleRetryPolicy.html" title="A retry policy abstract class."></a>
@@ -1251,22 +1243,6 @@ customizable.
       <p class="shortcomment cmt">Allows filtering of a <code>ServicePerEndpoint</code> when constructing new ServicePerEndpoint
 through <code>MethodBuilder</code>
 </p>
-    </li><li name="com.twitter.finagle.service.KetamaShardingServiceBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="KetamaShardingServiceBuilder[Req,Rep]extendsProductwithSerializable"></a><a id="KetamaShardingServiceBuilder[Req,Rep]:KetamaShardingServiceBuilder[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/index.html#KetamaShardingServiceBuilder[Req,Rep]extendsProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="KetamaShardingServiceBuilder.html"><span class="name">KetamaShardingServiceBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_nodes">_nodes: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<span class="extype" name="com.twitter.hashing.KetamaNode">KetamaNode</span>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Rep">Rep</span>]]]] = <span class="symbol"><span class="name"><a href="../../../../scala/index.html">None: None.type</a></span></span></span>, <span name="_hash">_hash: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a>]] = <span class="symbol"><span class="name"><a href="../../../../scala/index.html">None: None.type</a></span></span></span>, <span name="_numReps">_numReps: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol">160</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.service.LocalRateLimitingStrategy" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LocalRateLimitingStrategy[Req]extendsReq=&gt;com.twitter.util.Future[Boolean]"></a><a id="LocalRateLimitingStrategy[Req]:LocalRateLimitingStrategy[Req]"></a>
       <span class="permalink">
@@ -1279,7 +1255,7 @@ through <code>MethodBuilder</code>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Strategy responsible for tracking requests and computing rate per client." href="LocalRateLimitingStrategy.html"><span class="name">LocalRateLimitingStrategy</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.LocalRateLimitingStrategy.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="Strategy responsible for tracking requests and computing rate per client." href="LocalRateLimitingStrategy.html"><span class="name">LocalRateLimitingStrategy</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.LocalRateLimitingStrategy.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Strategy responsible for tracking requests and computing rate per client.</p>
@@ -1333,7 +1309,7 @@ rate limiting strategy.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Represents a request/response pair." href="ReqRep.html"><span class="name">ReqRep</span></a><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>, <span name="response">response: <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Represents a request/response pair." href="ReqRep.html"><span class="name">ReqRep</span></a><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>, <span name="response">response: <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Represents a request/response pair.</p><div class="fullcomment"><div class="comment cmt"><p>Represents a request/response pair.</p><p>For some protocols, like HTTP, these types are what you'd expect —
@@ -1526,7 +1502,7 @@ less correlation between retries. For example <span class="extype" name="HighRes
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A function defining retry behavior for a given value type A." href="RetryPolicy.html"><span class="name">RetryPolicy</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>])]</span>
+        <a title="A function defining retry behavior for a given value type A." href="RetryPolicy.html"><span class="name">RetryPolicy</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>])]</span>
       </span>
       
       <p class="shortcomment cmt">A function defining retry behavior for a given value type <code>A</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A function defining retry behavior for a given value type <code>A</code>.</p><p>The <span class="extype" name="Function1">Function1</span> returns <span class="extype" name="None">None</span> if no more retries should be made
@@ -1536,34 +1512,6 @@ as the next <code>RetryPolicy</code> to use.</p><p>Finagle will handle retryable
 supply a custom <a href="#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> to inform Finagle which application
 level exceptions are retryable.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="SimpleRetryPolicy.html" class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy">SimpleRetryPolicy</a> for a Java friendly API.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.service.ShardingService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ShardingService[Req,Rep]extendsService[Req,Rep]"></a><a id="ShardingService[Req,Rep]:ShardingService[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/index.html#ShardingService[Req,Rep]extendsService[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="ShardingService takes a Distributor where the handle is a service." href="ShardingService.html"><span class="name">ShardingService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.ShardingService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.ShardingService.Rep">Rep</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">ShardingService takes a <code>Distributor</code> where the handle is a service.</p><div class="fullcomment"><div class="comment cmt"><p>ShardingService takes a <code>Distributor</code> where the handle is a service.
-It uses the distributor to distribute requests *only* when the hash function returns Some[Long].
-If None is returned, it throws <code>NotShardableException</code>.
-If the underlying service for a particular shard is not available, <code>NotServableException</code> is thrown.
-Example:
-  val serviceFactory =
-    KetamaShardingServiceBuilder()
-      .nodes(services) // services is of type Seq[(String, Service[Req,Rep])]
-      .withHash { req =&gt; Some(hashCodeOfSomething)}
-      .buildFactory()
-  val service = serviceFactory()
-  service(req) // where req is a Req and may have ShardableRequest mixed in
-</p></div></div>
     </li><li name="com.twitter.finagle.service.SimpleRetryPolicy" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="SimpleRetryPolicy[A]extendsRetryPolicy[A]withA=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]"></a><a id="SimpleRetryPolicy[A]:SimpleRetryPolicy[A]"></a>
       <span class="permalink">
@@ -1576,7 +1524,7 @@ Example:
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A retry policy abstract class." href="SimpleRetryPolicy.html"><span class="name">SimpleRetryPolicy</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>] with (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<span class="extype" name="com.twitter.util.Duration">Duration</span>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
+        <a title="A retry policy abstract class." href="SimpleRetryPolicy.html"><span class="name">SimpleRetryPolicy</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>] with (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
       </span>
       
       <p class="shortcomment cmt">A retry policy abstract class.</p><div class="fullcomment"><div class="comment cmt"><p>A retry policy abstract class. This is convenient to use for Java programmers. Simply implement

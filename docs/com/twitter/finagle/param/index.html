@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1241,13 +1241,13 @@ of Finagle clients.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.finagle.stats.ExceptionStatsHandler throughout finagle servers and clients." href="ExceptionStatsHandler.html"><span class="name">ExceptionStatsHandler</span></a><span class="params">(<span name="categorizer">categorizer: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">stats.ExceptionStatsHandler</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.stats.ExceptionStatsHandler throughout finagle servers and clients." href="ExceptionStatsHandler.html"><span class="name">ExceptionStatsHandler</span></a><span class="params">(<span name="categorizer">categorizer: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">stats.ExceptionStatsHandler</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a
-<span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">com.twitter.finagle.stats.ExceptionStatsHandler</span> throughout finagle servers
+<a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">com.twitter.finagle.stats.ExceptionStatsHandler</a> throughout finagle servers
 and clients.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a
-<span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">com.twitter.finagle.stats.ExceptionStatsHandler</span> throughout finagle servers
+<a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">com.twitter.finagle.stats.ExceptionStatsHandler</a> throughout finagle servers
 and clients.</p><p>NB: Since the default for failures is to be scoped under &quot;failures&quot;, if you
 set the default to be in another scope, it may be difficult for engineers
 unfamiliar with your stats to understand your service's key metrics.
@@ -1264,11 +1264,11 @@ unfamiliar with your stats to understand your service's key metrics.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a high resolution com.twitter.util.Timer such that tasks are run tighter to their schedule." href="HighResTimer.html"><span class="name">HighResTimer</span></a><span class="params">(<span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">util.Timer</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a high resolution com.twitter.util.Timer such that tasks are run tighter to their schedule." href="HighResTimer.html"><span class="name">HighResTimer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">util.Timer</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">A class eligible for configuring a high resolution <span class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</span>
-such that tasks are run tighter to their schedule.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a high resolution <span class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</span>
+      <p class="shortcomment cmt">A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html" class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</a>
+such that tasks are run tighter to their schedule.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html" class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</a>
 such that tasks are run tighter to their schedule.
 </p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <span class="extype" name="com.twitter.util.Local">Locals</span>
  from scheduling time to execution time.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>it is expected that the resolution should be sub-10 milliseconds.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Timer.html" class="extype" name="com.twitter.finagle.param.Timer">Timer</a> for a configuration that is appropriate for
@@ -1319,10 +1319,10 @@ used throughout finagle clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.util.Monitor throughout finagle servers and clients." href="Monitor.html"><span class="name">Monitor</span></a><span class="params">(<span name="monitor">monitor: <span class="extype" name="com.twitter.util.Monitor">util.Monitor</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.util.Monitor throughout finagle servers and clients." href="Monitor.html"><span class="name">Monitor</span></a><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">util.Monitor</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">A class eligible for configuring a <span class="extype" name="com.twitter.util.Monitor">com.twitter.util.Monitor</span>
+      <p class="shortcomment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">com.twitter.util.Monitor</a>
 throughout finagle servers and clients.</p>
     </li><li name="com.twitter.finagle.param.ProtocolLibrary" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ProtocolLibraryextendsProductwithSerializable"></a><a id="ProtocolLibrary:ProtocolLibrary"></a>
@@ -1515,11 +1515,11 @@ client to maintain higher success rates.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.finagle.stats.StatsReceiver throughout finagle clients and servers." href="Stats.html"><span class="name">Stats</span></a><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.stats.StatsReceiver throughout finagle clients and servers." href="Stats.html"><span class="name">Stats</span></a><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a
-<span class="extype" name="com.twitter.finagle.stats.StatsReceiver">com.twitter.finagle.stats.StatsReceiver</span> throughout finagle
+<a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html" class="extype" name="com.twitter.finagle.stats.StatsReceiver">com.twitter.finagle.stats.StatsReceiver</a> throughout finagle
 clients and servers.</p>
     </li><li name="com.twitter.finagle.param.Timer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="TimerextendsProductwithSerializable"></a><a id="Timer:Timer"></a>
@@ -1533,11 +1533,11 @@ clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.util.Timer used throughout finagle clients and servers." href="Timer.html"><span class="name">Timer</span></a><span class="params">(<span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">util.Timer</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.util.Timer used throughout finagle clients and servers." href="Timer.html"><span class="name">Timer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">util.Timer</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">A class eligible for configuring a <span class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</span> used
-throughout finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a <span class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</span> used
+      <p class="shortcomment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html" class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</a> used
+throughout finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html" class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</a> used
 throughout finagle clients and servers.
 </p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <span class="extype" name="com.twitter.util.Local">Locals</span>
  from scheduling time to execution time.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="HighResTimer.html" class="extype" name="com.twitter.finagle.param.HighResTimer">HighResTimer</a> for a configuration that needs a more

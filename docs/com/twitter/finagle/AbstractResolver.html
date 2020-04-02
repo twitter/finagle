@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1164,10 +1164,6 @@ generator.
                         <a href="NotServableException.html" title="Indicates that the request was not servable, according to some policy.">NotServableException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="NotShardableException.html" title="Indicates that the client failed to distribute a given request according to some sharding strategy."></a>
-                        <a href="NotShardableException.html" title="Indicates that the client failed to distribute a given request according to some sharding strategy.">NotShardableException</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="NullServer$.html" title="An empty ListeningServer that can be used as a placeholder."></a>
                         <a href="NullServer$.html" title="An empty ListeningServer that can be used as a placeholder.">NullServer</a>
                       </li><li class="current-entities indented3">
@@ -1480,7 +1476,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bind</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
+        <span class="name">bind</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Var.html#com.twitter.util.Var" class="extype" name="com.twitter.util.Var">Var</a>[<a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></dd></dl></div>

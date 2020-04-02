@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -809,7 +809,7 @@ Further details, including the request and response, are available at
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">idempotent</span><span class="params">(<span name="maxExtraLoad">maxExtraLoad: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+        <span class="name">idempotent</span><span class="params">(<span name="maxExtraLoad">maxExtraLoad: <a href="https://twitter.github.io/util/docs/com/twitter/util/tunable/Tunable.html#com.twitter.util.tunable.Tunable" class="extype" name="com.twitter.util.tunable.Tunable">Tunable</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
       </span>
       
       <p class="shortcomment cmt">Configure that requests are to be treated as idempotent.</p><div class="fullcomment"><div class="comment cmt"><p>Configure that requests are to be treated as idempotent. Because requests can be safely
@@ -1146,7 +1146,7 @@ the client.</p></li></ol>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withTimeoutPerRequest</span><span class="params">(<span name="howLong">howLong: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+        <span class="name">withTimeoutPerRequest</span><span class="params">(<span name="howLong">howLong: <a href="https://twitter.github.io/util/docs/com/twitter/util/tunable/Tunable.html#com.twitter.util.tunable.Tunable" class="extype" name="com.twitter.util.tunable.Tunable">Tunable</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
       </span>
       
       <p class="shortcomment cmt">How long a <b>single</b> request is given to complete.</p><div class="fullcomment"><div class="comment cmt"><p>How long a <b>single</b> request is given to complete.</p><p>If there are <a href="#withRetryForClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.http.MethodBuilder#withRetryForClassifier">retries</a>, each attempt is given up
@@ -1184,7 +1184,7 @@ builder.withTimeoutPerRequest(tunableTimeout))</pre></li></ol>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withTimeoutPerRequest</span><span class="params">(<span name="howLong">howLong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+        <span class="name">withTimeoutPerRequest</span><span class="params">(<span name="howLong">howLong: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
       </span>
       
       <p class="shortcomment cmt">How long a <b>single</b> request is given to complete.</p><div class="fullcomment"><div class="comment cmt"><p>How long a <b>single</b> request is given to complete.</p><p>If there are <a href="#withRetryForClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.http.MethodBuilder#withRetryForClassifier">retries</a>, each attempt is given up
@@ -1220,7 +1220,7 @@ builder.withTimeoutPerRequest(<span class="num">50.</span>milliseconds))</pre></
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withTimeoutTotal</span><span class="params">(<span name="howLong">howLong: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+        <span class="name">withTimeoutTotal</span><span class="params">(<span name="howLong">howLong: <a href="https://twitter.github.io/util/docs/com/twitter/util/tunable/Tunable.html#com.twitter.util.tunable.Tunable" class="extype" name="com.twitter.util.tunable.Tunable">Tunable</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
       </span>
       
       <p class="shortcomment cmt">Set a total timeout with a <span class="extype" name="Tunable">Tunable</span>, including time spent on retries.</p><div class="fullcomment"><div class="comment cmt"><p>Set a total timeout with a <span class="extype" name="Tunable">Tunable</span>, including time spent on retries.</p><p>If the request does not complete in this time, the response
@@ -1255,7 +1255,7 @@ builder.withTimeoutTotal(tunableTimeout))</pre></li></ol>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withTimeoutTotal</span><span class="params">(<span name="howLong">howLong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+        <span class="name">withTimeoutTotal</span><span class="params">(<span name="howLong">howLong: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
       </span>
       
       <p class="shortcomment cmt">Set a total timeout, including time spent on retries.</p><div class="fullcomment"><div class="comment cmt"><p>Set a total timeout, including time spent on retries.</p><p>If the request does not complete in this time, the response

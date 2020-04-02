@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1164,10 +1164,6 @@ generator.
                         <a href="NotServableException.html" title="Indicates that the request was not servable, according to some policy.">NotServableException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="NotShardableException.html" title="Indicates that the client failed to distribute a given request according to some sharding strategy."></a>
-                        <a href="NotShardableException.html" title="Indicates that the client failed to distribute a given request according to some sharding strategy.">NotShardableException</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="" title="An empty ListeningServer that can be used as a placeholder."></a>
                         <a href="" title="An empty ListeningServer that can be used as a placeholder.">NullServer</a>
                       </li><li class="current-entities indented3">
@@ -1401,7 +1397,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a>, <span class="extype" name="com.twitter.util.Awaitable">Awaitable</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Awaitable.html#com.twitter.util.Awaitable" class="extype" name="com.twitter.util.Awaitable">Awaitable</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>], <a href="https://twitter.github.io/util/docs/com/twitter/util/ClosableOnce.html#com.twitter.util.ClosableOnce" class="extype" name="com.twitter.util.ClosableOnce">ClosableOnce</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/CloseOnce.html#com.twitter.util.CloseOnce" class="extype" name="com.twitter.util.CloseOnce">CloseOnce</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a>, <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1427,7 +1423,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.NullServer"><span>NullServer</span></li><li class="in" name="com.twitter.finagle.ListeningServer"><span>ListeningServer</span></li><li class="in" name="com.twitter.util.Awaitable"><span>Awaitable</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.NullServer"><span>NullServer</span></li><li class="in" name="com.twitter.finagle.ListeningServer"><span>ListeningServer</span></li><li class="in" name="com.twitter.util.Awaitable"><span>Awaitable</span></li><li class="in" name="com.twitter.util.ClosableOnce"><span>ClosableOnce</span></li><li class="in" name="com.twitter.util.CloseOnce"><span>CloseOnce</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -1514,7 +1510,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">announce</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a>]</span>
+        <span class="name">announce</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Announce the given address and return a future to the announcement
@@ -1577,7 +1573,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.ListeningServer#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.util.CloseOnce#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a><a id="close(Time):Future[Unit]"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/NullServer$.html#close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]" title="Permalink">
@@ -1589,10 +1585,10 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a> → Closable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseOnce</dd></dl></div>
     </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a><a id="close(Duration):Future[Unit]"></a>
       <span class="permalink">
@@ -1605,7 +1601,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -1621,10 +1617,26 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li name="com.twitter.finagle.ListeningServer#closeOnce" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="closeOnce(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a><a id="closeOnce(Time):Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/NullServer$.html#closeOnce(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">closeOnce</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a> → CloseOnce</dd></dl></div>
     </li><li name="com.twitter.finagle.NullServer#closeServer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="closeServer(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a><a id="closeServer(Time):Future[Unit]"></a>
       <span class="permalink">
@@ -1637,7 +1649,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">closeServer</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">closeServer</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a> → <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></dd></dl></div>
@@ -1733,6 +1745,22 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.util.CloseOnce#isClosed" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isClosed:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/NullServer$.html#isClosed:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isClosed</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseOnce</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -1831,7 +1859,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ready</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a>.this.type</span>
+        <span class="name">ready</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a>.this.type</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a> → Awaitable</dd></dl></div>
@@ -1847,7 +1875,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">result</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">result</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a> → Awaitable</dd></dl></div>
@@ -1863,7 +1891,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/Set.html#scala.collection.immutable.Set" class="extype" name="scala.collection.immutable.Set">Set</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]] with <span class="extype" name="com.twitter.util.Extractable">Extractable</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/Set.html#scala.collection.immutable.Set" class="extype" name="scala.collection.immutable.Set">Set</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]]</span>
+        <span class="name">set</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Var.html#com.twitter.util.Var" class="extype" name="com.twitter.util.Var">Var</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/Set.html#scala.collection.immutable.Set" class="extype" name="scala.collection.immutable.Set">Set</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]] with <a href="https://twitter.github.io/util/docs/com/twitter/util/Extractable.html#com.twitter.util.Extractable" class="extype" name="com.twitter.util.Extractable">Extractable</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/collection/immutable/Set.html#scala.collection.immutable.Set" class="extype" name="scala.collection.immutable.Set">Set</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></dd></dl></div>
@@ -1980,9 +2008,13 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <div class="parent" name="com.twitter.finagle.ListeningServer">
               <h3>Inherited from <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></h3>
             </div><div class="parent" name="com.twitter.util.Awaitable">
-              <h3>Inherited from <span class="extype" name="com.twitter.util.Awaitable">Awaitable</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Awaitable.html#com.twitter.util.Awaitable" class="extype" name="com.twitter.util.Awaitable">Awaitable</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</h3>
+            </div><div class="parent" name="com.twitter.util.ClosableOnce">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/ClosableOnce.html#com.twitter.util.ClosableOnce" class="extype" name="com.twitter.util.ClosableOnce">ClosableOnce</a></h3>
+            </div><div class="parent" name="com.twitter.util.CloseOnce">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/CloseOnce.html#com.twitter.util.CloseOnce" class="extype" name="com.twitter.util.CloseOnce">CloseOnce</a></h3>
             </div><div class="parent" name="com.twitter.util.Closable">
-              <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

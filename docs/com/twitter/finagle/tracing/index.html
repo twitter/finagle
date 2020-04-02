@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1229,7 +1229,7 @@ spans.</p></span></dd></dl></div>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Records information of interest to the tracing system." href="Record.html"><span class="name">Record</span></a><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="timestamp">timestamp: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="annotation">annotation: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="duration">duration: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Records information of interest to the tracing system." href="Record.html"><span class="name">Record</span></a><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="annotation">annotation: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="duration">duration: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Records information of interest to the tracing system.</p><div class="fullcomment"><div class="comment cmt"><p>Records information of interest to the tracing system. For example when an event happened,
@@ -1325,9 +1325,9 @@ override the span resets, and still be properly reported here.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This should be replaced by per-codec trace initializers that
 is capable of parsing trace information out of the codec.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.TracelessFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TracelessFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a><a id="TracelessFilter[Req,Rep]:TracelessFilter[Req,Rep]"></a>
+      <a id="TracelessFilterextendsFilter.TypeAgnostic"></a><a id="TracelessFilter:TracelessFilter"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/index.html#TracelessFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/index.html#TracelessFilterextendsFilter.TypeAgnostic" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1336,7 +1336,7 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl></
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A filter to clear tracing information" href="TracelessFilter.html"><span class="name">TracelessFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.tracing.TracelessFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.TracelessFilter.Rep">Rep</span>]</span>
+        <a title="A filter to clear tracing information" href="TracelessFilter.html"><span class="name">TracelessFilter</span></a><span class="result"> extends <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>
       </span>
       
       <p class="shortcomment cmt">A filter to clear tracing information
@@ -1408,7 +1408,7 @@ and increase throughput.</p><pre><span class="cmt">// Performs six context looku
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A logging Handler that sends log information via tracing" href="TracingLogHandler.html"><span class="name">TracingLogHandler</span></a><span class="result"> extends <span class="extype" name="com.twitter.logging.Handler">Handler</span></span>
+        <a title="A logging Handler that sends log information via tracing" href="TracingLogHandler.html"><span class="name">TracingLogHandler</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/logging/Handler.html#com.twitter.logging.Handler" class="extype" name="com.twitter.logging.Handler">Handler</a></span>
       </span>
       
       <p class="shortcomment cmt">A logging Handler that sends log information via tracing
@@ -1755,7 +1755,7 @@ which is used to identify traces that belong to the respective process.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="enabled$.html"><span class="name">enabled</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="" href="enabled$.html"><span class="name">enabled</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       
@@ -1771,7 +1771,7 @@ which is used to identify traces that belong to the respective process.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="traceId128Bit$.html"><span class="name">traceId128Bit</span></a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="" href="traceId128Bit$.html"><span class="name">traceId128Bit</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       

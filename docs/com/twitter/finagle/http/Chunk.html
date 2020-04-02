@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -507,7 +507,7 @@ resources for using Finagle.
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Represents a piece of an HTTP stream, commonly referred to as a chunk.</p><p>HTTP semantics treat trailing headers as the end of stream signal hence no writes (neither
 trailers nor data) are allowed after them, only <code>close</code> (EOS) is valid. This is typically
-enforced by an HTTP dispatcher in both clients and servers.</p><p>Similarly, when consumed via <span class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</span>, trailers are always followed by <code>None</code>,
+enforced by an HTTP dispatcher in both clients and servers.</p><p>Similarly, when consumed via <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html" class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</a>, trailers are always followed by <code>None</code>,
 readers's EOS. Users MUST read until the end of stream to ensure resource hygiene.</p><p>The following example demonstrates one way of doing so: wiring in one extra read before
 returning from a read-loop:</p><pre><span class="kw">def</span> accumulate(r: Reader[Chunk]): Future[(Buf, <span class="std">Option</span>[HeaderMap])] = {
   <span class="kw">def</span> loop(acc: Buf, trailers: <span class="std">Option</span>[HeaderMap]): Future[(Buf, <span class="std">Option</span>[HeaderMap])] =
@@ -592,7 +592,7 @@ individual HTTP streams from child readers.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">content</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
+        <span class="name">content</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>
       </span>
       
       <p class="shortcomment cmt">The payload of this chunk.</p><div class="fullcomment"><div class="comment cmt"><p>The payload of this chunk. Can be empty if this is a last chunk.

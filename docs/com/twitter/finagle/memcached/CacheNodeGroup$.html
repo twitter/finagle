@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -461,9 +461,9 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.CacheNodeGroup#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(group:com.twitter.finagle.Group[java.net.SocketAddress],useOnlyResolvedAddress:Boolean):com.twitter.finagle.Group[com.twitter.finagle.partitioning.CacheNode]"></a><a id="apply(Group[SocketAddress],Boolean):Group[CacheNode]"></a>
+      <a id="apply(group:com.twitter.finagle.Group[java.net.SocketAddress],useOnlyResolvedAddress:Boolean):com.twitter.finagle.Group[com.twitter.finagle.partitioning.PartitionNode]"></a><a id="apply(Group[SocketAddress],Boolean):Group[PartitionNode]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/CacheNodeGroup$.html#apply(group:com.twitter.finagle.Group[java.net.SocketAddress],useOnlyResolvedAddress:Boolean):com.twitter.finagle.Group[com.twitter.finagle.partitioning.CacheNode]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/memcached/CacheNodeGroup$.html#apply(group:com.twitter.finagle.Group[java.net.SocketAddress],useOnlyResolvedAddress:Boolean):com.twitter.finagle.Group[com.twitter.finagle.partitioning.PartitionNode]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -472,14 +472,14 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="group">group: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="useOnlyResolvedAddress">useOnlyResolvedAddress: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../partitioning/CacheNode.html" class="extype" name="com.twitter.finagle.partitioning.CacheNode">CacheNode</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="group">group: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="useOnlyResolvedAddress">useOnlyResolvedAddress: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../partitioning/PartitionNode.html" class="extype" name="com.twitter.finagle.partitioning.PartitionNode">PartitionNode</a>]</span>
       </span>
       
       
     </li><li name="com.twitter.finagle.memcached.CacheNodeGroup#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(hosts:String):com.twitter.finagle.Group[com.twitter.finagle.partitioning.CacheNode]"></a><a id="apply(String):Group[CacheNode]"></a>
+      <a id="apply(hosts:String):com.twitter.finagle.Group[com.twitter.finagle.partitioning.PartitionNode]"></a><a id="apply(String):Group[PartitionNode]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/CacheNodeGroup$.html#apply(hosts:String):com.twitter.finagle.Group[com.twitter.finagle.partitioning.CacheNode]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/memcached/CacheNodeGroup$.html#apply(hosts:String):com.twitter.finagle.Group[com.twitter.finagle.partitioning.PartitionNode]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -488,7 +488,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../partitioning/CacheNode.html" class="extype" name="com.twitter.finagle.partitioning.CacheNode">CacheNode</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../partitioning/PartitionNode.html" class="extype" name="com.twitter.finagle.partitioning.PartitionNode">PartitionNode</a>]</span>
       </span>
       
       
@@ -657,9 +657,9 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.CacheNodeGroup#newStaticGroup" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newStaticGroup(cacheNodeSet:Set[com.twitter.finagle.partitioning.CacheNode]):com.twitter.finagle.Group[com.twitter.finagle.partitioning.CacheNode]"></a><a id="newStaticGroup(Set[CacheNode]):Group[CacheNode]"></a>
+      <a id="newStaticGroup(cacheNodeSet:Set[com.twitter.finagle.partitioning.PartitionNode]):com.twitter.finagle.Group[com.twitter.finagle.partitioning.PartitionNode]"></a><a id="newStaticGroup(Set[PartitionNode]):Group[PartitionNode]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/CacheNodeGroup$.html#newStaticGroup(cacheNodeSet:Set[com.twitter.finagle.partitioning.CacheNode]):com.twitter.finagle.Group[com.twitter.finagle.partitioning.CacheNode]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/memcached/CacheNodeGroup$.html#newStaticGroup(cacheNodeSet:Set[com.twitter.finagle.partitioning.PartitionNode]):com.twitter.finagle.Group[com.twitter.finagle.partitioning.PartitionNode]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -668,14 +668,14 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newStaticGroup</span><span class="params">(<span name="cacheNodeSet">cacheNodeSet: <span class="extype" name="scala.Predef.Set">Set</span>[<a href="../partitioning/CacheNode.html" class="extype" name="com.twitter.finagle.partitioning.CacheNode">CacheNode</a>]</span>)</span><span class="result">: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../partitioning/CacheNode.html" class="extype" name="com.twitter.finagle.partitioning.CacheNode">CacheNode</a>]</span>
+        <span class="name">newStaticGroup</span><span class="params">(<span name="cacheNodeSet">cacheNodeSet: <span class="extype" name="scala.Predef.Set">Set</span>[<a href="../partitioning/PartitionNode.html" class="extype" name="com.twitter.finagle.partitioning.PartitionNode">PartitionNode</a>]</span>)</span><span class="result">: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../partitioning/PartitionNode.html" class="extype" name="com.twitter.finagle.partitioning.PartitionNode">PartitionNode</a>]</span>
       </span>
       
       
     </li><li name="com.twitter.finagle.memcached.CacheNodeGroup#newZkCacheNodeGroup" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newZkCacheNodeGroup(path:String,zkClient:com.twitter.finagle.common.zookeeper.ZooKeeperClient,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.Group[com.twitter.finagle.partitioning.CacheNode]"></a><a id="newZkCacheNodeGroup(String,ZooKeeperClient,StatsReceiver):Group[CacheNode]"></a>
+      <a id="newZkCacheNodeGroup(path:String,zkClient:com.twitter.finagle.common.zookeeper.ZooKeeperClient,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.Group[com.twitter.finagle.partitioning.PartitionNode]"></a><a id="newZkCacheNodeGroup(String,ZooKeeperClient,StatsReceiver):Group[PartitionNode]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/CacheNodeGroup$.html#newZkCacheNodeGroup(path:String,zkClient:com.twitter.finagle.common.zookeeper.ZooKeeperClient,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.Group[com.twitter.finagle.partitioning.CacheNode]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/memcached/CacheNodeGroup$.html#newZkCacheNodeGroup(path:String,zkClient:com.twitter.finagle.common.zookeeper.ZooKeeperClient,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.Group[com.twitter.finagle.partitioning.PartitionNode]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -684,7 +684,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newZkCacheNodeGroup</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="zkClient">zkClient: <span class="extype" name="com.twitter.finagle.common.zookeeper.ZooKeeperClient">ZooKeeperClient</span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="symbol"><span class="name"><a href="../../../index.html">NullStatsReceiver</a></span></span></span>)</span><span class="result">: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../partitioning/CacheNode.html" class="extype" name="com.twitter.finagle.partitioning.CacheNode">CacheNode</a>]</span>
+        <span class="name">newZkCacheNodeGroup</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="zkClient">zkClient: <span class="extype" name="com.twitter.finagle.common.zookeeper.ZooKeeperClient">ZooKeeperClient</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">NullStatsReceiver</a></span></span></span>)</span><span class="result">: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../partitioning/PartitionNode.html" class="extype" name="com.twitter.finagle.partitioning.PartitionNode">PartitionNode</a>]</span>
       </span>
       
       

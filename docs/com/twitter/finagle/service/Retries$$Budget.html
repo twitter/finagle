@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -214,7 +214,7 @@ a client.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Budget</span><span class="params">(<span name="retryBudget">retryBudget: <a href="RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>, <span name="requeueBackoffs">requeueBackoffs: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<span class="extype" name="com.twitter.util.Duration">Duration</span>] = <span class="symbol"><span class="name"><a href="Retries$$Budget$.html">Budget.emptyBackoffSchedule</a></span></span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">Budget</span><span class="params">(<span name="retryBudget">retryBudget: <a href="RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>, <span name="requeueBackoffs">requeueBackoffs: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>] = <span class="symbol"><span class="name"><a href="Retries$$Budget$.html">Budget.emptyBackoffSchedule</a></span></span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
@@ -302,7 +302,7 @@ being retried.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Budget</span><span class="params">(<span name="retryBudget">retryBudget: <a href="RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>, <span name="requeueBackoffs">requeueBackoffs: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<span class="extype" name="com.twitter.util.Duration">Duration</span>] = <span class="symbol"><span class="name"><a href="Retries$$Budget$.html">Budget.emptyBackoffSchedule</a></span></span></span>)</span>
+        <span class="name">Budget</span><span class="params">(<span name="retryBudget">retryBudget: <a href="RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>, <span name="requeueBackoffs">requeueBackoffs: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>] = <span class="symbol"><span class="name"><a href="Retries$$Budget$.html">Budget.emptyBackoffSchedule</a></span></span></span>)</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">retryBudget</dt><dd class="cmt"><p>maintains a budget of remaining retries for
@@ -617,7 +617,7 @@ resulting in an infinite computation to get to the hashCode.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">requeueBackoffs</span><span class="result">: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>
+        <span class="name">requeueBackoffs</span><span class="result">: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>
       </span>
       
       

@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -443,7 +443,7 @@ to code via <code>Contexts.local(ClientDeserializeCtx.Key)</code>.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ClientDeserializeCtx</span><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>, <span name="replyDeserializer">replyDeserializer: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx.Rep">Rep</span>]</span>)</span>
+        <span class="name">ClientDeserializeCtx</span><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>, <span name="replyDeserializer">replyDeserializer: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<span class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx.Rep">Rep</span>]</span>)</span>
       </span>
       
       
@@ -631,12 +631,12 @@ as such, should be ignored.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">deserialize</span><span class="params">(<span name="responseBytes">responseBytes: <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx.Rep">Rep</span>]</span>
+        <span class="name">deserialize</span><span class="params">(<span name="responseBytes">responseBytes: <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<span class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx.Rep">Rep</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Deserialize the given bytes.</p><div class="fullcomment"><div class="comment cmt"><p>Deserialize the given bytes.</p><p>Ensures that deserialization will only happen once regardless of future
-inputs. If different bytes are seen on future calls, this will still
-return the first deserialized result.
+      <p class="shortcomment cmt">Deserialize the given bytes.</p><div class="fullcomment"><div class="comment cmt"><p>Deserialize the given bytes.</p><p>Ensures that deserialization will only happen once for non fan-out responses
+regardless of future inputs. If different bytes are seen on future calls,
+this will still return the first deserialized result.
 </p></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>

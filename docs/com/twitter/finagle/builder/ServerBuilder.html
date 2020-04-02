@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -672,7 +672,7 @@ Http.server.configured(ServerAdmissionControl.Param(enable))</pre></div><dl clas
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">exceptionCategorizer</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">exceptionCategorizer</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Provide an alternative to putting all request exceptions under
@@ -755,7 +755,7 @@ Http.server.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl clas
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionMaxIdleTime</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">hostConnectionMaxIdleTime</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       
@@ -771,7 +771,7 @@ Http.server.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl clas
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionMaxLifeTime</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">hostConnectionMaxLifeTime</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       
@@ -884,7 +884,7 @@ Http.server.withAdmissionControl.concurrencyLimit(<span class="num">10</span>, <
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">monitor</span><span class="params">(<span name="mFactory">mFactory: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">monitor</span><span class="params">(<span name="mFactory">mFactory: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">Monitor</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>CommonParams.withMonitor</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>CommonParams.withMonitor</code>.
@@ -994,7 +994,7 @@ Http.server.withLabel(<span class="lit">"my_server"</span>)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readTimeout</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">readTimeout</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>TransportParams.readTimeout</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>TransportParams.readTimeout</code>.
@@ -1032,7 +1032,7 @@ Http.server.withTransport.receiveBufferSize(value)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>CommonParams.withStatsReceiver</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>CommonParams.withStatsReceiver</code>.
@@ -1051,7 +1051,7 @@ Http.server.withStatsReceiver(receiver)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">requestTimeout</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">requestTimeout</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>CommonParams.withRequestTimeout</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>CommonParams.withRequestTimeout</code>.
@@ -1397,7 +1397,7 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeCompletionTimeout</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">writeCompletionTimeout</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>TransportParams.writeTimeout</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>TransportParams.writeTimeout</code>.

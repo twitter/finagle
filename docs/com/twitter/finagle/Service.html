@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1164,10 +1164,6 @@ generator.
                         <a href="NotServableException.html" title="Indicates that the request was not servable, according to some policy.">NotServableException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="NotShardableException.html" title="Indicates that the client failed to distribute a given request according to some sharding strategy."></a>
-                        <a href="NotShardableException.html" title="Indicates that the client failed to distribute a given request according to some sharding strategy.">NotShardableException</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="NullServer$.html" title="An empty ListeningServer that can be used as a placeholder."></a>
                         <a href="NullServer$.html" title="An empty ListeningServer that can be used as a placeholder.">NullServer</a>
                       </li><li class="current-entities indented3">
@@ -1391,7 +1387,7 @@ generator.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Service</span><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>] with <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <span class="name">Service</span><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>] with <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
       </span>
       </h4>
 
@@ -1403,12 +1399,12 @@ generator.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.util.Closable">Closable</span>, (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>], <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a>, (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>], <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">
               Known Subclasses
             </span>
-            <div class="subClasses hiddenContent"><a href="FactoryToService.html" class="extype" name="com.twitter.finagle.FactoryToService">FactoryToService</a>, <a href="ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>, <a href="dispatch/ClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher">ClientDispatcher</a>, <a href="dispatch/GenPipeliningDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenPipeliningDispatcher">GenPipeliningDispatcher</a>, <a href="dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>, <a href="dispatch/PipeliningDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher">PipeliningDispatcher</a>, <a href="dispatch/SerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialClientDispatcher">SerialClientDispatcher</a>, <a href="exception/thriftscala/Scribe$FinagleService.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe$FinagleService">Scribe$FinagleService</a>, <a href="exception/thriftscala/Scribe$$FinagledService.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.FinagledService">FinagledService</a>, <a href="http/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.http.HttpMuxHandler">HttpMuxHandler</a>, <a href="http/HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="http/HttpMuxer$.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="http/service/NotFoundService.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>, <a href="http/service/NotFoundService$.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>, <a href="http/service/NullService.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>, <a href="http/service/NullService$.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>, <a href="http/service/RoutingService.html" class="extype" name="com.twitter.finagle.http.service.RoutingService">RoutingService</a>, <a href="memcached/InterpreterService.html" class="extype" name="com.twitter.finagle.memcached.InterpreterService">InterpreterService</a>, <a href="redis/exp/SubscribeDispatcher.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeDispatcher">SubscribeDispatcher</a>, <a href="service/ConstantService.html" class="extype" name="com.twitter.finagle.service.ConstantService">ConstantService</a>, <a href="service/ExpiringService.html" class="extype" name="com.twitter.finagle.service.ExpiringService">ExpiringService</a>, <a href="service/FailedService.html" class="extype" name="com.twitter.finagle.service.FailedService">FailedService</a>, <a href="service/NilService$.html" class="extype" name="com.twitter.finagle.service.NilService">NilService</a>, <a href="service/ShardingService.html" class="extype" name="com.twitter.finagle.service.ShardingService">ShardingService</a>, <a href="stats/HostMetricsExporter.html" class="extype" name="com.twitter.finagle.stats.HostMetricsExporter">HostMetricsExporter</a>, <a href="stats/JsonExporter.html" class="extype" name="com.twitter.finagle.stats.JsonExporter">JsonExporter</a>, <a href="stats/MetricsExporter.html" class="extype" name="com.twitter.finagle.stats.MetricsExporter">MetricsExporter</a>, <a href="thrift/ValidateThriftService.html" class="extype" name="com.twitter.finagle.thrift.ValidateThriftService">ValidateThriftService</a>, <a href="zipkin/thriftscala/Scribe$FinagleService.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe$FinagleService">Scribe$FinagleService</a>, <a href="zipkin/thriftscala/Scribe$$FinagledService.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.FinagledService">FinagledService</a></div>
+            <div class="subClasses hiddenContent"><a href="FactoryToService.html" class="extype" name="com.twitter.finagle.FactoryToService">FactoryToService</a>, <a href="ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>, <a href="dispatch/ClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher">ClientDispatcher</a>, <a href="dispatch/GenPipeliningDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenPipeliningDispatcher">GenPipeliningDispatcher</a>, <a href="dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>, <a href="dispatch/PipeliningDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher">PipeliningDispatcher</a>, <a href="dispatch/SerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialClientDispatcher">SerialClientDispatcher</a>, <a href="exception/thriftscala/Scribe$FinagleService.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe$FinagleService">Scribe$FinagleService</a>, <a href="exception/thriftscala/Scribe$$FinagledService.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.FinagledService">FinagledService</a>, <a href="http/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.http.HttpMuxHandler">HttpMuxHandler</a>, <a href="http/HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="http/HttpMuxer$.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="http/service/NotFoundService.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>, <a href="http/service/NotFoundService$.html" class="extype" name="com.twitter.finagle.http.service.NotFoundService">NotFoundService</a>, <a href="http/service/NullService.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>, <a href="http/service/NullService$.html" class="extype" name="com.twitter.finagle.http.service.NullService">NullService</a>, <a href="http/service/RoutingService.html" class="extype" name="com.twitter.finagle.http.service.RoutingService">RoutingService</a>, <a href="memcached/InterpreterService.html" class="extype" name="com.twitter.finagle.memcached.InterpreterService">InterpreterService</a>, <a href="redis/exp/SubscribeDispatcher.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeDispatcher">SubscribeDispatcher</a>, <a href="service/ConstantService.html" class="extype" name="com.twitter.finagle.service.ConstantService">ConstantService</a>, <a href="service/ExpiringService.html" class="extype" name="com.twitter.finagle.service.ExpiringService">ExpiringService</a>, <a href="service/FailedService.html" class="extype" name="com.twitter.finagle.service.FailedService">FailedService</a>, <a href="service/NilService$.html" class="extype" name="com.twitter.finagle.service.NilService">NilService</a>, <a href="stats/HostMetricsExporter.html" class="extype" name="com.twitter.finagle.stats.HostMetricsExporter">HostMetricsExporter</a>, <a href="stats/JsonExporter.html" class="extype" name="com.twitter.finagle.stats.JsonExporter">JsonExporter</a>, <a href="stats/MetricsExporter.html" class="extype" name="com.twitter.finagle.stats.MetricsExporter">MetricsExporter</a>, <a href="thrift/ValidateThriftService.html" class="extype" name="com.twitter.finagle.thrift.ValidateThriftService">ValidateThriftService</a>, <a href="zipkin/thriftscala/Scribe$FinagleService.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe$FinagleService">Scribe$FinagleService</a>, <a href="zipkin/thriftscala/Scribe$$FinagledService.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.FinagledService">FinagledService</a></div>
           </div></div>
         
 
@@ -1489,7 +1485,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.Service.Req">Req</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.Service.Req">Req</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</span>
       </span>
       
       <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
@@ -1560,7 +1556,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -1619,7 +1615,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Service">Service</a> → Closable</dd></dl></div>
@@ -1635,7 +1631,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -1651,7 +1647,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -1667,7 +1663,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.Service.Req">Req</span></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</span>
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.Service.Req">Req</span></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -1996,9 +1992,9 @@ with a reasonable likelihood of success).</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.util.Closable">
-              <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></h3>
             </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</h3>
+              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.Service.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.Service.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

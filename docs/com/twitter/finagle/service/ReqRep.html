@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -199,10 +199,6 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="trait" href="Filterable.html" title="Allows filtering of a ServicePerEndpoint when constructing new ServicePerEndpoint through MethodBuilder"></a>
                         <a href="Filterable.html" title="Allows filtering of a ServicePerEndpoint when constructing new ServicePerEndpoint through MethodBuilder">Filterable</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="KetamaShardingServiceBuilder.html" title=""></a>
-                        <a href="KetamaShardingServiceBuilder.html" title="">KetamaShardingServiceBuilder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="LocalRateLimitingStrategy.html" title="Strategy responsible for tracking requests and computing rate per client."></a>
@@ -277,10 +273,6 @@ resources for using Finagle.
                         <a href="RetryingService$.html" title="">RetryingService</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ShardingService.html" title="ShardingService takes a Distributor where the handle is a service."></a>
-                        <a href="ShardingService.html" title="ShardingService takes a Distributor where the handle is a service.">ShardingService</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="class" href="SimpleRetryPolicy.html" title="A retry policy abstract class."></a>
                         <a href="SimpleRetryPolicy.html" title="A retry policy abstract class.">SimpleRetryPolicy</a>
                       </li><li class="current-entities indented4">
@@ -322,7 +314,7 @@ resources for using Finagle.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ReqRep</span><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>, <span name="response">response: <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">ReqRep</span><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>, <span name="response">response: <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
@@ -395,7 +387,7 @@ for details.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ReqRep</span><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>, <span name="response">response: <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span>
+        <span class="name">ReqRep</span><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>, <span name="response">response: <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span>
       </span>
       
       
@@ -652,7 +644,7 @@ for details.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">response</span><span class="result">: <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>
+        <span class="name">response</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>
       </span>
       
       

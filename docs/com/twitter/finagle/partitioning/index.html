@@ -143,7 +143,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
+returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -647,17 +647,21 @@ finagle clients and servers.
       
       
     </li><li class="current-entities indented4">
-                        <a class="object" href="CacheNode$.html" title=""></a>
-                        <a class="class" href="CacheNode.html" title=""></a>
-                        <a href="CacheNode.html" title="">CacheNode</a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="FailureAccrualException.html" title=""></a>
                         <a href="FailureAccrualException.html" title="">FailureAccrualException</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="HashNodeKey$.html" title="Constructs HashNodeKey based on the PartitionNode address."></a>
+                        <a class="trait" href="HashNodeKey.html" title="Provides hashing key information of the com.twitter.hashing.HashNodes on consistent-hashing hash ring."></a>
+                        <a href="HashNodeKey.html" title="Provides hashing key information of the com.twitter.hashing.HashNodes on consistent-hashing hash ring.">HashNodeKey</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="KetamaClientKey$.html" title=""></a>
                         <a class="class" href="KetamaClientKey.html" title=""></a>
                         <a href="KetamaClientKey.html" title="">KetamaClientKey</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="PartitionNode$.html" title=""></a>
+                        <a class="class" href="PartitionNode.html" title=""></a>
+                        <a href="PartitionNode.html" title="">PartitionNode</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="PartitioningService$.html" title=""></a>
@@ -1017,23 +1021,7 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.partitioning.CacheNode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CacheNodeextendsSocketAddresswithProductwithSerializable"></a><a id="CacheNode:CacheNode"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/partitioning/index.html#CacheNodeextendsSocketAddresswithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="CacheNode.html"><span class="name">CacheNode</span></a><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="weight">weight: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="key">key: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../scala/index.html">None</a></span></span></span>)</span><span class="result"> extends <span class="extype" name="java.net.SocketAddress">SocketAddress</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.partitioning.FailureAccrualException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.partitioning.FailureAccrualException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailureAccrualExceptionextendsRequestException"></a><a id="FailureAccrualException:FailureAccrualException"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/partitioning/index.html#FailureAccrualExceptionextendsRequestException" title="Permalink">
@@ -1049,6 +1037,23 @@ generator.
       </span>
       
       
+    </li><li name="com.twitter.finagle.partitioning.HashNodeKey" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="HashNodeKeyextendsAnyRef"></a><a id="HashNodeKey:HashNodeKey"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/partitioning/index.html#HashNodeKeyextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Provides hashing key information of the com.twitter.hashing.HashNodes on consistent-hashing hash ring." href="HashNodeKey.html"><span class="name">HashNodeKey</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Provides hashing key information of the <a href="https://twitter.github.io/util/docs/com/twitter/hashing/HashNode.html" class="extype" name="com.twitter.hashing.HashNode">com.twitter.hashing.HashNode</a>s
+on consistent-hashing hash ring.</p>
     </li><li name="com.twitter.finagle.partitioning.KetamaClientKey" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="KetamaClientKeyextendsAnyRef"></a><a id="KetamaClientKey:KetamaClientKey"></a>
       <span class="permalink">
@@ -1065,6 +1070,22 @@ generator.
       </span>
       
       
+    </li><li name="com.twitter.finagle.partitioning.PartitionNode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PartitionNodeextendsSocketAddresswithProductwithSerializable"></a><a id="PartitionNode:PartitionNode"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/partitioning/index.html#PartitionNodeextendsSocketAddresswithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PartitionNode.html"><span class="name">PartitionNode</span></a><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="weight">weight: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="key">key: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../scala/index.html">None</a></span></span></span>)</span><span class="result"> extends <span class="extype" name="java.net.SocketAddress">SocketAddress</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
     </li></ol>
             </div>
 
@@ -1073,10 +1094,10 @@ generator.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.partitioning.CacheNode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CacheNode"></a><a id="CacheNode:CacheNode"></a>
+                <li name="com.twitter.finagle.partitioning.HashNodeKey" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HashNodeKey"></a><a id="HashNodeKey:HashNodeKey"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/partitioning/index.html#CacheNode" title="Permalink">
+      <a href="../../../../com/twitter/finagle/partitioning/index.html#HashNodeKey" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1085,10 +1106,12 @@ generator.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="CacheNode$.html"><span class="name">CacheNode</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Constructs HashNodeKey based on the PartitionNode address." href="HashNodeKey$.html"><span class="name">HashNodeKey</span></a>
       </span>
       
-      
+      <p class="shortcomment cmt">Constructs HashNodeKey based on the PartitionNode address.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs HashNodeKey based on the PartitionNode address. It can be either
+a &quot;host:port&quot; format or custom format.
+</p></div></div>
     </li><li name="com.twitter.finagle.partitioning.KetamaClientKey" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KetamaClientKey"></a><a id="KetamaClientKey:KetamaClientKey"></a>
       <span class="permalink">
@@ -1102,6 +1125,22 @@ generator.
       </span>
       <span class="symbol">
         <a title="" href="KetamaClientKey$.html"><span class="name">KetamaClientKey</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.partitioning.PartitionNode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PartitionNode"></a><a id="PartitionNode:PartitionNode"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/partitioning/index.html#PartitionNode" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PartitionNode$.html"><span class="name">PartitionNode</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
