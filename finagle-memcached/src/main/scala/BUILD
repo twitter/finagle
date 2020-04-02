@@ -32,7 +32,7 @@ scala_library(
         "finagle/finagle-serversets/src/main/thrift:thrift-java",
         "finagle/finagle-toggle/src/main/scala",
         "util/util-app/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-function/src/main/java",
         "util/util-hashing",
         "util/util-logging/src/main/scala",
@@ -43,6 +43,6 @@ scala_library(
         "3rdparty/jvm/com/twitter/bijection:core",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-partitioning",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
     ],
 )

@@ -23,6 +23,6 @@ junit_tests(
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-mysql",
         "finagle/finagle-mysql/src/test/resources",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
     ],
 )

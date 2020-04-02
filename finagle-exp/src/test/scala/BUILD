@@ -9,7 +9,7 @@ junit_tests(
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-exp",
         "finagle/finagle-thrift/src/main/java",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-stats",
     ],
 )

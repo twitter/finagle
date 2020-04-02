@@ -7,7 +7,7 @@ scala_library(
         repo = artifactory,
     ),
     dependencies = [
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-registry/src/main/scala",
     ],
 )

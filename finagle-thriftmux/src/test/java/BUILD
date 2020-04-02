@@ -12,7 +12,7 @@ junit_tests(
         "finagle/finagle-thriftmux/src/test/thrift:thrift-java",
         "finagle/finagle-thriftmux/src/test/thrift:thrift-scala",
         "scrooge/scrooge-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-core/src/main/java",
-        "util/util-core/src/main/scala",
     ],
 )

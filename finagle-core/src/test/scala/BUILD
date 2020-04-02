@@ -46,7 +46,7 @@ junit_tests(
         "finagle/finagle-netty4",
         "finagle/finagle-toggle/src/main/scala",
         "util/util-app/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-hashing/src/main/scala",
         "util/util-jvm/src/main/scala",
         "util/util-lint/src/main/scala",

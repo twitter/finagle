@@ -17,11 +17,11 @@ scala_library(
         "finagle/finagle-netty4",
         "finagle/finagle-toggle",
         "util/util-cache",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging/src/main/scala",
         "util/util-stats/src/main/scala",
     ],
     exports = [
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
     ],
 )

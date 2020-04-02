@@ -14,7 +14,7 @@ junit_tests(
             "util/util-app/src/main/scala",
             scope = "forced",
         ),
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging",
         "util/util-stats",
     ],

@@ -4,6 +4,6 @@ junit_tests(
         "3rdparty/jvm/io/grpc:grpc-context",
         "3rdparty/jvm/junit",
         "finagle/finagle-grpc-context/src/main/java/io/grpc/override",
-        "util/util-core/src/main/scala/com/twitter/util",
+        "util/util-core:util-core-util",
     ],
 )

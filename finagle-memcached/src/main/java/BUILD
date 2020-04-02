@@ -12,7 +12,7 @@ java_library(
         "3rdparty/jvm/org/scala-lang:scala-library",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-memcached/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-function/src/main/java",
         "util/util-stats/src/main/scala",
     ],

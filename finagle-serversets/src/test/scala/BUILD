@@ -31,7 +31,7 @@ junit_tests(
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-serversets/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-stats/src/main/scala",
     ],
 )
@@ -43,7 +43,7 @@ junit_tests(
     dependencies = [
         ":core",
         "finagle/finagle-serversets/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-stats/src/main/scala",
     ],
 )
@@ -68,7 +68,7 @@ junit_tests(
         "src/java/com/twitter/common/io:json",
         "src/java/com/twitter/common/net:dynamic-host-set",
         "src/thrift/com/twitter/thrift:thrift-java",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-stats/src/main/scala",
         "util/util-zk-test/src/main/scala",
     ],

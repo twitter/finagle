@@ -17,7 +17,7 @@ scala_library(
         "finagle/finagle-toggle/src/main/scala/com/twitter/finagle/server",
         "util/util-app/src/main/java",
         "util/util-app/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging",
         "util/util-registry",
         "util/util-stats",

@@ -19,7 +19,7 @@ junit_tests(
         "finagle/finagle-thrift",
         "finagle/finagle-thriftmux",
         "finagle/finagle-thriftmux/src/test/thrift:thrift-scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-stats/src/main/scala",
     ],
 )

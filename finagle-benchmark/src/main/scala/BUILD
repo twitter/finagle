@@ -23,7 +23,7 @@ scala_library(
         "finagle/finagle-zipkin-scribe/src/main/scala",
         "scrooge/scrooge-core/src/main/scala",
         "util/util-app/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging/src/main/scala",
         "util/util-stats/src/main/scala",
     ],

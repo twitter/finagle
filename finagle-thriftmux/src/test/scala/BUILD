@@ -17,7 +17,7 @@ junit_tests(
         "finagle/finagle-thriftmux/src/test/thrift:thrift-scala",
         "finagle/finagle-toggle",
         "util/util-app/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-stats/src/main/scala",
     ],
 )

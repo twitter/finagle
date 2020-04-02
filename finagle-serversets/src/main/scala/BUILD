@@ -20,12 +20,12 @@ scala_library(
         "finagle/finagle-serversets/src/main/thrift:thrift-java",
         "util/util-app/src/main/scala",
         "util/util-cache",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging/src/main/scala",
         "util/util-stats/src/main/scala",
     ],
     exports = [
         "finagle/finagle-partitioning/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
     ],
 )

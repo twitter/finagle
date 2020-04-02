@@ -21,7 +21,7 @@ scala_library(
         "util/util-app",
         "util/util-cache",
         "util/util-codec",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-hashing",
         "util/util-jvm",
         scoped(
@@ -35,7 +35,7 @@ scala_library(
         "util/util-tunable/src/main/scala",
     ],
     exports = [
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging",
         "util/util-registry",
         "util/util-stats",

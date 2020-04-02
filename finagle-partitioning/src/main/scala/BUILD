@@ -9,7 +9,7 @@ scala_library(
     dependencies = [
         "3rdparty/jvm/org/scala-lang/modules:scala-collection-compat",
         "finagle/finagle-core",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-hashing",
     ],
 )

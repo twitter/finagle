@@ -8,7 +8,7 @@ junit_tests(
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-partitioning",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging/src/main/scala",
     ],
 )

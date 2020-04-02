@@ -8,7 +8,7 @@ junit_tests(
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-redis",
         "finagle/finagle-redis/src/test/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging/src/main/scala",
     ],
 )

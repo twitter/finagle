@@ -10,7 +10,7 @@ junit_tests(
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-zipkin-core",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-stats/src/main/scala",
     ],
 )

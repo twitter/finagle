@@ -14,7 +14,7 @@ scala_library(
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-netty4",
         "finagle/finagle-netty4-http/src/main/resources",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-logging/src/main/scala",
     ],
     exports = [

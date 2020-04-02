@@ -14,6 +14,6 @@ junit_tests(
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-netty4",
         "finagle/finagle-netty4-http",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
     ],
 )

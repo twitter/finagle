@@ -14,13 +14,13 @@ scala_library(
     dependencies = [
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-memcached/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
     ],
 )
 
 junit_tests(
-    sources = ["**/*.scala"] + exclude_globs(EXTERNAL_SOURCES),
     name = "scala",
+    sources = ["**/*.scala"] + exclude_globs(EXTERNAL_SOURCES),
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         ":external",
@@ -37,7 +37,7 @@ junit_tests(
         "finagle/finagle-partitioning/src/main/scala",
         "finagle/finagle-serversets",
         "finagle/finagle-toggle/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-hashing",
         "util/util-registry/src/main/scala",
         "util/util-stats/src/main/scala",

@@ -37,7 +37,7 @@ scala_library(
         "finagle/finagle-http/src/main/scala",
         "finagle/finagle-tunable/src/main/scala",
         "util/util-app/src/main/scala",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-lint/src/main/scala",
         "util/util-logging",
         "util/util-registry",

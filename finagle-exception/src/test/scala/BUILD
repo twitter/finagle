@@ -10,7 +10,7 @@ junit_tests(
         "finagle/finagle-exception",
         "finagle/finagle-exception/src/main/thrift:thrift-scala",
         "util/util-codec",
-        "util/util-core/src/main/scala",
+        "util/util-core:scala",
         "util/util-stats/src/main/scala",
     ],
 )
