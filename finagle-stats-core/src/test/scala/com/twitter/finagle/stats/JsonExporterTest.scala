@@ -8,7 +8,6 @@ import com.twitter.util.{Await, MockTimer, Time}
 import java.io.{BufferedWriter, File, FileOutputStream, OutputStreamWriter}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import scala.util.matching.Regex
 
 class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience {
 
@@ -44,8 +43,10 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   test("samples can be filtered") {
     val registry = Metrics.createDetached()
     val exporter = new JsonExporter(registry) {
-      override lazy val statsFilterRegex: Option[Regex] =
-        commaSeparatedRegex("abc,ill_be_partially_matched.*")
+      override lazy val filterSample: collection.Map[String, Number] => collection.Map[
+        String,
+        Number] =
+        new CachedRegex(commaSeparatedRegex("abc,ill_be_partially_matched.*").get)
     }
     val sample = Map[String, Number](
       "jvm_uptime" -> 15.0,
@@ -66,7 +67,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   test("statsFilterFile defaults without exception") {
     val registry = Metrics.createDetached()
     val exporter1 = new JsonExporter(registry)
-    assert(exporter1.statsFilterRegex.isEmpty)
+    assert(exporter1.filterSample eq JsonExporter.mapIdentity)
   }
 
   test("statsFilterFile reads empty files") {
@@ -74,7 +75,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
 
     statsFilterFile.let(Set(new File("/dev/null"))) {
       val exporter = new JsonExporter(registry)
-      assert(exporter.statsFilterRegex.isEmpty)
+      assert(exporter.filterSample eq JsonExporter.mapIdentity)
     }
   }
 
@@ -98,11 +99,14 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
 
     statsFilterFile.let(Set(tFile1, tFile2)) {
       val exporter = new JsonExporter(registry)
-      val regex = exporter.statsFilterRegex
-      assert(regex.isDefined)
-      assert(regex.get.pattern.matcher("abc123").matches)
-      assert(regex.get.pattern.matcher("def456").matches)
-      assert(regex.get.pattern.matcher("ghi789").matches)
+      val fn = exporter.filterSample
+      val original: Map[String, Number] = Map(
+        "abc123" -> 1,
+        "def456" -> 2,
+        "ghi789" -> 3,
+        "foo" -> 4
+      )
+      assert(fn(original) == Map("foo" -> 4))
     }
   }
 
@@ -119,10 +123,13 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     statsFilterFile.let(Set(tFile)) {
       statsFilter.let("def456") {
         val exporter = new JsonExporter(registry)
-        val regex = exporter.statsFilterRegex
-        assert(regex.isDefined)
-        assert(regex.get.pattern.matcher("abc123").matches)
-        assert(regex.get.pattern.matcher("def456").matches)
+        val fn = exporter.filterSample
+        val original: Map[String, Number] = Map(
+          "abc123" -> 1,
+          "def456" -> 2,
+          "foo" -> 4
+        )
+        assert(fn(original) == Map("foo" -> 4))
       }
     }
   }
@@ -146,7 +153,9 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     viewsCounter.incr()
     gcCounter.incr()
     val exporter = new JsonExporter(registry) {
-      override lazy val statsFilterRegex: Option[Regex] = commaSeparatedRegex("jvm.*,vie")
+      override lazy val filterSample: collection.Map[String, Number] => collection.Map[
+        String,
+        Number] = new CachedRegex(commaSeparatedRegex("jvm.*,vie").get)
     }
     val requestFiltered = Request("/admin/metrics.json?filtered=1&pretty=0")
     val responseFiltered = Await.result(exporter.apply(requestFiltered)).contentString

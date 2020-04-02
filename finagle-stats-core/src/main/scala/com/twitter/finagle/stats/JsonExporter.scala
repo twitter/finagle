@@ -15,11 +15,11 @@ import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.io.IOException
-import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
 import scala.io.{Codec, Source}
-import scala.util.matching.Regex
+import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
+import scala.util.matching.Regex
 
 object useCounterDeltas
     extends GlobalFlag[Boolean](
@@ -29,6 +29,10 @@ object useCounterDeltas
     )
 
 object JsonExporter {
+  // we cache this to make it easier to test JsonExporter, so that
+  // we can check reference equality against this
+  private[stats] val mapIdentity: collection.Map[String, Number] => collection.Map[String, Number] =
+    identity
 
   private[stats] def startOfNextMinute: Time =
     Time.fromSeconds(Time.now.inMinutes * 60) + 1.minute
@@ -37,7 +41,7 @@ object JsonExporter {
 
   /**
    * Merges individual regular expressions (represented as a sequence of strings) into
-   * a [[Regex]] instance that is matches as long as one of these expressions is matched.
+   * a [[Regex]] instance that is matched as long as one of these expressions is matched.
    */
   private def mergedRegex(regex: Seq[String]): Option[Regex] =
     if (regex.isEmpty) None
@@ -85,7 +89,10 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   private[this] def sampleVerbose(): Option[String] =
     verbose().orElse(com.twitter.finagle.stats.verbose.get)
 
-  lazy val statsFilterRegex: Option[Regex] = {
+  // scoped to stats for testing
+  private[stats] lazy val filterSample: collection.Map[String, Number] => collection.Map[
+    String,
+    Number] = {
     val regexesFromFile = statsFilterFile().flatMap { file =>
       try {
         Source.fromFile(file)(Codec.UTF8).getLines()
@@ -96,7 +103,10 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
       }
     }
     val regexesFromFlag = statsFilter.get.toSeq.flatMap(_.split(","))
-    mergedRegex(regexesFromFlag ++ regexesFromFile)
+    mergedRegex(regexesFromFlag ++ regexesFromFile) match {
+      case Some(regex) => new CachedRegex(regex)
+      case None => mapIdentity
+    }
   }
 
   private[this] val registryLoaded = new AtomicBoolean(false)
@@ -200,12 +210,6 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
       writer.writeValueAsString(sampleFiltered)
     }
   }
-
-  def filterSample(sample: collection.Map[String, Number]): collection.Map[String, Number] =
-    statsFilterRegex match {
-      case Some(regex) => sample.filterKeys(!regex.pattern.matcher(_).matches).toMap
-      case None => sample
-    }
 
   private final def denylistDebugSample[A](
     sample: collection.Map[String, A],

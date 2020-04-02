@@ -37,6 +37,12 @@ Bug Fixes
 * finagle-base-http: RequestBuilder headers use SortedMap to equalize keys in different caps.
   `setHeader` keys are case insensitive, the last one wins. ``PHAB_ID=D449255``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-stats: JsonExporter now caches the regex matching, so that you only need to check
+  the result of regex matching on new stats. ``PHAB_ID=D459391``
+
 20.3.0
 ------
 
