@@ -2,6 +2,7 @@ package com.twitter.finagle.mysql.param
 
 import com.twitter.finagle.mysql.MysqlCharset.Utf8_general_ci
 import com.twitter.finagle.Stack
+import com.twitter.finagle.mysql.Request
 
 /**
  * A class eligible for configuring a mysql client's credentials during
@@ -80,4 +81,12 @@ object MaxConcurrentPrepareStatements {
 case class UnsignedColumns(supported: Boolean)
 object UnsignedColumns {
   implicit val param: Stack.Param[UnsignedColumns] = Stack.Param(UnsignedColumns(false))
+}
+
+/**
+ * A class eligible for configuring a initial request which used when establishing a new session.
+ */
+case class ConnectionInitRequest(request: Option[Request])
+object ConnectionInitRequest {
+  implicit val param: Stack.Param[ConnectionInitRequest] = Stack.Param(ConnectionInitRequest(None))
 }
