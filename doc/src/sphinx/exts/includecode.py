@@ -108,12 +108,12 @@ class IncludeCode(Directive):
                 else:
                     return count
 
-        nonempty = filter(lambda l: l.strip(), lines)
-        tabcounts = map(lambda l: countwhile(lambda c: c == ' ', l), nonempty)
+        nonempty = [l for l in lines if l.strip()]
+        tabcounts = [countwhile(lambda c: c == ' ', l) for l in nonempty]
         tabshift = min(tabcounts) if tabcounts else 0
 
         if tabshift > 0:
-            lines = map(lambda l: l[tabshift:] if len(l) > tabshift else l, lines)
+            lines = [l[tabshift:] if len(l) > tabshift else l for l in lines]
 
         prepend = self.options.get('prepend')
         append  = self.options.get('append')

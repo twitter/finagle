@@ -35,8 +35,8 @@ html_theme_options = {
 html_show_sphinx = False
 html_style = 'finagle.css'
 
-project = u'Finagle'
-copyright = u'{} Twitter, Inc'.format(datetime.datetime.now().year)
+project = 'Finagle'
+copyright = '{} Twitter, Inc'.format(datetime.datetime.now().year)
 htmlhelp_basename = "finagle"
 release = sbt_versions.find_release(os.path.abspath('../../../project/Build.scala'))
 version = sbt_versions.release_to_version(release)
@@ -72,12 +72,12 @@ pygments_style = 'flask_theme_support.FlaskyStyle'
 try:
     __import__('flask_theme_support')
 except ImportError as e:
-    print '-' * 74
-    print 'Warning: Flask themes unavailable.  Building with default theme'
-    print 'If you want the Flask themes, run this command and build again:'
-    print
-    print '  git submodule update --init'
-    print '-' * 74
+    print('-' * 74)
+    print('Warning: Flask themes unavailable.  Building with default theme')
+    print('If you want the Flask themes, run this command and build again:')
+    print()
+    print('  git submodule update --init')
+    print('-' * 74)
 
     pygments_style = 'tango'
     html_theme = 'default'
