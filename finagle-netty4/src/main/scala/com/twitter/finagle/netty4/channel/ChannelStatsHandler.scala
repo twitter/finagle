@@ -90,8 +90,8 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
     extends ChannelDuplexHandler {
   import ChannelStatsHandler._
 
-  // `channelBytesRead` and `channelBytesWritten` are thread-safe since they
-  // are used only in their `channelStatsHandler` instance.
+  // The following fields are thread safe as they're only accessed by the handler
+  // instance which is single threaded due to the Netty4 event model.
   private[this] var channelBytesRead: Long = _
   private[this] var channelBytesWritten: Long = _
   private[this] var channelWasWritable: Boolean = _
@@ -100,6 +100,7 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
   private[this] var connectionDuration: Stopwatch.Elapsed = _
   private[this] var channelActive: Boolean = false
   private[this] var tlsChannelActive: Boolean = false
+  private[this] var closeCalled: Boolean = false
   private[this] var tcpStatsUpdater: TcpStatsUpdater = _
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
@@ -156,7 +157,11 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
   }
 
   override def close(ctx: ChannelHandlerContext, p: ChannelPromise): Unit = {
-    sharedChannelStats.closesCount.incr()
+    // protect against Netty calling this multiple times
+    if (!closeCalled) {
+      closeCalled = true
+      sharedChannelStats.closesCount.incr()
+    }
     super.close(ctx, p)
   }
 

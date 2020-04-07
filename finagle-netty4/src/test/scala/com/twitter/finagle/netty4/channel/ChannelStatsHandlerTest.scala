@@ -88,6 +88,39 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     connectionCountEquals(sr, 0)
   }
 
+  test("Multiple close calls only close the channel once") {
+    val sr = new InMemoryStatsReceiver
+    val params = Stack.Params.empty + Stats(sr)
+    val sharedStats = new SharedChannelStats(params)
+    val ctx1 = new TestContext(sharedStats)
+    val ctx2 = new TestContext(sharedStats)
+    val handler1 = ctx1.channelStatsHandler
+    val handler2 = ctx2.channelStatsHandler
+
+    def closeCountEquals(num: Long): Unit = {
+      val r = sr.counters.get(Seq("closes")).getOrElse(0L)
+      assert(r == num)
+    }
+
+    closeCountEquals(0)
+
+    handler1.channelActive(ctx1.ctx)
+    connectionCountEquals(sr, 1)
+
+    handler2.channelActive(ctx2.ctx)
+    connectionCountEquals(sr, 2)
+
+    handler1.close(ctx1.ctx, ctx1.ctx.newPromise)
+    closeCountEquals(1)
+
+    // Try to close handler1 again which should have no effect.
+    handler1.close(ctx1.ctx, ctx1.ctx.newPromise)
+    closeCountEquals(1)
+
+    handler2.close(ctx2.ctx, ctx2.ctx.newPromise)
+    closeCountEquals(2)
+  }
+
   test("ChannelStatsHandler counts pending_io_events") {
     val sr = new InMemoryStatsReceiver
     val params = Stack.Params.empty + Stats(sr)
