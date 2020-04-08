@@ -89,7 +89,9 @@ before_cache:
   - find $HOME/.sbt         -name "*.lock"               -delete
 
 scala:
-  - 2.11.12
+  # We don't run the 2.11.x series with finagle because the build matrix becomes
+  # too large. Travis limits the build matrix to 200.
+  # https://docs.travis-ci.com/user/customizing-the-build#build-matrix
   - 2.12.8
   - 2.13.1
 
