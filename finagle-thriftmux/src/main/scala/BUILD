@@ -9,7 +9,7 @@ scala_library(
     dependencies = [
         "3rdparty/jvm/io/netty:netty4",
         "3rdparty/jvm/org/apache/thrift:libthrift",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-mux/src/main/scala",
         "finagle/finagle-thrift",
         "finagle/finagle-thrift/src/main/java",

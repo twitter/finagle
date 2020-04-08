@@ -13,13 +13,13 @@ scala_library(
     # need it at compiletime that it is non-trivial to split the target at this juncture.
     scope = "forced",
     dependencies = [
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-stats-core/src/main/scala",
         "finagle/finagle-stats/src/main/resources",
         "util/util-stats",
     ],
     exports = [
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-stats-core/src/main/scala",
         "util/util-stats",
     ],

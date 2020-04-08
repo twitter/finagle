@@ -12,7 +12,7 @@ scala_library(
         repo = artifactory,
     ),
     dependencies = [
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-memcached/src/main/scala",
         "util/util-core:scala",
     ],
@@ -30,7 +30,7 @@ junit_tests(
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalacheck",
         "3rdparty/jvm/org/scalatest",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-memcached/src/main/scala",
         "finagle/finagle-memcached/src/test/resources",

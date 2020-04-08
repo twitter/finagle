@@ -11,7 +11,7 @@ junit_tests(
         "3rdparty/jvm/org/scalatest",
         "finagle/finagle-base-http",
         "finagle/finagle-base-http:tests",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-netty4",
         "finagle/finagle-netty4-http",
         "util/util-core:scala",

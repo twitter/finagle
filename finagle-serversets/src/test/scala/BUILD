@@ -29,7 +29,7 @@ junit_tests(
     dependencies = [
         ":core",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-serversets/src/main/scala",
         "util/util-core:scala",
         "util/util-stats/src/main/scala",
@@ -61,7 +61,7 @@ junit_tests(
         ":core",
         "3rdparty/jvm/com/google/inject:guice",
         "3rdparty/jvm/org/scalacheck",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-serversets/src/main/java",
         "finagle/finagle-serversets/src/main/scala",
         "finagle/finagle-serversets/src/test/resources",

@@ -33,7 +33,7 @@ scala_library(
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
         "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",
         "finagle/finagle-base-http/src/main/scala",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-http/src/main/scala",
         "finagle/finagle-tunable/src/main/scala",
         "util/util-app/src/main/scala",
@@ -45,7 +45,7 @@ scala_library(
         "util/util-tunable/src/main/scala",
     ],
     exports = [
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "util/util-stats",
     ],
 )

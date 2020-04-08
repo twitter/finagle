@@ -9,7 +9,7 @@ scala_library(
     dependencies = [
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/org/apache/thrift:libthrift",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-netty4",
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-thrift/src/main/resources",
@@ -23,7 +23,7 @@ scala_library(
     exports = [
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/org/apache/thrift:libthrift",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-thrift/src/main/java",
         "util/util-stats/src/main/scala",
     ],

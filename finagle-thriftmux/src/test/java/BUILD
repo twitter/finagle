@@ -4,7 +4,7 @@ junit_tests(
     dependencies = [
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/apache/thrift:libthrift",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-mux/src/main/scala",
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-thrift/src/main/scala",

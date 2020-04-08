@@ -22,7 +22,7 @@ scala_library(
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/org/apache/thrift:libthrift",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-memcached/src/main/java:pants-workaround",
         "finagle/finagle-memcached/src/main/resources",
         "finagle/finagle-netty4",
@@ -41,7 +41,7 @@ scala_library(
     ],
     exports = [
         "3rdparty/jvm/com/twitter/bijection:core",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-partitioning",
         "util/util-core:scala",
     ],

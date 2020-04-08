@@ -10,7 +10,7 @@ java_library(
         "3rdparty/jvm/com/google/guava",
         "3rdparty/jvm/com/google/inject:guice",
         "3rdparty/jvm/org/scala-lang:scala-library",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-memcached/src/main/scala",
         "util/util-core:scala",
         "util/util-function/src/main/java",

@@ -11,7 +11,7 @@ scala_library(
         "3rdparty/jvm/io/netty:netty4-codec",
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-init/src/main/scala",
         "finagle/finagle-netty4/src/main/resources",
         "finagle/finagle-toggle",

@@ -7,7 +7,7 @@ java_library(
         repo = artifactory,
     ),
     dependencies = [
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "util/util-core:scala",
         "util/util-core/src/main/java",
     ],

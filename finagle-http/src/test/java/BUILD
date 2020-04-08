@@ -4,8 +4,8 @@ junit_tests(
     dependencies = [
         "3rdparty/jvm/junit",
         "finagle/finagle-base-http/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-core/src/main/java",
-        "finagle/finagle-core/src/main/scala",
         "finagle/finagle-http",
         "finagle/finagle-http2",
         "util/util-core:scala",

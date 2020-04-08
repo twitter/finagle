@@ -13,7 +13,7 @@ scala_library(
         "3rdparty/jvm/com/google/inject:guice",
         "3rdparty/jvm/org/apache/thrift:libthrift",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-partitioning/src/main/scala",
         "finagle/finagle-serversets/src/main/java",
         "finagle/finagle-serversets/src/main/resources",

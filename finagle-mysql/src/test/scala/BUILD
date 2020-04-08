@@ -20,7 +20,7 @@ junit_tests(
         "3rdparty/jvm/mysql:mysql-connector-mxj-gpl-db-files",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalatest",
-        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-mysql",
         "finagle/finagle-mysql/src/test/resources",
         "util/util-core:scala",
