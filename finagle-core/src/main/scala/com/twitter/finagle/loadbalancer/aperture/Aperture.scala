@@ -58,6 +58,35 @@ private object Aperture {
       12
     }
   }
+
+  /**
+   * Compute the width of the aperture slice using the logical aperture size and the local
+   * and remote ring unit widths.
+   */
+  def dApertureWidth(
+    localUnitWidth: Double,
+    remoteUnitWidth: Double,
+    logicalAperture: Int
+  ): Double = {
+    // A recasting of the formula
+    // clients*aperture <= N*servers
+    // - N is the smallest integer satisfying the inequality and represents
+    //   the number of times we have to circle the ring.
+    // -> ceil(clients*aperture/servers) = N
+    // - unitWidth = 1/clients; ring.unitWidth = 1/servers
+    // -> ceil(aperture*ring.unitWidth/unitWidth) = N
+    val unitWidth: Double = localUnitWidth // (0, 1.0]
+
+    val unitAperture: Double = logicalAperture * remoteUnitWidth // (0, 1.0]
+    val N: Int = math.ceil(unitAperture / unitWidth).toInt
+    val width: Double = N * unitWidth
+    // We know that `width` is bounded between (0, 1.0] since `N`
+    // at most will be the inverse of `unitWidth` (i.e. if `unitAperture`
+    // is 1, then units = 1/(1/x) = x, width = x*(1/x) = 1). However,
+    // practically, we take the min of 1.0 to account for any floating
+    // point stability issues.
+    math.min(1.0, width)
+  }
 }
 
 /**
@@ -504,26 +533,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // this width will be >= the aperture. Put differently, we may
     // cover more servers than the `aperture` requested in service
     // of global uniform load.
-    private[this] def apertureWidth: Double = {
-      // A recasting of the formula
-      // clients*aperture <= N*servers
-      // - N is the smallest integer satisfying the inequality and represents
-      //   the number of times we have to circle the ring.
-      // -> ceil(clients*aperture/servers) = N
-      // - unitWidth = 1/clients; ring.unitWidth = 1/servers
-      // -> ceil(aperture*ring.unitWidth/unitWidth) = N
-      val unitWidth: Double = coord.unitWidth // (0, 1.0]
-
-      val unitAperture: Double = logicalAperture * ring.unitWidth // (0, 1.0]
-      val N: Int = math.ceil(unitAperture / unitWidth).toInt
-      val width: Double = N * unitWidth
-      // We know that `width` is bounded between (0, 1.0] since `N`
-      // at most will be the inverse of `unitWidth` (i.e. if `unitAperture`
-      // is 1, then units = 1/(1/x) = x, width = x*(1/x) = 1). However,
-      // practically, we take the min of 1.0 to account for any floating
-      // point stability issues.
-      math.min(1.0, width)
-    }
+    private[this] def apertureWidth: Double =
+      Aperture.dApertureWidth(coord.unitWidth, ring.unitWidth, logicalAperture)
 
     override def physicalAperture: Int = {
       val width = apertureWidth

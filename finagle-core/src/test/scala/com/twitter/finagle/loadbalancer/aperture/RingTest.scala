@@ -27,6 +27,46 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     }
   }
 
+  test("Ring.range has a valid size") {
+    val numClients = 65
+    val localUnitWidth = 1.0 / numClients
+    val minAperture = 12
+    val numRemote = 20
+
+    forAll(Gen.choose(1, numRemote), Gen.choose(0, numClients)) { (remoteSize, clientId) =>
+      // For whatever reason the generator doesn't respect the lower bound
+      whenever(remoteSize > 0) {
+        val remoteUnitWidth = 1.0 / remoteSize
+        val offset: Double = (clientId * localUnitWidth) % 1.0
+
+        val ring = new Ring(remoteSize, Rng(123))
+        val apWidth = Aperture.dApertureWidth(localUnitWidth, remoteUnitWidth, minAperture)
+
+        withClue(s"clientId: $clientId, offset: $offset, aperture width: $apWidth") {
+          val ringRange = ring.range(offset, apWidth)
+          assert(ring.indices(offset, apWidth).size == ringRange)
+          assert(ringRange >= math.min(remoteSize, minAperture))
+          assert(ringRange <= remoteSize)
+        }
+      }
+    }
+  }
+
+  test("Ring.range has a valid size with tricky values") {
+    // These were values found to fail as part of CSL-9607.
+    val offset = 0.09230769230769231 // clientId = 6 of 65
+    val apertureWidth = 0.9230769230769231
+    val remoteSize = 13
+    val minAperture = 12
+
+    val ring = new Ring(remoteSize, Rng(123))
+    val ringRange = ring.range(offset, apertureWidth)
+
+    assert(ring.indices(offset, apertureWidth).size == ringRange)
+    assert(ringRange >= math.min(remoteSize, minAperture))
+    assert(ringRange <= remoteSize)
+  }
+
   test("pick2") {
     val ring = new Ring(10, rng)
     val offset = 3 / 4d

@@ -84,7 +84,7 @@ private class Ring(size: Int, rng: Rng) {
         val adjustedEnd = if (endWeight > 0) end + 1 else end
 
         val diff = adjustedEnd - adjustedBegin
-        if (diff < 0) diff + size else diff
+        if (diff <= 0) diff + size else diff
       }
     } else {
       // We know that `width == 1.0` in this case, meaning the entire
