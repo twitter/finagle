@@ -1,7 +1,7 @@
 target(
     name = "finagle-base-http",
     dependencies = [
-        "finagle/finagle-base-http/src/main/scala",
+        "finagle/finagle-base-http/src/main",
     ],
 )
 
