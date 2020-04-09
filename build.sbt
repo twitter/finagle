@@ -140,23 +140,19 @@ def jdk11GcJavaOptions: Seq[String] = {
   )
 }
 
-val withTwoThirteen = Seq(
-  crossScalaVersions += "2.13.1",
-  libraryDependencies += scalaCollectionCompat
-)
-
 val sharedSettings = Seq(
   version := releaseVersion,
   organization := "com.twitter",
   scalaVersion := "2.12.8",
-  crossScalaVersions := Seq("2.11.12", "2.12.8"),
+  crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.1"),
   fork in Test := true, // We have to fork to get the JavaOptions
   libraryDependencies ++= Seq(
     "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
     "org.scalatest" %% "scalatest" % "3.0.8" % "test",
     // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
     "com.novocode" % "junit-interface" % "0.11" % "test",
-    "org.mockito" % "mockito-all" % "1.9.5" % "test"
+    "org.mockito" % "mockito-all" % "1.9.5" % "test",
+    scalaCollectionCompat
   ),
   // Workaround for cross building Dtab.scala, which is not compatible between
   // 2.12- with 2.13+.
@@ -349,8 +345,7 @@ lazy val finagleIntegration = Project(
   id = "finagle-integration",
   base = file("finagle-integration")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-integration",
     libraryDependencies ++= Seq(util("core")) ++ scroogeLibs
@@ -371,8 +366,7 @@ lazy val finagleToggle = Project(
   id = "finagle-toggle",
   base = file("finagle-toggle")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-toggle",
     libraryDependencies ++= Seq(util("app"), util("core"), util("logging"), util("stats")) ++
@@ -383,8 +377,7 @@ lazy val finagleInit = Project(
   id = "finagle-init",
   base = file("finagle-init")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-init"
   )
@@ -393,8 +386,7 @@ lazy val finagleCore = Project(
   id = "finagle-core",
   base = file("finagle-core")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-core",
     libraryDependencies ++= Seq(
@@ -421,8 +413,7 @@ lazy val finagleNetty4 = Project(
   id = "finagle-netty4",
   base = file("finagle-netty4")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-netty4",
     libraryDependencies ++= Seq(
@@ -443,8 +434,7 @@ lazy val finagleStatsCore = Project(
   id = "finagle-stats-core",
   base = file("finagle-stats-core")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-stats-core",
     libraryDependencies ++= Seq(
@@ -468,8 +458,7 @@ lazy val finagleStats = Project(
   id = "finagle-stats",
   base = file("finagle-stats")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-stats"
   ).dependsOn(
@@ -480,8 +469,7 @@ lazy val finagleZipkinCore = Project(
   id = "finagle-zipkin-core",
   base = file("finagle-zipkin-core")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-zipkin-core",
     libraryDependencies ++= Seq(util("codec"), util("core"), util("stats")) ++ scroogeLibs ++ jacksonLibs
@@ -491,8 +479,7 @@ lazy val finagleZipkinScribe = Project(
   id = "finagle-zipkin-scribe",
   base = file("finagle-zipkin-scribe")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-zipkin-scribe",
     libraryDependencies ++= scroogeLibs
@@ -502,8 +489,7 @@ lazy val finagleException = Project(
   id = "finagle-exception",
   base = file("finagle-exception")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-exception",
     libraryDependencies ++= Seq(
@@ -516,8 +502,7 @@ lazy val finagleServersets = Project(
   id = "finagle-serversets",
   base = file("finagle-serversets")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-serversets",
     libraryDependencies ++= Seq(
@@ -546,8 +531,7 @@ lazy val finaglePartitioning = Project(
   id = "finagle-partitioning",
   base = file("finagle-partitioning")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-partitioning",
     libraryDependencies ++= Seq(
@@ -564,8 +548,7 @@ lazy val finagleTunable = Project(
   id = "finagle-tunable",
   base = file("finagle-tunable")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-tunable",
     libraryDependencies ++= Seq(
@@ -581,8 +564,7 @@ lazy val finagleHttp = Project(
   id = "finagle-http",
   base = file("finagle-http")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-http",
     libraryDependencies ++= Seq(
@@ -596,8 +578,7 @@ lazy val finagleBaseHttp = Project(
   id = "finagle-base-http",
   base = file("finagle-base-http")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-base-http",
     libraryDependencies ++= Seq(
@@ -610,8 +591,7 @@ lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
   base = file("finagle-netty4-http")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-netty4-http",
     libraryDependencies ++= Seq(
@@ -628,8 +608,7 @@ lazy val finagleHttp2 = Project(
   id = "finagle-http2",
   base = file("finagle-http2")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-http2",
     libraryDependencies ++= Seq(
@@ -646,8 +625,7 @@ lazy val finagleThrift = Project(
   id = "finagle-thrift",
   base = file("finagle-thrift")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-thrift",
     libraryDependencies ++= scroogeLibs
@@ -657,8 +635,7 @@ lazy val finagleMemcached = Project(
   id = "finagle-memcached",
   base = file("finagle-memcached")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-memcached",
     libraryDependencies ++= Seq(
@@ -685,8 +662,7 @@ lazy val finagleRedis = Project(
   id = "finagle-redis",
   base = file("finagle-redis")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).configs(
     IntegrationTest extend (Test)
   ).settings(
@@ -702,8 +678,7 @@ lazy val finagleMux = Project(
   id = "finagle-mux",
   base = file("finagle-mux")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-mux",
     libraryDependencies ++= Seq(
@@ -719,8 +694,7 @@ lazy val finagleThriftMux = Project(
   id = "finagle-thriftmux",
   base = file("finagle-thriftmux")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-thriftmux",
     libraryDependencies ++= Seq(util("core"), util("logging"), util("stats")) ++ scroogeLibs
@@ -730,8 +704,7 @@ lazy val finagleMySQL = Project(
   id = "finagle-mysql",
   base = file("finagle-mysql")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-mysql",
     libraryDependencies ++= Seq(
@@ -751,8 +724,7 @@ lazy val finagleExp = Project(
   id = "finagle-exp",
   base = file("finagle-exp")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-exp",
     libraryDependencies ++= Seq(
@@ -767,8 +739,7 @@ lazy val finagleGrpcContext = Project(
   id = "finagle-grpc-context",
   base = file("finagle-grpc-context")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-grpc-context",
     libraryDependencies ++= Seq(
@@ -781,8 +752,7 @@ lazy val finagleOpenCensusTracing = Project(
   id = "finagle-opencensus-tracing",
   base = file("finagle-opencensus-tracing")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     name := "finagle-opencensus-tracing",
     libraryDependencies ++= Seq(
@@ -822,8 +792,7 @@ lazy val finagleBenchmarkThrift = Project(
   id = "finagle-benchmark-thrift",
   base = file("finagle-benchmark-thrift")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).settings(
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleThrift)
@@ -832,8 +801,7 @@ lazy val finagleBenchmark = Project(
   id = "finagle-benchmark",
   base = file("finagle-benchmark")
 ).settings(
-    sharedSettings,
-    withTwoThirteen
+    sharedSettings
   ).enablePlugins(
     JmhPlugin
   ).settings(
