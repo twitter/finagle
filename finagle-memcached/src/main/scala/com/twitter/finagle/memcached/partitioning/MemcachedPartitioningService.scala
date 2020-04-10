@@ -3,12 +3,14 @@ package com.twitter.finagle.memcached.partitioning
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.param.Logger
+import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
 import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, param}
 import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
 import com.twitter.logging.Level
+import com.twitter.util.Future
 
 /**
  * MemcachedPartitioningService provides Ketama consistent hashing based partitioning for the
@@ -124,8 +126,16 @@ private[finagle] class MemcachedPartitioningService(
     )
   }
 
-  protected def isSinglePartition(request: Command): Boolean = request match {
-    case _: StorageCommand | _: ArithmeticCommand | _: Delete => true
-    case _ => allKeysForSinglePartition(request)
+  protected def isSinglePartition(request: Command): Future[Boolean] = request match {
+    case _: StorageCommand | _: ArithmeticCommand | _: Delete => Future.True
+    case _ if allKeysForSinglePartition(request) => Future.True
+    case _ => Future.False
+  }
+
+  final protected def failedProcessRequest(req: Command): Future[Nothing] = {
+    val ex = new NoPartitioningKeys(s"NoPartitioningKeys in for the thrift method: ${req.name}")
+    if (logger.isLoggable(Level.DEBUG))
+      logger.log(Level.DEBUG, "partitionRequest failed: ", ex)
+    Future.exception(ex)
   }
 }

@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.ClientDispatcher
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -13,10 +14,15 @@ import com.twitter.finagle.param.{
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.thrift.{ClientId => FinagleClientId, _}
+import com.twitter.finagle.thrift.exp.partitioning.{
+  PartitioningParams,
+  ThriftPartitioningService,
+  WithThriftPartitioningStrategy
+}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.transport.ThriftClientPreparer
 import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
+import com.twitter.finagle.thrift.{ClientId => FinagleClientId, _}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.scrooge.TReusableBuffer
@@ -227,6 +233,7 @@ object Thrift
     private val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
       StackClient.newStack
         .replace(StackClient.Role.prepConn, preparer)
+        .insertAfter(BindingFactory.role, ThriftPartitioningService.module)
 
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("thrift")
@@ -245,6 +252,7 @@ object Thrift
       extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
       with WithSessionPool[Client]
       with WithDefaultLoadBalancer[Client]
+      with WithThriftPartitioningStrategy[Client]
       with ThriftRichClient {
 
     protected def copy1(
@@ -371,6 +379,8 @@ object Thrift
       new SessionQualificationParams(this)
     override val withAdmissionControl: ClientAdmissionControlParams[Client] =
       new ClientAdmissionControlParams(this)
+    override val withPartitioning: PartitioningParams[Client] =
+      new PartitioningParams(this)
 
     override def withLabel(label: String): Client = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Client =

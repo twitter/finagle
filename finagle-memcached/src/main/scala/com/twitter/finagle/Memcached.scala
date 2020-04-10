@@ -2,21 +2,16 @@ package com.twitter.finagle
 
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.DurationOps._
+import com.twitter.{finagle, hashing}
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{
   ClientDispatcher,
   SerialServerDispatcher,
   StalledPipelineTimeout
 }
-import com.twitter.finagle.pushsession.{
-  PipeliningClientPushSession,
-  PushChannelHandle,
-  PushStackClient,
-  PushTransporter
-}
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
-import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.{Toggles, _}
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
@@ -25,10 +20,9 @@ import com.twitter.finagle.memcached.protocol.text.transport.{
   Netty4ServerFramer
 }
 import com.twitter.finagle.memcached.protocol.{Command, Response}
-import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
 import com.twitter.finagle.netty4.Netty4Listener
+import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -36,7 +30,7 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
-import com.twitter.finagle.partitioning.param.{EjectFailedHost, KeyHasher, NumReps}
+import com.twitter.finagle.partitioning.param.{KeyHasher, NumReps, WithPartitioningStrategy}
 import com.twitter.finagle.partitioning.{
   ConsistentHashingFailureAccrualFactory,
   HashNodeKey,
@@ -44,6 +38,12 @@ import com.twitter.finagle.partitioning.{
   PartitionNode
 }
 import com.twitter.finagle.pool.SingletonPool
+import com.twitter.finagle.pushsession.{
+  PipeliningClientPushSession,
+  PushChannelHandle,
+  PushStackClient,
+  PushTransporter
+}
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
@@ -52,7 +52,6 @@ import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
-import com.twitter.{finagle, hashing}
 import java.net.SocketAddress
 
 /**
@@ -213,6 +212,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     stack: Stack[ServiceFactory[Command, Response]] = Client.stack,
     params: Stack.Params = Client.params)
       extends PushStackClient[Command, Response, Client]
+      with WithPartitioningStrategy[Client]
       with MemcachedRichClient {
 
     protected type In = Response
@@ -305,33 +305,6 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     }
 
     /**
-     * Whether to eject cache host from the Ketama ring based on failure accrual.
-     * By default, this is off. When turning on, keep the following caveat in
-     * mind: ejection is based on local failure accrual, so your cluster may
-     * get different views of the same cache host. With cache updates, this can
-     * introduce inconsistency in cache data. In many cases, it's better to eject
-     * cache host from a separate mechanism that's based on a global view.
-     */
-    def withEjectFailedHost(eject: Boolean): Client =
-      configured(EjectFailedHost(eject))
-
-    /**
-     * Defines the hash function to use for partitioned clients when
-     * mapping keys to partitions.
-     */
-    def withKeyHasher(hasher: hashing.KeyHasher): Client =
-      configured(KeyHasher(hasher))
-
-    /**
-     * Duplicate each node across the hash ring according to `reps`.
-     *
-     * @see [[com.twitter.hashing.ConsistentHashingDistributor]] for more
-     *      details.
-     */
-    def withNumReps(reps: Int): Client =
-      configured(NumReps(reps))
-
-    /**
      * Configures the number of concurrent `connections` a single endpoint has.
      * The connections are load balanced over which allows the pipelined client to
      * avoid head-of-line blocking and reduce its latency.
@@ -350,6 +323,10 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       new ClientAdmissionControlParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
       new SessionQualificationParams(this)
+
+    override def withEjectFailedHost(eject: Boolean): Client = super.withEjectFailedHost(eject)
+    override def withKeyHasher(hasher: hashing.KeyHasher): Client = super.withKeyHasher(hasher)
+    override def withNumReps(reps: Int): Client = super.withNumReps(reps)
 
     override def withLabel(label: String): Client = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Client =

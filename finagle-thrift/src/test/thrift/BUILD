@@ -30,3 +30,20 @@ java_thrift_library(
     compiler = "scrooge",
     language = "java",
 )
+
+java_thrift_library(
+    name = "delivery-thrift-java",
+    sources = [
+        "delivery_service.thrift",
+    ],
+    compiler = "scrooge",
+    language = "java",
+)
+
+java_thrift_library(
+    name = "delivery-thrift-scala",
+    sources = [
+        "delivery_service.thrift",
+    ],
+    language = "scala",
+)

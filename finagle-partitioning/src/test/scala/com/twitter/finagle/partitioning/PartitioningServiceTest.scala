@@ -275,10 +275,10 @@ private[this] class SimplePartitioningService(
 
   override protected def partitionRequest(
     batchedRequest: String
-  ): Seq[(String, Future[Service[String, String]])] = {
+  ): Future[Map[String, Future[Service[String, String]]]] = {
     // assuming all sub-requests are unique (one request per partition). If not the following code
     // will need to group requests by partition by using getPartitionFor method
-    batchedRequest.split(RequestDelimiter).map(stringToTuple).toSeq
+    Future.value(batchedRequest.split(RequestDelimiter).map(stringToTuple).toMap)
   }
 
   protected override def mergeResponses(
@@ -287,5 +287,5 @@ private[this] class SimplePartitioningService(
   ): String =
     mergeStringResults(originalReq, pr)
 
-  protected def isSinglePartition(request: String): Boolean = false
+  protected def isSinglePartition(request: String): Future[Boolean] = Future.False
 }

@@ -86,8 +86,8 @@ class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte]
   /**
    * Sets the merged deserialized response
    */
-  private[finagle] def mergedDeserializedResponse(response: Try[Rep]): Unit = synchronized {
-    deserialized = response
+  private[finagle] def mergedDeserializedResponse(response: Try[Any]): Unit = synchronized {
+    deserialized = response.asInstanceOf[Try[Rep]]
   }
 
   /**

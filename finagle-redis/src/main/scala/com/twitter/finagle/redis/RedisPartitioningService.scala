@@ -2,15 +2,17 @@ package com.twitter.finagle.redis
 
 import com.twitter.finagle.param.Logger
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService
+import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
 import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.redis.param.RedisKeyHasher
 import com.twitter.finagle.redis.protocol.{Command, Reply, StatusReply}
-import com.twitter.finagle.redis.util.ReplyFormat
+import com.twitter.finagle.redis.util.{BufToString, ReplyFormat}
 import com.twitter.finagle.{ServiceFactory, Stack, Stackable}
 import com.twitter.hashing
 import com.twitter.io.Buf
 import com.twitter.logging.Level
+import com.twitter.util.Future
 import scala.collection.{Set => SSet}
 
 private[finagle] object RedisPartitioningService {
@@ -207,9 +209,18 @@ private[finagle] class RedisPartitioningService(
     }
   }
 
-  protected def isSinglePartition(command: Command): Boolean =
+  protected def isSinglePartition(command: Command): Future[Boolean] =
     command match {
-      case _: KeyCommand | _: XDel | _: Ping.type => true
-      case _ => allKeysForSinglePartition(command)
+      case _: KeyCommand | _: XDel | _: Ping.type => Future.True
+      case _ if allKeysForSinglePartition(command) => Future.True
+      case _ => Future.False
     }
+
+  final protected def failedProcessRequest(req: Command): Future[Nothing] = {
+    val ex = new NoPartitioningKeys(
+      s"NoPartitioningKeys in for the thrift method: ${BufToString(req.name)}")
+    if (logger.isLoggable(Level.DEBUG))
+      logger.log(Level.DEBUG, "partitionRequest failed: ", ex)
+    Future.exception(ex)
+  }
 }

@@ -629,7 +629,7 @@ lazy val finagleThrift = Project(
   ).settings(
     name := "finagle-thrift",
     libraryDependencies ++= scroogeLibs
-  ).dependsOn(finagleCore, finagleNetty4, finagleToggle)
+).dependsOn(finagleCore, finagleNetty4, finaglePartitioning, finagleToggle)
 
 lazy val finagleMemcached = Project(
   id = "finagle-memcached",

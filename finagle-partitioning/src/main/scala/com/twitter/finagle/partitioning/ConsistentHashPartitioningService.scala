@@ -6,7 +6,6 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param.Logger
 import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing._
-import com.twitter.logging.Level
 import com.twitter.util._
 
 /**
@@ -20,7 +19,13 @@ private[finagle] object ConsistentHashPartitioningService {
   /**
    * Request is missing partitioning keys needed to determine target partition(s).
    */
-  private[finagle] class NoPartitioningKeys extends Exception
+  private[finagle] class NoPartitioningKeys(message: String) extends Exception(message)
+
+  /**
+   * Errored when applying the hashing strategy to a request.
+   * @param message
+   */
+  private[finagle] class HashingStrategyException(message: String) extends Exception(message)
 
   private[finagle] val DefaultNumReps = 160
 
@@ -81,8 +86,6 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
   numReps: Int = ConsistentHashPartitioningService.DefaultNumReps)
     extends PartitioningService[Req, Rep] {
 
-  import ConsistentHashPartitioningService._
-
   private[this] val logger = params[Logger].log
 
   private[this] val nodeManager = new HashRingNodeManager(underlying, params, numReps)
@@ -106,18 +109,20 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
    */
   protected def createPartitionRequestForKeys(original: Req, keys: Seq[Key]): Req
 
+  /**
+   * Error handling when processing requests to keys failed, this is implemented by each protocol
+   * to log proper information.
+   */
+  protected def failedProcessRequest(req: Req): Future[Nothing]
+
   override def close(deadline: Time): Future[Unit] = {
     Future.join(Seq(nodeManager.close(deadline), super.close(deadline)))
   }
 
-  final override protected def getPartitionFor(
-    partitionedRequest: Req
-  ): Future[Service[Req, Rep]] = {
+  override protected def getPartitionFor(partitionedRequest: Req): Future[Service[Req, Rep]] = {
     val keys = getPartitionKeys(partitionedRequest)
     if (keys.isEmpty) {
-      if (logger.isLoggable(Level.DEBUG))
-        logger.log(Level.DEBUG, s"NoPartitioningKeys in getPartitionFor: $partitionedRequest")
-      Future.exception(new NoPartitioningKeys())
+      failedProcessRequest(partitionedRequest)
     } else {
       // All keys in the request are assumed to belong to the same partition, so use the
       // first key to find the associated partition.
@@ -127,25 +132,24 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
 
   final override protected def partitionRequest(
     request: Req
-  ): Seq[(Req, Future[Service[Req, Rep]])] = {
+  ): Future[Map[Req, Future[Service[Req, Rep]]]] = {
     getPartitionKeys(request) match {
       case Seq(key) =>
-        Seq((request, partitionServiceForKey(key)))
+        Future.value(Map(request -> partitionServiceForKey(key)))
       case keys: Seq[Key] if keys.nonEmpty =>
         groupByPartition(keys) match {
           case keyMap if keyMap.size == 1 =>
             // all keys belong to the same partition
-            Seq((request, partitionServiceForKey(keys.head)))
+            Future.value(Map(request -> partitionServiceForKey(keys.head)))
           case keyMap =>
-            keyMap.map {
-              case (ps, pKeys) =>
-                (createPartitionRequestForKeys(request, pKeys.toSeq), ps)
-            }.toSeq
+            Future.value(
+              keyMap.map {
+                case (ps, pKeys) =>
+                  (createPartitionRequestForKeys(request, pKeys.toSeq), ps)
+              }
+            )
         }
-      case _ =>
-        if (logger.isLoggable(Level.DEBUG))
-          logger.log(Level.DEBUG, s"NoPartitioningKeys in partitionRequest: $request")
-        throw new NoPartitioningKeys
+      case _ => failedProcessRequest(request)
     }
   }
 
@@ -163,17 +167,17 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
       partitionIdForKey
     )
 
-  private[this] def groupByPartition(
+  protected[this] def groupByPartition(
     keys: Iterable[Key]
   ): Map[Future[Service[Req, Rep]], Iterable[Key]] =
     keys.groupBy(partitionServiceForKey)
+
+  protected[this] def partitionServiceForKey(key: Key): Future[Service[Req, Rep]] =
+    nodeManager.getServiceForHash(hashForKey(key))
 
   private[this] def hashForKey(key: Key): Long =
     keyHasher.hashKey(getKeyBytes(key))
 
   private[this] def partitionIdForKey(key: Key): Long =
     nodeManager.getPartitionIdForHash(hashForKey(key))
-
-  private[this] def partitionServiceForKey(key: Key): Future[Service[Req, Rep]] =
-    nodeManager.getServiceForHash(hashForKey(key))
 }

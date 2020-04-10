@@ -1,4 +1,4 @@
-package com.twitter.finagle.thrift.partitioning
+package com.twitter.finagle.thrift.exp.partitioning
 
 import com.twitter.finagle.{Stack, Thrift}
 import com.twitter.scrooge.ThriftStruct

@@ -359,5 +359,8 @@ private[this] class TestConsistentHashPartitioningService(
   ): String =
     mergeStringResults(origReq, pr)
 
-  protected def isSinglePartition(request: String): Boolean = false
+  protected def isSinglePartition(request: String): Future[Boolean] = Future.False
+
+  override protected def failedProcessRequest(req: String): Future[Nothing] =
+    Future.exception(new NoPartitioningKeys("TestConsistentHashPartitioningService"))
 }
