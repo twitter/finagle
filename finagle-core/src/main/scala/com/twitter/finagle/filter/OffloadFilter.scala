@@ -19,13 +19,13 @@ object OffloadFilter {
   private[this] val Role = Stack.Role("OffloadWorkFromIO")
   private[this] val Description = "Offloading computations from IO threads"
 
-  private[this] lazy val (defautPool, defautPoolStats) = {
+  private[this] lazy val (defaultPool, defautPoolStats) = {
     numWorkers.get match {
       case None =>
         (None, Seq.empty)
       case Some(threads) =>
         val factory = new NamedPoolThreadFactory("finagle/offload", makeDaemons = true)
-        val pool = FuturePool.interruptible(Executors.newFixedThreadPool(threads, factory))
+        val pool = FuturePool(Executors.newFixedThreadPool(threads, factory))
         val stats = FinagleStatsReceiver.scope("offload_pool")
         val gauges = Seq(
           stats.addGauge("pool_size") { pool.poolSize },
@@ -46,7 +46,7 @@ object OffloadFilter {
     final case object Disabled extends Param
 
     implicit val param: Stack.Param[Param] =
-      Stack.Param(defautPool.map(Enabled(_)).getOrElse(Disabled))
+      Stack.Param(defaultPool.map(Enabled(_)).getOrElse(Disabled))
   }
 
   private[finagle] def client[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
@@ -88,14 +88,14 @@ object OffloadFilter {
       // > Kernels are crazy.
       val response = service(request)
       val shifted = Promise.interrupts[Rep](response)
-      response.respond(t => {
+      response.respond { t =>
         pool(shifted.update(t))
 
         val tracing = Trace()
         if (tracing.isActivelyTracing) {
           tracing.record(offloadAnnotation)
         }
-      })
+      }
 
       shifted
     }
@@ -116,13 +116,28 @@ object OffloadFilter {
       // Unfortunately, there is no (easy) way to bounce back to the IO thread as we return into
       // the stack. It's more or less fine as we will switch back to IO as we enter the pipeline
       // (Netty land).
-      val res = pool(service(request)).flatten
+      //
+      // Note: we use an indirection promise so that we can disallow interrupting the `Future`
+      // returned by the `FuturePool`. It is not generally safe to interrupt the thread performing
+      // the `service.apply` call and thread interruption is a behavior of some FuturePool
+      // implementations (see `FuturePool.interruptible`). By using an intermediate `Promise` we can
+      // still allow chaining of interrupts without allowing interruption of the `FuturePool` thread
+      // itself. This is handled nicely by using `Promise.become` inside the FuturePool task which
+      // results in proper propagation of interrupts from `shifted` to the result of `service(req)`.
+      // It's worth noting that the order of interrupting and setting interrupt handlers works as
+      // expected when using the `.become` method. Both the following cases correctly propagate
+      // interrupts:
+      // val a,b = new Promise[Unit]()
+      // 1: a.raise(ex); b.setInterruptHandler(h); a.become(b) -> h(ex) called.
+      // 2: a.raise(ex); a.become(b); b.setInterruptHandler(h) -> h(ex) called.
+      val shifted = Promise[Rep]()
+      pool { shifted.become(service(request)) }
 
       val tracing = Trace()
       if (tracing.isActivelyTracing) {
         tracing.record(offloadAnnotation)
       }
-      res
+      shifted
     }
   }
 
