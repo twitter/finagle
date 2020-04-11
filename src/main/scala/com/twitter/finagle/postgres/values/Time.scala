@@ -3,7 +3,7 @@ package com.twitter.finagle.postgres.values
 import java.text.NumberFormat
 import java.time._
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder, ResolverStyle}
-import java.time.temporal.ChronoField
+import java.time.temporal.{ChronoField, TemporalAccessor, TemporalQuery}
 
 import io.netty.buffer.{ByteBuf, Unpooled}
 
@@ -52,9 +52,14 @@ private object DateTimeUtils {
     .append(timeTzParser)
     .toFormatter()
 
-  def parseLocalDateTime(s: String) = PostgresDateTimeParser.parse(s, LocalDateTime.from(_))
-  def parseInstant(s: String) = PostgresDateTimeParser.withZone(ZoneOffset.UTC).parse(s, Instant.from(_))
-  def parseZonedDateTime(s: String) = PostgresDateTimeParser.parse(s, ZonedDateTime.from(_))
+  // NOTE: this is Scala 2.11 interrop. Scala 2.12 automatically does this for us.
+  private def query[T](f: TemporalAccessor => T): TemporalQuery[T] = new TemporalQuery[T] {
+    override def queryFrom(temporal: TemporalAccessor): T = f(temporal)
+  }
+
+  def parseLocalDateTime(s: String) = PostgresDateTimeParser.parse(s, query(LocalDateTime.from))
+  def parseInstant(s: String) = PostgresDateTimeParser.withZone(ZoneOffset.UTC).parse(s, query(Instant.from))
+  def parseZonedDateTime(s: String) = PostgresDateTimeParser.parse(s, query(ZonedDateTime.from))
 
   def readTimestamp(buf: ByteBuf) = {
     val micros = buf.readLong() + POSTGRES_EPOCH_MICROS
