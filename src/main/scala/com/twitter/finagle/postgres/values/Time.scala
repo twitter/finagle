@@ -25,6 +25,37 @@ private object DateTimeUtils {
     .optionalEnd()
     .toFormatter
 
+  /**
+    * https://www.postgresql.org/docs/current/datatype-datetime.html
+    *
+    * ISO 8601 specifies the use of uppercase letter T to separate the date and time.
+    * PostgreSQL accepts that format on input, but on output it uses a space rather than T, as shown above.
+    * This is for readability and for consistency with RFC 3339 as well as some other database systems.
+    */
+  private val PostgresDateTimeFormat = new DateTimeFormatterBuilder()
+    .parseCaseInsensitive()
+    .append(DateTimeFormatter.ISO_LOCAL_DATE)
+    .appendLiteral(' ')
+    .append(DateTimeFormatter.ISO_LOCAL_TIME)
+    .optionalStart()
+    .appendOffsetId()
+    .toFormatter()
+
+  def format(i: Instant) = PostgresDateTimeFormat.withZone(ZoneOffset.UTC).format(i)
+  def format(zdt: ZonedDateTime) = PostgresDateTimeFormat.format(zdt)
+  def format(ldt: LocalDateTime) = PostgresDateTimeFormat.format(ldt)
+
+  private val PostgresDateTimeParser = new DateTimeFormatterBuilder()
+    .parseCaseInsensitive()
+    .append(DateTimeFormatter.ISO_LOCAL_DATE)
+    .appendLiteral(' ')
+    .append(timeTzParser)
+    .toFormatter()
+
+  def parseLocalDateTime(s: String) = PostgresDateTimeParser.parse(s, LocalDateTime.from(_))
+  def parseInstant(s: String) = PostgresDateTimeParser.withZone(ZoneOffset.UTC).parse(s, Instant.from(_))
+  def parseZonedDateTime(s: String) = PostgresDateTimeParser.parse(s, ZonedDateTime.from(_))
+
   def readTimestamp(buf: ByteBuf) = {
     val micros = buf.readLong() + POSTGRES_EPOCH_MICROS
     val seconds = micros / 1000000L

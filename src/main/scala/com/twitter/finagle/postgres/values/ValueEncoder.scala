@@ -2,7 +2,6 @@ package com.twitter.finagle.postgres.values
 
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
-import java.sql.Timestamp
 import java.time._
 import java.time.temporal.JulianFields
 import java.util.UUID
@@ -120,20 +119,17 @@ object ValueEncoder extends LowPriorityEncoder {
   )
   implicit val timestamp: ValueEncoder[LocalDateTime] = instance(
     "timestamp",
-    t => java.sql.Timestamp.valueOf(t).toString,
+    t => DateTimeUtils.format(t),
     (ts, c) => Option(ts).map(ts => DateTimeUtils.writeTimestamp(ts))
   )
   implicit val timestampTz: ValueEncoder[ZonedDateTime] = instance(
-    "timestamptz", { t =>
-      val offs = t.toOffsetDateTime
-      val hours = (offs.getOffset.getTotalSeconds / 3600).formatted("%+03d")
-      Timestamp.from(t.toInstant).toString + hours
-    },
+    "timestamptz",
+    t => DateTimeUtils.format(t),
     (ts, c) => Option(ts).map(ts => DateTimeUtils.writeTimestampTz(ts))
   )
   implicit val instant: ValueEncoder[Instant] = instance(
     "timestamptz",
-    i => Timestamp.from(i).toString + "+00",
+    i => DateTimeUtils.format(i),
     (ts, c) => Option(ts).map(ts => DateTimeUtils.writeInstant(ts))
   )
   implicit val time: ValueEncoder[LocalTime] = instance(

@@ -102,28 +102,18 @@ object ValueDecoder {
     (b, c) => Try(DateTimeUtils.readTimeTz(b))
   )
   implicit val localDateTime: ValueDecoder[LocalDateTime] = instance(
-    s => Try(LocalDateTime.ofInstant(java.sql.Timestamp.valueOf(s).toInstant, ZoneId.systemDefault())),
+    s => Try(DateTimeUtils.parseLocalDateTime(s)),
     (b, c) => Try(LocalDateTime.ofInstant(DateTimeUtils.readTimestamp(b), ZoneOffset.UTC))
   )
 
   implicit val instant: ValueDecoder[Instant] = instance(
-    s => Try {
-      val (str, zoneOffs) = DateTimeUtils.ZONE_REGEX.findFirstMatchIn(s) match {
-        case Some(m) => m.group(1) -> (m.group(2) match {
-          case "-" => -1 * m.group(3).toInt
-          case "+" => m.group(3).toInt
-        })
-        case None => throw new DateTimeException("TimestampTZ string could not be parsed")
-      }
-      val zone = ZoneId.ofOffset("", ZoneOffset.ofHours(zoneOffs))
-      LocalDateTime.ofInstant(
-        java.sql.Timestamp.valueOf(str).toInstant,
-        zone).atZone(zone).toInstant
-    },
+    s => Try(DateTimeUtils.parseInstant(s)),
     (b, c) => Try(DateTimeUtils.readTimestamp(b))
   )
-
-  implicit val zonedDateTime: ValueDecoder[ZonedDateTime] = instant.map(_.atZone(ZoneId.systemDefault()))
+  implicit val zonedDateTime: ValueDecoder[ZonedDateTime] = instance(
+    s => Try(DateTimeUtils.parseZonedDateTime(s)),
+    (b, c) => Try(DateTimeUtils.readTimestamp(b).atZone(ZoneOffset.UTC)) // binary mode does not provide the zone
+  )
   implicit val offsetDateTime: ValueDecoder[OffsetDateTime] = zonedDateTime.map(_.toOffsetDateTime)
 
   implicit val interval: ValueDecoder[Interval] = instance(
@@ -183,7 +173,7 @@ object ValueDecoder {
     case "time_recv" => localTime
     case "timetz_recv" => offsetTime
     case "timestamp_recv" => localDateTime
-    case "timestamptz_recv" => instant
+    case "timestamptz_recv" => instant // TODO: this should be zonedDateTime since in text mode, using instant will lose the timezone
     case "interval_recv" => interval
     //TODO: bit
     //TODO: varbit

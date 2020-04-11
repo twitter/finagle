@@ -156,17 +156,24 @@ class ValuesSpec extends Spec with ScalaCheckDrivenPropertyChecks {
             "timestamptz_send",
             "timestamptz",
             ts => ts.toOffsetDateTime.toString,
-            (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY),
+            (a, b) => {
+              // when reading the value, the timezone may have changed:
+              //   the binary protocol does not include timezone information (everything is in UTC)
+              //   the text protocol returns in the server's timezone which may be different than the supplied tz.
+              // so we convert the input value to the read value's timezone and then compare them
+              a.withZoneSameInstant(b.getOffset) == b
+            },
             nonDefault = true,
             localTz = tz
           )
 
-        s"parse timestamps as instants when local timezone is ${tz.getID}" in test(ValueDecoder.instant, ValueEncoder.instant)(
-          "timestamptz_send",
-          "timestamptz",
-          ts => ts.toString,
-          localTz = tz
-        )
+        s"parse timestamps as instants when local timezone is ${tz.getID}" in
+          test(ValueDecoder.instant, ValueEncoder.instant)(
+            "timestamptz_send",
+            "timestamptz",
+            ts => ts.toString,
+            localTz = tz
+          )
       }
       "parse uuids" in test(ValueDecoder.uuid, ValueEncoder.uuid)("uuid_send", "uuid")
       "parse dates" in test(ValueDecoder.localDate, ValueEncoder.date)("date_send", "date")
