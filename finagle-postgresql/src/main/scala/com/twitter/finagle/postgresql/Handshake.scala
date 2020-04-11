@@ -13,48 +13,50 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.Future
 
-trait StateMachine[R] {
-  def init: StateMachine.TransitionResult[R]
-  def receive(msg: BackendMessage): StateMachine.TransitionResult[R]
-  def send(msg: FrontendMessage): StateMachine.TransitionResult[R]
+trait StateMachine[S, R] {
+  def init: S
+  def start: StateMachine.TransitionResult[S, R]
+  def receive(state: S, msg: BackendMessage): StateMachine.TransitionResult[S, R]
+  def send(state: S, msg: FrontendMessage): StateMachine.TransitionResult[S, R]
 }
 object StateMachine {
-  sealed trait TransitionResult[+R]
-  case object Noop extends TransitionResult[Nothing]
-  case class Send(msg: FrontendMessage) extends TransitionResult[Nothing]
-  case class Complete[R](value: R) extends TransitionResult[R]
+  sealed trait TransitionResult[+S, +R]
+  case class Noop[S](state: S) extends TransitionResult[S, Nothing]
+  case class Send[S](state: S, msg: FrontendMessage) extends TransitionResult[S, Nothing]
+  case class Complete[R](value: R) extends TransitionResult[Nothing, R] // TODO: how do we move to the next machine?
 }
 
-case class MachineRunner[R](transport: Transport[Packet, Packet], machine: StateMachine[R]) {
+case class MachineRunner[S, R](transport: Transport[Packet, Packet], machine: StateMachine[S, R]) {
+
+  var state: S = machine.init
 
   private[this] def readMsg = transport.read().map(Messages.BackendMessage.read)
 
-  private[this] def step(transition: StateMachine.TransitionResult[R]): Future[R] = transition match {
-    case StateMachine.Send(msg) => transport.write(msg.write) before readAndStep
+  private[this] def step(transition: StateMachine.TransitionResult[S, R]): Future[R] = transition match {
+    case StateMachine.Send(s, msg) =>
+      state = s
+      transport.write(msg.write) before readAndStep
     case StateMachine.Complete(result) => Future.value(result)
-    case StateMachine.Noop => readAndStep
+    case StateMachine.Noop(s) =>
+      state = s
+      readAndStep
   }
   private[this] def readAndStep =
-    readMsg.flatMap { msg => step(machine.receive(msg)) }
+    readMsg.flatMap { msg => step(machine.receive(state, msg)) }
 
   def run: Future[R] =
-    step(machine.init)
+    step(machine.start)
 }
 
-case class AuthenticationMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[HandshakeResult] {
+case class AuthenticationMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[AuthenticationMachine.State, HandshakeResult] {
+  import AuthenticationMachine._
 
-  sealed trait State
-  case object Startup extends State
-  case object Done extends State
-  case object Authenticating extends State
-  case class BackendStarting(params: List[ParameterStatus], bkd: Option[BackendKeyData]) extends State
+  override def init: State = Startup
 
-  var state: State = Startup
+  override def start: StateMachine.TransitionResult[State, HandshakeResult] =
+    StateMachine.Send(Startup, Messages.StartupMessage(user = credentials.username, database = database.name))
 
-  override def init: StateMachine.TransitionResult[HandshakeResult] =
-    StateMachine.Send(Messages.StartupMessage(user = credentials.username, database = database.name))
-
-  override def receive(msg: BackendMessage): StateMachine.TransitionResult[HandshakeResult] = (state, msg) match {
+  override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, HandshakeResult] = (state, msg) match {
     case (Startup, Messages.AuthenticationMD5Password(salt)) =>
       def hex(input: Array[Byte]) = input.map(s => f"$s%02x").mkString
       def bytes(str: String) = str.getBytes(StandardCharsets.UTF_8)
@@ -62,30 +64,32 @@ case class AuthenticationMachine(credentials: Params.Credentials, database: Para
         hex(input.foldLeft(MessageDigest.getInstance("MD5")) { case(d,v) => d.update(v);d }.digest())
 
       val hashed = md5(
-        bytes(md5(bytes(credentials.password), bytes(credentials.username))),
+        bytes(md5(bytes(credentials.password.getOrElse("")), bytes(credentials.username))),
         Buf.ByteArray.Owned.extract(salt)
       )
 
-      state = Authenticating
-      StateMachine.Send(Messages.PasswordMessage(s"md5$hashed"))
-    case (Authenticating, Messages.AuthenticationOk) =>
-      state = BackendStarting(Nil, None)
-      StateMachine.Noop
+      StateMachine.Send(Authenticating, Messages.PasswordMessage(s"md5$hashed"))
+    case (Authenticating | Startup, Messages.AuthenticationOk) => // This can happen at Startup when there's no password
+      StateMachine.Noop(BackendStarting(Nil, None))
     case (BackendStarting(params, bkd), p: Messages.ParameterStatus) =>
-      state = BackendStarting(p :: params, bkd)
-      StateMachine.Noop
+      StateMachine.Noop(BackendStarting(p :: params, bkd))
     case (BackendStarting(params, _), bkd: Messages.BackendKeyData) =>
-      state = BackendStarting(params, Some(bkd))
-      StateMachine.Noop
+      StateMachine.Noop(state = BackendStarting(params, Some(bkd)))
     case (BackendStarting(params, bkd), _: Messages.ReadyForQuery) =>
-      state = Done
       StateMachine.Complete(HandshakeResult(params, bkd.get))
     case _ =>
       sys.error(s"Unexpected msg $msg in state $state")
   }
 
-  override def send(msg: FrontendMessage): StateMachine.TransitionResult[HandshakeResult] =
+  override def send(state: State, msg: FrontendMessage): StateMachine.TransitionResult[State, HandshakeResult] =
     sys.error("unexpected frontend message")
+}
+
+object AuthenticationMachine {
+  sealed trait State
+  case object Startup extends State
+  case object Authenticating extends State
+  case class BackendStarting(params: List[ParameterStatus], bkd: Option[BackendKeyData]) extends State
 }
 
 case class HandshakeResult(parameters: List[ParameterStatus], backendData: BackendKeyData)
@@ -95,11 +99,6 @@ case class Handshake(
   transport: Transport[Packet, Packet]
 ) {
 
-  val credentials = params[Params.Credentials]
-  val database = params[Params.Database]
-
-  val machine = AuthenticationMachine(params[Params.Credentials], params[Params.Database])
-
   def startup(): Future[HandshakeResult] =
-    MachineRunner(transport, machine).run
+    MachineRunner(transport, AuthenticationMachine(params[Params.Credentials], params[Params.Database])).run
 }

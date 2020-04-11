@@ -6,8 +6,6 @@ import com.twitter.io.Buf
 import com.twitter.io.BufByteWriter
 import com.twitter.io.ByteReader
 
-import scala.collection.mutable.ArrayBuffer
-
 object PgBuf {
 
   class Writer(w: BufByteWriter) {

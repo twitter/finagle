@@ -35,7 +35,7 @@ object PostgreSQL {
     override type Out = Packet
     override type Context = TransportContext
 
-    def withCredentials(u: String, p: String): Client =
+    def withCredentials(u: String, p: Option[String]): Client =
       configured(Params.Credentials(u, p))
 
     def withDatabase(db: String): Client =
