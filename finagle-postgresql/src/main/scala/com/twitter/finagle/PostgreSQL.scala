@@ -5,21 +5,16 @@ import java.net.SocketAddress
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.StdStackClient
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.decoder.Framer
+import com.twitter.finagle.decoder.LengthFieldFramer
+import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.postgresql.Messages.BackendMessage
 import com.twitter.finagle.postgresql.Messages.FrontendMessage
 import com.twitter.finagle.postgresql.Params
-import com.twitter.finagle.postgresql.PgsqlTransporter
 import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.transport.TransportContext
-import com.twitter.util.Future
-import com.twitter.util.Promise
-import com.twitter.util.Return
-import com.twitter.util.Throw
-import com.twitter.util.Try
+import com.twitter.io.Buf
 
 object PostgreSQL {
 
@@ -31,9 +26,11 @@ object PostgreSQL {
     params: Stack.Params = defaultParams
   ) extends StdStackClient[FrontendMessage, BackendMessage, Client] {
 
-    override type In = Packet
-    override type Out = Packet
+    override type In = Buf
+    override type Out = Buf
     override type Context = TransportContext
+
+    type ClientTransport = Transport[In, Out] { type Context <: TransportContext }
 
     def withCredentials(u: String, p: Option[String]): Client =
       configured(Params.Credentials(u, p))
@@ -41,35 +38,26 @@ object PostgreSQL {
     def withDatabase(db: String): Client =
       configured(Params.Database(Some(db)))
 
-    override protected def newTransporter(addr: SocketAddress): Transporter[Packet, Packet, TransportContext] = {
-      new PgsqlTransporter(addr, params)
+    override protected def newTransporter(addr: SocketAddress): Transporter[Buf, Buf, TransportContext] = {
+      // TODO: this doesn't work during ssl handshaking
+      def factory: Framer =
+        new LengthFieldFramer(
+          lengthFieldBegin = 1,
+          lengthFieldLength = 4,
+          lengthAdjust = 1,
+          maxFrameLength = Int.MaxValue,
+          bigEndian = true)
+
+      Netty4Transporter.framedBuf(Some(factory _), addr, params)
     }
 
-    override protected def newDispatcher(trans: Transport[Packet, Packet] {
-      type Context <: TransportContext
-    }
-    ): Service[FrontendMessage, BackendMessage] = new GenSerialClientDispatcher[FrontendMessage, BackendMessage, Packet, Packet](trans, params[Stats].statsReceiver) {
+    override protected def newDispatcher(transport: ClientTransport): Service[FrontendMessage, BackendMessage] =
+      new postgresql.ClientDispatcher(transport.map[Packet, Packet](_.toBuf, Packet.parse), params)
 
-      private[this] val tryReadTheTransport: Try[Unit] => Future[Packet] = {
-        case Return(_) => trans.read()
-        case Throw(exc) => wrapWriteException(exc)
-      }
-
-      // TODO: this isn't how we're supposed to dispatch since PgSQL isn't req/res based
-      override protected def dispatch(req: FrontendMessage, p: Promise[BackendMessage]): Future[Unit] = {
-        trans
-          .write(req.write)
-          .transform(tryReadTheTransport)
-          .map(rep => BackendMessage.read(rep))
-          .respond(rep => p.updateIfEmpty(rep))
-          .unit
-      }
-    }
-
-    override protected def copy1(stack: Stack[ServiceFactory[FrontendMessage, BackendMessage]], params: Stack.Params): Client {
-      type In = Packet
-      type Out = Packet
-    } = copy(stack, params)
+    override protected def copy1(
+      stack: Stack[ServiceFactory[FrontendMessage, BackendMessage]] = this.stack,
+      params: Stack.Params = this.params
+    ): Client = copy(stack, params)
   }
 
 }
