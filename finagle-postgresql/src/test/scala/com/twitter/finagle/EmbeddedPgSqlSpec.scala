@@ -18,7 +18,7 @@ trait EmbeddedPgSqlSpec extends BeforeAfterAll {
   def client: Service[postgresql.Messages.FrontendMessage, postgresql.Messages.BackendMessage] = embeddedPgSql match {
     case None => sys.error("getClient invoked outside of test fragment")
     case Some(pgsql) =>
-      PostgreSQL.Client()
+      PostgreSql.Client()
         .withCredentials(TestDbUser, TestDbPassword)
         .withDatabase(TestDbName)
         .newService(s"localhost:${pgsql.getPort}")

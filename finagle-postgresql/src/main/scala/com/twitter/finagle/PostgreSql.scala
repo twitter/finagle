@@ -16,7 +16,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.transport.TransportContext
 import com.twitter.io.Buf
 
-object PostgreSQL {
+object PostgreSql {
 
   val defaultStack: Stack[ServiceFactory[FrontendMessage, BackendMessage]] = StackClient.newStack[FrontendMessage, BackendMessage]
   val defaultParams: Stack.Params = StackClient.defaultParams
