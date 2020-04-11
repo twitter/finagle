@@ -3,7 +3,7 @@ package com.twitter.finagle.postgresql
 import com.twitter.finagle.Stack
 
 object Params {
-  case class Credentials(username: String, password: String)
+  case class Credentials(username: String, password: Option[String])
   object Credentials {
     implicit val param: Stack.Param[Credentials] = new Stack.Param[Credentials] {
       override def show(p: Credentials): Seq[(String, () => String)] = {
