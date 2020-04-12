@@ -3,10 +3,8 @@ package com.twitter.finagle.postgresql.machine
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
-import com.twitter.finagle.postgresql.Messages
-import com.twitter.finagle.postgresql.Messages.BackendKeyData
-import com.twitter.finagle.postgresql.Messages.BackendMessage
-import com.twitter.finagle.postgresql.Messages.ParameterStatus
+import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
 import com.twitter.io.Buf
 import com.twitter.util.Future
@@ -15,10 +13,10 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
   import HandshakeMachine._
 
   override def start: StateMachine.TransitionResult[State, HandshakeResult] =
-    StateMachine.TransitionAndSend(Authenticating, Messages.StartupMessage(user = credentials.username, database = database.name))
+    StateMachine.TransitionAndSend(Authenticating, FrontendMessage.StartupMessage(user = credentials.username, database = database.name))
 
   override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, HandshakeResult] = (state, msg) match {
-    case (Authenticating, Messages.AuthenticationMD5Password(salt)) =>
+    case (Authenticating, BackendMessage.AuthenticationMD5Password(salt)) =>
       def hex(input: Array[Byte]) = input.map(s => f"$s%02x").mkString
       def bytes(str: String) = str.getBytes(StandardCharsets.UTF_8)
       def md5(input: Array[Byte]*): String =
@@ -29,14 +27,14 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
         Buf.ByteArray.Owned.extract(salt)
       )
 
-      StateMachine.TransitionAndSend(Authenticating, Messages.PasswordMessage(s"md5$hashed"))
-    case (Authenticating, Messages.AuthenticationOk) => // This can happen at Startup when there's no password
+      StateMachine.TransitionAndSend(Authenticating, FrontendMessage.PasswordMessage(s"md5$hashed"))
+    case (Authenticating, BackendMessage.AuthenticationOk) => // This can happen at Startup when there's no password
       StateMachine.Transition(BackendStarting(Nil, None))
-    case (BackendStarting(params, bkd), p: Messages.ParameterStatus) =>
+    case (BackendStarting(params, bkd), p: BackendMessage.ParameterStatus) =>
       StateMachine.Transition(BackendStarting(p :: params, bkd))
-    case (BackendStarting(params, _), bkd: Messages.BackendKeyData) =>
+    case (BackendStarting(params, _), bkd: BackendMessage.BackendKeyData) =>
       StateMachine.Transition(state = BackendStarting(params, Some(bkd)))
-    case (BackendStarting(params, bkd), ready: Messages.ReadyForQuery) =>
+    case (BackendStarting(params, bkd), ready: BackendMessage.ReadyForQuery) =>
       StateMachine.Complete(HandshakeResult(params, bkd.get), Future.value(ready))
     case _ =>
       sys.error(s"Unexpected msg $msg in state $state")
@@ -46,7 +44,7 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
 object HandshakeMachine {
   sealed trait State
   case object Authenticating extends State
-  case class BackendStarting(params: List[ParameterStatus], bkd: Option[BackendKeyData]) extends State
+  case class BackendStarting(params: List[BackendMessage.ParameterStatus], bkd: Option[BackendMessage.BackendKeyData]) extends State
 
-  case class HandshakeResult(parameters: List[ParameterStatus], backendData: BackendKeyData)
+  case class HandshakeResult(parameters: List[BackendMessage.ParameterStatus], backendData: BackendMessage.BackendKeyData)
 }

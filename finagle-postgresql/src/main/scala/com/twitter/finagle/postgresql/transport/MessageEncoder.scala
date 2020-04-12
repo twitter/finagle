@@ -1,21 +1,20 @@
 package com.twitter.finagle.postgresql.transport
 
-import com.twitter.finagle.postgresql.Messages
-import com.twitter.finagle.postgresql.Messages.StartupMessage
+import com.twitter.finagle.postgresql.FrontendMessage
 
-trait MessageEncoder[M <: Messages.FrontendMessage] {
+trait MessageEncoder[M <: FrontendMessage] {
   def toPacket(m: M): Packet
 }
 
 object MessageEncoder {
 
-  def apply[M <: Messages.FrontendMessage](b: Option[Byte])(f: (PgBuf.Writer, M) => PgBuf.Writer): MessageEncoder[M] =
+  def apply[M <: FrontendMessage](b: Option[Byte])(f: (PgBuf.Writer, M) => PgBuf.Writer): MessageEncoder[M] =
     m => Packet(b, f(PgBuf.writer, m).build)
 
-  def apply[M <: Messages.FrontendMessage](c: Char)(f: (PgBuf.Writer, M) => PgBuf.Writer): MessageEncoder[M] =
+  def apply[M <: FrontendMessage](c: Char)(f: (PgBuf.Writer, M) => PgBuf.Writer): MessageEncoder[M] =
     apply(Some(c.toByte))(f)
 
-  implicit val startupEncoder: MessageEncoder[StartupMessage]  = MessageEncoder(None) { (writer, msg) =>
+  implicit val startupEncoder: MessageEncoder[FrontendMessage.StartupMessage]  = MessageEncoder(None) { (writer, msg) =>
     writer
       .short(msg.version.major)
       .short(msg.version.minor)
@@ -27,9 +26,9 @@ object MessageEncoder {
       .byte(0)
   }
 
-  implicit val passwordEncoder: MessageEncoder[Messages.PasswordMessage] = MessageEncoder('p') { (writer, msg) =>
+  implicit val passwordEncoder: MessageEncoder[FrontendMessage.PasswordMessage] = MessageEncoder('p') { (writer, msg) =>
     writer.string(msg.password)
   }
 
-  implicit val syncEncoder: MessageEncoder[Messages.Sync.type] = MessageEncoder('S') { (writer, msg) => writer }
+  implicit val syncEncoder: MessageEncoder[FrontendMessage.Sync.type] = MessageEncoder('S') { (writer, msg) => writer }
 }
