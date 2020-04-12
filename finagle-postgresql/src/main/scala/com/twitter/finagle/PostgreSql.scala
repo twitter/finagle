@@ -8,9 +8,9 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.decoder.Framer
 import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.postgresql.Messages.BackendMessage
-import com.twitter.finagle.postgresql.Messages.FrontendMessage
 import com.twitter.finagle.postgresql.Params
+import com.twitter.finagle.postgresql.Request
+import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.transport.TransportContext
@@ -18,13 +18,13 @@ import com.twitter.io.Buf
 
 object PostgreSql {
 
-  val defaultStack: Stack[ServiceFactory[FrontendMessage, BackendMessage]] = StackClient.newStack[FrontendMessage, BackendMessage]
+  val defaultStack: Stack[ServiceFactory[Request, Response]] = StackClient.newStack[Request, Response]
   val defaultParams: Stack.Params = StackClient.defaultParams
 
   case class Client(
-    stack:  Stack[ServiceFactory[FrontendMessage, BackendMessage]] = defaultStack,
+    stack:  Stack[ServiceFactory[Request, Response]] = defaultStack,
     params: Stack.Params = defaultParams
-  ) extends StdStackClient[FrontendMessage, BackendMessage, Client] {
+  ) extends StdStackClient[Request, Response, Client] {
 
     override type In = Buf
     override type Out = Buf
@@ -51,11 +51,11 @@ object PostgreSql {
       Netty4Transporter.framedBuf(Some(factory _), addr, params)
     }
 
-    override protected def newDispatcher(transport: ClientTransport): Service[FrontendMessage, BackendMessage] =
+    override protected def newDispatcher(transport: ClientTransport): Service[Request, Response] =
       new postgresql.ClientDispatcher(transport.map[Packet, Packet](_.toBuf, Packet.parse), params)
 
     override protected def copy1(
-      stack: Stack[ServiceFactory[FrontendMessage, BackendMessage]] = this.stack,
+      stack: Stack[ServiceFactory[Request, Response]] = this.stack,
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
   }
