@@ -9,6 +9,8 @@ import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
 import com.twitter.finagle.postgresql.machine.SimpleQueryMachine
 import com.twitter.finagle.postgresql.machine.StateMachine
+import com.twitter.finagle.postgresql.transport.MessageDecoder
+import com.twitter.finagle.postgresql.transport.MessageEncoder
 import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
@@ -22,17 +24,17 @@ class ClientDispatcher(
   params[Stats].statsReceiver
 ) {
 
-  def write(msg: Messages.FrontendMessage): Future[Unit] =
+  def write[M <: Messages.FrontendMessage](msg: M)(implicit encoder: MessageEncoder[M]): Future[Unit] =
     transport
-      .write(msg.write)
+      .write(encoder.toPacket(msg))
       .rescue {
         case exc => wrapWriteException(exc)
       }
 
   def read(): Future[Messages.BackendMessage] =
-    transport.read().map(rep => Messages.BackendMessage.read(rep))
+    transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry // TODO: better error handling
 
-  def exchange(msg: Messages.FrontendMessage): Future[Messages.BackendMessage] =
+  def exchange[M <: Messages.FrontendMessage : MessageEncoder](msg: M): Future[Messages.BackendMessage] =
     write(msg) before read()
 
   def run[S,R](machine: StateMachine[S, R]) = {
@@ -40,9 +42,12 @@ class ClientDispatcher(
     var state: S = null.asInstanceOf[S] // TODO
 
     def step(transition: StateMachine.TransitionResult[S, R]): Future[StateMachine.Complete[R]] = transition match {
-      case StateMachine.Transition(s, action) =>
+      case StateMachine.Transition(s) =>
         state = s
-        action.fold(Future.Done) { msg => write(msg) } before readAndStep
+        readAndStep
+      case t@StateMachine.TransitionAndSend(s, msg) =>
+        state = s
+        write(msg)(t.encoder) before readAndStep
       case c: StateMachine.Complete[R] => Future.value(c)
     }
 
