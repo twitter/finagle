@@ -6,10 +6,10 @@ import java.security.MessageDigest
 import com.twitter.finagle.postgresql.Messages
 import com.twitter.finagle.postgresql.Messages.BackendKeyData
 import com.twitter.finagle.postgresql.Messages.BackendMessage
-import com.twitter.finagle.postgresql.Messages.FrontendMessage
 import com.twitter.finagle.postgresql.Messages.ParameterStatus
 import com.twitter.finagle.postgresql.Params
 import com.twitter.io.Buf
+import com.twitter.util.Future
 
 case class HandshakeMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[HandshakeMachine.State, HandshakeMachine.HandshakeResult] {
   import HandshakeMachine._
@@ -36,14 +36,11 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
       StateMachine.Transition(BackendStarting(p :: params, bkd), None)
     case (BackendStarting(params, _), bkd: Messages.BackendKeyData) =>
       StateMachine.Transition(state = BackendStarting(params, Some(bkd)), None)
-    case (BackendStarting(params, bkd), _: Messages.ReadyForQuery) =>
-      StateMachine.Complete(HandshakeResult(params, bkd.get))
+    case (BackendStarting(params, bkd), ready: Messages.ReadyForQuery) =>
+      StateMachine.Complete(HandshakeResult(params, bkd.get), Future.value(ready))
     case _ =>
       sys.error(s"Unexpected msg $msg in state $state")
   }
-
-  override def send(state: State, msg: FrontendMessage): StateMachine.TransitionResult[State, HandshakeResult] =
-    sys.error("unexpected frontend message")
 }
 
 object HandshakeMachine {
