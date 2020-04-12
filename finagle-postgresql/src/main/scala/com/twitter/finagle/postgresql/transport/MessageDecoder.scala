@@ -1,37 +1,36 @@
 package com.twitter.finagle.postgresql.transport
 
-import com.twitter.finagle.postgresql.Messages
-import com.twitter.finagle.postgresql.Messages.AuthenticationCleartextPassword
-import com.twitter.finagle.postgresql.Messages.AuthenticationGSS
-import com.twitter.finagle.postgresql.Messages.AuthenticationGSSContinue
-import com.twitter.finagle.postgresql.Messages.AuthenticationKerberosV5
-import com.twitter.finagle.postgresql.Messages.AuthenticationMD5Password
-import com.twitter.finagle.postgresql.Messages.AuthenticationMessage
-import com.twitter.finagle.postgresql.Messages.AuthenticationOk
-import com.twitter.finagle.postgresql.Messages.AuthenticationSASL
-import com.twitter.finagle.postgresql.Messages.AuthenticationSASLContinue
-import com.twitter.finagle.postgresql.Messages.AuthenticationSASLFinal
-import com.twitter.finagle.postgresql.Messages.AuthenticationSCMCredential
-import com.twitter.finagle.postgresql.Messages.AuthenticationSSPI
-import com.twitter.finagle.postgresql.Messages.BackendKeyData
-import com.twitter.finagle.postgresql.Messages.BackendMessage
-import com.twitter.finagle.postgresql.Messages.ErrorResponse
-import com.twitter.finagle.postgresql.Messages.FailedTx
-import com.twitter.finagle.postgresql.Messages.Field
-import com.twitter.finagle.postgresql.Messages.InTx
-import com.twitter.finagle.postgresql.Messages.NoTx
-import com.twitter.finagle.postgresql.Messages.ParameterStatus
-import com.twitter.finagle.postgresql.Messages.ReadyForQuery
+import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationCleartextPassword
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSSContinue
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationKerberosV5
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationMD5Password
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationMessage
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationOk
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASL
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASLContinue
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASLFinal
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
+import com.twitter.finagle.postgresql.BackendMessage.BackendKeyData
+import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
+import com.twitter.finagle.postgresql.BackendMessage.FailedTx
+import com.twitter.finagle.postgresql.BackendMessage.Field
+import com.twitter.finagle.postgresql.BackendMessage.InTx
+import com.twitter.finagle.postgresql.BackendMessage.NoTx
+import com.twitter.finagle.postgresql.BackendMessage.ParameterStatus
+import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.util.Throw
 import com.twitter.util.Try
 
-trait MessageDecoder[M <: Messages.BackendMessage] {
+trait MessageDecoder[M <: BackendMessage] {
   def decode(b: PgBuf.Reader): Try[M]
 }
 
 object MessageDecoder {
 
-  def decode[M <: Messages.BackendMessage](reader: PgBuf.Reader)(implicit decoder: MessageDecoder[M]) =
+  def decode[M <: BackendMessage](reader: PgBuf.Reader)(implicit decoder: MessageDecoder[M]) =
     decoder.decode(reader)
 
   def fromPacket(p: Packet): Try[BackendMessage] = {
@@ -46,7 +45,7 @@ object MessageDecoder {
     }
   }
 
-  def apply[M <: Messages.BackendMessage](f: PgBuf.Reader => M): MessageDecoder[M] = reader => Try(f(reader))
+  def apply[M <: BackendMessage](f: PgBuf.Reader => M): MessageDecoder[M] = reader => Try(f(reader))
 
   implicit lazy val errorResponseDecoder: MessageDecoder[ErrorResponse] = MessageDecoder { reader =>
     def nextField: Option[Field] =

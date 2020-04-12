@@ -24,17 +24,17 @@ class ClientDispatcher(
   params[Stats].statsReceiver
 ) {
 
-  def write[M <: Messages.FrontendMessage](msg: M)(implicit encoder: MessageEncoder[M]): Future[Unit] =
+  def write[M <: FrontendMessage](msg: M)(implicit encoder: MessageEncoder[M]): Future[Unit] =
     transport
       .write(encoder.toPacket(msg))
       .rescue {
         case exc => wrapWriteException(exc)
       }
 
-  def read(): Future[Messages.BackendMessage] =
+  def read(): Future[BackendMessage] =
     transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry // TODO: better error handling
 
-  def exchange[M <: Messages.FrontendMessage : MessageEncoder](msg: M): Future[Messages.BackendMessage] =
+  def exchange[M <: FrontendMessage : MessageEncoder](msg: M): Future[BackendMessage] =
     write(msg) before read()
 
   def run[S,R](machine: StateMachine[S, R]) = {
@@ -57,7 +57,7 @@ class ClientDispatcher(
     step(machine.start)
   }
 
-  def dispatch[S,R](machine: StateMachine[S,R], promise: Promise[R]): Future[Messages.ReadyForQuery] = {
+  def dispatch[S,R](machine: StateMachine[S,R], promise: Promise[R]): Future[BackendMessage.ReadyForQuery] = {
     run(machine)
       .flatMap { case StateMachine.Complete(response, signal) =>
         promise.setValue(response)
@@ -74,7 +74,7 @@ class ClientDispatcher(
 
   override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
     req match {
-      case Sync => dispatch(StateMachine.singleMachine(Messages.Sync)(BackendResponse(_): Response), p).unit
+      case Sync => dispatch(StateMachine.singleMachine(FrontendMessage.Sync)(BackendResponse(_): Response), p).unit
       case Query(q) => dispatch(new SimpleQueryMachine(q), p).unit
     }
 }
