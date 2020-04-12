@@ -7,14 +7,12 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
-import com.twitter.finagle.postgresql.machine.MachineRunner
+import com.twitter.finagle.postgresql.machine.SimpleQueryMachine
+import com.twitter.finagle.postgresql.machine.StateMachine
 import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 import com.twitter.util.Promise
-import com.twitter.util.Return
-import com.twitter.util.Throw
-import com.twitter.util.Try
 
 class ClientDispatcher(
   transport: Transport[Packet, Packet],
@@ -24,30 +22,57 @@ class ClientDispatcher(
   params[Stats].statsReceiver
 ) {
 
-  private[this] val tryReadTheTransport: Try[Unit] => Future[Packet] = {
-    case Return(_) => transport.read()
-    case Throw(exc) => wrapWriteException(exc)
+  def write(msg: Messages.FrontendMessage): Future[Unit] =
+    transport
+      .write(msg.write)
+      .rescue {
+        case exc => wrapWriteException(exc)
+      }
+
+  def read(): Future[Messages.BackendMessage] =
+    transport.read().map(rep => Messages.BackendMessage.read(rep))
+
+  def exchange(msg: Messages.FrontendMessage): Future[Messages.BackendMessage] =
+    write(msg) before read()
+
+  def run[S,R](machine: StateMachine[S, R]) = {
+
+    var state: S = null.asInstanceOf[S] // TODO
+
+    def step(transition: StateMachine.TransitionResult[S, R]): Future[StateMachine.Complete[R]] = transition match {
+      case StateMachine.Transition(s, action) =>
+        state = s
+        action.fold(Future.Done) { msg => write(msg) } before readAndStep
+      case c: StateMachine.Complete[R] => Future.value(c)
+    }
+
+    def readAndStep =
+      read().flatMap { msg => step(machine.receive(state, msg)) }
+
+    step(machine.start)
   }
 
-  val connect =
-    MachineRunner(transport, HandshakeMachine(params[Credentials], params[Database])).run
+  def dispatch[S,R](machine: StateMachine[S,R], promise: Promise[R]): Future[Messages.ReadyForQuery] = {
+    run(machine)
+      .flatMap { case StateMachine.Complete(response, signal) =>
+        promise.setValue(response)
+        signal
+      }
+  }
+
+  val handshakeResult: Promise[HandshakeMachine.HandshakeResult] = new Promise()
+
+  val startup = dispatch(HandshakeMachine(params[Credentials], params[Database]), handshakeResult).unit
 
   override def apply(req: Request): Future[Response] =
-    connect.unit before { super.apply(req) }
+    startup before { super.apply(req) }
 
-  def exchange(req: Messages.FrontendMessage): Future[Messages.BackendMessage] =
-    transport
-      .write(req.write)
-      .transform(tryReadTheTransport)
-      .map(rep => Messages.BackendMessage.read(rep))
-
-  // TODO: based on the Request, we start a state machine that does the backend and forth
-  //   with the backend and eventually prodices a Response.
   override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
     req match {
       case Sync =>
         val resp = exchange(Messages.Sync)
         p.become(resp.map(BackendResponse))
         resp.unit
+      case Query(q) => dispatch(new SimpleQueryMachine(q), p).unit
     }
 }
