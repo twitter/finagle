@@ -74,10 +74,7 @@ class ClientDispatcher(
 
   override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
     req match {
-      case Sync =>
-        val resp = exchange(Messages.Sync)
-        p.become(resp.map(BackendResponse))
-        resp.unit
+      case Sync => dispatch(StateMachine.singleMachine(Messages.Sync)(BackendResponse(_): Response), p).unit
       case Query(q) => dispatch(new SimpleQueryMachine(q), p).unit
     }
 }
