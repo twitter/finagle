@@ -15,7 +15,7 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
   import HandshakeMachine._
 
   override def start: StateMachine.TransitionResult[State, HandshakeResult] =
-    StateMachine.Transition(Authenticating, Some(Messages.StartupMessage(user = credentials.username, database = database.name)))
+    StateMachine.TransitionAndSend(Authenticating, Messages.StartupMessage(user = credentials.username, database = database.name))
 
   override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, HandshakeResult] = (state, msg) match {
     case (Authenticating, Messages.AuthenticationMD5Password(salt)) =>
@@ -29,13 +29,13 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
         Buf.ByteArray.Owned.extract(salt)
       )
 
-      StateMachine.Transition(Authenticating, Some(Messages.PasswordMessage(s"md5$hashed")))
+      StateMachine.TransitionAndSend(Authenticating, Messages.PasswordMessage(s"md5$hashed"))
     case (Authenticating, Messages.AuthenticationOk) => // This can happen at Startup when there's no password
-      StateMachine.Transition(BackendStarting(Nil, None), None)
+      StateMachine.Transition(BackendStarting(Nil, None))
     case (BackendStarting(params, bkd), p: Messages.ParameterStatus) =>
-      StateMachine.Transition(BackendStarting(p :: params, bkd), None)
+      StateMachine.Transition(BackendStarting(p :: params, bkd))
     case (BackendStarting(params, _), bkd: Messages.BackendKeyData) =>
-      StateMachine.Transition(state = BackendStarting(params, Some(bkd)), None)
+      StateMachine.Transition(state = BackendStarting(params, Some(bkd)))
     case (BackendStarting(params, bkd), ready: Messages.ReadyForQuery) =>
       StateMachine.Complete(HandshakeResult(params, bkd.get), Future.value(ready))
     case _ =>
