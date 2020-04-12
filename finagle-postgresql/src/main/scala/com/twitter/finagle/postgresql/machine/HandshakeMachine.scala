@@ -14,10 +14,8 @@ import com.twitter.io.Buf
 case class HandshakeMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[HandshakeMachine.State, HandshakeMachine.HandshakeResult] {
   import HandshakeMachine._
 
-  override def init: State = Authenticating
-
   override def start: StateMachine.TransitionResult[State, HandshakeResult] =
-    StateMachine.Send(Authenticating, Messages.StartupMessage(user = credentials.username, database = database.name))
+    StateMachine.Transition(Authenticating, Some(Messages.StartupMessage(user = credentials.username, database = database.name)))
 
   override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, HandshakeResult] = (state, msg) match {
     case (Authenticating, Messages.AuthenticationMD5Password(salt)) =>
@@ -31,13 +29,13 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
         Buf.ByteArray.Owned.extract(salt)
       )
 
-      StateMachine.Send(Authenticating, Messages.PasswordMessage(s"md5$hashed"))
+      StateMachine.Transition(Authenticating, Some(Messages.PasswordMessage(s"md5$hashed")))
     case (Authenticating, Messages.AuthenticationOk) => // This can happen at Startup when there's no password
-      StateMachine.Noop(BackendStarting(Nil, None))
+      StateMachine.Transition(BackendStarting(Nil, None), None)
     case (BackendStarting(params, bkd), p: Messages.ParameterStatus) =>
-      StateMachine.Noop(BackendStarting(p :: params, bkd))
+      StateMachine.Transition(BackendStarting(p :: params, bkd), None)
     case (BackendStarting(params, _), bkd: Messages.BackendKeyData) =>
-      StateMachine.Noop(state = BackendStarting(params, Some(bkd)))
+      StateMachine.Transition(state = BackendStarting(params, Some(bkd)), None)
     case (BackendStarting(params, bkd), _: Messages.ReadyForQuery) =>
       StateMachine.Complete(HandshakeResult(params, bkd.get))
     case _ =>
