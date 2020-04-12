@@ -4,8 +4,10 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.postgresql.Messages.BackendMessage
-import com.twitter.finagle.postgresql.Messages.FrontendMessage
+import com.twitter.finagle.postgresql.Params.Credentials
+import com.twitter.finagle.postgresql.Params.Database
+import com.twitter.finagle.postgresql.machine.HandshakeMachine
+import com.twitter.finagle.postgresql.machine.MachineRunner
 import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
@@ -17,7 +19,7 @@ import com.twitter.util.Try
 class ClientDispatcher(
   transport: Transport[Packet, Packet],
   params: Stack.Params,
-) extends GenSerialClientDispatcher[FrontendMessage, BackendMessage, Packet, Packet](
+) extends GenSerialClientDispatcher[Request, Response, Packet, Packet](
   transport,
   params[Stats].statsReceiver
 ) {
@@ -27,24 +29,25 @@ class ClientDispatcher(
     case Throw(exc) => wrapWriteException(exc)
   }
 
-  // TODO: we want to replace this with the connection state machine
-  val connect = {
-    val handshake = Handshake(params, transport)
-    handshake
-      .startup()
-      .ensure(println) // TODO: logging
-  }
+  val connect =
+    MachineRunner(transport, HandshakeMachine(params[Credentials], params[Database])).run
 
-  override def apply(req: FrontendMessage): Future[BackendMessage] =
+  override def apply(req: Request): Future[Response] =
     connect.unit before { super.apply(req) }
 
-  // TODO: this isn't how we're supposed to dispatch since PgSQL isn't req/res based
-  override protected def dispatch(req: FrontendMessage, p: Promise[BackendMessage]): Future[Unit] = {
+  def exchange(req: Messages.FrontendMessage): Future[Messages.BackendMessage] =
     transport
       .write(req.write)
       .transform(tryReadTheTransport)
-      .map(rep => BackendMessage.read(rep))
-      .respond(rep => p.updateIfEmpty(rep))
-      .unit
-  }
+      .map(rep => Messages.BackendMessage.read(rep))
+
+  // TODO: based on the Request, we start a state machine that does the backend and forth
+  //   with the backend and eventually prodices a Response.
+  override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
+    req match {
+      case Sync =>
+        val resp = exchange(Messages.Sync)
+        p.become(resp.map(BackendResponse))
+        resp.unit
+    }
 }
