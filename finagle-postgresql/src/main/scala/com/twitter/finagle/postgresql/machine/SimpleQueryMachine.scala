@@ -13,24 +13,20 @@ import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
 
-class SimpleQueryMachine(query: String) extends StateMachine[SimpleQueryMachine.State, Response.BackendResponse] {
+class SimpleQueryMachine(query: String) extends StateMachine[Response.BackendResponse] {
 
-  import SimpleQueryMachine._
+  sealed trait State
+  case object Init extends State
+  case class Complete(response: Try[Response.BackendResponse]) extends State
 
-  override def start: StateMachine.TransitionResult[SimpleQueryMachine.State, Response.BackendResponse] =
+  override def start: StateMachine.TransitionResult[State, Response.BackendResponse] =
     StateMachine.TransitionAndSend(Init, FrontendMessage.Query(query))
 
-  override def receive(state: SimpleQueryMachine.State, msg: BackendMessage): StateMachine.TransitionResult[SimpleQueryMachine.State, Response.BackendResponse] = (state, msg) match {
+  override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, Response.BackendResponse] = (state, msg) match {
     case (Init, EmptyQueryResponse) => StateMachine.Transition(Complete(Return(Response.BackendResponse(EmptyQueryResponse))))
     case (Complete(response), r: ReadyForQuery) => StateMachine.Respond(response, Future.value(r))
     case (_, e: ErrorResponse) => StateMachine.Transition(Complete(Throw(PgSqlServerError(e))))
     case (state, msg) =>
       StateMachine.Respond(Throw(PgSqlStateMachineError("SimpleQueryMachine", state.toString, msg)), Future.exception(new RuntimeException))
   }
-}
-
-object SimpleQueryMachine {
-  sealed trait State
-  case object Init extends State
-  case class Complete(response: Try[Response.BackendResponse]) extends State
 }

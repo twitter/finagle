@@ -14,8 +14,11 @@ import com.twitter.util.Future
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
-case class HandshakeMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[HandshakeMachine.State, Response.HandshakeResult] {
-  import HandshakeMachine._
+case class HandshakeMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[Response.HandshakeResult] {
+
+  sealed trait State
+  case object Authenticating extends State
+  case class BackendStarting(params: List[BackendMessage.ParameterStatus], bkd: Option[BackendMessage.BackendKeyData]) extends State
 
   override def start: StateMachine.TransitionResult[State, Response.HandshakeResult] =
     StateMachine.TransitionAndSend(Authenticating, FrontendMessage.StartupMessage(user = credentials.username, database = database.name))
@@ -47,8 +50,3 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
   }
 }
 
-object HandshakeMachine {
-  sealed trait State
-  case object Authenticating extends State
-  case class BackendStarting(params: List[BackendMessage.ParameterStatus], bkd: Option[BackendMessage.BackendKeyData]) extends State
-}
