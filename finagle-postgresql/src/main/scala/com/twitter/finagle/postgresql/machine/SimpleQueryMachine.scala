@@ -21,6 +21,8 @@ import com.twitter.util.Throw
 
 class SimpleQueryMachine(query: String) extends StateMachine[Response] {
 
+  import StateMachine._
+
   sealed trait State
   case object Init extends State
   case class StreamResult(rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
@@ -28,28 +30,30 @@ class SimpleQueryMachine(query: String) extends StateMachine[Response] {
       StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
     def resultSet: ResultSet = ResultSet(rowDescription, pipe)
   }
-  case object Complete extends State
+  case object ExpectReady extends State
 
   override def start: StateMachine.TransitionResult[State, Response] =
-    StateMachine.TransitionAndSend(Init, FrontendMessage.Query(query))
+    StateMachine.Transition(Init, StateMachine.Send(FrontendMessage.Query(query)))
 
   override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, Response] = (state, msg) match {
-    case (Init, EmptyQueryResponse) => StateMachine.Respond(Complete, Return(BackendResponse(EmptyQueryResponse)))
-    case (Init, c: CommandComplete) => StateMachine.Respond(Complete, Return(BackendResponse(c)))
+    case (Init, EmptyQueryResponse) =>
+      Transition(ExpectReady, Respond(Return(BackendResponse(EmptyQueryResponse))))
+    case (Init, c: CommandComplete) =>
+      Transition(ExpectReady, Respond(Return(BackendResponse(c))))
 
     case (Init, rd: RowDescription) =>
       val state = StreamResult(rd, new Pipe, Future.Done)
-      StateMachine.Respond(state, Return(state.resultSet))
-    case (r: StreamResult, dr: DataRow) => StateMachine.Transition(r.append(dr))
+      Transition(state, Respond(Return(state.resultSet)))
+    case (r: StreamResult, dr: DataRow) => Transition(r.append(dr), NoOp)
     case (r: StreamResult, _: CommandComplete) =>
       // TODO: handle discard() to client can cancel the stream
       r.lastWrite.liftToTry.unit before r.pipe.close()
-      StateMachine.Transition(Complete)
+      Transition(ExpectReady, NoOp)
 
-    case (Complete, r: ReadyForQuery) => StateMachine.Complete(r, None)
+    case (ExpectReady, r: ReadyForQuery) => Complete(r, None)
 
-    case (state, _: NoticeResponse) => StateMachine.Transition(state) // TODO: don't ignore
-    case (_, e: ErrorResponse) => StateMachine.Respond(Complete, Throw(PgSqlServerError(e)))
+    case (state, _: NoticeResponse) => Transition(state, NoOp) // TODO: don't ignore
+    case (_, e: ErrorResponse) => Transition(ExpectReady, Respond(Throw(PgSqlServerError(e))))
     case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
   }
 }

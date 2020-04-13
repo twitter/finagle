@@ -18,12 +18,14 @@ import com.twitter.util.Throw
 
 case class HandshakeMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[Response.HandshakeResult] {
 
+  import StateMachine._
+
   sealed trait State
   case object Authenticating extends State
   case class BackendStarting(params: List[BackendMessage.ParameterStatus], bkd: Option[BackendMessage.BackendKeyData]) extends State
 
   override def start: StateMachine.TransitionResult[State, Response.HandshakeResult] =
-    StateMachine.TransitionAndSend(Authenticating, FrontendMessage.StartupMessage(user = credentials.username, database = database.name))
+    Transition(Authenticating, Send(FrontendMessage.StartupMessage(user = credentials.username, database = database.name)))
 
   override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, Response.HandshakeResult] = (state, msg) match {
     case (Authenticating, BackendMessage.AuthenticationMD5Password(salt)) =>
@@ -37,22 +39,21 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
         Buf.ByteArray.Owned.extract(salt)
       )
 
-      StateMachine.TransitionAndSend(Authenticating, FrontendMessage.PasswordMessage(s"md5$hashed"))
+      Transition(Authenticating, Send(FrontendMessage.PasswordMessage(s"md5$hashed")))
     case (Authenticating, BackendMessage.AuthenticationOk) => // This can happen at Startup when there's no password
-      StateMachine.Transition(BackendStarting(Nil, None))
+      Transition(BackendStarting(Nil, None), NoOp)
     case (BackendStarting(params, bkd), p: BackendMessage.ParameterStatus) =>
-      StateMachine.Transition(BackendStarting(p :: params, bkd))
+      Transition(BackendStarting(p :: params, bkd), NoOp)
     case (BackendStarting(params, _), bkd: BackendMessage.BackendKeyData) =>
-      StateMachine.Transition(state = BackendStarting(params, Some(bkd)))
-
+      Transition(BackendStarting(params, Some(bkd)), NoOp)
 
     case (BackendStarting(params, bkd), ready: BackendMessage.ReadyForQuery) =>
-      StateMachine.Complete(ready, Some(Return(HandshakeResult(params, bkd.get))))
+      Complete(ready, Some(Return(HandshakeResult(params, bkd.get))))
 
-    case (state, _: BackendMessage.NoticeResponse) => StateMachine.Transition(state) // TODO: don't ignore
+    case (state, _: BackendMessage.NoticeResponse) => Transition(state, NoOp) // TODO: don't ignore
     case (_, e: BackendMessage.ErrorResponse) =>
       // The backend closes the connection, so we use a bogus ReadyForQuery value
-      StateMachine.Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlServerError(e))))
+      Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlServerError(e))))
 
     case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
   }
