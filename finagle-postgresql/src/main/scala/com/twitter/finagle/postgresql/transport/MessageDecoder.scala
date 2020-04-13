@@ -21,6 +21,7 @@ import com.twitter.finagle.postgresql.BackendMessage.FailedTx
 import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.BackendMessage.InTx
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
+import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
 import com.twitter.finagle.postgresql.BackendMessage.ParameterStatus
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.util.Return
@@ -41,6 +42,7 @@ object MessageDecoder {
     p.cmd.getOrElse(Throw(new IllegalStateException("invalid backend packet, missing type."))) match {
       case 'C' => decode[CommandComplete](reader)
       case 'E' => decode[ErrorResponse](reader)
+      case 'N' => decode[NoticeResponse](reader)
       case 'I' => Return(EmptyQueryResponse)
       case 'K' => decode[BackendKeyData](reader)
       case 'R' => decode[AuthenticationMessage](reader)
@@ -52,7 +54,7 @@ object MessageDecoder {
 
   def apply[M <: BackendMessage](f: PgBuf.Reader => M): MessageDecoder[M] = reader => Try(f(reader))
 
-  implicit lazy val errorResponseDecoder: MessageDecoder[ErrorResponse] = MessageDecoder { reader =>
+  def readFields(reader: PgBuf.Reader): Map[Field, String] = {
     import Field._
     def nextField: Option[Field] =
       reader.byte().toChar match {
@@ -86,7 +88,15 @@ object MessageDecoder {
           loop(fields + (field -> value))
       }
 
-    ErrorResponse(loop(Map.empty))
+    loop(Map.empty)
+  }
+
+  implicit lazy val errorResponseDecoder: MessageDecoder[ErrorResponse] = MessageDecoder { reader =>
+    ErrorResponse(readFields(reader))
+  }
+
+  implicit lazy val noticeResponseDecoder: MessageDecoder[NoticeResponse] = MessageDecoder { reader =>
+    NoticeResponse(readFields(reader))
   }
 
   implicit lazy val backendKeyDataDecoder: MessageDecoder[BackendKeyData] = MessageDecoder { reader =>
