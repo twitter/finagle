@@ -6,6 +6,7 @@ import java.security.MessageDigest
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
+import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PgSqlStateMachineError
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.HandshakeResult
@@ -44,9 +45,10 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
       StateMachine.Transition(state = BackendStarting(params, Some(bkd)))
     case (BackendStarting(params, bkd), ready: BackendMessage.ReadyForQuery) =>
       StateMachine.Respond(Return(HandshakeResult(params, bkd.get)), Future.value(ready))
-    // TODO: Error handling
-    case (state, msg) =>
-      StateMachine.Respond(Throw(PgSqlStateMachineError("HandshakeMachine", state.toString, msg)), Future.exception(new RuntimeException))
+    case (_, e: BackendMessage.ErrorResponse) =>
+      // The backend closes the connection, so the signal is useless anyway.
+      StateMachine.Respond(Throw(PgSqlServerError(e)), Future.exception(new RuntimeException)) // the signal
+    case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
   }
 }
 

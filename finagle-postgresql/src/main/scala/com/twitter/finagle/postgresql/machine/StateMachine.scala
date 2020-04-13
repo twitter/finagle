@@ -29,7 +29,7 @@ object StateMachine {
     override def receive(state: State, msg: BackendMessage): TransitionResult[State, R] = msg match {
       case r: BackendMessage.ReadyForQuery => Respond(Return(f(r)), Future.value(r))
       case e: BackendMessage.ErrorResponse => Respond(Throw(PgSqlServerError(e)), Future.exception(new RuntimeException)) // TODO: what happens when the signal is an exception?
-      case msg => Respond(Throw(PgSqlStateMachineError("anonymous", "n/a", msg)), Future.exception(new RuntimeException))
+      case msg => throw PgSqlStateMachineError("anonymous", (), msg)
     }
   }
 }

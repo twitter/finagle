@@ -26,7 +26,6 @@ class SimpleQueryMachine(query: String) extends StateMachine[Response.BackendRes
     case (Init, EmptyQueryResponse) => StateMachine.Transition(Complete(Return(Response.BackendResponse(EmptyQueryResponse))))
     case (Complete(response), r: ReadyForQuery) => StateMachine.Respond(response, Future.value(r))
     case (_, e: ErrorResponse) => StateMachine.Transition(Complete(Throw(PgSqlServerError(e))))
-    case (state, msg) =>
-      StateMachine.Respond(Throw(PgSqlStateMachineError("SimpleQueryMachine", state.toString, msg)), Future.exception(new RuntimeException))
+    case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
   }
 }
