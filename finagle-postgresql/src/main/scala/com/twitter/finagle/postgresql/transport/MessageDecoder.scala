@@ -1,6 +1,7 @@
 package com.twitter.finagle.postgresql.transport
 
 import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.BackendMessage.AttributeId
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationCleartextPassword
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSSContinue
@@ -15,15 +16,19 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.BackendMessage.BackendKeyData
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
+import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
 import com.twitter.finagle.postgresql.BackendMessage.FailedTx
 import com.twitter.finagle.postgresql.BackendMessage.Field
+import com.twitter.finagle.postgresql.BackendMessage.FieldDescription
 import com.twitter.finagle.postgresql.BackendMessage.InTx
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
+import com.twitter.finagle.postgresql.BackendMessage.Oid
 import com.twitter.finagle.postgresql.BackendMessage.ParameterStatus
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
+import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
@@ -41,12 +46,14 @@ object MessageDecoder {
     lazy val reader = PgBuf.reader(p.body)
     p.cmd.getOrElse(Throw(new IllegalStateException("invalid backend packet, missing type."))) match {
       case 'C' => decode[CommandComplete](reader)
+      case 'D' => decode[DataRow](reader)
       case 'E' => decode[ErrorResponse](reader)
-      case 'N' => decode[NoticeResponse](reader)
       case 'I' => Return(EmptyQueryResponse)
       case 'K' => decode[BackendKeyData](reader)
+      case 'N' => decode[NoticeResponse](reader)
       case 'R' => decode[AuthenticationMessage](reader)
       case 'S' => decode[ParameterStatus](reader)
+      case 'T' => decode[RowDescription](reader)
       case 'Z' => decode[ReadyForQuery](reader)
       case byte => sys.error(s"unimplemented message $byte")
     }
@@ -134,5 +141,35 @@ object MessageDecoder {
       case 'F' => FailedTx
     }
     ReadyForQuery(state)
+  }
+
+  implicit lazy val rowDescriptionDecoder: MessageDecoder[RowDescription] = MessageDecoder { reader =>
+    RowDescription(
+      reader.collect { r =>
+        FieldDescription(
+          name = r.string(),
+          tableOid = r.int() match {
+            case 0 => None
+            case oid => Some(Oid(oid))
+          },
+          tableAttributeId = r.short() match {
+            case 0 => None
+            case attrId => Some(AttributeId(attrId))
+          },
+          dataType = Oid(r.int()),
+          dataTypeSize = r.short(),
+          typeModifier = r.int(),
+          format = r.format()
+        )
+      }
+    )
+  }
+
+  implicit lazy val dataRowDecoder: MessageDecoder[DataRow] = MessageDecoder { reader =>
+    DataRow(
+      reader.collect { r =>
+        r.buf(r.int())
+      }
+    )
   }
 }

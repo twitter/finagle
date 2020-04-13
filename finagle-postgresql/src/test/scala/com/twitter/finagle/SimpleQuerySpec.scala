@@ -6,6 +6,7 @@ import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.Response.BackendResponse
 import com.twitter.finagle.postgresql.Query
+import com.twitter.finagle.postgresql.Response.ResultSet
 import com.twitter.util.Throw
 
 class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
@@ -34,6 +35,17 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
         .map {
           case BackendResponse(CommandComplete(commandTag)) => commandTag must_== "CREATE ROLE"
           case _ => ko
+        }
+    }
+    "return a ResultSet for a SELECT query" in {
+      client(Query("SELECT 1 AS one;"))
+        .map { response =>
+          response must beAnInstanceOf[ResultSet]
+
+          val ResultSet(desc, rows) = response
+          desc.rowFields must haveSize(1)
+          desc.rowFields.head.name must beEqualTo("one")
+          rows must haveSize(1)
         }
     }
   }
