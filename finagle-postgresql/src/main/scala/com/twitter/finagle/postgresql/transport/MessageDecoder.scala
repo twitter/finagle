@@ -14,6 +14,8 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASLFinal
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.BackendMessage.BackendKeyData
+import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
+import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
 import com.twitter.finagle.postgresql.BackendMessage.FailedTx
 import com.twitter.finagle.postgresql.BackendMessage.Field
@@ -21,6 +23,7 @@ import com.twitter.finagle.postgresql.BackendMessage.InTx
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.ParameterStatus
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
+import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
 
@@ -36,7 +39,9 @@ object MessageDecoder {
   def fromPacket(p: Packet): Try[BackendMessage] = {
     lazy val reader = PgBuf.reader(p.body)
     p.cmd.getOrElse(Throw(new IllegalStateException("invalid backend packet, missing type."))) match {
+      case 'C' => decode[CommandComplete](reader)
       case 'E' => decode[ErrorResponse](reader)
+      case 'I' => Return(EmptyQueryResponse)
       case 'K' => decode[BackendKeyData](reader)
       case 'R' => decode[AuthenticationMessage](reader)
       case 'S' => decode[ParameterStatus](reader)
@@ -48,10 +53,29 @@ object MessageDecoder {
   def apply[M <: BackendMessage](f: PgBuf.Reader => M): MessageDecoder[M] = reader => Try(f(reader))
 
   implicit lazy val errorResponseDecoder: MessageDecoder[ErrorResponse] = MessageDecoder { reader =>
+    import Field._
     def nextField: Option[Field] =
-      reader.byte() match {
+      reader.byte().toChar match {
         case 0 => None
-        case field => Some(Field.TODO) // TODO
+        case 'S' => Some(LocalizedSeverity)
+        case 'V' => Some(Severity)
+        case 'C' => Some(Code)
+        case 'M' => Some(Message)
+        case 'D' => Some(Detail)
+        case 'H' => Some(Hint)
+        case 'P' => Some(Position)
+        case 'p' => Some(InternalPosition)
+        case 'q' => Some(InternalQuery)
+        case 'W' => Some(Where)
+        case 's' => Some(Schema)
+        case 't' => Some(Table)
+        case 'c' => Some(Column)
+        case 'd' => Some(DataType)
+        case 'n' => Some(Constraint)
+        case 'F' => Some(File)
+        case 'L' => Some(Line)
+        case 'R' => Some(Routine)
+        case unk => Some(Unknown(unk))
       }
 
     def loop(fields: Map[Field, String]): Map[Field, String] =
@@ -67,6 +91,10 @@ object MessageDecoder {
 
   implicit lazy val backendKeyDataDecoder: MessageDecoder[BackendKeyData] = MessageDecoder { reader =>
     BackendKeyData(reader.int(), reader.int())
+  }
+
+  implicit lazy val commandCompleteDecoder: MessageDecoder[CommandComplete] = MessageDecoder { reader =>
+    CommandComplete(reader.string())
   }
 
   implicit lazy val authenticationMessageDecoder: MessageDecoder[AuthenticationMessage] = MessageDecoder { reader =>

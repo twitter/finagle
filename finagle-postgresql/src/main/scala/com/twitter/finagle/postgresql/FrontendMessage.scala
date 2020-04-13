@@ -23,4 +23,6 @@ object FrontendMessage {
   case class PasswordMessage(password: String) extends FrontendMessage
 
   case object Sync extends FrontendMessage
+
+  case class Query(value: String) extends FrontendMessage
 }

@@ -30,5 +30,9 @@ object MessageEncoder {
     writer.string(msg.password)
   }
 
+  implicit val queryEncoder: MessageEncoder[FrontendMessage.Query] = MessageEncoder('Q') { (writer, msg) =>
+    writer.string(msg.value)
+  }
+
   implicit val syncEncoder: MessageEncoder[FrontendMessage.Sync.type] = MessageEncoder('S') { (writer, msg) => writer }
 }
