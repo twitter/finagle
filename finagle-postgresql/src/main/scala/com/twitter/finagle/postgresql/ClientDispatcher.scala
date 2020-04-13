@@ -38,11 +38,11 @@ class ClientDispatcher(
   def exchange[M <: FrontendMessage : MessageEncoder](msg: M): Future[BackendMessage] =
     write(msg) before read()
 
-  def run[S, R <: Response](machine: StateMachine[S, R]) = {
+  def run[R <: Response](machine: StateMachine[R]) = {
 
-    var state: S = null.asInstanceOf[S] // TODO
+    var state: machine.State = null.asInstanceOf[machine.State] // TODO
 
-    def step(transition: StateMachine.TransitionResult[S, R]): Future[StateMachine.Respond[R]] = transition match {
+    def step(transition: StateMachine.TransitionResult[machine.State, R]): Future[StateMachine.Respond[R]] = transition match {
       case StateMachine.Transition(s) =>
         state = s
         readAndStep
@@ -58,7 +58,7 @@ class ClientDispatcher(
     step(machine.start)
   }
 
-  def machineDispatch[S, R <: Response](machine: StateMachine[S, R], promise: Promise[R]): Future[BackendMessage.ReadyForQuery] = {
+  def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[BackendMessage.ReadyForQuery] = {
     run(machine)
       .flatMap { case StateMachine.Respond(response, signal) =>
         promise.updateIfEmpty(response)
