@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.postgresql.BackendMessage
-import com.twitter.finagle.postgresql.BackendResponse
+import com.twitter.finagle.postgresql.Response.BackendResponse
 import com.twitter.finagle.postgresql.Sync
 
 class HandshakeSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
