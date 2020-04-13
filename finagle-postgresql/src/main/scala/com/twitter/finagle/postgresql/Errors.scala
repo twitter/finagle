@@ -1,11 +1,10 @@
 package com.twitter.finagle.postgresql
 
 abstract class PgSqlException extends RuntimeException
-case class PgSqlServerError(e: BackendMessage.ErrorResponse) extends PgSqlException {
-  override def getMessage: String = PgSqlServerError.field(BackendMessage.Field.Message, e).getOrElse("Server error")
-}
-object PgSqlServerError {
-  def field(f: BackendMessage.Field, e: BackendMessage.ErrorResponse): Option[String] = e.values.get(f)
+case class PgSqlServerError(error: BackendMessage.ErrorResponse) extends PgSqlException {
+  override def getMessage: String = field(BackendMessage.Field.Message).getOrElse("Server error")
+
+  def field(f: BackendMessage.Field): Option[String] = error.values.get(f)
 }
 
 abstract class PgSqlClientError extends PgSqlException
