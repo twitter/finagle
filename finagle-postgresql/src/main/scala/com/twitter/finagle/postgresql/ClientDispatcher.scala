@@ -37,9 +37,6 @@ class ClientDispatcher(
   def read(): Future[BackendMessage] =
     transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry // TODO: better error handling
 
-  def exchange[M <: FrontendMessage : MessageEncoder](msg: M): Future[BackendMessage] =
-    write(msg) before read()
-
   def run[R <: Response](machine: StateMachine[R]) = {
 
     var state: machine.State = null.asInstanceOf[machine.State] // TODO
