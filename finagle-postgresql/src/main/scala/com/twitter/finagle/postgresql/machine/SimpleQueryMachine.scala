@@ -14,6 +14,8 @@ import com.twitter.finagle.postgresql.PgSqlStateMachineError
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.BackendResponse
 import com.twitter.finagle.postgresql.Response.ResultSet
+import com.twitter.io.Pipe
+import com.twitter.util.Future
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
@@ -21,9 +23,10 @@ class SimpleQueryMachine(query: String) extends StateMachine[Response] {
 
   sealed trait State
   case object Init extends State
-  case class BuildResult(rowDescription: RowDescription, rows: List[DataRow]) extends State {
-    def append(row: DataRow): BuildResult = copy(rows = row :: rows)
-    def resultSet: ResultSet = ResultSet(rowDescription, rows.reverse)
+  case class StreamResult(rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
+    def append(row: DataRow): StreamResult =
+      StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
+    def resultSet: ResultSet = ResultSet(rowDescription, pipe)
   }
   case object Complete extends State
 
@@ -34,9 +37,14 @@ class SimpleQueryMachine(query: String) extends StateMachine[Response] {
     case (Init, EmptyQueryResponse) => StateMachine.Respond(Complete, Return(BackendResponse(EmptyQueryResponse)))
     case (Init, c: CommandComplete) => StateMachine.Respond(Complete, Return(BackendResponse(c)))
 
-    case (Init, rd: RowDescription) => StateMachine.Transition(BuildResult(rd, Nil))
-    case (r: BuildResult, dr: DataRow) => StateMachine.Transition(r.append(dr))
-    case (r: BuildResult, _: CommandComplete) => StateMachine.Respond(Complete, Return(r.resultSet))
+    case (Init, rd: RowDescription) =>
+      val state = StreamResult(rd, new Pipe, Future.Done)
+      StateMachine.Respond(state, Return(state.resultSet))
+    case (r: StreamResult, dr: DataRow) => StateMachine.Transition(r.append(dr))
+    case (r: StreamResult, _: CommandComplete) =>
+      // TODO: handle discard() to client can cancel the stream
+      r.lastWrite.liftToTry.unit before r.pipe.close()
+      StateMachine.Transition(Complete)
 
     case (Complete, r: ReadyForQuery) => StateMachine.Complete(r, None)
 
