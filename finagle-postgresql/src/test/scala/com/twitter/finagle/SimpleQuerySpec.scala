@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
-import com.twitter.finagle.postgresql.BackendResponse
+import com.twitter.finagle.postgresql.Response.BackendResponse
 import com.twitter.finagle.postgresql.Query
 
 class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
