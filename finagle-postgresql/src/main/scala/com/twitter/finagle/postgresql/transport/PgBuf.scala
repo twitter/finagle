@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql.transport
 
 import java.nio.charset.StandardCharsets
 
+import com.twitter.finagle.postgresql.BackendMessage.Format
 import com.twitter.io.Buf
 import com.twitter.io.BufByteWriter
 import com.twitter.io.ByteReader
@@ -66,12 +67,22 @@ object PgBuf {
     def string(): String = {
       val length = reader.remainingUntil(0)
 
-      val str = if(length < 0) sys.error("invalid string value")
+      val str = if(length < 0) sys.error(s"invalid string length $length")
       else if(length == 0) ""
       else reader.readString(length, StandardCharsets.UTF_8)
 
       reader.skip(1) // skip the null-terminating byte
       str
+    }
+    def format(): Format = short() match {
+      case 0 => Format.Text
+      case 1 => Format.Binary
+      case v => sys.error(s"unexpected format value $v")
+    }
+    def collect[T](f: Reader => T): List[T] = {
+      val builder = List.newBuilder[T]
+      for(_ <- 0 until short()) { builder += f(this) }
+      builder.result()
     }
     def buf(length: Int): Buf = reader.readBytes(length)
     def remainingBuf(): Buf = reader.readAll()
