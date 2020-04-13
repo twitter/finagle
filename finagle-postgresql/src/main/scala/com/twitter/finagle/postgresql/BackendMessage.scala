@@ -5,6 +5,10 @@ import com.twitter.io.Buf
 sealed trait BackendMessage
 object BackendMessage {
 
+  // TODO: command tag parser
+  case class CommandComplete(commandTag: String) extends BackendMessage
+  case object EmptyQueryResponse extends BackendMessage
+
   sealed trait AuthenticationMessage extends BackendMessage
   case object AuthenticationOk extends AuthenticationMessage
   case object AuthenticationKerberosV5 extends AuthenticationMessage
@@ -28,9 +32,29 @@ object BackendMessage {
   case object FailedTx extends TxState
   case class ReadyForQuery(state: TxState) extends BackendMessage
 
+  // https://www.postgresql.org/docs/current/protocol-error-fields.html
   sealed trait Field
   object Field {
-    case object TODO extends Field // TODO
+    case object LocalizedSeverity extends Field
+    case object Severity extends Field
+    case object Code extends Field
+    case object Message extends Field
+    case object Detail extends Field
+    case object Hint extends Field
+    case object Position extends Field
+    case object InternalPosition extends Field
+    case object InternalQuery extends Field
+    case object Where extends Field
+    case object Schema extends Field
+    case object Table extends Field
+    case object Column extends Field
+    case object DataType extends Field
+    case object Constraint extends Field
+    case object File extends Field
+    case object Line extends Field
+    case object Routine extends Field
+
+    case class Unknown(value: Char) extends Field
   }
   case class ErrorResponse(values: Map[Field, String]) extends BackendMessage
 
