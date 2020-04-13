@@ -1,7 +1,5 @@
 package com.twitter.finagle.postgresql
 
-import scala.reflect.ClassTag
-
 abstract class PgSqlException extends RuntimeException
 case class PgSqlServerError(e: BackendMessage.ErrorResponse) extends PgSqlException {
   override def getMessage: String = PgSqlServerError.field(BackendMessage.Field.Message, e).getOrElse("Server error")
@@ -15,7 +13,6 @@ case class PgSqlStateMachineError(machine: String, state: String, msg: String) e
   override def getMessage: String = s"State machine $machine in state $state has no transition defined for message $msg"
 }
 object PgSqlStateMachineError {
-  // uses reflection to get the class name. Uses ClassTag to do this safely (avoid https://github.com/scala/bug/issues/2034)
-  def apply[B <: BackendMessage](machine: String, state: String, msg: B)(implicit ct: ClassTag[B]): PgSqlStateMachineError =
-    PgSqlStateMachineError(machine, state, ct.toString)
+  def apply[S, B <: BackendMessage](machine: String, state: S, msg: B): PgSqlStateMachineError =
+    PgSqlStateMachineError(machine, state.toString, msg.toString) // TODO: Show or similar instead of toString
 }

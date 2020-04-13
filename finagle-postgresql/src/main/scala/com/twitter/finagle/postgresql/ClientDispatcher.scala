@@ -16,6 +16,8 @@ import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Throw
 
 class ClientDispatcher(
   transport: Transport[Packet, Packet],
@@ -58,24 +60,31 @@ class ClientDispatcher(
     step(machine.start)
   }
 
-  def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[BackendMessage.ReadyForQuery] = {
+  def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] = {
     run(machine)
-      .flatMap { case StateMachine.Respond(response, signal) =>
-        promise.updateIfEmpty(response)
-        signal
+      .transform {
+        case Return(StateMachine.Respond(response, signal)) =>
+          promise.updateIfEmpty(response)
+          signal.unit
+        case Throw(e) =>
+          promise.raise(e)
+          // the state machine failed unexpectedly, which leaves the connection in a bad state
+          //   let's close the transport
+          // TODO: is this the appropriate way to handle "bad connections" in finagle?
+          close()
       }
   }
 
   val handshakeResult: Promise[Response.HandshakeResult] = new Promise()
 
-  val startup = machineDispatch(HandshakeMachine(params[Credentials], params[Database]), handshakeResult).unit
+  val startup = machineDispatch(HandshakeMachine(params[Credentials], params[Database]), handshakeResult)
 
   override def apply(req: Request): Future[Response] =
     startup before { super.apply(req) }
 
   override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
     req match {
-      case Sync => machineDispatch(StateMachine.singleMachine(FrontendMessage.Sync)(BackendResponse(_)), p).unit
-      case Query(q) => machineDispatch(new SimpleQueryMachine(q), p).unit
+      case Sync => machineDispatch(StateMachine.singleMachine(FrontendMessage.Sync)(BackendResponse(_)), p)
+      case Query(q) => machineDispatch(new SimpleQueryMachine(q), p)
     }
 }
