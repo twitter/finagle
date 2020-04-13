@@ -39,13 +39,16 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
     }
     "return a ResultSet for a SELECT query" in {
       client(Query("SELECT 1 AS one;"))
-        .map { response =>
+        .flatMap { response =>
           response must beAnInstanceOf[ResultSet]
 
-          val ResultSet(desc, rows) = response
+          val rs@ResultSet(desc, _) = response
           desc.rowFields must haveSize(1)
           desc.rowFields.head.name must beEqualTo("one")
-          rows must haveSize(1)
+
+          rs.toSeq.map { rowSeq =>
+            rowSeq must haveSize(1)
+          }
         }
     }
   }

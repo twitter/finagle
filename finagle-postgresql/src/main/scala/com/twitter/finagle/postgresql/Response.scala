@@ -2,6 +2,8 @@ package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.io.Reader
+import com.twitter.util.Future
 
 sealed trait Response
 object Response {
@@ -11,6 +13,8 @@ object Response {
   // TODO: remove this
   case class BackendResponse(e: BackendMessage) extends Response
 
-  // TODO: make this useful and streamable.
-  case class ResultSet(rowDescription: RowDescription, rows: List[DataRow]) extends Response
+  // TODO: make this useful
+  case class ResultSet(rowDescription: RowDescription, rows: Reader[DataRow]) extends Response {
+    def toSeq: Future[Seq[DataRow]] = Reader.toAsyncStream(rows).toSeq()
+  }
 }
