@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
 import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.BackendMessage.NoTx
+import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
 import com.twitter.finagle.postgresql.PgSqlServerError
@@ -11,7 +13,6 @@ import com.twitter.finagle.postgresql.PgSqlStateMachineError
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.HandshakeResult
 import com.twitter.io.Buf
-import com.twitter.util.Future
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
@@ -43,12 +44,16 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
       StateMachine.Transition(BackendStarting(p :: params, bkd))
     case (BackendStarting(params, _), bkd: BackendMessage.BackendKeyData) =>
       StateMachine.Transition(state = BackendStarting(params, Some(bkd)))
+
+
     case (BackendStarting(params, bkd), ready: BackendMessage.ReadyForQuery) =>
-      StateMachine.Respond(Return(HandshakeResult(params, bkd.get)), Future.value(ready))
+      StateMachine.Complete(ready, Some(Return(HandshakeResult(params, bkd.get))))
+
     case (state, _: BackendMessage.NoticeResponse) => StateMachine.Transition(state) // TODO: don't ignore
     case (_, e: BackendMessage.ErrorResponse) =>
-      // The backend closes the connection, so the signal is useless anyway.
-      StateMachine.Respond(Throw(PgSqlServerError(e)), Future.exception(new RuntimeException)) // the signal
+      // The backend closes the connection, so we use a bogus ReadyForQuery value
+      StateMachine.Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlServerError(e))))
+
     case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
   }
 }

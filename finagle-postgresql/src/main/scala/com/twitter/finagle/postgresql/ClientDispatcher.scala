@@ -4,6 +4,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Response.BackendResponse
@@ -37,18 +38,24 @@ class ClientDispatcher(
   def read(): Future[BackendMessage] =
     transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry // TODO: better error handling
 
-  def run[R <: Response](machine: StateMachine[R]) = {
+  def run[R <: Response](machine: StateMachine[R], promise: Promise[R]) = {
 
     var state: machine.State = null.asInstanceOf[machine.State] // TODO
 
-    def step(transition: StateMachine.TransitionResult[machine.State, R]): Future[StateMachine.Respond[R]] = transition match {
+    def step(transition: StateMachine.TransitionResult[machine.State, R]): Future[ReadyForQuery] = transition match {
       case StateMachine.Transition(s) =>
         state = s
         readAndStep
       case t@StateMachine.TransitionAndSend(s, msg) =>
         state = s
         write(msg)(t.encoder) before readAndStep
-      case r: StateMachine.Respond[R] => Future.value(r)
+      case StateMachine.Respond(s, response) =>
+        state = s
+        promise.updateIfEmpty(response)
+        readAndStep
+      case StateMachine.Complete(ready, response) =>
+        response.foreach(promise.updateIfEmpty)
+        Future.value(ready)
     }
 
     def readAndStep =
@@ -58,11 +65,11 @@ class ClientDispatcher(
   }
 
   def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] = {
-    run(machine)
+    run(machine, promise)
       .transform {
-        case Return(StateMachine.Respond(response, signal)) =>
-          promise.updateIfEmpty(response)
-          signal.unit
+        // TODO: this value may be necessary to keep around
+        case Return(ready) =>
+          Future.Done
         case Throw(e) =>
           promise.raise(e)
           // the state machine failed unexpectedly, which leaves the connection in a bad state
