@@ -4,6 +4,7 @@ import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
+import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.PgSqlServerError
@@ -27,6 +28,7 @@ class SimpleQueryMachine(query: String) extends StateMachine[Response.BackendRes
     case (Init, EmptyQueryResponse) => StateMachine.Transition(Complete(Return(Response.BackendResponse(EmptyQueryResponse))))
     case (Init, c: CommandComplete) => StateMachine.Transition(Complete(Return(Response.BackendResponse(c))))
     case (Complete(response), r: ReadyForQuery) => StateMachine.Respond(response, Future.value(r))
+    case (state, _: NoticeResponse) => StateMachine.Transition(state) // TODO: don't ignore
     case (_, e: ErrorResponse) => StateMachine.Transition(Complete(Throw(PgSqlServerError(e))))
     case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
   }

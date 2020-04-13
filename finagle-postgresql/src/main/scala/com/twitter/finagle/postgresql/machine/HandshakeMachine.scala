@@ -45,6 +45,7 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
       StateMachine.Transition(state = BackendStarting(params, Some(bkd)))
     case (BackendStarting(params, bkd), ready: BackendMessage.ReadyForQuery) =>
       StateMachine.Respond(Return(HandshakeResult(params, bkd.get)), Future.value(ready))
+    case (state, _: BackendMessage.NoticeResponse) => StateMachine.Transition(state) // TODO: don't ignore
     case (_, e: BackendMessage.ErrorResponse) =>
       // The backend closes the connection, so the signal is useless anyway.
       StateMachine.Respond(Throw(PgSqlServerError(e)), Future.exception(new RuntimeException)) // the signal

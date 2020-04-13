@@ -57,7 +57,8 @@ object BackendMessage {
     case class Unknown(value: Char) extends Field
   }
 
-  // TODO: parse out code to determine if this is a notice or an error message
+  // TODO: parse out the fields to expose the category and sql state.
+  case class NoticeResponse(values: Map[Field, String]) extends BackendMessage
   case class ErrorResponse(values: Map[Field, String]) extends BackendMessage
 
 }
