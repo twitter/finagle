@@ -1,11 +1,9 @@
-package com.twitter.finagle
+package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.Field
-import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.Response.BackendResponse
-import com.twitter.finagle.postgresql.Query
 import com.twitter.finagle.postgresql.Response.ResultSet
 import com.twitter.util.Throw
 
