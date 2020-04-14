@@ -8,6 +8,8 @@ case class PgSqlServerError(error: BackendMessage.ErrorResponse) extends PgSqlEx
 }
 
 abstract class PgSqlClientError extends PgSqlException
+case object PgSqlPasswordRequired extends PgSqlException
+case class PgSqlUnsupportedAuthenticationMechanism(method: BackendMessage.AuthenticationMessage) extends PgSqlException
 case class PgSqlStateMachineError(machine: String, state: String, msg: String) extends PgSqlClientError {
   override def getMessage: String = s"State machine $machine in state $state has no transition defined for message $msg"
 }
