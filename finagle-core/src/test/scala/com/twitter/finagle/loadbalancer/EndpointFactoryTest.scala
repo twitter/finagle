@@ -59,6 +59,17 @@ class EndpointFactoryTest extends FunSuite with OneInstancePerTest {
     val exc = new Exception("boom")
     val failingMk: () => ServiceFactory[Int, Int] = () => throw exc
     val failingEf = new LazyEndpointFactory(failingMk, address)
-    assert(exc == intercept[Exception] { Await.result(failingEf(), 1.second) })
+    assert(exc eq intercept[Exception] { Await.result(failingEf(), 1.second) })
+  }
+
+  test("handles when mk throws fatal exceptions") {
+    var exc: Throwable = new InterruptedException
+    val failingMk: () => ServiceFactory[Int, Int] = () => throw exc
+    val failingEf = new LazyEndpointFactory(failingMk, address)
+    assert(exc eq intercept[InterruptedException] { failingEf() })
+
+    // Now we try again with a non-fatal exception and we should get a result
+    exc = new Exception("boom")
+    assert(exc eq intercept[Exception] { Await.result(failingEf(), 1.second) })
   }
 }

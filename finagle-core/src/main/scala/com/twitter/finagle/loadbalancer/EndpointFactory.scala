@@ -92,6 +92,13 @@ private final class LazyEndpointFactory[Req, Rep](
             catch {
               case NonFatal(exc) =>
                 new FailingFactory[Req, Rep](exc)
+
+              case fatal: Throwable =>
+                // We must not leave the lock in an inconsistent `Making` state, even
+                // for fatal exceptions, so we take a conservative approach of replacing
+                // the `Init` state and then rethrowing the exception.
+                state.set(Init)
+                throw fatal
             }
           // This is the only place where we can transition from `Making`
           // to any other state so this is safe. All other spin loops wait
