@@ -15,6 +15,11 @@ Runtime Behavior Changes
 
 Bug Fixes
 ~~~~~~~~~
+
+* finagle-core: Restrict `OffloadFilter` from allowing interruption of the work performed in
+  the worker pool. This is to ensure that the worker thread isn't interruptible, which is a
+  behavior of certain `FuturePool` implementations. ``PHAB_ID=D465042`` ``PHAB_ID=D465591``
+
 * finagle-netty4: ChannelStatsHandler will now only count the first channel `close(..)` call
   when incrementing the `closes` counter. ``PHAB_ID=D462360``
 

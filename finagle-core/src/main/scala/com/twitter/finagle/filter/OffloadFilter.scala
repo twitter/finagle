@@ -5,8 +5,9 @@ import com.twitter.finagle.offload.numWorkers
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.tracing.{Annotation, Trace}
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
-import com.twitter.util.{Future, FuturePool, Promise}
+import com.twitter.util.{Future, FutureNonLocalReturnControl, FuturePool, Promise}
 import java.util.concurrent.{ExecutorService, Executors}
+import scala.runtime.NonLocalReturnControl
 
 /**
  * These modules introduce async-boundary into the future chain, effectively shifting continuations
@@ -117,21 +118,36 @@ object OffloadFilter {
       // the stack. It's more or less fine as we will switch back to IO as we enter the pipeline
       // (Netty land).
       //
-      // Note: we use an indirection promise so that we can disallow interrupting the `Future`
-      // returned by the `FuturePool`. It is not generally safe to interrupt the thread performing
-      // the `service.apply` call and thread interruption is a behavior of some FuturePool
-      // implementations (see `FuturePool.interruptible`). By using an intermediate `Promise` we can
-      // still allow chaining of interrupts without allowing interruption of the `FuturePool` thread
-      // itself. This is handled nicely by using `Promise.become` inside the FuturePool task which
-      // results in proper propagation of interrupts from `shifted` to the result of `service(req)`.
-      // It's worth noting that the order of interrupting and setting interrupt handlers works as
-      // expected when using the `.become` method. Both the following cases correctly propagate
-      // interrupts:
+      // Note: We don't use `pool(service(request)).flatten` because we don't want to allow
+      // interrupting the `Future` returned by the `FuturePool`. It is not generally safe to
+      // interrupt the thread performing the `service.apply` call and thread interruption is a
+      // behavior of some `FuturePool` implementations (see `FuturePool.interruptible`).
+      // Furthermore, allowing interrupts at all (even simply aborting the task execution before it
+      // begins) would change the behavior of interrupts between users of `OffloadFilter` and those
+      // without which can be worrisome without knowing the intricate details of `FuturePool`
+      // interrupt behavior. By using an intermediate `Promise` we can still allow chaining of
+      // interrupts without allowing interruption of the `FuturePool` thread itself. This is handled
+      // nicely by using `Promise.become` inside the FuturePool task which results in proper
+      // propagation of interrupts from `shifted` to the result of `service(req)`. It's worth noting
+      // that the order of interrupting and setting interrupt handlers works as expected when using
+      // the `.become` method. Both the following cases correctly propagate interrupts:
       // val a,b = new Promise[Unit]()
       // 1: a.raise(ex); b.setInterruptHandler(h); a.become(b) -> h(ex) called.
       // 2: a.raise(ex); a.become(b); b.setInterruptHandler(h) -> h(ex) called.
       val shifted = Promise[Rep]()
-      pool { shifted.become(service(request)) }
+      pool {
+        shifted.become {
+          // Filter composition handles the case of non-fatal exceptions but we should also
+          // handle fatal exceptions here so we don't leave the service hanging.
+          try service(request)
+          catch {
+            case nlrc: NonLocalReturnControl[_] =>
+              Future.exception(new FutureNonLocalReturnControl(nlrc))
+            case t: Throwable =>
+              Future.exception(t)
+          }
+        }
+      }
 
       val tracing = Trace()
       if (tracing.isActivelyTracing) {
