@@ -37,9 +37,13 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
     case Transition(_, action) => action must not(beAnInstanceOf[Respond[_]])
   }
 
+  def mkMachine(username: String, password: Option[String], dbName: String): HandshakeMachine =
+    HandshakeMachine(Params.Credentials(username = username, password = password), Params.Database(Some(dbName)))
+  def mkMachine: HandshakeMachine = mkMachine("username", None, "database")
+
   "HandshakeMachine Authentication" should {
     "use the supplied parameters" in forAll { (username: String, dbName: String) =>
-      val machine = HandshakeMachine(Params.Credentials(username = username, password = None), Params.Database(Some(dbName)))
+      val machine = mkMachine(username, password = None, dbName = dbName)
       machineSpec(machine) {
         checkResult("start is a startup message") {
           case Transition(_, Send(s: FrontendMessage.StartupMessage)) =>
@@ -49,19 +53,16 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
       }
     }
 
-    "support password-less authentication" in forAll { (username: String, dbName: String) =>
-      val machine = HandshakeMachine(Params.Credentials(username = username, password = None), Params.Database(Some(dbName)))
-
-      machineSpec(machine)(
+    "support password-less authentication" in {
+      machineSpec(mkMachine)(
         checkStartup,
         receive(BackendMessage.AuthenticationOk),
         checkAuthSuccess
       )
     }
 
-    "fails when password is required but not provided" in forAll { (username: String, dbName: String) =>
-      val machine = HandshakeMachine(Params.Credentials(username = username, password = None), Params.Database(Some(dbName)))
-      machineSpec(machine)(
+    "fails when password is required but not provided" in {
+      machineSpec(mkMachine)(
         checkStartup,
         receive(BackendMessage.AuthenticationCleartextPassword),
         checkFailure("complete with failure") { ex =>
@@ -71,8 +72,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
     }
 
     def passwordAuthSpec(username: String, password: String)(f: => BackendMessage)(check: String => MatchResult[_]) = {
-      val machine = HandshakeMachine(Params.Credentials(username = username, password = Some(password)), Params.Database(Some("database")))
-      machineSpec(machine)(
+      machineSpec(mkMachine(username, Some(password), "database"))(
         checkStartup,
         receive(f),
         checkResult("sends password") {
@@ -92,7 +92,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
     def md5(input: Array[Byte]*): String =
       hex(input.foldLeft(MessageDigest.getInstance("MD5")) { case(d,v) => d.update(v);d }.digest())
 
-    "support md5 password authentication" in forAll { (username: String, password: String, dbName: String, salt: Array[Byte]) =>
+    "support md5 password authentication" in forAll { (username: String, password: String, salt: Array[Byte]) =>
       passwordAuthSpec(username, password)(BackendMessage.AuthenticationMD5Password(Buf.ByteArray.Owned(salt))) { hashed =>
         val expectedHash = md5(bytes(md5(bytes(password), bytes(username))), salt)
         hashed must_== s"md5$expectedHash"
@@ -103,8 +103,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
       List(AuthenticationGSS, AuthenticationKerberosV5, AuthenticationSCMCredential, AuthenticationSSPI, AuthenticationSASL("bogus"))
         .map { method =>
           s"fails with unsupported authentication method for $method" in {
-            val machine = HandshakeMachine(Params.Credentials(username = "username", password = Some("password")), Params.Database(Some("database")))
-            machineSpec(machine)(
+            machineSpec(mkMachine("username", Some("password"), "database"))(
               checkStartup,
               receive(method),
               checkFailure("complete with failure") { ex =>
@@ -133,8 +132,6 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
     val authSuccess = checkStartup :: receive(BackendMessage.AuthenticationOk) :: checkAuthSuccess :: Nil
 
     "accumulate backend parameters" in forAll { (parameters: List[BackendMessage.ParameterStatus], bkd: BackendMessage.BackendKeyData) =>
-      val machine = HandshakeMachine(Params.Credentials(username = "username", password = None), Params.Database(Some("dbName")))
-
       val receiveParams = parameters.map(receive)
       // shuffle the BackendKeyData in he ParameterStatus messages
       val startupPhase = util.Random.shuffle(receive(bkd) :: receiveParams)
@@ -148,14 +145,13 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
         }
       )
 
-      machineSpec(machine)(
+      machineSpec(mkMachine)(
         authSuccess ++ startupPhase ++ checks: _*
       )
     }
 
     "fails if missing BackendKeyData" in {
-      val machine = HandshakeMachine(Params.Credentials(username = "username", password = None), Params.Database(Some("dbName")))
-      machineSpec(machine)(
+      machineSpec(mkMachine)(
         authSuccess ++ List(
           receive(BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
           checkFailure("fails") { ex =>
