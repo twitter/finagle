@@ -9,8 +9,8 @@ import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlServerError
-import com.twitter.finagle.postgresql.PgSqlStateMachineError
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.BackendResponse
 import com.twitter.finagle.postgresql.Response.ResultSet
@@ -54,6 +54,6 @@ class SimpleQueryMachine(query: String) extends StateMachine[Response] {
 
     case (state, _: NoticeResponse) => Transition(state, NoOp) // TODO: don't ignore
     case (_, e: ErrorResponse) => Transition(ExpectReady, Respond(Throw(PgSqlServerError(e))))
-    case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
+    case (state, msg) => throw PgSqlNoSuchTransition("SimpleQueryMachine", state, msg)
   }
 }

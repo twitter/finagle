@@ -11,13 +11,18 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
+import com.twitter.finagle.postgresql.PgSqlInvalidMachineStateError
 import com.twitter.finagle.postgresql.PgSqlPasswordRequired
 import com.twitter.finagle.postgresql.PgSqlUnsupportedAuthenticationMechanism
 import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.io.Buf
+import com.twitter.util.Return
+import org.scalacheck.Arbitrary
+import org.scalacheck.Gen
 import org.specs2.ScalaCheck
 import org.scalacheck.Prop.forAll
 import org.specs2.matcher.MatchResult
@@ -108,6 +113,56 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
             )
           }
         }
+    }
+  }
+
+  implicit lazy val arbParam : Arbitrary[BackendMessage.ParameterStatus] = Arbitrary {
+    for {
+      name <- Gen.alphaLowerStr.suchThat(_.nonEmpty)
+      value <- Gen.alphaLowerStr.suchThat(_.nonEmpty)
+    } yield BackendMessage.ParameterStatus(name, value)
+  }
+  implicit lazy val arbBackendKeyData : Arbitrary[BackendMessage.BackendKeyData] = Arbitrary {
+    for {
+      pid <- Arbitrary.arbitrary[Int]
+      key <- Arbitrary.arbitrary[Int]
+    } yield BackendMessage.BackendKeyData(pid, key)
+  }
+
+  "HandshakeMachine Startup" should {
+    val authSuccess = checkStartup :: receive(BackendMessage.AuthenticationOk) :: checkAuthSuccess :: Nil
+
+    "accumulate backend parameters" in forAll { (parameters: List[BackendMessage.ParameterStatus], bkd: BackendMessage.BackendKeyData) =>
+      val machine = HandshakeMachine(Params.Credentials(username = "username", password = None), Params.Database(Some("dbName")))
+
+      val receiveParams = parameters.map(receive)
+      // shuffle the BackendKeyData in he ParameterStatus messages
+      val startupPhase = util.Random.shuffle(receive(bkd) :: receiveParams)
+
+      val checks = List(
+        receive(BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
+        checkResult("responds success") {
+          case Complete(_, Some(Return(result))) =>
+            result.parameters must containTheSameElementsAs(parameters)
+            result.backendData must beEqualTo(bkd)
+        }
+      )
+
+      machineSpec(machine)(
+        authSuccess ++ startupPhase ++ checks: _*
+      )
+    }
+
+    "fails if missing BackendKeyData" in {
+      val machine = HandshakeMachine(Params.Credentials(username = "username", password = None), Params.Database(Some("dbName")))
+      machineSpec(machine)(
+        authSuccess ++ List(
+          receive(BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
+          checkFailure("fails") { ex =>
+            ex must beAnInstanceOf[PgSqlInvalidMachineStateError]
+          }
+        ): _*
+      )
     }
   }
 }

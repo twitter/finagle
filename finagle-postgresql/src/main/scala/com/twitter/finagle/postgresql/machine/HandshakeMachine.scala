@@ -16,9 +16,10 @@ import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
+import com.twitter.finagle.postgresql.PgSqlInvalidMachineStateError
+import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlPasswordRequired
 import com.twitter.finagle.postgresql.PgSqlServerError
-import com.twitter.finagle.postgresql.PgSqlStateMachineError
 import com.twitter.finagle.postgresql.PgSqlUnsupportedAuthenticationMechanism
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.HandshakeResult
@@ -70,8 +71,12 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
       Transition(BackendStarting(params, Some(bkd)), NoOp)
 
     case (BackendStarting(params, bkd), ready: BackendMessage.ReadyForQuery) =>
-      Complete(ready, Some(Return(HandshakeResult(params, bkd.get))))
-
+      bkd match {
+        case Some(b) =>
+          Complete(ready, Some(Return(HandshakeResult(params, b))))
+        case None =>
+          Complete(ready, Some(Throw(PgSqlInvalidMachineStateError("HandshakeMachine did not receive BackendKeyData before ReadyForQuery"))))
+      }
     case (state, _: BackendMessage.NoticeResponse) => Transition(state, NoOp) // TODO: don't ignore
     case (_, e: BackendMessage.ErrorResponse) =>
       // The backend closes the connection, so we use a bogus ReadyForQuery value
@@ -80,7 +85,7 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
     case (_, AuthenticationGSS | AuthenticationKerberosV5 | AuthenticationSCMCredential | AuthenticationSSPI | AuthenticationSASL(_)) =>
       Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlUnsupportedAuthenticationMechanism(msg.asInstanceOf[BackendMessage.AuthenticationMessage]))))
 
-    case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
+    case (state, msg) => throw PgSqlNoSuchTransition("HandshakeMachine", state, msg)
   }
 }
 
