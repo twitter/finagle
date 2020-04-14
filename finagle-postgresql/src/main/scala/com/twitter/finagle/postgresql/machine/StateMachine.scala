@@ -3,8 +3,8 @@ package com.twitter.finagle.postgresql.machine
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlServerError
-import com.twitter.finagle.postgresql.PgSqlStateMachineError
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.transport.MessageEncoder
 import com.twitter.util.Return
@@ -34,7 +34,7 @@ object StateMachine {
     override def receive(state: State, msg: BackendMessage): TransitionResult[State, R] = msg match {
       case r: BackendMessage.ReadyForQuery => Complete(r, Some(Return(f(r))))
       case e: BackendMessage.ErrorResponse => Transition(Unit, Respond(Throw(PgSqlServerError(e))))
-      case msg => throw PgSqlStateMachineError(name, (), msg)
+      case msg => throw PgSqlNoSuchTransition(name, (), msg)
     }
   }
 }
