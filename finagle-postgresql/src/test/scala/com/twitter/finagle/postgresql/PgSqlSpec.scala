@@ -1,4 +1,4 @@
-package com.twitter.finagle
+package com.twitter.finagle.postgresql
 
 import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragment

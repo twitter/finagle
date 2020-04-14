@@ -1,6 +1,6 @@
 package com.twitter.finagle.postgresql.machine
 
-import com.twitter.finagle.PgSqlSpec
+import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond

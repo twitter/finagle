@@ -1,5 +1,8 @@
-package com.twitter.finagle
+package com.twitter.finagle.postgresql
 
+import com.twitter.finagle.PostgreSql
+import com.twitter.finagle.Service
+import com.twitter.finagle.postgresql
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import org.specs2.specification.BeforeAfterAll
 

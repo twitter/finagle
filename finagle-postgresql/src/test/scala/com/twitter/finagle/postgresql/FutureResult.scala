@@ -1,4 +1,4 @@
-package com.twitter.finagle
+package com.twitter.finagle.postgresql
 
 import com.twitter.util.Await
 import com.twitter.util.Future
