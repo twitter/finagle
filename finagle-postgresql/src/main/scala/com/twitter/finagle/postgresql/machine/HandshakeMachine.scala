@@ -4,12 +4,22 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
 import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationCleartextPassword
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationKerberosV5
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationMD5Password
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationOk
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASL
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
+import com.twitter.finagle.postgresql.PgSqlPasswordRequired
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PgSqlStateMachineError
+import com.twitter.finagle.postgresql.PgSqlUnsupportedAuthenticationMechanism
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.HandshakeResult
 import com.twitter.io.Buf
@@ -28,20 +38,32 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
     Transition(Authenticating, Send(FrontendMessage.StartupMessage(user = credentials.username, database = database.name)))
 
   override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, Response.HandshakeResult] = (state, msg) match {
-    case (Authenticating, BackendMessage.AuthenticationMD5Password(salt)) =>
+    case (Authenticating, AuthenticationMD5Password(salt)) =>
       def hex(input: Array[Byte]) = input.map(s => f"$s%02x").mkString
       def bytes(str: String) = str.getBytes(StandardCharsets.UTF_8)
       def md5(input: Array[Byte]*): String =
         hex(input.foldLeft(MessageDigest.getInstance("MD5")) { case(d,v) => d.update(v);d }.digest())
 
-      val hashed = md5(
-        bytes(md5(bytes(credentials.password.getOrElse("")), bytes(credentials.username))),
-        Buf.ByteArray.Owned.extract(salt)
-      )
+      credentials.password match {
+        case None => Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlPasswordRequired)))
+        case Some(password) =>
+          val hashed = md5(
+            bytes(md5(bytes(password), bytes(credentials.username))),
+            Buf.ByteArray.Owned.extract(salt)
+          )
 
-      Transition(Authenticating, Send(FrontendMessage.PasswordMessage(s"md5$hashed")))
-    case (Authenticating, BackendMessage.AuthenticationOk) => // This can happen at Startup when there's no password
+          Transition(Authenticating, Send(FrontendMessage.PasswordMessage(s"md5$hashed")))
+      }
+
+    case (Authenticating, AuthenticationCleartextPassword) =>
+      credentials.password match {
+        case None => Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlPasswordRequired)))
+        case Some(password) => Transition(Authenticating, Send(FrontendMessage.PasswordMessage(password)))
+      }
+
+    case (Authenticating, AuthenticationOk) => // This can happen at Startup when there's no password
       Transition(BackendStarting(Nil, None), NoOp)
+
     case (BackendStarting(params, bkd), p: BackendMessage.ParameterStatus) =>
       Transition(BackendStarting(p :: params, bkd), NoOp)
     case (BackendStarting(params, _), bkd: BackendMessage.BackendKeyData) =>
@@ -54,6 +76,9 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
     case (_, e: BackendMessage.ErrorResponse) =>
       // The backend closes the connection, so we use a bogus ReadyForQuery value
       Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlServerError(e))))
+
+    case (_, AuthenticationGSS | AuthenticationKerberosV5 | AuthenticationSCMCredential | AuthenticationSSPI | AuthenticationSASL(_)) =>
+      Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlUnsupportedAuthenticationMechanism(msg.asInstanceOf[BackendMessage.AuthenticationMessage]))))
 
     case (state, msg) => throw PgSqlStateMachineError("SimpleQueryMachine", state, msg)
   }
