@@ -49,6 +49,11 @@ class SimpleQueryMachine(query: String) extends StateMachine[Response] {
       // TODO: handle discard() to client can cancel the stream
       r.lastWrite.liftToTry.unit before r.pipe.close()
       Transition(ExpectReady, NoOp)
+    case (r: StreamResult, e: ErrorResponse) =>
+      val exception = PgSqlServerError(e)
+      r.pipe.fail(exception)
+      // We've already responded at this point, so this will likely not do anything.
+      Transition(ExpectReady, Respond(Throw(exception)))
 
     case (ExpectReady, r: ReadyForQuery) => Complete(r, None)
 
