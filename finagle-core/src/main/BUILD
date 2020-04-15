@@ -35,6 +35,7 @@ scala_library(
         "util/util-tunable/src/main/scala",
     ],
     exports = [
+        "finagle/finagle-toggle",
         "util/util-core:scala",
         "util/util-logging",
         "util/util-registry",

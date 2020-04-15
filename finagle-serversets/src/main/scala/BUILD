@@ -18,6 +18,7 @@ scala_library(
         "finagle/finagle-serversets/src/main/java",
         "finagle/finagle-serversets/src/main/resources",
         "finagle/finagle-serversets/src/main/thrift:thrift-java",
+        "scrooge/scrooge-core/src/main/scala",
         "util/util-app/src/main/scala",
         "util/util-cache",
         "util/util-core:scala",

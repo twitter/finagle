@@ -15,6 +15,7 @@ scala_library(
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-thriftmux/src/main/resources",
         "finagle/finagle-toggle/src/main/scala",
+        "scrooge/scrooge-core/src/main/scala",
         "util/util-core:scala",
         "util/util-logging/src/main/scala",
         "util/util-stats/src/main/scala",

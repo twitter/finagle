@@ -7,6 +7,7 @@ scala_library(
         repo = artifactory,
     ),
     dependencies = [
+        "3rdparty/jvm/io/netty:netty4-codec",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/org/apache/thrift:libthrift",
         "finagle/finagle-core/src/main",

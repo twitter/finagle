@@ -9,6 +9,8 @@ scala_library(
     scope = "forced",
     dependencies = [
         ":core",
+        "finagle/finagle-core/src/main",
+        "finagle/finagle-zipkin-core/src/main/scala",
         "finagle/finagle-zipkin-scribe/src/main/resources",
     ],
     exports = [

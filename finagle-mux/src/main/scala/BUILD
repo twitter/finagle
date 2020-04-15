@@ -8,10 +8,12 @@ scala_library(
     ),
     dependencies = [
         "3rdparty/jvm/io/netty:netty4",
+        "3rdparty/jvm/io/netty:netty4-codec",
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "finagle/finagle-core",
         "finagle/finagle-netty4",
+        "finagle/finagle-toggle/src/main/scala",
         "util/util-app/src/main/scala",
         "util/util-core:scala",
         "util/util-logging/src/main/scala",
