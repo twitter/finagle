@@ -3,24 +3,18 @@ package com.twitter.finagle.postgresql.machine
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
-import com.twitter.finagle.postgresql.BackendMessage.FieldDescription
-import com.twitter.finagle.postgresql.BackendMessage.Format
-import com.twitter.finagle.postgresql.BackendMessage.Oid
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
-import com.twitter.io.Buf
 import com.twitter.io.Reader
-import org.scalacheck.Arbitrary
-import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll
-import org.specs2.ScalaCheck
 
-class SimpleQueryMachineSpec extends MachineSpec[Response] with ScalaCheck {
+class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
   def mkMachine(q: String): SimpleQueryMachine = new SimpleQueryMachine(q)
 
@@ -72,33 +66,6 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with ScalaCheck {
         receive(readyForQuery),
         checkCompletes
       )
-    }
-
-    // TODO
-    implicit lazy val arbFieldDescription: Arbitrary[FieldDescription] = Arbitrary {
-      for {
-        name <- Gen.alphaStr
-        dataType <- implicitly[Arbitrary[Int]].arbitrary.map(Oid) // TODO Gen.oneOf(...)
-        dataTypeSize <- Gen.oneOf(1,2,4,8,16).map(_.toShort)
-        format <- Gen.oneOf(Format.Text, Format.Binary)
-      } yield FieldDescription(name, None, None, dataType, dataTypeSize, 0, format)
-    }
-    implicit lazy val arbRowDescription: Arbitrary[RowDescription] = Arbitrary {
-      Gen.nonEmptyListOf(arbFieldDescription.arbitrary).map(l => RowDescription(l.toIndexedSeq))
-    }
-    implicit lazy val arbBuf = Arbitrary(implicitly[Arbitrary[Array[Byte]]].arbitrary.map { bytes => Buf.ByteArray.Owned(bytes) })
-
-    def arbDataRow(rowDescription: RowDescription): Arbitrary[DataRow] = Arbitrary {
-      Gen.containerOfN[IndexedSeq, Buf](rowDescription.rowFields.size, arbBuf.arbitrary)
-        .map(DataRow)
-    }
-
-    case class TestResultSet(desc: RowDescription, rows: List[DataRow])
-    implicit lazy val arbTestResultSet = Arbitrary {
-      for {
-        desc <- arbRowDescription.arbitrary
-        rows <- Gen.listOf(arbDataRow(desc).arbitrary)
-      } yield TestResultSet(desc, rows)
     }
 
     def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow]): Reader[DataRow] = {
