@@ -26,8 +26,8 @@ object BackendMessage {
     typeModifier: Int, // meaning is type-specific
     format: Format
   )
-  case class RowDescription(rowFields: List[FieldDescription]) extends BackendMessage
-  case class DataRow(values: List[Buf]) extends BackendMessage
+  case class RowDescription(rowFields: IndexedSeq[FieldDescription]) extends BackendMessage
+  case class DataRow(values: IndexedSeq[Buf]) extends BackendMessage
 
   sealed trait AuthenticationMessage extends BackendMessage
   case object AuthenticationOk extends AuthenticationMessage
