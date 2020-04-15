@@ -11,8 +11,7 @@ import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
-import com.twitter.util.Future
-import org.scalacheck.Prop.forAll
+import org.specs2.matcher.MatchResult
 
 class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
@@ -35,7 +34,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
   "SimpleQueryMachine" should {
 
-    "send the provided query string" in forAll { query: String =>
+    "send the provided query string" in prop { query: String =>
       machineSpec(mkMachine(query)) {
         checkQuery(query)
       }
@@ -54,7 +53,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       )
     }
 
-    "support commands" in forAll { (command: String, commandTag: String) =>
+    "support commands" in prop { (command: String, commandTag: String) =>
       val commandComplete = BackendMessage.CommandComplete(commandTag)
       machineSpec(mkMachine(command))(
         checkQuery(command),
@@ -68,7 +67,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       )
     }
 
-    def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow]): Future[Seq[DataRow]] = {
+    def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow])(f: Seq[DataRow] => MatchResult[_]) = {
       var rowReader: Option[Response.ResultSet] = None
 
       val prep = List(
@@ -93,22 +92,22 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
         checkCompletes
       )
 
-      machineSpec(mkMachine(query))(
-        prep ++ sendRows ++ post: _*
-      )
-
-      rowReader must beSome
-      rowReader.get.toSeq
+      // NOTE: machineSpec returns a Prop which we combine with another using &&
+      //   It's kind of weird, but specs2 isn't really helping here.
+      machineSpec(mkMachine(query))(prep ++ sendRows ++ post: _*) && {
+        rowReader must beSome
+        rowReader.get.toSeq.map(f)
+      }
     }
 
-    "support empty result sets" in forAll { rowDesc: RowDescription =>
-      resultSetSpec("select 1;", rowDesc, Nil).map { rows =>
+    "support empty result sets" in prop { rowDesc: RowDescription =>
+      resultSetSpec("select 1;", rowDesc, Nil) { rows =>
         rows must beEmpty
       }
-
     }
-    "return rows in order" in forAll { rs: TestResultSet =>
-      resultSetSpec("select 1;", rs.desc, rs.rows).map { rows =>
+
+    "return rows in order" in prop { rs: TestResultSet =>
+      resultSetSpec("select 1;", rs.desc, rs.rows) { rows =>
         rows must beEqualTo(rs.rows)
       }
     }

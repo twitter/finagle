@@ -22,7 +22,6 @@ import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.io.Buf
 import com.twitter.util.Return
-import org.scalacheck.Prop.forAll
 import org.specs2.matcher.MatchResult
 
 class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with PropertiesSpec {
@@ -40,7 +39,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Pr
   def mkMachine: HandshakeMachine = mkMachine("username", None, "database")
 
   "HandshakeMachine Authentication" should {
-    "use the supplied parameters" in forAll { (username: String, dbName: String) =>
+    "use the supplied parameters" in prop { (username: String, dbName: String) =>
       val machine = mkMachine(username, password = None, dbName = dbName)
       machineSpec(machine) {
         checkResult("start is a startup message") {
@@ -81,7 +80,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Pr
       )
     }
 
-    "support clear text password authentication" in forAll { (username: String, password: String) =>
+    "support clear text password authentication" in prop { (username: String, password: String) =>
       passwordAuthSpec(username, password)(BackendMessage.AuthenticationCleartextPassword)(_ must_== password)
     }
 
@@ -90,7 +89,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Pr
     def md5(input: Array[Byte]*): String =
       hex(input.foldLeft(MessageDigest.getInstance("MD5")) { case(d,v) => d.update(v);d }.digest())
 
-    "support md5 password authentication" in forAll { (username: String, password: String, salt: Array[Byte]) =>
+    "support md5 password authentication" in prop { (username: String, password: String, salt: Array[Byte]) =>
       passwordAuthSpec(username, password)(BackendMessage.AuthenticationMD5Password(Buf.ByteArray.Owned(salt))) { hashed =>
         val expectedHash = md5(bytes(md5(bytes(password), bytes(username))), salt)
         hashed must_== s"md5$expectedHash"
@@ -116,7 +115,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Pr
   "HandshakeMachine Startup" should {
     val authSuccess = checkStartup :: receive(BackendMessage.AuthenticationOk) :: checkAuthSuccess :: Nil
 
-    "accumulate backend parameters" in forAll { (parameters: List[BackendMessage.ParameterStatus], bkd: BackendMessage.BackendKeyData) =>
+    "accumulate backend parameters" in prop { (parameters: List[BackendMessage.ParameterStatus], bkd: BackendMessage.BackendKeyData) =>
       val receiveParams = parameters.map(receive(_))
       // shuffle the BackendKeyData in he ParameterStatus messages
       val startupPhase = util.Random.shuffle(receive(bkd) :: receiveParams)
