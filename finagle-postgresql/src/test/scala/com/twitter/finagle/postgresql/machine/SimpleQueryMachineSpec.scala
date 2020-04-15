@@ -35,7 +35,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
   "SimpleQueryMachine" should {
 
-    "send the provided query string" in { query: String =>
+    "send the provided query string" in forAll { query: String =>
       machineSpec(mkMachine(query)) {
         checkQuery(query)
       }
