@@ -56,4 +56,8 @@ trait PropertiesSpec extends ScalaCheck {
     } yield TestResultSet(desc, rows)
   }
 
+  // TODO
+  implicit lazy val arbErrorResponse: Arbitrary[BackendMessage.ErrorResponse] =
+    Arbitrary(Gen.const(BackendMessage.ErrorResponse(Map.empty)))
+
 }

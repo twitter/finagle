@@ -4,12 +4,16 @@ import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlServerError
+import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.util.Throw
+import org.scalacheck.Arbitrary
+import org.scalacheck.Gen
+import org.scalacheck.Prop
 import org.specs2.matcher.MatchResult
 
-abstract class MachineSpec[R <: Response] extends PgSqlSpec {
+abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSpec =>
 
   sealed trait StepSpec
   case class checkResult(name: String)(val spec: PartialFunction[StateMachine.TransitionResult[_, R], MatchResult[_]]) extends StepSpec
@@ -35,7 +39,7 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec {
 
         step(previous, tail)
       case receive(msg) :: tail =>
-        previous must beLike {
+        previous must beLike[StateMachine.TransitionResult[machine.State, R]] {
           case StateMachine.Transition(s, _) =>
             step(machine.receive(s, msg), tail)
           // This allows inejecting backend messages in random places, which can result in
@@ -47,27 +51,36 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec {
     step(machine.start, checks.toList)
   }
 
-  def injectError(x: BackendMessage.ErrorResponse, xs: List[StepSpec]): List[StepSpec] = {
-    // take everything before a ReadyForQuery or some other error.
+  // Given a list of steps, insert a ErrorResponse randomly and checks that the machine handled it
+  def genError(xs: List[StepSpec]): Gen[List[StepSpec]] = {
+    // take everything before a machine failure, ReadyForQuery message or some other error.
     val steps = xs.takeWhile {
       case receive(BackendMessage.ErrorResponse(_)) => false
       case receive(BackendMessage.ReadyForQuery(_)) => false
+      case checkFailure(_) => false
       case _ => true
     }
-    val (head, _) = steps.splitAt(util.Random.nextInt(steps.size))
-    val newTail = List(
-      receive(x), // TODO: ideally, we would conditionally add this if the state machine isn't already failed. See allowPreemptiveFailure
-      checkFailure("handles failure") {
-        case PgSqlServerError(e) => e must beEqualTo(x)
-        case _: PgSqlClientError => ok // we can't predict if the machine will fail normally, so we accept these failures as well
-      }
-    )
-    head ::: newTail
+
+    for {
+      error <- Arbitrary.arbitrary[BackendMessage.ErrorResponse]
+      insert <- Gen.choose(1, steps.size)
+    } yield {
+      val (head, _) = steps.splitAt(insert)
+      head ++ List(
+        receive(error), // TODO: ideally, we would conditionally add this if the state machine isn't already failed. See allowPreemptiveFailure
+        checkFailure("handles injected failure") {
+          case PgSqlServerError(e) => e must beEqualTo(error)
+          case _: PgSqlClientError => ok // we can't predict if the machine will fail normally, so we accept these failures as well
+        }
+      )
+    }
   }
 
   // TODO: ideally we generate fragments here, but not sure how to do that with scalacheck
-  def machineSpec(machine: StateMachine[R])(checks: StepSpec*) = {
-    oneMachineSpec(machine)(checks: _*)
-    oneMachineSpec(machine, allowPreemptiveFailure = true)(injectError(receive.error, checks.toList): _*)
+  def machineSpec(machine: StateMachine[R])(steps: StepSpec*) = {
+    oneMachineSpec(machine)(steps: _*)
+    Prop.forAll(genError(steps.toList)) { errorSteps =>
+      oneMachineSpec(machine, allowPreemptiveFailure = true)(errorSteps: _*)
+    }
   }
 }
