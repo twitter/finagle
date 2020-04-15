@@ -75,19 +75,30 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with ScalaCheck {
     }
 
     // TODO
-    implicit lazy val arbRowDescription: Arbitrary[RowDescription] = Arbitrary {
-      Gen.const(
-        RowDescription(
-          List(
-            FieldDescription("field", None, None, Oid(42), 0, 0, Format.Text)
-          )
-        )
-      )
-    }
-    implicit lazy val arbDataRow: Arbitrary[DataRow] = Arbitrary {
+    implicit lazy val arbFieldDescription: Arbitrary[FieldDescription] = Arbitrary {
       for {
-        bytes <- implicitly[Arbitrary[Array[Byte]]].arbitrary.suchThat(_.nonEmpty)
-      } yield DataRow(Buf.ByteArray.Owned(bytes) :: Nil)
+        name <- Gen.alphaStr
+        dataType <- implicitly[Arbitrary[Int]].arbitrary.map(Oid) // TODO Gen.oneOf(...)
+        dataTypeSize <- Gen.oneOf(1,2,4,8,16).map(_.toShort)
+        format <- Gen.oneOf(Format.Text, Format.Binary)
+      } yield FieldDescription(name, None, None, dataType, dataTypeSize, 0, format)
+    }
+    implicit lazy val arbRowDescription: Arbitrary[RowDescription] = Arbitrary {
+      Gen.nonEmptyListOf(arbFieldDescription.arbitrary).map(l => RowDescription(l.toIndexedSeq))
+    }
+    implicit lazy val arbBuf = Arbitrary(implicitly[Arbitrary[Array[Byte]]].arbitrary.map { bytes => Buf.ByteArray.Owned(bytes) })
+
+    def arbDataRow(rowDescription: RowDescription): Arbitrary[DataRow] = Arbitrary {
+      Gen.containerOfN[IndexedSeq, Buf](rowDescription.rowFields.size, arbBuf.arbitrary)
+        .map(DataRow)
+    }
+
+    case class TestResultSet(desc: RowDescription, rows: List[DataRow])
+    implicit lazy val arbTestResultSet = Arbitrary {
+      for {
+        desc <- arbRowDescription.arbitrary
+        rows <- Gen.listOf(arbDataRow(desc).arbitrary)
+      } yield TestResultSet(desc, rows)
     }
 
     def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow]): Reader[DataRow] = {
@@ -128,8 +139,8 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with ScalaCheck {
         rows must beEmpty
       }
     }
-    "return rows in order" in forAll { (rowDesc: RowDescription, rows: List[DataRow]) =>
-      Reader.toAsyncStream(resultSetSpec("select 1;", rowDesc, rows)).toSeq.map { rows =>
+    "return rows in order" in forAll { rs: TestResultSet =>
+      Reader.toAsyncStream(resultSetSpec("select 1;", rs.desc, rs.rows)).toSeq.map { rows =>
         rows must beEqualTo(rows)
       }
     }
