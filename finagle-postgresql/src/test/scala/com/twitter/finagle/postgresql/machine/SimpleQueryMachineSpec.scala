@@ -85,7 +85,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
         }
       )
 
-      val sendRows = rows.map(receive)
+      val sendRows = rows.map(receive(_))
 
       val post = List(
         receive(BackendMessage.CommandComplete("command tag")),

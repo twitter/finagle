@@ -8,8 +8,8 @@ case class PgSqlServerError(error: BackendMessage.ErrorResponse) extends PgSqlEx
 }
 
 abstract class PgSqlClientError extends PgSqlException
-case object PgSqlPasswordRequired extends PgSqlException
-case class PgSqlUnsupportedAuthenticationMechanism(method: BackendMessage.AuthenticationMessage) extends PgSqlException
+case object PgSqlPasswordRequired extends PgSqlClientError
+case class PgSqlUnsupportedAuthenticationMechanism(method: BackendMessage.AuthenticationMessage) extends PgSqlClientError
 
 sealed trait PgSqlStateMachineError extends PgSqlClientError
 case class PgSqlInvalidMachineStateError(msg: String) extends PgSqlStateMachineError {
