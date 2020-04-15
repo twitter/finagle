@@ -117,7 +117,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Pr
     val authSuccess = checkStartup :: receive(BackendMessage.AuthenticationOk) :: checkAuthSuccess :: Nil
 
     "accumulate backend parameters" in forAll { (parameters: List[BackendMessage.ParameterStatus], bkd: BackendMessage.BackendKeyData) =>
-      val receiveParams = parameters.map(receive)
+      val receiveParams = parameters.map(receive(_))
       // shuffle the BackendKeyData in he ParameterStatus messages
       val startupPhase = util.Random.shuffle(receive(bkd) :: receiveParams)
 
