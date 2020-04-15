@@ -14,6 +14,7 @@ import com.twitter.finagle.postgresql.Params
 import com.twitter.finagle.postgresql.PgSqlInvalidMachineStateError
 import com.twitter.finagle.postgresql.PgSqlPasswordRequired
 import com.twitter.finagle.postgresql.PgSqlUnsupportedAuthenticationMechanism
+import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
@@ -21,13 +22,10 @@ import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.io.Buf
 import com.twitter.util.Return
-import org.scalacheck.Arbitrary
-import org.scalacheck.Gen
-import org.specs2.ScalaCheck
 import org.scalacheck.Prop.forAll
 import org.specs2.matcher.MatchResult
 
-class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with ScalaCheck {
+class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with PropertiesSpec {
 
   val checkStartup = checkResult("start is a startup message") {
     case Transition(_, Send(s)) => s must beAnInstanceOf[FrontendMessage.StartupMessage]
@@ -113,19 +111,6 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Sc
           }
         }
     }
-  }
-
-  implicit lazy val arbParam : Arbitrary[BackendMessage.ParameterStatus] = Arbitrary {
-    for {
-      name <- Gen.alphaLowerStr.suchThat(_.nonEmpty)
-      value <- Gen.alphaLowerStr.suchThat(_.nonEmpty)
-    } yield BackendMessage.ParameterStatus(name, value)
-  }
-  implicit lazy val arbBackendKeyData : Arbitrary[BackendMessage.BackendKeyData] = Arbitrary {
-    for {
-      pid <- Arbitrary.arbitrary[Int]
-      key <- Arbitrary.arbitrary[Int]
-    } yield BackendMessage.BackendKeyData(pid, key)
   }
 
   "HandshakeMachine Startup" should {
