@@ -11,7 +11,7 @@ import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
-import com.twitter.io.Reader
+import com.twitter.util.Future
 import org.scalacheck.Prop.forAll
 
 class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
@@ -68,8 +68,8 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       )
     }
 
-    def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow]): Reader[DataRow] = {
-      var rowReader: Option[Reader[DataRow]] = None
+    def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow]): Future[Seq[DataRow]] = {
+      var rowReader: Option[Response.ResultSet] = None
 
       val prep = List(
         checkQuery(query),
@@ -78,8 +78,8 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
           case Transition(_, Respond(value)) =>
             value.asScala must beASuccessfulTry
             value.get must beLike {
-              case Response.ResultSet(desc, reader) =>
-                rowReader = Some(reader)
+              case rs@Response.ResultSet(desc, _) =>
+                rowReader = Some(rs)
                 desc must beEqualTo(rowDesc)
             }
         }
@@ -98,17 +98,18 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       )
 
       rowReader must beSome
-      rowReader.get
+      rowReader.get.toSeq
     }
 
     "support empty result sets" in forAll { rowDesc: RowDescription =>
-      Reader.toAsyncStream(resultSetSpec("select 1;", rowDesc, Nil)).toSeq.map { rows =>
+      resultSetSpec("select 1;", rowDesc, Nil).map { rows =>
         rows must beEmpty
       }
+
     }
     "return rows in order" in forAll { rs: TestResultSet =>
-      Reader.toAsyncStream(resultSetSpec("select 1;", rs.desc, rs.rows)).toSeq.map { rows =>
-        rows must beEqualTo(rows)
+      resultSetSpec("select 1;", rs.desc, rs.rows).map { rows =>
+        rows must beEqualTo(rs.rows)
       }
     }
   }
