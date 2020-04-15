@@ -79,9 +79,11 @@ object PgBuf {
       case 1 => Format.Binary
       case v => sys.error(s"unexpected format value $v")
     }
-    def collect[T](f: Reader => T): List[T] = {
-      val builder = List.newBuilder[T]
-      for(_ <- 0 until short()) { builder += f(this) }
+    def collect[T](f: Reader => T): IndexedSeq[T] = {
+      val size = short()
+      val builder = IndexedSeq.newBuilder[T]
+      builder.sizeHint(size)
+      for(_ <- 0 until size) { builder += f(this) }
       builder.result()
     }
     def buf(length: Int): Buf = reader.readBytes(length)
