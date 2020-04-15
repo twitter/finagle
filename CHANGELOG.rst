@@ -23,6 +23,13 @@ Bug Fixes
 * finagle-netty4: ChannelStatsHandler will now only count the first channel `close(..)` call
   when incrementing the `closes` counter. ``PHAB_ID=D462360``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-toggle: Removed abstract type for `c.t.finagle.Toggle`, all Toggles are of type `Int`.
+  This is to avoid Integer auto-boxing when calling `Toggle.apply`, thus to improve overall toggle
+  performance. ``PHAB_ID=D456960``
+
 20.4.0
 ------
 

@@ -195,7 +195,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     def numApply: Int = nApply
 
     val underlying: ToggleMap = ToggleMap.newMutable()
-    override def apply(id: String): Toggle[Int] = {
+    override def apply(id: String): Toggle = {
       nApply += 1
       super.apply(id)
     }

@@ -20,17 +20,17 @@ class ToggleTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   private val IntGen =
     Gen.chooseNum(Int.MinValue, Int.MaxValue)
 
-  private val on = Toggle.on[Int]("com.twitter.on")
-  private val off = Toggle.off[Int]("com.twitter.off")
+  private val on = Toggle.on("com.twitter.on")
+  private val off = Toggle.off("com.twitter.off")
 
   def newToggle[T](
     id: String,
-    pf: PartialFunction[T, Boolean],
+    pf: PartialFunction[Int, Boolean],
     fraction: Double
-  ): Toggle.Fractional[T] = new Toggle.Fractional[T](id) {
+  ): Toggle.Fractional = new Toggle.Fractional(id) {
     override def toString: String = s"Toggle($id)"
-    def isDefinedAt(x: T): Boolean = pf.isDefinedAt(x)
-    def apply(v1: T): Boolean = pf(v1)
+    def isDefinedAt(x: Int): Boolean = pf.isDefinedAt(x)
+    def apply(v1: Int): Boolean = pf(v1)
     def currentFraction: Double = fraction
   }
 
@@ -161,8 +161,8 @@ class ToggleTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   }
 
   test("Toggle.Fractional.min isDefinedAt is result of isDefinedAt for toggle with lower fraction") {
-    val definedAtZero = Toggle.on[Int]("com.foo")
-    val undefinedAtZero = newToggle[Int]("com.foo", { case x if x > 0 => true }, 1.0)
+    val definedAtZero = Toggle.on("com.foo")
+    val undefinedAtZero = newToggle("com.foo", { case x if x > 0 => true }, 1.0)
 
     val toggle1 = Toggle.Fractional.min(definedAtZero, definedAtZero)
     assert(toggle1.isDefinedAt(0))
@@ -175,8 +175,8 @@ class ToggleTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   }
 
   test("Toggle.Fractional.min currentFraction is min of both toggles' currentFractions") {
-    val a = newToggle[Int]("com.foo", { case _ => true }, 0.5)
-    val b = newToggle[Int]("com.foo", { case _ => true }, 0.8)
+    val a = newToggle("com.foo", { case _ => true }, 0.5)
+    val b = newToggle("com.foo", { case _ => true }, 0.8)
 
     val toggle1 = Toggle.Fractional.min(a, b)
     assert(toggle1.currentFraction == 0.5)
@@ -186,8 +186,8 @@ class ToggleTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   }
 
   test("Toggle.Fractional.min apply uses currentFraction") {
-    val a = newToggle[Int]("com.foo", { case _ => false }, 0.0)
-    val b = newToggle[Int]("com.foo", { case _ => true }, 1.0)
+    val a = newToggle("com.foo", { case _ => false }, 0.0)
+    val b = newToggle("com.foo", { case _ => true }, 1.0)
 
     val toggle1 = Toggle.Fractional.min(a, b)
     assert(toggle1(5) == false)

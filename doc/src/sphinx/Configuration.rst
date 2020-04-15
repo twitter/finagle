@@ -101,8 +101,8 @@ measured and controlled manner.
 Concepts
 ~~~~~~~~
 
-A :finagle-toggle-src:`Toggle <com/twitter/finagle/toggle/Toggle.scala>` is a partial
-function from a type-`T` to `Boolean`. These are used to decide whether a feature is
+A :finagle-toggle-src:`Toggle <com/twitter/finagle/toggle/Toggle.scala>` is a total
+function from a type-`Int` to `Boolean`. These are used to decide whether a feature is
 enabled or not for a given request or service configuration.
 
 A :finagle-toggle-src:`ToggleMap <com/twitter/finagle/toggle/ToggleMap.scala>` is
@@ -133,7 +133,7 @@ Here is an example :ref:`Filter <filters>` which uses a `Toggle` on the request 
       newBackend: Service[Request, Response])
     extends SimpleFilter[Request, Response] {
 
-    private[this] val useNewBackend: Toggle[Int] = toggleMap("com.example.service.UseNewBackend")
+    private[this] val useNewBackend: Toggle = toggleMap("com.example.service.UseNewBackend")
 
     def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
       if (useNewBackend(Rng.threadLocal.nextInt()))

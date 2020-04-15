@@ -16,7 +16,7 @@ class ToggleMapCompilationTest {
   public void testToggleCasting() {
     ToggleMap.Mutable toggleMap = ToggleMap.newMutable();
     toggleMap.put("com.twitter.finagle.toggle.test", 1.0);
-    Toggle<Integer> toggle = toggleMap.get("com.twitter.fiangle.toggle.test");
+    Toggle toggle = toggleMap.get("com.twitter.finagle.toggle.test");
     Assert.assertTrue(toggle.isEnabled(5000));
   }
 

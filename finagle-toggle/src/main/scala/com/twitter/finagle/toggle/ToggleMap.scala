@@ -44,7 +44,7 @@ abstract class ToggleMap { self =>
    *
    * @see [[get]] for a Java friendly version
    */
-  def apply(id: String): Toggle[Int]
+  def apply(id: String): Toggle
 
   /**
    * Get a [[Toggle]] for this `id`.  Java-friendly synonym for `apply`.
@@ -59,7 +59,7 @@ abstract class ToggleMap { self =>
    *
    * @note this returns a `java.lang.Integer` for Java compatibility.
    */
-  def get(id: String): Toggle[jl.Integer] = apply(id).asInstanceOf[Toggle[jl.Integer]]
+  final def get(id: String): Toggle = apply(id)
 
   def iterator: Iterator[Toggle.Metadata]
 
@@ -81,7 +81,7 @@ abstract class ToggleMap { self =>
       override def toString: String =
         s"${self.toString}.orElse(${that.toString})"
 
-      def apply(id: String): Toggle[Int] = {
+      def apply(id: String): Toggle = {
         self(id).orElse(that(id))
       }
 
@@ -108,30 +108,27 @@ abstract class ToggleMap { self =>
 object ToggleMap {
 
   /**
-   * Used to create a `Toggle[Int]` that hashes its inputs to
+   * Used to create a `Toggle` that hashes its inputs to
    * `apply` and `isDefinedAt` in order to promote a relatively even
    * distribution even when the inputs do not have a good distribution.
    *
    * This allows users to get away with using a poor hashing function,
    * such as `String.hashCode`.
    */
-  private def hashedToggle(
-    id: String,
-    pf: PartialFunction[Int, Boolean],
-    fraction: Double
-  ): Toggle.Fractional[Int] = new Toggle.Fractional[Int](id) {
-    override def toString: String = s"Toggle($id)"
-    // Each Toggle has a different hash seed so that Toggles are independent
-    private[this] val hashSeed = MurmurHash3.stringHash(id)
-    private[this] def hash(i: Int): Int = {
-      val h = MurmurHash3.mix(hashSeed, i)
-      MurmurHash3.finalizeHash(h, 1)
-    }
-    def isDefinedAt(x: Int): Boolean = pf.isDefinedAt(hash(x))
-    def apply(x: Int): Boolean = pf(hash(x))
+  private def hashedToggle(id: String, fn: Int => Boolean, fraction: Double): Toggle.Fractional =
+    new Toggle.Fractional(id) {
+      override def toString: String = s"Toggle($id)"
+      // Each Toggle has a different hash seed so that Toggles are independent
+      private[this] val hashSeed = MurmurHash3.stringHash(id)
+      private[this] def hash(i: Int): Int = {
+        val h = MurmurHash3.mix(hashSeed, i)
+        MurmurHash3.finalizeHash(h, 1)
+      }
+      def isDefinedAt(x: Int): Boolean = true
+      def apply(x: Int): Boolean = fn(hash(x))
 
-    def currentFraction: Double = fraction
-  }
+      def currentFraction: Double = fraction
+    }
 
   private[this] val MetadataOrdering: Ordering[Toggle.Metadata] =
     Ordering.by((md: Toggle.Metadata) => (md.id, md.fraction))
@@ -184,9 +181,9 @@ object ToggleMap {
 
       // mixes in `Toggle.Captured` to provide visibility into how
       // toggles are in use at runtime.
-      override def apply(id: String): Toggle[Int] = {
+      override def apply(id: String): Toggle = {
         val delegate = super.apply(id)
-        new Toggle[Int](delegate.id) with Toggle.Captured {
+        new Toggle(delegate.id) with Toggle.Captured {
           private[this] val last =
             lastApplied.computeIfAbsent(id, new juf.Function[String, AtomicReference[jl.Boolean]] {
               def apply(t: String): AtomicReference[jl.Boolean] =
@@ -287,7 +284,7 @@ object ToggleMap {
    *          to return `true`. If outside of that range, a
    *          `java.lang.IllegalArgumentException` will be thrown.
    */
-  private[toggle] def fractional(id: String, fraction: Double): Toggle[Int] = {
+  private[toggle] def fractional(id: String, fraction: Double): Toggle = {
     Toggle.validateFraction(id, fraction)
 
     // we want a continuous range within the space of Int.MinValue
@@ -342,13 +339,13 @@ object ToggleMap {
    */
   class Immutable(metadata: immutable.Seq[Toggle.Metadata]) extends ToggleMap {
 
-    private[this] val toggles: immutable.Map[String, Toggle[Int]] =
+    private[this] val toggles: immutable.Map[String, Toggle] =
       metadata.map { md => md.id -> fractional(md.id, md.fraction) }.toMap
 
     override def toString: String =
       s"ToggleMap.Immutable@${System.identityHashCode(this)}"
 
-    def apply(id: String): Toggle[Int] =
+    def apply(id: String): Toggle =
       toggles.get(id) match {
         case Some(t) => t
         case None => Toggle.Undefined
@@ -362,9 +359,9 @@ object ToggleMap {
 
   private[this] val NoFractionAndToggle = (Double.NaN, Toggle.Undefined)
 
-  private class MutableToggle(id: String) extends Toggle.Fractional[Int](id) {
+  private class MutableToggle(id: String) extends Toggle.Fractional(id) {
     private[this] val fractionAndToggle =
-      new AtomicReference[(Double, Toggle[Int])](NoFractionAndToggle)
+      new AtomicReference[(Double, Toggle)](NoFractionAndToggle)
 
     override def toString: String = s"MutableToggle($id)"
 
@@ -372,7 +369,7 @@ object ToggleMap {
       fractionAndToggle.get()._1
 
     private[ToggleMap] def setFraction(fraction: Double): Unit = {
-      val fAndT: (Double, Toggle[Int]) = if (Toggle.isValidFraction(fraction)) {
+      val fAndT: (Double, Toggle) = if (Toggle.isValidFraction(fraction)) {
         (fraction, fractional(id, fraction))
       } else {
         NoFractionAndToggle
@@ -432,7 +429,7 @@ object ToggleMap {
       }
     }
 
-    def apply(id: String): Toggle[Int] =
+    def apply(id: String): Toggle =
       toggleFor(id)
 
     def iterator: Iterator[Toggle.Metadata] = {
@@ -478,9 +475,9 @@ object ToggleMap {
     private[this] def fractions: Map[String, Double] =
       flag.overrides()
 
-    private[this] class FlagToggle(id: String) extends Toggle.Fractional[Int](id) {
+    private[this] class FlagToggle(id: String) extends Toggle.Fractional(id) {
       private[this] val fractionAndToggle =
-        new AtomicReference[(Double, Toggle[Int])](NoFractionAndToggle)
+        new AtomicReference[(Double, Toggle)](NoFractionAndToggle)
 
       override def toString: String = s"FlagToggle($id)"
 
@@ -513,7 +510,7 @@ object ToggleMap {
       }
     }
 
-    def apply(id: String): Toggle[Int] =
+    def apply(id: String): Toggle =
       new FlagToggle(id)
 
     def iterator: Iterator[Toggle.Metadata] = {
@@ -535,7 +532,7 @@ object ToggleMap {
     def underlying: ToggleMap
 
     override def toString: String = underlying.toString
-    def apply(id: String): Toggle[Int] = underlying(id)
+    def apply(id: String): Toggle = underlying(id)
     def iterator: Iterator[Metadata] = underlying.iterator
   }
 
@@ -548,7 +545,7 @@ object ToggleMap {
    * @note [[ToggleMap.iterator]] will always be empty.
    */
   val On: ToggleMap = new ToggleMap {
-    def apply(id: String): Toggle[Int] = Toggle.on(id)
+    def apply(id: String): Toggle = Toggle.on(id)
     def iterator: Iterator[Metadata] = Iterator.empty
   }
 
@@ -558,7 +555,7 @@ object ToggleMap {
    * @note [[ToggleMap.iterator]] will always be empty.
    */
   val Off: ToggleMap = new ToggleMap {
-    def apply(id: String): Toggle[Int] = Toggle.off(id)
+    def apply(id: String): Toggle = Toggle.off(id)
     def iterator: Iterator[Metadata] = Iterator.empty
   }
 }

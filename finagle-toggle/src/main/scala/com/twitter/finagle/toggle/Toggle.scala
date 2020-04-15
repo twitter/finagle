@@ -12,7 +12,7 @@ package com.twitter.finagle.toggle
  *      for detailed discussion on the topic.
  * @see [[ToggleMap]]
  */
-abstract class Toggle[-T](private[toggle] val id: String) extends PartialFunction[T, Boolean] {
+abstract class Toggle(private[toggle] val id: String) extends Function1[Int, Boolean] {
   self =>
 
   Toggle.validateId(id)
@@ -23,23 +23,30 @@ abstract class Toggle[-T](private[toggle] val id: String) extends PartialFunctio
    *
    * @note the returned [[Toggle]] will keep the current `id`.
    */
-  def orElse[T1 <: T](that: Toggle[T1]): Toggle[T1] = {
-    new Toggle[T1](self.id) {
+  def orElse(that: Toggle): Toggle = {
+    new Toggle(self.id) {
       override def toString: String =
         s"${self.toString}.orElse(${that.toString})"
 
-      def isDefinedAt(x: T1): Boolean =
+      def isDefinedAt(x: Int): Boolean =
         self.isDefinedAt(x) || that.isDefinedAt(x)
 
-      def apply(v1: T1): Boolean =
-        self.applyOrElse(v1, that)
+      def apply(v1: Int): Boolean =
+        if (self.isDefinedAt(v1)) self.apply(v1) else that.apply(v1)
     }
   }
 
   /**
-   * Similar to `PartialFunction.apply` but has better java friendliness.
+   * Similar to `Function1.apply` but has better java friendliness.
    */
-  def isEnabled(t: T): Boolean = apply(t)
+  final def isEnabled(t: Int): Boolean = apply(t)
+
+  /**
+   * A Toggle should be either defined for the entire domain of Int, or undefined.
+   *
+   * @note Parameter x will be removed in a later commit.
+   */
+  def isDefinedAt(x: Int): Boolean
 }
 
 object Toggle {
@@ -91,18 +98,15 @@ object Toggle {
      *
      * The ids of a and b must be the same.
      */
-    private[toggle] def min[T](
-      a: Toggle.Fractional[T],
-      b: Toggle.Fractional[T]
-    ): Toggle.Fractional[T] =
+    private[toggle] def min[T](a: Toggle.Fractional, b: Toggle.Fractional): Toggle.Fractional =
       if (a.id != b.id)
         throw new IllegalArgumentException(
           s"Cannot combine Toggles using Toggle.minOf when ids do not match: ${a.id}, ${b.id}"
         )
       else
-        new Toggle.Fractional[T](a.id) {
+        new Toggle.Fractional(a.id) {
 
-          private[this] def currentToggle: Toggle.Fractional[T] = {
+          private[this] def currentToggle: Toggle.Fractional = {
             val fractionA = a.currentFraction
             val fractionB = b.currentFraction
 
@@ -114,9 +118,9 @@ object Toggle {
             else b
           }
 
-          def isDefinedAt(x: T): Boolean = currentToggle.isDefinedAt(x)
+          def isDefinedAt(x: Int): Boolean = currentToggle.isDefinedAt(x)
 
-          override def apply(v1: T): Boolean =
+          override def apply(v1: Int): Boolean =
             currentToggle(v1)
 
           def currentFraction: Double = currentToggle.currentFraction
@@ -129,7 +133,7 @@ object Toggle {
    *
    * `currentFraction` should return a value between `0.0 and 1.0`, inclusive.
    */
-  private[toggle] abstract class Fractional[-T](id: String) extends Toggle[T](id) {
+  private[toggle] abstract class Fractional(id: String) extends Toggle(id) {
     def currentFraction: Double
   }
 
@@ -205,47 +209,44 @@ object Toggle {
     }
   }
 
-  private def apply[T](
-    id: String,
-    pf: PartialFunction[T, Boolean],
-    fraction: Double
-  ): Toggle.Fractional[T] = new Toggle.Fractional[T](id) {
-    validateFraction(id, fraction)
+  private def apply(id: String, fn: Int => Boolean, fraction: Double): Toggle.Fractional =
+    new Toggle.Fractional(id) {
+      validateFraction(id, fraction)
 
-    override def toString: String = s"Toggle($id)"
-    def isDefinedAt(x: T): Boolean = pf.isDefinedAt(x)
-    def apply(v1: T): Boolean = pf(v1)
-    def currentFraction: Double = fraction
-  }
+      override def toString: String = s"Toggle($id)"
+      def isDefinedAt(x: Int): Boolean = true
+      def apply(v1: Int): Boolean = fn(v1)
+      def currentFraction: Double = fraction
+    }
 
-  private[this] val AlwaysTrue: PartialFunction[Any, Boolean] = { case _ => true }
+  private[this] val AlwaysTrue: Int => Boolean = { case _ => true }
 
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `true`.
    */
-  def on[T](id: String): Toggle.Fractional[T] =
+  def on(id: String): Toggle.Fractional =
     apply(id, AlwaysTrue, 1.0)
 
-  private[this] val AlwaysFalse: PartialFunction[Any, Boolean] = { case _ => false }
+  private[this] val AlwaysFalse: Int => Boolean = { case _ => false }
 
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `false`.
    */
-  def off[T](id: String): Toggle.Fractional[T] =
+  def off(id: String): Toggle.Fractional =
     apply(id, AlwaysFalse, 0.0)
 
   /**
    * A [[Toggle]] which is defined for no inputs.
    */
-  private[toggle] val Undefined: Toggle[Any] =
-    new Toggle[Any]("com.twitter.finagle.toggle.Undefined") {
-      def isDefinedAt(x: Any): Boolean = false
-      def apply(v1: Any): Boolean = throw new UnsupportedOperationException()
+  private[toggle] val Undefined: Toggle =
+    new Toggle("com.twitter.finagle.toggle.Undefined") {
+      def isDefinedAt(x: Int): Boolean = false
+      def apply(v1: Int): Boolean = throw new UnsupportedOperationException()
       override def toString: String = "Undefined"
 
       // an optimization that allows for avoiding unnecessary Toggles
       // by "flattening" them out.
-      override def orElse[T](that: Toggle[T]): Toggle[T] = that
+      override def orElse(that: Toggle): Toggle = that
     }
 
 }

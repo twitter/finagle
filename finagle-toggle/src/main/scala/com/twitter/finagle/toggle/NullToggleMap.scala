@@ -9,7 +9,7 @@ import com.twitter.finagle.toggle.Toggle.Metadata
 object NullToggleMap extends ToggleMap {
   override def toString: String = "NullToggleMap"
 
-  def apply(id: String): Toggle[Int] = Toggle.Undefined
+  def apply(id: String): Toggle = Toggle.Undefined
 
   def iterator: Iterator[Metadata] = Iterator.empty
 
