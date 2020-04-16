@@ -5,12 +5,15 @@ import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
+import com.twitter.util.Return
+import com.twitter.util.Throw
 import org.specs2.matcher.MatchResult
 
 class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
@@ -92,11 +95,27 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
         checkCompletes
       )
 
-      // NOTE: machineSpec returns a Prop which we combine with another using &&
+      oneMachineSpec(mkMachine(query))(prep ++ sendRows ++ post: _*)
+      rowReader must beSome
+      rowReader.get.toSeq.map(f)
+
+      rowReader = None
+      // NOTE: machineErrorSpec returns a Prop which we combine with another using &&
       //   It's kind of weird, but specs2 isn't really helping here.
-      machineSpec(mkMachine(query))(prep ++ sendRows ++ post: _*) && {
-        rowReader must beSome
-        rowReader.get.toSeq.map(f)
+      machineErrorSpec(mkMachine(query))(prep ++ sendRows ++ post: _*) && {
+        // NOTE: the randomization of the error makes it possible that:
+        //   * we read no rows at all
+        //   * we read all rows (and the error isn't surfaced)
+        //   * we read partial rows and then an exception
+        rowReader match {
+          case None => ok
+          case Some(r) =>
+            rowReader = None // TODO: the statefulness of the test is pretty brittle
+            r.toSeq.liftToTry.map {
+              case Return(rows) => f(rows) // if we read all rows, then we should check that they're what we expect
+              case Throw(t) => t must beAnInstanceOf[PgSqlServerError] // the error should surface here
+            }
+        }
       }
     }
 

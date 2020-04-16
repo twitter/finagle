@@ -70,17 +70,20 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
         receive(error), // TODO: ideally, we would conditionally add this if the state machine isn't already failed. See allowPreemptiveFailure
         checkFailure("handles injected failure") {
           case PgSqlServerError(e) => e must beEqualTo(error)
-          case _: PgSqlClientError => ok // we can't predict if the machine will fail normally, so we accept these failures as well
         }
       )
+    }
+  }
+
+  def machineErrorSpec(machine: StateMachine[R])(steps: StepSpec*) = {
+    Prop.forAll(genError(steps.toList)) { errorSteps =>
+      oneMachineSpec(machine, allowPreemptiveFailure = true)(errorSteps: _*)
     }
   }
 
   // TODO: ideally we generate fragments here, but not sure how to do that with scalacheck
   def machineSpec(machine: StateMachine[R])(steps: StepSpec*) = {
     oneMachineSpec(machine)(steps: _*)
-    Prop.forAll(genError(steps.toList)) { errorSteps =>
-      oneMachineSpec(machine, allowPreemptiveFailure = true)(errorSteps: _*)
-    }
+    machineErrorSpec(machine)(steps: _*)
   }
 }
