@@ -21,6 +21,9 @@ object Response {
   case object Empty extends QueryResponse
   case class Command(commandTag: String) extends QueryResponse
 
-  case class SimpleQueryResponse(responses: Reader[QueryResponse]) extends Response
+  case class SimpleQueryResponse(responses: Reader[QueryResponse]) extends Response {
+    def next: Future[QueryResponse] =
+      responses.read().map(_.getOrElse(sys.error("expected at least one response, got none")))
+  }
 
 }

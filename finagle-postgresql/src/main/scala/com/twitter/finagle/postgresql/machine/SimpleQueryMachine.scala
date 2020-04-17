@@ -24,10 +24,13 @@ class SimpleQueryMachine(query: String) extends StateMachine[SimpleQueryResponse
   import StateMachine._
 
   sealed trait State
-//  case object Init extends State
+  case object Sent extends State
   case class StreamResponses(pipe: Pipe[Response.QueryResponse], lastWrite: Future[Unit]) extends State {
     def append(response: Response.QueryResponse): StreamResponses =
       StreamResponses(pipe, lastWrite before pipe.write(response))
+  }
+  object StreamResponses {
+    def init = StreamResponses(new Pipe, Future.Done)
   }
   case class StreamResult(responses: StreamResponses, rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
     def append(row: DataRow): StreamResult =
@@ -35,25 +38,26 @@ class SimpleQueryMachine(query: String) extends StateMachine[SimpleQueryResponse
     def resultSet: ResultSet = ResultSet(rowDescription, pipe)
   }
 
-  override def start: StateMachine.TransitionResult[State, SimpleQueryResponse] = {
-    val state = StreamResponses(new Pipe, Future.Done)
-    StateMachine.Transition(StreamResponses(new Pipe, Future.Done),
-      StateMachine.Send(FrontendMessage.Query(query)) ::
-      StateMachine.Respond(Return(SimpleQueryResponse(state.pipe))) :: Nil
-    )
+  override def start: StateMachine.TransitionResult[State, SimpleQueryResponse] =
+    StateMachine.Transition(Sent, StateMachine.Send(FrontendMessage.Query(query)))
+
+  def handleResponse(responses: StreamResponses, msg: BackendMessage): State = msg match {
+    case EmptyQueryResponse => responses.append(Response.Empty)
+    case CommandComplete(commandTag) => responses.append(Response.Command(commandTag))
+    case rd: RowDescription =>
+      val state = StreamResult(responses, rd, new Pipe, Future.Done)
+      responses.append(state.resultSet)
+      state
+    case _ => sys.error("") // TODO
   }
 
   override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, SimpleQueryResponse] = (state, msg) match {
-    case (s@StreamResponses(_, _), EmptyQueryResponse) =>
-      Transition(s.append(Response.Empty), NoOp)
+    case (Sent, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
+      val response = StreamResponses.init
+      Transition(handleResponse(response, msg), Respond(Return(Response.SimpleQueryResponse(response.pipe))))
+    case (s: StreamResponses, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
+      Transition(handleResponse(s, msg), NoOp)
 
-    case (s@StreamResponses(_, _), c: CommandComplete) =>
-      Transition(s.append(Response.Command(c.commandTag)), NoOp)
-
-    case (s@StreamResponses(_, _), rd: RowDescription) =>
-      val state = StreamResult(s, rd, new Pipe, Future.Done)
-      s.append(state.resultSet)
-      Transition(state, NoOp)
     case (r: StreamResult, dr: DataRow) => Transition(r.append(dr), NoOp)
     case (r: StreamResult, _: CommandComplete) =>
       // TODO: handle discard() to client can cancel the stream
@@ -76,7 +80,10 @@ class SimpleQueryMachine(query: String) extends StateMachine[SimpleQueryResponse
       Transition(s, Respond(Throw(exception)))
 
     case (state, _: NoticeResponse) => Transition(state, NoOp) // TODO: don't ignore
-//    case (_, e: ErrorResponse) => Transition(ExpectReady, Respond(Throw(PgSqlServerError(e))))
+
+    case (Sent, e: ErrorResponse) => Transition(Sent, Respond(Throw(PgSqlServerError(e))))
+    case (Sent, r:ReadyForQuery) => Complete(r, None)
+
     case (state, msg) => throw PgSqlNoSuchTransition("SimpleQueryMachine", state, msg)
   }
 }

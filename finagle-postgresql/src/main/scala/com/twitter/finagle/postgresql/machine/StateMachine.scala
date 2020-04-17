@@ -24,10 +24,7 @@ object StateMachine {
   case class Respond[R <: Response](value: Try[R]) extends Action[R]
 
   sealed trait TransitionResult[+S, +R <: Response]
-  case class Transition[S, R <: Response](state: S, action: List[Action[R]]) extends TransitionResult[S, R]
-  object Transition {
-    def apply[S, R <: Response](state: S, action: Action[R]):TransitionResult[S, R] = Transition(state, action :: Nil)
-  }
+  case class Transition[S, R <: Response](state: S, action: Action[R]) extends TransitionResult[S, R]
   case class Complete[R <: Response](ready: ReadyForQuery, response: Option[Try[R]]) extends TransitionResult[Nothing, R]
 
   /** A machine that sends a single frontend message and expects a ReadyForQuery response */

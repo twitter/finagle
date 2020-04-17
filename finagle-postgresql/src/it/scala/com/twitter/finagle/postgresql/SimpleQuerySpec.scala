@@ -1,34 +1,32 @@
 package com.twitter.finagle.postgresql
 
+import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.Response.SimpleQueryResponse
 import com.twitter.io.Reader
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Throw
+import org.specs2.matcher.MatchResult
 
 class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
   "Simple Query" should {
-    "multi-line" in {
-      client(Query("create user fake;\nselect 1;"))
-        .flatMap { response =>
-          response must beAnInstanceOf[SimpleQueryResponse]
-          val SimpleQueryResponse(stream) = response
-            Reader.toAsyncStream(stream.flatMap {
-              case Response.ResultSet(rowDescription, rows) => rows
-              case e => Reader.value(e)
-            }).toSeq
-              .map { all =>
-                println(all)
-                true
-              }
-          }
+
+    def one(q: Query)(check: Response.QueryResponse => Future[MatchResult[_]]) = {
+      client(q)
+        .flatMap {
+          case r: SimpleQueryResponse => r.next.flatMap(check)
+          case r => sys.error(s"unexpected response $r")
         }
     }
-    /*
+
     "return an empty result for an empty query" in {
-      client(Query(""))
-        .map { response =>
-          response must beEqualTo(BackendResponse(EmptyQueryResponse))
-        }
+      one(Query("")) {
+        case Response.Empty => Future.value(ok)
+        case r => sys.error(s"unexpected response $r")
+      }
     }
+
     "return a server error for an invalid query" in {
       client(Query("invalid"))
         .liftToTry
@@ -37,31 +35,55 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
           response match {
             case Throw(e: PgSqlServerError) =>
               e.field(Field.Code) must beSome("42601") // syntax_error
-            case _ => ko
+            case r => sys.error(s"unexpected response $r")
           }
         }
     }
     "return an CREATE ROLE command tag" in {
-      client(Query("CREATE USER fake;"))
-        .map {
-          case BackendResponse(CommandComplete(commandTag)) => commandTag must_== "CREATE ROLE"
-          case _ => ko
-        }
+      one(Query("CREATE USER fake;")) {
+        case Response.Command(tag) => Future.value(tag must_== "CREATE ROLE")
+        case r => sys.error(s"unexpected response $r")
+      }
     }
     "return a ResultSet for a SELECT query" in {
-      client(Query("SELECT 1 AS one;"))
-        .flatMap { response =>
-          response must beAnInstanceOf[ResultSet]
-
-          val rs@ResultSet(desc, _) = response
+      one(Query("SELECT 1 AS one;")) {
+        case rs@Response.ResultSet(desc, _) =>
           desc.rowFields must haveSize(1)
           desc.rowFields.head.name must beEqualTo("one")
-
           rs.toSeq.map { rowSeq =>
             rowSeq must haveSize(1)
           }
+        case r => sys.error(s"unexpected response $r")
+      }
+    }
+
+    "multi-line" in {
+      client(Query("create user other;\nselect 1 as one;drop user other;"))
+        .flatMap { response =>
+          response must beAnInstanceOf[SimpleQueryResponse]
+          val SimpleQueryResponse(stream) = response
+          Reader.toAsyncStream(stream)
+            .toSeq()
+            .map { responses =>
+              responses.toList must beLike {
+                case first :: rs :: last :: Nil =>
+                  first must beLike {
+                    case Response.Command(tag) => tag must_== "CREATE ROLE"
+                  }
+                  rs must beLike {
+                    case rs@Response.ResultSet(desc, _) =>
+                      desc.rowFields must haveSize(1)
+                      desc.rowFields.head.name must beEqualTo("one")
+                      Await.result(rs.toSeq.map { rowSeq =>
+                        rowSeq must haveSize(1)
+                      })
+                  }
+                  last must beLike {
+                    case Response.Command(tag) => tag must_== "DROP ROLE"
+                  }
+              }
+            }
         }
     }
-  }*/
-
+  }
 }

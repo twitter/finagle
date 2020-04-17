@@ -43,16 +43,16 @@ class ClientDispatcher(
     var state: machine.State = null.asInstanceOf[machine.State] // TODO
 
     def step(transition: StateMachine.TransitionResult[machine.State, R]): Future[ReadyForQuery] = transition match {
-      case StateMachine.Transition(s, actions) =>
+      case StateMachine.Transition(s, action) =>
         state = s
-        val doAction = Future.traverseSequentially(actions) {
+        val doAction = action match {
           case StateMachine.NoOp => Future.Done
           case a@StateMachine.Send(msg) => write(msg)(a.encoder)
           case StateMachine.Respond(r) =>
             promise.updateIfEmpty(r)
             Future.Done
         }
-        doAction.unit before readAndStep
+        doAction before readAndStep
       case StateMachine.Complete(ready, response) =>
         response.foreach(promise.updateIfEmpty)
         Future.value(ready)
