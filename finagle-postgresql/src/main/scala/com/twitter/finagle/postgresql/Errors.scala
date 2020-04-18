@@ -6,6 +6,7 @@ case class PgSqlServerError(error: BackendMessage.ErrorResponse) extends PgSqlEx
 
   def field(f: BackendMessage.Field): Option[String] = error.values.get(f)
 }
+case object PgSqlTlsUnsupportedError extends PgSqlException
 
 abstract class PgSqlClientError extends PgSqlException
 case object PgSqlPasswordRequired extends PgSqlClientError

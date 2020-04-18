@@ -14,6 +14,10 @@ object MessageEncoder {
   def apply[M <: FrontendMessage](c: Char)(f: (PgBuf.Writer, M) => PgBuf.Writer): MessageEncoder[M] =
     apply(Some(c.toByte))(f)
 
+  implicit val sslRequestEncoder: MessageEncoder[FrontendMessage.SslRequest.type] = MessageEncoder(None) { (writer, _) =>
+    writer.int(80877103)
+  }
+
   implicit val startupEncoder: MessageEncoder[FrontendMessage.StartupMessage]  = MessageEncoder(None) { (writer, msg) =>
     writer
       .short(msg.version.major)

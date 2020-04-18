@@ -10,6 +10,8 @@ object FrontendMessage {
     val `3.0` = Version(3, 0)
   }
 
+  case object SslRequest extends FrontendMessage
+
   sealed trait Replication // TODO
 
   case class StartupMessage(
@@ -25,4 +27,5 @@ object FrontendMessage {
   case object Sync extends FrontendMessage
 
   case class Query(value: String) extends FrontendMessage
+
 }

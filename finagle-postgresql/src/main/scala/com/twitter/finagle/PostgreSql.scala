@@ -5,9 +5,6 @@ import java.net.SocketAddress
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.StdStackClient
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.decoder.Framer
-import com.twitter.finagle.decoder.LengthFieldFramer
-import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.postgresql.Params
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
@@ -38,18 +35,8 @@ object PostgreSql {
     def withDatabase(db: String): Client =
       configured(Params.Database(Some(db)))
 
-    override protected def newTransporter(addr: SocketAddress): Transporter[Buf, Buf, TransportContext] = {
-      // TODO: this doesn't work during ssl handshaking
-      def factory: Framer =
-        new LengthFieldFramer(
-          lengthFieldBegin = 1,
-          lengthFieldLength = 4,
-          lengthAdjust = 1,
-          maxFrameLength = Int.MaxValue,
-          bigEndian = true)
-
-      Netty4Transporter.framedBuf(Some(factory _), addr, params)
-    }
+    override protected def newTransporter(addr: SocketAddress): Transporter[Buf, Buf, TransportContext] =
+      new postgresql.PgSqlTransporter(addr, params)
 
     override protected def newDispatcher(transport: ClientTransport): Service[Request, Response] =
       new postgresql.ClientDispatcher(transport.map[Packet, Packet](_.toBuf, Packet.parse), params)
