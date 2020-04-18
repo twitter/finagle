@@ -2,7 +2,9 @@ package com.twitter.finagle.postgresql.transport
 
 import java.nio.charset.StandardCharsets
 
-import com.twitter.finagle.postgresql.BackendMessage.Format
+import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import com.twitter.io.BufByteWriter
 import com.twitter.io.ByteReader
@@ -16,9 +18,14 @@ object PgBuf {
       case None => this
     }
 
-    def foreach[T](xs: TraversableOnce[T])(f: (T, Writer) => Writer): Writer = {
+    def foreachUnframed[T](xs: TraversableOnce[T])(f: (T, Writer) => Writer): Writer = {
       xs.map { x => f(x, this) }
       this
+    }
+
+    def foreach[T](xs: Seq[T])(f: (T, Writer) => Writer): Writer = {
+      short(xs.length.toShort)
+      foreachUnframed(xs)(f)
     }
 
     def byte(v: Byte): Writer = {
@@ -46,10 +53,29 @@ object PgBuf {
       this
     }
 
+    def framedBuf(b: Buf): Writer = {
+      int(b.length).buf(b)
+    }
+
     def framed(f: Writer => Buf): Writer = {
       val b = f(writer)
       int(b.length + 4) // length including self
       buf(b)
+    }
+
+    def value(v: WireValue): Writer = v match {
+      case WireValue.Null => int(-1)
+      case WireValue.Value(value) => framedBuf(value)
+    }
+
+    def name(n: Name): Writer = n match {
+      case Name.Unnamed => string("")
+      case Name.Named(value) => string(value)
+    }
+
+    def format(f: Format): Writer = f match {
+      case Format.Text => short(0)
+      case Format.Binary => short(1)
     }
 
     def build: Buf =
@@ -59,7 +85,7 @@ object PgBuf {
   def writer: Writer = new Writer(BufByteWriter.dynamic())
 
   class Reader(b: Buf) {
-    val reader = ByteReader(b)
+    private[this] val reader = ByteReader(b)
 
     def byte(): Byte = reader.readByte()
     def short(): Short = reader.readShortBE()
@@ -85,6 +111,12 @@ object PgBuf {
       builder.sizeHint(size)
       for(_ <- 0 until size) { builder += f(this) }
       builder.result()
+    }
+    def value(): WireValue = {
+      int() match {
+        case -1 => WireValue.Null
+        case length => WireValue.Value(buf(length))
+      }
     }
     def buf(length: Int): Buf = reader.readBytes(length)
     def remainingBuf(): Buf = reader.readAll()

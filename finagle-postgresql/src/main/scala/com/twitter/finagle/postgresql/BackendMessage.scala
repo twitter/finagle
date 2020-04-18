@@ -1,5 +1,9 @@
 package com.twitter.finagle.postgresql
 
+import com.twitter.finagle.postgresql.Types.AttributeId
+import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Oid
+import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 
 sealed trait BackendMessage
@@ -8,14 +12,6 @@ object BackendMessage {
   // TODO: command tag parser
   case class CommandComplete(commandTag: String) extends BackendMessage
   case object EmptyQueryResponse extends BackendMessage
-
-  case class Oid(value: Int)
-  case class AttributeId(value: Int)
-  sealed trait Format
-  object Format {
-    case object Text extends Format
-    case object Binary extends Format
-  }
 
   case class FieldDescription(
     name: String,
@@ -27,7 +23,7 @@ object BackendMessage {
     format: Format
   )
   case class RowDescription(rowFields: IndexedSeq[FieldDescription]) extends BackendMessage
-  case class DataRow(values: IndexedSeq[Buf]) extends BackendMessage
+  case class DataRow(values: IndexedSeq[WireValue]) extends BackendMessage
 
   sealed trait AuthenticationMessage extends BackendMessage
   case object AuthenticationOk extends AuthenticationMessage
@@ -80,5 +76,9 @@ object BackendMessage {
   // TODO: parse out the fields to expose the category and sql state.
   case class NoticeResponse(values: Map[Field, String]) extends BackendMessage
   case class ErrorResponse(values: Map[Field, String]) extends BackendMessage
+
+  // extended query
+  case object ParseComplete extends BackendMessage
+  case object BindComplete extends BackendMessage
 
 }

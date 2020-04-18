@@ -1,7 +1,6 @@
 package com.twitter.finagle.postgresql.transport
 
 import com.twitter.finagle.postgresql.BackendMessage
-import com.twitter.finagle.postgresql.BackendMessage.AttributeId
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationCleartextPassword
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSSContinue
@@ -15,6 +14,7 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASLFinal
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.BackendMessage.BackendKeyData
+import com.twitter.finagle.postgresql.BackendMessage.BindComplete
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
@@ -25,10 +25,12 @@ import com.twitter.finagle.postgresql.BackendMessage.FieldDescription
 import com.twitter.finagle.postgresql.BackendMessage.InTx
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
-import com.twitter.finagle.postgresql.BackendMessage.Oid
 import com.twitter.finagle.postgresql.BackendMessage.ParameterStatus
+import com.twitter.finagle.postgresql.BackendMessage.ParseComplete
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.Types.AttributeId
+import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
@@ -45,6 +47,8 @@ object MessageDecoder {
   def fromPacket(p: Packet): Try[BackendMessage] = {
     lazy val reader = PgBuf.reader(p.body)
     p.cmd.getOrElse(Throw(new IllegalStateException("invalid backend packet, missing type."))) match {
+      case '1' => Return(ParseComplete)
+      case '2' => Return(BindComplete)
       case 'C' => decode[CommandComplete](reader)
       case 'D' => decode[DataRow](reader)
       case 'E' => decode[ErrorResponse](reader)
@@ -167,9 +171,7 @@ object MessageDecoder {
 
   implicit lazy val dataRowDecoder: MessageDecoder[DataRow] = MessageDecoder { reader =>
     DataRow(
-      reader.collect { r =>
-        r.buf(r.int())
-      }
+      reader.collect { _.value() }
     )
   }
 }
