@@ -2,7 +2,6 @@ package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.PostgreSql
 import com.twitter.finagle.Service
-import com.twitter.finagle.postgresql
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import org.specs2.specification.BeforeAfterAll
 
@@ -18,14 +17,17 @@ trait EmbeddedPgSqlSpec extends BeforeAfterAll {
 
   def prep(e: EmbeddedPostgres): EmbeddedPostgres = e
 
-  def client: Service[postgresql.Request, postgresql.Response] = embeddedPgSql match {
+  def client(cfg: PostgreSql.Client => PostgreSql.Client): Service[Request, Response] = embeddedPgSql match {
     case None => sys.error("getClient invoked outside of test fragment")
     case Some(pgsql) =>
-      PostgreSql.Client()
-        .withCredentials(TestDbUser, TestDbPassword)
-        .withDatabase(TestDbName)
-        .newService(s"localhost:${pgsql.getPort}")
+      cfg(
+        PostgreSql.Client()
+          .withCredentials(TestDbUser, TestDbPassword)
+          .withDatabase(TestDbName)
+      ).newService(s"localhost:${pgsql.getPort}")
   }
+
+  def client: Service[Request, Response] = client(identity)
 
   override def beforeAll(): Unit = {
     val builder =
