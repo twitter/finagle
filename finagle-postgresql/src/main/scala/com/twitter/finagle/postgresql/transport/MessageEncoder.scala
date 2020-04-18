@@ -26,7 +26,7 @@ object MessageEncoder {
       .opt(msg.database) { (db, w) =>
         w.string("database").string(db)
       }
-      .foreach(msg.params) { case((key, value), w) => w.string(key).string(value) }
+      .foreachUnframed(msg.params) { case((key, value), w) => w.string(key).string(value) }
       .byte(0)
   }
 
@@ -38,5 +38,38 @@ object MessageEncoder {
     writer.string(msg.value)
   }
 
-  implicit val syncEncoder: MessageEncoder[FrontendMessage.Sync.type] = MessageEncoder('S') { (writer, msg) => writer }
+  implicit val syncEncoder: MessageEncoder[FrontendMessage.Sync.type] = MessageEncoder('S') { (writer, _) => writer }
+
+  implicit val parseEncoder: MessageEncoder[FrontendMessage.Parse] = MessageEncoder('P') { (writer, msg) =>
+    writer
+      .name(msg.name)
+      .string(msg.statement)
+      .foreach(msg.dataTypes) { (oid, w) =>
+        w.int(oid.value)
+      }
+  }
+
+  implicit val bindEncoder: MessageEncoder[FrontendMessage.Bind] = MessageEncoder('B') { (writer, msg) =>
+    writer
+      .name(msg.portal)
+      .name(msg.statement)
+      .foreach(msg.formats) { (f, w) => w.format(f) }
+      .foreach(msg.values) { (v, w) => w.value(v) }
+      .foreach(msg.resultFormats) { (f, w) => w.format(f) }
+  }
+
+  implicit val describeEncoder: MessageEncoder[FrontendMessage.Describe] = MessageEncoder('D') { (writer, msg) =>
+    writer
+      .byte(msg.target match {
+        case FrontendMessage.DescriptionTarget.Portal => 'P'
+        case FrontendMessage.DescriptionTarget.PreparedStatement => 'S'
+      })
+      .name(msg.name)
+  }
+
+  implicit val executeEncoder: MessageEncoder[FrontendMessage.Execute] = MessageEncoder('E') { (writer, msg) =>
+    writer
+      .name(msg.portal)
+      .int(msg.maxRows)
+  }
 }

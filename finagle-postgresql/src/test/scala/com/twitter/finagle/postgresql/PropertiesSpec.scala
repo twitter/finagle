@@ -2,9 +2,10 @@ package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.FieldDescription
-import com.twitter.finagle.postgresql.BackendMessage.Format
-import com.twitter.finagle.postgresql.BackendMessage.Oid
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Oid
+import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
@@ -37,13 +38,20 @@ trait PropertiesSpec extends ScalaCheck {
     Gen.nonEmptyListOf(arbFieldDescription.arbitrary).map(l => RowDescription(l.toIndexedSeq))
   }
 
-  // TODO: this will need to be dervied from the dataType when used in a DataRow
   implicit lazy val arbBuf: Arbitrary[Buf] =
     Arbitrary(Arbitrary.arbitrary[Array[Byte]].map { bytes => Buf.ByteArray.Owned(bytes) })
 
+  // TODO: this will need to be dervied from the dataType when used in a DataRow
+  val genValue = arbBuf.arbitrary.map(b => WireValue.Value(b))
+
+  implicit lazy val arbValue: Arbitrary[WireValue] = Arbitrary {
+    // TODO: more weight on non-null
+    Gen.oneOf(Gen.const(WireValue.Null), genValue)
+  }
+
   // TODO: produce the appropriate bytes based on the field descriptors. Should also include nulls.
   def arbDataRow(rowDescription: RowDescription): Arbitrary[DataRow] = Arbitrary {
-    Gen.containerOfN[IndexedSeq, Buf](rowDescription.rowFields.size, arbBuf.arbitrary)
+    Gen.containerOfN[IndexedSeq, WireValue](rowDescription.rowFields.size, arbValue.arbitrary)
       .map(DataRow)
   }
 

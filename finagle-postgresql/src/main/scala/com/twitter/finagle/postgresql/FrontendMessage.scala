@@ -1,5 +1,10 @@
 package com.twitter.finagle.postgresql
 
+import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.Oid
+import com.twitter.finagle.postgresql.Types.WireValue
+
 sealed trait FrontendMessage
 
 object FrontendMessage {
@@ -27,5 +32,36 @@ object FrontendMessage {
   case object Sync extends FrontendMessage
 
   case class Query(value: String) extends FrontendMessage
+
+  // Extended query
+  case class Parse(
+    name: Name,
+    statement: String,
+    dataTypes: Seq[Oid],
+  ) extends FrontendMessage
+
+  case class Bind(
+    portal: Name,
+    statement: Name,
+    formats: Seq[Format],
+    values: Seq[WireValue],
+    resultFormats: Seq[Format],
+  ) extends FrontendMessage
+
+  sealed trait DescriptionTarget
+  object DescriptionTarget {
+    case object Portal extends DescriptionTarget
+    case object PreparedStatement extends DescriptionTarget
+  }
+
+  case class Describe(
+    name: Name,
+    target: DescriptionTarget,
+  ) extends FrontendMessage
+
+  case class Execute(
+    portal: Name,
+    maxRows: Int,
+  ) extends FrontendMessage
 
 }
