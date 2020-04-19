@@ -20,7 +20,8 @@ object StateMachine {
 
   sealed trait Action[+R <: Response]
   case object NoOp extends Action[Nothing]
-  case class Send[M <: FrontendMessage](msg: M)(implicit val encoder: MessageEncoder[M]) extends Action[Nothing]
+  /** When flush is true, a [[FrontendMessage.Flush]] message will also be sent to force the backend to produce a response */
+  case class Send[M <: FrontendMessage](msg: M, flush: Boolean = false)(implicit val encoder: MessageEncoder[M]) extends Action[Nothing]
   case class Respond[R <: Response](value: Try[R]) extends Action[R]
 
   sealed trait TransitionResult[+S, +R <: Response]

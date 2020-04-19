@@ -80,5 +80,6 @@ object BackendMessage {
   // extended query
   case object ParseComplete extends BackendMessage
   case object BindComplete extends BackendMessage
+  case class ParameterDescription(parameters: IndexedSeq[Oid]) extends BackendMessage
 
 }

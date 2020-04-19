@@ -27,7 +27,7 @@ import org.specs2.matcher.MatchResult
 class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with PropertiesSpec {
 
   val checkStartup = checkResult("start is a startup message") {
-    case Transition(_, Send(s)) => s must beAnInstanceOf[FrontendMessage.StartupMessage]
+    case Transition(_, Send(s, false)) => s must beAnInstanceOf[FrontendMessage.StartupMessage]
   }
   val checkAuthSuccess = checkResult("expects more messages") {
     // the state machine should expect more messages
@@ -43,7 +43,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Pr
       val machine = mkMachine(username, password = None, dbName = dbName)
       machineSpec(machine) {
         checkResult("start is a startup message") {
-          case Transition(_, Send(s: FrontendMessage.StartupMessage)) =>
+          case Transition(_, Send(s: FrontendMessage.StartupMessage, false)) =>
             s.user must_== username
             s.database must beSome(dbName)
         }
@@ -73,7 +73,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with Pr
         checkStartup,
         receive(f),
         checkResult("sends password") {
-          case Transition(_, Send(FrontendMessage.PasswordMessage(sent))) => check(sent)
+          case Transition(_, Send(FrontendMessage.PasswordMessage(sent), false)) => check(sent)
         },
         receive(BackendMessage.AuthenticationOk),
         checkAuthSuccess

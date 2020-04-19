@@ -8,6 +8,8 @@ import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Response.BackendResponse
+import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.machine.ExtendedQueryMachine
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
 import com.twitter.finagle.postgresql.machine.SimpleQueryMachine
 import com.twitter.finagle.postgresql.machine.StateMachine
@@ -47,7 +49,10 @@ class ClientDispatcher(
         state = s
         val doAction = action match {
           case StateMachine.NoOp => Future.Done
-          case a@StateMachine.Send(msg) => write(msg)(a.encoder)
+          case a@StateMachine.Send(msg, flush) =>
+            write(msg)(a.encoder).flatMap { _ =>
+              if(flush) write(FrontendMessage.Flush) else Future.Done
+            }
           case StateMachine.Respond(r) =>
             promise.updateIfEmpty(r)
             Future.Done
@@ -90,5 +95,6 @@ class ClientDispatcher(
     req match {
       case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(BackendResponse(_)), p)
       case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q), p)
+      case Request.Prepare(s) => machineDispatch(new ExtendedQueryMachine(Name.Unnamed, s), p)
     }
 }
