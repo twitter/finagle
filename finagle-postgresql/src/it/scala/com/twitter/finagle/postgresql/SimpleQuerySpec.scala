@@ -12,7 +12,7 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
   "Simple Query" should {
 
-    def one(q: Query)(check: Response.QueryResponse => Future[MatchResult[_]]) = {
+    def one(q: Request.Query)(check: Response.QueryResponse => Future[MatchResult[_]]) = {
       client(q)
         .flatMap {
           case r: SimpleQueryResponse => r.next.flatMap(check)
@@ -21,14 +21,14 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
     }
 
     "return an empty result for an empty query" in {
-      one(Query("")) {
+      one(Request.Query("")) {
         case Response.Empty => Future.value(ok)
         case r => sys.error(s"unexpected response $r")
       }
     }
 
     "return a server error for an invalid query" in {
-      client(Query("invalid"))
+      client(Request.Query("invalid"))
         .liftToTry
         .map { response =>
           response.asScala must beFailedTry(beAnInstanceOf[PgSqlServerError])
@@ -40,13 +40,13 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
         }
     }
     "return an CREATE ROLE command tag" in {
-      one(Query("CREATE USER fake;")) {
+      one(Request.Query("CREATE USER fake;")) {
         case Response.Command(tag) => Future.value(tag must_== "CREATE ROLE")
         case r => sys.error(s"unexpected response $r")
       }
     }
     "return a ResultSet for a SELECT query" in {
-      one(Query("SELECT 1 AS one;")) {
+      one(Request.Query("SELECT 1 AS one;")) {
         case rs@Response.ResultSet(desc, _) =>
           desc.rowFields must haveSize(1)
           desc.rowFields.head.name must beEqualTo("one")
@@ -58,7 +58,7 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
     }
 
     "multi-line" in {
-      client(Query("create user other;\nselect 1 as one;drop user other;"))
+      client(Request.Query("create user other;\nselect 1 as one;drop user other;"))
         .flatMap { response =>
           response must beAnInstanceOf[SimpleQueryResponse]
           val SimpleQueryResponse(stream) = response

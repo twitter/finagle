@@ -6,7 +6,7 @@ class HandshakeSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
   "Handshake" should {
     "support password-less authentication" in {
-      client(Sync)
+      client(Request.Sync)
         .map { response =>
           response must beEqualTo(BackendResponse(BackendMessage.ReadyForQuery(BackendMessage.NoTx)))
         }
