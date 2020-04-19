@@ -14,6 +14,8 @@ object MessageEncoder {
   def apply[M <: FrontendMessage](c: Char)(f: (PgBuf.Writer, M) => PgBuf.Writer): MessageEncoder[M] =
     apply(Some(c.toByte))(f)
 
+  def emptyMessageEncoder[M <: FrontendMessage](b: Byte): MessageEncoder[M] = MessageEncoder(Some(b)) { (writer, _) => writer }
+
   implicit val sslRequestEncoder: MessageEncoder[FrontendMessage.SslRequest.type] = MessageEncoder(None) { (writer, _) =>
     writer.int(80877103)
   }
@@ -38,7 +40,8 @@ object MessageEncoder {
     writer.string(msg.value)
   }
 
-  implicit val syncEncoder: MessageEncoder[FrontendMessage.Sync.type] = MessageEncoder('S') { (writer, _) => writer }
+  implicit val syncEncoder: MessageEncoder[FrontendMessage.Sync.type] = emptyMessageEncoder('S')
+  implicit val flushEncoder: MessageEncoder[FrontendMessage.Flush.type] = emptyMessageEncoder('H')
 
   implicit val parseEncoder: MessageEncoder[FrontendMessage.Parse] = MessageEncoder('P') { (writer, msg) =>
     writer

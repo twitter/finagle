@@ -25,6 +25,7 @@ import com.twitter.finagle.postgresql.BackendMessage.FieldDescription
 import com.twitter.finagle.postgresql.BackendMessage.InTx
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
+import com.twitter.finagle.postgresql.BackendMessage.ParameterDescription
 import com.twitter.finagle.postgresql.BackendMessage.ParameterStatus
 import com.twitter.finagle.postgresql.BackendMessage.ParseComplete
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
@@ -57,6 +58,7 @@ object MessageDecoder {
       case 'N' => decode[NoticeResponse](reader)
       case 'R' => decode[AuthenticationMessage](reader)
       case 'S' => decode[ParameterStatus](reader)
+      case 't' => decode[ParameterDescription](reader)
       case 'T' => decode[RowDescription](reader)
       case 'Z' => decode[ReadyForQuery](reader)
       case byte => sys.error(s"unimplemented message $byte")
@@ -172,6 +174,12 @@ object MessageDecoder {
   implicit lazy val dataRowDecoder: MessageDecoder[DataRow] = MessageDecoder { reader =>
     DataRow(
       reader.collect { _.value() }
+    )
+  }
+
+  implicit lazy val parameterDescriptionDecoder: MessageDecoder[ParameterDescription] = MessageDecoder { reader =>
+    ParameterDescription(
+      reader.collect { r => Oid(r.int()) }
     )
   }
 }
