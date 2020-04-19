@@ -88,7 +88,7 @@ class ClientDispatcher(
 
   override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
     req match {
-      case Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(BackendResponse(_)), p)
-      case Query(q) => machineDispatch(new SimpleQueryMachine(q), p)
+      case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(BackendResponse(_)), p)
+      case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q), p)
     }
 }

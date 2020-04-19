@@ -39,7 +39,7 @@ class TlsSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
   "TLS" should {
     "support tls" in {
       client(_.withTransport.tls(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)))
-        .apply(Sync)
+        .apply(Request.Sync)
         .map { response =>
           response must beEqualTo(BackendResponse(BackendMessage.ReadyForQuery(BackendMessage.NoTx)))
         }
