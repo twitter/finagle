@@ -30,6 +30,9 @@ Breaking API Changes
   This is to avoid Integer auto-boxing when calling `Toggle.apply`, thus to improve overall toggle
   performance. ``PHAB_ID=D456960``
 
+* finagle-core: Retried requests due to the `c.t.finagle.service.RetryFilter` will generate their
+own spanId. ``PHAB_ID=`D466083`
+
 20.4.0
 ------
 

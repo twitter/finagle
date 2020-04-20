@@ -65,17 +65,27 @@ private[finagle] class RequeueFilter[Req, Rep](
   ): Future[Rep] = {
     Contexts.broadcast.let(context.Retries, context.Retries(attempt)) {
       val trace = Trace()
-      // If a requeued request, add the attempt and annotation
-      if (trace.isActivelyTracing && attempt > 0) {
+      val shouldTrace = attempt > 0 && trace.isActivelyTracing
+      if (shouldTrace) {
         trace.record(RequeuedAnnotation)
+        trace.record("clnt/requeue_begin")
         trace.recordBinary("clnt/requeue_attempt", attempt)
+
+        // we set the rpc name to "requeue". The true rpc name can be inferred by
+        // the recorded parent span
+        trace.recordRpc("requeue")
       }
 
-      service(req).transform {
-        case t @ Throw(Requeueable(_)) =>
-          // We also annotate the failure
+      val svcRep = service(req)
+      if (shouldTrace) {
+        svcRep.ensure(trace.record("clnt/requeue_end"))
+      }
+
+      svcRep.transform {
+        case t @ Throw(Requeueable(cause)) =>
+          // we always trace the exception
           if (trace.isActivelyTracing) {
-            trace.recordBinary("clnt/requeue_exc", t.throwable.getClass.getName)
+            trace.recordBinary("clnt/requeue_exc", s"${cause.getClass.getName}:${cause.getMessage}")
           }
 
           // We check the service's status to determine if a retry should be issued.
@@ -125,7 +135,7 @@ private[finagle] class RequeueFilter[Req, Rep](
     backoffs: Stream[Duration]
   ): Future[Rep] = {
     // If we've requeued a request, `attempt > 0`, we want the child request to subsequently
-    // generate a new spanId for this requeust. The original requeust, `attempt == 0` should
+    // generate a new spanId for this request. The original request, `attempt == 0` should
     // retain the original span
     if (attempt > 0) {
       val requeueTraceId: TraceId = Trace.nextId
