@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.io.Reader
 import com.twitter.util.Future
 
@@ -25,5 +26,9 @@ object Response {
     def next: Future[QueryResponse] =
       responses.read().map(_.getOrElse(sys.error("expected at least one response, got none")))
   }
+
+  // Extended query
+  case class Prepared private[postgresql](name: Name)
+  case class ParseComplete(statement: Prepared) extends Response
 
 }

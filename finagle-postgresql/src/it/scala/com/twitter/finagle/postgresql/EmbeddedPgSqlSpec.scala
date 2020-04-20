@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.PostgreSql
 import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import org.specs2.specification.BeforeAfterAll
 
@@ -17,15 +18,18 @@ trait EmbeddedPgSqlSpec extends BeforeAfterAll {
 
   def prep(e: EmbeddedPostgres): EmbeddedPostgres = e
 
-  def client(cfg: PostgreSql.Client => PostgreSql.Client): Service[Request, Response] = embeddedPgSql match {
+  def newClient(cfg: PostgreSql.Client => PostgreSql.Client): ServiceFactory[Request, Response] = embeddedPgSql match {
     case None => sys.error("getClient invoked outside of test fragment")
     case Some(pgsql) =>
       cfg(
         PostgreSql.Client()
           .withCredentials(TestDbUser, TestDbPassword)
           .withDatabase(TestDbName)
-      ).newService(s"localhost:${pgsql.getPort}")
+      ).newClient(s"localhost:${pgsql.getPort}")
   }
+
+  def client(cfg: PostgreSql.Client => PostgreSql.Client): Service[Request, Response] =
+    newClient(cfg).toService
 
   def client: Service[Request, Response] = client(identity)
 

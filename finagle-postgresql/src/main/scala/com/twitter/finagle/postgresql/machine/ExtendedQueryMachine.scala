@@ -25,10 +25,9 @@ import com.twitter.util.Return
  * Unfortunately, postgresql has a different behaviour for this, it does not eagerly respond to individual request,
  * but expects that you simply send them in sequence or issue a [[Flush]] to get the response "synchronously".
  */
-class ExtendedQueryMachine(name: Name, statement: String) extends StateMachine[Response.QueryResponse] {
+class ExtendedQueryMachine(name: Name, parameters: IndexedSeq[Buf]) extends StateMachine[Response.QueryResponse] {
 
   sealed trait State
-  case object Parsing extends State
   case object Binding extends State
   case object Describing extends State
   case class Executing(r: RowDescription) extends State
@@ -40,12 +39,9 @@ class ExtendedQueryMachine(name: Name, statement: String) extends StateMachine[R
   case object Syncing extends State
 
   override def start: TransitionResult[State, Response.QueryResponse] =
-    Transition(Parsing, Send(FrontendMessage.Parse(name, statement, Nil), flush = true))
+    Transition(Binding, Send(FrontendMessage.Bind(Name.Unnamed, name, Nil, Nil, Nil), flush = true))
 
   override def receive(state: State, msg: BackendMessage): TransitionResult[State, Response.QueryResponse] = (state, msg) match {
-    case (Parsing, BackendMessage.ParseComplete) =>
-      Transition(Binding, Send(FrontendMessage.Bind(Name.Unnamed, name, Nil, Nil, Nil), flush = true))
-
     case (Binding, BackendMessage.BindComplete) =>
       Transition(Describing, Send(FrontendMessage.Describe(Name.Unnamed, FrontendMessage.DescriptionTarget.Portal), flush = true))
 
