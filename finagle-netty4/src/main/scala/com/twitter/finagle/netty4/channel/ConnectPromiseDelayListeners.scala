@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4.channel
 
+import com.twitter.logging.Logger
 import io.netty.channel._
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 
@@ -15,6 +16,7 @@ import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
  * - [[com.twitter.finagle.netty4.proxy.Netty4ProxyConnectHandler]]
  */
 private[netty4] object ConnectPromiseDelayListeners {
+  private val log = Logger.get(this.getClass)
 
   /**
    * Creates a new [[GenericFutureListener]] that cancels a given `promise` when the
@@ -48,7 +50,15 @@ private[netty4] object ConnectPromiseDelayListeners {
         // We filter cancellation here since we assume it was proxied from the old promise and
         // is already being handled in `cancelPromiseWhenCancelled`.
         if (!f.isSuccess && !f.isCancelled) {
-          promise.setFailure(f.cause)
+          // if we fail `tryFailure` and we didn't get a resource, it is up to whoever set the failure
+          // to clean up resources.
+          if (!promise.tryFailure(f.cause)) {
+            if (!promise.isCancelled)
+              log.warning(
+                "Attempted to propagate failure forward for a Future that had already been set."
+                  + " This may indicate that there are multiple \"owners\" for the promise who may mark it as complete."
+                  + s" Promise: $promise")
+          }
         }
     }
 }
