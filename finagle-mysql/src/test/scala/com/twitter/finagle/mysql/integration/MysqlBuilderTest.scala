@@ -2,6 +2,7 @@ package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Mysql
+import com.twitter.finagle.mysql.QueryRequest
 import com.twitter.finagle.param
 import com.twitter.finagle.tracing._
 import com.twitter.util.{Await, Awaitable}
@@ -32,6 +33,8 @@ class MysqlBuilderTest extends FunSuite with IntegrationClient {
         .withDatabase("test")
         .withCredentials(username, password)
         .withDatabase(db)
+        .withConnectionInitRequest(QueryRequest(
+          "SET SESSION sql_mode='TRADITIONAL,NO_AUTO_VALUE_ON_ZERO,ONLY_FULL_GROUP_BY'"))
         .newRichClient("localhost:3306")
 
       ready(client.query("SELECT 1"))

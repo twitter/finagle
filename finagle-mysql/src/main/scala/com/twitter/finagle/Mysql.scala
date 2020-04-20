@@ -117,6 +117,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       // Note: there is a stack overflow in insertAfter using CanStackFrom, thus the module.
       .insertAfter(DefaultPool.Role, PoisonConnection.module)
       .prepend(RollbackFactory.module)
+      .insertAfter(StackClient.Role.prepConn, ConnectionInitSql.module)
   }
 
   /**
@@ -246,6 +247,12 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
      */
     def withNoRollback: Client =
       withStack(stack.remove(RollbackFactory.Role))
+
+    /**
+     * The connection init request to use when establishing a new session.
+     */
+    def withConnectionInitRequest(request: Request): Client =
+      configured(ConnectionInitRequest(Some(request)))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
