@@ -1,8 +1,8 @@
 package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
-import com.twitter.finagle.postgresql.BackendMessage.FieldDescription
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue

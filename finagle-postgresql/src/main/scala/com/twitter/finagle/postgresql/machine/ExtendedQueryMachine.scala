@@ -43,7 +43,7 @@ class ExtendedQueryMachine(name: Name, parameters: IndexedSeq[Buf]) extends Stat
   case class StreamResult(rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
     def append(row: DataRow): StreamResult =
       StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
-    def resultSet: ResultSet = ResultSet(rowDescription, pipe)
+    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe)
   }
   case object Syncing extends State
 

@@ -21,7 +21,6 @@ import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
 import com.twitter.finagle.postgresql.BackendMessage.FailedTx
 import com.twitter.finagle.postgresql.BackendMessage.Field
-import com.twitter.finagle.postgresql.BackendMessage.FieldDescription
 import com.twitter.finagle.postgresql.BackendMessage.InTx
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
@@ -31,6 +30,7 @@ import com.twitter.finagle.postgresql.BackendMessage.ParseComplete
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.Types.AttributeId
+import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.util.Return
 import com.twitter.util.Throw

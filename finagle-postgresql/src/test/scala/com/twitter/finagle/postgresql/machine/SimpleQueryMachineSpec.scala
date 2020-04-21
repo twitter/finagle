@@ -126,7 +126,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
             value must beLike {
               case rs@Response.ResultSet(desc, _) =>
                 rowReader = Some(rs)
-                desc must beEqualTo(rowDesc)
+                desc must beEqualTo(rowDesc.rowFields)
             }
         }
       )
