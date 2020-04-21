@@ -45,6 +45,7 @@ class PrepareMachine(name: Name, statement: String) extends StateMachine[Respons
     //   the format for the returned fields is unknown at this point.
     //   Because we issue a Describe on the portal, this incomplete information is not useful, so we ignore it.
     case (p: Parsed, _: BackendMessage.RowDescription) => Transition(p, NoOp)
+    case (p: Parsed, BackendMessage.NoData) => Transition(p, NoOp)
     case (Parsed(desc), r: ReadyForQuery) =>
       Complete(r, Some(Return(Response.ParseComplete(Response.Prepared(name, desc.parameters)))))
 
