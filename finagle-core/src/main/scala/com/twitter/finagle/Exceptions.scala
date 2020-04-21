@@ -58,6 +58,17 @@ object SourcedException {
     case _ =>
       None
   }
+
+  /**
+   * Given a Throwable and a serviceName, if the Throwable is a SourcedException
+   * and the serviceName is not empty, sets the serviceName on the Throwable
+   * */
+  def setServiceName(ex: Throwable, serviceName: String): Throwable = {
+    if (serviceName != "" && ex.isInstanceOf[SourcedException]) {
+      ex.asInstanceOf[SourcedException].serviceName = serviceName
+    }
+    ex
+  }
 }
 
 /**
