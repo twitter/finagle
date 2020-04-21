@@ -27,7 +27,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
   def checkQuery(q: String) =
     checkResult("sends a query message") {
-      case Transition(_, Send(FrontendMessage.Query(str), false)) =>
+      case Transition(_, Send(FrontendMessage.Query(str))) =>
         str must_== q
     }
 

@@ -20,8 +20,27 @@ object StateMachine {
 
   sealed trait Action[+R <: Response]
   case object NoOp extends Action[Nothing]
-  /** When flush is true, a [[FrontendMessage.Flush]] message will also be sent to force the backend to produce a response */
-  case class Send[M <: FrontendMessage](msg: M, flush: Boolean = false)(implicit val encoder: MessageEncoder[M]) extends Action[Nothing]
+  case class Send[M <: FrontendMessage](msg: M)(implicit val encoder: MessageEncoder[M]) extends Action[Nothing]
+  case class SendSeveral(msgs: Seq[Send[_ <: FrontendMessage]]) extends Action[Nothing]
+  object SendSeveral {
+    def apply[
+      A <: FrontendMessage: MessageEncoder,
+      B <: FrontendMessage: MessageEncoder
+    ](a: A, b: B): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Nil)
+
+    def apply[
+      A <: FrontendMessage: MessageEncoder,
+      B <: FrontendMessage: MessageEncoder,
+      C <: FrontendMessage: MessageEncoder,
+    ](a: A, b: B, c: C): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Nil)
+
+    def apply[
+      A <: FrontendMessage: MessageEncoder,
+      B <: FrontendMessage: MessageEncoder,
+      C <: FrontendMessage: MessageEncoder,
+      D <: FrontendMessage: MessageEncoder,
+    ](a: A, b: B, c: C, d: D): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Send(d) :: Nil)
+  }
   case class Respond[R <: Response](value: Try[R]) extends Action[R]
 
   sealed trait TransitionResult[+S, +R <: Response]

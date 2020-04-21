@@ -50,10 +50,10 @@ class ClientDispatcher(
         state = s
         val doAction = action match {
           case StateMachine.NoOp => Future.Done
-          case a@StateMachine.Send(msg, flush) =>
-            write(msg)(a.encoder).flatMap { _ =>
-              if(flush) write(FrontendMessage.Flush) else Future.Done
-            }
+          case a@StateMachine.Send(msg) => write(msg)(a.encoder)
+          case StateMachine.SendSeveral(msgs) => Future.traverseSequentially(msgs) {
+            case a@StateMachine.Send(msg) => write(msg)(a.encoder)
+          }.unit
           case StateMachine.Respond(r) =>
             promise.updateIfEmpty(r)
             Future.Done
