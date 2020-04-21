@@ -28,7 +28,7 @@ object Response {
   }
 
   // Extended query
-  case class Prepared private[postgresql](name: Name, parameters: IndexedSeq[Types.Oid])
+  case class Prepared private[postgresql](name: Name, parameterTypes: IndexedSeq[Types.Oid])
   case class ParseComplete(statement: Prepared) extends Response
 
 }

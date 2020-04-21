@@ -14,10 +14,6 @@ import scala.collection.JavaConverters._
 
 class TlsSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
-  def using[I <: java.io.Closeable, T](io: => I)(f: I => T) = {
-    val c = io
-    try { f(c) } finally { c.close() }
-  }
   def toTmpFile(name: String) = {
     using(getClass.getResourceAsStream(name)) { is =>
       val file = TempFile.fromResourcePath(name)

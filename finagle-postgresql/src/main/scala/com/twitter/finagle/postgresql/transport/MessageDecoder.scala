@@ -22,6 +22,7 @@ import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
 import com.twitter.finagle.postgresql.BackendMessage.FailedTx
 import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.BackendMessage.InTx
+import com.twitter.finagle.postgresql.BackendMessage.NoData
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
 import com.twitter.finagle.postgresql.BackendMessage.ParameterDescription
@@ -55,6 +56,7 @@ object MessageDecoder {
       case 'E' => decode[ErrorResponse](reader)
       case 'I' => Return(EmptyQueryResponse)
       case 'K' => decode[BackendKeyData](reader)
+      case 'n' => Return(NoData)
       case 'N' => decode[NoticeResponse](reader)
       case 'R' => decode[AuthenticationMessage](reader)
       case 'S' => decode[ParameterStatus](reader)
