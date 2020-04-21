@@ -1,7 +1,7 @@
 package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
-import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.io.Reader
 import com.twitter.util.Future
@@ -16,7 +16,7 @@ object Response {
 
   sealed trait QueryResponse extends Response
   // TODO: make this useful
-  case class ResultSet(rowDescription: RowDescription, rows: Reader[DataRow]) extends QueryResponse {
+  case class ResultSet(fields: IndexedSeq[FieldDescription], rows: Reader[DataRow]) extends QueryResponse {
     def toSeq: Future[Seq[DataRow]] = Reader.toAsyncStream(rows).toSeq()
   }
   case object Empty extends QueryResponse

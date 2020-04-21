@@ -13,6 +13,16 @@ object Types {
   case class Oid(value: Int)
   case class AttributeId(value: Int)
 
+  case class FieldDescription(
+    name: String,
+    tableOid: Option[Oid],
+    tableAttributeId: Option[AttributeId],
+    dataType: Oid,
+    dataTypeSize: Short, // negative means variable length
+    typeModifier: Int, // meaning is type-specific
+    format: Format
+  )
+
   // portal and statement naming
   sealed trait Name
   object Name {

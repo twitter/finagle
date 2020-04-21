@@ -1,7 +1,6 @@
 package com.twitter.finagle.postgresql
 
-import com.twitter.finagle.postgresql.Types.AttributeId
-import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
@@ -13,15 +12,6 @@ object BackendMessage {
   case class CommandComplete(commandTag: String) extends BackendMessage
   case object EmptyQueryResponse extends BackendMessage
 
-  case class FieldDescription(
-    name: String,
-    tableOid: Option[Oid],
-    tableAttributeId: Option[AttributeId],
-    dataType: Oid,
-    dataTypeSize: Short, // negative means variable length
-    typeModifier: Int, // meaning is type-specific
-    format: Format
-  )
   case class RowDescription(rowFields: IndexedSeq[FieldDescription]) extends BackendMessage
   case class DataRow(values: IndexedSeq[WireValue]) extends BackendMessage
 
