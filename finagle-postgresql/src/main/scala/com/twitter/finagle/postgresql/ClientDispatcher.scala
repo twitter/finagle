@@ -8,7 +8,6 @@ import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Response.BackendResponse
-import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine.ExtendedQueryMachine
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
 import com.twitter.finagle.postgresql.machine.PrepareMachine
@@ -96,7 +95,7 @@ class ClientDispatcher(
     req match {
       case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(BackendResponse(_)), p)
       case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q), p)
-      case Request.Prepare(s) => machineDispatch(new PrepareMachine(Name.Unnamed, s), p)
-      case Request.Execute(prepared, parameters) => machineDispatch(new ExtendedQueryMachine(prepared.name, parameters), p)
+      case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
+      case Request.Execute(prepared, parameters, portalName) => machineDispatch(new ExtendedQueryMachine(prepared.name, portalName, parameters), p)
     }
 }
