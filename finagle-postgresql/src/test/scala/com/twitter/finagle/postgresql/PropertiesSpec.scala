@@ -4,6 +4,7 @@ import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
@@ -12,6 +13,9 @@ import org.scalacheck.Gen
 import org.specs2.ScalaCheck
 
 trait PropertiesSpec extends ScalaCheck {
+
+  // TODO: Once we have actual data types, Gen.oneOf(...)
+  implicit lazy val arbOid = Arbitrary(Arbitrary.arbitrary[Int].map(Oid))
 
   implicit lazy val arbParam : Arbitrary[BackendMessage.ParameterStatus] = Arbitrary {
     for {
@@ -29,11 +33,16 @@ trait PropertiesSpec extends ScalaCheck {
   implicit lazy val arbFieldDescription: Arbitrary[FieldDescription] = Arbitrary {
     for {
       name <- Gen.alphaStr.suchThat(_.nonEmpty)
-      dataType <- Arbitrary.arbitrary[Int].map(Oid) // TODO: Once we have actual data types, Gen.oneOf(...)
+      dataType <- Arbitrary.arbitrary[Oid]
       dataTypeSize <- Gen.oneOf(1,2,4,8,16).map(_.toShort)
       format <- Gen.oneOf(Format.Text, Format.Binary)
     } yield FieldDescription(name, None, None, dataType, dataTypeSize, 0, format)
   }
+
+  implicit lazy val arbNamed : Arbitrary[Name.Named] = Arbitrary(Gen.alphaLowerStr.suchThat(_.nonEmpty).map(Name.Named))
+  implicit lazy val arbName : Arbitrary[Name] =
+    Arbitrary(Gen.oneOf(Gen.const(Name.Unnamed), Arbitrary.arbitrary[Name.Named]))
+
   implicit lazy val arbRowDescription: Arbitrary[RowDescription] = Arbitrary {
     Gen.nonEmptyListOf(arbFieldDescription.arbitrary).map(l => RowDescription(l.toIndexedSeq))
   }
