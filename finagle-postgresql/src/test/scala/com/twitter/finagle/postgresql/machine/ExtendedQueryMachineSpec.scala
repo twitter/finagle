@@ -31,14 +31,14 @@ import com.twitter.util.Throw
 
 class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with PropertiesSpec {
 
-  def checkStartup(name: Name, parameters: IndexedSeq[Buf]): StepSpec =
+  def checkStartup(name: Name, portalName: Name, parameters: IndexedSeq[Buf]): StepSpec =
     checkResult("start is several messages") {
       case Transition(_, SendSeveral(msgs)) =>
         msgs.toList must beLike {
           case a :: b :: c :: d :: Nil =>
-            a must beEqualTo(Send(Bind(Name.Unnamed, name, Nil, Nil, Nil)))
-            b must beEqualTo(Send(Describe(Name.Unnamed, DescriptionTarget.Portal)))
-            c must beEqualTo(Send(Execute(Name.Unnamed, 0)))
+            a must beEqualTo(Send(Bind(portalName, name, Nil, Nil, Nil)))
+            b must beEqualTo(Send(Describe(portalName, DescriptionTarget.Portal)))
+            c must beEqualTo(Send(Execute(portalName, 0)))
             d must beEqualTo(Send(Flush))
         }
     }
@@ -57,36 +57,37 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
   // The ExtendedQueryMachine needs to send a Sync message to get the connection back to normal before completing
   val errorHandler: ErrorHandler = error => handleSync ++ defaultErrorHandler(error)
 
-  def mkMachine(name: Name, parameters: IndexedSeq[Buf]): ExtendedQueryMachine =
-    new ExtendedQueryMachine(name, parameters)
+  def mkMachine(name: Name, portalName: Name, parameters: IndexedSeq[Buf]): ExtendedQueryMachine =
+    new ExtendedQueryMachine(name, portalName, parameters)
 
   "ExtendedQueryMachine" should {
-    "send multiple messages on start" in prop { (name: Name, parameters: IndexedSeq[Buf]) =>
-      machineSpec(mkMachine(name, parameters), errorHandler) {
-        checkStartup(name, parameters)
+    "send multiple messages on start" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf]) =>
+      machineSpec(mkMachine(name, portalName, parameters), errorHandler) {
+        checkStartup(name, portalName, parameters)
       }
     }
 
-    def baseSpec(name: Name, parameters: IndexedSeq[Buf], describeMessage: BackendMessage)(tail: StepSpec*) = {
+    def baseSpec(name: Name, portalName: Name, parameters: IndexedSeq[Buf], describeMessage: BackendMessage)(tail: StepSpec*) = {
       val head = List(
-        checkStartup(name, parameters),
+        checkStartup(name, portalName, parameters),
         receive(BindComplete),
         checkNoOp("handles BindComplete"),
         receive(describeMessage),
         checkNoOp("handles describe message"),
       )
 
-      machineSpec(mkMachine(name, parameters), errorHandler)(head ++ tail: _*)
+      machineSpec(mkMachine(name, portalName, parameters), errorHandler)(head ++ tail: _*)
     }
 
     def nominalSpec(
       name: Name,
+      portalName: Name,
       parameters: IndexedSeq[Buf],
       describeMessage: BackendMessage,
       executeMessage: BackendMessage,
       expectedResponse: Response.QueryResponse,
     )= {
-      baseSpec(name, parameters, describeMessage)(
+      baseSpec(name, portalName, parameters, describeMessage)(
         receive(executeMessage),
         checkResult("sends sync") {
           case Transition(_, Send(Sync)) => ok
@@ -99,15 +100,15 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
       )
     }
 
-    "support empty queries" in prop { (name: Name, parameters: IndexedSeq[Buf], desc: RowDescription) =>
-      nominalSpec(name, parameters, desc, EmptyQueryResponse, Response.Empty)
+    "support empty queries" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf], desc: RowDescription) =>
+      nominalSpec(name, portalName, parameters, desc, EmptyQueryResponse, Response.Empty)
     }
 
-    "support commands" in prop { (name: Name, parameters: IndexedSeq[Buf], commandTag: String) =>
-      nominalSpec(name, parameters, NoData, CommandComplete(commandTag), Response.Command(commandTag))
+    "support commands" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf], commandTag: String) =>
+      nominalSpec(name, portalName, parameters, NoData, CommandComplete(commandTag), Response.Command(commandTag))
     }
 
-    "support result sets" in prop { (name: Name, parameters: IndexedSeq[Buf], rs: TestResultSet) =>
+    "support result sets" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf], rs: TestResultSet) =>
       rs.rows.nonEmpty ==> {
         var rowReader: Option[Response.ResultSet] = None
         val steps = rs.rows match {
@@ -118,14 +119,14 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
               checkResult("responds") {
                 case Transition(_, Respond(Return(r@Response.ResultSet(fields, _)))) =>
                   rowReader = Some(r)
-                  fields must beEqualTo((rs.desc.rowFields))
+                  fields must beEqualTo(rs.desc.rowFields)
               }
             ) ++ tail.map(receive(_))
         }
         val postSteps = List(
           receive(CommandComplete("TODO"))
         )
-        baseSpec(name, parameters, rs.desc)(
+        baseSpec(name, portalName, parameters, rs.desc)(
           steps ++ postSteps: _*
         ) && {
           rowReader must beSome

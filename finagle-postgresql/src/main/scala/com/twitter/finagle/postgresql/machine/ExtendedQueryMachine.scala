@@ -41,7 +41,11 @@ import com.twitter.util.Try
  * For this reason, this machine issues several messages on startup and expects the responses to happen in order.
  * It's not clear if the backend is allowed to send them in a different order.
  */
-class ExtendedQueryMachine(name: Name, parameters: IndexedSeq[Buf]) extends StateMachine[Response.QueryResponse] {
+class ExtendedQueryMachine(
+  statementName: Name,
+  portalName: Name,
+  parameters: IndexedSeq[Buf]
+) extends StateMachine[Response.QueryResponse] {
 
   sealed trait State
   case object Binding extends State
@@ -59,9 +63,9 @@ class ExtendedQueryMachine(name: Name, parameters: IndexedSeq[Buf]) extends Stat
     Transition(
       Binding,
       SendSeveral(
-        Bind(Name.Unnamed, name, Nil, Nil, Nil), // TODO: deal with parameters
-        Describe(Name.Unnamed, DescriptionTarget.Portal), // TODO: we can avoid this one when one from Prepared returned NoData
-        Execute(Name.Unnamed, 0), // TODO: allow portal suspension
+        Bind(portalName, statementName, Nil, Nil, Nil), // TODO: deal with parameters
+        Describe(portalName, DescriptionTarget.Portal), // TODO: we can avoid this one when one from Prepared returned NoData
+        Execute(portalName, 0), // TODO: allow portal suspension
         Flush
       )
     )
