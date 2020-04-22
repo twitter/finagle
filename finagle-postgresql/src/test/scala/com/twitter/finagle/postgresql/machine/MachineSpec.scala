@@ -51,8 +51,14 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
     step(machine.start, checks.toList)
   }
 
+  type ErrorHandler = BackendMessage.ErrorResponse => List[StepSpec]
+  protected val defaultErrorHandler: ErrorHandler = (error: BackendMessage.ErrorResponse) =>
+    checkFailure("handles injected failure") {
+      case PgSqlServerError(e) => e must beEqualTo(error)
+    } :: Nil
+
   // Given a list of steps, insert a ErrorResponse randomly and checks that the machine handled it
-  def genError(xs: List[StepSpec]): Gen[List[StepSpec]] = {
+  def genError(xs: List[StepSpec], errorHandler: ErrorHandler): Gen[List[StepSpec]] = {
     // take everything before a machine failure, ReadyForQuery message or some other error.
     val steps = xs.takeWhile {
       case receive(BackendMessage.ErrorResponse(_)) => false
@@ -66,24 +72,19 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
       insert <- Gen.choose(1, steps.size)
     } yield {
       val (head, _) = steps.splitAt(insert)
-      head ++ List(
-        receive(error), // TODO: ideally, we would conditionally add this if the state machine isn't already failed. See allowPreemptiveFailure
-        checkFailure("handles injected failure") {
-          case PgSqlServerError(e) => e must beEqualTo(error)
-        }
-      )
+      head ++ (receive(error) :: errorHandler(error))
     }
   }
 
-  def machineErrorSpec(machine: StateMachine[R])(steps: StepSpec*) = {
-    Prop.forAll(genError(steps.toList)) { errorSteps =>
+  def machineErrorSpec(machine: StateMachine[R], errorHandler: ErrorHandler = defaultErrorHandler)(steps: StepSpec*) = {
+    Prop.forAllNoShrink(genError(steps.toList, errorHandler)) { errorSteps =>
       oneMachineSpec(machine, allowPreemptiveFailure = true)(errorSteps: _*)
     }
   }
 
   // TODO: ideally we generate fragments here, but not sure how to do that with scalacheck
-  def machineSpec(machine: StateMachine[R])(steps: StepSpec*) = {
+  def machineSpec(machine: StateMachine[R], errorHandler: ErrorHandler = defaultErrorHandler)(steps: StepSpec*) = {
     oneMachineSpec(machine)(steps: _*)
-    machineErrorSpec(machine)(steps: _*)
+    machineErrorSpec(machine, errorHandler)(steps: _*)
   }
 }
