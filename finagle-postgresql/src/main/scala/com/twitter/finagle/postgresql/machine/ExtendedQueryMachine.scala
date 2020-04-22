@@ -92,7 +92,7 @@ class ExtendedQueryMachine(name: Name, parameters: IndexedSeq[Buf]) extends Stat
     case (r: StreamResult, e: ErrorResponse) =>
       val exception = PgSqlServerError(e)
       r.pipe.fail(exception)
-      Transition(Syncing(None), Send(Sync))
+      Transition(Syncing(Some(Throw(exception))), Send(Sync))
 
     case (Syncing(response), r: ReadyForQuery) => Complete(r, response)
 
