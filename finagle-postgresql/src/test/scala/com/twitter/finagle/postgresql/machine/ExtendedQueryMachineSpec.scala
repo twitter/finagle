@@ -16,7 +16,9 @@ import com.twitter.finagle.postgresql.FrontendMessage.Flush
 import com.twitter.finagle.postgresql.FrontendMessage.Sync
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PropertiesSpec
+import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql.Response.Prepared
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.NoOp
@@ -58,7 +60,7 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
   val errorHandler: ErrorHandler = error => handleSync ++ defaultErrorHandler(error)
 
   def mkMachine(name: Name, portalName: Name, parameters: IndexedSeq[Buf]): ExtendedQueryMachine =
-    new ExtendedQueryMachine(name, portalName, parameters)
+    new ExtendedQueryMachine(Request.ExecutePortal(Prepared(name, IndexedSeq.empty), parameters, portalName))
 
   "ExtendedQueryMachine" should {
     "send multiple messages on start" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf]) =>

@@ -6,7 +6,9 @@ import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
+import com.twitter.finagle.postgresql.BackendMessage.InTx
 import com.twitter.finagle.postgresql.BackendMessage.NoData
+import com.twitter.finagle.postgresql.BackendMessage.PortalSuspended
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.FrontendMessage.Bind
@@ -17,9 +19,9 @@ import com.twitter.finagle.postgresql.FrontendMessage.Flush
 import com.twitter.finagle.postgresql.FrontendMessage.Sync
 import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlServerError
+import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.ResultSet
-import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.NoOp
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
@@ -27,7 +29,6 @@ import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.SendSeveral
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.finagle.postgresql.machine.StateMachine.TransitionResult
-import com.twitter.io.Buf
 import com.twitter.io.Pipe
 import com.twitter.util.Future
 import com.twitter.util.Return
@@ -41,11 +42,7 @@ import com.twitter.util.Try
  * For this reason, this machine issues several messages on startup and expects the responses to happen in order.
  * It's not clear if the backend is allowed to send them in a different order.
  */
-class ExtendedQueryMachine(
-  statementName: Name,
-  portalName: Name,
-  parameters: IndexedSeq[Buf]
-) extends StateMachine[Response.QueryResponse] {
+class ExtendedQueryMachine(req: Request.Execute) extends StateMachine[Response.QueryResponse] {
 
   sealed trait State
   case object Binding extends State
@@ -59,16 +56,29 @@ class ExtendedQueryMachine(
   }
   case class Syncing(response: Option[Try[Response.QueryResponse]]) extends State
 
-  override def start: TransitionResult[State, Response.QueryResponse] =
-    Transition(
-      Binding,
-      SendSeveral(
-        Bind(portalName, statementName, Nil, Nil, Nil), // TODO: deal with parameters
-        Describe(portalName, DescriptionTarget.Portal), // TODO: we can avoid this one when one from Prepared returned NoData
-        Execute(portalName, 0), // TODO: allow portal suspension
-        Flush
+  override def start: TransitionResult[State, Response.QueryResponse] = req match {
+    case Request.ExecutePortal(prepared, parameters, portalName, maxResults) =>
+      Transition(
+        Binding,
+        SendSeveral(
+          Bind(portalName, prepared.name, Nil, Nil, Nil), // TODO: deal with parameters
+          Describe(portalName, DescriptionTarget.Portal), // TODO: we can avoid sending this one when the Prepare phase already returned NoData.
+          Execute(portalName, maxResults),
+          Flush
+        )
       )
-    )
+    case Request.ResumePortal(portalName, maxResults) =>
+      Transition(
+        Describing,
+        SendSeveral(
+          // TODO: we can avoid this one by reusing the one in the first execution. Not sure what the best API for this is yet.
+          Describe(portalName, DescriptionTarget.Portal),
+          Execute(portalName, maxResults),
+          Flush
+        )
+      )
+
+  }
 
   override def receive(state: State, msg: BackendMessage): TransitionResult[State, Response.QueryResponse] = (state, msg) match {
     case (Binding, BindComplete) =>
@@ -89,6 +99,10 @@ class ExtendedQueryMachine(
       Transition(stream, Respond(Return(stream.resultSet)))
 
     case (r: StreamResult, dr: DataRow) => Transition(r.append(dr), NoOp)
+    case (r: StreamResult, PortalSuspended) =>
+      r.lastWrite.liftToTry.unit before r.pipe.close()
+      // TODO: the ReadyForQuery here is fake
+      Complete(ReadyForQuery(InTx), None)
     case (r: StreamResult, _: CommandComplete) =>
       // TODO: handle discard() to client can cancel the stream
       r.lastWrite.liftToTry.unit before r.pipe.close()
