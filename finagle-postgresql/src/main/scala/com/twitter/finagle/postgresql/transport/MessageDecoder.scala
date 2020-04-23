@@ -28,6 +28,7 @@ import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
 import com.twitter.finagle.postgresql.BackendMessage.ParameterDescription
 import com.twitter.finagle.postgresql.BackendMessage.ParameterStatus
 import com.twitter.finagle.postgresql.BackendMessage.ParseComplete
+import com.twitter.finagle.postgresql.BackendMessage.PortalSuspended
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.Types.AttributeId
@@ -59,6 +60,7 @@ object MessageDecoder {
       case 'n' => Return(NoData)
       case 'N' => decode[NoticeResponse](reader)
       case 'R' => decode[AuthenticationMessage](reader)
+      case 's' => Return(PortalSuspended)
       case 'S' => decode[ParameterStatus](reader)
       case 't' => decode[ParameterDescription](reader)
       case 'T' => decode[RowDescription](reader)

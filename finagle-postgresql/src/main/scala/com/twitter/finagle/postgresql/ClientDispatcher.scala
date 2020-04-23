@@ -96,6 +96,6 @@ class ClientDispatcher(
       case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(BackendResponse(_)), p)
       case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q), p)
       case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
-      case Request.Execute(prepared, parameters, portalName) => machineDispatch(new ExtendedQueryMachine(prepared.name, portalName, parameters), p)
+      case e: Request.Execute => machineDispatch(new ExtendedQueryMachine(e), p)
     }
 }
