@@ -13,7 +13,7 @@ import com.twitter.finagle.param.{
   _
 }
 import com.twitter.finagle.redis.RedisPartitioningService
-import com.twitter.finagle.redis.exp.RedisPool
+import com.twitter.finagle.redis.exp.{ConnectionInitCommand, RedisPool}
 import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
@@ -22,6 +22,8 @@ import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
 import java.net.SocketAddress
+
+import com.twitter.finagle.redis.param.{Database, Password}
 
 trait RedisRichClient { self: Client[Command, Reply] =>
 
@@ -69,6 +71,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
      */
     private val stack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
       .insertBefore(DefaultPool.Role, RedisPool.module)
+      .insertAfter(StackClient.Role.prepConn, ConnectionInitCommand.module)
 
     private[finagle] val hashRingStack: Stack[ServiceFactory[Command, Reply]] =
       stack.insertAfter(BindingFactory.role, RedisPartitioningService.module)
@@ -103,6 +106,18 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
         params[finagle.param.Stats].statsReceiver.scope(ClientDispatcher.StatsScope),
         params[StalledPipelineTimeout].timeout
       )
+
+    /**
+     * Database to use when this client establishes a new connection.
+     */
+    def withDatabase(db: Int): Client =
+      configured(Database(Some(db)))
+
+    /**
+     * Password to use when authenticating a new connection.
+     */
+    def withPassword(password: Buf): Client =
+      configured(Password(Some(password)))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

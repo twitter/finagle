@@ -10,6 +10,9 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-redis: Add `ConnectionInitCommand` stack to set database and password.
+  ``PHAB_ID=D468835``
+
 * finagle-mysql: Add `ConnectionInitSql` stack to set connection init sql. ``PHAB_ID=D468856``
 
 Runtime Behavior Changes
