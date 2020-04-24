@@ -14,7 +14,7 @@ object Request {
   sealed trait Execute extends Request
   case class ExecutePortal(
     prepared: Prepared,
-    parameters: IndexedSeq[Buf],
+    parameters: Seq[Buf],
     portalName: Name = Name.Unnamed,
     maxResults: Int = 0,
   ) extends Execute

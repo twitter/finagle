@@ -136,7 +136,7 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
           // NOTE: this isn't as strict as it could be.
           //   Ideally we would only expect an error when one was injected
           rows must beLike {
-            case Return(rows) => rows must beEqualTo(rs.rows)
+            case Return(rows) => rows must beEqualTo(rs.rows.map(_.values))
             case Throw(PgSqlServerError(e)) => ok // injected error case
           }
         }
