@@ -42,6 +42,8 @@ trait EmbeddedPgSqlSpec extends BeforeAfterAll { _: PgSqlSpec =>
     ).newClient(s"localhost:${pgsql.getPort}")
   }
 
+  def newRichClient: Client = Client(newClient(identity))
+
   def client(cfg: PostgreSql.Client => PostgreSql.Client): Service[Request, Response] =
     newClient(cfg).toService
 

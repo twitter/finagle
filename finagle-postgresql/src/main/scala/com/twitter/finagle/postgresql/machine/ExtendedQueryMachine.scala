@@ -52,7 +52,7 @@ class ExtendedQueryMachine(req: Request.Execute) extends StateMachine[Response.Q
   case class StreamResult(rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
     def append(row: DataRow): StreamResult =
       StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
-    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe)
+    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values))
   }
   case class Syncing(response: Option[Try[Response.QueryResponse]]) extends State
 

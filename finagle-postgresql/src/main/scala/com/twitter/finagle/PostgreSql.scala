@@ -35,6 +35,9 @@ object PostgreSql {
     def withDatabase(db: String): Client =
       configured(Params.Database(Some(db)))
 
+    def newRichClient(dest: String): postgresql.Client =
+      postgresql.Client(newClient(dest))
+
     override protected def newTransporter(addr: SocketAddress): Transporter[Buf, Buf, TransportContext] =
       new postgresql.PgSqlTransporter(addr, params)
 

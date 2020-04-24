@@ -7,6 +7,7 @@ import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql.Response.Row
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
@@ -115,7 +116,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       }
     }
 
-    def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow])(f: Seq[DataRow] => MatchResult[_]) = {
+    def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow])(f: Seq[Row] => MatchResult[_]) = {
       var rowReader: Option[Response.ResultSet] = None
 
       val prep = List(
@@ -171,7 +172,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
     "return rows in order" in prop { rs: TestResultSet =>
       resultSetSpec("select 1;", rs.desc, rs.rows) { rows =>
-        rows must beEqualTo(rs.rows)
+        rows must beEqualTo(rs.rows.map(_.values))
       }
     }
 

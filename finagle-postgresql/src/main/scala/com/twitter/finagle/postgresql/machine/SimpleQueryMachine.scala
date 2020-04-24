@@ -35,7 +35,7 @@ class SimpleQueryMachine(query: String) extends StateMachine[SimpleQueryResponse
   case class StreamResult(responses: StreamResponses, rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
     def append(row: DataRow): StreamResult =
       StreamResult(responses, rowDescription, pipe, lastWrite before pipe.write(row))
-    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe)
+    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values))
   }
 
   override def start: StateMachine.TransitionResult[State, SimpleQueryResponse] =
