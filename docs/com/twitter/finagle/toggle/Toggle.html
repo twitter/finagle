@@ -228,18 +228,18 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Toggle</span><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <span class="name">Toggle</span><span class="result"> extends (<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       </h4>
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p><code>Toggles</code> are used for modifying behavior without changing code.
-</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>]</dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://martinfowler.com/articles/feature-toggles.html" target="_blank">Feature Toggles</a>
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://martinfowler.com/articles/feature-toggles.html" target="_blank">Feature Toggles</a>
      for detailed discussion on the topic.</p></span><span class="cmt"><p><a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>], (<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>, <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent">(<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>, <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -265,7 +265,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.toggle.Toggle"><span>Toggle</span></li><li class="in" name="scala.PartialFunction"><span>PartialFunction</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.toggle.Toggle"><span>Toggle</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -286,9 +286,9 @@ resources for using Finagle.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.toggle.Toggle#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(id:String):com.twitter.finagle.toggle.Toggle[T]"></a><a id="&lt;init&gt;:Toggle[T]"></a>
+      <a id="&lt;init&gt;(id:String):com.twitter.finagle.toggle.Toggle"></a><a id="&lt;init&gt;:Toggle"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#&lt;init&gt;(id:String):com.twitter.finagle.toggle.Toggle[T]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#&lt;init&gt;(id:String):com.twitter.finagle.toggle.Toggle" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -312,7 +312,7 @@ resources for using Finagle.
         <div class="values members">
               <h3>Abstract Value Members</h3>
               <ol><li name="scala.Function1#apply" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="apply(v1:T1):R"></a><a id="apply(T):Boolean"></a>
+      <a id="apply(v1:T1):R"></a><a id="apply(Int):Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/toggle/Toggle.html#apply(v1:T1):R" title="Permalink">
         <i class="material-icons"></i>
@@ -323,14 +323,14 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="v1">v1: <span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">apply</span><span class="params">(<span name="v1">v1: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
-    </li><li name="scala.PartialFunction#isDefinedAt" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="isDefinedAt(x:A):Boolean"></a><a id="isDefinedAt(T):Boolean"></a>
+    </li><li name="com.twitter.finagle.toggle.Toggle#isDefinedAt" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="isDefinedAt(x:Int):Boolean"></a><a id="isDefinedAt(Int):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#isDefinedAt(x:A):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#isDefinedAt(x:Int):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -339,10 +339,11 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isDefinedAt</span><span class="params">(<span name="x">x: <span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isDefinedAt</span><span class="params">(<span name="x">x: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
+      <p class="shortcomment cmt">A Toggle should be either defined for the entire domain of Int, or undefined.</p><div class="fullcomment"><div class="comment cmt"><p>A Toggle should be either defined for the entire domain of Int, or undefined.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Parameter x will be removed in a later commit.</p></span></dd></dl></div>
     </li></ol>
             </div>
 
@@ -397,10 +398,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.PartialFunction#andThen" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="andThen[C](k:B=&gt;C):PartialFunction[A,C]"></a><a id="andThen[C]((Boolean)⇒C):PartialFunction[T,C]"></a>
+    </li><li name="scala.Function1#andThen" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="andThen[A](g:R=&gt;A):T1=&gt;A"></a><a id="andThen[A]((Boolean)⇒A):(Int)⇒A"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#andThen[C](k:B=&gt;C):PartialFunction[A,C]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#andThen[A](g:R=&gt;A):T1=&gt;A" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -409,26 +410,13 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="C">C</span>]</span><span class="params">(<span name="k">k: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>) ⇒ <span class="extype" name="scala.PartialFunction.andThen.C">C</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>, <span class="extype" name="scala.PartialFunction.andThen.C">C</span>]</span>
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction → Function1</dd></dl></div>
-    </li><li name="scala.PartialFunction#applyOrElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="applyOrElse[A1&lt;:A,B1&gt;:B](x:A1,default:A1=&gt;B1):B1"></a><a id="applyOrElse[A1&lt;:T,B1&gt;:Boolean](A1,(A1)⇒B1):B1"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#applyOrElse[A1&lt;:A,B1&gt;:B](x:A1,default:A1=&gt;B1):B1" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">applyOrElse</span><span class="tparams">[<span name="A1">A1 &lt;: <span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span></span>, <span name="B1">B1 &gt;: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>]</span><span class="params">(<span name="x">x: <span class="extype" name="scala.PartialFunction.applyOrElse.A1">A1</span></span>, <span name="default">default: (<span class="extype" name="scala.PartialFunction.applyOrElse.A1">A1</span>) ⇒ <span class="extype" name="scala.PartialFunction.applyOrElse.B1">B1</span></span>)</span><span class="result">: <span class="extype" name="scala.PartialFunction.applyOrElse.B1">B1</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
+                <span class="name">@unspecialized</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -470,7 +458,7 @@ resources for using Finagle.
               
         </dd></dl></div>
     </li><li name="scala.Function1#compose" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="compose[A](g:A=&gt;T1):A=&gt;R"></a><a id="compose[A]((A)⇒T):(A)⇒Boolean"></a>
+      <a id="compose[A](g:A=&gt;T1):A=&gt;R"></a><a id="compose[A]((A)⇒Int):(A)⇒Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/toggle/Toggle.html#compose[A](g:A=&gt;T1):A=&gt;R" title="Permalink">
         <i class="material-icons"></i>
@@ -481,7 +469,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -581,21 +569,21 @@ resources for using Finagle.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.Toggle#isEnabled" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="isEnabled(t:T):Boolean"></a><a id="isEnabled(T):Boolean"></a>
+      <a id="isEnabled(t:Int):Boolean"></a><a id="isEnabled(Int):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#isEnabled(t:T):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#isEnabled(t:Int):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isEnabled</span><span class="params">(<span name="t">t: <span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isEnabled</span><span class="params">(<span name="t">t: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt">Similar to <code>PartialFunction.apply</code> but has better java friendliness.</p>
+      <p class="shortcomment cmt">Similar to <code>Function1.apply</code> but has better java friendliness.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -612,22 +600,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="scala.PartialFunction#lift" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="lift:A=&gt;Option[B]"></a><a id="lift:(T)⇒Option[Boolean]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#lift:A=&gt;Option[B]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">lift</span><span class="result">: (<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -683,9 +655,9 @@ resources for using Finagle.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.Toggle#orElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="orElse[T1&lt;:T](that:com.twitter.finagle.toggle.Toggle[T1]):com.twitter.finagle.toggle.Toggle[T1]"></a><a id="orElse[T1&lt;:T](Toggle[T1]):Toggle[T1]"></a>
+      <a id="orElse(that:com.twitter.finagle.toggle.Toggle):com.twitter.finagle.toggle.Toggle"></a><a id="orElse(Toggle):Toggle"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#orElse[T1&lt;:T](that:com.twitter.finagle.toggle.Toggle[T1]):com.twitter.finagle.toggle.Toggle[T1]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#orElse(that:com.twitter.finagle.toggle.Toggle):com.twitter.finagle.toggle.Toggle" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -694,45 +666,13 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">orElse</span><span class="tparams">[<span name="T1">T1 &lt;: <span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span></span>]</span><span class="params">(<span name="that">that: <a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.orElse.T1">T1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.orElse.T1">T1</span>]</span>
+        <span class="name">orElse</span><span class="params">(<span name="that">that: <a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a></span>
       </span>
       
       <p class="shortcomment cmt">Similar to <code>PartialFunction.orElse</code> but specialized
 for <a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggles</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Similar to <code>PartialFunction.orElse</code> but specialized
 for <a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggles</a>.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>the returned <a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> will keep the current <code>id</code>.</p></span></dd></dl></div>
-    </li><li name="scala.PartialFunction#orElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="orElse[A1&lt;:A,B1&gt;:B](that:PartialFunction[A1,B1]):PartialFunction[A1,B1]"></a><a id="orElse[A1&lt;:T,B1&gt;:Boolean](PartialFunction[A1,B1]):PartialFunction[A1,B1]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#orElse[A1&lt;:A,B1&gt;:B](that:PartialFunction[A1,B1]):PartialFunction[A1,B1]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">orElse</span><span class="tparams">[<span name="A1">A1 &lt;: <span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span></span>, <span name="B1">B1 &gt;: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>]</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="scala.PartialFunction.orElse.A1">A1</span>, <span class="extype" name="scala.PartialFunction.orElse.B1">B1</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="scala.PartialFunction.orElse.A1">A1</span>, <span class="extype" name="scala.PartialFunction.orElse.B1">B1</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
-    </li><li name="scala.PartialFunction#runWith" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="runWith[U](action:B=&gt;U):A=&gt;Boolean"></a><a id="runWith[U]((Boolean)⇒U):(T)⇒Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#runWith[U](action:B=&gt;U):A=&gt;Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">runWith</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="action">action: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>) ⇒ <span class="extype" name="scala.PartialFunction.runWith.U">U</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartialFunction</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -843,10 +783,8 @@ for <a href="" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggles</
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.PartialFunction">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</h3>
-            </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.toggle.Toggle.T">T</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></h3>
+        <div class="parent" name="scala.Function1">
+              <h3>Inherited from (<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

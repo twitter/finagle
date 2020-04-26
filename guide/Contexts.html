@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Contexts &#8212; Finagle 20.4.0 documentation</title>
+    <title>Contexts &#8212; Finagle 20.4.1 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -126,8 +126,14 @@ A broadcast <code class="docutils literal notranslate"><span class="pre">Context
 A broadcast <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents which retry attempt this request is.
 Will have <code class="docutils literal notranslate"><span class="pre">attempt</span></code> set to 0 if the request is not a retry.</p>
 </div>
-<div class="section" id="current-tls-peer-certificate">
-<h3>Current TLS peer certificate<a class="headerlink" href="#current-tls-peer-certificate" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="current-tls-session">
+<h3>Current TLS session<a class="headerlink" href="#current-tls-session" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.transport.Transport.sslSessionInfo</span></code> _
+A local <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents the <code class="docutils literal notranslate"><span class="pre">Transport</span></code>s
+<code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.ssl.session.SslSessionInfo</span></code>. If a TLS session is established,
+the <code class="docutils literal notranslate"><span class="pre">SslSessionInfo</span></code> provides access to the <code class="docutils literal notranslate"><span class="pre">javax.net.ssl.SSLSession</span></code>, along with
+the <code class="docutils literal notranslate"><span class="pre">sessionId</span></code>, <code class="docutils literal notranslate"><span class="pre">cipherSuite</span></code>, and both <code class="docutils literal notranslate"><span class="pre">local</span></code> and <code class="docutils literal notranslate"><span class="pre">peer</span></code> certificates. This
+is an encompassing replacement for <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.transport.Transport.peerCertificate</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.transport.Transport.peerCertificate</span></code> —
 A local <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents the <code class="docutils literal notranslate"><span class="pre">Transport</span></code>s
 <code class="docutils literal notranslate"><span class="pre">java.security.cert.Certificate</span></code> if a TLS session is established.</p>
@@ -181,7 +187,7 @@ schema evolution.</p>
 <li><a class="reference internal" href="#current-client-id">Current client id</a></li>
 <li><a class="reference internal" href="#current-request-deadline">Current request deadline</a></li>
 <li><a class="reference internal" href="#current-retry-attempt">Current retry attempt</a></li>
-<li><a class="reference internal" href="#current-tls-peer-certificate">Current TLS peer certificate</a></li>
+<li><a class="reference internal" href="#current-tls-session">Current TLS session</a></li>
 <li><a class="reference internal" href="#upstream-address">Upstream Address</a></li>
 <li><a class="reference internal" href="#backup-request-indicator">Backup request indicator</a></li>
 </ul>

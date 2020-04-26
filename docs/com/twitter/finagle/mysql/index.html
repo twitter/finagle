@@ -592,6 +592,10 @@ use.</p><p> Flag          Value     Meaning
                         <a href="CommandRequest.html" title="A command request is a request initiated by the client and has a cmd byte associated with it.">CommandRequest</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="ConnectionInitSql$.html" title="A stack module that executes a request when create a connection."></a>
+                        <a href="ConnectionInitSql$.html" title="A stack module that executes a request when create a connection.">ConnectionInitSql</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="trait" href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement."></a>
                         <a href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement.">CursorResult</a>
                       </li><li class="current-entities indented4">
@@ -2314,6 +2318,24 @@ CloseRequest
       </span>
       
       
+    </li><li name="com.twitter.finagle.mysql.ConnectionInitSql" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ConnectionInitSql"></a><a id="ConnectionInitSql:ConnectionInitSql"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#ConnectionInitSql" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="A stack module that executes a request when create a connection." href="ConnectionInitSql$.html"><span class="name">ConnectionInitSql</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">A stack module that executes a request when create a connection.</p><div class="fullcomment"><div class="comment cmt"><p>A stack module that executes a request when create a connection.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>that this needs to be added at the bottom of the stack near
+      the <code>prepConn</code> Role.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.CursoredStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CursoredStatement"></a><a id="CursoredStatement:CursoredStatement"></a>
       <span class="permalink">

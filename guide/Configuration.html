@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Configuration &#8212; Finagle 20.4.0 documentation</title>
+    <title>Configuration &#8212; Finagle 20.4.1 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -145,8 +145,8 @@ library and service owners which enables library owners to rollout functionality
 measured and controlled manner.</p>
 <div class="section" id="concepts">
 <h3>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h3>
-<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/Toggle.scala">Toggle</a> is a partial
-function from a type-<cite>T</cite> to <cite>Boolean</cite>. These are used to decide whether a feature is
+<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/Toggle.scala">Toggle</a> is a total
+function from a type-<cite>Int</cite> to <cite>Boolean</cite>. These are used to decide whether a feature is
 enabled or not for a given request or service configuration.</p>
 <p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ToggleMap.scala">ToggleMap</a> is
 a collection of <cite>Int</cite>-typed <cite>Toggles</cite>. It provides a means of getting a <cite>Toggle</cite>
@@ -171,7 +171,7 @@ used only at startup this is unnecessary.</p>
     <span class="n">newBackend</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span><span class="p">,</span> <span class="kt">Response</span><span class="o">])</span>
   <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Request</span><span class="p">,</span> <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
 
-  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">useNewBackend</span><span class="k">:</span> <span class="kt">Toggle</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="n">toggleMap</span><span class="o">(</span><span class="s">&quot;com.example.service.UseNewBackend&quot;</span><span class="o">)</span>
+  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">useNewBackend</span><span class="k">:</span> <span class="kt">Toggle</span> <span class="o">=</span> <span class="n">toggleMap</span><span class="o">(</span><span class="s">&quot;com.example.service.UseNewBackend&quot;</span><span class="o">)</span>
 
   <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span><span class="p">,</span> <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
     <span class="k">if</span> <span class="o">(</span><span class="n">useNewBackend</span><span class="o">(</span><span class="nc">Rng</span><span class="o">.</span><span class="n">threadLocal</span><span class="o">.</span><span class="n">nextInt</span><span class="o">()))</span>

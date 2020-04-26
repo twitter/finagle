@@ -696,9 +696,28 @@ for example.
         <span class="name">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Retrieve the transport's SSLSession (if any) from
-<a href="../context/Contexts$.html#local:com.twitter.finagle.context.LocalContext" class="extmbr" name="com.twitter.finagle.context.Contexts#local">com.twitter.finagle.context.Contexts.local</a>
-</p>
+      <p class="shortcomment cmt">Retrieve the peer certificate of the <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>, if
+one exists.</p>
+    </li><li name="com.twitter.finagle.transport.Transport#sslSessionInfo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sslSessionInfo:com.twitter.finagle.ssl.session.SslSessionInfo"></a><a id="sslSessionInfo:SslSessionInfo"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport$.html#sslSessionInfo:com.twitter.finagle.ssl.session.SslSessionInfo" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sslSessionInfo</span><span class="result">: <a href="../ssl/session/SslSessionInfo.html" class="extype" name="com.twitter.finagle.ssl.session.SslSessionInfo">SslSessionInfo</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Retrieve the <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>'s <span class="extype" name="SslSessionInfo">SslSessionInfo</span> from
+<a href="../context/Contexts$.html#local:com.twitter.finagle.context.LocalContext" class="extmbr" name="com.twitter.finagle.context.Contexts#local">com.twitter.finagle.context.Contexts.local</a> if available.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>'s <span class="extype" name="SslSessionInfo">SslSessionInfo</span> from
+<a href="../context/Contexts$.html#local:com.twitter.finagle.context.LocalContext" class="extmbr" name="com.twitter.finagle.context.Contexts#local">com.twitter.finagle.context.Contexts.local</a> if available. If none exists,
+a <span class="extype" name="NullSslSessionInfo">NullSslSessionInfo</span> is returned instead.
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

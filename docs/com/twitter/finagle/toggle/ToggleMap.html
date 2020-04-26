@@ -319,9 +319,9 @@ on every call.
         <div class="values members">
               <h3>Abstract Value Members</h3>
               <ol><li name="com.twitter.finagle.toggle.ToggleMap#apply" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="apply(id:String):com.twitter.finagle.toggle.Toggle[Int]"></a><a id="apply(String):Toggle[Int]"></a>
+      <a id="apply(id:String):com.twitter.finagle.toggle.Toggle"></a><a id="apply(String):Toggle"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/ToggleMap.html#apply(id:String):com.twitter.finagle.toggle.Toggle[Int]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/ToggleMap.html#apply(id:String):com.twitter.finagle.toggle.Toggle" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -330,7 +330,7 @@ on every call.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a></span>
       </span>
       
       <p class="shortcomment cmt">Get a <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> for this <code>id</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Get a <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> for this <code>id</code>.</p><p>The <code>Toggle.isDefined</code> method should return <code>false</code> if the
@@ -338,7 +338,7 @@ on every call.
 or it is currently not &quot;operating&quot; on that <code>id</code>.
 </p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>the identifying name of the <code>Toggle</code>.
           These should generally be fully qualified names to avoid conflicts
-          between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#get(id:String):com.twitter.finagle.toggle.Toggle[Integer]" class="extmbr" name="com.twitter.finagle.toggle.ToggleMap#get">get</a> for a Java friendly version</p></span></dd></dl></div>
+          between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#get(id:String):com.twitter.finagle.toggle.Toggle" class="extmbr" name="com.twitter.finagle.toggle.ToggleMap#get">get</a> for a Java friendly version</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.ToggleMap#iterator" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="iterator:Iterator[com.twitter.finagle.toggle.Toggle.Metadata]"></a><a id="iterator:Iterator[Metadata]"></a>
       <span class="permalink">
@@ -504,18 +504,18 @@ or it is currently not &quot;operating&quot; on that <code>id</code>.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.ToggleMap#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get(id:String):com.twitter.finagle.toggle.Toggle[Integer]"></a><a id="get(String):Toggle[Integer]"></a>
+      <a id="get(id:String):com.twitter.finagle.toggle.Toggle"></a><a id="get(String):Toggle"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/ToggleMap.html#get(id:String):com.twitter.finagle.toggle.Toggle[Integer]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/ToggleMap.html#get(id:String):com.twitter.finagle.toggle.Toggle" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<span class="extype" name="java.lang.Integer">Integer</span>]</span>
+        <span class="name">get</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a></span>
       </span>
       
       <p class="shortcomment cmt">Get a <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> for this <code>id</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Get a <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> for this <code>id</code>.  Java-friendly synonym for <code>apply</code>.</p><p>The <code>Toggle.isDefined</code> method should return <code>false</code> if the
@@ -647,7 +647,7 @@ or it is currently not &quot;operating&quot; on that <code>id</code>.
         <span class="name">orElse</span><span class="params">(<span name="that">that: <a href="" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a></span>
       </span>
       
-      <p class="shortcomment cmt">Creates a <a href="" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> which uses <code>this</code> before <code>that</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a <a href="" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> which uses <code>this</code> before <code>that</code>.</p><p><a href="#apply(id:String):com.twitter.finagle.toggle.Toggle[Int]" class="extmbr" name="com.twitter.finagle.toggle.ToggleMap#apply">apply</a> returns a <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> that uses the <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> from <code>this</code>
+      <p class="shortcomment cmt">Creates a <a href="" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> which uses <code>this</code> before <code>that</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a <a href="" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> which uses <code>this</code> before <code>that</code>.</p><p><a href="#apply(id:String):com.twitter.finagle.toggle.Toggle" class="extmbr" name="com.twitter.finagle.toggle.ToggleMap#apply">apply</a> returns a <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> that uses the <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> from <code>this</code>
 if it <code>isDefinedAt</code> for the input, before trying <code>that</code>.</p><p><a href="#iterator:Iterator[com.twitter.finagle.toggle.Toggle.Metadata]" class="extmbr" name="com.twitter.finagle.toggle.ToggleMap#iterator">iterator</a> includes metadata from both <code>self</code> and <code>that</code>,
 with <code>self</code>'s metadata taking precedence on conflicting ids.
 Note however that if a <code>ToggleMetadata.description</code> is not defined on <code>self</code>,

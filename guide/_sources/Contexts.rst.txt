@@ -79,8 +79,15 @@ Current retry attempt
 A broadcast ``Context`` that represents which retry attempt this request is.
 Will have ``attempt`` set to 0 if the request is not a retry.
 
-Current TLS peer certificate
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Current TLS session
+~~~~~~~~~~~~~~~~~~~
+
+``com.twitter.finagle.transport.Transport.sslSessionInfo`` _
+A local ``Context`` that represents the ``Transport``\s
+``com.twitter.finagle.ssl.session.SslSessionInfo``. If a TLS session is established,
+the ``SslSessionInfo`` provides access to the ``javax.net.ssl.SSLSession``, along with
+the ``sessionId``, ``cipherSuite``, and both ``local`` and ``peer`` certificates. This
+is an encompassing replacement for ``com.twitter.finagle.transport.Transport.peerCertificate``.
 
 ``com.twitter.finagle.transport.Transport.peerCertificate`` —
 A local ``Context`` that represents the ``Transport``\s

@@ -294,7 +294,7 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Log</span><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span></span>
+        <span class="name">Log</span><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftMethodIface">ThriftMethodIface</span> with <span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span></span>
       </span>
       </h4>
 
@@ -303,7 +303,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span>, <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span>, <span class="extype" name="com.twitter.scrooge.ThriftMethodIface">ThriftMethodIface</span>, <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -329,7 +329,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.Log"><span>Log</span></li><li class="in" name="com.twitter.scrooge.ThriftMethod"><span>ThriftMethod</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.Log"><span>Log</span></li><li class="in" name="com.twitter.scrooge.ThriftMethod"><span>ThriftMethod</span></li><li class="in" name="com.twitter.scrooge.ThriftMethodIface"><span>ThriftMethodIface</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -714,7 +714,7 @@ resources for using Finagle.
         <span class="name">name</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.Log">Log</a> → ThriftMethod</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.Log">Log</a> → ThriftMethodIface</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -816,7 +816,7 @@ resources for using Finagle.
         <span class="name">serviceName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.Log">Log</a> → ThriftMethod</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.Log">Log</a> → ThriftMethodIface</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -993,6 +993,8 @@ resources for using Finagle.
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.scrooge.ThriftMethod">
               <h3>Inherited from <span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span></h3>
+            </div><div class="parent" name="com.twitter.scrooge.ThriftMethodIface">
+              <h3>Inherited from <span class="extype" name="com.twitter.scrooge.ThriftMethodIface">ThriftMethodIface</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
