@@ -128,7 +128,7 @@ jobs:
       - name: dodo
         shell: bash
         run: |
-        curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version ${{ matrix.scala }} finagle
+          curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version ${{ matrix.scala }} finagle
       - name: test
         shell: bash
         run: |
