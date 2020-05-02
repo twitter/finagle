@@ -15,11 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         java: [openjdk@1.8, openjdk@1.11]
-        scala: [2.12.8]
-        use_netty: [false]
-        include:
-          - use_netty: true
-            experimental: true
+        scala: 2.12.8
+        use_netty: [true, false]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -85,11 +82,12 @@ jobs:
       fail-fast: false
       matrix:
         java: [openjdk@1.8, openjdk@1.11]
-        scala: [2.11.12]
-        use_netty: [false]
+        scala: 2.11.12
+        use_netty: [true, false]
         include:
           - scala: 2.13.1
-            use_netty: true
+            use_netty: [true, false]
+            java: [openjdk@1.8, openjdk@1.11]
             experimental: true
     steps:
       - uses: actions/checkout@v2
