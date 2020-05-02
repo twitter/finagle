@@ -1,0 +1,135 @@
+# twitter/finagle sbt build/test with coverage
+name: sbt-build
+
+on:
+  push:
+    branches: [ ccoco/WorkflowBuild ]
+
+jobs:
+  test-with-coverage: # generate coverage report for 2.12.8 on jdk1.8
+    runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: "-Dsbt.log.noformat=true"
+      USE_NETTY_SNAPSHOT: ${{ matrix.use_netty }}
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [openjdk@1.8, openjdk@1.11]
+        scala: [2.12.8]
+        use_netty: [false]
+          include:
+            - use_netty: true
+              experimental: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - uses: olafurpg/setup-scala@v7
+        with:
+          java-version: ${{ matrix.java }}
+      - name: cache/maven
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: cache/ivy2
+        uses: actions/cache@v1
+        with:
+          path: ~/.ivy2/cache
+          key: ${{ runner.os }}-${{ matrix.java }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
+      - name: cache/sbt
+        uses: actions/cache@v1
+        with:
+          path: ~/.sbt
+          key: ${{ runner.os }}-${{ matrix.java }}-sbt-${{ hashFiles('**/build.sbt') }}
+      - name: cache/dodo
+        uses: actions/cache@v1
+        with:
+          path: ~/.dodo
+          key: ${{ runner.os }}-dodo-${{ hashFiles('**/*.*') }}
+      - name: unset/sbt-opts # default $SBT_OPTS is irrelevant to sbt launcher
+        shell: bash
+        run: |
+          unset SBT_OPTS
+      - name: dodo
+        shell: bash
+        run: |
+          curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version ${{ matrix.scala }} finagle
+      - name: test
+        if: ${{ matrix.java != 'openjdk@1.8' }}
+        shell: bash
+        run: |
+          ./sbt ++${{ matrix.scala }} clean test
+      - name: test/with-coverage
+        if: ${{ matrix.java == 'openjdk@1.8' }}
+        shell: bash
+        run: |
+          ./sbt ++${{ matrix.scala }} clean coverage test coverageReport
+      - name: test/coverage-report/generate
+        if: ${{ matrix.java == 'openjdk@1.8' }}
+        shell: bash
+        run: |
+          ./sbt ++${{ matrix.scala }} coverageAggregate
+      - name: test/coverage-report/upload
+        if: ${{ success() && matrix.java == 'openjdk@1.8' }}
+        uses: codecov/codecov-action@v1
+  test:
+    runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: "-Dsbt.log.noformat=true"
+      USE_NETTY_SNAPSHOT: ${{ matrix.use_netty }}
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [openjdk@1.8, openjdk@1.11]
+        scala: [2.11.12]
+        use_netty: [false]
+        include:
+          - scala: 2.13.1
+            use_netty: true
+            experimental: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - uses: olafurpg/setup-scala@v7
+        with:
+          java-version: ${{ matrix.java }}
+      - name: cache/maven
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: cache/ivy2
+        uses: actions/cache@v1
+        with:
+          path: ~/.ivy2/cache
+          key: ${{ runner.os }}-${{ matrix.java }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
+      - name: cache/sbt
+        uses: actions/cache@v1
+        with:
+          path: ~/.sbt
+          key: ${{ runner.os }}-${{ matrix.java }}-sbt-${{ hashFiles('**/build.sbt') }}
+      - name: cache/dodo
+        uses: actions/cache@v1
+        with:
+          path: ~/.dodo
+          key: ${{ runner.os }}-dodo-${{ hashFiles('**/*.*') }}
+      - name: unset/sbt-opts # default $SBT_OPTS is irrelevant to sbt launcher
+        shell: bash
+        run: |
+          unset SBT_OPTS
+      - name: dodo
+        shell: bash
+        run: |
+        curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version ${{ matrix.scala }} finagle
+      - name: test
+        shell: bash
+        run: |
+          ./sbt ++${{ matrix.scala }} clean test
