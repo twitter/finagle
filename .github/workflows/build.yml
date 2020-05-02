@@ -16,10 +16,10 @@ jobs:
       matrix:
         java: [openjdk@1.8, openjdk@1.11]
         scala: [2.12.8]
-        use_netty: [ 'false' ]
-          include:
-            - use_netty: 'true'
-              experimental: true
+        use_netty: [false]
+        include:
+          - use_netty: true
+            experimental: true
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
@@ -86,10 +86,10 @@ jobs:
       matrix:
         java: [openjdk@1.8, openjdk@1.11]
         scala: [2.11.12]
-        use_netty: [ 'false' ]
+        use_netty: [false]
         include:
           - scala: 2.13.1
-            use_netty: 'true'
+            use_netty: true
             experimental: true
     steps:
       - uses: actions/checkout@v2
