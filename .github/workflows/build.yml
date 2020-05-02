@@ -86,8 +86,8 @@ jobs:
         use_netty: [true, false]
         include:
           - scala: 2.13.1
-            use_netty: [true, false]
-            java: [openjdk@1.8, openjdk@1.11]
+            use_netty: false
+            java: openjdk@1.8
             experimental: true
     steps:
       - uses: actions/checkout@v2
