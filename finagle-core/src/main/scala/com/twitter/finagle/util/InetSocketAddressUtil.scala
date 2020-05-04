@@ -1,13 +1,48 @@
 package com.twitter.finagle.util
 
-import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
+import java.net.{Inet4Address, Inet6Address, InetAddress, InetSocketAddress,
+  NetworkInterface, SocketAddress, SocketException, UnknownHostException}
+import com.twitter.logging.Logger
 
 object InetSocketAddressUtil {
 
   type HostPort = (String, Int)
 
+  private[this] val log = Logger()
+
   private[finagle] val unconnected =
     new SocketAddress { override def toString = "unconnected" }
+
+  private[this] lazy val anyInterfaceSupportsIpV6: Boolean = {
+    try {
+      val interfaces = NetworkInterface.getNetworkInterfaces();
+      while (interfaces.hasMoreElements()) {
+        val iface = interfaces.nextElement();
+        val addresses = iface.getInetAddresses();
+        while (addresses.hasMoreElements()) {
+          val inetAddress = addresses.nextElement();
+          if (inetAddress.isInstanceOf[Inet6Address] && !inetAddress.isAnyLocalAddress() &&
+            !inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()) {
+            true;
+          }
+        }
+      }
+    }
+    catch {
+      case e: SocketException => {
+        log.debug("Unable to detect if any interface supports IPv6, assuming IPv4-only", e);
+      }
+    }
+    false;
+  }
+
+  private[finagle] def getAllByName(host: String): Array[InetAddress] = {
+    def isAddressSupported(a: InetAddress) = {
+      if (!anyInterfaceSupportsIpV6) a.isInstanceOf[Inet4Address]
+      else true
+    }
+    InetAddress.getAllByName(host).filter(isAddressSupported(_))
+  }
 
   /** converts 0.0.0.0 -> public ip in bound ip */
   def toPublic(bound: SocketAddress): SocketAddress = {
@@ -57,8 +92,7 @@ object InetSocketAddressUtil {
   private[finagle] def resolveHostPortsSeq(hostPorts: Seq[HostPort]): Seq[Seq[SocketAddress]] =
     hostPorts.map {
       case (host, port) =>
-        InetAddress
-          .getAllByName(host)
+          getAllByName(host)
           .iterator
           .map { addr => new InetSocketAddress(addr, port) }
           .toSeq
