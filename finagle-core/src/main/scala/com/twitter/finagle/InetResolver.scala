@@ -33,7 +33,7 @@ private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: Fu
     } else {
       dnsLookups.incr()
       dnsCond.acquire().flatMap { permit =>
-        resolvePool(InetAddress.getAllByName(host).toSeq)
+        resolvePool(InetSocketAddressUtil.getAllByName(host).toSeq)
           .onFailure { e =>
             log.debug(s"Failed to resolve $host. Error $e")
             dnsLookupFailures.incr()
