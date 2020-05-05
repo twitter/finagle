@@ -62,6 +62,11 @@ New Features
 * finagle-thrift/thriftmux: Thrift and ThriftMux client side can set a sharable
   TReusableBuffer by `withTReusableBufferFactory`. ``PHAB_ID=D452763``
 
+* finagle: Server side TLS snooping has been added to all server implementations with the
+  exception of Mux/ThriftMux. This feature allows a server to select between a cleartext
+  and TLS connection based on identifying the initial bytes as a TLS record of type handshake.
+  ``PHAB_ID=D436225``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

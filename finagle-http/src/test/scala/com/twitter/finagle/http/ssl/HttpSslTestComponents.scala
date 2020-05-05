@@ -36,6 +36,9 @@ object HttpSslTestComponents {
     trustCredentials = TrustCredentials.CertCollection(chainCert)
   )
 
+  val unauthenticatedServerConfig: SslServerConfiguration =
+    SslServerConfiguration(keyCredentials = KeyCredentials.CertAndKey(serverCert, serverKey))
+
   def getPort(server: ListeningServer): Int =
     server.boundAddress.asInstanceOf[InetSocketAddress].getPort
 

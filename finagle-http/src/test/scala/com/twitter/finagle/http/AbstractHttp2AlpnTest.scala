@@ -2,8 +2,9 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle
 import com.twitter.finagle.Service
+import com.twitter.finagle.http.ssl.HttpSslTestComponents
 import com.twitter.finagle.liveness.FailureDetector
-import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
+import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.InMemoryStatsReceiver
@@ -24,15 +25,8 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
     SslClientConfiguration(trustCredentials = TrustCredentials.CertCollection(intermediateFile))
   }
 
-  def serverConfiguration(): SslServerConfiguration = {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    SslServerConfiguration(keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile))
-  }
+  def serverConfiguration(): SslServerConfiguration =
+    HttpSslTestComponents.unauthenticatedServerConfig
 
   // we need this to turn off ALPN in ci
   override def skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY")

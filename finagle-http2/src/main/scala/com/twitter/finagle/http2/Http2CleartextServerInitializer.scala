@@ -40,30 +40,31 @@ final private[finagle] class Http2CleartextServerInitializer(
   private[this] val upgradedCounter = upgradeStatsReceiver.counter("success")
   private[this] val ignoredCounter = upgradeStatsReceiver.counter("ignored")
 
-  def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
-    override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
-      if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
-        val (codec, handler) = MultiplexHandlerBuilder.serverFrameCodec(params, initializer)
-        MultiplexHandlerBuilder.addStreamsGauge(statsReceiver, codec, channel)
+  private[this] def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory =
+    new UpgradeCodecFactory {
+      override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
+        if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
+          val (codec, handler) = MultiplexHandlerBuilder.serverFrameCodec(params, initializer)
+          MultiplexHandlerBuilder.addStreamsGauge(statsReceiver, codec, channel)
 
-        new Http2ServerUpgradeCodec(codec, handler) {
-          override def upgradeTo(
-            ctx: ChannelHandlerContext,
-            upgradeRequest: FullHttpRequest
-          ): Unit = {
-            upgradedCounter.incr()
-            // we turn off backpressure because Http2 only works with autoread on for now
-            ctx.channel.config.setAutoRead(true)
-            super.upgradeTo(ctx, upgradeRequest)
+          new Http2ServerUpgradeCodec(codec, handler) {
+            override def upgradeTo(
+              ctx: ChannelHandlerContext,
+              upgradeRequest: FullHttpRequest
+            ): Unit = {
+              upgradedCounter.incr()
+              // we turn off backpressure because Http2 only works with autoread on for now
+              ctx.channel.config.setAutoRead(true)
+              super.upgradeTo(ctx, upgradeRequest)
 
-            // we insert immediately after the Http2MultiplexHandler#0, which we know is the
-            // last Http2 frames before they're converted to Http/1.1
-            Http2PipelineInitializer.setupServerPipeline(ctx.pipeline, params)
+              // we insert immediately after the Http2MultiplexHandler#0, which we know is the
+              // last Http2 frames before they're converted to Http/1.1
+              Http2PipelineInitializer.setupServerPipeline(ctx.pipeline, params)
+            }
           }
-        }
-      } else null
+        } else null
+      }
     }
-  }
 
   def initChannel(ch: SocketChannel): Unit = {
     val p = ch.pipeline

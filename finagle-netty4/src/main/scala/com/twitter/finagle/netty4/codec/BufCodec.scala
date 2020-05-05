@@ -62,7 +62,7 @@ private[finagle] object BufCodec extends ChannelDuplexHandler {
     msg match {
       case bb: ByteBuf =>
         val result =
-          try ByteBufConversion.copyByteBufToBuf(bb)
+          try ByteBufConversion.readByteBufToBuf(bb)
           finally bb.release()
 
         ctx.fireChannelRead(result)

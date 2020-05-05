@@ -31,10 +31,7 @@ private[finagle] object Http2Listener {
 
     val initializer =
       if (configuration.isDefined)
-        new Http2TlsServerInitializer(
-          _: ChannelInitializer[Channel],
-          params
-        )
+        new TlsSnoopingInitializer(_: ChannelInitializer[Channel], params)
       else new Http2CleartextServerInitializer(_: ChannelInitializer[Channel], params)
 
     new Http2Listener(params, initializer, mIn, mOut)
@@ -50,12 +47,14 @@ private[http2] class Http2Listener[In, Out](
 
   private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 
+  private[this] def pipelineInit(pipeline: ChannelPipeline): Unit = {
+    channels.add(pipeline.channel)
+    pipeline.addLast(HttpCodecName, newHttpServerCodec(params))
+    initServer(params)(pipeline)
+  }
+
   private[this] val underlyingListener = Netty4Listener[In, Out, TransportContext](
-    pipelineInit = { pipeline: ChannelPipeline =>
-      channels.add(pipeline.channel)
-      pipeline.addLast(HttpCodecName, newHttpServerCodec(params))
-      initServer(params)(pipeline)
-    },
+    pipelineInit = pipelineInit(_),
     params = params,
     setupMarshalling = setupMarshalling,
     transportFactory = { ch: Channel =>

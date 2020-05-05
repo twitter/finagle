@@ -1,13 +1,6 @@
 package com.twitter.finagle.ssl.server
 
-import com.twitter.finagle.ssl.{
-  ApplicationProtocols,
-  CipherSuites,
-  ClientAuth,
-  KeyCredentials,
-  Protocols,
-  TrustCredentials
-}
+import com.twitter.finagle.ssl._
 
 /**
  * SslServerConfiguration represents the collection of parameters that an engine factory

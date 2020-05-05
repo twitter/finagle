@@ -13,8 +13,29 @@ private[finagle] object ByteBufConversion {
     new Buf.ByteArray(bb.array, begin, end)
   }
 
-  /** Make a copied `Buf.ByteArray` representation of the provided `ByteBuf`. */
-  def copyByteBufToBuf(bb: ByteBuf): Buf.ByteArray = {
+  /**
+   * Make a copied `Buf.ByteArray` representation of the provided `ByteBuf`.
+   *
+   * @note that this method __does not__ drain the bytes from the provided `ByteBuf` or
+   *       manipulate the reference count.
+   * @see [[readByteBufToBuf]] for a function that drains the bytes from the provided `ByteBuf`.
+   */
+  def copyByteBufToBuf(bb: ByteBuf): Buf = {
+    val data = new Array[Byte](bb.readableBytes)
+    // note: ByteBuf.getBytes does not modify the ByteBuf.
+    bb.getBytes(bb.readerIndex, data)
+    Buf.ByteArray.Owned(data)
+  }
+
+  /**
+   * Make a copied `Buf.ByteArray` representation of the provided `ByteBuf`.
+   *
+   * @note that this method __does__ drain the bytes from the provided `ByteBuf` but doesn't
+   *       manipulate the reference count.
+   * @see [[copyByteBufToBuf]] for a function that __does not__ drain the bytes from the provided
+   *     `ByteBuf`.
+   */
+  def readByteBufToBuf(bb: ByteBuf): Buf.ByteArray = {
     val array = new Array[Byte](bb.readableBytes)
     bb.readBytes(array)
     new io.Buf.ByteArray(array, 0, array.length)
@@ -48,6 +69,6 @@ private[finagle] object ByteBufConversion {
     else
       try {
         if (buf.hasArray) heapToBuf(buf)
-        else copyByteBufToBuf(buf)
+        else readByteBufToBuf(buf)
       } finally buf.release()
 }
