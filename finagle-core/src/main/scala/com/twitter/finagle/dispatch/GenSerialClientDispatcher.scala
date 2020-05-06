@@ -61,7 +61,10 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
         p.setException(Failure.adapt(intr, FailureFlags.Interrupted))
         Future.Done
       case None =>
-        Trace.recordClientAddr(localAddress)
+        val tracing = Trace()
+        if (tracing.isActivelyTracing) {
+          tracing.recordClientAddr(localAddress)
+        }
 
         p.setInterruptHandler {
           case intr =>
