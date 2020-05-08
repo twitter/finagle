@@ -17,7 +17,6 @@ private[twitter] case class EagerConnections private (isEnabled: () => Boolean) 
 
 private[twitter] object EagerConnections {
   private val toggle = CoreToggles(apertureEagerConnections.name)
-  private val serverHashCode = ServerInfo().id.hashCode
 
   // re-evaluate the default on each call for "kill-switch" functionality via the toggle.
   // The flag value takes precedence over the toggle
@@ -25,9 +24,11 @@ private[twitter] object EagerConnections {
     apertureEagerConnections.get match {
       case Some(eagerConnections) => eagerConnections
       case None =>
+        // we lazily grab the server id until the toggle is evaluated to ensure
+        // server initialization has completed.
+        val serverHashCode = ServerInfo().id.hashCode
         // protect against the toggle not being present
-        if (toggle.isDefinedAt(serverHashCode)) toggle(hashCode)
-        else false
+        toggle.isDefinedAt(serverHashCode) && toggle(serverHashCode)
     }
   }
 
