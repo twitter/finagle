@@ -8,8 +8,9 @@ import com.twitter.finagle.client.{
 }
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
-import com.twitter.finagle.mux.{OpportunisticTlsParams, WithCompressionPreferences}
 import com.twitter.finagle.mux.transport.{MuxFailure, OpportunisticTls}
+import com.twitter.finagle.mux.{OpportunisticTlsParams, WithCompressionPreferences}
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -26,6 +27,12 @@ import com.twitter.finagle.stats.{
   StatsReceiver
 }
 import com.twitter.finagle.thrift._
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
+import com.twitter.finagle.thrift.exp.partitioning.{
+  PartitioningParams,
+  ThriftPartitioningService,
+  WithThriftPartitioningStrategy
+}
 import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
 import com.twitter.finagle.thriftmux.pushsession.MuxDowngradingNegotiator
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
@@ -34,8 +41,8 @@ import com.twitter.io.Buf
 import com.twitter.scrooge.TReusableBuffer
 import com.twitter.util._
 import java.net.SocketAddress
-import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.TException
+import org.apache.thrift.protocol.TProtocolFactory
 
 /**
  * The `ThriftMux` object is both a `com.twitter.finagle.Client` and a
@@ -111,12 +118,30 @@ object ThriftMux
    */
   val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] = {
     val stack = ThriftMuxUtil.protocolRecorder +: Mux.client.stack
+
+    /** ThriftMux helper for message marshalling */
+    object ThriftMuxMarshallable extends ReqRepMarshallable[mux.Request, mux.Response] {
+      def framePartitionedRequest(
+        rawRequest: ThriftClientRequest,
+        original: mux.Request
+      ): mux.Request =
+        mux.Request(
+          original.destination,
+          original.contexts,
+          Buf.ByteArray.Owned(rawRequest.message))
+      def isOneway(original: mux.Request): Boolean = false
+      def fromResponseToBytes(rep: mux.Response): Array[Byte] =
+        Buf.ByteArray.Owned.extract(rep.body)
+      val emptyResponse: mux.Response = mux.Response.empty
+    }
+
     // this module does Tracing and as such it's important to be added
     // after the tracing context is initialized.
-    stack.insertAfter(
-      TraceInitializerFilter.role,
-      thriftmux.service.ClientTraceAnnotationsFilter.module
-    )
+    stack
+      .insertAfter(
+        TraceInitializerFilter.role,
+        thriftmux.service.ClientTraceAnnotationsFilter.module)
+      .insertAfter(BindingFactory.role, ThriftPartitioningService.module(ThriftMuxMarshallable))
   }
 
   /**
@@ -172,6 +197,7 @@ object ThriftMux
       with WithClientSession[Client]
       with WithSessionQualifier[Client]
       with WithDefaultLoadBalancer[Client]
+      with WithThriftPartitioningStrategy[Client]
       with ThriftRichClient
       with OpportunisticTlsParams[Client]
       with WithCompressionPreferences[Client] {
@@ -378,6 +404,8 @@ object ThriftMux
       new SessionQualificationParams(this)
     override val withAdmissionControl: ClientAdmissionControlParams[Client] =
       new ClientAdmissionControlParams(this)
+    override val withPartitioning: PartitioningParams[Client] =
+      new PartitioningParams(this)
 
     override def withLabel(label: String): Client = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Client =

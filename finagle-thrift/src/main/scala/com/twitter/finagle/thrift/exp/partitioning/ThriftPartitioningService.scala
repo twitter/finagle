@@ -13,18 +13,46 @@ import com.twitter.finagle.{ServiceFactory, Stack}
  */
 private[finagle] object ThriftPartitioningService {
 
-  case class Param(strategy: PartitioningStrategy)
+  case class Strategy(strategy: PartitioningStrategy)
 
-  object Param {
-    implicit val param: Stack.Param[Param] =
-      Stack.Param(Param(Disabled))
+  object Strategy {
+    implicit val strategy: Stack.Param[Strategy] =
+      Stack.Param(Strategy(Disabled))
+  }
+
+  /**
+   * A helper class to provide helper methods for different Protocols when marshalling
+   * requests and responses. Now distinctions are between Thrift messages and
+   * ThriftMux messages.
+   */
+  trait ReqRepMarshallable[Req, Rep] {
+
+    /**
+     * Frames a new Request by using the serialized request content req, and properties
+     * in the original request.
+     */
+    def framePartitionedRequest(thriftClientRequest: ThriftClientRequest, original: Req): Req
+
+    /**
+     * Gets the oneway property from the original request.
+     * Oneway methods will generate code that does not wait for a response.
+     */
+    def isOneway(original: Req): Boolean
+
+    /** Gets the serialized data from the response body */
+    def fromResponseToBytes(rep: Rep): Array[Byte]
+
+    /** Returns an empty response of the Response type */
+    def emptyResponse: Rep
   }
 
   val role: Stack.Role = Stack.Role("ThriftPartitioningService")
   val description: String = "Apply partition awareness on the Thrift client."
 
-  def module: Stack.Module[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
-    new Stack.Module[ServiceFactory[ThriftClientRequest, Array[Byte]]] {
+  def module[Req, Rep](
+    thriftMarshallable: ReqRepMarshallable[Req, Rep]
+  ): Stack.Module[ServiceFactory[Req, Rep]] =
+    new Stack.Module[ServiceFactory[Req, Rep]] {
       val parameters = Seq(
         implicitly[Stack.Param[LoadBalancerFactory.Dest]],
         implicitly[Stack.Param[finagle.param.Stats]]
@@ -32,15 +60,21 @@ private[finagle] object ThriftPartitioningService {
 
       final override def make(
         params: Stack.Params,
-        next: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]]
-      ): Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = {
-        params[Param].strategy match {
+        next: Stack[ServiceFactory[Req, Rep]]
+      ): Stack[ServiceFactory[Req, Rep]] = {
+        params[Strategy].strategy match {
           case Disabled => next
           case hashingStrategy: HashingPartitioningStrategy =>
             val param.KeyHasher(hasher) = params[param.KeyHasher]
             val param.NumReps(numReps) = params[param.NumReps]
             val service =
-              new ThriftHashingPartitioningService(next, params, hashingStrategy, hasher, numReps)
+              new ThriftHashingPartitioningService[Req, Rep](
+                next,
+                thriftMarshallable,
+                params,
+                hashingStrategy,
+                hasher,
+                numReps)
             Stack.leaf(role, ServiceFactory.const(service))
         }
       }

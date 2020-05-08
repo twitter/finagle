@@ -138,7 +138,7 @@ private[partitioning] object PartitioningStrategy {
  */
 sealed trait PartitioningStrategy
 
-private[finagle] object HashingPartitioningStrategy {
+private[partitioning] object HashingPartitioningStrategy {
 
   /**
    * Thrift requests not specifying hashing keys will fall in here. This allows a

@@ -4,23 +4,28 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.delivery.thriftscala.DeliveryService._
 import com.twitter.delivery.thriftscala._
 import com.twitter.finagle.addr.WeightedAddress
-import com.twitter.finagle.param.Stats
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.{
   HashingStrategyException,
   NoPartitioningKeys
 }
 import com.twitter.finagle.partitioning.zk.ZkMetadata
-import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy._
-import com.twitter.finagle.{Address, ListeningServer, Name, Thrift}
+import com.twitter.finagle.thrift.{ThriftRichClient, ThriftRichServer}
+import com.twitter.finagle.{Address, ListeningServer, Name, Stack}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Return, Throw}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
 
-class PartitionAwareClientEndToEndTest extends FunSuite {
+abstract class PartitionAwareClientEndToEndTest extends FunSuite {
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)
+
+  type ClientType <: Stack.Parameterized[ClientType] with WithThriftPartitioningStrategy[ClientType] with ThriftRichClient
+
+  def clientImpl(): ClientType
+
+  def serverImpl(): ThriftRichServer
 
   trait Ctx {
     val addrInfo1 = AddrInfo("one", 12345)
@@ -62,11 +67,7 @@ class PartitionAwareClientEndToEndTest extends FunSuite {
       val inetAddresses = (1 to 5)
         .map(_ => new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
 
-      inetAddresses.map { inet =>
-        Thrift.server
-          .configured(Stats(NullStatsReceiver))
-          .serveIface(inet, iface)
-      }
+      inetAddresses.map(inet => serverImpl().serveIface(inet, iface))
     }
   }
 
@@ -110,7 +111,7 @@ class PartitionAwareClientEndToEndTest extends FunSuite {
         newAddress(inet, 1)
       }
 
-      val client = Thrift.client
+      val client = clientImpl()
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 
       val expectedOneNode =
@@ -129,7 +130,7 @@ class PartitionAwareClientEndToEndTest extends FunSuite {
 
   test("with consistent hashing strategy") {
     new PartitioningCtx {
-      val client = Thrift.client.withPartitioning
+      val client = clientImpl().withPartitioning
         .strategy(hashingPartitioningStrategy)
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 
@@ -152,7 +153,7 @@ class PartitionAwareClientEndToEndTest extends FunSuite {
 
   test("with consistent hashing strategy, unspecified endpoint returns error") {
     new PartitioningCtx {
-      val client = Thrift.client.withPartitioning
+      val client = clientImpl().withPartitioning
         .strategy(hashingPartitioningStrategy)
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 
@@ -173,7 +174,7 @@ class PartitionAwareClientEndToEndTest extends FunSuite {
     }
 
     new PartitioningCtx {
-      val client = Thrift.client.withPartitioning
+      val client = clientImpl().withPartitioning
         .strategy(erroredHashingPartitioningStrategy)
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 

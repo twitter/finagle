@@ -3,7 +3,6 @@ package com.twitter.finagle.partitioning
 import com.twitter.finagle
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.param.Logger
 import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing._
 import com.twitter.util._
@@ -85,8 +84,6 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
   keyHasher: KeyHasher = KeyHasher.KETAMA,
   numReps: Int = ConsistentHashPartitioningService.DefaultNumReps)
     extends PartitioningService[Req, Rep] {
-
-  private[this] val logger = params[Logger].log
 
   private[this] val nodeManager = new HashRingNodeManager(underlying, params, numReps)
 

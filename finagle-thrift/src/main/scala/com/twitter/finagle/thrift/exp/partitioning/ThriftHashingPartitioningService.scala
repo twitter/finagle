@@ -6,8 +6,9 @@ import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.{
   NoPartitioningKeys
 }
 import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, PartitioningService}
+import com.twitter.finagle.thrift.ClientDeserializeCtx
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.RequestMerger
-import com.twitter.finagle.thrift.{ClientDeserializeCtx, ThriftClientRequest}
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
@@ -21,13 +22,14 @@ import scala.util.control.NonFatal
  * A [[ConsistentHashPartitioningService]] for Thrift messages.
  * @see [[PartitioningService]].
  */
-final private[partitioning] class ThriftHashingPartitioningService(
-  underlying: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]],
+final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
+  underlying: Stack[ServiceFactory[Req, Rep]],
+  thriftMarshallable: ReqRepMarshallable[Req, Rep],
   params: Stack.Params,
   hashingStrategy: HashingPartitioningStrategy,
   keyHasher: KeyHasher = KeyHasher.MURMUR3,
   numReps: Int = ConsistentHashPartitioningService.DefaultNumReps)
-    extends ConsistentHashPartitioningService[ThriftClientRequest, Array[Byte], Any](
+    extends ConsistentHashPartitioningService[Req, Rep, Any](
       underlying,
       params,
       keyHasher,
@@ -40,13 +42,13 @@ final private[partitioning] class ThriftHashingPartitioningService(
     Buf.ByteArray.Owned.extract(Buf.U32BE(key.hashCode()))
 
   final override protected def getPartitionFor(
-    partitionedRequest: ThriftClientRequest
-  ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
+    partitionedRequest: Req
+  ): Future[Service[Req, Rep]] = {
     val keyMap = getKeyAndRequestMap
-    // HashingPartitioningStrategy.defaultHashingKeyAndRequest set the key as None for
-    // undefined endpoints(method) in PartitioningStrategy. It indicates those requests
-    // for certain endpoint won't be served in PartitioningService.
     if (keyMap.isEmpty || keyMap.head._1 == None) {
+      // HashingPartitioningStrategy.defaultHashingKeyAndRequest set the key as None for
+      // undefined endpoints(method) in PartitioningStrategy. It indicates those requests
+      // for certain endpoint won't be served in PartitioningService.
       failedProcessRequest(partitionedRequest)
     } else {
       // All keys in the request are assumed to belong to the same partition, so use the
@@ -55,7 +57,7 @@ final private[partitioning] class ThriftHashingPartitioningService(
     }
   }
 
-  final protected def failedProcessRequest(req: ThriftClientRequest): Future[Nothing] = {
+  final protected def failedProcessRequest(req: Req): Future[Nothing] = {
     val ex = new NoPartitioningKeys(
       s"NoPartitioningKeys in for the thrift method: ${ClientDeserializeCtx.get.rpcName.getOrElse(None)}")
     if (logger.isLoggable(Level.DEBUG))
@@ -63,20 +65,17 @@ final private[partitioning] class ThriftHashingPartitioningService(
     Future.exception(ex)
   }
 
-  final override protected def getPartitionKeys(request: ThriftClientRequest): Seq[Any] =
+  final override protected def getPartitionKeys(request: Req): Seq[Any] =
     getKeyAndRequestMap.map(_._1).toSeq
 
-  final protected def createPartitionRequestForKeys(
-    original: ThriftClientRequest,
-    keys: Seq[Any]
-  ): ThriftClientRequest = {
+  final protected def createPartitionRequestForKeys(original: Req, keys: Seq[Any]): Req = {
     val requests = keys.flatMap(getKeyAndRequestMap.get)
     val requestSerializer = new ThriftRequestSerializer(params)
 
     val requestMerger: String => Option[RequestMerger[ThriftStructIface]] = { rpcName: String =>
       hashingStrategy match {
-        case client: ClientHashingStrategy =>
-          client.requestMergerRegistry.get(rpcName)
+        case clientHashingStrategy: ClientHashingStrategy =>
+          clientHashingStrategy.requestMergerRegistry.get(rpcName)
       }
     }
 
@@ -87,11 +86,11 @@ final private[partitioning] class ThriftHashingPartitioningService(
       requestSerializer.serialize(
         rpcName,
         merger(requests).asInstanceOf[ThriftStruct],
-        original.oneway)
+        thriftMarshallable.isOneway(original))
     }
 
     serializedRequest match {
-      case Some(r) => r
+      case Some(r) => thriftMarshallable.framePartitionedRequest(r, original)
       case None =>
         throw new IllegalArgumentException(
           s"cannot find the request merger for thrift method: " +
@@ -99,13 +98,13 @@ final private[partitioning] class ThriftHashingPartitioningService(
     }
   }
 
-  final protected def isSinglePartition(request: ThriftClientRequest): Future[Boolean] =
+  final protected def isSinglePartition(request: Req): Future[Boolean] =
     Future.value(allKeysForSinglePartition(request))
 
   final protected def mergeResponses(
-    originalReq: ThriftClientRequest,
-    results: PartitioningService.PartitionedResults[ThriftClientRequest, Array[Byte]]
-  ): Array[Byte] = {
+    originalReq: Req,
+    results: PartitioningService.PartitionedResults[Req, Rep]
+  ): Rep = {
     val successesRep = results.successes.map(_._2)
     val failuresRep = results.failures.map(_._2)
 
@@ -128,7 +127,9 @@ final private[partitioning] class ThriftHashingPartitioningService(
     deserializedFailures ++= failuresRep
 
     successesRep.foreach { response =>
-      ClientDeserializeCtx.get.deserializeFromBatched(response) match {
+      ClientDeserializeCtx.get.deserializeFromBatched(
+        thriftMarshallable.fromResponseToBytes(response)
+      ) match {
         case Return(rep) => deserializedSuccesses += rep
         case Throw(t) => deserializedFailures += t
       }
@@ -141,7 +142,7 @@ final private[partitioning] class ThriftHashingPartitioningService(
     // return an empty response.
     // Thrift client get the deserialized response from the field.
     ClientDeserializeCtx.get.mergedDeserializedResponse(mergedResponse)
-    Array.emptyByteArray
+    thriftMarshallable.emptyResponse
   }
 
   // apply the user provided getHashingKeyAndRequest to the original request,

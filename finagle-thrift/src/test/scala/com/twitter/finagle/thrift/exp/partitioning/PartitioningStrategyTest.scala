@@ -61,10 +61,9 @@ class PartitioningStrategyTest extends FunSuite with MockitoSugar {
   }
 
   test("unset endpoints behavior has default None to original request") {
-    class T extends java.io.Serializable
     val hashingStrategy = new ClientHashingStrategy {
       def getHashingKeyAndRequest: ToPartitionedMap = {
-        case a: ARequest => Map(new T -> a)
+        case a: ARequest => Map(1 -> a)
         case b: BRequest => Map("some hashing key" -> b)
       }
     }

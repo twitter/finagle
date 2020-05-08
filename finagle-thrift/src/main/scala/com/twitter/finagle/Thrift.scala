@@ -14,6 +14,7 @@ import com.twitter.finagle.param.{
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
 import com.twitter.finagle.thrift.exp.partitioning.{
   PartitioningParams,
   ThriftPartitioningService,
@@ -230,10 +231,23 @@ object Thrift
       }
 
     // We must do 'preparation' this way in order to let Finagle set up tracing & so on.
-    private val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
+    private val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = {
+
+      /** Thrift helper for message marshalling */
+      object ThriftMarshallable extends ReqRepMarshallable[ThriftClientRequest, Array[Byte]] {
+        def framePartitionedRequest(
+          rawRequest: ThriftClientRequest,
+          original: ThriftClientRequest
+        ): ThriftClientRequest = rawRequest
+        def isOneway(original: ThriftClientRequest): Boolean = original.oneway
+        def fromResponseToBytes(rep: Array[Byte]): Array[Byte] = rep
+        val emptyResponse: Array[Byte] = Array.emptyByteArray
+      }
+
       StackClient.newStack
         .replace(StackClient.Role.prepConn, preparer)
-        .insertAfter(BindingFactory.role, ThriftPartitioningService.module)
+        .insertAfter(BindingFactory.role, ThriftPartitioningService.module(ThriftMarshallable))
+    }
 
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("thrift")

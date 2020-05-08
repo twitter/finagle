@@ -16,7 +16,7 @@ class PartitioningParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[
    * @param partitioningStrategy see [[PartitioningStrategy]]
    */
   def strategy(partitioningStrategy: PartitioningStrategy): A =
-    self.configured(ThriftPartitioningService.Param(partitioningStrategy))
+    self.configured(ThriftPartitioningService.Strategy(partitioningStrategy))
 
   /**
    * Whether to eject failing hosts from the hash ring based on failure accrual.
