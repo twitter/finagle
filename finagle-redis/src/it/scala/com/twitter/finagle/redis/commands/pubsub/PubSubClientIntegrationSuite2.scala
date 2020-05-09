@@ -70,12 +70,12 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     }
   }
 
-  def subscribeAndAssert(channels: Buf*)(implicit ctx: TestContext) {
+  def subscribeAndAssert(channels: Buf*)(implicit ctx: TestContext): Unit = {
     ctx.subscribe(channels)
     assertSubscribed(channels: _*)
   }
 
-  def assertSubscribed(channels: Buf*)(implicit ctx: TestContext) {
+  def assertSubscribed(channels: Buf*)(implicit ctx: TestContext): Unit = {
     channels.foreach { channel =>
       assert(ctx.pubSubNumSub(channel) == 1)
       val messages = (1 to 10).map(_ => ctx.publish(channel))
@@ -83,19 +83,19 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     }
   }
 
-  def pSubscribeAndAssert(channels: Buf*)(implicit ctx: TestContext) {
+  def pSubscribeAndAssert(channels: Buf*)(implicit ctx: TestContext): Unit = {
     ctx.pSubscribe(channels)
     assertPSubscribed(channels: _*)
   }
 
-  def assertPSubscribed(channels: Buf*)(implicit ctx: TestContext) {
+  def assertPSubscribed(channels: Buf*)(implicit ctx: TestContext): Unit = {
     channels.foreach { channel =>
       val messages = (1 to 10).map(_ => ctx.publish(channel, Some(channel)))
       messages.foreach(message => assert(ctx.recvCount(message) == 1))
     }
   }
 
-  def unsubscribeAndAssert(channels: Buf*)(implicit ctx: TestContext) {
+  def unsubscribeAndAssert(channels: Buf*)(implicit ctx: TestContext): Unit = {
     ctx.unsubscribe(channels)
     channels.foreach { channel =>
       assert(ctx.pubSubNumSub(channel) == 0)
@@ -103,12 +103,12 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     }
   }
 
-  def pUnsubscribeAndAssert(channels: Buf*)(implicit ctx: TestContext) {
+  def pUnsubscribeAndAssert(channels: Buf*)(implicit ctx: TestContext): Unit = {
     ctx.pUnsubscribe(channels)
     channels.foreach { channel => the[TimeoutException] thrownBy ctx.publish(channel) }
   }
 
-  def ensureMasterReplica() {
+  def ensureMasterReplica(): Unit = {
     replica.withClient { client =>
       val masterAddr = master.address.get
       result(
@@ -125,7 +125,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     }
   }
 
-  def runTest(test: TestContext => Unit) {
+  def runTest(test: TestContext => Unit): Unit = {
     master.withClient { masterClnt =>
       replica.withClient { replicaClnt =>
         val dest = Seq(master, replica)

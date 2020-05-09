@@ -194,13 +194,13 @@ trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
     )
   }
 
-  protected def withClusterClient(index: Int)(testCode: ClusterClient => Any) {
+  protected def withClusterClient(index: Int)(testCode: ClusterClient => Any): Unit = {
     val client = newClusterClient(index)
     try { testCode(client) }
     finally { client.close() }
   }
 
-  protected def withClusterClients(indices: Int*)(testCode: Seq[ClusterClient] => Any) {
+  protected def withClusterClients(indices: Int*)(testCode: Seq[ClusterClient] => Any): Unit = {
     val clients = indices.map(newClusterClient)
     try { testCode(clients) }
     finally { clients.foreach(_.close()) }

@@ -94,7 +94,7 @@ class MetricsStatsReceiverTest extends FunSuite {
     assert("MetricsStatsReceiver/s1/s2" == sr.scope("s1").scope("s2").toString)
   }
 
-  def testMetricsStatsReceiver(ctx: TestCtx) {
+  def testMetricsStatsReceiver(ctx: TestCtx): Unit = {
     import ctx._
 
     // scalafix:off StoreGaugesAsMemberVariables

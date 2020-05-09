@@ -167,7 +167,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     Await.result(client.flushAll(), TIMEOUT) //clear the keys
   }
 
-  def defaultTest(client: Client) {
+  def defaultTest(client: Client): Unit = {
     val key = "megatron"
     val value = "optimus"
 
@@ -202,7 +202,10 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     dict
   }
 
-  def testBadd(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
+  def testBadd(
+    client: Client,
+    dict: mutable.HashMap[String, mutable.HashMap[String, String]]
+  ): Unit = {
     for ((outerKey, inner) <- dict) {
       for ((innerKey, value) <- inner) {
         val target = client.bAdd(Buf.Utf8(outerKey), Buf.Utf8(innerKey), Buf.Utf8(value))
@@ -213,7 +216,10 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     println("Test BADD succeeded")
   }
 
-  def testBcard(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
+  def testBcard(
+    client: Client,
+    dict: mutable.HashMap[String, mutable.HashMap[String, String]]
+  ): Unit = {
     for ((outerKey, inner) <- dict) {
       val target = client.bCard(Buf.Utf8(outerKey))
       assert(
@@ -225,7 +231,10 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     println("Test BCARD succeeded")
   }
 
-  def testBget(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
+  def testBget(
+    client: Client,
+    dict: mutable.HashMap[String, mutable.HashMap[String, String]]
+  ): Unit = {
     for ((outerKey, inner) <- dict) {
       for ((innerKey, value) <- inner) {
         val target = client.bGet(Buf.Utf8(outerKey), Buf.Utf8(innerKey))
@@ -240,7 +249,10 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     println("Test BGET succeeded")
   }
 
-  def testBrem(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
+  def testBrem(
+    client: Client,
+    dict: mutable.HashMap[String, mutable.HashMap[String, String]]
+  ): Unit = {
     for ((outerKey, inner) <- dict) {
       for ((innerKey, value) <- inner) {
         val target = client.bRem(Buf.Utf8(outerKey), Seq(Buf.Utf8(innerKey)))
@@ -252,7 +264,10 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     println("Test BREM succeeded")
   }
 
-  def testBrange(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
+  def testBrange(
+    client: Client,
+    dict: mutable.HashMap[String, mutable.HashMap[String, String]]
+  ): Unit = {
     for ((outerKey, inner) <- dict) {
       val innerKeys = inner.toList.sortBy(_._1)
       val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size, None, None))
@@ -265,7 +280,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBrangeInclusiveStart(
     client: Client,
     dict: mutable.HashMap[String, mutable.HashMap[String, String]]
-  ) {
+  ): Unit = {
     val rand = new scala.util.Random()
     for ((outerKey, inner) <- dict) {
       var innerKeys = inner.toList.sortBy(_._1)
@@ -285,7 +300,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBrangeInclusiveEnd(
     client: Client,
     dict: mutable.HashMap[String, mutable.HashMap[String, String]]
-  ) {
+  ): Unit = {
     val rand = new scala.util.Random()
     for ((outerKey, inner) <- dict) {
       var innerKeys = inner.toList.sortBy(_._1)
@@ -305,7 +320,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBrangeInclusiveStartEnd(
     client: Client,
     dict: mutable.HashMap[String, mutable.HashMap[String, String]]
-  ) {
+  ): Unit = {
     val rand = new scala.util.Random()
     for ((outerKey, inner) <- dict) {
       var innerKeys = inner.toList.sortBy(_._1)
@@ -335,7 +350,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBrangeExclusiveStart(
     client: Client,
     dict: mutable.HashMap[String, mutable.HashMap[String, String]]
-  ) {
+  ): Unit = {
     for ((outerKey, inner) <- dict) {
       var innerKeys = inner.toList.sortBy(_._1)
       val start = UUID.randomUUID().toString
@@ -352,7 +367,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBrangeExclusiveEnd(
     client: Client,
     dict: mutable.HashMap[String, mutable.HashMap[String, String]]
-  ) {
+  ): Unit = {
     for ((outerKey, inner) <- dict) {
       var innerKeys = inner.toList.sortBy(_._1)
       val end = UUID.randomUUID().toString
@@ -368,7 +383,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBrangeExclusiveStartEnd(
     client: Client,
     dict: mutable.HashMap[String, mutable.HashMap[String, String]]
-  ) {
+  ): Unit = {
     for ((outerKey, inner) <- dict) {
       var innerKeys = inner.toList.sortBy(_._1)
       val start = UUID.randomUUID().toString
@@ -414,7 +429,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     assert(getResult == None)
   }
 
-  def validate(outerKey: String, exp: List[(String, String)], got: Seq[(Buf, Buf)]) {
+  def validate(outerKey: String, exp: List[(String, String)], got: Seq[(Buf, Buf)]): Unit = {
     assert(
       got.size == exp.size,
       "BRANGE failed for " + outerKey + " expected size " + exp.size + " got size " + got.size

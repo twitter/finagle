@@ -93,7 +93,7 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-  def runTest(test: TestContext => Unit) {
+  def runTest(test: TestContext => Unit): Unit = {
     withRedisClient { c => test(new TestContext(c)) }
   }
 
@@ -136,7 +136,7 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
       result(c.pubSubNumPat())
     }
 
-    def publish(channel: String, pattern: Option[String] = None) {
+    def publish(channel: String, pattern: Option[String] = None): Unit = {
       val p = new Promise[(String, String, Option[String])]
       val message = nextMessage
       q.put(message, p)
