@@ -64,7 +64,8 @@ class StandardTunableMapTest extends FunSuite {
     assert(components.size == 4)
 
     assert(
-      components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerEnvPerInstance"))() ==
+      components(0)(
+        TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerEnvPerInstance"))() ==
         Some("file based per env per instance")
     )
     assert(

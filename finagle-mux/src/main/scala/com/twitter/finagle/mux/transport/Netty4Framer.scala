@@ -4,7 +4,7 @@ import io.netty.channel.{ChannelHandler, ChannelPipeline}
 import io.netty.handler.codec.{LengthFieldBasedFrameDecoder, LengthFieldPrepender}
 
 private[mux] object Netty4Framer {
-  val MaxFrameLength = 0x7FFFFFFF
+  val MaxFrameLength = 0x7fffffff
   val LengthFieldOffset = 0
   val LengthFieldLength = 4
   val LengthAdjustment = 0

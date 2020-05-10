@@ -17,25 +17,26 @@ object Command {
   val COM_REFRESH: Byte = 0x07.toByte // mysql_refresh
   val COM_SHUTDOWN: Byte = 0x08.toByte // mysql_shutdown
   val COM_STATISTICS: Byte = 0x09.toByte // mysql_stat
-  val COM_PROCESS_INFO: Byte = 0x0A.toByte // mysql_list_processes
-  val COM_CONNECT: Byte = 0x0B.toByte // internal thread state
-  val COM_PROCESS_KILL: Byte = 0x0C.toByte // mysql_kill
-  val COM_DEBUG: Byte = 0x0D.toByte // mysql_dump_debug_info
-  val COM_PING: Byte = 0x0E.toByte // mysql_ping
-  val COM_TIME: Byte = 0x0F.toByte // internal thread state
+  val COM_PROCESS_INFO: Byte = 0x0a.toByte // mysql_list_processes
+  val COM_CONNECT: Byte = 0x0b.toByte // internal thread state
+  val COM_PROCESS_KILL: Byte = 0x0c.toByte // mysql_kill
+  val COM_DEBUG: Byte = 0x0d.toByte // mysql_dump_debug_info
+  val COM_PING: Byte = 0x0e.toByte // mysql_ping
+  val COM_TIME: Byte = 0x0f.toByte // internal thread state
   val COM_DELAYED_INSERT: Byte = 0x10.toByte // internal thread state
   val COM_CHANGE_USER: Byte = 0x11.toByte // mysql_change_user
   val COM_BINLOG_DUMP: Byte = 0x12.toByte // sent by replica IO thread to req a binlog
   val COM_TABLE_DUMP: Byte = 0x13.toByte // deprecated
   val COM_CONNECT_OUT: Byte = 0x14.toByte // internal thread state
-  val COM_REGISTER_SLAVE: Byte = 0x15.toByte // sent by the replica to register with the master (optional)
+  val COM_REGISTER_SLAVE: Byte =
+    0x15.toByte // sent by the replica to register with the master (optional)
   val COM_STMT_PREPARE: Byte = 0x16.toByte // mysql_stmt_prepare
   val COM_STMT_EXECUTE: Byte = 0x17.toByte // mysql_stmt_execute
   val COM_STMT_SEND_LONG_DATA: Byte = 0x18.toByte // mysql_stmt_send_long_data
   val COM_STMT_CLOSE: Byte = 0x19.toByte // mysql_stmt_close
-  val COM_STMT_RESET: Byte = 0x1A.toByte // mysql_stmt_reset
-  val COM_SET_OPTION: Byte = 0x1B.toByte // mysql_set_server_option
-  val COM_STMT_FETCH: Byte = 0x1C.toByte // mysql_stmt_fetch
+  val COM_STMT_RESET: Byte = 0x1a.toByte // mysql_stmt_reset
+  val COM_SET_OPTION: Byte = 0x1b.toByte // mysql_set_server_option
+  val COM_STMT_FETCH: Byte = 0x1c.toByte // mysql_stmt_fetch
 }
 
 /**

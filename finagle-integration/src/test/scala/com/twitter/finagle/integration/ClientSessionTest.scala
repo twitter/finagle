@@ -62,7 +62,8 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   }
 
   testPushSessionStatus(
-    "mux-dispatcher", { handle: PushChannelHandle[ByteReader, Buf] =>
+    "mux-dispatcher",
+    { handle: PushChannelHandle[ByteReader, Buf] =>
       val session = new mux.pushsession.MuxClientSession(
         handle = handle,
         h_decoder = mock[MuxMessageDecoder],
@@ -78,7 +79,8 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   )
 
   testSessionStatus(
-    "http-transport", { tr: Transport[Any, Any] =>
+    "http-transport",
+    { tr: Transport[Any, Any] =>
       val manager = mock[http.codec.Http1ConnectionManager]
       val closeP = new Promise[Unit]
       when(manager.shouldClose).thenReturn(false)
@@ -92,7 +94,8 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   )
 
   testSessionStatus(
-    "http-dispatcher", { tr: Transport[Any, Any] =>
+    "http-dispatcher",
+    { tr: Transport[Any, Any] =>
       val dispatcher = new HttpClientDispatcher(
         new IdentityStreamTransport(Transport.cast[http.Request, http.Response](tr)),
         NullStatsReceiver
@@ -116,7 +119,8 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   }
 
   testPushSessionStatus(
-    "memcached-session", { handle: PushChannelHandle[memcached.Response, memcached.Command] =>
+    "memcached-session",
+    { handle: PushChannelHandle[memcached.Response, memcached.Command] =>
       val cl: MyPushClient = new MyPushClient
       val svc = cl.toSvc(handle)
       () => svc.status
@@ -124,7 +128,8 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   )
 
   testSessionStatus(
-    "mysql-dispatcher", { tr: Transport[mysql.transport.Packet, mysql.transport.Packet] =>
+    "mysql-dispatcher",
+    { tr: Transport[mysql.transport.Packet, mysql.transport.Packet] =>
       val params = Stack.Params.empty
       val dispatcher = new mysql.ClientDispatcher(tr, params)
       () => dispatcher.status

@@ -72,7 +72,8 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
     await(server.close())
   }
 
-  test("Multiple clients and server results in server TLS connections incremented and decremented") {
+  test(
+    "Multiple clients and server results in server TLS connections incremented and decremented") {
     val serverStats = new InMemoryStatsReceiver
 
     val server = mkTlsServer("server", serverStats)

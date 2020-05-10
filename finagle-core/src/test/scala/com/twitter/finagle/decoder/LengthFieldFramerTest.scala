@@ -84,7 +84,7 @@ class LengthFieldFramerTest extends FunSuite with ScalaCheckDrivenPropertyChecks
 
   test("behave properly for frames that report zero size") {
     // [1 byte magic][2 bytes size of data][data]
-    val packetSizeOne = mkBuf(0x11, 0x00, 0x01, 0x0D)
+    val packetSizeOne = mkBuf(0x11, 0x00, 0x01, 0x0d)
     val packetSizeZero = mkBuf(0x11, 0x00, 0x00)
 
     val decoder = new LengthFieldFramer(
@@ -105,7 +105,7 @@ class LengthFieldFramerTest extends FunSuite with ScalaCheckDrivenPropertyChecks
     "behave properly if the length field is in the middle and the given length counts the header"
   ) {
     //               { header     len  header}{ data                     }
-    val frame = mkBuf(0x0A, 0x0A, 0x09, 0x0A, 0x0D, 0x0D, 0x0D, 0x0D, 0x0D)
+    val frame = mkBuf(0x0a, 0x0a, 0x09, 0x0a, 0x0d, 0x0d, 0x0d, 0x0d, 0x0d)
     val decoder = new LengthFieldFramer(
       lengthFieldBegin = 2,
       lengthFieldLength = 1,
@@ -119,7 +119,7 @@ class LengthFieldFramerTest extends FunSuite with ScalaCheckDrivenPropertyChecks
   }
 
   test("throw FrameTooLargeException when a frame exceeds maxFrameLength") {
-    val frame = mkBuf(0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+    val frame = mkBuf(0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
     val decoder = new LengthFieldFramer(
       lengthFieldBegin = 0,
       lengthFieldLength = 1,

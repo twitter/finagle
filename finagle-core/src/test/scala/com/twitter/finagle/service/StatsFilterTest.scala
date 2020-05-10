@@ -199,9 +199,11 @@ class StatsFilterTest extends FunSuite {
     // not chaining using andThen here because that wraps any raw Exception inside a Future.exception
     val chain = new Service[String, String] {
       def apply(request: String): Future[String] =
-        statsFilter.apply(request, new Service[String, String] {
-          def apply(req: String): Future[String] = verifyingFilter.apply(req, service)
-        })
+        statsFilter.apply(
+          request,
+          new Service[String, String] {
+            def apply(req: String): Future[String] = verifyingFilter.apply(req, service)
+          })
     }
 
     assert(receiver.gauges(Seq("pending"))() == 0.0)

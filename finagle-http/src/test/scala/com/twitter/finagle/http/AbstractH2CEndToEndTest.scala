@@ -306,10 +306,12 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
 
   test("We delete the HTTP2-SETTINGS header properly") {
     @volatile var headers: HeaderMap = null
-    val server = serverImpl().serve("localhost:*", Service.mk { req: Request =>
-      headers = req.headerMap
-      Future.value(Response())
-    })
+    val server = serverImpl().serve(
+      "localhost:*",
+      Service.mk { req: Request =>
+        headers = req.headerMap
+        Future.value(Response())
+      })
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl().newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 

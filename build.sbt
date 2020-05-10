@@ -405,7 +405,8 @@ lazy val finagleCore = Project(
       hdrHistogramLib,
       jsr305Lib
     ) ++ netty4LibsTest,
-    unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty4"), Compile)).value
+    unmanagedClasspath in Test ++= (fullClasspath in (LocalProject(
+      "finagle-netty4"), Compile)).value
   ).dependsOn(finagleToggle, finagleInit)
 
 lazy val finagleNetty4 = Project(
@@ -471,7 +472,10 @@ lazy val finagleZipkinCore = Project(
     sharedSettings
   ).settings(
     name := "finagle-zipkin-core",
-    libraryDependencies ++= Seq(util("codec"), util("core"), util("stats")) ++ scroogeLibs ++ jacksonLibs
+    libraryDependencies ++= Seq(
+      util("codec"),
+      util("core"),
+      util("stats")) ++ scroogeLibs ++ jacksonLibs
   ).dependsOn(finagleCore, finagleThrift)
 
 lazy val finagleZipkinScribe = Project(
@@ -628,7 +632,7 @@ lazy val finagleThrift = Project(
   ).settings(
     name := "finagle-thrift",
     libraryDependencies ++= scroogeLibs
-).dependsOn(finagleCore, finagleNetty4, finaglePartitioning, finagleToggle)
+  ).dependsOn(finagleCore, finagleNetty4, finaglePartitioning, finagleToggle)
 
 lazy val finagleMemcached = Project(
   id = "finagle-memcached",
@@ -698,9 +702,9 @@ lazy val finagleThriftMux = Project(
     name := "finagle-thriftmux",
     libraryDependencies ++= Seq(util("core"), util("logging"), util("stats")) ++ scroogeLibs
   ).dependsOn(
-  finagleCore % "compile->compile;test->test",
-  finagleMux,
-  finagleThrift % "compile->compile;test->test")
+    finagleCore % "compile->compile;test->test",
+    finagleMux,
+    finagleThrift % "compile->compile;test->test")
 
 lazy val finagleMySQL = Project(
   id = "finagle-mysql",

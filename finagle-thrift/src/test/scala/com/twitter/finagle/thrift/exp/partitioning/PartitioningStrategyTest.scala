@@ -57,7 +57,9 @@ class PartitioningStrategyTest extends FunSuite with MockitoSugar {
 
     val getBMerger = responseMergerRegistry.get(BMethod.name).get
     assert(
-      getBMerger(Seq.empty, Seq(new Exception("1"), new Exception("2"))).throwable.getMessage == "2")
+      getBMerger(
+        Seq.empty,
+        Seq(new Exception("1"), new Exception("2"))).throwable.getMessage == "2")
   }
 
   test("unset endpoints behavior has default None to original request") {

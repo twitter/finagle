@@ -188,12 +188,12 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       s"${FixedInetResolver.scheme}!$hostName:$port"
 
     /*
-   * We are migrating the Memcached client to be push-based. To facilitate a gradual rollout,
-   * The PushClient and NonPushClient provide endpointer service factories (`enptr`) for the
-   * [[Memcached.Client]] to use. In the future, the client will be able to be toggled to use
-   * the push or non-push underlying client and its endpointer implementation. Currently,
-   * the client is hard-coded to use the non-push underlying client.
-   */
+     * We are migrating the Memcached client to be push-based. To facilitate a gradual rollout,
+     * The PushClient and NonPushClient provide endpointer service factories (`enptr`) for the
+     * [[Memcached.Client]] to use. In the future, the client will be able to be toggled to use
+     * the push or non-push underlying client and its endpointer implementation. Currently,
+     * the client is hard-coded to use the non-push underlying client.
+     */
 
   }
 

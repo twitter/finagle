@@ -185,10 +185,12 @@ object ToggleMap {
         val delegate = super.apply(id)
         new Toggle(delegate.id) with Toggle.Captured {
           private[this] val last =
-            lastApplied.computeIfAbsent(id, new juf.Function[String, AtomicReference[jl.Boolean]] {
-              def apply(t: String): AtomicReference[jl.Boolean] =
-                new AtomicReference[jl.Boolean](null)
-            })
+            lastApplied.computeIfAbsent(
+              id,
+              new juf.Function[String, AtomicReference[jl.Boolean]] {
+                def apply(t: String): AtomicReference[jl.Boolean] =
+                  new AtomicReference[jl.Boolean](null)
+              })
 
           override def toString: String = delegate.toString
 

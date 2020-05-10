@@ -24,7 +24,7 @@ object LogFormatter {
     var index = 0
     s.foreach { c =>
       val i = c.toInt
-      if (i >= 0x20 && i <= 0x7E && i != 0x22 && i != 0x5C) {
+      if (i >= 0x20 && i <= 0x7e && i != 0x22 && i != 0x5c) {
         if (builder == null) {
           index += 1 // common case
         } else {
@@ -145,8 +145,10 @@ class LoggingFilter[REQUEST <: Request](
 }
 
 object LoggingFilter
-    extends LoggingFilter[Request]({
-      val log = Logger("access")
-      log.setUseParentHandlers(false)
-      log
-    }, new CommonLogFormatter)
+    extends LoggingFilter[Request](
+      {
+        val log = Logger("access")
+        log.setUseParentHandlers(false)
+        log
+      },
+      new CommonLogFormatter)

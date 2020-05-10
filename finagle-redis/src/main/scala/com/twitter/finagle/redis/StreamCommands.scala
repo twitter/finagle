@@ -227,7 +227,8 @@ private[redis] trait StreamCommands { self: BaseClient =>
   def xPending(key: Buf, group: Buf): Future[XPendingAllReply] =
     doRequest(XPending(key, group)) {
       case MBulkReply(
-          IntegerReply(count) :: BulkReply(start) :: BulkReply(end) :: MBulkReply(consumerCounts) :: Nil
+            IntegerReply(count) :: BulkReply(start) :: BulkReply(end) :: MBulkReply(
+              consumerCounts) :: Nil
           ) =>
         val consumerAndCount = consumerCounts.collect {
           case MBulkReply(BulkReply(consumer) :: BulkReply(consumerCount) :: Nil) =>
@@ -237,7 +238,7 @@ private[redis] trait StreamCommands { self: BaseClient =>
         Future.value(XPendingAllReply(count, Some(start), Some(end), consumerAndCount))
 
       case MBulkReply(
-          IntegerReply(count) :: EmptyBulkReply :: EmptyBulkReply :: NilMBulkReply :: Nil
+            IntegerReply(count) :: EmptyBulkReply :: EmptyBulkReply :: NilMBulkReply :: Nil
           ) =>
         Future.value(XPendingAllReply(count, None, None, Seq.empty))
     }
@@ -268,9 +269,9 @@ private[redis] trait StreamCommands { self: BaseClient =>
         Future.value {
           pending.collect {
             case MBulkReply(
-                BulkReply(id) :: BulkReply(consumerId) :: IntegerReply(ms) :: IntegerReply(
-                  deliveries
-                ) :: Nil
+                  BulkReply(id) :: BulkReply(consumerId) :: IntegerReply(ms) :: IntegerReply(
+                    deliveries
+                  ) :: Nil
                 ) =>
               XPendingRangeReply(id, consumerId, ms, deliveries)
           }

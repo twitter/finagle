@@ -77,9 +77,11 @@ object ThriftServicePerEndpointExample {
 
     //#thriftclientapi-retries
     val retryPolicy: RetryPolicy[Try[GetLogSize.Result]] =
-      RetryPolicy.tries[Try[GetLogSize.Result]](3, {
-        case Throw(ex: ReadException) => true
-      })
+      RetryPolicy.tries[Try[GetLogSize.Result]](
+        3,
+        {
+          case Throw(ex: ReadException) => true
+        })
 
     val retriedGetLogSize: Service[GetLogSize.Args, GetLogSize.SuccessType] =
       new RetryExceptionsFilter(retryPolicy, DefaultTimer)

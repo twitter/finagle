@@ -28,10 +28,9 @@ private[finagle] object Netty4Transport {
       }
   }
 
-  val Client: Stack.Params => SocketAddress => Transporter[
-    ThriftClientRequest,
-    Array[Byte],
-    TransportContext] = { params => Netty4Transporter.raw(ClientPipelineInit(params), _, params) }
+  val Client: Stack.Params => SocketAddress => Transporter[ThriftClientRequest, Array[
+    Byte
+  ], TransportContext] = { params => Netty4Transporter.raw(ClientPipelineInit(params), _, params) }
 
   val ServerPipelineInit: Stack.Params => ChannelPipeline => Unit = {
     params =>

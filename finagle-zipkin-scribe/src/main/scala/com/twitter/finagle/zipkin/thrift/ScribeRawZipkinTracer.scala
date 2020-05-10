@@ -41,7 +41,8 @@ object ScribeRawZipkinTracer {
 
   // only report these finagle metrics (including counters for individual exceptions)
   private[this] val clientStatsReceiver: StatsReceiver = new DenylistStatsReceiver(
-    ClientStatsReceiver, {
+    ClientStatsReceiver,
+    {
       // StatsFilter
       case Seq(_, "requests") => false
       case Seq(_, "success") => false
@@ -64,7 +65,8 @@ object ScribeRawZipkinTracer {
 
   private[this] val shouldRetry: PartialFunction[
     (Scribe.Log.Args, Try[Scribe.Log.SuccessType]),
-    Boolean] = {
+    Boolean
+  ] = {
     // We don't retry failures that the RequeueFilter will handle
     case (_, Throw(RequeueFilter.Requeueable(_))) => false
     case tup if responseClassifier.isDefinedAt(ReqRep(tup._1, tup._2)) =>

@@ -44,7 +44,10 @@ final class SetClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-  test("Correctly add and pop members from a set, while looking at the set", RedisTest, ClientTest) {
+  test(
+    "Correctly add and pop members from a set, while looking at the set",
+    RedisTest,
+    ClientTest) {
     withRedisClient { client =>
       assert(Await.result(client.sAdd(key, List(bufFoo))) == oneElemAdded, oneElemAddErrorMessage)
       assert(Await.result(client.sIsMember(key, bufFoo)) == true, "Foo was not a member of the set")

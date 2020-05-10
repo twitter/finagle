@@ -49,9 +49,11 @@ object StandardTunableMap {
 
   // Exposed for testing
   private[tunable] def apply(id: String, serverInfo: ServerInfo, mutable: TunableMap): TunableMap =
-    clientMaps.computeIfAbsent(id, new JFunction[String, TunableMap] {
-      def apply(ID: String): TunableMap = composeMap(mutable, serverInfo, id)
-    })
+    clientMaps.computeIfAbsent(
+      id,
+      new JFunction[String, TunableMap] {
+        def apply(ID: String): TunableMap = composeMap(mutable, serverInfo, id)
+      })
 
   /**
    * Re-compose [[TunableMap]]s after ServerInfo initialized, re-subscribe

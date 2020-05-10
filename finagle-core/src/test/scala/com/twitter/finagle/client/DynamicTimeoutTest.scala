@@ -218,9 +218,11 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
     val stats = new InMemoryStatsReceiver()
 
     // 1 retry on a per-request timeout
-    val retryOnTimeout = RetryPolicy.tries[Try[Nothing]](2, {
-      case Throw(_: IndividualRequestTimeoutException) => true
-    })
+    val retryOnTimeout = RetryPolicy.tries[Try[Nothing]](
+      2,
+      {
+        case Throw(_: IndividualRequestTimeoutException) => true
+      })
 
     val params =
       totalParams(1500.millis) ++

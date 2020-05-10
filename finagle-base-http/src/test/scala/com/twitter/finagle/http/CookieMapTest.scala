@@ -40,7 +40,8 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends FunS
       assert(message.headerMap(headerName) == "name=value")
     }
 
-    test(s"$codec: Add multiple cookies to the CookieMap on a $messageType adds them to the header") {
+    test(
+      s"$codec: Add multiple cookies to the CookieMap on a $messageType adds them to the header") {
       val message = newMessage()
       val allPossibleHeaders = Seq("foo=foo", "bar=bar", "baz=baz").permutations
         .map(_.mkString("; "))

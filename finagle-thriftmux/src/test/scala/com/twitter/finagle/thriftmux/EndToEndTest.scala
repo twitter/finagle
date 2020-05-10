@@ -475,10 +475,10 @@ class EndToEndTest
           case Record(_, _, Annotation.BinaryAnnotation("clnt/request_serialization_ns", _), _) =>
             reqSer.set(true)
           case Record(
-              _,
-              _,
-              Annotation.BinaryAnnotation("clnt/response_deserialization_ns", _),
-              _) =>
+                _,
+                _,
+                Annotation.BinaryAnnotation("clnt/response_deserialization_ns", _),
+                _) =>
             resDeser.set(true)
           case _ =>
         }
@@ -504,7 +504,8 @@ class EndToEndTest
     await(server.close())
   }
 
-  test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
+  test(
+    "thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {

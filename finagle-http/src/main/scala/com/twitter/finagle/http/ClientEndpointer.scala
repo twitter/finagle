@@ -35,27 +35,27 @@ private[finagle] object ClientEndpointer {
 
   val HttpEndpointer: Stackable[ServiceFactory[Request, Response]] =
     new EndpointerModule[Request, Response](
-      Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[Stats]]), {
-        (prms: Stack.Params, addr: SocketAddress) =>
-          val transporter = Netty4HttpTransporter(prms)(addr)
-          new TransporterServiceFactory(transporter, prms)
+      Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[Stats]]),
+      { (prms: Stack.Params, addr: SocketAddress) =>
+        val transporter = Netty4HttpTransporter(prms)(addr)
+        new TransporterServiceFactory(transporter, prms)
       }
     )
 
   val Http2Endpointer: Stackable[ServiceFactory[Request, Response]] =
     new EndpointerModule[Request, Response](
-      Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[Stats]]), {
-        (prms: Stack.Params, addr: SocketAddress) =>
-          val modifierFn = prms[TransportModifier].modifier
+      Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[Stats]]),
+      { (prms: Stack.Params, addr: SocketAddress) =>
+        val modifierFn = prms[TransportModifier].modifier
 
-          // The HTTP/2 multiplex codec with prior knowledge does pooling the same
-          // way that Mux does.
-          if (isPriorKnowledgeEnabled(prms)) {
-            new PriorKnowledgeServiceFactory(addr, modifierFn, prms)
-          } else {
-            val transporter = Http2Transporter(addr, modifierFn, prms)
-            new TransporterServiceFactory(transporter, prms)
-          }
+        // The HTTP/2 multiplex codec with prior knowledge does pooling the same
+        // way that Mux does.
+        if (isPriorKnowledgeEnabled(prms)) {
+          new PriorKnowledgeServiceFactory(addr, modifierFn, prms)
+        } else {
+          val transporter = Http2Transporter(addr, modifierFn, prms)
+          new TransporterServiceFactory(transporter, prms)
+        }
       }
     )
 }

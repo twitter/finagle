@@ -95,6 +95,7 @@ final class Failure private[finagle] (
 object Failure {
   object Source extends Enumeration {
     val
+
     /**
      * Represents the name of the service.
      * See [[com.twitter.finagle.filter.ExceptionSourceFilter]]

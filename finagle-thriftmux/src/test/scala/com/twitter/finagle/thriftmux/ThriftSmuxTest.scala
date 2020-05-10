@@ -80,7 +80,8 @@ class ThriftSmuxTest extends FunSuite {
   // tests
   test("thriftsmux: can talk to each other with opportunistic tls") {
     smuxTest(
-      compatibleEnabledLevels, {
+      compatibleEnabledLevels,
+      {
         case (results, string, _) =>
           assert(results.get == "." * 20)
           // we check that it's non-empty to ensure that it was correctly installed
@@ -92,19 +93,23 @@ class ThriftSmuxTest extends FunSuite {
   }
 
   test("thriftsmux: can talk to each other when both parties are off") {
-    smuxTest(compatibleUndesiredDisabledLevels, {
-      case (results, string, _) =>
-        assert(results.get == "." * 20)
-        assert(string.isEmpty)
-    })
+    smuxTest(
+      compatibleUndesiredDisabledLevels,
+      {
+        case (results, string, _) =>
+          assert(results.get == "." * 20)
+          assert(string.isEmpty)
+      })
   }
 
   test("thriftsmux: can talk to each other when one party is off") {
-    smuxTest(compatibleDesiredDisabledLevels, {
-      case (results, string, _) =>
-        assert(results.get == "." * 20)
-        assert(string.isEmpty)
-    })
+    smuxTest(
+      compatibleDesiredDisabledLevels,
+      {
+        case (results, string, _) =>
+          assert(results.get == "." * 20)
+          assert(string.isEmpty)
+      })
   }
 
   test("thriftsmux: can't create a client with an invalid OppTls config") {
@@ -138,7 +143,8 @@ class ThriftSmuxTest extends FunSuite {
 
   test("thriftsmux: can't talk to each other with incompatible opportunistic tls") {
     smuxTest(
-      incompatibleLevels, {
+      incompatibleLevels,
+      {
         case (results, string, stats) =>
           intercept[IncompatibleNegotiationException] {
             results.get

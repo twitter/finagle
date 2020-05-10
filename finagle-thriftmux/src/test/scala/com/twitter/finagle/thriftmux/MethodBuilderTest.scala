@@ -55,11 +55,11 @@ class MethodBuilderTest extends FunSuite with Eventually {
     }
 
     // ReqRepServicePerEndpoint
-    val shortTimeoutReqRepSvcPerEndpoint: Service[
-      scrooge.Request[TestService.Query.Args],
-      scrooge.Response[
-        TestService.Query.SuccessType
-      ]] =
+    val shortTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[
+      TestService.Query.Args
+    ], scrooge.Response[
+      TestService.Query.SuccessType
+    ]] =
       builder
         .withTimeoutPerRequest(5.millis)
         .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("fast")
@@ -207,11 +207,11 @@ class MethodBuilderTest extends FunSuite with Eventually {
       }
 
       // ReqRepServicePerEndpoint
-      val asIsReqRepSvcPerEndpoint: Service[
-        scrooge.Request[TestService.Query.Args],
-        scrooge.Response[
-          TestService.Query.SuccessType
-        ]] =
+      val asIsReqRepSvcPerEndpoint: Service[scrooge.Request[
+        TestService.Query.Args
+      ], scrooge.Response[
+        TestService.Query.SuccessType
+      ]] =
         mb.servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("as_is").query
       val req2 = asIsReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("nope")))
       control.advance(10.milliseconds)
@@ -222,7 +222,8 @@ class MethodBuilderTest extends FunSuite with Eventually {
       // ServicePerEndpoint
       val longTimeoutSvcPerEndpoint: Service[
         TestService.Query.Args,
-        TestService.Query.SuccessType] =
+        TestService.Query.SuccessType
+      ] =
         mb.withTimeoutPerRequest(5.seconds)
           .withTimeoutTotal(5.seconds)
           .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
@@ -243,11 +244,11 @@ class MethodBuilderTest extends FunSuite with Eventually {
       }
 
       // ReqRepServicePerEndpoint
-      val longTimeoutReqRepSvcPerEndpoint: Service[
-        scrooge.Request[TestService.Query.Args],
-        scrooge.Response[
-          TestService.Query.SuccessType
-        ]] =
+      val longTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[
+        TestService.Query.Args
+      ], scrooge.Response[
+        TestService.Query.SuccessType
+      ]] =
         mb.withTimeoutPerRequest(5.seconds)
           .withTimeoutTotal(5.seconds)
           .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("good")
@@ -400,11 +401,11 @@ class MethodBuilderTest extends FunSuite with Eventually {
     }
 
     // ReqRepServicePerEndpoint
-    val retryInvalidReqRepSvcPerEndpoint: Service[
-      scrooge.Request[TestService.Query.Args],
-      scrooge.Response[
-        TestService.Query.SuccessType
-      ]] =
+    val retryInvalidReqRepSvcPerEndpoint: Service[scrooge.Request[
+      TestService.Query.Args
+    ], scrooge.Response[
+      TestService.Query.SuccessType
+    ]] =
       builder
         .withRetryForClassifier {
           case ReqRep(_, Throw(InvalidQueryException(_))) =>
@@ -420,7 +421,8 @@ class MethodBuilderTest extends FunSuite with Eventually {
     // ServicePerEndpoint
     val errCode1SucceedsSvcPerEndpoint: Service[
       TestService.Query.Args,
-      TestService.Query.SuccessType] =
+      TestService.Query.SuccessType
+    ] =
       builder
         .withRetryForClassifier {
           case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>
@@ -445,11 +447,11 @@ class MethodBuilderTest extends FunSuite with Eventually {
     }
 
     // ReqRepServicePerEndpoint
-    val errCode1SucceedsReqRepSvcPerEndpoint: Service[
-      scrooge.Request[TestService.Query.Args],
-      scrooge.Response[
-        TestService.Query.SuccessType
-      ]] =
+    val errCode1SucceedsReqRepSvcPerEndpoint: Service[scrooge.Request[
+      TestService.Query.Args
+    ], scrooge.Response[
+      TestService.Query.SuccessType
+    ]] =
       builder
         .withRetryForClassifier {
           case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>

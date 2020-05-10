@@ -31,7 +31,8 @@ class FramingDecoderTest extends FunSuite with MockitoSugar {
   }
 
   test("frame response without data") {
-    val framer = newFramer(-1, -1) // second one because the framer checks to see if we need an empty Buf
+    val framer =
+      newFramer(-1, -1) // second one because the framer checks to see if we need an empty Buf
     val outputMessages = new mutable.ArrayBuffer[Buf]()
     framer(ByteReader(Buf.Utf8("STORED\r\n")), outputMessages)
     assert(outputMessages == Seq(Buf.Utf8("STORED")))

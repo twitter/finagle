@@ -30,7 +30,7 @@ private object Rfc7230HeaderValidationTest {
     // We don't use the definition in Rfc7230HeaderValidation so that we don't make a
     // self consistent but wrong test.
     val invalid = (0x0 to 0xff).toSet --
-      (0x21 to 0x7E).toSet -- // VCHAR = 0x21-0x7E
+      (0x21 to 0x7e).toSet -- // VCHAR = 0x21-0x7E
       (0x80 to 0xff).toSet -- // obs-text =  0x80-0xff
       " \t\r\n".map(_.toInt).toSet // valid whitespace: " \t\r\n"
 

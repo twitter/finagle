@@ -7,9 +7,11 @@ import com.twitter.util.{Await, Future}
 object ThriftServer {
   def main(args: Array[String]): Unit = {
     //#thriftserverapi
-    val server = Thrift.server.serveIface("localhost:8080", new Hello[Future] {
-      def hi() = Future.value("hi")
-    })
+    val server = Thrift.server.serveIface(
+      "localhost:8080",
+      new Hello[Future] {
+        def hi() = Future.value("hi")
+      })
     Await.ready(server)
     //#thriftserverapi
   }

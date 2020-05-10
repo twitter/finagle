@@ -164,7 +164,8 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     handle.serialExecutor.executeAll()
 
     // Chunk 2 should be a complete message
-    decoder.decode(ByteReader(handle.dequeAndCompleteWrite().foldLeft(Buf.Empty)(_.concat(_)))) match {
+    decoder.decode(
+      ByteReader(handle.dequeAndCompleteWrite().foldLeft(Buf.Empty)(_.concat(_)))) match {
       case Tdispatch(_, _, Path(), _, req) => req == data
       case other => fail(s"unexpected message: $other")
     }

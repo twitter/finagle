@@ -165,8 +165,8 @@ class Zk2Resolver(
             val endpoint = endpointOption.orNull
             val hosts: Seq[(String, Int, Addr.Metadata)] = weightedEntries.collect {
               case (
-                  Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _, metadata),
-                  weight)
+                    Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _, metadata),
+                    weight)
                   if names.contains(endpoint) &&
                     host != null &&
                     shardOption.forall { s => s == shardId && shardId != Int.MinValue } =>

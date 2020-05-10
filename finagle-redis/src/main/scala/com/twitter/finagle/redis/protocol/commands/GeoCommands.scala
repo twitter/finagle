@@ -131,7 +131,12 @@ object GeoCommands {
     override def name: Buf = Command.GEORADIUS
 
     override def body: Seq[Buf] = {
-      Seq(key, Utf8(longitude.toString), Utf8(latitude.toString), Utf8(radius.toString), unit.toBuf) ++ optionalArgs
+      Seq(
+        key,
+        Utf8(longitude.toString),
+        Utf8(latitude.toString),
+        Utf8(radius.toString),
+        unit.toBuf) ++ optionalArgs
     }
   }
 

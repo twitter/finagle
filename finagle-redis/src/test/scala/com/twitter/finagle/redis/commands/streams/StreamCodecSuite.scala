@@ -14,7 +14,9 @@ final class StreamCodecSuite extends RedisRequestTest {
       } else {
         val fvStr = b.toSeq.flatMap(t => Seq(t._1, t._2)).map(_.asString)
         assert(
-          encodeCommand(command) == "XADD" +: (Seq(key.asString, a.map(_.asString).getOrElse("*")) ++ fvStr)
+          encodeCommand(command) == "XADD" +: (Seq(
+            key.asString,
+            a.map(_.asString).getOrElse("*")) ++ fvStr)
         )
       }
     }

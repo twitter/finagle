@@ -50,7 +50,8 @@ class CopyingByteBufByteReaderTest extends AbstractByteBufByteReaderTest {
 
 class CopyingByteBufByteReaderProcessorTest
     extends ReadableBufProcessorTest(
-      "CopyingByteBufByteReader", { bytes: Array[Byte] =>
+      "CopyingByteBufByteReader",
+      { bytes: Array[Byte] =>
         val br = CopyingByteBufByteReaderTest.readerWith(bytes.toIndexedSeq: _*)
         new ReadableBufProcessorTest.CanProcess {
           def process(from: Int, until: Int, processor: Buf.Processor): Int =
@@ -216,12 +217,12 @@ abstract class AbstractByteBufByteReaderTest extends FunSuite with ScalaCheckDri
 
   test("readUnsignedIntBE")(forAll { i: Int =>
     val br = newReader(_.writeInt(i))
-    assert(br.readUnsignedIntBE() == (i & 0xFFFFFFFFL))
+    assert(br.readUnsignedIntBE() == (i & 0xffffffffL))
   })
 
   test("readUnsignedIntLE")(forAll { i: Int =>
     val br = newReader(_.writeIntLE(i))
-    assert(br.readUnsignedIntLE() == (i & 0xFFFFFFFFL))
+    assert(br.readUnsignedIntLE() == (i & 0xffffffffL))
   })
 
   val uInt64s: Gen[BigInt] = Gen

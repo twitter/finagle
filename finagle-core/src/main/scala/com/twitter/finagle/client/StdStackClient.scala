@@ -59,22 +59,22 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    */
   protected final def endpointer: Stackable[ServiceFactory[Req, Rep]] =
     new EndpointerModule[Req, Rep](
-      Seq(implicitly[Stack.Param[ProtocolLibrary]], implicitly[Stack.Param[Label]]), {
-        (prms: Stack.Params, sa: SocketAddress) =>
-          val endpointClient = self.copy1(params = prms)
-          val transporter = endpointClient.newTransporter(sa)
-          // This assumes that the `toString` of the implementation is sufficiently descriptive.
-          // Note: this should be kept in sync with the equivalent `PushStackClient` logic.
-          endpointClient.registerTransporter(transporter.toString)
-          // Note, this ensures that session establishment is lazy (i.e.,
-          // on the service acquisition path).
-          ServiceFactory.apply[Req, Rep] { () =>
-            // we do not want to capture and request specific Locals
-            // that would live for the life of the session.
-            Contexts.letClearAll {
-              transporter().map { trans => endpointClient.newDispatcher(trans) }
-            }
+      Seq(implicitly[Stack.Param[ProtocolLibrary]], implicitly[Stack.Param[Label]]),
+      { (prms: Stack.Params, sa: SocketAddress) =>
+        val endpointClient = self.copy1(params = prms)
+        val transporter = endpointClient.newTransporter(sa)
+        // This assumes that the `toString` of the implementation is sufficiently descriptive.
+        // Note: this should be kept in sync with the equivalent `PushStackClient` logic.
+        endpointClient.registerTransporter(transporter.toString)
+        // Note, this ensures that session establishment is lazy (i.e.,
+        // on the service acquisition path).
+        ServiceFactory.apply[Req, Rep] { () =>
+          // we do not want to capture and request specific Locals
+          // that would live for the life of the session.
+          Contexts.letClearAll {
+            transporter().map { trans => endpointClient.newDispatcher(trans) }
           }
+        }
       }
     )
 }

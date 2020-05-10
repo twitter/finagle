@@ -37,7 +37,7 @@ class SslConnectionRequestTest extends FunSuite {
 
   test("encode capabilities") {
     val mask = br.readIntLE()
-    assert(mask == 0x2AE8F)
+    assert(mask == 0x2ae8f)
   }
 
   test("maxPacketSize") {

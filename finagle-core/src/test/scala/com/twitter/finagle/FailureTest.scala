@@ -78,7 +78,9 @@ class FailureTest extends FunSuite with AssertionsForJUnit with ScalaCheckDriven
 
   test("Failure.show") {
     assert(
-      Failure("ok", FailureFlags.Rejected | FailureFlags.Retryable | FailureFlags.Interrupted).show == Failure(
+      Failure(
+        "ok",
+        FailureFlags.Rejected | FailureFlags.Retryable | FailureFlags.Interrupted).show == Failure(
         "ok",
         FailureFlags.Interrupted | FailureFlags.Rejected
       )

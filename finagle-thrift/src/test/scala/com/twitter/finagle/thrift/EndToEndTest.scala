@@ -253,10 +253,14 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       assert(traces.collect { case Record(_, _, Annotation.LocalAddr(_), _) => () }.size == 1)
       // These are set by one side only.
       assert(
-        traces.collect { case Record(_, _, Annotation.ServiceName("thriftclient"), _) => () }.size == 1
+        traces.collect {
+          case Record(_, _, Annotation.ServiceName("thriftclient"), _) => ()
+        }.size == 1
       )
       assert(
-        traces.collect { case Record(_, _, Annotation.ServiceName("thriftserver"), _) => () }.size == 1
+        traces.collect {
+          case Record(_, _, Annotation.ServiceName("thriftserver"), _) => ()
+        }.size == 1
       )
       assert(traces.collect { case Record(_, _, Annotation.ClientSend, _) => () }.size == 1)
       assert(traces.collect { case Record(_, _, Annotation.ServerRecv, _) => () }.size == 1)
@@ -1107,9 +1111,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     server.close()
   }
 
-  private[this] val servers: Seq[(
-    String,
-    (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)] =
+  private[this] val servers: Seq[
+    (String, (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)
+  ] =
     Seq(
       "Thrift.server" ->
         ((sr, fi) =>

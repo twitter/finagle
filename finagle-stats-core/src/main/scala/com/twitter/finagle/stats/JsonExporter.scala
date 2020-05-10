@@ -92,7 +92,8 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   // scoped to stats for testing
   private[stats] lazy val filterSample: collection.Map[String, Number] => collection.Map[
     String,
-    Number] = {
+    Number
+  ] = {
     val regexesFromFile = statsFilterFile().flatMap { file =>
       try {
         Source.fromFile(file)(Codec.UTF8).getLines()

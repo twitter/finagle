@@ -221,13 +221,14 @@ trait SubscribeCommands {
     def onMessage(message: Reply): Unit = {
       message match {
         case MBulkReply(
-            BulkReply(MessageBytes.MESSAGE) :: BulkReply(channel) :: BulkReply(message) :: Nil
+              BulkReply(MessageBytes.MESSAGE) :: BulkReply(channel) :: BulkReply(message) :: Nil
             ) =>
           subManager.handleMessage(channel, (channel, message))
         case MBulkReply(
-            BulkReply(MessageBytes.PMESSAGE) :: BulkReply(pattern) :: BulkReply(channel) :: BulkReply(
-              message
-            ) :: Nil
+              BulkReply(MessageBytes.PMESSAGE) :: BulkReply(pattern) :: BulkReply(
+                channel) :: BulkReply(
+                message
+              ) :: Nil
             ) =>
           pSubManager.handleMessage(pattern, (pattern, channel, message))
         case MBulkReply(BulkReply(tpe) :: BulkReply(channel) :: IntegerReply(count) :: Nil) =>

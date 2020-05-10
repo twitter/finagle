@@ -232,7 +232,10 @@ class WindowedPercentileHistogramTest
 
       eventually {
         assert(
-          wp.toBucketAndCounts().toSet == generateBucketAndCounts(Seq(1, 2, 3, 3, 4, 5), 2000, wp).toSet
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(
+            Seq(1, 2, 3, 3, 4, 5),
+            2000,
+            wp).toSet
         )
       }
 
@@ -248,7 +251,10 @@ class WindowedPercentileHistogramTest
 
       eventually {
         assert(
-          wp.toBucketAndCounts().toSet == generateBucketAndCounts(Seq(3, 4, 4, 5, 5, 7), 2000, wp).toSet
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(
+            Seq(3, 4, 4, 5, 5, 7),
+            2000,
+            wp).toSet
         )
       }
 

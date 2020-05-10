@@ -126,7 +126,8 @@ final class StreamsClientIntegrationSuite extends RedisClientTest with Inside {
 
     try {
       val stream = Buf.Utf8("c")
-      val start = Buf.Utf8("$") // Only read items that were pushed to the stream after we start listening
+      val start =
+        Buf.Utf8("$") // Only read items that were pushed to the stream after we start listening
 
       val countdownLatch = new CountDownLatch(1)
       val blockingRead = Promise[Seq[XReadStreamReply]]

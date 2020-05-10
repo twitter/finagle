@@ -148,14 +148,14 @@ object StandardToggleMap {
     }
     val d = md.digest()
     // use the first 8 bytes which should be unique enough for our purposes.
-    (d(0) & 0xFFL) |
-      ((d(1) & 0xFFL) << 8) |
-      ((d(2) & 0xFFL) << 16) |
-      ((d(3) & 0xFFL) << 24) |
-      ((d(4) & 0xFFL) << 32) |
-      ((d(5) & 0xFFL) << 40) |
-      ((d(6) & 0xFFL) << 48) |
-      ((d(7) & 0xFFL) << 56)
+    (d(0) & 0xffL) |
+      ((d(1) & 0xffL) << 8) |
+      ((d(2) & 0xffL) << 16) |
+      ((d(3) & 0xffL) << 24) |
+      ((d(4) & 0xffL) << 32) |
+      ((d(5) & 0xffL) << 40) |
+      ((d(6) & 0xffL) << 48) |
+      ((d(7) & 0xffL) << 56)
   }
 
   // exposed for testing

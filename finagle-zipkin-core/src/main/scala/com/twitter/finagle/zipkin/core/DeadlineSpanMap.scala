@@ -52,9 +52,11 @@ private class DeadlineSpanMap(
     // avoiding a removal from the map and a logSpans call is important
     // or updates written to the MutableSpan may not get logged.
     val ms: MutableSpan =
-      spanMap.computeIfAbsent(traceId, new java.util.function.Function[TraceId, MutableSpan]() {
-        def apply(t: TraceId): MutableSpan = new MutableSpan(traceId, Time.now)
-      })
+      spanMap.computeIfAbsent(
+        traceId,
+        new java.util.function.Function[TraceId, MutableSpan]() {
+          def apply(t: TraceId): MutableSpan = new MutableSpan(traceId, Time.now)
+        })
 
     val toFlush: Option[MutableSpan] = ms.synchronized {
       if (ms.wasFlushed) {

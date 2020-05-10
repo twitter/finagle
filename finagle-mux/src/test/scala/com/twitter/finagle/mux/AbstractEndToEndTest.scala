@@ -89,11 +89,13 @@ abstract class AbstractEndToEndTest
   }
 
   test(s"$implName: (no) Dtab propagation") {
-    val server = serverImpl.serve("localhost:*", Service.mk[Request, Response] { _ =>
-      val bw = BufByteWriter.fixed(4)
-      bw.writeIntBE(Dtab.local.size)
-      Future.value(Response(Nil, bw.owned()))
-    })
+    val server = serverImpl.serve(
+      "localhost:*",
+      Service.mk[Request, Response] { _ =>
+        val bw = BufByteWriter.fixed(4)
+        bw.writeIntBE(Dtab.local.size)
+        Future.value(Response(Nil, bw.owned()))
+      })
 
     val client = clientImpl.newService(getName(server), "client")
 
@@ -119,13 +121,15 @@ abstract class AbstractEndToEndTest
     val server = serverImpl
       .configured(param.Tracer(tracer))
       .configured(param.Label("theServer"))
-      .serve("localhost:*", new Service[Request, Response] {
-        def apply(req: Request) = {
-          count += 1
-          if (count >= 1) Future.value(Response(Nil, req.body))
-          else client(req)
-        }
-      })
+      .serve(
+        "localhost:*",
+        new Service[Request, Response] {
+          def apply(req: Request) = {
+            count += 1
+            if (count >= 1) Future.value(Response(Nil, req.body))
+            else client(req)
+          }
+        })
 
     client = clientImpl
       .configured(param.Tracer(tracer))
@@ -297,9 +301,11 @@ abstract class AbstractEndToEndTest
 
     val server = serverImpl
       .configured(Lessor.Param(lessor))
-      .serve("localhost:*", new Service[mux.Request, mux.Response] {
-        def apply(req: Request) = ???
-      })
+      .serve(
+        "localhost:*",
+        new Service[mux.Request, mux.Response] {
+          def apply(req: Request) = ???
+        })
 
     val sr = new InMemoryStatsReceiver
 

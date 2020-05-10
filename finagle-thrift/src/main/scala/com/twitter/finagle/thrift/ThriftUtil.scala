@@ -114,20 +114,21 @@ private[twitter] object ThriftUtil {
     // Will try to create a ServiceName$FinagleService.
     def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
       (for {
-        baseName <- findRootWithSuffix(iface.getName, "$FutureIface")
-          .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint"))
-          // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
-          .orElse(findRootWithSuffix(iface.getName, "$MethodIface"))
-          // handles ServiceB extends ServiceA, then using ServiceB$MethodPerEndpoint$MethodPerEndpointImpl
-          .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint$MethodPerEndpointImpl"))
-          // handles ServiceB extends ServiceA, then using ServiceB$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl
-          .orElse(
-            findRootWithSuffix(
-              iface.getName,
-              "$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl"
+        baseName <-
+          findRootWithSuffix(iface.getName, "$FutureIface")
+            .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint"))
+            // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
+            .orElse(findRootWithSuffix(iface.getName, "$MethodIface"))
+            // handles ServiceB extends ServiceA, then using ServiceB$MethodPerEndpoint$MethodPerEndpointImpl
+            .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint$MethodPerEndpointImpl"))
+            // handles ServiceB extends ServiceA, then using ServiceB$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl
+            .orElse(
+              findRootWithSuffix(
+                iface.getName,
+                "$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl"
+              )
             )
-          )
-          .orElse(Some(iface.getName))
+            .orElse(Some(iface.getName))
         serviceCls <- findClass[BinaryService](baseName + "$FinagleService")
         baseClass <- findClass1(baseName)
       } yield {

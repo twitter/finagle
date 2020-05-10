@@ -50,7 +50,8 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
     verify(client).newService("dest_string", "client")
   }
 
-  test("ThriftRichClientTest servicePerEndpoint takes dest Name and stats scoping label arguments") {
+  test(
+    "ThriftRichClientTest servicePerEndpoint takes dest Name and stats scoping label arguments") {
     val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
     val mockBuilder = mock[ServicePerEndpointBuilder[SvcIface]]
     doReturn(svcIface).when(mockBuilder).servicePerEndpoint(any(), captor.capture())

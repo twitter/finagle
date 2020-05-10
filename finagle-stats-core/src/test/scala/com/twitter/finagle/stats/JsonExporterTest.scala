@@ -45,7 +45,8 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val exporter = new JsonExporter(registry) {
       override lazy val filterSample: collection.Map[String, Number] => collection.Map[
         String,
-        Number] =
+        Number
+      ] =
         new CachedRegex(commaSeparatedRegex("abc,ill_be_partially_matched.*").get)
     }
     val sample = Map[String, Number](
@@ -155,7 +156,8 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val exporter = new JsonExporter(registry) {
       override lazy val filterSample: collection.Map[String, Number] => collection.Map[
         String,
-        Number] = new CachedRegex(commaSeparatedRegex("jvm.*,vie").get)
+        Number
+      ] = new CachedRegex(commaSeparatedRegex("jvm.*,vie").get)
     }
     val requestFiltered = Request("/admin/metrics.json?filtered=1&pretty=0")
     val responseFiltered = Await.result(exporter.apply(requestFiltered)).contentString

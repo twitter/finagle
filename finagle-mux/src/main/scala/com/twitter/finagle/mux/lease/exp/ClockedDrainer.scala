@@ -142,7 +142,8 @@ private[finagle] class ClockedDrainer(
     upkeep("open", init)
 
     coord.sleepUntilDiscountRemaining(
-      space, { () =>
+      space,
+      { () =>
         if (verbose) {
           log.info(
             "AWAIT-DISCOUNT: discount=" + space.discount() +
@@ -212,10 +213,12 @@ private[finagle] class ClockedDrainer(
       lr.record("byteLeft", coord.counter.info.remaining().inBytes.toString)
 
       forcedGc = 0
-      coord.sleepUntilGc({ () =>
-        forceGc()
-        forcedGc += 1
-      }, 10.milliseconds)
+      coord.sleepUntilGc(
+        { () =>
+          forceGc()
+          forcedGc += 1
+        },
+        10.milliseconds)
 
       stats.pendingAtGc.add(n)
       stats.forcedGcs.incr()

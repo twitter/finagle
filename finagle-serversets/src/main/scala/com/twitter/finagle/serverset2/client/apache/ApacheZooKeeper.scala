@@ -353,10 +353,12 @@ private[serverset2] object ApacheZooKeeper {
     }
     if (com.twitter.finagle.serverset2.client.chatty()) {
       val logger = Logger.get(getClass)
-      Watched(new ChattyRW {
-        protected val underlying: ZooKeeperRW = wrappedZk
-        protected val print = { m: String => logger.info(m) }
-      }, statsWatcher)
+      Watched(
+        new ChattyRW {
+          protected val underlying: ZooKeeperRW = wrappedZk
+          protected val print = { m: String => logger.info(m) }
+        },
+        statsWatcher)
     } else
       Watched(wrappedZk, statsWatcher)
   }

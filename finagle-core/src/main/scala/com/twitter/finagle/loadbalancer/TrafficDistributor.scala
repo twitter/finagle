@@ -86,7 +86,8 @@ private object TrafficDistributor {
     private[this] val (balancers, weights, drv): (
       IndexedSeq[ServiceFactory[Req, Rep]],
       IndexedSeq[Double],
-      Drv) = {
+      Drv
+    ) = {
       val wcs = classes.toIndexedSeq.sortBy(_.weight)
       val tupled = wcs.map {
         case WeightClass(b, _, weight, size) => (b, weight, weight * size)

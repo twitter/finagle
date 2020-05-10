@@ -134,7 +134,8 @@ case class XReadGroup(
     val countSeq = count.map(c => Seq("COUNT", c.toString).map(Buf.Utf8.apply)).getOrElse(Seq.empty)
     val blockSeq =
       blockMs.map(b => Seq("BLOCK", b.toString).map(Buf.Utf8.apply)).getOrElse(Seq.empty)
-    Seq(Buf.Utf8("GROUP"), group, consumer) ++ countSeq ++ blockSeq ++ Seq(Buf.Utf8("STREAMS")) ++ keys ++ ids
+    Seq(Buf.Utf8("GROUP"), group, consumer) ++ countSeq ++ blockSeq ++ Seq(
+      Buf.Utf8("STREAMS")) ++ keys ++ ids
   }
 }
 

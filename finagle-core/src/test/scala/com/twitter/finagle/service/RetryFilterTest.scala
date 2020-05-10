@@ -260,9 +260,11 @@ class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
           Future.exception(new RuntimeException("never gonna be seen"))
         )
 
-        val policy = RetryPolicy.tries[Try[Nothing]](3, {
-          case Throw(_) => true
-        })
+        val policy = RetryPolicy.tries[Try[Nothing]](
+          3,
+          {
+            case Throw(_) => true
+          })
         val retryFilter =
           new RetryExceptionsFilter[Int, Int](policy, timer, stats, RetryBudget.Infinite)
         val retryingSvc = retryFilter.andThen(svc)

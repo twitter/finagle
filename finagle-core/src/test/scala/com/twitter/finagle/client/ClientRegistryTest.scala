@@ -166,11 +166,14 @@ class ClientRegistryTest
 
     val factory = ServiceFactory.const(mockSvc)
 
-    val stack = new StackBuilder(Stack.leaf(new Stack.Head {
-      def role: Stack.Role = headRole
-      def description: String = "the head!!"
-      def parameters: Seq[Stack.Param[_]] = Seq(TestParam2.param)
-    }, factory))
+    val stack = new StackBuilder(
+      Stack.leaf(
+        new Stack.Head {
+          def role: Stack.Role = headRole
+          def description: String = "the head!!"
+          def parameters: Seq[Stack.Param[_]] = Seq(TestParam2.param)
+        },
+        factory))
     val stackable: Stackable[ServiceFactory[Int, Int]] =
       new Stack.Module1[TestParam, ServiceFactory[Int, Int]] {
         def make(p: TestParam, l: ServiceFactory[Int, Int]): ServiceFactory[Int, Int] = l.map {

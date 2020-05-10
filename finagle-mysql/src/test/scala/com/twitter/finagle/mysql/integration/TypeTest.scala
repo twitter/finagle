@@ -412,7 +412,7 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
     }
 
     test("extract %s from %s".format("varbinary", rowType)) {
-      val expected = List(0x6A)
+      val expected = List(0x6a)
       row("varbinary") match {
         case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList == expected)
         case a => fail("Expected RawValue but got %s".format(a))

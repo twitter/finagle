@@ -97,7 +97,8 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
     Await.result(server.close(), timeout)
   }
 
-  test("Multiple clients and server results in server TLS connections incremented and decremented") {
+  test(
+    "Multiple clients and server results in server TLS connections incremented and decremented") {
     val serverStats = new InMemoryStatsReceiver
 
     val server = mkTlsServer(worldService, "server", serverStats)

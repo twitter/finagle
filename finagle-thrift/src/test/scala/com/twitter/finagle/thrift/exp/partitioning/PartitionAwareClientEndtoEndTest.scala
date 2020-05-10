@@ -21,7 +21,9 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)
 
-  type ClientType <: Stack.Parameterized[ClientType] with WithThriftPartitioningStrategy[ClientType] with ThriftRichClient
+  type ClientType <: Stack.Parameterized[ClientType] with WithThriftPartitioningStrategy[
+    ClientType
+  ] with ThriftRichClient
 
   def clientImpl(): ClientType
 
@@ -121,7 +123,8 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
       assert(result == expectedOneNode)
       assert(await(client.sendBox(Box(addrInfo1, "test"))) == "test")
       assert(
-        await(client.sendBoxes(Seq(Box(addrInfo1, "test1"), Box(addrInfo2, "test2")))) == "test1,test2")
+        await(
+          client.sendBoxes(Seq(Box(addrInfo1, "test1"), Box(addrInfo2, "test2")))) == "test1,test2")
       assert(await(client.getBox(addrInfo1, Byte.MinValue)) == Box(addrInfo1, "hi"))
       client.asClosable.close()
       servers.map(_.close())

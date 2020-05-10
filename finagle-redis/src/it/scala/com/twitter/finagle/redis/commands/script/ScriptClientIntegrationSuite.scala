@@ -109,7 +109,8 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
 
     testCase(
       testName,
-      scripts, { client => (s, keys, argv) => client.eval(s, keys, argv) map cast })
+      scripts,
+      { client => (s, keys, argv) => client.eval(s, keys, argv) map cast })
 
     test(
       "In " + testName + ", scriptExists should return true for executed scripts; and return false after scriptFlush"
@@ -133,9 +134,12 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
       }
     }
 
-    testCase(testName + " SHA w/o fallback", scripts, { client => (s, keys, argv) =>
-      client.evalSha(SHA1hex(s), keys, argv) map cast
-    })
+    testCase(
+      testName + " SHA w/o fallback",
+      scripts,
+      { client => (s, keys, argv) =>
+        client.evalSha(SHA1hex(s), keys, argv) map cast
+      })
 
     test(
       testName + " SHA w/o fallback should make scriptsExists return true; and scriptFlush should make scriptExists return false"
@@ -148,9 +152,12 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
       }
     }
 
-    testCase(testName + " SHA w/ fallback", scripts, { client => (s, keys, argv) =>
-      client.evalSha(SHA1hex(s), s, keys, argv) map cast
-    })
+    testCase(
+      testName + " SHA w/ fallback",
+      scripts,
+      { client => (s, keys, argv) =>
+        client.evalSha(SHA1hex(s), s, keys, argv) map cast
+      })
 
     test(
       testName + " SHA w/ fallback should make scriptsExists return true; and scriptFlush should make scriptExists return false again"
@@ -349,9 +356,11 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
         assert(
           Await
             .result(for {
-              _ <- client.hMSet(Buf.Utf8("info"), Map("x" -> "1", "y" -> "2").map {
-                case (k, v) => Buf.Utf8(k) -> Buf.Utf8(v)
-              })
+              _ <- client.hMSet(
+                Buf.Utf8("info"),
+                Map("x" -> "1", "y" -> "2").map {
+                  case (k, v) => Buf.Utf8(k) -> Buf.Utf8(v)
+                })
               s1 <- eval(client)(scriptHGetAll, stringsToBuffers("info"), Nil)
               s2 <- eval(client)(scriptHGetAll, stringsToBuffers("nonexsisting"), Nil)
               s3 <- eval(client)(

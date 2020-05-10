@@ -30,7 +30,7 @@ object Tracing {
   private[tracing] def nextTraceIdHigh(): SpanId = {
     val epochSeconds = Time.now.sinceEpoch.inSeconds
     val random = Rng.nextInt()
-    SpanId((epochSeconds & 0xFFFFFFFFL) << 32 | (random & 0xFFFFFFFFL))
+    SpanId((epochSeconds & 0xffffffffL) << 32 | (random & 0xffffffffL))
   }
 
   // A collection of methods to work with tracers stored in the local context.

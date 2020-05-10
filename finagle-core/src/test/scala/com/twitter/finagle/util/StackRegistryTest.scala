@@ -40,11 +40,14 @@ class StackRegistryTest extends FunSuite {
   val param1 = TestParam(999)
 
   def newStack() = {
-    val stack = new StackBuilder(Stack.leaf(new Stack.Head {
-      def role: Stack.Role = headRole
-      def description: String = "the head!!"
-      def parameters: Seq[Stack.Param[_]] = Seq(TestParam2.param)
-    }, List(1, 2, 3, 4)))
+    val stack = new StackBuilder(
+      Stack.leaf(
+        new Stack.Head {
+          def role: Stack.Role = headRole
+          def description: String = "the head!!"
+          def parameters: Seq[Stack.Param[_]] = Seq(TestParam2.param)
+        },
+        List(1, 2, 3, 4)))
     val stackable: Stackable[List[Int]] = new Stack.Module1[TestParam, List[Int]] {
       def make(p: TestParam, l: List[Int]): List[Int] = p.p1 :: l
 

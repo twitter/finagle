@@ -86,9 +86,9 @@ private[redis] trait GeoCommands {
     case _ => None
   }
 
-  private val handleGeoRadiusResponse: PartialFunction[
-    Reply,
-    Future[Seq[Option[GeoRadiusResult]]]] = {
+  private val handleGeoRadiusResponse: PartialFunction[Reply, Future[
+    Seq[Option[GeoRadiusResult]]
+  ]] = {
     case EmptyBulkReply => Future.Nil
     case EmptyMBulkReply => Future.Nil
     case MBulkReply(memberRadiusList) => Future.value(memberRadiusList.map(geoRadiusResultParser))

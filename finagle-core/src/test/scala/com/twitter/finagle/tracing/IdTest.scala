@@ -97,7 +97,13 @@ class IdTest extends FunSuite {
 
   test("hashCode only accounts for id fields") {
     assert(
-      TraceId(Some(SpanId(1L)), Some(SpanId(2L)), SpanId(3L), Some(true), Flags(), Some(SpanId(4L))).hashCode ==
+      TraceId(
+        Some(SpanId(1L)),
+        Some(SpanId(2L)),
+        SpanId(3L),
+        Some(true),
+        Flags(),
+        Some(SpanId(4L))).hashCode ==
         TraceId(
           Some(SpanId(1L)),
           Some(SpanId(2L)),

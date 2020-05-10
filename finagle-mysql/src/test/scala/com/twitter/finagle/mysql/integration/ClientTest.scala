@@ -18,7 +18,8 @@ case class SwimmingRecord(
   date: Date) {
   override def toString: String = {
     def q(s: String) = "'" + s + "'"
-    "(" + q(event) + "," + time + "," + q(name) + "," + q(nationality) + "," + q(date.toString) + ")"
+    "(" + q(event) + "," + time + "," + q(name) + "," + q(nationality) + "," + q(
+      date.toString) + ")"
   }
 }
 

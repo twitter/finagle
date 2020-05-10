@@ -298,7 +298,8 @@ abstract class AbstractStackClientTest
       // don't pool or else we don't see underlying close until service is ejected from pool
       .remove(DefaultPool.Role)
       .replace(
-        StackClient.Role.prepFactory, { next: ServiceFactory[Unit, Unit] =>
+        StackClient.Role.prepFactory,
+        { next: ServiceFactory[Unit, Unit] =>
           next map { service: Service[Unit, Unit] =>
             new ServiceProxy[Unit, Unit](service) {
               override def close(deadline: Time) = Future.never

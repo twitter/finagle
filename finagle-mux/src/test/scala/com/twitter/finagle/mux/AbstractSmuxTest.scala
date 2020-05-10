@@ -20,11 +20,19 @@ abstract class AbstractSmuxTest extends FunSuite {
 
   import AbstractSmuxTest._
 
-  type ServerT <: ListeningStackServer[mux.Request, mux.Response, ServerT] with OpportunisticTlsParams[
+  type ServerT <: ListeningStackServer[
+    mux.Request,
+    mux.Response,
+    ServerT
+  ] with OpportunisticTlsParams[
     ServerT
   ]
 
-  type ClientT <: EndpointerStackClient[mux.Request, mux.Response, ClientT] with OpportunisticTlsParams[
+  type ClientT <: EndpointerStackClient[
+    mux.Request,
+    mux.Response,
+    ClientT
+  ] with OpportunisticTlsParams[
     ClientT
   ]
 
@@ -94,7 +102,8 @@ abstract class AbstractSmuxTest extends FunSuite {
   // tests
   test("smux: can talk to each other with opportunistic tls") {
     smuxTest(
-      compatibleEnabledLevels, {
+      compatibleEnabledLevels,
+      {
         case (results, string, _) =>
           val Buf.Utf8(repString) = results.get.body
           assert(repString == "." * 20)
@@ -107,21 +116,25 @@ abstract class AbstractSmuxTest extends FunSuite {
   }
 
   test("smux: can talk to each other when both parties are off") {
-    smuxTest(compatibleUndesiredDisabledLevels, {
-      case (results, string, _) =>
-        val Buf.Utf8(repString) = results.get.body
-        assert(repString == "." * 20)
-        assert(string.isEmpty)
-    })
+    smuxTest(
+      compatibleUndesiredDisabledLevels,
+      {
+        case (results, string, _) =>
+          val Buf.Utf8(repString) = results.get.body
+          assert(repString == "." * 20)
+          assert(string.isEmpty)
+      })
   }
 
   test("smux: can talk to each other when one party is off") {
-    smuxTest(compatibleDesiredDisabledLevels, {
-      case (results, string, _) =>
-        val Buf.Utf8(repString) = results.get.body
-        assert(repString == "." * 20)
-        assert(string.isEmpty)
-    })
+    smuxTest(
+      compatibleDesiredDisabledLevels,
+      {
+        case (results, string, _) =>
+          val Buf.Utf8(repString) = results.get.body
+          assert(repString == "." * 20)
+          assert(string.isEmpty)
+      })
   }
 
   test("smux: can't create a client with an invalid OppTls config") {
@@ -146,7 +159,8 @@ abstract class AbstractSmuxTest extends FunSuite {
 
   test("smux: can't talk to each other with incompatible opportunistic tls") {
     smuxTest(
-      incompatibleLevels, {
+      incompatibleLevels,
+      {
         case (results, string, stats) =>
           intercept[IncompatibleNegotiationException] {
             results.get

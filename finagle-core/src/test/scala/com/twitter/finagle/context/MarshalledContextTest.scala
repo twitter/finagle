@@ -83,7 +83,8 @@ class MarshalledContextTest extends AbstractContextTest {
   }
 
   test("Unmarshal") {
-    ctx.let(Seq(ctx.KeyValuePair(a, "ok"), ctx.KeyValuePair(b, 123), ctx.KeyValuePair(a, "notok"))) {
+    ctx.let(
+      Seq(ctx.KeyValuePair(a, "ok"), ctx.KeyValuePair(b, 123), ctx.KeyValuePair(a, "notok"))) {
       val roundTrip = ctx.doUnmarshal(Map.empty, ctx.marshal())
 
       def checkKey(key: ctx.Key[_]): Unit = {

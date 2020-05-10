@@ -160,7 +160,8 @@ class ToggleTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     }
   }
 
-  test("Toggle.Fractional.min isDefinedAt is result of isDefinedAt for toggle with lower fraction") {
+  test(
+    "Toggle.Fractional.min isDefinedAt is result of isDefinedAt for toggle with lower fraction") {
     val definedAtZero = Toggle.on("com.foo")
     val undefinedAtZero = newToggle("com.foo", { case x if x > 0 => true }, 1.0)
 

@@ -456,9 +456,11 @@ class TrafficDistributorTest extends FunSuite {
 
   if (!sys.props.contains("SKIP_FLAKY"))
     test("increment weights on a shard") {
-      val server = StringServer.server.serve(":*", Service.mk { r: String =>
-        Future.value(r.reverse)
-      })
+      val server = StringServer.server.serve(
+        ":*",
+        Service.mk { r: String =>
+          Future.value(r.reverse)
+        })
       val sr = new CumulativeGaugeInMemoryStatsReceiver()
       val addr = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
       val va = Var[Addr](Addr.Bound(addr))
