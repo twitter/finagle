@@ -9,9 +9,11 @@ means that it may be necessary to publish the `develop` branches of these
 libraries locally in order to work on Finagle's `develop` branch. To do so
 you can use our build tool, [dodo](https://github.com/twitter/dodo).
 
-``` bash
-curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
-```
+1. Clone [dodo](https://github.com/twitter/dodo.git)
+2. `./dodo/bin/build --no-test finagle`
+
+dodo depends on bash version > 4 to run correctly, in case of an error that
+`BASH_SOURCE` is unbound, make sure to run with bash
 
 ## Building Finagle
 
