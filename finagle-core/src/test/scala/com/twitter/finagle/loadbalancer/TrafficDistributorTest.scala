@@ -4,6 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.loadbalancer.TrafficDistributor.DiffOps
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
@@ -598,4 +599,146 @@ class TrafficDistributorTest extends FunSuite {
     assert(newBalancerCalls == 4)
     assert(closeBalancerCalls == 3)
   })
+
+  trait UpdatePartitionMapCtx {
+    var closeIsCalled = 0
+    case class Partition(value: Var[Set[Int]] with Updatable[Set[Int]]) extends Closable {
+      def close(deadline: Time): Future[Unit] = {
+        closeIsCalled += 1
+        Future.Done
+      }
+    }
+
+    var removed = 0
+    var added = 0
+    var updated = 0
+    val partitionDiffOps = new DiffOps[Int, Partition] {
+      def remove(partition: Partition): Unit = {
+        removed += 1
+        partition.close()
+      }
+      def add(items: Set[Int]): Partition = {
+        added += 1
+        Partition(Var(items))
+      }
+      def update(items: Set[Int], partition: Partition): Partition = {
+        updated += 1
+        partition.value.update(items)
+        partition
+      }
+    }
+
+    def getPartitionKey(i: Int) = i % 3
+  }
+
+  test("updatePartitionMap - add new partitions") {
+    new UpdatePartitionMapCtx {
+      val current = Set(1, 2, 3, 4, 5, 6)
+      val init = Map.empty[Int, Partition]
+
+      val result =
+        TrafficDistributor.updatePartitionMap(init, current, getPartitionKey, partitionDiffOps)
+      assert(result(0).value.sample() == Set(3, 6))
+      assert(result(1).value.sample() == Set(1, 4))
+      assert(result(2).value.sample() == Set(2, 5))
+    }
+  }
+
+  test("updatePartitionMap - remove a partitions") {
+    new UpdatePartitionMapCtx {
+      val init = Map(
+        0 -> Partition(Var(Set(3, 6))),
+        1 -> Partition(Var(Set(1, 4))),
+        2 -> Partition(Var(Set(2, 5))))
+
+      // remove a partition
+      val current1 = Set(1, 3, 4)
+      val result =
+        TrafficDistributor.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
+      assert(result(0).value.sample() == Set(3))
+      assert(result(1).value.sample() == Set(1, 4))
+      assert(result.get(2) == None)
+      assert(closeIsCalled == 1)
+      assert(removed == 1)
+      assert(updated == 2)
+    }
+  }
+
+  test("updatePartitionMap - update") {
+    new UpdatePartitionMapCtx {
+      val init = Map(
+        0 -> Partition(Var(Set(3, 6))),
+        1 -> Partition(Var(Set(1, 4))),
+        2 -> Partition(Var(Set(2, 5))))
+      val current1 = Set(7, 2, 3, 4, 5, 6)
+
+      val result1 =
+        TrafficDistributor.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
+      assert(result1(0).value.sample() == Set(3, 6))
+      assert(result1(1).value.sample() == Set(4, 7))
+      assert(result1(2).value.sample() == Set(2, 5))
+      assert(closeIsCalled == 0)
+
+      val current2 = Set(7, 8, 3, 4, 11, 6)
+      val result2 =
+        TrafficDistributor.updatePartitionMap(result1, current2, getPartitionKey, partitionDiffOps)
+      assert(result2(0).value.sample() == Set(3, 6))
+      assert(result2(1).value.sample() == Set(4, 7))
+      assert(result2(2).value.sample() == Set(8, 11))
+      assert(closeIsCalled == 0)
+    }
+  }
+  test("updatePartitionMap - no addition and removal") {
+    new UpdatePartitionMapCtx {
+      val init = Map(
+        0 -> Partition(Var(Set(3, 6))),
+        1 -> Partition(Var(Set(1, 4))),
+        2 -> Partition(Var(Set(2, 5))))
+      val current = Set(1, 2, 3, 4, 5, 6)
+
+      val result =
+        TrafficDistributor.updatePartitionMap(init, current, getPartitionKey, partitionDiffOps)
+      assert(result(0).value.sample() == Set(3, 6))
+      assert(result(1).value.sample() == Set(1, 4))
+      assert(result(2).value.sample() == Set(2, 5))
+      assert(removed == 0)
+      assert(added == 0)
+      assert(updated == 3)
+    }
+  }
+  test("updatePartitionMap - a combination of 3 operations") {
+    new UpdatePartitionMapCtx {
+      val init = Map(
+        0 -> Partition(Var(Set(3, 6))),
+        1 -> Partition(Var(Set(1, 4))),
+        2 -> Partition(Var(Set(2, 5))))
+
+      val current1 = Set(1, 2, 4, 7)
+      val result1 =
+        TrafficDistributor.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
+      assert(result1.get(0) == None)
+      assert(closeIsCalled == 1)
+      assert(result1(1).value.sample() == Set(1, 4, 7))
+      assert(result1(2).value.sample() == Set(2))
+      assert(removed == 1)
+      assert(added == 0)
+      assert(updated == 2)
+
+      removed = 0
+      added = 0
+      updated = 0
+      closeIsCalled = 0
+
+      val current2 = Set(2, 5, 9, 12)
+      val result2 =
+        TrafficDistributor.updatePartitionMap(result1, current2, getPartitionKey, partitionDiffOps)
+      assert(result2(0).value.sample() == Set(9, 12))
+      assert(result2.get(1) == None)
+      assert(result2(2).value.sample() == Set(2, 5))
+      assert(removed == 1)
+      assert(added == 1)
+      assert(updated == 1)
+      assert(closeIsCalled == 1)
+    }
+  }
 }

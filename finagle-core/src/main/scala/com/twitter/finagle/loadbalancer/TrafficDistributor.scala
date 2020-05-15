@@ -3,13 +3,13 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.service.{DelayedFactory, FailingFactory, ServiceFactoryRef}
-import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver, Verbosity}
+import com.twitter.finagle.stats.{Counter, NullStatsReceiver, StatsReceiver, Verbosity}
 import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.logging.Logger
 import com.twitter.util._
 import scala.util.control.NonFatal
 
-private object TrafficDistributor {
+private[finagle] object TrafficDistributor {
   val log = Logger.get(classOf[TrafficDistributor[_, _]])
 
   /**
@@ -49,6 +49,25 @@ private object TrafficDistributor {
     size: Int)
 
   /**
+   * Transforms a [[Var]] of bound Addresses to an [[Activity]] of bound Addresses
+   * @note The Addr.Bound metadata is stripped out in this method, the metadata can
+   *       be found in [[AddrMetadataExotraction]]
+   */
+  private[finagle] def varAddrToActivity(dest: Var[Addr], label: String): Activity[Set[Address]] =
+    Activity(dest.map {
+      case Addr.Bound(set, _) => Activity.Ok(set)
+      case Addr.Neg =>
+        log.info(s"$label: name resolution is negative (local dtab: ${Dtab.local})")
+        Activity.Ok(Set.empty[Address])
+      case Addr.Failed(e) =>
+        log.info(s"$label: name resolution failed  (local dtab: ${Dtab.local})", e)
+        Activity.Failed(e)
+      case Addr.Pending =>
+        log.debug(s"$label: name resolution is pending")
+        Activity.Pending
+    })
+
+  /**
    * Folds and accumulates over an [[Activity]] based event `stream` while biasing
    * for success by suppressing intermediate failures.
    *
@@ -56,7 +75,7 @@ private object TrafficDistributor {
    * changes and keep using stale data to prevent discarding possibly valid data
    * if the updating activity is having transient failures.
    */
-  private def safelyScanLeft[T, U](
+  private[finagle] def safelyScanLeft[T, U](
     init: U,
     stream: Event[Activity.State[T]]
   )(
@@ -72,6 +91,48 @@ private object TrafficDistributor {
       case (_, failed @ Activity.Failed(_)) => failed
       case (_, Activity.Pending) => Activity.Pending
     }
+  }
+
+  /**
+   * This interface handles operations when partitioning a Set of elements into a Map.
+   */
+  trait DiffOps[U, Partition] {
+
+    /** Removes/cleans up an existing partition */
+    def remove(partition: Partition): Unit
+
+    /** Constructs a new partition from the an addition set of elements */
+    def add(current: Set[U]): Partition
+
+    /** Updates the existing partition with a set of elements */
+    def update(current: Set[U], partition: Partition): Partition
+  }
+
+  /**
+   * Transform the current element Set to a new Partition Map which updates the previous
+   * Partition Map by provided operations.
+   *
+   * @param accumulated Previous Partition Map
+   * @param current     Current Set of elements
+   * @param getKey      A discriminator function for current Set to get key
+   * @param diffOps     [[DiffOps]] to handle the diff between the previous partition map and
+   *                    newly transformed partition map from the current Set. This function
+   *                    usually handles transactions during creating, updating, and removing.
+   */
+  private[finagle] def updatePartitionMap[Key, Partition, U](
+    accumulated: Map[Key, Partition],
+    current: Set[U],
+    getKey: U => Key,
+    diffOps: DiffOps[U, Partition]
+  ): Map[Key, Partition] = {
+    val grouped = current.groupBy(getKey)
+    val removals = accumulated.keySet &~ grouped.keySet
+    val additions = grouped.keySet &~ accumulated.keySet
+    val updates = grouped.keySet & accumulated.keySet
+    removals.foreach { key => diffOps.remove(accumulated(key)) }
+    val added = additions.map { key => key -> diffOps.add(grouped(key)) }.toMap
+    val updated = updates.map { key => key -> diffOps.update(grouped(key), accumulated(key)) }.toMap
+    added ++ updated
   }
 
   /**
@@ -248,41 +309,40 @@ private class TrafficDistributor[Req, Rep](
     // which is updatable. The entries are keyed by weight class.
     val init = Map.empty[Double, CachedBalancer[Req, Rep]]
 
-    safelyScanLeft(init, endpoints) { (balancers, activeSet) =>
-      // Group factories so we can retrieve sets of them by weight.
-      val factories = activeSet.groupBy(_.weight)
-
-      // Everything is indexed by weight, so we add or update balancers that
-      // have corresponding factories, and remove balancers that don't.
-      val removals = balancers.keySet -- factories.keySet
-      val additions = factories.keySet -- balancers.keySet
-      val updates = factories.keySet & balancers.keySet
-
+    val balancerDiffOps = new DiffOps[WeightedFactory[Req, Rep], CachedBalancer[Req, Rep]] {
       // Close balancers that don't correspond to new endpoints.
-      removals.foreach { weight =>
-        try balancers(weight).balancer.close()
+      def remove(cachedBalancer: CachedBalancer[Req, Rep]): Unit =
+        try cachedBalancer.balancer.close()
         catch {
           case NonFatal(t) => log.warning(t, "unable to close balancer")
         }
-      }
 
       // Construct new balancers from new endpoints.
-      val addedBalancers = additions.map { weight =>
-        val group = factories(weight).map(_.factory)
+      def add(factories: Set[WeightedFactory[Req, Rep]]): CachedBalancer[Req, Rep] = {
+        val group = factories.map(_.factory)
         val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(group))
         val bal = newBalancer(Activity(endpoints))
-        (weight -> CachedBalancer(bal, endpoints, group.size))
-      }.toMap
+        CachedBalancer(bal, endpoints, group.size)
+      }
 
       // Update existing balancers with new endpoints.
-      val updatedBalancers = updates.map { weight =>
-        val group = factories(weight).map(_.factory)
-        val bal = balancers(weight)
-        bal.endpoints.update(Activity.Ok(group))
-        (weight -> bal.copy(size = group.size))
-      }.toMap
+      def update(
+        factories: Set[WeightedFactory[Req, Rep]],
+        cachedBalancer: CachedBalancer[Req, Rep]
+      ): CachedBalancer[Req, Rep] = {
+        val group = factories.map(_.factory)
+        cachedBalancer.endpoints.update(Activity.Ok(group))
+        cachedBalancer.copy(size = group.size)
+      }
+    }
 
-      val result = addedBalancers ++ updatedBalancers
+    safelyScanLeft(init, endpoints) { (balancers, activeSet) =>
+      // group the factories and partition them to CachedBalancer by weight
+      val result = updatePartitionMap(
+        balancers,
+        activeSet,
+        (weightedFactory: WeightedFactory[Req, Rep]) => weightedFactory.weight,
+        balancerDiffOps)
 
       // Intercept the empty balancer set and replace it with a single balancer
       // that has an empty set of endpoints.

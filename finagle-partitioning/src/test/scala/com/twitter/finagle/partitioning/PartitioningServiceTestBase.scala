@@ -5,14 +5,13 @@ import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.{param => ctfparam}
-import com.twitter.finagle.partitioning.{param => partitioningParam}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
+import com.twitter.finagle.partitioning.{param => partitioningParam}
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Address, _}
+import com.twitter.finagle.{Address, param => ctfparam, _}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.CountDownLatch

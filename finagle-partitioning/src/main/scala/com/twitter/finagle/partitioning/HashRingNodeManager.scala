@@ -117,7 +117,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
                       }
                   }
                 val node =
-                  PartitionNode(ia.getHostName, ia.getPort, w.asInstanceOf[Int], shardIdOpt)
+                  PartitionNode(ia.getHostName, ia.getPort, w.toInt, shardIdOpt)
                 val key = HashNodeKey.fromPartitionNode(node)
                 val service = mkService(boundAddress, key)
 
