@@ -16,3 +16,12 @@
 
 **<label>/cursor/closed**
   A counter of the number of closed cursors.
+
+**<label>/pstmt-cache/calls**
+  A counter of the number of requested prepared statements.
+
+**<label>/pstmt-cache/misses**
+  A counter of the number of times when a prepared statement was not the cache.
+
+**<label>/pstmt-cache/evicted_size**
+  A counter of the number of times prepared statements were evicted from the cache.

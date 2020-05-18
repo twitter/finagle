@@ -8,6 +8,7 @@ import com.twitter.finagle.mysql.LostSyncException.const
 import com.twitter.finagle.mysql.param.{MaxConcurrentPrepareStatements, UnsignedColumns}
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader, Packet}
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.stats.{Counter, LazyStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, ServiceProxy, Stack}
 import com.twitter.util._
@@ -24,13 +25,32 @@ case class ServerError(code: Short, sqlState: String, message: String) extends E
  * the chances of leaking prepared statements and can simplify the
  * implementation of prepared statements in the presence of a connection pool.
  */
-private[mysql] class PrepareCache(svc: Service[Request, Result], cache: Caffeine[Object, Object])
+private[mysql] class PrepareCache(
+  svc: Service[Request, Result],
+  cache: Caffeine[Object, Object],
+  statsReceiver: StatsReceiver)
     extends ServiceProxy[Request, Result](svc) {
+
+  private[this] val scopedStatsReceiver = new LazyStatsReceiver(
+    statsReceiver.scope("pstmt-cache")
+  )
+
+  private[this] val evictionCounters = {
+    val counters = new Array[Counter](RemovalCause.values().length)
+    for (value <- RemovalCause.values()) {
+      counters(value.ordinal()) =
+        scopedStatsReceiver.counter(s"evicted_${value.name().toLowerCase}")
+    }
+    counters
+  }
+  private[this] val callCounter = scopedStatsReceiver.counter("calls")
+  private[this] val missCounter = scopedStatsReceiver.counter("misses")
 
   private[this] val fn = {
     val listener = new RemovalListener[Request, Future[Result]] {
       // make sure prepared futures get removed eventually
       def onRemoval(request: Request, response: Future[Result], cause: RemovalCause): Unit = {
+        evictionCounters(cause.ordinal()).incr()
         response.respond {
           case Return(r: PrepareOK) =>
             svc(CloseRequest(r.id)).unit
@@ -43,7 +63,13 @@ private[mysql] class PrepareCache(svc: Service[Request, Result], cache: Caffeine
       .removalListener(listener)
       .build[Request, Future[Result]]()
 
-    CaffeineCache.fromCache(Service.mk { req: Request => svc(req) }, underlying)
+    CaffeineCache.fromCache(
+      fn = { req: Request =>
+        missCounter.incr()
+        svc(req)
+      },
+      cache = underlying
+    )
   }
 
   /**
@@ -51,7 +77,9 @@ private[mysql] class PrepareCache(svc: Service[Request, Result], cache: Caffeine
    * sql queries.
    */
   override def apply(req: Request): Future[Result] = req match {
-    case _: PrepareRequest => fn(req)
+    case _: PrepareRequest =>
+      callCounter.incr()
+      fn(req)
     case _ => super.apply(req)
   }
 }
@@ -67,8 +95,9 @@ private[finagle] object ClientDispatcher {
   def apply(trans: Transport[Packet, Packet], params: Stack.Params): Service[Request, Result] = {
     val maxConcurrentPrepareStatements = params[MaxConcurrentPrepareStatements].num
     new PrepareCache(
-      new ClientDispatcher(trans, params),
-      Caffeine.newBuilder().maximumSize(maxConcurrentPrepareStatements)
+      svc = new ClientDispatcher(trans, params),
+      cache = Caffeine.newBuilder().maximumSize(maxConcurrentPrepareStatements),
+      statsReceiver = params[Stats].statsReceiver
     )
   }
 
@@ -171,8 +200,9 @@ private[finagle] final class ClientDispatcher(
           (seq2, _) <- readTx(req, ok.numOfCols)
           ps <- Future.collect(seq1.map { p => const(Field(p)) })
           cs <- Future.collect(seq2.map { p => const(Field(p)) })
-        } yield ok.copy(params = ps, columns = cs)
-
+        } yield {
+          ok.copy(params = ps, columns = cs)
+        }
         result.ensure { signal.setDone() }
 
       // decode OK Result
