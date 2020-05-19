@@ -5,5 +5,5 @@ version := "1.0"
 scalaVersion := "2.12.1"
 
 libraryDependencies ++= Seq(
-  "com.twitter" %% "finagle-core" % "20.4.1"
+  "com.twitter" %% "finagle-core" % "20.5.0"
 )
