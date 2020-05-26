@@ -95,6 +95,12 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    * @return whether the keys live on the same partition
    */
   protected def isSinglePartition(request: Req): Future[Boolean]
+
+  /**
+   * Error handling when processing requests to retrieve partition information failed, this is
+   * implemented by each protocol to log proper information.
+   */
+  protected def noPartitionInformationHandler(req: Req): Future[Nothing]
 }
 
 object PartitioningService {

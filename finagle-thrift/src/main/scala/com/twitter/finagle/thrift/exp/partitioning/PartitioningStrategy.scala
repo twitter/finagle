@@ -1,8 +1,9 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy._
+import com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.PartitioningStrategyException
 import com.twitter.scrooge.{ThriftMethodIface, ThriftStructIface}
-import com.twitter.util.Try
+import com.twitter.util.{Future, Try}
 import scala.collection.mutable
 
 private[partitioning] object PartitioningStrategy {
@@ -38,6 +39,9 @@ private[partitioning] object PartitioningStrategy {
    * the Thrift IDL definition. ResponseMerger is registered through
    * [[ResponseMergerRegistry]].
    *
+   * Failing sub-responses are expected to be handled by the application (proper logging,
+   * exception handling, etc),
+   *
    * for example:
    * {{{
    *   string example(1: i32 a)
@@ -56,7 +60,7 @@ private[partitioning] object PartitioningStrategy {
      * @note The created RequestMergerRegistry is NOT thread safe, it carries an assumption
      *       that registries are written during client initialization.
      */
-    def create: RequestMergerRegistry = new RequestMergerRegistry()
+    def create(): RequestMergerRegistry = new RequestMergerRegistry()
   }
 
   /**
@@ -97,7 +101,7 @@ private[partitioning] object PartitioningStrategy {
      * @note The created ResponseMergerRegistry is NOT thread safe, it carries an assumption
      *       that registries are written during client initialization.
      */
-    def create: ResponseMergerRegistry = new ResponseMergerRegistry()
+    def create(): ResponseMergerRegistry = new ResponseMergerRegistry()
   }
 
   /**
@@ -136,9 +140,47 @@ private[partitioning] object PartitioningStrategy {
  * indicator of destination, for example a hashing key or a partition address.
  * Messaging fan-out is supported by leveraging RequestMerger and ResponseMerger.
  */
-sealed trait PartitioningStrategy
+sealed trait PartitioningStrategy {
 
-private[partitioning] object HashingPartitioningStrategy {
+  /**
+   * A ResponseMergerRegistry implemented by client to supply [[ResponseMerger]]s.
+   * For message fan-out cases.
+   * @see [[ResponseMerger]]
+   */
+  def responseMergerRegistry(): ResponseMergerRegistry = ResponseMergerRegistry.create()
+}
+
+private[partitioning] sealed trait HashingPartitioningStrategy extends PartitioningStrategy {
+
+  /**
+   * A RequestMergerRegistry implemented by client to supply [[RequestMerger]]s.
+   * For message fan-out cases.
+   * @see [[RequestMerger]]
+   */
+  def requestMergerRegistry(): RequestMergerRegistry = RequestMergerRegistry.create()
+}
+
+private[partitioning] sealed trait CustomPartitioningStrategy extends PartitioningStrategy {
+
+  /**
+   * Gets the logical partition identifier from a host identifier, host identifiers are derived
+   * from [[ZkMetadata]] shardId. Indicates which logical partition a physical host belongs to,
+   * multiple hosts can belong to the same partition, for example:
+   * {{{
+   *  val getLogicalPartition: Int => Int = {
+   *    case a if Range(0, 10).contains(a) => 0
+   *    case b if Range(10, 20).contains(b) => 1
+   *    case c if Range(20, 30).contains(c) => 2
+   *    case _ => throw ...
+   *  }
+   * }}}
+   * The default is each host is a partition.
+   */
+  def getLogicalPartition(instance: Int): Int = instance
+}
+private[partitioning] object Disabled extends PartitioningStrategy
+
+private[partitioning] object ClientHashingStrategy {
 
   /**
    * Thrift requests not specifying hashing keys will fall in here. This allows a
@@ -150,11 +192,8 @@ private[partitioning] object HashingPartitioningStrategy {
     Map(None -> args)
 }
 
-private[partitioning] sealed trait HashingPartitioningStrategy extends PartitioningStrategy
-private[partitioning] object Disabled extends PartitioningStrategy
-
 /**
- * Experimental API to set a consistent hashing partition strategy for a Thrift/ThriftMux Client.
+ * An API to set a consistent hashing partitioning strategy for a Thrift/ThriftMux Client.
  */
 private[partitioning] abstract class ClientHashingStrategy extends HashingPartitioningStrategy {
   // input: original thrift request
@@ -167,20 +206,45 @@ private[partitioning] abstract class ClientHashingStrategy extends HashingPartit
    * sub-requests. If no fan-out needs, it should return one element: hashing key to the
    * original request.
    * This PartialFunction can take multiple Thrift request types of one Thrift service
-   * (different method endpoints of one service). In consideration of messaging fan-out,
-   * the PartialFunction returns a map from a hashing key to a request.
+   * (different method endpoints of one service).
    */
   def getHashingKeyAndRequest: ToPartitionedMap
+}
+
+private[partitioning] object ClientCustomStrategy {
 
   /**
-   * A RequestMergerRegistry implemented by client to supply [[RequestMerger]]s.
-   * @see [[RequestMerger]]
+   * Thrift requests not specifying partition ids will fall in here. This allows a
+   * Thrift/ThriftMux partition aware client to serve a part of endpoints of a service.
+   * Un-specified endpoints should not be called from this client, otherwise, throw
+   * [[com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.PartitioningStrategyException]].
    */
-  def requestMergerRegistry: RequestMergerRegistry = RequestMergerRegistry.create
+  val defaultPartitionIdAndRequest: ThriftStructIface => Future[Map[Int, ThriftStructIface]] =
+    _ =>
+      Future.exception(
+        new PartitioningStrategyException(
+          "An unspecified endpoint has been applied to the partitioning service, please check " +
+            "your ClientCustomStrategy.getPartitionIdAndRequest see if the endpoint is defined"))
+}
+
+/**
+ * An API to set a custom partitioning strategy for a Thrift/ThriftMux Client.
+ */
+private[partitioning] abstract class ClientCustomStrategy extends CustomPartitioningStrategy {
+  // input: original thrift request
+  // output: Future Map of partition ids and split requests
+  type ToPartitionedMap = PartialFunction[ThriftStructIface, Future[Map[Int, ThriftStructIface]]]
 
   /**
-   * A ResponseMergerRegistry implemented by client to supply [[ResponseMerger]]s.
-   * @see [[ResponseMerger]]
+   * A PartialFunction implemented by client that provides the partitioning logic on
+   * a request. It takes a Thrift object request, and returns Future Map of partition ids to
+   * sub-requests. If no fan-out needs, it should return one element: partition id to the
+   * original request.
+   * This PartialFunction can take multiple Thrift request types of one Thrift service
+   * (different method endpoints of one service).
+   *
+   * @note  When updating the partition topology dynamically, there is a potential one-time
+   *        mismatch if a Service Discovery update happens after getPartitionIdAndRequest.
    */
-  def responseMergerRegistry: ResponseMergerRegistry = ResponseMergerRegistry.create
+  def getPartitionIdAndRequest: ToPartitionedMap
 }

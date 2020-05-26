@@ -132,7 +132,7 @@ private[finagle] class MemcachedPartitioningService(
     case _ => Future.False
   }
 
-  final protected def failedProcessRequest(req: Command): Future[Nothing] = {
+  final protected def noPartitionInformationHandler(req: Command): Future[Nothing] = {
     val ex = new NoPartitioningKeys(s"NoPartitioningKeys in for the thrift method: ${req.name}")
     if (logger.isLoggable(Level.DEBUG))
       logger.log(Level.DEBUG, "partitionRequest failed: ", ex)

@@ -288,4 +288,7 @@ private[this] class SimplePartitioningService(
     mergeStringResults(originalReq, pr)
 
   protected def isSinglePartition(request: String): Future[Boolean] = Future.False
+
+  protected def noPartitionInformationHandler(req: String): Future[Nothing] =
+    Future.exception(new Exception("boom!"))
 }

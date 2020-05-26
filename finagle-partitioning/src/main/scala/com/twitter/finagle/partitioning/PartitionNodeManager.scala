@@ -11,13 +11,13 @@ import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 import scala.util.control.NonFatal
 
-private object PartitionNodeManager {
+private[finagle] object PartitionNodeManager {
 
   /**
    * A ServiceFactory that hold an updatable collection of address to configure the
    * its LoadBalancerFactory.
    */
-  class CachedServiceFactory[Req, Rep](
+  private class CachedServiceFactory[Req, Rep](
     val endpoints: Var[Addr] with Updatable[Addr] with Extractable[Addr],
     params: Stack.Params,
     underlying: Stack[ServiceFactory[Req, Rep]])
@@ -31,6 +31,9 @@ private object PartitionNodeManager {
     def close(deadline: Time): Future[Unit] = factory.close(deadline)
   }
 
+  /**
+   * The given partition Id cannot be found in the Partition node map.
+   */
   final class NoPartitionException(
     message: String,
     val flags: Long = FailureFlags.Empty)
@@ -43,6 +46,9 @@ private object PartitionNodeManager {
       new NoPartitionException(message, flags)
   }
 
+  /**
+   * Cannot retrieve the shardId information from [[ZkMetadata]].
+   */
   final class NoShardIdException(
     message: String,
     val flags: Long = FailureFlags.Empty)
@@ -94,7 +100,7 @@ private object PartitionNodeManager {
  *
  * @param params              Configured Finagle client params
  */
-private class PartitionNodeManager[Req, Rep](
+private[finagle] class PartitionNodeManager[Req, Rep](
   underlying: Stack[ServiceFactory[Req, Rep]],
   getLogicalPartition: Int => Int,
   params: Stack.Params)

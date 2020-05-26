@@ -70,7 +70,7 @@ class PartitioningStrategyTest extends FunSuite with MockitoSugar {
       }
     }
     val result = hashingStrategy.getHashingKeyAndRequest
-      .applyOrElse(CRequest(1), HashingPartitioningStrategy.defaultHashingKeyAndRequest)
+      .applyOrElse(CRequest(1), ClientHashingStrategy.defaultHashingKeyAndRequest)
     assert(result == Map(None -> CRequest(1)))
   }
 }

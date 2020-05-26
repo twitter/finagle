@@ -67,14 +67,21 @@ private[finagle] object ThriftPartitioningService {
           case hashingStrategy: HashingPartitioningStrategy =>
             val param.KeyHasher(hasher) = params[param.KeyHasher]
             val param.NumReps(numReps) = params[param.NumReps]
-            val service =
-              new ThriftHashingPartitioningService[Req, Rep](
-                next,
-                thriftMarshallable,
-                params,
-                hashingStrategy,
-                hasher,
-                numReps)
+            val service = new ThriftHashingPartitioningService[Req, Rep](
+              next,
+              thriftMarshallable,
+              params,
+              hashingStrategy,
+              hasher,
+              numReps)
+            Stack.leaf(role, ServiceFactory.const(service))
+          case customStrategy: CustomPartitioningStrategy =>
+            val service = new ThriftCustomPartitioningService[Req, Rep](
+              next,
+              thriftMarshallable,
+              params,
+              customStrategy
+            )
             Stack.leaf(role, ServiceFactory.const(service))
         }
       }

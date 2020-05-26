@@ -106,12 +106,6 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
    */
   protected def createPartitionRequestForKeys(original: Req, keys: Seq[Key]): Req
 
-  /**
-   * Error handling when processing requests to keys failed, this is implemented by each protocol
-   * to log proper information.
-   */
-  protected def failedProcessRequest(req: Req): Future[Nothing]
-
   override def close(deadline: Time): Future[Unit] = {
     Future.join(Seq(nodeManager.close(deadline), super.close(deadline)))
   }
@@ -119,7 +113,7 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
   override protected def getPartitionFor(partitionedRequest: Req): Future[Service[Req, Rep]] = {
     val keys = getPartitionKeys(partitionedRequest)
     if (keys.isEmpty) {
-      failedProcessRequest(partitionedRequest)
+      noPartitionInformationHandler(partitionedRequest)
     } else {
       // All keys in the request are assumed to belong to the same partition, so use the
       // first key to find the associated partition.
@@ -146,7 +140,7 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
               }
             )
         }
-      case _ => failedProcessRequest(request)
+      case _ => noPartitionInformationHandler(request)
     }
   }
 

@@ -361,6 +361,6 @@ private[this] class TestConsistentHashPartitioningService(
 
   protected def isSinglePartition(request: String): Future[Boolean] = Future.False
 
-  override protected def failedProcessRequest(req: String): Future[Nothing] =
+  override protected def noPartitionInformationHandler(req: String): Future[Nothing] =
     Future.exception(new NoPartitioningKeys("TestConsistentHashPartitioningService"))
 }
