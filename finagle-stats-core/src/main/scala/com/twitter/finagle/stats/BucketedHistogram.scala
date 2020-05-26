@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.{AtomicLong, AtomicIntegerArray}
 
 private[twitter] object BucketedHistogram {
 
-  private[stats] val DefaultQuantiles = IndexedSeq(
+  private[stats] val DefaultQuantiles: IndexedSeq[Double] = Array(
     0.5, 0.9, 0.95, 0.99, 0.999, 0.9999
   )
 
@@ -56,19 +56,6 @@ private[twitter] object BucketedHistogram {
   // this is exposed for testing, but should not be mutated
   private[stats] val DefaultLimits: Array[Int] =
     makeLimitsFor(DefaultErrorPercent)
-
-  /** check all the limits are non-negative and increasing in value. */
-  private def assertLimits(limits: Array[Int]): Unit = {
-    require(limits.length > 0)
-    var i = 0
-    var prev = -1L
-    while (i < limits.length) {
-      val value = limits(i)
-      require(value >= 0 && value > prev, i)
-      prev = value
-      i += 1
-    }
-  }
 
   /**
    * Creates an instance using the default bucket limits.
@@ -128,17 +115,10 @@ private[twitter] object BucketedHistogram {
  *  - counts per bucket are stored in int's
  *  - no tracking of min, max, sum
  *
- * @param limits the values at each index represent upper bounds, exclusive,
- *               of values for the bucket. As an example, given limits of `Array(1, 3, MaxValue)`,
- *               index=0 counts values `[0..1)`,
- *               index=1 counts values `[1..3)`, and
- *               index=2 counts values `[3..MaxValue)`.
- *               An Int per bucket should suffice, as standard usage only gives
- *               20 seconds before rolling to the next BucketedHistogram.
- *               This gives you up to Int.MaxValue / 20 = ~107MM add()s per second
- *               to a ''single'' bucket.
+ * @param error sets the exponential factor which controls bucket width. Higher values
+ *              will result in wider buckets but less memory footprint and vise verse.
  *
- * @see [[BucketedHistogram.apply()]] for creation.
+ * @see [[BucketedHistogram.apply()]] for creation using the default `error` value.
  */
 private[stats] final class BucketedHistogram(error: Double) {
   assert(0 < error && error < 1, "Error must be in the range (0.0, 1.0)")
@@ -208,18 +188,18 @@ private[stats] final class BucketedHistogram(error: Double) {
    * @inheritdoc
    */
   def add(value: Long): Unit = {
+    var index = 0
+    var truncatedValue = value
+    if (truncatedValue >= Int.MaxValue) {
+      truncatedValue = Int.MaxValue
+      index = countsLength - 1
+    } else {
+      index = findBucket(truncatedValue.toInt)
+    }
+
     sync.acquireShared(1)
     try {
-      val index = if (value >= Int.MaxValue) {
-        total.getAndAdd(Int.MaxValue)
-        countsLength - 1
-      } else {
-        total.getAndAdd(value)
-        val asInt = value.toInt
-        // recall that limits represent upper bounds, exclusive — so take the next position (+1).
-        // we assume that no inputs can be larger than the largest value in the limits array.
-        findBucket(asInt)
-      }
+      total.getAndAdd(truncatedValue)
       counts.getAndIncrement(index)
       num.getAndIncrement()
     } finally {
