@@ -36,6 +36,62 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     assert(runs == 1)
   }
 
+  test("Trace.letTracers: should enable all tracers in the stack") {
+    var runs = 0
+    val tracers = Seq(mock[Tracer], mock[Tracer])
+
+    assert(Trace.tracers.isEmpty)
+    Trace.letTracers(tracers) {
+      assert(Trace.tracers == tracers)
+      runs += 1
+    }
+
+    assert(runs == 1)
+  }
+
+  test("Trace.letTracers: should not replace existing tracers") {
+    var runs = 0
+    val tracer = mock[Tracer]
+    val otherTracer = mock[Tracer]
+
+    assert(Trace.tracers.isEmpty)
+    Trace.letTracer(tracer) {
+      assert(Trace.tracers == Seq(tracer))
+      Trace.letTracers(Seq(otherTracer)) {
+        assert(Trace.tracers == Seq(otherTracer, tracer))
+        runs += 1
+      }
+      assert(Trace.tracers == Seq(tracer))
+      runs += 1
+    }
+
+    assert(runs == 2)
+  }
+
+  test("Trace.letTracers: should not add any tracers when they already exist") {
+    var runs = 0
+    val tracer = mock[Tracer]
+    val otherTracer = mock[Tracer]
+
+    assert(Trace.tracers.isEmpty)
+    Trace.letTracer(tracer) {
+      assert(Trace.tracers == Seq(tracer))
+      Trace.letTracer(otherTracer) {
+        assert(Trace.tracers == Seq(otherTracer, tracer))
+        Trace.letTracers(Seq(otherTracer, tracer)) {
+          assert(Trace.tracers == Seq(otherTracer, tracer))
+          runs += 1
+        }
+        assert(Trace.tracers == Seq(otherTracer, tracer))
+        runs += 1
+      }
+      assert(Trace.tracers == Seq(tracer))
+      runs += 1
+    }
+
+    assert(runs == 3)
+  }
+
   test("Trace.letId") {
     var didRun = false
     val priorId = Trace.id

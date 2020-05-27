@@ -34,10 +34,10 @@ object Trace extends Tracing {
    * Captures both tracers and the trace id in this simple wrapper so we don't look up them
    * multiple times.
    */
-  private final class Capture(val tracers: List[Tracer], val idOption: Option[TraceId])
+  private final class Capture(val tracers: Seq[Tracer], val idOption: Option[TraceId])
       extends Tracing
 
-  private[this] val tracersCtx = new Contexts.local.Key[List[Tracer]]
+  private[this] val tracersCtx = new Contexts.local.Key[Seq[Tracer]]
 
   private[twitter] val TraceIdContext: Contexts.broadcast.Key[TraceId] =
     new Contexts.broadcast.Key[TraceId](
@@ -63,7 +63,7 @@ object Trace extends Tracing {
    */
   def apply(): Tracing = new Capture(tracers, idOption)
 
-  def tracers: List[Tracer] = {
+  def tracers: Seq[Tracer] = {
     Contexts.local.get(tracersCtx) match {
       case Some(ts) => ts
       case None => Nil
@@ -121,7 +121,17 @@ object Trace extends Tracing {
   def letTracer[R](tracer: Tracer)(f: => R): R = {
     val ts = tracers
     if (ts.contains(tracer)) f
-    else Contexts.local.let(tracersCtx, tracer :: ts)(f)
+    else Contexts.local.let(tracersCtx, tracer +: ts)(f)
+  }
+
+  /**
+   * Run computation `f` with `tracers` added onto the tracer stack.
+   */
+  def letTracers[R](tracers: Seq[Tracer])(f: => R): R = {
+    val ts = this.tracers
+    val missingTracers = tracers.filter(!ts.contains(_))
+    if (missingTracers.isEmpty) f
+    else Contexts.local.let(tracersCtx, missingTracers ++ ts)(f)
   }
 
   /**
@@ -157,7 +167,7 @@ object Trace extends Tracing {
       val ts = tracers
       if (ts.contains(tracer)) Contexts.broadcast.let(TraceIdContext, newId)(f)
       else {
-        Contexts.local.let(tracersCtx, tracer :: ts) {
+        Contexts.local.let(tracersCtx, tracer +: ts) {
           Contexts.broadcast.let(TraceIdContext, newId)(f)
         }
       }

@@ -35,7 +35,7 @@ object Tracing {
 
   // A collection of methods to work with tracers stored in the local context.
   // Structured as an implicit syntax for ergonomics.
-  private implicit class Tracers(val ts: List[Tracer]) extends AnyVal {
+  private implicit class Tracers(val ts: Seq[Tracer]) extends AnyVal {
 
     @tailrec
     final def isActivelyTracing(id: TraceId): Boolean =
@@ -100,7 +100,7 @@ abstract class Tracing {
   /**
    * @return the current list of tracers
    */
-  def tracers: List[Tracer]
+  def tracers: Seq[Tracer]
 
   /**
    * Get the current identifier, if it exists.

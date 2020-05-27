@@ -7,6 +7,18 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Migrated `List[Tracer]` to `Seq[Tracer]` in `Tracing`, and `tracersCtx`.
+  ``PHAB_ID=D489697``
+
+New Features
+~~~~~~~~~~~~
+
+* finagle-core: Add `letTracers` to allow setting multiple tracers onto the tracer stack.
+  ``PHAB_ID=D489697``
+
 20.5.0
 ------
 
