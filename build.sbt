@@ -213,6 +213,7 @@ val sharedSettings = Seq(
   pomIncludeRepository := { _ => false },
   publishMavenStyle := true,
   publishConfiguration := publishConfiguration.value.withOverwrite(true),
+  publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true),
   autoAPIMappings := true,
   apiURL := Some(url("https://twitter.github.io/finagle/docs/")),
   pomExtra :=
@@ -270,11 +271,7 @@ val jmockSettings = Seq(
 )
 
 lazy val noPublishSettings = Seq(
-  publish := {},
-  publishLocal := {},
-  publishArtifact := false,
-  // sbt-pgp's publishSigned task needs this defined even though it is not publishing.
-  publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))
+  skip in publish := true
 )
 
 lazy val projectList = Seq[sbt.ProjectReference](
