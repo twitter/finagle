@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Metrics &#8212; Finagle 20.4.1 documentation</title>
+    <title>Metrics &#8212; Finagle 20.5.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -1353,6 +1353,12 @@ is put back into the pool.</p>
 <dt><strong>&lt;label&gt;/cursor/opened</strong></dt><dd><p>A counter of the number of opened cursors.</p>
 </dd>
 <dt><strong>&lt;label&gt;/cursor/closed</strong></dt><dd><p>A counter of the number of closed cursors.</p>
+</dd>
+<dt><strong>&lt;label&gt;/pstmt-cache/calls</strong></dt><dd><p>A counter of the number of requested prepared statements.</p>
+</dd>
+<dt><strong>&lt;label&gt;/pstmt-cache/misses</strong></dt><dd><p>A counter of the number of times when a prepared statement was not the cache.</p>
+</dd>
+<dt><strong>&lt;label&gt;/pstmt-cache/evicted_size</strong></dt><dd><p>A counter of the number of times prepared statements were evicted from the cache.</p>
 </dd>
 </dl>
 </div>

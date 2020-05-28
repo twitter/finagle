@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Protocols &#8212; Finagle 20.4.1 documentation</title>
+    <title>Protocols &#8212; Finagle 20.5.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -166,9 +166,11 @@ following rich APIs:</p>
 </div>
 <p>Here’s an example of a retry policy that retries on Thrift exceptions:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">retryPolicy</span><span class="k">:</span> <span class="kt">RetryPolicy</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]]</span> <span class="k">=</span>
-  <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span><span class="mi">3</span><span class="o">,</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">ex</span><span class="k">:</span> <span class="kt">ReadException</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="kc">true</span>
-  <span class="o">})</span>
+  <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span>
+    <span class="mi">3</span><span class="o">,</span>
+    <span class="o">{</span>
+      <span class="k">case</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">ex</span><span class="k">:</span> <span class="kt">ReadException</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="kc">true</span>
+    <span class="o">})</span>
 
 <span class="k">val</span> <span class="n">retriedGetLogSize</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">GetLogSize.Args</span><span class="p">,</span> <span class="kt">GetLogSize.SuccessType</span><span class="o">]</span> <span class="k">=</span>
   <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">(</span><span class="n">retryPolicy</span><span class="o">,</span> <span class="nc">DefaultTimer</span><span class="o">)</span>
