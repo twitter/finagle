@@ -19,6 +19,8 @@ New Features
 * finagle-core: Add `letTracers` to allow setting multiple tracers onto the tracer stack.
   ``PHAB_ID=D489697``
 
+* finagle-redis: Make partitionedClient accessible. ``PHAB_ID=D492754``
+
 20.5.0
 ------
 

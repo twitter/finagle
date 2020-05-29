@@ -159,7 +159,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
 
   def client: Redis.Client = Client()
 
-  private[finagle] def partitionedClient: Redis.Client =
+  def partitionedClient: Redis.Client =
     client.withStack(Client.hashRingStack)
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Reply] =
