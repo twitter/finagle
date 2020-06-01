@@ -19,6 +19,12 @@ New Features
 * finagle-core: Add `letTracers` to allow setting multiple tracers onto the tracer stack.
   ``PHAB_ID=D489697``
 
+
+* finagle-core: `DeadlineFilter` now exposes a metric `admission_control/deadline/remaining_ms`
+  which tracks the remaining time in non-expired deadlines on the server side. An increase in this
+  stat, assuming request latency is constant and timeout configurations upstream have not changed,
+  may indicate that upstream services have become slower. ``PHAB_ID=D492608``
+
 * finagle-redis: Make partitionedClient accessible. ``PHAB_ID=D492754``
 
 20.5.0

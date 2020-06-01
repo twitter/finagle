@@ -10,6 +10,10 @@ Deadline Admission Control
   A stat of the elapsed time since expiry if a deadline has expired, in
   milliseconds.
 
+**admission_control/deadline/remaining_ms**
+  A stat of the remaining time in a deadline if it has not expired, in
+  milliseconds.
+
 
 Nack Admission Control
 <<<<<<<<<<<<<<<<<<<<<<

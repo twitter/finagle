@@ -43,6 +43,20 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         tc.advance(1.second)
         val res = deadlineService("marco")
         assert(statsReceiver.stats(Seq("expired_ms"))(0) == 800f)
+        assert(statsReceiver.stats(Seq("remaining_ms")) == List.empty)
+        assert(await(res) == "polo")
+      }
+    }
+  }
+
+  test("DeadlineFilter should record remaining time on non-expired deadlines") {
+    Time.withCurrentTimeFrozen { tc =>
+      val deadlineService = mkDeadlineService()
+      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1200.milliseconds)) {
+        tc.advance(1.second)
+        val res = deadlineService("marco")
+        assert(statsReceiver.stats(Seq("remaining_ms"))(0) == 200f)
+        assert(statsReceiver.stats(Seq("expired_ms")) == List.empty)
         assert(await(res) == "polo")
       }
     }

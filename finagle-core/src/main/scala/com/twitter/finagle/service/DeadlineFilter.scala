@@ -218,9 +218,10 @@ class DeadlineFilter[Req, Rep](
     s"maxRejectFraction must be between 0.0 and 1.0: $maxRejectFraction"
   )
 
-  private[this] val exceededStat = statsReceiver.counter("exceeded")
-  private[this] val rejectedStat = statsReceiver.counter("rejected")
+  private[this] val exceededCounter = statsReceiver.counter("exceeded")
+  private[this] val rejectedCounter = statsReceiver.counter("rejected")
   private[this] val expiredTimeStat = statsReceiver.stat("expired_ms")
+  private[this] val remainingTimeStat = statsReceiver.stat("remaining_ms")
 
   private[this] val serviceDeposit =
     DeadlineFilter.RejectBucketScaleFactor.toInt
@@ -236,16 +237,15 @@ class DeadlineFilter[Req, Rep](
     Deadline.current match {
       case Some(Deadline(timestamp, deadline)) =>
         val now = Time.now
-        val remaining = deadline - now
 
         if (deadline < now) {
           val exceeded = now - deadline
-          exceededStat.incr()
+          exceededCounter.incr()
           expiredTimeStat.add(exceeded.inMillis)
 
           // There are enough tokens to reject the request
           if (rejectBucket.tryGet(rejectWithdrawal)) {
-            rejectedStat.incr()
+            rejectedCounter.incr()
             if (isDarkMode)
               service(request)
             else
@@ -258,6 +258,8 @@ class DeadlineFilter[Req, Rep](
           }
         } else {
           rejectBucket.put(serviceDeposit)
+          val remaining = deadline - now
+          remainingTimeStat.add(remaining.inMillis)
           service(request)
         }
       case None =>
