@@ -59,6 +59,7 @@ Contents
    Flags
    UnsuccessfulResponses
    Tracing
+   Compression
    FAQ
    Glossary
 
