@@ -154,7 +154,7 @@ private[stats] final class BucketedHistogram(error: Double) {
   /**
    * Given a number that you want to insert into a bucket, find the bucket that it should
    * go into.  If it's below the point where we're still removing duplicates, index directly
-   * into the bucket.  If it's above, take the logarithm.
+   * into the bucket. If it's above, take the logarithm.
    */
   // 0 to inflectionPoint
   private[stats] def findBucket(num: Int): Int = {

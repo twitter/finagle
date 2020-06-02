@@ -13,6 +13,7 @@ import com.twitter.util._
 import org.scalatest.FunSpec
 
 class RetryPolicyTest extends FunSpec {
+
   def getBackoffs(
     policy: RetryPolicy[Try[Nothing]],
     exceptions: Stream[Exception]
@@ -184,6 +185,29 @@ class RetryPolicyTest extends FunSpec {
         channelClosedBackoff
       )
       assert(backoffs == expectedBackoffs)
+    }
+  }
+
+  describe("RetryPolicy.namedPF") {
+    it("uses the name parameter as the toString method") {
+      val f = RetryPolicy.namedPF[Int]("foo") { case _ => false }
+      assert(f.toString == "foo")
+    }
+
+    it("preserves the behavior of the underlying patial function") {
+      val f: PartialFunction[Int, Boolean] = { case i if i >= 0 => true }
+      val f1 = RetryPolicy.namedPF("foo")(f)
+
+      assert(f.isDefinedAt(1) == f1.isDefinedAt(1))
+      assert(f.isDefinedAt(-1) == f1.isDefinedAt(-1))
+    }
+
+    it("preserves toString information when composition with .orElse") {
+      val f1 = RetryPolicy.namedPF[Int]("foo") { case i if i >= 0 => false }
+      val f2 = RetryPolicy.namedPF[Int]("bar") { case _ => true }
+
+      val composed = f1.orElse(f2)
+      assert(composed.toString == "foo.orElse(bar)")
     }
   }
 

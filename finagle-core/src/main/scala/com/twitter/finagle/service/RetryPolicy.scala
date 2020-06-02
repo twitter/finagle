@@ -45,7 +45,7 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
    * in the chain.
    */
   def filter[B <: A](pred: B => Boolean): RetryPolicy[B] =
-    RetryPolicy { e => if (!pred(e)) None else this(e) }
+    RetryPolicy.named("RetryPolicy.filter") { e => if (!pred(e)) None else this(e) }
 
   /**
    * Similar to `filter`, but the predicate is applied to each `RetryPolicy` in the chain
@@ -63,7 +63,7 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
    * 50% chance of the full number of retries.
    */
   def filterEach[B <: A](pred: B => Boolean): RetryPolicy[B] =
-    RetryPolicy { e =>
+    RetryPolicy.named("RetryPolicy.filterEach") { e =>
       if (!pred(e))
         None
       else {
@@ -84,7 +84,7 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
    * based upon backpressure signals such as failure rate or request latency.
    */
   def limit(maxRetries: => Int): RetryPolicy[A] =
-    RetryPolicy[A] { e =>
+    RetryPolicy.named[A]("RetryPolicy.limit") { e =>
       val triesRemaining = maxRetries
       if (triesRemaining <= 0)
         None
@@ -94,6 +94,8 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
         }
       }
     }
+
+  override def toString: String = getClass.getName
 }
 
 /**
@@ -105,7 +107,7 @@ abstract class SimpleRetryPolicy[A](i: Int)
     with (A => Option[(Duration, RetryPolicy[A])]) {
   def this() = this(0)
 
-  final def apply(e: A) = {
+  final def apply(e: A): Option[(Duration, RetryPolicy[A])] = {
     if (shouldRetry(e)) {
       backoffAt(i) match {
         case Duration.Top =>
@@ -117,6 +119,7 @@ abstract class SimpleRetryPolicy[A](i: Int)
               new SimpleRetryPolicy[A](i + 1) {
                 def shouldRetry(a: A) = SimpleRetryPolicy.this.shouldRetry(a)
                 def backoffAt(retry: Int) = SimpleRetryPolicy.this.backoffAt(retry)
+                override def toString: String = SimpleRetryPolicy.this.toString
               }))
       }
     } else {
@@ -151,6 +154,38 @@ abstract class SimpleRetryPolicy[A](i: Int)
 
 object RetryPolicy {
 
+  // We provide a proxy around partial functions so we can give them a better .toString
+  private class NamedPf[A, B](name: String, f: PartialFunction[A, B])
+      extends PartialFunction[A, B] {
+    def isDefinedAt(x: A): Boolean = f.isDefinedAt(x)
+    def apply(v1: A): B = f(v1)
+
+    override def applyOrElse[A1 <: A, B1 >: B](
+      x: A1,
+      default: A1 => B1
+    ): B1 = f.applyOrElse(x, default)
+
+    override def orElse[A1 <: A, B1 >: B](that: PartialFunction[A1, B1]): PartialFunction[A1, B1] =
+      new NamedPf(s"$name.orElse($that)", f.orElse(that))
+
+    override def lift: A => Option[B] = f.lift
+
+    override def toString(): String = name
+  }
+
+  /**
+   * Create a `PartialFunction` with a defined `.toString` method.
+   *
+   * @param name the value to use for `toString`
+   * @param f the `PartialFunction` to apply the name to.
+   */
+  def namedPF[A](
+    name: String
+  )(
+    f: PartialFunction[A, Boolean]
+  ): PartialFunction[A, Boolean] =
+    new NamedPf(name, f)
+
   /**
    * An extractor for exceptions which are known to be safe to retry.
    *
@@ -174,35 +209,36 @@ object RetryPolicy {
    * before it finished being written to the remote service.
    * See [[com.twitter.finagle.WriteException]].
    */
-  val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
-    case Throw(RetryableWriteException(_)) => true
-  }
+  val WriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] =
+    namedPF("WriteExceptionsOnly") {
+      case Throw(RetryableWriteException(_)) => true
+    }
 
   /**
    * Use [[ResponseClassifier.RetryOnTimeout]] composed with
    * [[ResponseClassifier.RetryOnWriteExceptions]] for the [[ResponseClassifier]] equivalent.
    */
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] =
-    WriteExceptionsOnly.orElse {
+    namedPF("TimeoutAndWriteExceptionsOnly")(WriteExceptionsOnly.orElse {
       case Throw(Failure(Some(_: TimeoutException))) => true
       case Throw(Failure(Some(_: UtilTimeoutException))) => true
       case Throw(_: TimeoutException) => true
       case Throw(_: UtilTimeoutException) => true
-    }
+    })
 
   /**
    * Use [[ResponseClassifier.RetryOnChannelClosed]] for the [[ResponseClassifier]] equivalent.
    */
-  val ChannelClosedExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
-    case Throw(_: ChannelClosedException) => true
-  }
+  val ChannelClosedExceptionsOnly: PartialFunction[Try[Nothing], Boolean] =
+    namedPF("ChannelClosedExceptionsOnly") {
+      case Throw(_: ChannelClosedException) => true
+    }
 
   /**
    * A [[RetryPolicy]] that never retries.
    */
   val none: RetryPolicy[Any] = new RetryPolicy[Any] {
     def apply(t: Any): Option[(Duration, RetryPolicy[Any])] = None
-
     override def toString: String = "RetryPolicy.none"
   }
 
@@ -231,14 +267,31 @@ object RetryPolicy {
             }
           case (_, Return(_)) => None
         }
+
+      override def toString: String = s"RetryPolicy.convertExceptionPolicy($policy)"
     }
 
   /**
    * Lifts a function of type `A => Option[(Duration, RetryPolicy[A])]` in the  `RetryPolicy` type.
+   *
+   * @param f The function used to classify values.
+   *
+   * @note the [[RetryPolicy.named]] function should be preferred to make inspection of the
+   *       [[RetryPolicy]] easier.
    */
   def apply[A](f: A => Option[(Duration, RetryPolicy[A])]): RetryPolicy[A] =
+    named(s"RetryPolicy.apply($f)")(f)
+
+  /**
+   * Lifts a function of type `A => Option[(Duration, RetryPolicy[A])]` in the  `RetryPolicy` type.
+   *
+   * @param name The name to use in the `.toString` method which can aid in inspection.
+   * @param f The function used to classify values.
+   */
+  def named[A](name: String)(f: A => Option[(Duration, RetryPolicy[A])]): RetryPolicy[A] =
     new RetryPolicy[A] {
       def apply(e: A): Option[(Duration, RetryPolicy[A])] = f(e)
+      override def toString: String = name
     }
 
   /**
@@ -287,7 +340,7 @@ object RetryPolicy {
   )(
     shouldRetry: PartialFunction[A, Boolean]
   ): RetryPolicy[A] = {
-    RetryPolicy { e =>
+    RetryPolicy.named(s"backoff($backoffs)($shouldRetry)") { e =>
       if (shouldRetry.applyOrElse(e, AlwaysFalse)) {
         backoffs match {
           case howlong #:: rest =>
@@ -338,7 +391,7 @@ object RetryPolicy {
    * policy with a smaller cap.
    */
   def combine[A](policies: RetryPolicy[A]*): RetryPolicy[A] =
-    RetryPolicy[A] { e =>
+    RetryPolicy.named[A](s"RetryPolicy.combine(${policies.mkString(", ")})") { e =>
       // stores the first matched backoff
       var backoffOpt: Option[Duration] = None
 
