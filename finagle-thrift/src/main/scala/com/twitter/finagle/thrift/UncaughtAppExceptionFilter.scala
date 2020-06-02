@@ -5,6 +5,7 @@ import com.twitter.io.Buf
 import com.twitter.util.Future
 import org.apache.thrift.{TApplicationException, TException}
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
+import scala.util.control.NoStackTrace
 
 private[finagle] object UncaughtAppExceptionFilter {
 
@@ -29,10 +30,14 @@ private[finagle] object UncaughtAppExceptionFilter {
 
     // Note: The wire contents of the exception message differ from Apache's Thrift in that here,
     // e.toString is appended to the error message.
+    // As it is the only place where the TApplicationException is constructed with this error code
+    // and the stack trace is not serialised, it doesn't make any sense to populate the stack
+    // trace at all
+
     val x = new TApplicationException(
       TApplicationException.INTERNAL_ERROR,
       s"Internal error processing $name: '$throwable'"
-    )
+    ) with NoStackTrace
 
     x.write(buffer())
     buffer().writeMessageEnd()
