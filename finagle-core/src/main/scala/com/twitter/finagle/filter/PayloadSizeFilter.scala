@@ -18,7 +18,7 @@ import com.twitter.util.{Future, Return, Try}
  * client side, and srv/request_payload_bytes and srv/response_payload_bytes.
  * on the server.
  */
-private[finagle] class PayloadSizeFilter[Req, Rep](
+class PayloadSizeFilter[Req, Rep](
   statsReceiver: StatsReceiver,
   reqTraceKey: String,
   repTraceKey: String,
@@ -46,10 +46,10 @@ private[finagle] class PayloadSizeFilter[Req, Rep](
   }
 }
 
-private[finagle] object PayloadSizeFilter {
+object PayloadSizeFilter {
 
   val Role: Stack.Role = Stack.Role("PayloadSize")
-  val Description: String = "Reports request/response payload sizes"
+  private[finagle] val Description: String = "Reports request/response payload sizes"
 
   private def module[Req, Rep](
     reqTraceKey: String,
@@ -70,7 +70,7 @@ private[finagle] object PayloadSizeFilter {
   val ClientReqTraceKey: String = "clnt/request_payload_bytes"
   val ClientRepTraceKey: String = "clnt/response_payload_bytes"
 
-  def clientModule[Req, Rep](
+  private[finagle] def clientModule[Req, Rep](
     reqSize: Req => Int,
     repSize: Rep => Int
   ): Stackable[ServiceFactory[Req, Rep]] = module(
@@ -83,7 +83,7 @@ private[finagle] object PayloadSizeFilter {
   val ServerReqTraceKey: String = "srv/request_payload_bytes"
   val ServerRepTraceKey: String = "srv/response_payload_bytes"
 
-  def serverModule[Req, Rep](
+  private[finagle] def serverModule[Req, Rep](
     reqSize: Req => Int,
     repSize: Rep => Int
   ): Stackable[ServiceFactory[Req, Rep]] = module(

@@ -228,8 +228,8 @@ object ClientTracingFilter {
 /**
  * Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)
  */
-private[finagle] object WireTracingFilter {
-  val role = Stack.Role("WireTracingFilter")
+object WireTracingFilter {
+  private[finagle] val role = Stack.Role("WireTracingFilter")
 
   case class TracingFilter[Req, Rep](
     label: String,
@@ -271,14 +271,14 @@ private[finagle] object WireTracingFilter {
       }
     }
 
-  def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = module(
+  private[finagle] def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = module(
     "clnt",
     Annotation.WireSend,
     Annotation.WireRecv,
     traceMetadata = false
   )
 
-  def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = module(
+  private[finagle] def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = module(
     "srv",
     Annotation.WireRecv,
     Annotation.WireSend,

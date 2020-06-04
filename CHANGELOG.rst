@@ -13,6 +13,9 @@ Breaking API Changes
 * finagle-core: Migrated `List[Tracer]` to `Seq[Tracer]` in `Tracing`, and `tracersCtx`.
   ``PHAB_ID=D489697``
 
+* finagle-core: `PayloadSizeFilter` and `WireTracingFilter` are now public APIs.
+  ``PHAB_ID=D493803``
+
 New Features
 ~~~~~~~~~~~~
 
