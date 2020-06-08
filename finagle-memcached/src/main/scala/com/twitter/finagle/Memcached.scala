@@ -37,7 +37,7 @@ import com.twitter.finagle.partitioning.{
   NodeHealth,
   PartitionNode
 }
-import com.twitter.finagle.pool.SingletonPool
+import com.twitter.finagle.pool.BalancingPool
 import com.twitter.finagle.pushsession.{
   PipeliningClientPushSession,
   PushChannelHandle,
@@ -176,7 +176,9 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * has a single pipelined connection.
      */
     private val stack: Stack[ServiceFactory[Command, Response]] = StackClient.newStack
-      .replace(DefaultPool.Role, SingletonPool.module[Command, Response](allowInterrupts = true))
+      .replace(
+        StackClient.Role.pool,
+        BalancingPool.module[Command, Response](allowInterrupts = true))
       .replace(StackClient.Role.protoTracing, MemcachedTracingFilter.Module)
 
     /**

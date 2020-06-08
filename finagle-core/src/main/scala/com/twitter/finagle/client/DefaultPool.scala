@@ -9,7 +9,8 @@ import com.twitter.util.{Timer, Duration}
 
 object DefaultPool {
 
-  implicit object Role extends Stack.Role("Pool") {
+  val Role = StackClient.Role.pool
+  object Roles {
     val bufferingPool = Stack.Role("BufferingPool")
     val cachingPool = Stack.Role("CachingPool")
     val watermarkPool = Stack.Role("WatermarkPool")
@@ -54,7 +55,6 @@ object DefaultPool {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module[ServiceFactory[Req, Rep]] {
-      import com.twitter.finagle.pool.{CachingPool, WatermarkPool, BufferingPool}
       val role = DefaultPool.Role
       val description = "Control client connection pool"
       val parameters = Seq(
@@ -71,21 +71,21 @@ object DefaultPool {
 
         if (idleTime > 0.seconds && high > low) {
           stack.push(
-            Role.cachingPool,
+            Roles.cachingPool,
             (sf: ServiceFactory[Req, Rep]) =>
               new CachingPool(sf, high - low, idleTime, timer, statsReceiver)
           )
         }
 
         stack.push(
-          Role.watermarkPool,
+          Roles.watermarkPool,
           (sf: ServiceFactory[Req, Rep]) =>
             new WatermarkPool(sf, low, high, statsReceiver, maxWaiters)
         )
 
         if (bufferSize > 0) {
           stack.push(
-            Role.bufferingPool,
+            Roles.bufferingPool,
             (sf: ServiceFactory[Req, Rep]) => new BufferingPool(sf, bufferSize)
           )
         }

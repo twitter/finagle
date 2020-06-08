@@ -21,7 +21,7 @@ import com.twitter.finagle.netty4.pushsession.{Netty4PushListener, Netty4PushTra
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslChannelInitializer
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
 import com.twitter.finagle.param.{Label, ProtocolLibrary, Stats, Timer, WithDefaultLoadBalancer}
-import com.twitter.finagle.pool.SingletonPool
+import com.twitter.finagle.pool.BalancingPool
 import com.twitter.finagle.pushsession._
 import com.twitter.finagle.server._
 import com.twitter.finagle.tracing._
@@ -163,7 +163,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     // acquisitions, so we disable `allowInterrupts`.
       .replace(
         StackClient.Role.pool,
-        SingletonPool.module[mux.Request, mux.Response](allowInterrupts = false)
+        BalancingPool.module[mux.Request, mux.Response](allowInterrupts = false)
       )
       // As per the config above, we don't allow interrupts to propagate past the pool.
       // However, we need to provide a way to cancel service acquisitions which are taking

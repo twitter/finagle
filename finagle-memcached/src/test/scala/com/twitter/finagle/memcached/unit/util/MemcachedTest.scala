@@ -8,7 +8,7 @@ import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.memcached.{Client, KetamaPartitionedClient, TwemcacheClient}
-import com.twitter.finagle.pool.SingletonPool
+import com.twitter.finagle.pool.BalancingPool
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.partitioning.{param => pparam}
 import com.twitter.finagle.service._
@@ -35,7 +35,7 @@ class MemcachedTest extends FunSuite with MockitoSugar with Eventually with Inte
 
     val stack = client.stack
     assert(stack.contains(FailureAccrualFactory.role))
-    assert(stack.contains(SingletonPool.role))
+    assert(stack.contains(BalancingPool.role))
     assert(!stack.contains(NackAdmissionFilter.role))
 
     val params = client.params
