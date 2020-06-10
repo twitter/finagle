@@ -93,6 +93,9 @@ object MethodBuilder {
    *  - The [[ClientBuilder]] retry policy will not be applied and must
    *  be migrated to using [[MethodBuilder.withRetryForClassifier]].
    *
+   *  - The [[ClientBuilder]] retries will not be applied and must
+   *  be migrated to using [[MethodBuilder.withMaxRetries]].
+   *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#migrating-from-clientbuilder user guide]]
    */
   def from(
@@ -263,6 +266,9 @@ class MethodBuilder(
 
   def withRetryForClassifier(classifier: ResponseClassifier): MethodBuilder =
     new MethodBuilder(thriftMuxClient, mb.withRetry.forClassifier(classifier))
+
+  def withMaxRetries(value: Int): MethodBuilder =
+    new MethodBuilder(thriftMuxClient, mb.withRetry.maxRetries(value))
 
   def withRetryDisabled: MethodBuilder =
     new MethodBuilder(thriftMuxClient, mb.withRetry.disabled)

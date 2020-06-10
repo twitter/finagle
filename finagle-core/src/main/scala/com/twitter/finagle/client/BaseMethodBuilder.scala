@@ -214,6 +214,24 @@ trait BaseMethodBuilder[T] {
   def withRetryForClassifier(classifier: service.ResponseClassifier): T
 
   /**
+   * Maximum retry attempts for a request based on the configured [[ResponseClassifier]].
+   *
+   * @param value when a [[com.twitter.finagle.service.ResponseClass.Failed Failed]]
+   *                   with `retryable` is `true` is returned for a given `ReqRep`, the
+   *                   request will be retried up to `value` times or the [[com.twitter.finagle.service.RetryBudget]]
+   *                   has been exhausted (whichever occurs first).
+   *
+   * @see [[withRetryDisabled]]
+   *
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#response-classification
+   *     response classification user guide]]
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#retries user guide]]
+   *      for further details.
+   */
+  def withMaxRetries(value: Int): T
+
+  /**
    * Disables "application" level retries.
    *
    * This '''does not''' disable retries of failures that are known

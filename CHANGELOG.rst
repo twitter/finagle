@@ -22,13 +22,18 @@ New Features
 * finagle-core: Add `letTracers` to allow setting multiple tracers onto the tracer stack.
   ``PHAB_ID=D489697``
 
-
 * finagle-core: `DeadlineFilter` now exposes a metric `admission_control/deadline/remaining_ms`
   which tracks the remaining time in non-expired deadlines on the server side. An increase in this
   stat, assuming request latency is constant and timeout configurations upstream have not changed,
   may indicate that upstream services have become slower. ``PHAB_ID=D492608``
 
 * finagle-redis: Make partitionedClient accessible. ``PHAB_ID=D492754``
+
+* finagle-core, finagle-http, finagle-thriftmux: introduce `MethodBuilder` `maxRetries`
+  configuration. A ThriftMux or HTTP method can now be configured to allow a specific number of
+  maximum retries per request, where the retries are gated by the configured `RetryBudget`. This
+  configuration can be applied via `Http.client.methodBuilder(name).withMaxRetries(n)` or
+  `ThriftMux.client.methodBuilder(name).withMaxRetries(n)`. ``PHAB_ID=D493139``
 
 20.5.0
 ------

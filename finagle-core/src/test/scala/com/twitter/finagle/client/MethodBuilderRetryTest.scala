@@ -99,6 +99,33 @@ class MethodBuilderRetryTest extends FunSuite {
     assert(stats.stat(clientName, "client", "retries")() == Seq(1))
   }
 
+  test("maxRetries") {
+    val stats = new InMemoryStatsReceiver()
+    class InfiniteRetrySvc {
+      var reqNum = 0
+      val svc: Service[Int, Int] = Service.mk { _ =>
+        reqNum += 1
+        Future.exception(new IllegalArgumentException("uno"))
+      }
+    }
+    val retrySvc = new InfiniteRetrySvc
+    val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
+    val classifier: ResponseClassifier = {
+      case ReqRep(_, Throw(_: IllegalArgumentException)) =>
+        ResponseClass.RetryableFailure
+    }
+    val client = methodBuilder.withRetry
+      .forClassifier(classifier)
+      .withRetry.maxRetries(5)
+      .newService("client")
+
+    // the client will retry 5 times and then fail
+    intercept[IllegalArgumentException] {
+      Await.result(client(1), 5.seconds)
+    }
+    assert(stats.stat(clientName, "client", "retries")() == Seq(5))
+  }
+
   test("scoped to clientName if methodName is None") {
     val stats = new InMemoryStatsReceiver()
     val retrySvc = new RetrySvc()

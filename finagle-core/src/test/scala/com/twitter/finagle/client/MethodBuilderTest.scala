@@ -308,7 +308,7 @@ class MethodBuilderTest
       val totalSvc = methodBuilder.newService
       val totalSvcEntries = Set(
         Entry(key("statsReceiver"), s"InMemoryStatsReceiver/$clientName"),
-        Entry(key("retry"), "Config(None)")
+        Entry(key("retry"), "Config(None,2)")
       )
       assert(filteredRegistry == totalSvcEntries)
 
@@ -342,7 +342,7 @@ class MethodBuilderTest
       val vanillaSvc = methodBuilder.newService("vanilla")
       val vanillaEntries = Set(
         Entry(key("vanilla", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/vanilla"),
-        Entry(key("vanilla", "retry"), "Config(None)")
+        Entry(key("vanilla", "retry"), "Config(None,2)")
       )
       assert(filteredRegistry == vanillaEntries)
 
@@ -356,7 +356,7 @@ class MethodBuilderTest
         .newService("sundae")
       val sundaeEntries = Set(
         Entry(key("sundae", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/sundae"),
-        Entry(key("sundae", "retry"), "Config(Some(Disabled))"),
+        Entry(key("sundae", "retry"), "Config(Some(Disabled),2)"),
         Entry(
           key("sundae", "timeout", "total"),
           "TunableDuration(total,10.seconds,Tunable(com.twitter.util.tunable.NoneTunable))"

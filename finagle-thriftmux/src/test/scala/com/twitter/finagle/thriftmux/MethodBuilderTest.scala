@@ -400,6 +400,30 @@ class MethodBuilderTest extends FunSuite with Eventually {
       assert(stats.stat("a_label", "all_invalid", "retries")() == Seq(2))
     }
 
+    stats.clear()
+    // ServicePerEndpoint retry configuration
+    val retryInvalidSvcPerEndpointCustom: Service[
+      TestService.Query.Args,
+      TestService.Query.SuccessType
+    ] =
+      builder
+        .withRetryForClassifier {
+          case ReqRep(_, Throw(InvalidQueryException(_))) =>
+            ResponseClass.RetryableFailure
+        }
+        .withMaxRetries(5)
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("all_invalid")
+        .query
+
+    intercept[InvalidQueryException] {
+      await(retryInvalidSvcPerEndpointCustom(TestService.Query.Args("fail0")))
+    }
+    eventually {
+      assert(stats.counter("a_label", "all_invalid", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "all_invalid", "logical", "success")() == 0)
+      assert(stats.stat("a_label", "all_invalid", "retries")() == Seq(5))
+    }
+
     // ReqRepServicePerEndpoint
     val retryInvalidReqRepSvcPerEndpoint: Service[scrooge.Request[
       TestService.Query.Args
@@ -593,6 +617,7 @@ class MethodBuilderTest extends FunSuite with Eventually {
       .reportTo(stats)
       .name("a_label")
       .stack(client)
+      .retries(20) // this should be ignored
       .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
 
     val builder: MethodBuilder = MethodBuilder.from(clientBuilder)

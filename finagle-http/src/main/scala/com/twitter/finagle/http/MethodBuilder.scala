@@ -218,6 +218,9 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
   def withRetryForClassifier(classifier: ResponseClassifier): MethodBuilder =
     new MethodBuilder(mb.withRetry.forClassifier(classifier))
 
+  def withMaxRetries(value: Int): MethodBuilder =
+    new MethodBuilder(mb.withRetry.maxRetries(value))
+
   def withRetryDisabled: MethodBuilder =
     new MethodBuilder(mb.withRetry.disabled)
 

@@ -17,7 +17,14 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
    * @see [[BaseMethodBuilder.withRetryForClassifier]]
    */
   def forClassifier(classifier: ResponseClassifier): MethodBuilder[Req, Rep] =
-    mb.withConfig(mb.config.copy(retry = Config(Some(classifier))))
+    mb.withConfig(
+      mb.config.copy(retry = mb.config.retry.copy(underlyingClassifier = Some(classifier))))
+
+  /**
+   * @see [[BaseMethodBuilder.withMaxRetries]]
+   */
+  def maxRetries(value: Int): MethodBuilder[Req, Rep] =
+    mb.withConfig(mb.config.copy(retry = mb.config.retry.copy(maxRetries = value)))
 
   /**
    * @see [[BaseMethodBuilder.withRetryDisabled]]
@@ -27,12 +34,13 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
 
   private[client] def filter(scopedStats: StatsReceiver): Filter.TypeAgnostic = {
     val classifier = mb.config.retry.responseClassifier
+    val maxRetries = mb.config.retry.maxRetries
     if (classifier eq Disabled)
       Filter.TypeAgnostic.Identity
     else {
       new Filter.TypeAgnostic {
         def toFilter[Req1, Rep1]: Filter[Req1, Rep1, Req1, Rep1] = {
-          val retryPolicy = policyForReqRep(shouldRetry[Req1, Rep1](classifier))
+          val retryPolicy = policyForReqRep(shouldRetry[Req1, Rep1](classifier), maxRetries)
           val withoutRequeues = filteredPolicy(retryPolicy)
 
           new RetryFilter[Req1, Rep1](
@@ -87,7 +95,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
 }
 
 private[client] object MethodBuilderRetry {
-  val MaxRetries = 2
+  private[this] val DefaultMaxRetries = 2
 
   private val Disabled: ResponseClassifier =
     ResponseClassifier.named("Disabled")(PartialFunction.empty)
@@ -106,10 +114,11 @@ private[client] object MethodBuilderRetry {
     }
 
   private def policyForReqRep[Req, Rep](
-    shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean]
+    shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean],
+    maxRetries: Int
   ): RetryPolicy[(Req, Try[Rep])] =
     RetryPolicy.tries(
-      MethodBuilderRetry.MaxRetries + 1, // add 1 for the initial request
+      maxRetries + 1, // add 1 for the initial request
       shouldRetry
     )
 
@@ -182,7 +191,9 @@ private[client] object MethodBuilderRetry {
    * @see [[MethodBuilderRetry.forClassifier]] for details on how the
    *     classifier is used.
    */
-  case class Config(underlyingClassifier: Option[ResponseClassifier]) {
+  case class Config(
+    underlyingClassifier: Option[ResponseClassifier],
+    maxRetries: Int = DefaultMaxRetries) {
     def responseClassifier: ResponseClassifier = underlyingClassifier match {
       case Some(classifier) => classifier
       case None => ResponseClassifier.Default
