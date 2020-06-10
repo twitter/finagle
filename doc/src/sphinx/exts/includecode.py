@@ -17,6 +17,7 @@ class IncludeCode(Directive):
     option_spec = {
         'section':      directives.unchanged_required,
         'comment':      directives.unchanged_required,
+        'endcomment':   directives.unchanged_required,
         'marker':       directives.unchanged_required,
         'include':      directives.unchanged_required,
         'exclude':      directives.unchanged_required,
@@ -68,8 +69,11 @@ class IncludeCode(Directive):
                 (encoding, filename))]
 
         comment = self.options.get('comment', '//')
+        endcomment = self.options.get('endcomment', '')
         marker = self.options.get('marker', comment + '#')
-        lenm = len(marker)
+        len_marker = len(marker)
+        len_end_comment = len(endcomment)
+
         if not section:
             section = self.options.get('section')
         include_sections = self.options.get('include', '')
@@ -85,7 +89,12 @@ class IncludeCode(Directive):
         for line in lines:
             index = line.find(marker)
             if index >= 0:
-                section_name = line[index+lenm:].strip()
+                start_section = index + len_marker
+                if len_end_comment > 0:
+                    end_section = -1 * (len_end_comment + 1) # + 1 for newline
+                    section_name = line[start_section:end_section].strip()
+                else:
+                    section_name = line[start_section:].strip()
                 if section_name in within:
                     within ^= set([section_name])
                     if excluding and not (exclude & within):
