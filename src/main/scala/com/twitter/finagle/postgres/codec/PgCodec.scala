@@ -153,7 +153,8 @@ class PacketDecoder(@volatile var inSslNegotation: Boolean) extends ByteToMessag
 
       inSslNegotation = false
 
-      new Packet(Some(SslCode), 1, null, true)
+      buffer.retain()
+      out.add(new Packet(Some(SslCode), 1, null, true))
     } else if (buffer.readableBytes() < 5) {
     } else {
       buffer.markReaderIndex()
