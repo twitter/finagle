@@ -22,7 +22,7 @@ object Sampler {
 /**
  * Decide if we should sample a particular trace or not.
  */
-class Sampler(var sr: Float) {
+class Sampler(private var sr: Float) {
   private[this] val log = Logger(getClass.getName)
 
   def this() = this(Sampler.DefaultSampleRate)
@@ -58,7 +58,7 @@ class Sampler(var sr: Float) {
    * False means drop.
    * @param traceId check if this trace id passes the sampler
    */
-  def sampleTrace(traceId: TraceId): Option[Boolean] = sampleTrace(traceId, sr)
+  def sampleTrace(traceId: TraceId): Option[Boolean] = sampleTrace(traceId, sampleRate)
 
   /**
    * Should we drop this particular trace or send it on to Scribe?

@@ -16,6 +16,9 @@ Breaking API Changes
 * finagle-core: `PayloadSizeFilter` and `WireTracingFilter` are now public APIs.
   ``PHAB_ID=D493803``
 
+* finagle-zipkin-core: `initialSampleRate` flag will now fail if the sample rate is not in the range
+  [0.0, 1.0]. ``PHAB_ID=D498408``
+
 New Features
 ~~~~~~~~~~~~
 
