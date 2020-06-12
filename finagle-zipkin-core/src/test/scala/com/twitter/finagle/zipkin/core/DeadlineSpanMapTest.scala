@@ -125,10 +125,7 @@ class DeadlineSpanMapTest extends FunSuite with Eventually with IntegrationPatie
 
       // Span must have been logged twice.
       assert(spansLoggedCount == 2, "Wrong number of calls to log spans")
-
-      // Flushing adds a "finagle.flush" annotation and we have flushed twice.
-      assert(annotationCount == 4, "Wrong number of annotations")
+      assert(annotationCount == 2, "Wrong number of annotations")
     }
   }
-
 }

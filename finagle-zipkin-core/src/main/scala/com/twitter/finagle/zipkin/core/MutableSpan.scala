@@ -2,7 +2,7 @@ package com.twitter.finagle.zipkin.core
 
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.thrift.thrift.Constants
-import com.twitter.finagle.tracing.TraceId
+import com.twitter.finagle.tracing.{Trace, TraceId}
 import com.twitter.util.Time
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.mutable.ArrayBuffer
@@ -83,7 +83,8 @@ private final class MutableSpan(val traceId: TraceId, val started: Time) {
   def addAnnotation(ann: ZipkinAnnotation): MutableSpan = synchronized {
     if (ann.value.equals(Constants.CLIENT_RECV) ||
       ann.value.equals(Constants.SERVER_SEND) ||
-      ann.value.equals(TimeoutFilter.TimeoutAnnotation)) {
+      ann.value.equals(TimeoutFilter.TimeoutAnnotation) ||
+      ann.value.equals(Trace.LocalEndAnnotation)) {
       _onHold = true
     }
 

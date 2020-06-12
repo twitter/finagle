@@ -38,6 +38,12 @@ New Features
   configuration can be applied via `Http.client.methodBuilder(name).withMaxRetries(n)` or
   `ThriftMux.client.methodBuilder(name).withMaxRetries(n)`. ``PHAB_ID=D493139``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-zipkin-core: Remove flush and late-arrival annotations, which artificially extend
+  trace durations. ``PHAB_ID=D498073``
+
 20.5.0
 ------
 

@@ -224,6 +224,9 @@ object Trace extends Tracing {
     }
   }
 
+  val LocalBeginAnnotation: String = "local/begin"
+  val LocalEndAnnotation: String = "local/end"
+
   /**
    * Create a span that begins right before the function is called
    * and ends immediately after the function completes. This
@@ -240,11 +243,11 @@ object Trace extends Tracing {
       trace.recordServiceName(serviceName)
       trace.recordBinary("lc", name)
 
-      trace.record("local/begin")
+      trace.record(LocalBeginAnnotation)
       try {
         f
       } finally {
-        trace.record("local/end")
+        trace.record(LocalEndAnnotation)
       }
     }
   }
@@ -265,8 +268,8 @@ object Trace extends Tracing {
       trace.recordServiceName(serviceName)
       trace.recordBinary("lc", name)
 
-      trace.record("local/begin")
-      f.ensure(trace.record("local/end"))
+      trace.record(LocalBeginAnnotation)
+      f.ensure(trace.record(LocalEndAnnotation))
     }
   }
 
