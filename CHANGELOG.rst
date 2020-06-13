@@ -38,11 +38,19 @@ New Features
   configuration can be applied via `Http.client.methodBuilder(name).withMaxRetries(n)` or
   `ThriftMux.client.methodBuilder(name).withMaxRetries(n)`. ``PHAB_ID=D493139``
 
+* finagle-memcached: Annotate the shard id of the backend the request will reach. ``PHAB_ID=D491738``
+
 Bug Fixes
 ~~~~~~~~~
 
 * finagle-zipkin-core: Remove flush and late-arrival annotations, which artificially extend
   trace durations. ``PHAB_ID=D498073``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-memcached: The key in `RetrievalCommand` are ommited in traces. The total number of Hits
+  and Misses are annotated via a counter instead under `clnt/memcached.(hits/misses)` ``PHAB_ID=D491738``
 
 20.5.0
 ------

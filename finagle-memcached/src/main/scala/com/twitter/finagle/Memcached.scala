@@ -47,7 +47,7 @@ import com.twitter.finagle.pushsession.{
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.tracing.Tracer
+import com.twitter.finagle.tracing.{ClientDestTracingFilter, Tracer}
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util._
@@ -179,7 +179,9 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       .replace(
         StackClient.Role.pool,
         BalancingPool.module[Command, Response](allowInterrupts = true))
-      .replace(StackClient.Role.protoTracing, MemcachedTracingFilter.Module)
+      .replace(StackClient.Role.protoTracing, MemcachedTracingFilter.memcachedTracingModule)
+      // we place this module at a point where the endpoint is resolved in the stack.
+      .insertBefore(ClientDestTracingFilter.role, MemcachedTracingFilter.shardIdTracingModule)
 
     /**
      * The memcached client should be using fixed hosts that do not change
