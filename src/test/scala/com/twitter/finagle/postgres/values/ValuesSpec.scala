@@ -60,14 +60,13 @@ class ValuesSpec extends Spec with ScalaCheckDrivenPropertyChecks {
       try {
         forAll {
           (t: T) =>
-            //TODO: change this once prepared statements are available
-            val escaped = toStr(t).replaceAllLiterally("'", "\\'")
-            val ResultSet(binaryRows) = Await.result(client.query(s"SELECT $send('$escaped'::$typ) AS out"))
-            val binaryRow = Await.result(binaryRows.toSeq).head
-            val ResultSet(textRows) = Await.result(client.query(s"SELECT CAST('$escaped'::$typ AS text) AS out"))
-            val textRow = Await.result(textRows.toSeq).head
-            val bytes = binaryRow.get[Array[Byte]]("out")
-            val textString = textRow.get[String]("out")
+            val str = toStr(t)
+            val bytes = Await.result(
+              client.prepareAndQuery(s"SELECT $send($$1::$typ) AS out", str)(_.get[Array[Byte]]("out"))
+            ).head
+            val textString = Await.result(
+              client.prepareAndQuery(s"SELECT CAST($$1::$typ AS text) AS out", str)(_.get[String]("out"))
+            ).head
             val binaryOut = decoder.decodeBinary(recv, Unpooled.wrappedBuffer(bytes), client.charset).get
             val textOut = decoder.decodeText(recv, textString).get
 
