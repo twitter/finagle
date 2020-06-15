@@ -13,6 +13,14 @@ Runtime Behavior Changes
   This is recommended as a best practice anyway, now it's the default behavior. Less things
   to configure and worry about! ``PHAB_ID=D498911``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: namer annotations are prefixed with "clnt/". ``PHAB_ID=D492443``
+
+* finagle-core: `namer.success` & `namer.failure` are not annotated as they are not request based.
+  `namer.tree` annotation was also removed to reduce the size of traces.``PHAB_ID=D492443``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -53,6 +61,9 @@ Bug Fixes
 
 * finagle-zipkin-core: Remove flush and late-arrival annotations, which artificially extend
   trace durations. ``PHAB_ID=D498073``
+
+* finagle-core: namer annotations are added at the Service level instead of ServiceFactory as
+  traces are intended to be request based ``PHAB_ID=D492443``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

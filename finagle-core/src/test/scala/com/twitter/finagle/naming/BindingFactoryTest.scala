@@ -208,7 +208,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(noBrokers.localDtab == localDtab)
   }
 
-  test("Trace on success")(new Ctx {
+  test("Traces name information per request")(new Ctx {
     withExpectedTrace(
       {
         val n1 = Dtab.read("/foo/bar=>/test1010")
@@ -217,81 +217,9 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
         s1.close()
       },
       Seq(
-        Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
-        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
-        Annotation.Message("namer.success"),
-        Annotation.BinaryAnnotation("namer.tree", "/$/inet/1010"),
-        Annotation.BinaryAnnotation("namer.name", "/$/inet/1010")
-      )
-    )
-  })
-
-  test("Trace on exception")(new Ctx {
-    withExpectedTrace(
-      {
-        val exc = new RuntimeException
-
-        NameInterpreter.global = new NameInterpreter {
-          override def bind(dtab: Dtab, path: Path) = Activity.exception(exc)
-        }
-
-        assert(intercept[Failure](Await.result(factory())).isFlagged(FailureFlags.Naming))
-      },
-      Seq(
-        Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
-        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
-        Annotation.BinaryAnnotation("namer.failure", "java.lang.RuntimeException")
-      )
-    )
-  })
-
-  test("Trace on negative resolution")(new Ctx {
-    withExpectedTrace(
-      {
-        intercept[NoBrokersAvailableException] {
-          Await.result(factory())
-        }
-      },
-      Seq(
-        Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
-        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
-        Annotation.Message("namer.success"),
-        Annotation.BinaryAnnotation("namer.tree", "~")
-      )
-    )
-  })
-
-  test("Trace on service creation failure")(new Ctx {
-    withExpectedTrace(
-      {
-        val localDtab = Dtab.read("/foo/bar=>/test1010")
-
-        val f = new BindingFactory(
-          Path.read("/foo/bar"),
-          newFactory = { addr =>
-            new ServiceFactory[Unit, Unit] {
-              def apply(conn: ClientConnection) =
-                Future.exception(new NoBrokersAvailableException("/foo/bar"))
-
-              def close(deadline: Time) = Future.Done
-            }
-          },
-          Timer.Nil
-        )
-
-        intercept[NoBrokersAvailableException] {
-          Dtab.unwind {
-            Dtab.local = localDtab
-            Await.result(f())
-          }
-        }
-      },
-      Seq(
-        Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
-        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
-        Annotation.Message("namer.success"),
-        Annotation.BinaryAnnotation("namer.tree", "/$/inet/1010"),
-        Annotation.BinaryAnnotation("namer.name", "/$/inet/1010")
+        Annotation.BinaryAnnotation("clnt/namer.path", "/foo/bar"),
+        Annotation.BinaryAnnotation("clnt/namer.dtab.base", "/test1010=>/$/inet/1010"),
+        Annotation.BinaryAnnotation("clnt/namer.name", "/$/inet/1010")
       )
     )
   })

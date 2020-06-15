@@ -3,7 +3,6 @@ package com.twitter.finagle.naming
 import com.twitter.finagle._
 import com.twitter.finagle.factory.ServiceFactoryCache
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Activity, Future, Promise, Stopwatch, Time}
 import scala.collection.immutable
 
@@ -74,16 +73,12 @@ private class DynNameFactory[Req, Rep](
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     state match {
       case Named(name) =>
-        Trace.record("namer.success")
         cache(name, conn)
 
       case Failed(exc) =>
-        Trace.recordBinary("namer.failure", exc.getClass.getName)
         Future.exception(Failure.adapt(exc, FailureFlags.Naming))
 
       case Closed() =>
-        Trace.record("namer.closed")
-        // don't trace these, since they're not a namer failure
         Future.exception(new ServiceClosedException)
 
       case Pending(_) =>

@@ -57,17 +57,27 @@ private[finagle] class BindingFactory[Req, Rep](
     extends ServiceFactory[Req, Rep] {
 
   import BindingFactory.Dtabs
+  import BindingFactory.NamerNameAnnotationKey
+  import BindingFactory.NamerPathAnnotationKey
+  import BindingFactory.DtabBaseAnnotationKey
 
   private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](
-      bound =>
-        new ServiceFactoryProxy(newFactory(bound)) {
-          private val boundShow = Showable.show(bound)
-          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-            Trace.recordBinary("namer.name", boundShow)
-            super.apply(conn)
+      bound => {
+        val boundShow = Showable.show(bound)
+        val filter = new SimpleFilter[Req, Rep] {
+          def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+            val trace = Trace()
+            if (trace.isActivelyTracing) {
+              trace.recordBinary(NamerNameAnnotationKey, boundShow)
+            }
+
+            service(request)
           }
-        },
+        }
+
+        filter.andThen(newFactory(bound))
+      },
       timer,
       statsReceiver.scope("namecache"),
       maxNameCacheSize,
@@ -76,14 +86,7 @@ private[finagle] class BindingFactory[Req, Rep](
 
   private[this] val nameTreeCache =
     new ServiceFactoryCache[NameTree[Name.Bound], Req, Rep](
-      tree =>
-        new ServiceFactoryProxy(NameTreeFactory(path, tree, nameCache)) {
-          private val treeShow = tree.show
-          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-            Trace.recordBinary("namer.tree", treeShow)
-            super.apply(conn)
-          }
-        },
+      tree => NameTreeFactory(path, tree, nameCache),
       timer,
       statsReceiver.scope("nametreecache"),
       maxNameTreeCacheSize,
@@ -93,20 +96,30 @@ private[finagle] class BindingFactory[Req, Rep](
   private[this] val dtabCache = {
     val newFactory: Dtabs => ServiceFactory[Req, Rep] = {
       case Dtabs(baseDtab, localDtab) =>
-        val factory = new DynNameFactory(
+        val dynFactory = new DynNameFactory(
           NameInterpreter.bind(baseDtab ++ localDtab, path),
           nameTreeCache,
           statsReceiver = statsReceiver
         )
 
-        new ServiceFactoryProxy(factory) {
-          private val pathShow = path.show
-          private val baseDtabShow = baseDtab.show
-          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-            Trace.recordBinary("namer.path", pathShow)
-            Trace.recordBinary("namer.dtab.base", baseDtabShow)
-            // dtab.local is annotated on the client & server tracers.
+        val pathShow = path.show
+        val baseDtabShow = baseDtab.show
+        val filter = new SimpleFilter[Req, Rep] {
+          def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+            val trace = Trace()
+            if (trace.isActivelyTracing) {
+              // local dtabs are annotated on the client & server trace initializer filters.
+              trace.recordBinary(NamerPathAnnotationKey, pathShow)
+              trace.recordBinary(DtabBaseAnnotationKey, baseDtabShow)
+            }
 
+            service(request)
+          }
+        }
+
+        val factory = filter.andThen(dynFactory)
+        new ServiceFactoryProxy(factory) {
+          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
             super.apply(conn).rescue {
               // we don't have the dtabs handy at the point we throw
               // the exception; fill them in on the way out
@@ -137,6 +150,10 @@ private[finagle] class BindingFactory[Req, Rep](
 
 private[finagle] object BindingFactory {
   private val log = Logger.get()
+
+  val NamerNameAnnotationKey = "clnt/namer.name"
+  val NamerPathAnnotationKey = "clnt/namer.path"
+  val DtabBaseAnnotationKey = "clnt/namer.dtab.base"
 
   private case class Dtabs(base: Dtab, local: Dtab) extends CachedHashCode.ForClass {
     override protected def computeHashCode: Int = {
