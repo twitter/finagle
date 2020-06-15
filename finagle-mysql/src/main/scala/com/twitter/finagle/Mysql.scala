@@ -13,9 +13,9 @@ import com.twitter.finagle.param.{
 }
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.tracing._
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Duration, Future, Monitor}
+import com.twitter.util.{Duration, Monitor}
 import java.net.SocketAddress
 
 /**
@@ -51,42 +51,6 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
     mysql.Client(newClient(dest), richClientStatsReceiver, supportUnsigned)
 }
 
-object MySqlClientTracingFilter {
-  object Stackable extends Stack.Module1[Label, ServiceFactory[Request, Result]] {
-    val role: Stack.Role = ClientTracingFilter.role
-    val description: String = "Add MySql client specific annotations to the trace"
-    def make(
-      _label: Label,
-      next: ServiceFactory[Request, Result]
-    ): ServiceFactory[Request, Result] = {
-      // TODO(jeff): should be able to get this directly from ClientTracingFilter
-      val annotations = new AnnotatingTracingFilter[Request, Result](
-        _label.label,
-        Annotation.ClientSend,
-        Annotation.ClientRecv
-      )
-      annotations.andThen(TracingFilter).andThen(next)
-    }
-  }
-
-  object TracingFilter extends SimpleFilter[Request, Result] {
-    def apply(request: Request, service: Service[Request, Result]): Future[Result] = {
-      val trace = Trace()
-      if (trace.isActivelyTracing) {
-        request match {
-          case QueryRequest(sqlStatement) => trace.recordBinary("mysql.query", sqlStatement)
-          case PrepareRequest(sqlStatement) => trace.recordBinary("mysql.prepare", sqlStatement)
-          // TODO: save the prepared statement and put it in the executed request trace
-          case ExecuteRequest(id, _, _, _) => trace.recordBinary("mysql.execute", id)
-          case _ => trace.record("mysql." + request.getClass.getSimpleName.replace("$", ""))
-        }
-      }
-
-      service(request)
-    }
-  }
-}
-
 /**
  * @example {{{
  * val client = Mysql.client
@@ -113,10 +77,9 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       ParamMonitor(ServerErrorMonitor(Seq()))
 
     private val stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
-      .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)
-      // Note: there is a stack overflow in insertAfter using CanStackFrom, thus the module.
-      .insertAfter(DefaultPool.Role, PoisonConnection.module)
       .prepend(RollbackFactory.module)
+      .replace(StackClient.Role.protoTracing, MysqlTracingFilter.module)
+      .insertAfter(DefaultPool.Role, PoisonConnection.module)
       .insertAfter(StackClient.Role.prepConn, ConnectionInitSql.module)
   }
 

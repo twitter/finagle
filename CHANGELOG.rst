@@ -25,6 +25,8 @@ Breaking API Changes
 * finagle-zipkin-core: `initialSampleRate` flag will now fail if the sample rate is not in the range
   [0.0, 1.0]. ``PHAB_ID=D498408``
 
+* finagle-mysql: mysql client annos are prefixed with `clnt/` ``PHAB_ID=D492274``
+
 New Features
 ~~~~~~~~~~~~
 
