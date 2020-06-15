@@ -6,6 +6,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+* finagle-core: FailFastFactory is now disabled at runtime when a client's destination has only
+  one endpoint, since the client cannot do anything meaningful by breaking the circuit early.
+  This is recommended as a best practice anyway, now it's the default behavior. Less things
+  to configure and worry about! ``PHAB_ID=D498911``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -292,7 +298,7 @@ Runtime Behavior Changes
 * finagle-thrift: Per-method metrics are now created lazily, so if you have methods on a Thrift
   service that you don't use, the associated metrics won't be exported.  ``PHAB_ID=D400382``
 
-* finagle-zipkin-core: Tracing produces microsecond resolution timestamps in JDK9 or later. 
+* finagle-zipkin-core: Tracing produces microsecond resolution timestamps in JDK9 or later.
   ``PHAB_ID=D400661``
 
 * finagle-core: `Trace#time` and `Trace#timeFuture` no longer generate timestamped annotations or

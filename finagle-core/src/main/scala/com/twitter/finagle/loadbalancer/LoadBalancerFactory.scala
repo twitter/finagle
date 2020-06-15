@@ -2,6 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.util.{Activity, Var}
@@ -220,8 +221,7 @@ object LoadBalancerFactory {
         if (!perHostStats()) NullStatsReceiver
         else params[LoadBalancerFactory.HostStats].hostStatsReceiver
 
-      // Creates a ServiceFactory from the `next` in the stack and ensures
-      // that `sockaddr` is an available param for `next`.
+      // Creates a ServiceFactory from `next` with the given `addr`.
       def newEndpoint(addr: Address): ServiceFactory[Req, Rep] = {
         val stats =
           if (hostStatsReceiver.isNull) statsReceiver
@@ -247,8 +247,31 @@ object LoadBalancerFactory {
           reporter(label, ia).andThen(monitor.orElse(defaultMonitor))
         }
 
+        // If we only have one endpoint in our collection, we construct our configuration
+        // for the endpoint to disable circuit breakers which fail closed. Otherwise, we will
+        // "fail fast" with no reasonable options for the finagle stack to gracefully handle
+        // the failure. This improves the ergonomics of using a Finagle client since it's
+        // recommended to disable these type of circuit breakers for clients connected to
+        // a single endpoint anyway.
+        val failFastParam: FailFastFactory.FailFast = {
+          if (params.contains[FailFastFactory.FailFast]) {
+            params[FailFastFactory.FailFast]
+          } else {
+            // Note, this isn't perfect. The life of this endpoint can outlive the life of
+            // the `sample`. That is, our destination size can change from 1 and we've
+            // still disabled failfast on this endppoint. If this happens to become an
+            // unacceptable trade-off, we'd have to recreate this endpoint based on
+            // destination changes.
+            dest.sample() match {
+              case Addr.Bound(addrs, _) if addrs.size == 1 => FailFastFactory.FailFast(false)
+              case _ => params[FailFastFactory.FailFast]
+            }
+          }
+        }
+
         next.make(
           params +
+            failFastParam +
             Transporter.EndpointAddr(addr) +
             param.Stats(stats) +
             param.Monitor(composite)

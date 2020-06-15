@@ -149,27 +149,29 @@ abstract class AbstractStackClientTest
       .push(alwaysFail)
       .result
 
-    def newClient(name: String, failFastOn: Option[Boolean]): Service[String, String] = {
+    def newClient(label: String, failFastOn: Option[Boolean]): Service[String, String] = {
       var stack = ctx.client
-        .configured(param.Label(name))
+        .withLabel(label)
         .withStack(_.concat(alwaysFailStack))
       failFastOn.foreach { ffOn => stack = stack.configured(FailFast(ffOn)) }
       val client = stack.newClient("/$/inet/localhost/0")
       new FactoryToService[String, String](client)
     }
 
-    def testClient(name: String, failFastOn: Option[Boolean]): Unit = {
-      val svc = newClient(name, failFastOn)
+    def testClient(label: String, failFastOn: Option[Boolean]): Unit = {
+      val svc = newClient(label, failFastOn)
       val e = intercept[RuntimeException] { await(svc("hi")) }
       assert(e == ex)
+
+      def markedDead: Option[Long] = ctx.sr.counters.get(Seq(label, "failfast", "marked_dead"))
       failFastOn match {
-        case Some(on) if !on =>
-          assert(!ctx.sr.counters.contains(Seq(name, "failfast", "marked_dead")))
+        // Although the default for FailFast = true, we disable it
+        // for clients connecting to a dest with a size of 1.
+        case Some(false) | None =>
+          eventually { assert(markedDead == None) }
           intercept[RuntimeException] { await(svc("hi2")) }
-        case _ =>
-          eventually {
-            assert(ctx.sr.counters(Seq(name, "failfast", "marked_dead")) == 1)
-          }
+        case Some(true) =>
+          eventually { assert(markedDead == Some(1)) }
           intercept[FailedFastException] { await(svc("hi2")) }
       }
     }

@@ -178,11 +178,6 @@ A common cause is when all endpoints in the load balancer's pool are
 marked down as fail fast, then the load balancer will pass requests through, resulting in a
 ``com.twitter.finagle.FailedFastException``.
 
-A related issue is when the load balancer's pool is a single endpoint that is itself a
-load balancer (for example an Nginx server or a hardware load balancer).
-It is important to disable fail fast as the remote load balancer has
-the visibility into which endpoints are up.
-
 See :ref:`this example <disabling_fail_fast>` on how to disable `Fail Fast` for a given client.
 
 Refer to the :ref:`fail fast <client_fail_fast>` section for further context.

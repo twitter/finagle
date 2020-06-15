@@ -739,9 +739,9 @@ particular client.
 
 .. note::
 
-  Because this module fails closed, it is advised to disable `Fail Fast` when only one host
-  is present in the replica set. For example, when configuring your client to communicate to
-  a VIP or any other destination which resolves to a single entity.
+  Because this module fails closed, Finagle will automatically disable `Fail Fast` when only
+  one host is present in the replica set. This is because, without more replicas, Fiangle can
+  not meaningfully handle the failure when breaking the circuit.
 
 :ref:`Related stats <fail_fast_stats>`
 

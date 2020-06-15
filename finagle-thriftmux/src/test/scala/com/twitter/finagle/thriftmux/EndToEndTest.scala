@@ -654,12 +654,10 @@ class EndToEndTest
         case Failure(Some(_: ConnectionFailedException)) => // ok
       }
 
-      // Subsequent requests are failed fast since there are (still) no
+      // Subsequent requests are failed since there are (still) no
       // Open service factories in the load balancer. Again, no requeues
       // are attempted.
-      intercept[FailedFastException] {
-        await(client.query("ok"))
-      }
+      intercept[Failure] { await(client.query("ok")) }
     }
   }
 
@@ -725,9 +723,7 @@ class EndToEndTest
         case other => fail(s"Expected Failure(Some(ConnectionFailedException)) but found $other")
       }
 
-      intercept[FailedFastException] {
-        await(client.query("ok"))
-      }
+      intercept[Failure] { await(client.query("ok")) }
 
       await(server.close())
     }
