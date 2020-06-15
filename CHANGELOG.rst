@@ -38,6 +38,9 @@ Breaking API Changes
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: Trace the request's protocol identified by the `ProtocolLibrary` of the client
+  stack. This is annotated under `clnt/finagle.protocol`. ``PHAB_ID=D495645``
+
 * finagle-core: Add `letTracers` to allow setting multiple tracers onto the tracer stack.
   ``PHAB_ID=D489697``
 

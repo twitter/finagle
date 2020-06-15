@@ -28,7 +28,6 @@ object StackServer {
    * Canonical Roles for each Server-related Stack modules.
    */
   object Role extends Stack.Role("StackServer") {
-    val serverDestTracing: Stack.Role = Stack.Role("ServerDestTracing")
     val jvmTracing: Stack.Role = Stack.Role("JvmTracing")
     val preparer: Stack.Role = Stack.Role("preparer")
     val protoTracing: Stack.Role = Stack.Role("protoTracing")
@@ -41,7 +40,7 @@ object StackServer {
    * params defined in the companion objects of the respective modules.
    *
    * @see [[com.twitter.finagle.filter.OffloadFilter]]
-   * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
+   * @see [[com.twitter.finagle.tracing.ServerDestTracingFilter]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
    * @see [[com.twitter.finagle.service.DeadlineFilter]]
    * @see [[com.twitter.finagle.filter.DtabStatsFilter]]
@@ -75,10 +74,7 @@ object StackServer {
     // as possible. By installing `ExpiringService` here, we are guaranteed
     // to wrap the server's dispatcher.
     stk.push(ExpiringService.server)
-    stk.push(
-      Role.serverDestTracing,
-      (next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)
-    )
+    stk.push(ServerDestTracingFilter.module)
     stk.push(TimeoutFilter.serverModule)
     // The DeadlineFilter is pushed before the stats filters so stats are
     // recorded for the request. If a server processing deadlines is set in
