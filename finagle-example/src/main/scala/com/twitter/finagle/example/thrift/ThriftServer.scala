@@ -9,7 +9,7 @@ object ThriftServer {
     //#thriftserverapi
     val server = Thrift.server.serveIface(
       "localhost:8080",
-      new Hello[Future] {
+      new Hello.MethodPerEndpoint {
         def hi() = Future.value("hi")
       })
     Await.ready(server)
