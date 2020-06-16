@@ -38,6 +38,9 @@ Breaking API Changes
 New Features
 ~~~~~~~~~~~~
 
+* finagle-http: Add LoadBalancedHostFilter to allow setting host header after LoadBalancer
+  ``PHAB_ID=D498954``
+
 * finagle-core: Trace the request's protocol identified by the `ProtocolLibrary` of the client
   stack. This is annotated under `clnt/finagle.protocol`. ``PHAB_ID=D495645``
 
