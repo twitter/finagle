@@ -8,6 +8,9 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Future, Return}
 
 private[finagle] object MemcachedTracingFilter {
+  val ShardIdAnnotationKey = "clnt/memcached.shard_id"
+  val HitsAnnotationKey = "clnt/memcached.hits"
+  val MissesAnnotationKey = "clnt/memcached.misses"
 
   /**
    * Apply the [[MemcachedTracingFilter]] protocol specific annotations
@@ -46,8 +49,7 @@ private[finagle] object MemcachedTracingFilter {
 }
 
 private final class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
-  val hitsKey = "clnt/memcached.hits"
-  val missesKey = "clnt/memcached.misses"
+  import MemcachedTracingFilter._
 
   def apply(command: Command, service: Service[Command, Response]): Future[Response] = {
     val trace = Trace()
@@ -60,8 +62,8 @@ private final class MemcachedTracingFilter extends SimpleFilter[Command, Respons
         case command: RetrievalCommand =>
           response.respond {
             case Return(Values(vals)) =>
-              trace.recordBinary(hitsKey, vals.size)
-              trace.recordBinary(missesKey, command.keys.size - vals.size)
+              trace.recordBinary(HitsAnnotationKey, vals.size)
+              trace.recordBinary(MissesAnnotationKey, command.keys.size - vals.size)
             case _ =>
           }
         case _ =>
@@ -73,21 +75,23 @@ private final class MemcachedTracingFilter extends SimpleFilter[Command, Respons
 }
 
 private final class ShardIdTracingFilter(addr: Address) extends SimpleFilter[Command, Response] {
-  val shardIdKey = "clnt/memcached.shard_id"
+  import MemcachedTracingFilter._
 
   def apply(command: Command, service: Service[Command, Response]): Future[Response] = {
     val trace = Trace
     if (trace.isActivelyTracing) {
       addr match {
         case Address.Inet(_, metadata) =>
-          val zkMetadata = ZkMetadata.fromAddrMetadata(metadata)
-
-          // record the shard id if present in the metadata
-          zkMetadata.foreach { zk =>
-            zk.shardId.foreach(trace.recordBinary(shardIdKey, _))
+          ZkMetadata.fromAddrMetadata(metadata) match {
+            case Some(zkMetadata) =>
+              zkMetadata.shardId match {
+                case Some(shard) =>
+                  trace.recordBinary(ShardIdAnnotationKey, shard)
+                case _ => // no-op if the shard wasn't populated
+              }
+            case _ => // no-op if there is no metadata
           }
-
-        case _ => // do nothing when there is no metadata
+        case _ => // no-op
       }
     }
 
