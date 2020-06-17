@@ -340,7 +340,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     server.close()
   }
 
-  test("serveIface works with X.MethodPerEndpoint, X.MethodPerEndpoint with extended services") {
+  test("serveIface works with X.MethodPerEndpoint, X[Future] with extended services") {
     // 1. Server extends X.MethodPerEndpoint.
     class ExtendedEchoService1 extends ExtendedEcho.MethodPerEndpoint {
       override def echo(msg: String): Future[String] = Future.value(msg)
@@ -359,8 +359,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(await(client1.echo("asdf"), 10.seconds) == "asdf")
     assert(await(client1.getStatus(), 10.seconds) == "OK")
 
-    // 2. Server extends X.MethodPerEndpoint.
-    class ExtendedEchoService2 extends ExtendedEcho.MethodPerEndpoint {
+    // 2. Server extends X[Future].
+    class ExtendedEchoService2 extends ExtendedEcho[Future] {
       override def echo(msg: String): Future[String] = Future.value(msg)
       override def getStatus(): Future[String] = Future.value("OK")
     }

@@ -10,7 +10,7 @@ import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
 class DefaultReporterTest extends FunSuite with MockitoSugar {
-  val logger = mock[Scribe.MethodPerEndpoint]
+  val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())).thenReturn(Future.value(ResultCode.Ok))
 
   val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
@@ -33,7 +33,7 @@ class DefaultReporterTest extends FunSuite with MockitoSugar {
 }
 
 class ClientReporterTest extends FunSuite with MockitoSugar {
-  val logger = mock[Scribe.MethodPerEndpoint]
+  val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())).thenReturn(Future.value(ResultCode.Ok))
 
   val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
@@ -60,7 +60,7 @@ class ClientReporterTest extends FunSuite with MockitoSugar {
 }
 
 class SourceClientReporterTest extends FunSuite with MockitoSugar {
-  val logger = mock[Scribe.MethodPerEndpoint]
+  val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())).thenReturn(Future.value(ResultCode.Ok))
 
   val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
@@ -93,7 +93,7 @@ class SourceClientReporterTest extends FunSuite with MockitoSugar {
 class ExceptionReporterTest extends FunSuite with MockitoSugar {
 
   test("logs an exception") {
-    val logger = mock[Scribe.MethodPerEndpoint]
+    val logger = mock[Scribe.FutureIface]
     when(logger.log(anyObject())).thenReturn(Future.value(ResultCode.Ok))
     val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
     val tse = new TestServiceException("service", "my cool message")
@@ -104,7 +104,7 @@ class ExceptionReporterTest extends FunSuite with MockitoSugar {
   }
 
   test("logs a client exception") {
-    val logger = mock[Scribe.MethodPerEndpoint]
+    val logger = mock[Scribe.FutureIface]
     when(logger.log(anyObject())).thenReturn(Future.value(ResultCode.Ok))
     val captor = ArgumentCaptor.forClass(classOf[Seq[LogEntry]])
     val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)

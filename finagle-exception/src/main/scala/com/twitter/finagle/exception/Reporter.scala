@@ -97,7 +97,7 @@ object Reporter {
  * is very wrong!
  */
 sealed case class Reporter(
-  client: Scribe.MethodPerEndpoint,
+  client: Scribe[Future],
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   private val sourceAddress: Option[String] = Some(InetAddress.getLoopbackAddress.getHostName),

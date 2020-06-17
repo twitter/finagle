@@ -22,7 +22,7 @@ import java.net.SocketAddress
  * }
  * }}}
  *
- * Scrooge will generate an interface, `TestService.MethodPerEndpoint`,
+ * Scrooge will generate an interface, `TestService.FutureIface`,
  * implementing the above IDL.
  *
  * $serverExample
@@ -32,11 +32,11 @@ import java.net.SocketAddress
  *
  * @define serverExample
  *
- * `TestService.MethodPerEndpoint` must be implemented and passed
+ * `TestService.FutureIface` must be implemented and passed
  * into `serveIface`:
  *
  * {{{
- * $serverExampleObject.serveIface(":*", new TestService.MethodPerEndpoint {
+ * $serverExampleObject.serveIface(":*", new TestService.FutureIface {
  *   def query(x: String) = Future.value(x)  // (echo service)
  * })
  * }}}

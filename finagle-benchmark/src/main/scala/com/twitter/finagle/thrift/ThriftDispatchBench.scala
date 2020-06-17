@@ -44,7 +44,7 @@ object ThriftDispatchBench {
   }
 
   def scroogeService(prot: TProtocolFactory) = {
-    val impl = new Hello.MethodPerEndpoint {
+    val impl = new Hello.FutureIface {
       def echo(body: String) = Future.value(body)
     }
     new Hello.FinagledService(impl, prot)

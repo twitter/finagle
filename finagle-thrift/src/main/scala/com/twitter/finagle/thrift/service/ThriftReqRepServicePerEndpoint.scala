@@ -36,7 +36,7 @@ import com.twitter.util.{Future, Return, Throw, Try}
  *
  * and the method interface, or `MethodPerEndpoint`, is
  * {{{
- * trait Logger.MethodPerEndpoint {
+ * trait Logger[Future] {
  *   def log(message: String, logLevel: Int): Future[String]
  *   def getLogSize(): Future[Int]
  * }
