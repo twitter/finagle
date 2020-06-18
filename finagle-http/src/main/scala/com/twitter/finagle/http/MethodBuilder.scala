@@ -5,7 +5,7 @@ import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.param.{Tracer => TracerParam}
 import com.twitter.finagle.service.ResponseClassifier
-import com.twitter.finagle.{Name, Resolver, Service, client}
+import com.twitter.finagle.{Filter, Name, Resolver, Service, client}
 import com.twitter.util.Duration
 import com.twitter.util.tunable.Tunable
 import com.twitter.{finagle => ctf}
@@ -214,6 +214,9 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
 
   def withTimeoutPerRequest(howLong: Tunable[Duration]): MethodBuilder =
     new MethodBuilder(mb.withTimeout.perRequest(howLong))
+
+  def withTraceInitializer(initializer: Filter.TypeAgnostic): MethodBuilder =
+    new MethodBuilder(mb.withTraceInitializer(initializer))
 
   def withRetryForClassifier(classifier: ResponseClassifier): MethodBuilder =
     new MethodBuilder(mb.withRetry.forClassifier(classifier))
