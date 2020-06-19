@@ -6,20 +6,23 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
 * finagle-core: FailFastFactory is now disabled at runtime when a client's destination has only
   one endpoint, since the client cannot do anything meaningful by breaking the circuit early.
   This is recommended as a best practice anyway, now it's the default behavior. Less things
   to configure and worry about! ``PHAB_ID=D498911``
 
-Runtime Behavior Changes
-~~~~~~~~~~~~~~~~~~~~~~~~
-
 * finagle-core: namer annotations are prefixed with "clnt/". ``PHAB_ID=D492443``
 
 * finagle-core: `namer.success` & `namer.failure` are not annotated as they are not request based.
   `namer.tree` annotation was also removed to reduce the size of traces.``PHAB_ID=D492443``
+
+* finagle-core: The offload filter client annotation is annotated under the child request span instead of
+  its parent. The offload filter annotations are also changed to be binary annotations with the key
+  `(clnt|srv)/finagle.offload_pool_size` and the value being the pool size ``PHAB_ID=D502521``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

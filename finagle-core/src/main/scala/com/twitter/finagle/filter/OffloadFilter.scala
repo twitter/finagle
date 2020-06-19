@@ -3,7 +3,7 @@ package com.twitter.finagle.filter
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.offload.numWorkers
 import com.twitter.finagle.stats.FinagleStatsReceiver
-import com.twitter.finagle.tracing.{Annotation, Trace}
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.util.{Future, FutureNonLocalReturnControl, FuturePool, Promise}
 import java.util.concurrent.{ExecutorService, Executors}
@@ -19,6 +19,8 @@ object OffloadFilter {
 
   private[this] val Role = Stack.Role("OffloadWorkFromIO")
   private[this] val Description = "Offloading computations from IO threads"
+  private[this] val ClientAnnotationKey = "clnt/finagle.offload_pool_size"
+  private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"
 
   private[this] lazy val (defaultPool, defautPoolStats) = {
     numWorkers.get match {
@@ -58,11 +60,6 @@ object OffloadFilter {
 
   final class Client[Req, Rep](pool: FuturePool) extends SimpleFilter[Req, Rep] {
 
-    // Has to be lazy to see the number of workers in the pool at the point at which the annotation
-    // is generated.
-    private lazy val offloadAnnotation = Annotation.Message(
-      s"clnt/OffloadFilter: Offloaded continuation from IO threads to pool with ${pool.poolSize} workers")
-
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
       // What we're trying to achieve is to ensure all continuations spawn out of a future returned
       // from this method are run outside of the IO thread (in the given FuturePool).
@@ -94,7 +91,7 @@ object OffloadFilter {
 
         val tracing = Trace()
         if (tracing.isActivelyTracing) {
-          tracing.record(offloadAnnotation)
+          tracing.recordBinary(ClientAnnotationKey, pool.poolSize)
         }
       }
 
@@ -103,11 +100,6 @@ object OffloadFilter {
   }
 
   final class Server[Req, Rep](pool: FuturePool) extends SimpleFilter[Req, Rep] {
-
-    // Has to be lazy to see the number of workers in the pool at the point at which the annotation
-    // is generated.
-    private lazy val offloadAnnotation = Annotation.Message(
-      s"srv/OffloadFilter: Offloaded continuation from IO threads to pool with ${pool.poolSize} workers")
 
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
 
@@ -151,7 +143,7 @@ object OffloadFilter {
 
       val tracing = Trace()
       if (tracing.isActivelyTracing) {
-        tracing.record(offloadAnnotation)
+        tracing.recordBinary(ServerAnnotationKey, pool.poolSize)
       }
       shifted
     }

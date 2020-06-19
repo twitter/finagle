@@ -388,36 +388,42 @@ object StackClient {
     stk.push(FactoryToService.module)
 
     /*
-     * These modules set up tracing for the request span:
+     * These modules set up tracing for the request span and miscellaneous
+     * actions before a request leaves the client stack:
      *
      *  * `Role.protoTracing` is a hook for protocol-specific tracing
+     *
+     *  * `Failure` processes request failures for external representation
      *
      *  * `ClientTracingFilter` traces request send / receive
      *    events. It must appear above all other modules except
      *    `TraceInitializerFilter` so it delimits all tracing in the
      *    course of a request.
      *
-     *  * `ChildTraceContext` is a hook for placing tracing annotations
-     *    into the context of a child request.
+     *  * `ForwardAnnotation` allows us to inject annotations into child
+     *    span.
      *
-     *  * `TraceInitializerFilter` allocates a new trace span per
-     *    request. It must appear above all other modules so the
-     *    request span encompasses all tracing in the course of a
-     *    request.
+     *  * `RegistryEntryLifecycle` is a hook for registering this client
+     *    into the ClientRegistry and removing on close.
      *
      *  * `OffloadFilter` shifts future continuations (callbacks and
      *    transformations) off of IO threads into a configured `FuturePool`.
      *    This module is intentionally placed at the top of the stack
      *    such that execution context shifts as client's response leaves
      *    the stack and enters the application code.
+     *
+     *  * `TraceInitializerFilter` allocates a new trace span per
+     *    request. It must appear above all other modules so the
+     *    request span encompasses all tracing in the course of a
+     *    request.
      */
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
     stk.push(ForwardAnnotation.module)
-    stk.push(TraceInitializerFilter.clientModule)
     stk.push(RegistryEntryLifecycle.module)
     stk.push(OffloadFilter.client)
+    stk.push(TraceInitializerFilter.clientModule)
     stk.result
   }
 
