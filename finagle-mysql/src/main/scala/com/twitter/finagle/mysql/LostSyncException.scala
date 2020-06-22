@@ -6,7 +6,7 @@ import com.twitter.util.{Future, Throw, Try}
  * A [[LostSyncException]] indicates that this finagle-mysql client and the MySQL server are
  * no longer able to properly communicate, as there has been a failure to decode a message
  * from the server or data has become corrupted in transmission. It is a fatal error and the
- * communication with the server must be closed, then reopened, and renogotiated.
+ * communication with the server must be closed, then reopened, and renegotiated.
  */
 final case class LostSyncException(underlying: Throwable) extends RuntimeException(underlying) {
   override def getMessage: String = underlying.toString
