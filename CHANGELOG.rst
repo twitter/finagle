@@ -41,6 +41,10 @@ Breaking API Changes
 New Features
 ~~~~~~~~~~~~
 
+* finagle-thrift: Expose `c.t.f.thrift.exp.partitioning.PartitioningStrategy`,
+  the bundled PartitioningStrategy APIs are public for experiments.
+  ``PHAB_ID=D503436``
+
 * finagle-http: Add LoadBalancedHostFilter to allow setting host header after LoadBalancer
   ``PHAB_ID=D498954``
 

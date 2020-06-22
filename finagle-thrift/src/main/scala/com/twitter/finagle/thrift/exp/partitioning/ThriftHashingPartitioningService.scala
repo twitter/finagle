@@ -68,7 +68,7 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
     val requestMerger: String => Option[RequestMerger[ThriftStructIface]] = { rpcName: String =>
       hashingStrategy match {
         case clientHashingStrategy: ClientHashingStrategy =>
-          clientHashingStrategy.requestMergerRegistry().get(rpcName)
+          clientHashingStrategy.requestMergerRegistry.get(rpcName)
       }
     }
 
@@ -101,7 +101,7 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
     val responseMerger = hashingStrategy match {
       case clientHashingStrategy: ClientHashingStrategy =>
         ClientDeserializeCtx.get.rpcName.flatMap { rpcName =>
-          clientHashingStrategy.responseMergerRegistry().get(rpcName)
+          clientHashingStrategy.responseMergerRegistry.get(rpcName)
         } match {
           case Some(merger) => merger
           case None =>

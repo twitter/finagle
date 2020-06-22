@@ -6,7 +6,7 @@ import com.twitter.scrooge.{ThriftMethodIface, ThriftStructIface}
 import com.twitter.util.{Future, Try}
 import scala.collection.mutable
 
-private[partitioning] object PartitioningStrategy {
+object PartitioningStrategy {
 
   /**
    *
@@ -147,20 +147,20 @@ sealed trait PartitioningStrategy {
    * For message fan-out cases.
    * @see [[ResponseMerger]]
    */
-  def responseMergerRegistry(): ResponseMergerRegistry = ResponseMergerRegistry.create()
+  val responseMergerRegistry: ResponseMergerRegistry = ResponseMergerRegistry.create()
 }
 
-private[partitioning] sealed trait HashingPartitioningStrategy extends PartitioningStrategy {
+sealed trait HashingPartitioningStrategy extends PartitioningStrategy {
 
   /**
    * A RequestMergerRegistry implemented by client to supply [[RequestMerger]]s.
    * For message fan-out cases.
    * @see [[RequestMerger]]
    */
-  def requestMergerRegistry(): RequestMergerRegistry = RequestMergerRegistry.create()
+  val requestMergerRegistry: RequestMergerRegistry = RequestMergerRegistry.create()
 }
 
-private[partitioning] sealed trait CustomPartitioningStrategy extends PartitioningStrategy {
+sealed trait CustomPartitioningStrategy extends PartitioningStrategy {
 
   /**
    * Gets the logical partition identifier from a host identifier, host identifiers are derived
@@ -180,7 +180,7 @@ private[partitioning] sealed trait CustomPartitioningStrategy extends Partitioni
 }
 private[partitioning] object Disabled extends PartitioningStrategy
 
-private[partitioning] object ClientHashingStrategy {
+object ClientHashingStrategy {
 
   /**
    * Thrift requests not specifying hashing keys will fall in here. This allows a
@@ -195,7 +195,7 @@ private[partitioning] object ClientHashingStrategy {
 /**
  * An API to set a consistent hashing partitioning strategy for a Thrift/ThriftMux Client.
  */
-private[partitioning] abstract class ClientHashingStrategy extends HashingPartitioningStrategy {
+abstract class ClientHashingStrategy extends HashingPartitioningStrategy {
   // input: original thrift request
   // output: a Map of hashing keys and split requests
   type ToPartitionedMap = PartialFunction[ThriftStructIface, Map[Any, ThriftStructIface]]
@@ -211,7 +211,7 @@ private[partitioning] abstract class ClientHashingStrategy extends HashingPartit
   def getHashingKeyAndRequest: ToPartitionedMap
 }
 
-private[partitioning] object ClientCustomStrategy {
+object ClientCustomStrategy {
 
   /**
    * Thrift requests not specifying partition ids will fall in here. This allows a
@@ -230,7 +230,7 @@ private[partitioning] object ClientCustomStrategy {
 /**
  * An API to set a custom partitioning strategy for a Thrift/ThriftMux Client.
  */
-private[partitioning] abstract class ClientCustomStrategy extends CustomPartitioningStrategy {
+abstract class ClientCustomStrategy extends CustomPartitioningStrategy {
   // input: original thrift request
   // output: Future Map of partition ids and split requests
   type ToPartitionedMap = PartialFunction[ThriftStructIface, Future[Map[Int, ThriftStructIface]]]

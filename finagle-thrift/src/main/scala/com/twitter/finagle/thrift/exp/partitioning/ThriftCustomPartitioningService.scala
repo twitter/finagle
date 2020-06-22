@@ -102,7 +102,7 @@ class ThriftCustomPartitioningService[Req, Rep](
     val responseMerger = customStrategy match {
       case clientCustomStrategy: ClientCustomStrategy =>
         ClientDeserializeCtx.get.rpcName.flatMap { rpcName =>
-          clientCustomStrategy.responseMergerRegistry().get(rpcName)
+          clientCustomStrategy.responseMergerRegistry.get(rpcName)
         } match {
           case Some(merger) => merger
           case None =>

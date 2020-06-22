@@ -30,7 +30,7 @@ class ThriftCustomPartitioningServiceTest
         Future.value(idsAndRequests)
     }
 
-    override def responseMergerRegistry: PartitioningStrategy.ResponseMergerRegistry =
+    override val responseMergerRegistry: PartitioningStrategy.ResponseMergerRegistry =
       ResponseMergerRegistry.create.add(AMethod, aResponseMerger)
 
   }

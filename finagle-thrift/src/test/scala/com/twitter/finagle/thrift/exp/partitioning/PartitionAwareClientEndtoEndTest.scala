@@ -229,7 +229,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
             Future.value(partitionIdAndRequest)
         }
 
-        override def responseMergerRegistry: ResponseMergerRegistry = {
+        override val responseMergerRegistry: ResponseMergerRegistry = {
           ResponseMergerRegistry.create.add(GetBoxes, getBoxesRepMerger)
         }
       }
@@ -265,7 +265,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
           Future.value(partitionIdAndRequest)
       }
 
-      override def responseMergerRegistry: ResponseMergerRegistry = {
+      override val responseMergerRegistry: ResponseMergerRegistry = {
         ResponseMergerRegistry.create.add(GetBoxes, getBoxesRepMerger)
       }
 

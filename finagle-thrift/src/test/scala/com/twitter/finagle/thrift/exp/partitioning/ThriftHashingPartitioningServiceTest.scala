@@ -29,7 +29,7 @@ class ThriftHashingPartitioningServiceTest
     override val requestMergerRegistry: RequestMergerRegistry =
       RequestMergerRegistry.create.add(AMethod, aRequestMerger)
 
-    override def responseMergerRegistry: ResponseMergerRegistry =
+    override val responseMergerRegistry: ResponseMergerRegistry =
       ResponseMergerRegistry.create.add(AMethod, aResponseMerger)
   }
 
