@@ -68,7 +68,7 @@ private[twitter] class LengthFieldFramer(
 
   require(lengthAdjust >= 0, s"Invalid lengthAdjust: $lengthAdjust. must be >= 0.")
 
-  require(maxFrameLength > 0, s"Invalid lengthFieldlength: $maxFrameLength. must be > 0.")
+  require(maxFrameLength > 0, s"Invalid maxFrameLength: $maxFrameLength. must be > 0.")
 
   require(
     lengthFieldBegin >= 0 && lengthFieldEnd <= maxFrameLength,
