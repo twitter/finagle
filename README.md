@@ -70,3 +70,9 @@ Finagle, and weekly snapshots are published to the `develop` branch. In general
 pull requests should be submitted against `develop`. See
 [CONTRIBUTING.md](https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md)
 for more details about how to contribute.
+
+## License
+
+Copyright 2010-2020 Twitter, Inc.
+
+Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
