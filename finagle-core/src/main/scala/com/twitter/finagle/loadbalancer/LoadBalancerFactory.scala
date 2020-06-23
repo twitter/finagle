@@ -386,10 +386,10 @@ object FlagBalancerFactory extends LoadBalancerFactory {
       case _ => Balancers.p2c()
     }
 
-  private def aperture(useDeterminsticOrdering: Option[Boolean]): LoadBalancerFactory =
+  private def aperture(useDeterministicOrdering: Option[Boolean]): LoadBalancerFactory =
     loadbalancer.exp.loadMetric() match {
-      case "ewma" => Balancers.aperturePeakEwma(useDeterministicOrdering = useDeterminsticOrdering)
-      case _ => Balancers.aperture(useDeterministicOrdering = useDeterminsticOrdering)
+      case "ewma" => Balancers.aperturePeakEwma(useDeterministicOrdering = useDeterministicOrdering)
+      case _ => Balancers.aperture(useDeterministicOrdering = useDeterministicOrdering)
     }
 
   private val underlying: LoadBalancerFactory =
