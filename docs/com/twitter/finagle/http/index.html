@@ -542,6 +542,10 @@ stabilized (moved elsewhere) at any time.
                         <a class="object" href="HttpTracing$.html" title=""></a>
                         <a href="HttpTracing$.html" title="">HttpTracing</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="LoadBalancedHostFilter$.html" title="Adds host header to load balanced requests."></a>
+                        <a href="LoadBalancedHostFilter$.html" title="Adds host header to load balanced requests.">LoadBalancedHostFilter</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="MapParamMap$.html" title=""></a>
                         <a class="class" href="MapParamMap.html" title="Map-backed ParamMap."></a>
                         <a href="MapParamMap.html" title="Map-backed ParamMap.">MapParamMap</a>
@@ -2057,6 +2061,30 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
       </span>
       
       
+    </li><li name="com.twitter.finagle.http.LoadBalancedHostFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="LoadBalancedHostFilter"></a><a id="LoadBalancedHostFilter:LoadBalancedHostFilter"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#LoadBalancedHostFilter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Adds host header to load balanced requests." href="LoadBalancedHostFilter$.html"><span class="name">LoadBalancedHostFilter</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Adds host header to load balanced requests.</p><div class="fullcomment"><div class="comment cmt"><p>Adds host header to load balanced requests.
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p>Overriding the <a href="TlsFilter.html" class="extype" name="com.twitter.finagle.http.TlsFilter">TlsFilter</a> host header setting with this module:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+<span class="kw">import</span> com.twitter.finagle.loadbalancer.LoadBalancerFactory
+Http.client.withStack(Http.client.stack.remove(TlsFilter.role)
+  .insertAfter(LoadBalancerFactory.role, LoadBalancedHostFilter.module))</pre></li></ol>
+            </div><dt>Note</dt><dd><span class="cmt"><p>If <span class="extype" name="Transporter.EndpointAddr">Transporter.EndpointAddr</span> was not created via <span class="extype" name="java.net.InetSocketAddress.createUnresolved">java.net.InetSocketAddress.createUnresolved</span>,
+      the filter will make an asynchronous network call to determine the hostname.</p></span>, <span class="cmt"><p>Since this stack module expects a <span class="extype" name="Transporter.EndpointAddr">Transporter.EndpointAddr</span> to be set, it only makes sense to configure
+      it below a module that sets the <span class="extype" name="Transporter.EndpointAddr">Transporter.EndpointAddr</span> (typically via com.twitter.finagle.loadbalancer.LoadBalancerFactory).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p>com.twitter.finagle.loadbalancer.LoadBalancerFactory for details on how <span class="extype" name="Transporter.EndpointAddr">Transporter.EndpointAddr</span> is selected</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.MapParamMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MapParamMap"></a><a id="MapParamMap:MapParamMap"></a>
       <span class="permalink">

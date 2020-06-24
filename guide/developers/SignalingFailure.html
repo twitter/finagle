@@ -1,17 +1,26 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
-    <title>Signaling Failure within Finagle &#8212; Finagle 20.5.0 documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Signaling Failure within Finagle &#8212; Finagle 20.6.0 documentation</title>
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,7 +40,8 @@
 
   </script>
 
-  </head><body>
+  </head>
+  <body>
   
   
 
@@ -103,7 +113,7 @@ Thrift will convert them to <cite>TApplicationExceptions</cite>.</p>
 <div class="section" id="examining-and-modifying-failureflags">
 <h2>Examining and Modifying FailureFlags<a class="headerlink" href="#examining-and-modifying-failureflags" title="Permalink to this headline">¶</a></h2>
 <p>To inspect a <cite>Throw</cite> response for flags, pattern match against the FailureFlags trait.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.FailureFlags</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.FailureFlags</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Throw</span>
 
 <span class="n">response</span> <span class="k">match</span> <span class="o">{</span>
@@ -115,7 +125,7 @@ Thrift will convert them to <cite>TApplicationExceptions</cite>.</p>
 </div>
 <p><cite>FailureFlags</cite> responses should be immutable. All of the convenience methods for
 flagging and unflagging make copies. Use these methods to modify flags.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.FailureFlags</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.FailureFlags</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Throw</span>
 
 <span class="c1">// Flag a response as &quot;nonRetryable&quot;</span>
@@ -148,40 +158,40 @@ transformed along the way.</p>
 <h3>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h3>
 <p>ThriftMux will currently pass the following <cite>FailureFlags</cite>: <cite>Rejected</cite>,
 <cite>Retryable</cite>, <cite>NonRetryable</cite>. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/com/twitter/finagle/mux/transport/MuxFailure.scala">MuxFailure.scala</a>.</p>
-<table class="docutils align-default">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Cause</p></th>
-<th class="head"><p>Finagle (as Throw)</p></th>
-<th class="head"><p>ThriftMux</p></th>
-<th class="head"><p>Mux</p></th>
-<th class="head"><p>Client Sees (as Throw)</p></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Cause</th>
+<th class="head">Finagle (as Throw)</th>
+<th class="head">ThriftMux</th>
+<th class="head">Mux</th>
+<th class="head">Client Sees (as Throw)</th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p><cite>SomeException(message)</cite> raised in handling request</p></td>
-<td><p><cite>SomeException</cite></p></td>
-<td><p><cite>TApplicationException</cite></p></td>
-<td><p><cite>RdispatchOk</cite></p></td>
-<td><p><cite>TApplicationException(message)</cite></p></td>
+<tbody valign="top">
+<tr class="row-even"><td><cite>SomeException(message)</cite> raised in handling request</td>
+<td><cite>SomeException</cite></td>
+<td><cite>TApplicationException</cite></td>
+<td><cite>RdispatchOk</cite></td>
+<td><cite>TApplicationException(message)</cite></td>
 </tr>
-<tr class="row-odd"><td><p><cite>Failure.rejected(message)</cite></p></td>
-<td><p><cite>Failure</cite></p></td>
-<td><p><cite>Failure</cite></p></td>
-<td><p><cite>RdispatchNack</cite></p></td>
-<td><p><cite>Failure(message)</cite> flagged <cite>Rejected</cite> &amp; <cite>NonRetryable</cite></p></td>
+<tr class="row-odd"><td><cite>Failure.rejected(message)</cite></td>
+<td><cite>Failure</cite></td>
+<td><cite>Failure</cite></td>
+<td><cite>RdispatchNack</cite></td>
+<td><cite>Failure(message)</cite> flagged <cite>Rejected</cite> &amp; <cite>NonRetryable</cite></td>
 </tr>
-<tr class="row-even"><td><p>any <cite>Throwable with HasFailureFlags</cite></p></td>
-<td><p><cite>T: HasFailureFlags</cite></p></td>
-<td><p><cite>T: HasFailureFlags</cite></p></td>
-<td><p><cite>RdispatchError</cite></p></td>
-<td><p><cite>Failure(throwable.toString)</cite> with supported <cite>FailureFlags</cite></p></td>
+<tr class="row-even"><td>any <cite>Throwable with HasFailureFlags</cite></td>
+<td><cite>T: HasFailureFlags</cite></td>
+<td><cite>T: HasFailureFlags</cite></td>
+<td><cite>RdispatchError</cite></td>
+<td><cite>Failure(throwable.toString)</cite> with supported <cite>FailureFlags</cite></td>
 </tr>
 </tbody>
 </table>
@@ -202,35 +212,35 @@ the future.</p>
 and <cite>NonRetryable</cite> (a nonretryable nack) via headers. HTTP will completely discard
 any information (stack trace, message, etc) except for the flags. See
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></p>
-<table class="docutils align-default">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Cause</p></th>
-<th class="head"><p>Finagle (as Throw)</p></th>
-<th class="head"><p>Http</p></th>
-<th class="head"><p>Client Sees (as Throw)</p></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Cause</th>
+<th class="head">Finagle (as Throw)</th>
+<th class="head">Http</th>
+<th class="head">Client Sees (as Throw)</th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p><cite>SomeException(message)</cite> raised in handling request</p></td>
-<td><p><cite>SomeException</cite></p></td>
-<td><p><cite>500 Internal Server Error</cite></p></td>
-<td><p><cite>Return(Http.Response(500 w/ message))</cite></p></td>
+<tbody valign="top">
+<tr class="row-even"><td><cite>SomeException(message)</cite> raised in handling request</td>
+<td><cite>SomeException</cite></td>
+<td><cite>500 Internal Server Error</cite></td>
+<td><cite>Return(Http.Response(500 w/ message))</cite></td>
 </tr>
-<tr class="row-odd"><td><p>any <cite>Throwable with HasFailureFlags</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></p></td>
-<td><p><cite>T: HasFailureFlags</cite></p></td>
-<td><p><cite>503 Service Unavailable</cite> w/ ‘finagle-http-nack’ header</p></td>
-<td><p><cite>Failure</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></p></td>
+<tr class="row-odd"><td>any <cite>Throwable with HasFailureFlags</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></td>
+<td><cite>T: HasFailureFlags</cite></td>
+<td><cite>503 Service Unavailable</cite> w/ ‘finagle-http-nack’ header</td>
+<td><cite>Failure</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></td>
 </tr>
-<tr class="row-even"><td><p>any <cite>Throwable with HasFailureFlags</cite> flagged <cite>Rejected</cite></p></td>
-<td><p><cite>T: HasFailureFlags</cite></p></td>
-<td><p><cite>503 Service Unavailable</cite> w/ ‘finagle-http-nonretryable-nack’ header</p></td>
-<td><p><cite>Failure</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></p></td>
+<tr class="row-even"><td>any <cite>Throwable with HasFailureFlags</cite> flagged <cite>Rejected</cite></td>
+<td><cite>T: HasFailureFlags</cite></td>
+<td><cite>503 Service Unavailable</cite> w/ ‘finagle-http-nonretryable-nack’ header</td>
+<td><cite>Failure</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></td>
 </tr>
 </tbody>
 </table>
@@ -255,7 +265,7 @@ any information (stack trace, message, etc) except for the flags. See
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="../index.html">Table of Contents</a></h3>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Signaling Failure within Finagle</a><ul>
 <li><a class="reference internal" href="#history">History</a></li>

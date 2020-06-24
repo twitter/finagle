@@ -860,10 +860,6 @@ generator.
                         <a href="BufferingTracer.html" title="A tracer that buffers each record in memory.">BufferingTracer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ClientDestTracingFilter.html" title="com.twitter.finagle.Filter for clients to record the remote address of the server."></a>
-                        <a href="ClientDestTracingFilter.html" title="com.twitter.finagle.Filter for clients to record the remote address of the server.">ClientDestTracingFilter</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="trait" href="ClientRequestTracingFilter.html" title="Adds the basic tracing information to a request."></a>
                         <a href="ClientRequestTracingFilter.html" title="Adds the basic tracing information to a request.">ClientRequestTracingFilter</a>
                       </li><li class="current-entities indented4">
@@ -938,6 +934,10 @@ generator.
                         <span class="separator"></span>
                         <a class="class" href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing"></a>
                         <a href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing">TracingLogHandler</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="WireTracingFilter$.html" title="Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)"></a>
+                        <a href="WireTracingFilter$.html" title="Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)">WireTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="enabled$.html" title=""></a>
@@ -1143,24 +1143,6 @@ instances (especially, when used from Java).
       
       <p class="shortcomment cmt">A tracer that buffers each record in memory.</p><div class="fullcomment"><div class="comment cmt"><p>A tracer that buffers each record in memory. These may then be
 iterated over.
-</p></div></div>
-    </li><li name="com.twitter.finagle.tracing.ClientDestTracingFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ClientDestTracingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a><a id="ClientDestTracingFilter[Req,Rep]:ClientDestTracingFilter[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/index.html#ClientDestTracingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="com.twitter.finagle.Filter for clients to record the remote address of the server." href="ClientDestTracingFilter.html"><span class="name">ClientDestTracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.tracing.ClientDestTracingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.ClientDestTracingFilter.Rep">Rep</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt"><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> for clients to record the remote address of the server.</p><div class="fullcomment"><div class="comment cmt"><p><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> for clients to record the remote address of the server.
-We don't log the local addr here because it's already done in the client Dispatcher.
 </p></div></div>
     </li><li name="com.twitter.finagle.tracing.ClientRequestTracingFilter" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ClientRequestTracingFilter[Req,Res]extendsSimpleFilter[Req,Res]"></a><a id="ClientRequestTracingFilter[Req,Res]:ClientRequestTracingFilter[Req,Res]"></a>
@@ -1743,6 +1725,23 @@ which is used to identify traces that belong to the respective process.</p>
       </span>
       
       
+    </li><li name="com.twitter.finagle.tracing.WireTracingFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WireTracingFilter"></a><a id="WireTracingFilter:WireTracingFilter"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/index.html#WireTracingFilter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)" href="WireTracingFilter$.html"><span class="name">WireTracingFilter</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)
+</p>
     </li><li name="com.twitter.finagle.tracing.enabled" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="enabled"></a><a id="enabled:enabled"></a>
       <span class="permalink">

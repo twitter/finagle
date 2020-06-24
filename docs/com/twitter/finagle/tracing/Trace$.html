@@ -197,10 +197,6 @@ resources for using Finagle.
                         <a href="BufferingTracer.html" title="A tracer that buffers each record in memory.">BufferingTracer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ClientDestTracingFilter.html" title="com.twitter.finagle.Filter for clients to record the remote address of the server."></a>
-                        <a href="ClientDestTracingFilter.html" title="com.twitter.finagle.Filter for clients to record the remote address of the server.">ClientDestTracingFilter</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="trait" href="ClientRequestTracingFilter.html" title="Adds the basic tracing information to a request."></a>
                         <a href="ClientRequestTracingFilter.html" title="Adds the basic tracing information to a request.">ClientRequestTracingFilter</a>
                       </li><li class="current-entities indented4">
@@ -275,6 +271,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="class" href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing"></a>
                         <a href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing">TracingLogHandler</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="WireTracingFilter$.html" title="Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)"></a>
+                        <a href="WireTracingFilter$.html" title="Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)">WireTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="enabled$.html" title=""></a>
@@ -418,6 +418,38 @@ lookups on each operation. Prefer &quot;capturing&quot; a <a href="Tracing.html"
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#LocalBeginAnnotation" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LocalBeginAnnotation:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#LocalBeginAnnotation:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">LocalBeginAnnotation</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Trace#LocalEndAnnotation" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LocalEndAnnotation:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#LocalEndAnnotation:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">LocalEndAnnotation</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.tracing.Trace#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply():com.twitter.finagle.tracing.Tracing"></a><a id="apply():Tracing"></a>
       <span class="permalink">
@@ -829,6 +861,22 @@ letTracer, nextId and letId sequentially as it minimizes the number
 of request context changes.
 </p></div><dl class="paramcmts block"><dt class="param">tracer</dt><dd class="cmt"><p>the tracer to be pushed</p></dd><dt class="param">terminal</dt><dd class="cmt"><p>true if the next traceId is a terminal id. Future
                 attempts to set nextId will be ignored.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#letTracers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="letTracers[R](tracers:Seq[com.twitter.finagle.tracing.Tracer])(f:=&gt;R):R"></a><a id="letTracers[R](Seq[Tracer])(⇒R):R"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#letTracers[R](tracers:Seq[com.twitter.finagle.tracing.Tracer])(f:=&gt;R):R" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letTracers</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="tracers">tracers: <a href="../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>]</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracers.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracers.R">R</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Run computation <code>f</code> with <code>tracers</code> added onto the tracer stack.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1415,9 +1463,9 @@ service handling code inside this to get proper tracing with all
 the correct fields filled in.
 </p></div></div>
     </li><li name="com.twitter.finagle.tracing.Trace#tracers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tracers:List[com.twitter.finagle.tracing.Tracer]"></a><a id="tracers:List[Tracer]"></a>
+      <a id="tracers:Seq[com.twitter.finagle.tracing.Tracer]"></a><a id="tracers:Seq[Tracer]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#tracers:List[com.twitter.finagle.tracing.Tracer]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#tracers:Seq[com.twitter.finagle.tracing.Tracer]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1426,7 +1474,7 @@ the correct fields filled in.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tracers</span><span class="result">: <a href="../../../../scala/index.html#List[+A]=List[A]" class="extmbr" name="scala.List">List</a>[<a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>]</span>
+        <span class="name">tracers</span><span class="result">: <a href="../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>]</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the current list of tracers</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.tracing.Trace">Trace</a> → <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>

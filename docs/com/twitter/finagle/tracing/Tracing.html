@@ -197,10 +197,6 @@ resources for using Finagle.
                         <a href="BufferingTracer.html" title="A tracer that buffers each record in memory.">BufferingTracer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ClientDestTracingFilter.html" title="com.twitter.finagle.Filter for clients to record the remote address of the server."></a>
-                        <a href="ClientDestTracingFilter.html" title="com.twitter.finagle.Filter for clients to record the remote address of the server.">ClientDestTracingFilter</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="trait" href="ClientRequestTracingFilter.html" title="Adds the basic tracing information to a request."></a>
                         <a href="ClientRequestTracingFilter.html" title="Adds the basic tracing information to a request.">ClientRequestTracingFilter</a>
                       </li><li class="current-entities indented4">
@@ -275,6 +271,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="class" href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing"></a>
                         <a href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing">TracingLogHandler</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="WireTracingFilter$.html" title="Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)"></a>
+                        <a href="WireTracingFilter$.html" title="Annotate the request events directly before/after sending data on the wire (WireSend, WireRecv)">WireTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="enabled$.html" title=""></a>
@@ -431,9 +431,9 @@ and increase throughput.</p><pre><span class="cmt">// Performs six context looku
       
       <p class="shortcomment cmt">Get the current identifier, if it exists.</p>
     </li><li name="com.twitter.finagle.tracing.Tracing#tracers" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="tracers:List[com.twitter.finagle.tracing.Tracer]"></a><a id="tracers:List[Tracer]"></a>
+      <a id="tracers:Seq[com.twitter.finagle.tracing.Tracer]"></a><a id="tracers:Seq[Tracer]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Tracing.html#tracers:List[com.twitter.finagle.tracing.Tracer]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Tracing.html#tracers:Seq[com.twitter.finagle.tracing.Tracer]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -442,7 +442,7 @@ and increase throughput.</p><pre><span class="cmt">// Performs six context looku
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tracers</span><span class="result">: <a href="../../../../scala/index.html#List[+A]=List[A]" class="extmbr" name="scala.List">List</a>[<a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>]</span>
+        <span class="name">tracers</span><span class="result">: <a href="../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>]</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the current list of tracers</p></dd></dl></div>

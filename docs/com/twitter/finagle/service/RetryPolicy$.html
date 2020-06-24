@@ -496,7 +496,7 @@ before it finished being written to the remote service.</p><div class="fullcomme
 before it finished being written to the remote service.
 See <a href="../WriteException.html" class="extype" name="com.twitter.finagle.WriteException">com.twitter.finagle.WriteException</a>.
 </p></div></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.service.RetryPolicy#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply[A](f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]"></a><a id="apply[A]((A)⇒Option[(Duration,RetryPolicy[A])]):RetryPolicy[A]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#apply[A](f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink">
@@ -511,7 +511,9 @@ See <a href="../WriteException.html" class="extype" name="com.twitter.finagle.Wr
         <span class="name">apply</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>])]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Lifts a function of type <code>A =&gt; Option[(Duration, RetryPolicy[A])]</code> in the  <code>RetryPolicy</code> type.</p>
+      <p class="shortcomment cmt">Lifts a function of type <code>A =&gt; Option[(Duration, RetryPolicy[A])]</code> in the  <code>RetryPolicy</code> type.</p><div class="fullcomment"><div class="comment cmt"><p>Lifts a function of type <code>A =&gt; Option[(Duration, RetryPolicy[A])]</code> in the  <code>RetryPolicy</code> type.
+</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The function used to classify values.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>the <a href="#named[A](name:String)(f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#named">RetryPolicy.named</a> function should be preferred to make inspection of the
+      <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a> easier.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -728,6 +730,40 @@ policy with a smaller cap.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryPolicy#named" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="named[A](name:String)(f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]"></a><a id="named[A](String)((A)⇒Option[(Duration,RetryPolicy[A])]):RetryPolicy[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#named[A](name:String)(f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">named</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.named.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[(<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.named.A">A</span>])]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.named.A">A</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Lifts a function of type <code>A =&gt; Option[(Duration, RetryPolicy[A])]</code> in the  <code>RetryPolicy</code> type.</p><div class="fullcomment"><div class="comment cmt"><p>Lifts a function of type <code>A =&gt; Option[(Duration, RetryPolicy[A])]</code> in the  <code>RetryPolicy</code> type.
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>The name to use in the <code>.toString</code> method which can aid in inspection.</p></dd><dt class="param">f</dt><dd class="cmt"><p>The function used to classify values.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryPolicy#namedPF" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="namedPF[A](name:String)(f:PartialFunction[A,Boolean]):PartialFunction[A,Boolean]"></a><a id="namedPF[A](String)(PartialFunction[A,Boolean]):PartialFunction[A,Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#namedPF[A](name:String)(f:PartialFunction[A,Boolean]):PartialFunction[A,Boolean]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">namedPF</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.namedPF.A">A</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.namedPF.A">A</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a <code>PartialFunction</code> with a defined <code>.toString</code> method.</p><div class="fullcomment"><div class="comment cmt"><p>Create a <code>PartialFunction</code> with a defined <code>.toString</code> method.
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the value to use for <code>toString</code></p></dd><dt class="param">f</dt><dd class="cmt"><p>the <code>PartialFunction</code> to apply the name to.</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

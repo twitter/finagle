@@ -1,17 +1,26 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
-    <title>Random Aperture &#8212; Finagle 20.5.0 documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Random Aperture &#8212; Finagle 20.6.0 documentation</title>
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -29,7 +38,8 @@
 
   </script>
 
-  </head><body>
+  </head>
+  <body>
   
   
 
@@ -64,7 +74,7 @@ uniformly loaded.</p>
 <img alt="../_images/random-aperture.png" src="../_images/random-aperture.png" />
 <p class="caption"><span class="caption-text">Service A connecting to Service B using random aperture. The number of connections are reduced
 but there is an uneven number of connections per service B host due to the statistical nature of
-service A picking hosts randomly.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+service A picking hosts randomly.</span></p>
 </div>
 <div class="section" id="minimizing-banding-in-random-aperture">
 <h2>Minimizing Banding in Random Aperture<a class="headerlink" href="#minimizing-banding-in-random-aperture" title="Permalink to this headline">¶</a></h2>
@@ -74,7 +84,7 @@ a client represents a uniform amount of load. A binomial distribution can be cha
 parameters, n and p, where n is the number of edges (trials) between the clients and the servers,
 and p is the probability that a given server is chosen when a client chooses an edge. In a
 client/server relationship,</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>n = (# client) * (# remote peers per client)
+<div class="highlight-text"><div class="highlight"><pre><span></span>n = (# client) * (# remote peers per client)
 p = 1 / (# servers)
 </pre></div>
 </div>
@@ -123,7 +133,7 @@ the banding requirement, if so desired.</p>
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="../index.html">Table of Contents</a></h3>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Random Aperture</a><ul>
 <li><a class="reference internal" href="#minimizing-banding-in-random-aperture">Minimizing Banding in Random Aperture</a></li>

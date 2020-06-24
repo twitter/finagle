@@ -185,8 +185,8 @@ resources for using Finagle.
                         <a href="BinaryAnnotation.html" title="">BinaryAnnotation</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer."></a>
-                        <a href="" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer.">DefaultSampler</a>
+                        <a class="object" href="" title="The DefaultSampler uses the initialSampleRate flag's value as the sample rate."></a>
+                        <a href="" title="The DefaultSampler uses the initialSampleRate flag's value as the sample rate.">DefaultSampler</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Endpoint$.html" title=""></a>
                         <a class="class" href="Endpoint.html" title="Endpoints describe a TCP endpoint that terminates RPC communication."></a>
@@ -239,9 +239,10 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The DefaultSampler provides a default sample rate that can be overridden
-To override the default, pass this singleton as the Sampler when constructing
-the Tracer.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The DefaultSampler uses the <a href="../initialSampleRate$.html" class="extype" name="com.twitter.finagle.zipkin.initialSampleRate">initialSampleRate</a> flag's value as the sample rate. If the flag is
+not set by the user it defaults to the sample rate provided by <a href="Sampler.html#sampleRate:Float" class="extmbr" name="com.twitter.finagle.zipkin.core.Sampler#sampleRate">Sampler.sampleRate</a>.
+Pass this singleton as the <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a> when constructing the
+<a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -387,22 +388,6 @@ the Tracer.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.core.DefaultSampler#defaultSampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="defaultSampleRate:Option[Float]"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#defaultSampleRate:Option[Float]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">defaultSampleRate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Default sample rate is the initialSampleRate flag value if set.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -580,7 +565,8 @@ the Tracer.
         <span class="name">sampleRate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the current sample rate, 0.0-1.0</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.core.DefaultSampler">DefaultSampler</a> → <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+      <p class="shortcomment cmt">Current sample rate.</p><div class="fullcomment"><div class="comment cmt"><p>Current sample rate.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the <a href="../initialSampleRate$.html" class="extype" name="com.twitter.finagle.zipkin.initialSampleRate">initialSampleRate</a> if set by the user else return <a href="Sampler.html#sampleRate:Float" class="extmbr" name="com.twitter.finagle.zipkin.core.Sampler#sampleRate">Sampler.sampleRate</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.core.DefaultSampler">DefaultSampler</a> → <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.core.Sampler#sampleRecord" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sampleRecord(record:com.twitter.finagle.tracing.Record):Boolean"></a><a id="sampleRecord(Record):Boolean"></a>
       <span class="permalink">
@@ -652,23 +638,9 @@ False means drop.</p></div><dl class="paramcmts block"><dt class="param">traceId
         <span class="name">setSampleRate</span><span class="params">(<span name="sampleRate">sampleRate: <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Default sample rate may be explicitly overridden unless the initialSampleRate flag is set.</p><div class="fullcomment"><div class="comment cmt"><p>Default sample rate may be explicitly overridden unless the initialSampleRate flag is set.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.core.DefaultSampler">DefaultSampler</a> → <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.zipkin.core.Sampler#sr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sr:Float"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/zipkin/core/DefaultSampler$.html#sr:Float" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sr</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
+      <p class="shortcomment cmt">Allows the users to explicitly override the sample rate.</p><div class="fullcomment"><div class="comment cmt"><p>Allows the users to explicitly override the sample rate. This will not work if the
+<a href="../initialSampleRate$.html" class="extype" name="com.twitter.finagle.zipkin.initialSampleRate">initialSampleRate</a> flag is manually set by the user.
+</p></div><dl class="paramcmts block"><dt class="param">sampleRate</dt><dd class="cmt"><p>the new sample rate. Value should be in the range [0.0, 1.0].</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.core.DefaultSampler">DefaultSampler</a> → <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

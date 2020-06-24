@@ -185,8 +185,8 @@ resources for using Finagle.
                         <a href="BinaryAnnotation.html" title="">BinaryAnnotation</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="DefaultSampler$.html" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer."></a>
-                        <a href="DefaultSampler$.html" title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer.">DefaultSampler</a>
+                        <a class="object" href="DefaultSampler$.html" title="The DefaultSampler uses the initialSampleRate flag's value as the sample rate."></a>
+                        <a href="DefaultSampler$.html" title="The DefaultSampler uses the initialSampleRate flag's value as the sample rate.">DefaultSampler</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Endpoint$.html" title=""></a>
                         <a class="class" href="Endpoint.html" title="Endpoints describe a TCP endpoint that terminates RPC communication."></a>
@@ -431,7 +431,7 @@ rpc call) and parent id (links to the parent span in this trace, if None this is
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.zipkin.core.DefaultSampler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.zipkin.core.DefaultSampler" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultSampler"></a><a id="DefaultSampler:DefaultSampler"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/zipkin/core/index.html#DefaultSampler" title="Permalink">
@@ -443,12 +443,14 @@ rpc call) and parent id (links to the parent span in this trace, if None this is
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="The DefaultSampler provides a default sample rate that can be overridden To override the default, pass this singleton as the Sampler when constructing the Tracer." href="DefaultSampler$.html"><span class="name">DefaultSampler</span></a><span class="result"> extends <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></span>
+        <a title="The DefaultSampler uses the initialSampleRate flag's value as the sample rate." href="DefaultSampler$.html"><span class="name">DefaultSampler</span></a><span class="result"> extends <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a></span>
       </span>
       
-      <p class="shortcomment cmt">The DefaultSampler provides a default sample rate that can be overridden
-To override the default, pass this singleton as the Sampler when constructing
-the Tracer.</p>
+      <p class="shortcomment cmt">The DefaultSampler uses the <a href="../initialSampleRate$.html" class="extype" name="com.twitter.finagle.zipkin.initialSampleRate">initialSampleRate</a> flag's value as the sample rate.</p><div class="fullcomment"><div class="comment cmt"><p>The DefaultSampler uses the <a href="../initialSampleRate$.html" class="extype" name="com.twitter.finagle.zipkin.initialSampleRate">initialSampleRate</a> flag's value as the sample rate. If the flag is
+not set by the user it defaults to the sample rate provided by <a href="Sampler.html#sampleRate:Float" class="extmbr" name="com.twitter.finagle.zipkin.core.Sampler#sampleRate">Sampler.sampleRate</a>.
+Pass this singleton as the <a href="Sampler.html" class="extype" name="com.twitter.finagle.zipkin.core.Sampler">Sampler</a> when constructing the
+<a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.zipkin.core.Endpoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Endpoint"></a><a id="Endpoint:Endpoint"></a>
       <span class="permalink">

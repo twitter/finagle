@@ -216,13 +216,33 @@ generator.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.thrift.exp">exp</a></dd></dl></div>
     </li><li class="current-entities indented6">
+                        <a class="object" href="ClientCustomStrategy$.html" title=""></a>
+                        <a class="class" href="ClientCustomStrategy.html" title="An API to set a custom partitioning strategy for a Thrift/ThriftMux Client."></a>
+                        <a href="ClientCustomStrategy.html" title="An API to set a custom partitioning strategy for a Thrift/ThriftMux Client.">ClientCustomStrategy</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="ClientHashingStrategy$.html" title=""></a>
+                        <a class="class" href="ClientHashingStrategy.html" title="An API to set a consistent hashing partitioning strategy for a Thrift/ThriftMux Client."></a>
+                        <a href="ClientHashingStrategy.html" title="An API to set a consistent hashing partitioning strategy for a Thrift/ThriftMux Client.">ClientHashingStrategy</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="trait" href="CustomPartitioningStrategy.html" title=""></a>
+                        <a href="CustomPartitioningStrategy.html" title="">CustomPartitioningStrategy</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="trait" href="HashingPartitioningStrategy.html" title=""></a>
+                        <a href="HashingPartitioningStrategy.html" title="">HashingPartitioningStrategy</a>
+                      </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="PartitioningParams.html" title="A collection of methods for configuring the PartitioningService of Thrift clients"></a>
                         <a href="PartitioningParams.html" title="A collection of methods for configuring the PartitioningService of Thrift clients">PartitioningParams</a>
                       </li><li class="current-entities indented6">
-                        <span class="separator"></span>
+                        <a class="object" href="PartitioningStrategy$.html" title=""></a>
                         <a class="trait" href="" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly."></a>
                         <a href="" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly.">PartitioningStrategy</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ThriftCustomPartitioningService.html" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy."></a>
+                        <a href="ThriftCustomPartitioningService.html" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy.">ThriftCustomPartitioningService</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="WithThriftPartitioningStrategy.html" title="Provides the withPartitioning API entry point"></a>
@@ -234,14 +254,16 @@ generator.
           <div id="content">
             <body class="trait type">
       <div id="definition">
-        <div class="big-circle trait">t</div>
+        <a href="PartitioningStrategy$.html" title="See companion object"><div class="big-circle trait-companion-object">t</div></a>
         <p id="owner"><a href="../../../../../index.html" class="extype" name="com">com</a>.<a href="../../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.thrift.exp">exp</a>.<a href="index.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning">partitioning</a></p>
-        <h1>PartitioningStrategy<span class="permalink">
+        <h1><a href="PartitioningStrategy$.html" title="See companion object">PartitioningStrategy</a><span class="permalink">
       <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="PartitioningStrategy$.html" title="See companion object">object PartitioningStrategy</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -257,7 +279,7 @@ generator.
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Service partitioning strategy to apply on the clients in order to let clients route
 requests accordingly. Two particular partitioning strategies are going to be supported,
-<span class="extype" name="HashingPartitioningStrategy">HashingPartitioningStrategy</span> and <span class="extype" name="CustomPartitioningStrategy">CustomPartitioningStrategy</span>.
+<a href="HashingPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.HashingPartitioningStrategy">HashingPartitioningStrategy</a> and <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a>.
 Either one will need developers to provide a concrete function to give each request an
 indicator of destination, for example a hashing key or a partition address.
 Messaging fan-out is supported by leveraging RequestMerger and ResponseMerger.
@@ -266,7 +288,12 @@ Messaging fan-out is supported by leveraging RequestMerger and ResponseMerger.
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><a href="../../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
-        </div></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">
+              Known Subclasses
+            </span>
+            <div class="subClasses hiddenContent"><a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a>, <a href="ClientHashingStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientHashingStrategy">ClientHashingStrategy</a>, <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a>, <a href="HashingPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.HashingPartitioningStrategy">HashingPartitioningStrategy</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -568,6 +595,23 @@ Messaging fan-out is supported by leveraging RequestMerger and ResponseMerger.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy#responseMergerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="responseMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry"></a><a id="responseMergerRegistry:ResponseMergerRegistry"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.html#responseMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">responseMergerRegistry</span><span class="result">: <a href="PartitioningStrategy$$ResponseMergerRegistry.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry">ResponseMergerRegistry</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s.</p><div class="fullcomment"><div class="comment cmt"><p>A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s.
+For message fan-out cases.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="ResponseMerger">ResponseMerger</span></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

@@ -380,6 +380,10 @@ resources for using Finagle.
                         <a class="object" href="HttpTracing$.html" title=""></a>
                         <a href="HttpTracing$.html" title="">HttpTracing</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="LoadBalancedHostFilter$.html" title="Adds host header to load balanced requests."></a>
+                        <a href="LoadBalancedHostFilter$.html" title="Adds host header to load balanced requests.">LoadBalancedHostFilter</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="MapParamMap$.html" title=""></a>
                         <a class="class" href="MapParamMap.html" title="Map-backed ParamMap."></a>
                         <a href="MapParamMap.html" title="Map-backed ParamMap.">MapParamMap</a>
@@ -1067,6 +1071,28 @@ retries are removed.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.MethodBuilder#withMaxRetries" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withMaxRetries(value:Int):com.twitter.finagle.http.MethodBuilder"></a><a id="withMaxRetries(Int):MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/MethodBuilder.html#withMaxRetries(value:Int):com.twitter.finagle.http.MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withMaxRetries</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Maximum retry attempts for a request based on the configured <span class="extype" name="ResponseClassifier">ResponseClassifier</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Maximum retry attempts for a request based on the configured <span class="extype" name="ResponseClassifier">ResponseClassifier</span>.
+</p></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>when a <a href="../service/ResponseClass$$Failed.html" class="extype" name="com.twitter.finagle.service.ResponseClass.Failed">Failed</a>
+                  with <code>retryable</code> is <code>true</code> is returned for a given <code>ReqRep</code>, the
+                  request will be retried up to <code>value</code> times or the <a href="../service/RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">com.twitter.finagle.service.RetryBudget</a>
+                  has been exhausted (whichever occurs first).</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#withRetryDisabled:com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.http.MethodBuilder#withRetryDisabled">withRetryDisabled</a></p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#response-classification" target="_blank">response classification user guide</a></p></span><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#retries" target="_blank">user guide</a>
+     for further details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.MethodBuilder#withRetryDisabled" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRetryDisabled:com.twitter.finagle.http.MethodBuilder"></a><a id="withRetryDisabled:MethodBuilder"></a>
       <span class="permalink">
@@ -1276,6 +1302,22 @@ builder.withTimeoutTotal(<span class="num">200.</span>milliseconds))</pre></li><
             </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withTimeoutPerRequest(Duration)">withTimeoutPerRequest(Duration)</span></p></span><span class="cmt"><p>The MethodBuilder section in the
      <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts" target="_blank">user guide</a>
      for further details.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.MethodBuilder#withTraceInitializer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withTraceInitializer(initializer:com.twitter.finagle.Filter.TypeAgnostic):com.twitter.finagle.http.MethodBuilder"></a><a id="withTraceInitializer(TypeAgnostic):MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/MethodBuilder.html#withTraceInitializer(initializer:com.twitter.finagle.Filter.TypeAgnostic):com.twitter.finagle.http.MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withTraceInitializer</span><span class="params">(<span name="initializer">initializer: <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+      </span>
+      
+      
     </li>
               </ol>
             </div>

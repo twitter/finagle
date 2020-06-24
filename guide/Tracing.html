@@ -1,21 +1,30 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
-    <title>Tracing &#8212; Finagle 20.5.0 documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tracing &#8212; Finagle 20.6.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="next" title="Compression" href="Compression.html" />
     <link rel="prev" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
    
   
@@ -31,7 +40,8 @@
 
   </script>
 
-  </head><body>
+  </head>
+  <body>
   
   
 
@@ -42,7 +52,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="FAQ.html" title="FAQ"
+          <a href="Compression.html" title="Compression"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="UnsuccessfulResponses.html" title="Unsuccessful Responses"
@@ -65,7 +75,7 @@
 <p>By default Finagle uses a <cite>DefaultTracer</cite> which will load implementations from included artifacts using the Java <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>. Out of the box, adding the finagle-zipkin-scribe package to your classpath will enable sending tracing spans to zipkin via the <a class="reference external" href="http://go/scribe">scribe</a> protocol.</p>
 <p>You can replicate this functionality and globally install a tracer by including an artifact with a service loaded <cite>Tracer</cite>. Your implementation must implement the <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/tracing/Tracer.scala">Tracer</a> API and follow the requirements necessary to be loaded by the <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>.</p>
 <p>Furthermore, tracers can be overridden in code, they may be specified when creating a client or server. In the following example we replace the default tracer with our own <cite>BroadcastTracer</cite> which will send traces both to zipkin, via scribe, as well as to the console:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.</span><span class="o">{</span><span class="nc">BroadcastTracer</span><span class="o">,</span> <span class="nc">Record</span><span class="o">,</span> <span class="nc">TraceId</span><span class="o">,</span> <span class="nc">Tracer</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.zipkin.thrift.ZipkinTracer</span>
 
@@ -83,13 +93,13 @@
 </div>
 <p>We also supply a <cite>NullTracer</cite> which will not write trace messages anywhere.  However, even if <cite>NullTracer</cite> is passed to <cite>withTracer</cite>, Finagle clients will continue to propagate trace information.  This can have the surprising side effect of orphaning traces if the traces are being aggregated in a distributed tracing service like Zipkin, so we generally discourage people from using <cite>NullTracer</cite> in production.</p>
 <p>Information about active traces is located within the Finagle <a class="reference external" href="Context">Context</a>. The Trace API is a convenient way of accessing the currently active traces for a request and provides the ability to manipulate them with operations such as adding custom annotations.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">SimpleFilter</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
-<span class="k">class</span> <span class="nc">MyFilter</span> <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Request</span><span class="p">,</span> <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Request</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span><span class="p">,</span> <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+<span class="k">class</span> <span class="nc">MyFilter</span> <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Request</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
     <span class="k">val</span> <span class="n">header</span> <span class="k">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headerMap</span><span class="o">(</span><span class="s">&quot;Special-Header&quot;</span><span class="o">)</span>
     <span class="nc">Trace</span><span class="o">.</span><span class="n">recordBinary</span><span class="o">(</span><span class="s">&quot;special-header&quot;</span><span class="o">,</span> <span class="n">header</span><span class="o">)</span>
     <span class="n">service</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
@@ -135,7 +145,7 @@
 <h2>Tracing<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>In general you can use any method from the <cite>Trace</cite> API to add annotations to the current tracing context. This allows you to annotate events or information happening at the time a request is being made or processed.</p>
 <p>Each request operates within the scope of a span, which is created when the request is received or an initial request is made. In some cases it may be advantageous to segment parts of processing a request into their own discrete events. You can do this by generating local spans; these spans exist completely within a single process. This is useful when understanding the relationship between local computation and external requests as well as relative timing and duration of these operations to each other. Local spans can be created with the <cite>Trace#traceLocal</cite> methods.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
 
 <span class="k">def</span> <span class="n">chainOfEvents</span><span class="o">()</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="o">???</span>
 
@@ -146,7 +156,7 @@
 </pre></div>
 </div>
 <p>Furthermore, operations can be timed and the result recorded within the trace context:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
 
 <span class="k">def</span> <span class="n">complexComputation</span><span class="o">()</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="o">???</span>
 
@@ -160,78 +170,78 @@
 </div>
 <div class="section" id="standard-annotations">
 <h2>Standard Annotations<a class="headerlink" href="#standard-annotations" title="Permalink to this headline">¶</a></h2>
-<table class="docutils align-default">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 22%" />
-<col style="width: 49%" />
-<col style="width: 29%" />
+<col width="22%" />
+<col width="49%" />
+<col width="29%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Annotation</p></th>
-<th class="head"><p>Description</p></th>
-<th class="head"><p>Location Traced</p></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Annotation</th>
+<th class="head">Description</th>
+<th class="head">Location Traced</th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p>Wire Send</p></td>
-<td><p>Time a message is handed to the transport layer</p></td>
-<td><p><cite>WireTracingFilter</cite></p></td>
+<tbody valign="top">
+<tr class="row-even"><td>Wire Send</td>
+<td>Time a message is handed to the transport layer</td>
+<td><cite>WireTracingFilter</cite></td>
 </tr>
-<tr class="row-odd"><td><p>Wire Receive</p></td>
-<td><p>Time a message is received by the transport layer</p></td>
-<td><p><cite>WireTracingFilter</cite></p></td>
+<tr class="row-odd"><td>Wire Receive</td>
+<td>Time a message is received by the transport layer</td>
+<td><cite>WireTracingFilter</cite></td>
 </tr>
-<tr class="row-even"><td><p>Wire Receive Error</p></td>
-<td><p>Any error message generated by the transport layer</p></td>
-<td><p><cite>WireTracingFilter</cite></p></td>
+<tr class="row-even"><td>Wire Receive Error</td>
+<td>Any error message generated by the transport layer</td>
+<td><cite>WireTracingFilter</cite></td>
 </tr>
-<tr class="row-odd"><td><p>Client Send</p></td>
-<td><p>Time a request is sent by a client</p></td>
-<td><p><cite>ClientTracingFilter</cite></p></td>
+<tr class="row-odd"><td>Client Send</td>
+<td>Time a request is sent by a client</td>
+<td><cite>ClientTracingFilter</cite></td>
 </tr>
-<tr class="row-even"><td><p>Client Receive</p></td>
-<td><p>Time a response is received by a client</p></td>
-<td><p><cite>ClientTracingFilter</cite></p></td>
+<tr class="row-even"><td>Client Receive</td>
+<td>Time a response is received by a client</td>
+<td><cite>ClientTracingFilter</cite></td>
 </tr>
-<tr class="row-odd"><td><p>Client Receive Error</p></td>
-<td><p>Any error message generated by the client stack</p></td>
-<td><p><cite>ClientTracingFilter</cite></p></td>
+<tr class="row-odd"><td>Client Receive Error</td>
+<td>Any error message generated by the client stack</td>
+<td><cite>ClientTracingFilter</cite></td>
 </tr>
-<tr class="row-even"><td><p>Server Send</p></td>
-<td><p>Time a request is received by a server</p></td>
-<td><p><cite>ServerTracingFilter</cite></p></td>
+<tr class="row-even"><td>Server Send</td>
+<td>Time a request is received by a server</td>
+<td><cite>ServerTracingFilter</cite></td>
 </tr>
-<tr class="row-odd"><td><p>Server Receive</p></td>
-<td><p>Time a response is sent by a server</p></td>
-<td><p><cite>ServerTracingFilter</cite></p></td>
+<tr class="row-odd"><td>Server Receive</td>
+<td>Time a response is sent by a server</td>
+<td><cite>ServerTracingFilter</cite></td>
 </tr>
-<tr class="row-even"><td><p>Server Send Error</p></td>
-<td><p>Any error generated by the server stack</p></td>
-<td><p><cite>ServerTracingFilter</cite></p></td>
+<tr class="row-even"><td>Server Send Error</td>
+<td>Any error generated by the server stack</td>
+<td><cite>ServerTracingFilter</cite></td>
 </tr>
-<tr class="row-odd"><td><p>Service Name</p></td>
-<td><p>The service name where this span originated</p></td>
-<td><p><cite>TraceInitializationFilter</cite></p></td>
+<tr class="row-odd"><td>Service Name</td>
+<td>The service name where this span originated</td>
+<td><cite>TraceInitializationFilter</cite></td>
 </tr>
-<tr class="row-even"><td><p>RPC</p></td>
-<td><p>The RPC name and method</p></td>
-<td><p><cite>ClientRequestTracingFilter</cite></p></td>
+<tr class="row-even"><td>RPC</td>
+<td>The RPC name and method</td>
+<td><cite>ClientRequestTracingFilter</cite></td>
 </tr>
-<tr class="row-odd"><td><p>Message</p></td>
-<td><p>Informational message</p></td>
-<td><p><cite>RetryFilter</cite>, <cite>TimeoutFilter</cite></p></td>
+<tr class="row-odd"><td>Message</td>
+<td>Informational message</td>
+<td><cite>RetryFilter</cite>, <cite>TimeoutFilter</cite></td>
 </tr>
-<tr class="row-even"><td><p>Client Address</p></td>
-<td><p>Originating address for a request</p></td>
-<td><p><cite>ClientDispatcher</cite></p></td>
+<tr class="row-even"><td>Client Address</td>
+<td>Originating address for a request</td>
+<td><cite>ClientDispatcher</cite></td>
 </tr>
-<tr class="row-odd"><td><p>Server Address</p></td>
-<td><p>Terminal address for an address</p></td>
-<td><p><cite>DestinationTracing</cite></p></td>
+<tr class="row-odd"><td>Server Address</td>
+<td>Terminal address for an address</td>
+<td><cite>DestinationTracing</cite></td>
 </tr>
-<tr class="row-even"><td><p>Local Address</p></td>
-<td><p>Address where a span is generated</p></td>
-<td><p><cite>DestinationTracing</cite></p></td>
+<tr class="row-even"><td>Local Address</td>
+<td>Address where a span is generated</td>
+<td><cite>DestinationTracing</cite></td>
 </tr>
 </tbody>
 </table>
@@ -378,7 +388,7 @@
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="index.html">Table of Contents</a></h3>
+  <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Tracing</a><ul>
 <li><a class="reference internal" href="#configuration">Configuration</a></li>
@@ -452,7 +462,7 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="UnsuccessfulResponses.html" title="previous chapter">Unsuccessful Responses</a></li>
-      <li>Next: <a href="FAQ.html" title="next chapter">FAQ</a></li>
+      <li>Next: <a href="Compression.html" title="next chapter">Compression</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

@@ -390,6 +390,28 @@ retries are removed.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
      <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#idempotency" target="_blank">user guide</a>
      for further details.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.client.BaseMethodBuilder#withMaxRetries" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="withMaxRetries(value:Int):T"></a><a id="withMaxRetries(Int):T"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/BaseMethodBuilder.html#withMaxRetries(value:Int):T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withMaxRetries</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.BaseMethodBuilder.T">T</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Maximum retry attempts for a request based on the configured <span class="extype" name="ResponseClassifier">ResponseClassifier</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Maximum retry attempts for a request based on the configured <span class="extype" name="ResponseClassifier">ResponseClassifier</span>.
+</p></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>when a <a href="../service/ResponseClass$$Failed.html" class="extype" name="com.twitter.finagle.service.ResponseClass.Failed">Failed</a>
+                  with <code>retryable</code> is <code>true</code> is returned for a given <code>ReqRep</code>, the
+                  request will be retried up to <code>value</code> times or the <a href="../service/RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">com.twitter.finagle.service.RetryBudget</a>
+                  has been exhausted (whichever occurs first).</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#withRetryDisabled:T" class="extmbr" name="com.twitter.finagle.client.BaseMethodBuilder#withRetryDisabled">withRetryDisabled</a></p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#response-classification" target="_blank">response classification user guide</a></p></span><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#retries" target="_blank">user guide</a>
+     for further details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.client.BaseMethodBuilder#withRetryDisabled" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="withRetryDisabled:T"></a>
       <span class="permalink">
