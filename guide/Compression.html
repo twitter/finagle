@@ -1,0 +1,216 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Compression &#8212; Finagle 20.6.0 documentation</title>
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="prev" title="Tracing" href="Tracing.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="FAQ.html" title="FAQ"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Tracing.html" title="Tracing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="compression">
+<h1>Compression<a class="headerlink" href="#compression" title="Permalink to this headline">¶</a></h1>
+<p>Compression can allow us to make smart tradeoffs between IO and CPU.  This is
+necessarily protocol-specific, because different protocols use compression in
+different ways.  Finagle’s approach to compression is that once it’s configured,
+customers shouldn’t need to think about it–aside the configuration setup, and
+marking messages as compressed or not in some protocols, it should behave the
+same way as if you were sending uncompressed messages.</p>
+<div class="section" id="http">
+<h2>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
+<p>In HTTP, we compress messages according to the HTTP spec, using the
+<cite>Accept-Encoding</cite> and <cite>Content-Encoding</cite> headers.  However, the application
+doesn’t need to interpret either of them manually.  By default, servers will
+compress messages with text-like <a href="#id1"><span class="problematic" id="id2">`</span></a>Content-Type`s, but nothing else. By default,
+clients will decompress the messages it knows how to decompress automatically.</p>
+<p>To set up compression, All the application needs to do is configure
+<cite>Http.Client#withDecompression</cite> and <cite>Http.Server#withDecompression</cite> or
+<cite>Http.Server#withCompressionLevel</cite>.  -1 is the default compression level, and
+will only compress messages with text-like <a href="#id3"><span class="problematic" id="id4">`</span></a>Content-Type`s.  Although the HTTP
+spec does not officially support server-side decompression, some clients can
+send compressed HTTP requests, so we support that behavior.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+
+<span class="k">def</span> <span class="n">bigPayloadService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
+  <span class="o">.</span><span class="n">withCompressionLevel</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">bigPayloadService</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withDecompression</span><span class="o">(</span><span class="n">enabled</span> <span class="k">=</span> <span class="kc">true</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>This will set up a server, and a client that can talk to it.  When the client
+sets the <cite>Accept-Encoding</cite> header (or
+<cite>com.twitter.finagle.http.Fields.AcceptEncoding</cite>), the server will know that
+it’s safe to compress the response, using the encoding that’s specified in the
+<cite>Accept-Encoding</cite>, and it will compress the response and set the
+<cite>Content-Encoding</cite> header.</p>
+<p>Note that on the server-side, we don’t strip the <cite>Accept-Encoding</cite> header when
+handing it to your service implementation.  This means that HTTP proxies should
+manually strip the <cite>Accept-Encoding</cite> header if they don’t want to propagate it
+to the next hop.  If compression is enabled on a server, setting the
+<cite>Content-Encoding</cite> header in the response means that the server will not attempt
+to compress the response.  On the client-side, the <cite>Content-Encoding</cite> header
+will be dropped after the message is decoded, and will be preserved if the
+client does not decode it, whether it is because it is not configured to decode
+it or because it is unable to do so.</p>
+<p>Out of the box, Finagle supports “gzip” and “deflate”.</p>
+</div>
+<div class="section" id="thriftmux">
+<h2>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h2>
+<p>ThriftMux supports a different kind of compression, which is for the entire
+ThriftMux session, not just an individual message.  This has significant
+benefits in terms of being able to compress data better, since the dictionary
+that you use for compressing can collect more data on how to compress for your
+mix of data.</p>
+<p>ThriftMux negotiates compression in the Mux handshake, where the client and the
+server can each say which protocols they are willing to use to compress, for
+messages from the client to the server, and separately for messages from the
+server to the client.</p>
+<p>The three modes of compression are <cite>Off</cite>, <cite>Accepted</cite> and <cite>Desired</cite>.  If one of
+the peers sets their mode as <cite>Off</cite>, they will not compress the session.  If
+either of the peers sets their mode as <cite>Desired</cite>, and the other is either
+<cite>Accepted</cite> or <cite>Desired</cite> and both peers can agree on at least one compression
+format, then they will compress the stream.  If a peer sets their mode as
+<cite>Accepted</cite>, it means that it is able to compress (or decompress, as the case may
+be) using the specified compression formats.</p>
+<p>The default configured compression format is <cite>Off</cite>, so enabling compression
+means that you need to configure it as <cite>Accepted</cite> or <cite>Desired</cite> as appropriate.
+Here’s what configuring it looks like:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.mux.transport.</span><span class="o">{</span><span class="nc">Compression</span><span class="o">,</span> <span class="nc">CompressionLevel</span><span class="o">}</span>
+
+<span class="k">val</span> <span class="n">compressor</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="nc">Compression</span><span class="o">.</span><span class="n">lz4Compressor</span><span class="o">(</span><span class="n">highCompression</span> <span class="k">=</span> <span class="kc">false</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">decompressor</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="nc">Compression</span><span class="o">.</span><span class="n">lz4Decompressor</span><span class="o">())</span>
+<span class="k">val</span> <span class="n">compressionLevel</span> <span class="k">=</span> <span class="nc">CompressionLevel</span><span class="o">.</span><span class="nc">Desired</span>
+
+<span class="k">def</span> <span class="n">bigPayload</span><span class="k">:</span> <span class="kt">BigPayload.MethodPerEndpoint</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">server</span>
+  <span class="o">.</span><span class="n">withCompressionPreferences</span><span class="o">.</span><span class="n">compression</span><span class="o">(</span><span class="n">compressionLevel</span><span class="o">,</span> <span class="n">compressor</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withCompressionPreferences</span><span class="o">.</span><span class="n">decompression</span><span class="o">(</span><span class="n">compressionLevel</span><span class="o">,</span> <span class="n">decompressor</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">serveIface</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">bigPayload</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withCompressionPreferences</span><span class="o">.</span><span class="n">compression</span><span class="o">(</span><span class="n">compressionLevel</span><span class="o">,</span> <span class="n">compressor</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withCompressionPreferences</span><span class="o">.</span><span class="n">decompression</span><span class="o">(</span><span class="n">compressionLevel</span><span class="o">,</span> <span class="n">decompressor</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">build</span><span class="o">[</span><span class="kt">BigPayload.MethodPerEndpoint</span><span class="o">](</span><span class="s">&quot;:8080&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>Currently, lz4 is the only supported compression format for ThriftMux.  If you
+would like to use compression, you should add a dependency on the
+<a class="reference external" href="https://github.com/lz4/lz4-java">lz4-java</a> library.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Compression</a><ul>
+<li><a class="reference internal" href="#http">HTTP</a></li>
+<li><a class="reference internal" href="#thriftmux">ThriftMux</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Tracing.html" title="previous chapter">Tracing</a></li>
+      <li>Next: <a href="FAQ.html" title="next chapter">FAQ</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2020 Twitter, Inc.</div>
+  
+  </body>
+</html>
