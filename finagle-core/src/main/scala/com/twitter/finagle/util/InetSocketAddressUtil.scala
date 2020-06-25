@@ -1,7 +1,11 @@
 package com.twitter.finagle.util
 
 import java.net.{Inet4Address, Inet6Address, InetAddress, InetSocketAddress,
-  NetworkInterface, SocketAddress, SocketException, UnknownHostException}
+  NetworkInterface, SocketAddress, UnknownHostException}
+
+import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
+
 import com.twitter.logging.Logger
 
 object InetSocketAddressUtil {
@@ -13,31 +17,26 @@ object InetSocketAddressUtil {
   private[finagle] val unconnected =
     new SocketAddress { override def toString = "unconnected" }
 
-  private[this] lazy val anyInterfaceSupportsIpV6: Boolean = {
+  private[this] val anyInterfaceSupportsIpV6: Boolean = {
     try {
-      val interfaces = NetworkInterface.getNetworkInterfaces()
-      while (interfaces.hasMoreElements()) {
-        val iface = interfaces.nextElement()
-        val addresses = iface.getInetAddresses()
-        while (addresses.hasMoreElements()) {
-          val inetAddress = addresses.nextElement()
-          if (inetAddress.isInstanceOf[Inet6Address] && !inetAddress.isAnyLocalAddress() &&
-            !inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()) {
-            true
-          }
+      val interfaces = NetworkInterface.getNetworkInterfaces().asScala
+      interfaces.exists { interface =>
+        val addresses = interface.getInetAddresses().asScala
+        addresses.exists { inetAddress =>
+          inetAddress.isInstanceOf[Inet6Address] && !inetAddress.isAnyLocalAddress() &&
+            !inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()
         }
       }
-    }
-    catch {
-      case e: SocketException => {
+    } catch {
+      case NonFatal(e) => {
         log.debug(s"Unable to detect if any interface supports IPv6, assuming IPv4-only. Error $e")
+        false
       }
     }
-    false
   }
 
   private[finagle] def getAllByName(host: String): Array[InetAddress] = {
-    def isAddressSupported(a: InetAddress) = {
+    def isAddressSupported(a: InetAddress): Boolean = {
       if (!anyInterfaceSupportsIpV6) a.isInstanceOf[Inet4Address]
       else true
     }
