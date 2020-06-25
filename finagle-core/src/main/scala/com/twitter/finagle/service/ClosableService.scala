@@ -13,7 +13,7 @@ private[finagle] object ClosableService {
   def client[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[FactoryToService.Enabled, ServiceFactory[Req, Rep]] {
       val role = ClosableService.role
-      val description = "Explictly prevent reuse of a closed session"
+      val description = "Explicitly prevent reuse of a closed session"
       def make(
         factoryToService: FactoryToService.Enabled,
         next: ServiceFactory[Req, Rep]
