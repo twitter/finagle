@@ -1,13 +1,43 @@
 package com.twitter.finagle.util
 
-import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
+import com.twitter.logging.Logger
+import java.net._
+import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
 
 object InetSocketAddressUtil {
 
   type HostPort = (String, Int)
 
+  private[this] val log = Logger()
+
   private[finagle] val unconnected =
     new SocketAddress { override def toString = "unconnected" }
+
+  private[this] val anyInterfaceSupportsIpV6: Boolean = {
+    try {
+      val interfaces = NetworkInterface.getNetworkInterfaces().asScala
+      interfaces.exists { interface =>
+        val addresses = interface.getInetAddresses().asScala
+        addresses.exists { inetAddress =>
+          inetAddress.isInstanceOf[Inet6Address] && !inetAddress.isAnyLocalAddress() &&
+            !inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()
+        }
+      }
+    } catch {
+      case NonFatal(e) => {
+        log.debug(e, s"Unable to detect if any interface supports IPv6, assuming IPv4-only")
+        false
+      }
+    }
+  }
+
+  /**
+   * A proxy for InetAddress#getAllByName. Includes IPv6 Addresses only if a network interface
+   * supports it
+   */
+  private[finagle] def getAllByName(host: String): Array[InetAddress] =
+    InetAddress.getAllByName(host).filter(!anyInterfaceSupportsIpV6 && _.isInstanceOf[Inet4Address])
 
   /** converts 0.0.0.0 -> public ip in bound ip */
   def toPublic(bound: SocketAddress): SocketAddress = {
@@ -57,8 +87,7 @@ object InetSocketAddressUtil {
   private[finagle] def resolveHostPortsSeq(hostPorts: Seq[HostPort]): Seq[Seq[SocketAddress]] =
     hostPorts.map {
       case (host, port) =>
-        InetAddress
-          .getAllByName(host)
+          getAllByName(host)
           .iterator
           .map { addr => new InetSocketAddress(addr, port) }
           .toSeq
