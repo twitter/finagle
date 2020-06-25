@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-zipkin-scribe: The scribe client should be configured using the `NullTracer`. Otherwise, spans
+  produced by the client stack will be sampled at `initialSampleRate`. ``PHAB_ID=D507318``
+
 20.6.0
 ------
 

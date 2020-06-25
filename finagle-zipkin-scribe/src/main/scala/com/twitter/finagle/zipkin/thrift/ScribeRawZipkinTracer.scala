@@ -20,7 +20,7 @@ import com.twitter.finagle.stats.{
   StatsReceiver
 }
 import com.twitter.finagle.thrift.Protocols
-import com.twitter.finagle.tracing.TracelessFilter
+import com.twitter.finagle.tracing.{NullTracer, TracelessFilter}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.zipkin.{host => Host}
 import com.twitter.finagle.zipkin.core.{RawZipkinTracer, Span, TracerCache}
@@ -111,6 +111,7 @@ object ScribeRawZipkinTracer {
       .withSessionQualifier.noFailFast
       .withSessionQualifier.noFailureAccrual
       .withStatsReceiver(clientStatsReceiver)
+      .withTracer(NullTracer)
       .withRequestTimeout(1.second) // each "logical" retry will have this timeout
       .servicePerEndpoint[Scribe.ServicePerEndpoint](s"inet!$scribeHost:$scribePort", clientName)
 
