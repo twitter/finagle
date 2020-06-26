@@ -201,7 +201,7 @@ abstract class Tracing {
   final def recordServerSendError(error: String): Unit =
     record(Annotation.ServerSendError(error))
 
-  final def recordClientSendFrargmet(): Unit =
+  final def recordClientSendFragment(): Unit =
     record(Annotation.ClientSendFragment)
 
   final def recordClientRecvFragment(): Unit =

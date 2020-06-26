@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Correct the spelling of `Tracing.recordClientSendFrargmet()` to
+  `Tracing.recordClientSendFragment()` ``PHAB_ID=D505617``
+
 Bug Fixes
 ~~~~~~~~~
 
