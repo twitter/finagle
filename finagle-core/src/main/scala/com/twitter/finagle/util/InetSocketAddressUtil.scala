@@ -36,8 +36,11 @@ object InetSocketAddressUtil {
    * A proxy for InetAddress#getAllByName. Includes IPv6 Addresses only if a network interface
    * supports it
    */
-  private[finagle] def getAllByName(host: String): Array[InetAddress] =
-    InetAddress.getAllByName(host).filter(!anyInterfaceSupportsIpV6 && _.isInstanceOf[Inet4Address])
+  private[finagle] def getAllByName(host: String): Array[InetAddress] = {
+    val allHosts = InetAddress.getAllByName(host)
+    if (anyInterfaceSupportsIpV6) allHosts
+    else allHosts.filter(_.isInstanceOf[Inet4Address])
+  }
 
   /** converts 0.0.0.0 -> public ip in bound ip */
   def toPublic(bound: SocketAddress): SocketAddress = {
