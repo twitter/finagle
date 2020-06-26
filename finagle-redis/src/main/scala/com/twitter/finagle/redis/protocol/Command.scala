@@ -139,6 +139,7 @@ object Command {
   val LPOP = Buf.Utf8("LPOP")
   val LPUSH = Buf.Utf8("LPUSH")
   val LREM = Buf.Utf8("LREM")
+  val LRESET = Buf.Utf8("LRESET")
   val LSET = Buf.Utf8("LSET")
   val LRANGE = Buf.Utf8("LRANGE")
   val RPOP = Buf.Utf8("RPOP")

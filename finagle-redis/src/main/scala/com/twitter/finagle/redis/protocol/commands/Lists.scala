@@ -37,6 +37,11 @@ case class LRem(key: Buf, count: Long, value: Buf)
   override def body: Seq[Buf] = Seq(key, Buf.Utf8(count.toString), value)
 }
 
+case class LReset(key: Buf, values: List[Buf], ttl: Long, trim: Long) extends StrictKeyCommand {
+  def name: Buf = Command.LRESET
+  override def body: Seq[Buf] = key +: Buf.Utf8(trim.toString) +: Buf.Utf8(ttl.toString) +: values
+}
+
 case class LSet(key: Buf, index: Long, value: Buf)
     extends StrictKeyCommand
     with StrictValueCommand {

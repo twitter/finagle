@@ -1,28 +1,31 @@
 package com.twitter.finagle.redis.integration
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.io.Buf
-import com.twitter.util.Await
+import com.twitter.util.{Await, Future}
 
 final class ListClientIntegrationSuite extends RedisClientTest {
+
+  def await[A](a: Future[A]): A = Await.result(a, 5.seconds)
 
   val IndexFailureMessage = "Unknown failure calling Index"
   val PopFailureMessage = "Failure popping element from list"
 
   test("Correctly push elements onto a list", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.lPush(bufFoo, List(bufBar))) == 1)
-      assert(Await.result(client.lPush(bufFoo, List(bufBaz))) == 2)
+      assert(await(client.lPush(bufFoo, List(bufBar))) == 1)
+      assert(await(client.lPush(bufFoo, List(bufBaz))) == 2)
     }
   }
 
   test("Correctly pop elements off a list", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.lPush(bufFoo, List(bufBar))) == 1)
-      assert(Await.result(client.lPush(bufFoo, List(bufBaz))) == 2)
-      assert(Await.result(client.lPop(bufFoo)).getOrElse(fail(PopFailureMessage)) == bufBaz)
-      assert(Await.result(client.lPop(bufFoo)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.lPush(bufFoo, List(bufBar))) == 1)
+      assert(await(client.lPush(bufFoo, List(bufBaz))) == 2)
+      assert(await(client.lPop(bufFoo)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(await(client.lPop(bufFoo)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
@@ -30,11 +33,11 @@ final class ListClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val key = bufFoo
 
-      assert(Await.result(client.lLen(key)) == 0)
-      assert(Await.result(client.lPush(bufFoo, List(bufBar))) == 1, "Failed to insert list item.")
-      assert(Await.result(client.lLen(key)) == 1)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
-      assert(Await.result(client.lLen(key)) == 0)
+      assert(await(client.lLen(key)) == 0)
+      assert(await(client.lPush(bufFoo, List(bufBar))) == 1, "Failed to insert list item.")
+      assert(await(client.lLen(key)) == 1)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.lLen(key)) == 0)
     }
   }
 
@@ -42,14 +45,14 @@ final class ListClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val key = Buf.Utf8("lindex")
 
-      assert(Await.result(client.lIndex(key, 0L)) == None)
-      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
-      assert(Await.result(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBar)
-      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
-      assert(Await.result(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBaz)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
-      assert(Await.result(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBar)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.lIndex(key, 0L)) == None)
+      assert(await(client.lPush(key, List(bufBar))) == 1)
+      assert(await(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBar)
+      assert(await(client.lPush(key, List(bufBaz))) == 2)
+      assert(await(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBaz)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(await(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBar)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
@@ -58,20 +61,18 @@ final class ListClientIntegrationSuite extends RedisClientTest {
       val key = Buf.Utf8("linsert")
       val PivotFailureMessage = "Pivot not found"
 
-      assert(Await.result(client.lPush(key, List(bufMoo))) == 1)
+      assert(await(client.lPush(key, List(bufMoo))) == 1)
       assert(
-        Await
-          .result(client.lInsertAfter(key, bufMoo, bufBar))
+        await(client.lInsertAfter(key, bufMoo, bufBar))
           .getOrElse(fail(PivotFailureMessage)) == 2
       )
       assert(
-        Await
-          .result(client.lInsertBefore(key, bufMoo, bufFoo))
+        await(client.lInsertBefore(key, bufMoo, bufFoo))
           .getOrElse(fail(PivotFailureMessage)) == 3
       )
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufFoo)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufFoo)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
@@ -79,10 +80,10 @@ final class ListClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val key = Buf.Utf8("lremove")
 
-      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
-      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
-      assert(Await.result(client.lRem(key, 1L, bufBaz)) == 1)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.lPush(key, List(bufBar))) == 1)
+      assert(await(client.lPush(key, List(bufBaz))) == 2)
+      assert(await(client.lRem(key, 1L, bufBaz)) == 1)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
@@ -90,17 +91,17 @@ final class ListClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val key = Buf.Utf8("lset")
 
-      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
-      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
+      assert(await(client.lPush(key, List(bufBar))) == 1)
+      assert(await(client.lPush(key, List(bufBaz))) == 2)
 
       /*
        * We ingloriously side effect here as the API returns no verification,
        * if the key isn't found in the List a ServerError is thrown
        */
-      Await.result(client.lSet(key, 0L, bufMoo))
+      await(client.lSet(key, 0L, bufMoo))
 
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
@@ -108,11 +109,11 @@ final class ListClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val key = Buf.Utf8("lrange")
 
-      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
-      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
-      assert(Await.result(client.lRange(key, 0L, -1L)) == List(bufBaz, bufBar))
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.lPush(key, List(bufBar))) == 1)
+      assert(await(client.lPush(key, List(bufBaz))) == 2)
+      assert(await(client.lRange(key, 0L, -1L)) == List(bufBaz, bufBar))
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(await(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
@@ -120,10 +121,10 @@ final class ListClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val key = Buf.Utf8("rpop")
 
-      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
-      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(await(client.lPush(key, List(bufBar))) == 1)
+      assert(await(client.lPush(key, List(bufBaz))) == 2)
+      assert(await(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
     }
   }
 
@@ -131,10 +132,26 @@ final class ListClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val key = Buf.Utf8("rpush")
 
-      assert(Await.result(client.rPush(key, List(bufBar))) == 1)
-      assert(Await.result(client.rPush(key, List(bufBaz))) == 2)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(await(client.rPush(key, List(bufBar))) == 1)
+      assert(await(client.rPush(key, List(bufBaz))) == 2)
+      assert(await(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(await(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+    }
+  }
+
+  // LRESET test is ignored because most Redis implementations don't support this method
+  ignore("Correctly reset list and set TTL (LRESET)", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      val key = Buf.Utf8("lreset")
+
+      await(client.lReset(key, List(bufBar), 100))
+      assert(await(client.lRange(key, 0L, -1L)) == List(bufBar))
+
+      await(client.lReset(key, List(bufBaz), 100))
+      assert(await(client.lRange(key, 0L, -1L)) == List(bufBaz))
+
+      val ttl = await(client.ttl(key)).get
+      assert(90 < ttl && ttl <= 100)
     }
   }
 
@@ -142,26 +159,26 @@ final class ListClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val key = Buf.Utf8("ltrim")
 
-      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
-      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
-      assert(Await.result(client.lPush(key, List(bufBoo))) == 3)
+      assert(await(client.lPush(key, List(bufBar))) == 1)
+      assert(await(client.lPush(key, List(bufBaz))) == 2)
+      assert(await(client.lPush(key, List(bufBoo))) == 3)
 
       /*
        * We ingloriously side effect here as the API returns no verification,
        * if the key isn't found in the List a ServerError is thrown
        */
-      Await.result(client.lTrim(key, 0L, 1L))
+      await(client.lTrim(key, 0L, 1L))
 
-      assert(Await.result(client.lPush(key, List(bufMoo))) == 3)
+      assert(await(client.lPush(key, List(bufMoo))) == 3)
 
       /*
        * We ingloriously side effect here as the API returns no verification,
        * if the key isn't found in the List a ServerError is thrown
        */
-      Await.result(client.lTrim(key, 0L, 1L))
+      await(client.lTrim(key, 0L, 1L))
 
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBoo)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
+      assert(await(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBoo)
+      assert(await(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
     }
   }
 }

@@ -97,12 +97,26 @@ private[redis] trait ListCommands { self: BaseClient =>
     }
 
   /**
+   * Creates a list at `key`, pushes given `values` onto the end of the list,
+   * trims the list to `trim` length, and sets the ttl. `ttl` and `trim` are
+   * not used if set to -1. If a list already exists at `key`, the list will
+   * be overwritten. If the key is a non-list element, an exception will be thrown.
+   *
+   * This command is Twitter-specific. Most Redis implementations do not support
+   * this method.
+   */
+  def lReset(key: Buf, values: List[Buf], ttl: JLong = -1, trim: JLong = -1): Future[Unit] =
+    doRequest(LReset(key, values, ttl, trim)) {
+      case StatusReply(message) => Future.Done
+    }
+
+  /**
    * Sets the element at `index` in the list stored under the hash `key` to a
    * given `value`. If the key is a non-list element, an exception will be thrown.
    */
   def lSet(key: Buf, index: JLong, value: Buf): Future[Unit] =
     doRequest(LSet(key, index, value)) {
-      case StatusReply(message) => Future.Unit
+      case StatusReply(message) => Future.Done
     }
 
   /**
@@ -146,7 +160,7 @@ private[redis] trait ListCommands { self: BaseClient =>
    */
   def lTrim(key: Buf, start: JLong, end: JLong): Future[Unit] =
     doRequest(LTrim(key, start, end)) {
-      case StatusReply(message) => Future.Unit
+      case StatusReply(message) => Future.Done
     }
 
   /**
