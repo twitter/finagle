@@ -8,7 +8,8 @@ java_thrift_library(
 )
 
 java_thrift_library(
-    name = "thrift-scala",
+    # Renamed longer to assist bazel migration
+    name = "thrift-bazel-workaround-scala",
     sources = ["*.thrift"],
     compiler = "scrooge",
     language = "scala",
