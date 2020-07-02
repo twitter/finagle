@@ -43,7 +43,7 @@ val nettyVersionInfo = settingKey[String]("A setting reference for printing the 
 val zkVersion = "3.5.0-alpha"
 
 val scalaCollectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"
-val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.8.0"
+val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.8.5"
 val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.11"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
 val netty4Libs = Seq(
