@@ -25,8 +25,8 @@ trait DtabFlags { self: App =>
       "Supplemental Dtab to add to the `c.t.finagle.Dtab.base` delegation table.")
 
   /**
-   * Adds the parsed values of the defined Flags to their currently configured tables, e.g.,
-   * either [[com.twitter.finagle.Dtab.base]] or [[com.twitter.finagle.Dtab.local]].
+   * Adds the parsed value of the defined [[dtabAddBaseFlag]] Flag to the currently configured
+   * [[com.twitter.finagle.Dtab.base]].
    */
   def addDtabs(): Unit = {
     try {
