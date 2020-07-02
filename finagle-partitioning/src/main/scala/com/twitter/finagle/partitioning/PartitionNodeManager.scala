@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.loadbalancer.TrafficDistributor._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.param.{Label, Logger}
+import com.twitter.finagle.param.{Label, Logger, Stats}
 import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util._
@@ -110,9 +110,16 @@ private[finagle] class PartitionNodeManager[Req, Rep](
 
   private[this] val logger = params[Logger].log
   private[this] val label = params[Label].label
+  private[this] val statsReceiver = {
+    val stats = params[Stats].statsReceiver
+    stats.scope("partitioner")
+  }
 
   private[this] val partitionServiceNodes =
     new AtomicReference[Map[Int, ServiceFactory[Req, Rep]]]()
+
+  private[this] val partitionerMetrics =
+    statsReceiver.addGauge("nodes") { partitionServiceNodes.get.size }
 
   // Keep track of addresses in the current set that already have associate instances
   private[this] val destActivity = varAddrToActivity(params[LoadBalancerFactory.Dest].va, label)

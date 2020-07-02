@@ -1,6 +1,7 @@
 package com.twitter.finagle.partitioning
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.partitioning.PartitionNodeManager.NoPartitionException
@@ -8,6 +9,7 @@ import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Awaitable, Duration, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
@@ -67,7 +69,10 @@ class PartitionNodeManagerTest extends FunSuite {
       .push(factory)
       .result
 
-    val defaultParams = Stack.Params.empty + LoadBalancerFactory.Dest(varAddr)
+    val sr = new InMemoryStatsReceiver
+
+    val defaultParams =
+      Stack.Params.empty + LoadBalancerFactory.Dest(varAddr) + finagle.param.Stats(sr)
 
     // p0(0), p1(1,2), p2(3,4,5), p3(6,...)
     // use port number to mock shardId
@@ -109,6 +114,7 @@ class PartitionNodeManagerTest extends FunSuite {
         i => i,
         defaultParams
       )
+      assert(sr.gauges(Seq("partitioner", "nodes"))() == 5)
 
       val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
       // to get the port
@@ -120,6 +126,7 @@ class PartitionNodeManagerTest extends FunSuite {
       }
 
       varAddr.update(Addr.Bound((weightedAddress :+ newAddress(newIsa, 1)): _*))
+      assert(sr.gauges(Seq("partitioner", "nodes"))() == 6)
 
       await(nodeManager.getServiceByPartitionId(newIsa.getPort))
     }
@@ -133,6 +140,7 @@ class PartitionNodeManagerTest extends FunSuite {
         logicalPartition,
         defaultParams
       )
+      assert(sr.gauges(Seq("partitioner", "nodes"))() == 4)
 
       val svc00 = await(nodeManager.getServiceByPartitionId(0))
       val svc0 =
@@ -206,6 +214,7 @@ class PartitionNodeManagerTest extends FunSuite {
         getLogicalPartition(Var(fixedInetAddresses)),
         defaultParams
       )
+      assert(sr.gauges(Seq("partitioner", "nodes"))() == 4)
 
       await(nodeManager.getServiceByPartitionId(0))
 
@@ -253,6 +262,7 @@ class PartitionNodeManagerTest extends FunSuite {
         i => i,
         defaultParams
       )
+      assert(sr.gauges(Seq("partitioner", "nodes"))() == 3)
 
       val svc0 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
 
