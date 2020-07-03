@@ -14,23 +14,14 @@
 # limitations under the License.
 # ==================================================================================================
 
-java_thrift_library(
-    name = "thrift-java",
+create_thrift_libraries(
+    base_name = "thrift",
     sources = ["com/twitter/thrift/endpoint.thrift"],
-    compiler = "scrooge",
-    language = "java",
-    provides = artifact(
-        org = "com.twitter.thrift",
-        name = "finagle-serversets-thrift",
-        repo = artifactory,
-    ),
-)
-
-java_thrift_library(
-    name = "thrift-scala",
-    sources = ["com/twitter/thrift/endpoint.thrift"],
-    compiler = "scrooge",
-    language = "scala",
+    generate_languages = [
+        "java",
+        "scala",
+    ],
+    provides_java_name = "finagle-serversets-thrift-java",
 )
 
 python_thrift_library(
