@@ -359,7 +359,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   def newClient(dest: Name, label: String): ServiceFactory[Request, Response] =
     client.newClient(dest, label)
 
-  object Server {
+  object Srver {
     private val stack: Stack[ServiceFactory[Request, Response]] =
       StackServer.newStack
       // Because the payload filter also traces the sizes, it's important that we do so

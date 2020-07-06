@@ -48,7 +48,15 @@ class HttpMuxer(_routes: Seq[Route]) extends Service[Request, Response] {
     withHandler(Route(pattern, service))
   }
 
-  def withHandler(route: Route): HttpMuxer = {
+  def withHandler2(route: Route): HttpMuxer = {
+    val norm = normalize(route.pattern)
+    val newRoute = Route(pattern = norm, handler = route.handler, index = route.index)
+    new HttpMuxer(routes.filterNot { route =>
+      route.pattern == norm
+    } :+ newRoute)
+  }
+
+    def withHandler(route: Route): HttpMuxer = {
     val norm = normalize(route.pattern)
     val newRoute = Route(pattern = norm, handler = route.handler, index = route.index)
     new HttpMuxer(routes.filterNot { route =>
