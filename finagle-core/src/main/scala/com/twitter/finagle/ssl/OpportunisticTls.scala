@@ -3,13 +3,7 @@ package com.twitter.finagle.ssl
 import com.twitter.finagle.Stack
 import com.twitter.io.Buf
 
-// Note that this is a deliberate copy of the Mux OpportunisticTls
-// structure with the hope that we can make those configuration options
-// extend to all server implementations using TLS snooping.
-//
-// It is currently private while we examine what the user facing
-// API should be.
-private[finagle] object OpportunisticTls {
+object OpportunisticTls {
 
   case class Param(level: Level)
 
@@ -34,7 +28,7 @@ private[finagle] object OpportunisticTls {
   case object Off extends Level("off")
 
   /**
-   * Indicates that the peer can upgrade to tls.
+   * Indicates that the peer can upgrade to tls or supports tls snooping.
    *
    * The peer will upgrade to tls if the remote peer is "desired", or
    * "required", and will stay on cleartext if the remote peer is "off".

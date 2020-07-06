@@ -1,15 +1,38 @@
 package com.twitter.finagle.mux.transport
 
+import com.twitter.finagle.ssl.{OpportunisticTls => SslOptTls}
 import com.twitter.finagle.{FailureFlags, SourcedException}
 import com.twitter.io.Buf
-import com.twitter.logging.{Logger, HasLogLevel, Level}
+import com.twitter.logging.{HasLogLevel, Level => LogLevel, Logger}
 import scala.util.control.NoStackTrace
 
 private[twitter] object OpportunisticTls {
   private[this] val log = Logger.get()
 
-  /** The sequence of [[OpportunisticTls.Level]]s from least to most secure */
-  final val Values: Seq[OpportunisticTls.Level] = Seq(Off, Desired, Required)
+  // Type and reference aliases to make the migration easier.
+  @Deprecated
+  type Level = SslOptTls.Level
+
+  @Deprecated
+  type Off = SslOptTls.Off.type
+
+  @Deprecated
+  type Required = SslOptTls.Required.type
+
+  @Deprecated
+  type Desired = SslOptTls.Desired.type
+
+  @Deprecated
+  val Off: Off = SslOptTls.Off
+
+  @Deprecated
+  val Required: Required = SslOptTls.Required
+
+  @Deprecated
+  val Desired: Desired = SslOptTls.Desired
+
+  /** The sequence of [[SslOptTls.Level]]s from least to most secure */
+  final val Values: Seq[SslOptTls.Level] = Seq(SslOptTls.Off, SslOptTls.Desired, SslOptTls.Required)
 
   /**
    * Defines encrypter keys and values exchanged as part of a
@@ -21,14 +44,14 @@ private[twitter] object OpportunisticTls {
     /**
      * Extracts level from the `buf`.
      */
-    def decodeLevel(buf: Buf): Level =
-      if (buf == Off.buf) Off
-      else if (buf == Desired.buf) Desired
-      else if (buf == Required.buf) Required
+    def decodeLevel(buf: Buf): SslOptTls.Level =
+      if (buf == SslOptTls.Off.buf) SslOptTls.Off
+      else if (buf == SslOptTls.Desired.buf) SslOptTls.Desired
+      else if (buf == SslOptTls.Required.buf) SslOptTls.Required
       else {
         val Buf.Utf8(bad) = buf
         log.debug(s"Expected one of 'off', 'desired', or 'required' but received $bad")
-        Off // don't want to fail in case we decide to change levels in the future.
+        SslOptTls.Off // don't want to fail in case we decide to change levels in the future.
       }
   }
 
@@ -40,49 +63,18 @@ private[twitter] object OpportunisticTls {
    *
    * Throws an IncompatibleNegotiationException if the negotiation failed.
    */
-  private[finagle] def negotiate(left: Level, right: Level): Boolean = (left, right) match {
-    case (Off, Off) => false
-    case (Off, Desired) => false
-    case (Off, Required) => throw new IncompatibleNegotiationException
-    case (Desired, Off) => false
-    case (Desired, Desired) => true
-    case (Desired, Required) => true
-    case (Required, Off) => throw new IncompatibleNegotiationException
-    case (Required, Desired) => true
-    case (Required, Required) => true
-  }
-
-  /**
-   * Configures the level of TLS that the client or server can support or must
-   * support.
-   * @note Java users: See [[OpportunisticTlsConfig]].
-   */
-  sealed abstract class Level(val value: String) {
-    val buf: Buf = Buf.Utf8(value)
-  }
-
-  /**
-   * Indicates that the peer cannot upgrade to tls.
-   *
-   * Compatible with "off", or "desired".
-   */
-  case object Off extends Level("off")
-
-  /**
-   * Indicates that the peer can upgrade to tls.
-   *
-   * The peer will upgrade to tls if the remote peer is "desired", or
-   * "required", and will stay on cleartext if the remote peer is "off".
-   * Compatible with "off", "desired", or "required".
-   */
-  case object Desired extends Level("desired")
-
-  /**
-   * Indicates that the peer must upgrade to tls.
-   *
-   * Compatible with "desired", or "required".
-   */
-  case object Required extends Level("required")
+  private[finagle] def negotiate(left: SslOptTls.Level, right: SslOptTls.Level): Boolean =
+    (left, right) match {
+      case (SslOptTls.Off, SslOptTls.Off) => false
+      case (SslOptTls.Off, SslOptTls.Desired) => false
+      case (SslOptTls.Off, SslOptTls.Required) => throw new IncompatibleNegotiationException
+      case (SslOptTls.Desired, SslOptTls.Off) => false
+      case (SslOptTls.Desired, SslOptTls.Desired) => true
+      case (SslOptTls.Desired, SslOptTls.Required) => true
+      case (SslOptTls.Required, SslOptTls.Off) => throw new IncompatibleNegotiationException
+      case (SslOptTls.Required, SslOptTls.Desired) => true
+      case (SslOptTls.Required, SslOptTls.Required) => true
+    }
 }
 
 /**
@@ -98,7 +90,7 @@ class IncompatibleNegotiationException(val flags: Long = FailureFlags.Empty)
     with HasLogLevel
     with SourcedException
     with NoStackTrace {
-  def logLevel: Level = Level.ERROR
+  def logLevel: LogLevel = LogLevel.ERROR
   protected def copyWithFlags(flags: Long): IncompatibleNegotiationException =
     new IncompatibleNegotiationException(flags)
 }

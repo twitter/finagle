@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.twitter.finagle.Mux;
 import com.twitter.finagle.Mux$param$MaxFrameSize$;
 import com.twitter.finagle.Mux$param$OppTls$;
-import com.twitter.finagle.mux.transport.OpportunisticTlsConfig;
+import com.twitter.finagle.ssl.OpportunisticTlsConfig;
 import com.twitter.util.StorageUnit;
 
 public class StackParamCompilationTest {

@@ -5,9 +5,9 @@ import com.twitter.finagle.netty4.ssl.server.{
   Netty4TlsSnoopingHandler
 }
 import com.twitter.finagle.param._
-import com.twitter.finagle.ssl.{ClientAuth, OpportunisticTls}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Stack
+import com.twitter.finagle.ssl.SnoopingLevelInterpreter
 import io.netty.channel._
 import java.util.logging.Level
 
@@ -43,24 +43,7 @@ private[netty4] class Netty4RawServerChannelInitializer(params: Stack.Params)
     else
       None
 
-  private[this] val enableTlsSnooping: Boolean =
-    // We want to make sure that we both desire opportunistic TLS and haven't
-    // signaled through the client auth param that we want to verify the peer.
-    if (params[OpportunisticTls.Param].level != OpportunisticTls.Desired) false
-    else {
-      params[Transport.ServerSsl].sslServerConfiguration match {
-        case Some(config) if config.clientAuth != ClientAuth.Needed => true
-        case Some(_) =>
-          logger.warning(
-            "Opportunistic Tls was desired but not enabled because client authorization required.")
-          false
-
-        case None =>
-          logger.warning(
-            "Opportunistic Tls was desired but not enabled because security configuration not specified")
-          false
-      }
-    }
+  private[this] val enableTlsSnooping = SnoopingLevelInterpreter.shouldEnableSnooping(params)
 
   def initChannel(ch: Channel): Unit = {
     // first => last

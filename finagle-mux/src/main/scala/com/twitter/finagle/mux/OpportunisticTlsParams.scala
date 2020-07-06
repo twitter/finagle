@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.finagle.Mux.param
 import com.twitter.finagle.Stack
-import com.twitter.finagle.mux.transport.OpportunisticTls
+import com.twitter.finagle.ssl.OpportunisticTls
 
 /**
  * Mixin for supporting Opportunistic Tls on clients and servers

@@ -42,6 +42,9 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-mux: The `c.t.f.mux.transport.OpportunisticTlsConfig` params were moved to
+  `c.t.f.ssl.OpportunisticTlsConfig`. ``PHAB_ID=D482693``
+
 * finagle-core: Migrated `List[Tracer]` to `Seq[Tracer]` in `Tracing`, and `tracersCtx`.
   ``PHAB_ID=D489697``
 

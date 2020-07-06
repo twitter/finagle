@@ -1,4 +1,4 @@
-package com.twitter.finagle.mux.transport;
+package com.twitter.finagle.ssl;
 
 /**
  * Java APIs for {@link OpportunisticTls}.

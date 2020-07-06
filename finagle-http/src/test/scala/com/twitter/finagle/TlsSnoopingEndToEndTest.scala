@@ -4,7 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.ssl.HttpSslTestComponents
-import com.twitter.finagle.ssl.{ClientAuth, OpportunisticTls, TlsSnooping}
+import com.twitter.finagle.ssl.{ClientAuth, OpportunisticTls, SnoopingLevelInterpreter, TlsSnooping}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Awaitable, Future}
 import java.net.InetSocketAddress
@@ -20,7 +20,9 @@ class TlsSnoopingEndToEndTest extends FunSuite {
     level: OpportunisticTls.Level,
     snooper: TlsSnooping.Snooper
   ): finagle.Http.Server = {
-    (if (useH2) finagle.Http.server.withHttp2 else finagle.Http.server.withNoHttp2)
+    val base =
+      finagle.Http.server.configured(SnoopingLevelInterpreter.EnabledForNonNegotiatingProtocols)
+    (if (useH2) base.withHttp2 else base.withNoHttp2)
       .configured(Transport.ServerSsl(
         Some(HttpSslTestComponents.unauthenticatedServerConfig.copy(clientAuth = clientAuth))))
       .configured(OpportunisticTls.Param(level))

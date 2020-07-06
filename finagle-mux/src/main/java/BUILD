@@ -7,6 +7,6 @@ java_library(
         repo = artifactory,
     ),
     dependencies = [
-        "finagle/finagle-mux/src/main/scala",
+        "finagle/finagle-core/src/main",
     ],
 )
