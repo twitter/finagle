@@ -15,7 +15,4 @@ scala_library(
         "finagle/finagle-thrift/src/main/java",
         "util/util-core:scala",
     ],
-    exports = [
-        "util/util-core:scala",
-    ],
 )

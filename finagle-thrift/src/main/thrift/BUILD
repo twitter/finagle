@@ -1,8 +1,23 @@
 java_thrift_library(
-    sources = ["**/*.thrift"],
+    name = "scribe",
+    sources = ["scribe.thrift"],
+    compiler = "scrooge",
+    language = "scala",
     provides = artifact(
         org = "com.twitter",
-        name = "finagle-thrift-thrift",
+        name = "finagle-thrift-scribe",
+        repo = artifactory,
+    ),
+)
+
+java_thrift_library(
+    name = "tracing",
+    sources = ["tracing.thrift"],
+    compiler = "scrooge",
+    language = "scala",
+    provides = artifact(
+        org = "com.twitter",
+        name = "finagle-thrift-tracing",
         repo = artifactory,
     ),
 )

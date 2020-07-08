@@ -13,6 +13,9 @@ Breaking API Changes
 * finagle-core: Correct the spelling of `Tracing.recordClientSendFrargmet()` to
   `Tracing.recordClientSendFragment()` ``PHAB_ID=D505617``
 
+* finagle-zipkin-scribe: The scribe.thrift file was moved to finagle-thrift/src/main/thrift under a new
+  namespace. `com.twitter.finagle.thrift.scribe.(thrift|thriftscala)` ``PHAB_ID=D511471``
+
 Bug Fixes
 ~~~~~~~~~
 

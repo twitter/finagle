@@ -17,8 +17,8 @@
 ## See accompanying file LICENSE or visit the Scribe site at:
 ## https://developers.facebook.com/scribe/
 
-namespace java com.twitter.finagle.zipkin.thriftjava
-#@namespace scala com.twitter.finagle.zipkin.thriftscala
+namespace java com.twitter.finagle.thrift.scribe.thrift
+#@namespace scala com.twitter.finagle.thrift.scribe.thriftscala
 
 enum ResultCode
 {

@@ -20,11 +20,11 @@ import com.twitter.finagle.stats.{
   StatsReceiver
 }
 import com.twitter.finagle.thrift.Protocols
+import com.twitter.finagle.thrift.scribe.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.finagle.tracing.{NullTracer, TracelessFilter}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.zipkin.{host => Host}
 import com.twitter.finagle.zipkin.core.{RawZipkinTracer, Span, TracerCache}
-import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.scrooge.TReusableMemoryTransport
 import com.twitter.util._
 import java.nio.charset.StandardCharsets

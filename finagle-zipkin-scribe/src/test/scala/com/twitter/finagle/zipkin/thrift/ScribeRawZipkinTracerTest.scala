@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Service, WriteException}
 import com.twitter.finagle.service.{RetryBudget, RetryFilter, TimeoutFilter}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.thrift.scribe.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.zipkin.core.{BinaryAnnotation, Endpoint, Span, ZipkinAnnotation}
-import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
