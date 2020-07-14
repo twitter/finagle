@@ -100,7 +100,7 @@ object RequestLogger {
  *
  * Instances are thread-safe and safe to be used by multiple threads.
  *
- * @param log the logger to write request logs to
+ * @param logger the logger to write request logs to
  *
  * @param label the label of the client or server
  *

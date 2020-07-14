@@ -21,7 +21,7 @@ object TimeoutFactory {
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.factory.TimeoutFactory]].
    *
-   * @param _role The stack role used to identify the TimeoutFactory when inserted
+   * @param role The stack role used to identify the TimeoutFactory when inserted
    * into a stack.
    */
   def module[Req, Rep](role: Stack.Role): Stackable[ServiceFactory[Req, Rep]] = {

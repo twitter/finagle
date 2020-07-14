@@ -54,7 +54,7 @@ object StackClient {
     val postNameResolutionTimeout = Stack.Role("PostNameResolutionTimeout")
 
     /**
-     * Defines a preallocoted position at the "bottom" of the stack which is
+     * Defines a preallocated position at the "bottom" of the stack which is
      * special in that it's the first role before the client sends the request to
      * the underlying transport implementation.
      */

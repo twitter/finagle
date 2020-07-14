@@ -336,7 +336,7 @@ object Filter {
   /**
    * OneTime is a TypeAgnostic filter that can be materialized exactly once.
    * This provides a simple way to create the most commonly used kind of
-   * TypeAgnosic filters while ensuring that the apply method is not shared.
+   * TypeAgnostic filters while ensuring that the apply method is not shared.
    */
   abstract class OneTime extends TypeAgnostic { self =>
     private[this] val toFilterCalled = new AtomicBoolean(false)

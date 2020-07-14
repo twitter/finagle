@@ -58,7 +58,7 @@ private[finagle] object BalancingPool {
     IndexedSeq.tabulate(size) { i =>
       val a = addr match {
         // Note we inject an id into the addresses metadata map to make each
-        // replicated address structurally unique. This isn't strictly neccessary
+        // replicated address structurally unique. This isn't strictly necessary
         // in this context, but likely a useful property that will avoid us getting
         // bitten if we dedupe these in any of the consumers below.
         case Address.Inet(ia, metadata) =>
@@ -136,7 +136,7 @@ private[finagle] object BalancingPool {
 
           assert(poolNodes.nonEmpty, s"$poolNodes size expected to be >= 1")
 
-          // We default to p2cPeakEwma since it's highly sensitive to latency variantions.
+          // We default to p2cPeakEwma since it's highly sensitive to latency variations.
           // This is acceptable in this context since we won't unevenly load an endpoint
           // by disproportionally choosing one of its replicated sessions.
           val balancerFactory = Balancers.p2cPeakEwma()

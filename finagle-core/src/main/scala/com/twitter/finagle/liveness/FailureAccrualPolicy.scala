@@ -39,7 +39,7 @@ abstract class FailureAccrualPolicy { self =>
   def revived(): Unit
 
   /*
-   * Invoked by FailureAccrualFActory to retrieve a string representation
+   * Invoked by FailureAccrualFactory to retrieve a string representation
    * of the policy's current state.
    */
   def show(): String

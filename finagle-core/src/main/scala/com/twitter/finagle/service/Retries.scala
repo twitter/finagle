@@ -291,7 +291,7 @@ object Retries {
             // contract that Status can only be Closed when the close method was called, we must manually
             // close the session to forestall resource leaks.
             //
-            // However, `deadSvc` will be propogated up the stack if `this` is not in an Open state.
+            // However, `deadSvc` will be propagated up the stack if `this` is not in an Open state.
             // In this case, we do not close the session here
             if (status == Status.Open) {
               deadSvc.close()

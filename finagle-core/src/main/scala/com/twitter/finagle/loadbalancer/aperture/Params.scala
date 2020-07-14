@@ -9,7 +9,7 @@ import com.twitter.finagle.loadbalancer.exp.apertureEagerConnections
  * load balancers eagerly establish connections with the resolved endpoints in
  * the aperture.
  *
- * @param enabled indicator for eager connections. This feature can explictly be disabled
+ * @param isEnabled indicator for eager connections. This feature can explicitly be disabled
  */
 private[twitter] case class EagerConnections private (isEnabled: () => Boolean) {
   def enabled: Boolean = isEnabled()
@@ -41,7 +41,7 @@ private[twitter] object EagerConnections {
   def apply(): EagerConnections = this(true)
 
   /**
-   * Explictly configure EagerConnections
+   * Explicitly configure EagerConnections
    */
   def apply(enabled: Boolean): EagerConnections = EagerConnections(() => enabled)
 }

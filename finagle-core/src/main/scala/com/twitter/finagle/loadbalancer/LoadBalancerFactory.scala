@@ -259,7 +259,7 @@ object LoadBalancerFactory {
           } else {
             // Note, this isn't perfect. The life of this endpoint can outlive the life of
             // the `sample`. That is, our destination size can change from 1 and we've
-            // still disabled failfast on this endppoint. If this happens to become an
+            // still disabled failfast on this endpoint. If this happens to become an
             // unacceptable trade-off, we'd have to recreate this endpoint based on
             // destination changes.
             dest.sample() match {

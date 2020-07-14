@@ -41,7 +41,7 @@ class ClientAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Para
   /**
    * Configures the `NackAdmissionFilter`. The `NackAdmissionFilter` is enabled
    * by default and configured with the default values which can be found in
-   * [[com.twitter.finagle.filter.NackAdmssionFilter]].
+   * [[com.twitter.finagle.filter.NackAdmissionFilter]].
    *
    * NOTE: Here is a brief summary of the configurable params.
    *
@@ -66,7 +66,7 @@ class ClientAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Para
    *   requests during mild load so they choose a window of 10 seconds and a
    *   threshold of 0.15 (= 15%).
    *
-   * @param window Duration over which to average the ratio of nackd/non-nacked
+   * @param window Duration over which to average the ratio of nacked/non-nacked
    * responses.
    *
    * @param threshold The upper limit of the fraction of responses which are

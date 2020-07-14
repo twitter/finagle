@@ -168,7 +168,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * - `backlog`: OS-defined default value
  *
  * @see The [[https://twitter.github.io/finagle/guide/Configuration.html user guide]]
- *      for information on the preferred `with`-style APIs insead.
+ *      for information on the preferred `with`-style APIs instead.
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
   private[finagle] val server: StackBasedServer[Req, Rep]) {

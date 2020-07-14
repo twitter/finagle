@@ -219,7 +219,7 @@ private[ssl] object SslConfigurations {
     }
 
   /**
-   * Guart method for failing fast inside of a server factory's apply method when
+   * Guard method for failing fast inside of a server factory's apply method when
    * [[ClientAuth]] is not supported.
    */
   def checkClientAuthNotSupported(engineFactoryName: String, clientAuth: ClientAuth): Unit =

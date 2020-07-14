@@ -3,7 +3,7 @@ package com.twitter.finagle.util
 object ByteArrays {
 
   /**
-   * An efficient implementation of adding two Array[Byte] objects togther.
+   * An efficient implementation of adding two Array[Byte] objects together.
    * About 20x faster than (a ++ b).
    */
   def concat(a: Array[Byte], b: Array[Byte]): Array[Byte] = {

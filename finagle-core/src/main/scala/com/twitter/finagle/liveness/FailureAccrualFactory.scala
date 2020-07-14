@@ -207,7 +207,7 @@ object FailureAccrualFactory {
               override def didMarkDead(duration: Duration): Unit = {
                 // acceptable race condition here for the right `policy.show()`. A policy's
                 // state is only reset after it is revived,`policy.revived()` which is called
-                // afer `duration` and a successful probe.
+                // after `duration` and a successful probe.
                 logger.info(
                   s"""marking connection to "$label" as dead for ${duration.inSeconds} seconds. """ +
                     s"""Policy: ${failureAccrualPolicy.show()}. """ +

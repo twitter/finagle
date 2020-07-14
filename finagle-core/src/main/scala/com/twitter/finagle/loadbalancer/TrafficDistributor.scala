@@ -51,7 +51,7 @@ private[finagle] object TrafficDistributor {
   /**
    * Transforms a [[Var]] of bound Addresses to an [[Activity]] of bound Addresses
    * @note The Addr.Bound metadata is stripped out in this method, the metadata can
-   *       be found in [[AddrMetadataExotraction]]
+   *       be found in [[AddrMetadataExtraction]]
    */
   private[finagle] def varAddrToActivity(dest: Var[Addr], label: String): Activity[Set[Address]] =
     Activity(dest.map {

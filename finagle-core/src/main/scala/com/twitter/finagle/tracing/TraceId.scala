@@ -131,7 +131,7 @@ object TraceId {
  *              be moved in here.
  * @param traceIdHigh The high 64bits of the id for this request, when the id is 128bits.
  *
- * @param terminal Whether this trace id is terminal. Any attemtps to override a terminal trace id
+ * @param terminal Whether this trace id is terminal. Any attempts to override a terminal trace id
  *                 will be ignored.
  */
 final case class TraceId(

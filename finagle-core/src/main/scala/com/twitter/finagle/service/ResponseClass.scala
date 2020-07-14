@@ -8,7 +8,7 @@ package com.twitter.finagle.service
 sealed abstract class ResponseClass {
 
   /**
-   * Accomodates responses that can be partially successful.
+   * Accommodates responses that can be partially successful.
    *
    * Determining a fractional value will typically require the server to
    * participate in this, perhaps by signaling it in a response header, or

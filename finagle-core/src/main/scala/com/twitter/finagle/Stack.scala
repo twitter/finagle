@@ -313,7 +313,7 @@ object Stack {
    *
    * {{{
    * case class Multiplier(i: Int) {
-   *   def mk(): (Multipler, Stack.Param[Multipler]) =
+   *   def mk(): (Multiplier, Stack.Param[Multiplier]) =
    *     (this, Multiplier.param)
    * }
    * object Multiplier {
@@ -338,7 +338,7 @@ object Stack {
      * public member variables in the class. The function `() => value` is invoked to display the
      * current value of a member variable.
      *
-     * This should be overriden by param classes that do not implement [[scala.Product]]
+     * This should be overridden by param classes that do not implement [[scala.Product]]
      */
     def show(p: P): Seq[(String, () => String)] = Seq.empty
   }

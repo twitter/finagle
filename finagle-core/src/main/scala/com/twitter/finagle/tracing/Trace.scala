@@ -86,7 +86,7 @@ object Trace extends Tracing {
 
   /**
    * Whether or not trace recording is enabled on this process: `false` indicates it
-   * was shutdown either via `-com.twitter.finagle.tracing.enabled` flag or `Trac.disable()` API.
+   * was shutdown either via `-com.twitter.finagle.tracing.enabled` flag or `Trace.disable()` API.
    */
   def enabled: Boolean = _enabled
 

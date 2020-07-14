@@ -65,7 +65,7 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    * [[com.twitter.finagle.util.DefaultMonitor]], logs these exceptions.
    *
    * Monitors are wired into the server or client stacks via
-   * [[com.twitter.finagle.filter.MonitorFilter]] and are appl are applied to the following kinds
+   * [[com.twitter.finagle.filter.MonitorFilter]] and are applied to the following kinds
    * of exceptions:
    *
    *  - Synchronous exceptions thrown on request path, `Service.apply(request)`

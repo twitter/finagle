@@ -237,7 +237,7 @@ private[finagle] object BindingFactory {
       val LoadBalancerFactory.Param(balancer) = params[LoadBalancerFactory.Param]
       val eagerConnections = params[EagerConnections].enabled
 
-      // we check if the stack has been explictly configured to detect misconfiguration
+      // we check if the stack has been explicitly configured to detect misconfiguration
       // and make sure that the underlying balancer supports eagerly connecting to endpoints
       val eagerlyConnect: Boolean =
         if (params.contains[EagerConnections]) {
@@ -262,8 +262,8 @@ private[finagle] object BindingFactory {
             LoadBalancerFactory.Dest(bound.addr) +
             LoadBalancerFactory.ErrorLabel(errorLabel)
 
-        // Explictly disable `EagerConnections` if (1) `eagerlyConnect` is false, indicating that
-        // the feature was explictly disabled or the underlying balancer does not support the eager connections
+        // Explicitly disable `EagerConnections` if (1) `eagerlyConnect` is false, indicating that
+        // the feature was explicitly disabled or the underlying balancer does not support the eager connections
         // feature or (2) If request-level dtab overrides are present due to their unpredictable nature,
         // resulting in wasteful connections.
         val finalParams =

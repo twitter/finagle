@@ -563,7 +563,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // a zero allocation `status` implementation.
     //
     // DeterministicAperture has `coord` and `logicalAperture` fixed on construction,
-    // used to compute `indicies`. We can safely cache the resulting set into `seqIndices`.
+    // used to compute `indices`. We can safely cache the resulting set into `seqIndices`.
     // This cache will be recomputed on subsequent rebuilds.
     private[this] val seqIndices: Array[Int] = indices.toArray
     def status: Status = {
