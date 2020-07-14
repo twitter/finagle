@@ -10,6 +10,9 @@ Unreleased
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-base-http: Change return type of `MultipartDecoder.decodeFull` to return a `Future` and add
+  support for chunked requests.
+
 * finagle-core: Correct the spelling of `Tracing.recordClientSendFrargmet()` to
   `Tracing.recordClientSendFragment()` ``PHAB_ID=D505617``
 

@@ -2,7 +2,7 @@ package com.twitter.finagle.http.exp
 
 import com.twitter.finagle.http.{MediaType, Method, Request}
 import com.twitter.finagle.util.LoadService
-import com.twitter.util.StorageUnit
+import com.twitter.util.{Future, StorageUnit}
 
 /**
  * A utility that represents a decoder for a [[Multipart]] data.
@@ -12,20 +12,20 @@ import com.twitter.util.StorageUnit
  */
 abstract class MultipartDecoder {
 
-  protected def decodeFull(request: Request, maxInMemoryFileSize: StorageUnit): Option[Multipart]
+  protected def decodeFull(request: Request, maxInMemoryFileSize: StorageUnit): Future[Option[Multipart]]
 
-  final def decode(request: Request): Option[Multipart] =
+  final def decode(request: Request): Future[Option[Multipart]] =
     decode(request, Multipart.DefaultMaxInMemoryFileSize)
 
-  final def decode(request: Request, maxInMemoryFileSize: StorageUnit): Option[Multipart] =
-    if (request.isChunked || !MultipartDecoder.isMultipart(request)) None
+  final def decode(request: Request, maxInMemoryFileSize: StorageUnit): Future[Option[Multipart]] =
+    if (!MultipartDecoder.isMultipart(request)) Future.None
     else decodeFull(request, maxInMemoryFileSize)
 }
 
 object MultipartDecoder extends MultipartDecoder {
 
   val Empty: MultipartDecoder = new MultipartDecoder {
-    def decodeFull(request: Request, maxInMemoryFileSize: StorageUnit): Option[Multipart] = None
+    def decodeFull(request: Request, maxInMemoryFileSize: StorageUnit): Future[Option[Multipart]] = Future.None
   }
 
   // A service-loaded `MultipartDecoder`.
@@ -38,6 +38,6 @@ object MultipartDecoder extends MultipartDecoder {
   private def isMultipart(request: Request): Boolean =
     request.method == Method.Post && request.contentType.exists(contentTypeIsMultipart)
 
-  protected def decodeFull(request: Request, maxInMemoryFileSize: StorageUnit): Option[Multipart] =
+  protected def decodeFull(request: Request, maxInMemoryFileSize: StorageUnit): Future[Option[Multipart]] =
     underlying.decode(request)
 }
