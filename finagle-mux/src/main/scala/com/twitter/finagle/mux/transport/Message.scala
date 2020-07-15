@@ -43,12 +43,6 @@ private[finagle] object Message {
         typ == Message.Types.Rdiscarded ||
         typ == Message.Types.Tdiscarded
 
-    private[mux] def isRefCounted(typ: Byte): Boolean =
-      (typ == Types.Tping || typ == Types.Rping
-        || typ == Types.Tdiscarded || typ == Types.Rdiscarded
-        || typ == Types.Tdrain || typ == Types.Rdrain
-        || typ == Types.Tlease)
-
     // Application messages:
     val Treq = 1: Byte
     val Rreq = -1: Byte
