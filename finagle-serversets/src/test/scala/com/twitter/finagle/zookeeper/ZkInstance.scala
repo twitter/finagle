@@ -15,7 +15,7 @@ class ZkInstance {
 
   lazy val zookeeperAddress = {
     if (!started) throw new IllegalStateException("can't get address until instance is started")
-    new InetSocketAddress(zookeeperServer.getClientPort)
+    new InetSocketAddress(InetAddress.getLoopbackAddress.getHostName, zookeeperServer.getClientPort)
   }
 
   lazy val zookeeperConnectString =
@@ -30,9 +30,6 @@ class ZkInstance {
     connectionFactory = ServerCnxnFactory(InetAddress.getLoopbackAddress)
     connectionFactory.startup(zookeeperServer)
     zookeeperClient = new ZooKeeperClient(10.milliseconds, zookeeperAddress)
-
-    // Disable noise from zookeeper logger
-//    java.util.logging.LogManager.getLogManager().reset();
   }
 
   def stop(): Unit = {
