@@ -5,6 +5,7 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.param.Logger
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
+import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, param}
 import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing.KeyHasher
@@ -49,7 +50,7 @@ private[finagle] class MemcachedPartitioningService(
   underlying: Stack[ServiceFactory[Command, Response]],
   params: Stack.Params,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
-  numReps: Int = ConsistentHashPartitioningService.DefaultNumReps)
+  numReps: Int = NumReps.Default)
     extends ConsistentHashPartitioningService[Command, Response, Buf](
       underlying,
       params,

@@ -54,7 +54,7 @@ private[finagle] class RedisPartitioningService(
   underlying: Stack[ServiceFactory[Command, Reply]],
   params: Stack.Params,
   keyHasher: hashing.KeyHasher = hashing.KeyHasher.MURMUR3,
-  numReps: Int = ConsistentHashPartitioningService.DefaultNumReps)
+  numReps: Int = NumReps.Default)
     extends ConsistentHashPartitioningService[Command, Reply, Buf](
       underlying,
       params,

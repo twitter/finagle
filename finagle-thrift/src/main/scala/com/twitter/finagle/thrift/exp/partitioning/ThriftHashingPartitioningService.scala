@@ -4,6 +4,7 @@ import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.{
   HashingStrategyException,
   NoPartitioningKeys
 }
+import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, PartitioningService}
 import com.twitter.finagle.thrift.ClientDeserializeCtx
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.RequestMerger
@@ -25,7 +26,7 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
   params: Stack.Params,
   hashingStrategy: HashingPartitioningStrategy,
   keyHasher: KeyHasher = KeyHasher.MURMUR3,
-  numReps: Int = ConsistentHashPartitioningService.DefaultNumReps)
+  numReps: Int = NumReps.Default)
     extends ConsistentHashPartitioningService[Req, Rep, Any](
       underlying,
       params,

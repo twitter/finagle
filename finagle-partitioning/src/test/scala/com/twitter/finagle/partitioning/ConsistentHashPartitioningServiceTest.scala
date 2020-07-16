@@ -5,6 +5,7 @@ import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
+import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.hashing.KeyHasher
 import com.twitter.util._
@@ -324,7 +325,7 @@ private[this] class TestConsistentHashPartitioningService(
   underlying: Stack[ServiceFactory[String, String]],
   params: Stack.Params,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
-  numReps: Int = ConsistentHashPartitioningService.DefaultNumReps,
+  numReps: Int = NumReps.Default,
   oldLibMemcachedVersionComplianceMode: Boolean = false)
     extends ConsistentHashPartitioningService[String, String, String](
       underlying,

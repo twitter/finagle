@@ -5,6 +5,7 @@ import com.twitter.finagle
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.{param => _, _}
@@ -22,7 +23,7 @@ import scala.collection.mutable
 private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   underlying: Stack[ServiceFactory[Req, Rep]],
   params: Stack.Params,
-  numReps: Int = ConsistentHashPartitioningService.DefaultNumReps) { self =>
+  numReps: Int = NumReps.Default) { self =>
 
   private[this] val statsReceiver = {
     val finagle.param.Stats(stats) = params[finagle.param.Stats]
