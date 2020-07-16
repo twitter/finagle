@@ -61,10 +61,10 @@ case class XTrim(key: Buf, size: Long, exact: Boolean) extends StrictKeyCommand 
   }
 }
 
-case class XDel(key: Buf, ids: Seq[Buf]) extends StrictKeysCommand {
-  override def name: Buf = Command.XDEL
+case class XDel(key: Buf, ids: Seq[Buf]) extends StrictKeyCommand {
+  RequireClientProtocol(ids.nonEmpty, "ids must not be empty")
 
-  override def keys: Seq[Buf] = ids
+  override def name: Buf = Command.XDEL
 
   override def body: Seq[Buf] = Seq(key) ++ ids
 }

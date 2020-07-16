@@ -108,15 +108,6 @@ private[finagle] class RedisPartitioningService(
 
       case kc: KeyCommand => Seq(kc.key)
 
-      // NOTE: XDel seems to be categorized incorrectly in the hierarchy of Command traits.
-      // According to the documentation the semantics are `XDEL mystream id1 id2...`.
-      // The XDel case class has `keys` overridden as the ids, however these are lkeys,
-      // not pkeys, so it seems partitioning based on anything but the `key` field would
-      // be erroneous, therefore we can't rely on the KeysCommand case here to do things
-      // correctly, unless we want to change the implementation of the XDel command, and
-      // I'm unsure of the implications of doing that
-      case xdel: XDel => Seq(xdel.key)
-
       case kcs: KeysCommand => kcs.keys
       case _ => unsupportedCommand(command)
     }
@@ -211,7 +202,7 @@ private[finagle] class RedisPartitioningService(
 
   protected def isSinglePartition(command: Command): Future[Boolean] =
     command match {
-      case _: KeyCommand | _: XDel | _: Ping.type => Future.True
+      case _: KeyCommand | _: Ping.type => Future.True
       case _ if allKeysForSinglePartition(command) => Future.True
       case _ => Future.False
     }
