@@ -1,12 +1,10 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle.loadbalancer.p2c.P2CPick
 import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT}
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.util.DefaultTimer.Implicit
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Time}
 import scala.collection.immutable.VectorBuilder
@@ -349,13 +347,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       dist
     }
 
-    // A TLS handshake can take anywhere between [250, 1000]ms. A 500ms jitter was picked as an intermediate
-    // value based on this range
-    private final val connectJitterMs: Int = 500
-
     /**
-     * Eagerly connects to the endpoints within the aperture. Connection establishment with
-     * each endpoint is jittered picking a random duration between [0, `connectJitterMs`] milliseconds
+     * Eagerly connects to the endpoints within the aperture. The connections created are
+     * out of band without any timeouts. If an in-flight request picks a host that has no
+     * established sessions, a request-driven connection will be established.
      */
     private def doEagerlyConnect(): Unit = {
       val is = indices
@@ -363,16 +358,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         rebuildLog.debug(s"establishing ${is.size} eager connections")
       }
 
-      for (i <- is) {
-        // jitter the time to connect.
-        val timeToSleep = rng.nextInt(connectJitterMs).milliseconds
-
-        // the connection will be kicked off by the timer's thread.
-        Future.sleep(timeToSleep).onSuccess { _ =>
-          // short circuit if this distributor has been discarded
-          if (!rebuilt) {
-            vector(i).apply().flatMap { svc => svc.close() }
-          }
+      is.foreach { i =>
+        ApertureEagerConnections.submit {
+          if (rebuilt) Future.Done
+          else vector(i).apply().flatMap { svc => svc.close() }
         }
       }
     }
