@@ -45,7 +45,7 @@ class ZkAnnouncerTest
     Resolver.eval("zk2!" + inst.zookeeperConnectString + "!" + path)
 
   private[this] def zk2resolve(path: String, endpoint: String): Name =
-    Resolver.eval("zk2!" + inst.zookeeperConnectString + "!" + path + ":" + endpoint)
+    Resolver.eval("zk2!" + inst.zookeeperConnectString + "!" + path + "!" + endpoint)
 
   def hostPath = "localhost:%d!%s".format(inst.zookeeperAddress.getPort, path)
 
