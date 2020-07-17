@@ -59,7 +59,7 @@ class StandardToggleMapTest extends FunSuite {
       val tm = StandardToggleMap("com.twitter.finagle.toggle.test.ZZZ", NullStatsReceiver)
       assert(tm.iterator.isEmpty)
       val toggle = tm("com.toggle.XYZ")
-      assert(!toggle.isDefinedAt(245))
+      assert(toggle.isUndefined)
       intercept[UnsupportedOperationException] {
         toggle(245)
       }
@@ -250,7 +250,7 @@ class StandardToggleMapTest extends FunSuite {
       newRegistry()
     )
 
-    assert(!togMap("com.twitter.foo").isDefinedAt(1))
+    assert(togMap("com.twitter.foo").isUndefined)
     togMap.put("com.twitter.foo", 1.0)
     assert(togMap("com.twitter.foo")(1))
   }

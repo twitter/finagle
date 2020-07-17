@@ -141,11 +141,11 @@ class JsonToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
         val off = map("com.twitter.off")
         val doestExist = map("com.twitter.lolcat")
         forAll(arbitrary[Int]) { i =>
-          assert(on.isDefinedAt(i))
+          assert(on.isDefined)
           assert(on(i))
-          assert(off.isDefinedAt(i))
+          assert(off.isDefined)
           assert(!off(i))
-          assert(!doestExist.isDefinedAt(i))
+          assert(!doestExist.isDefined)
         }
     }
   }

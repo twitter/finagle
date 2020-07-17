@@ -67,7 +67,7 @@ abstract class ToggleMap { self =>
    * Creates a [[ToggleMap]] which uses `this` before `that`.
    *
    * [[apply]] returns a [[Toggle]] that uses the [[Toggle]] from `this`
-   * if it `isDefinedAt` for the input, before trying `that`.
+   * if it `isDefined` for the input, before trying `that`.
    *
    * [[iterator]] includes metadata from both `self` and `that`,
    * with `self`'s metadata taking precedence on conflicting ids.
@@ -109,7 +109,7 @@ object ToggleMap {
 
   /**
    * Used to create a `Toggle` that hashes its inputs to
-   * `apply` and `isDefinedAt` in order to promote a relatively even
+   * `apply` and `isDefined` in order to promote a relatively even
    * distribution even when the inputs do not have a good distribution.
    *
    * This allows users to get away with using a poor hashing function,
@@ -124,7 +124,7 @@ object ToggleMap {
         val h = MurmurHash3.mix(hashSeed, i)
         MurmurHash3.finalizeHash(h, 1)
       }
-      def isDefinedAt(x: Int): Boolean = true
+      def isDefined: Boolean = true
       def apply(x: Int): Boolean = fn(hash(x))
 
       def currentFraction: Double = fraction
@@ -194,8 +194,8 @@ object ToggleMap {
 
           override def toString: String = delegate.toString
 
-          def isDefinedAt(x: Int): Boolean =
-            delegate.isDefinedAt(x)
+          def isDefined: Boolean =
+            delegate.isDefined
 
           def apply(v1: Int): Boolean = {
             val value = delegate(v1)
@@ -379,8 +379,8 @@ object ToggleMap {
       fractionAndToggle.set(fAndT)
     }
 
-    def isDefinedAt(t: Int): Boolean =
-      fractionAndToggle.get()._2.isDefinedAt(t)
+    def isDefined: Boolean =
+      fractionAndToggle.get()._2.isDefined
 
     def apply(t: Int): Boolean =
       fractionAndToggle.get()._2(t)
@@ -485,7 +485,7 @@ object ToggleMap {
 
       def currentFraction: Double = fractionAndToggle.get()._1
 
-      def isDefinedAt(t: Int): Boolean =
+      def isDefined: Boolean =
         fractions.get(id) match {
           case Some(f) if Toggle.isValidFraction(f) => true
           case _ => false

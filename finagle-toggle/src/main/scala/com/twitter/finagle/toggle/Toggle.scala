@@ -28,11 +28,11 @@ abstract class Toggle(private[toggle] val id: String) extends Function1[Int, Boo
       override def toString: String =
         s"${self.toString}.orElse(${that.toString})"
 
-      def isDefinedAt(x: Int): Boolean =
-        self.isDefinedAt(x) || that.isDefinedAt(x)
+      def isDefined: Boolean =
+        self.isDefined || that.isDefined
 
       def apply(v1: Int): Boolean =
-        if (self.isDefinedAt(v1)) self.apply(v1) else that.apply(v1)
+        if (self.isDefined) self.apply(v1) else that.apply(v1)
     }
   }
 
@@ -42,11 +42,13 @@ abstract class Toggle(private[toggle] val id: String) extends Function1[Int, Boo
   final def isEnabled(t: Int): Boolean = apply(t)
 
   /**
-   * A Toggle should be either defined for the entire domain of Int, or undefined.
-   *
-   * @note Parameter x will be removed in a later commit.
+   * Whether this toggle is backed by a concrete toggle
+   * that will decide whether it's enabled or not.
+   * If this is false, then apply should always return false.
    */
-  def isDefinedAt(x: Int): Boolean
+  def isDefined: Boolean
+
+  final def isUndefined: Boolean = !isDefined
 }
 
 object Toggle {
@@ -118,7 +120,7 @@ object Toggle {
             else b
           }
 
-          def isDefinedAt(x: Int): Boolean = currentToggle.isDefinedAt(x)
+          def isDefined: Boolean = currentToggle.isDefined
 
           override def apply(v1: Int): Boolean =
             currentToggle(v1)
@@ -214,7 +216,7 @@ object Toggle {
       validateFraction(id, fraction)
 
       override def toString: String = s"Toggle($id)"
-      def isDefinedAt(x: Int): Boolean = true
+      def isDefined: Boolean = true
       def apply(v1: Int): Boolean = fn(v1)
       def currentFraction: Double = fraction
     }
@@ -240,7 +242,7 @@ object Toggle {
    */
   private[toggle] val Undefined: Toggle =
     new Toggle("com.twitter.finagle.toggle.Undefined") {
-      def isDefinedAt(x: Int): Boolean = false
+      def isDefined: Boolean = false
       def apply(v1: Int): Boolean = throw new UnsupportedOperationException()
       override def toString: String = "Undefined"
 

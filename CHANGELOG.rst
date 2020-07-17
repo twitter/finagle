@@ -15,6 +15,8 @@ Breaking API Changes
 
 * finagle-redis: Use `StrictKeyCommand` for XDEL ``PHAB_ID=D517291``
 
+* finagle-toggle: `Toggle.isDefinedAt(i: Int)` has become `Toggle.isDefined`. Additionally, a new method `Toggle.isUndefined` has been added. ``PHAB_ID=D516868``
+
 * finagle-zipkin-scribe: The scribe.thrift file was moved to finagle-thrift/src/main/thrift under a new
   namespace. `com.twitter.finagle.thrift.scribe.(thrift|thriftscala)` ``PHAB_ID=D511471``
 

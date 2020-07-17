@@ -78,19 +78,19 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
 
     // start out empty
     val toggle = m(id)
-    forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
+    assert(toggle.isUndefined)
 
     // update that toggle
     m.put(id, 1.0)
     forAll(IntGen) { i =>
-      assert(toggle.isDefinedAt(i))
+      assert(toggle.isDefined)
       assert(toggle(i))
     }
 
     // disable it.
     m.put(id, 0.0)
     forAll(IntGen) { i =>
-      assert(toggle.isDefinedAt(i))
+      assert(toggle.isDefined)
       assert(!toggle(i))
     }
 
@@ -98,7 +98,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     m.put(id, 1.0)
     assert(toggle(12333))
     m.remove(id)
-    assert(!toggle.isDefinedAt(12333))
+    assert(toggle.isUndefined)
   }
 
   test("ToggleMap.mutable logs") {
@@ -142,11 +142,11 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     val off = map("com.toggle.off")
     val doesntExist = map("com.toggle.ummm")
     forAll(IntGen) { i =>
-      assert(on.isDefinedAt(i))
+      assert(on.isDefined)
       assert(on(i))
-      assert(off.isDefinedAt(i))
+      assert(off.isDefined)
       assert(!off(i))
-      assert(!doesntExist.isDefinedAt(i))
+      assert(doesntExist.isUndefined)
     }
 
     assert(map.iterator.size == 2)
@@ -220,7 +220,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
 
       forAll(ToggleGenerator.Id) { s =>
         val toggle = ToggleMap.flags(s)
-        forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
+        assert(toggle.isUndefined)
       }
     }
   }
@@ -246,12 +246,12 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
 
       val on = ToggleMap.flags("com.toggle.on")
       forAll(IntGen) { i =>
-        assert(on.isDefinedAt(i))
+        assert(on.isDefined)
         assert(on(i))
       }
       val off = ToggleMap.flags("com.toggle.off")
       forAll(IntGen) { i =>
-        assert(off.isDefinedAt(i))
+        assert(off.isDefined)
         assert(!off(i))
       }
 
@@ -259,11 +259,11 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
       // to change if the underlying algorithm changes. we want
       // some mechanism for seeing that the values can be variable.
       val someToggle = ToggleMap.flags("com.toggle.some")
-      assert(someToggle.isDefinedAt(999))
+      assert(someToggle.isDefined)
       assert(someToggle(999))
-      assert(someToggle.isDefinedAt(Int.MinValue))
+      assert(someToggle.isDefined)
       assert(!someToggle(Int.MinValue))
-      assert(someToggle.isDefinedAt(Int.MaxValue))
+      assert(someToggle.isDefined)
       assert(someToggle(Int.MaxValue))
     }
   }
@@ -296,14 +296,14 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     // make sure we start out cleared and using the flag returns false
     assert(!containsFlagId("com.toggle.on", ToggleMap.flags.iterator))
     val toggle = ToggleMap.flags("com.toggle.on")
-    forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
+    assert(toggle.isUndefined)
 
     // now modify the flags and set it to 100%
     flag.overrides.let("com.toggle.on", 1.0) {
       assert(containsFlagId("com.toggle.on", ToggleMap.flags.iterator))
       forAll(IntGen) { i =>
         assert(toggle(i))
-        assert(toggle.isDefinedAt(i))
+        assert(toggle.isDefined)
       }
 
       // then nested within that, turn it off to 0%.
@@ -311,14 +311,14 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
         assert(containsFlagId("com.toggle.on", ToggleMap.flags.iterator))
         forAll(IntGen) { i =>
           assert(!toggle(i))
-          assert(toggle.isDefinedAt(i))
+          assert(toggle.isDefined)
         }
       }
 
       // then remove it via letClear
       flag.overrides.letClear("com.toggle.on") {
         assert(!containsFlagId("com.toggle.on", ToggleMap.flags.iterator))
-        forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
+        toggle.isUndefined
       }
     }
     assert(!containsFlagId("com.toggle.on", ToggleMap.flags.iterator))
@@ -371,20 +371,20 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
     val toggle = tm01("com.toggle.t")
 
     // the toggle doesn't exist in either underlying map
-    forAll(IntGen) { i => assert(!toggle.isDefinedAt(i)) }
+    toggle.isUndefined
 
     // the toggle doesn't yet exist in tm0
     // so we should use the value from tm1 (true)
     tm1.put("com.toggle.t", 1.0)
     forAll(IntGen) { i =>
-      assert(toggle.isDefinedAt(i))
+      assert(toggle.isDefined)
       assert(toggle(i))
     }
 
     // now, update it to 0% in tm0 which should it should use instead
     tm1.put("com.toggle.t", 0.0)
     forAll(IntGen) { i =>
-      assert(toggle.isDefinedAt(i))
+      assert(toggle.isDefined)
       assert(!toggle(i))
     }
   }
@@ -408,7 +408,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
   test("ToggleMap.On") {
     val toggle = ToggleMap.On("com.on.toggle")
     forAll(IntGen) { i =>
-      assert(toggle.isDefinedAt(i))
+      assert(toggle.isDefined)
       assert(toggle(i))
     }
     assert(Iterator.empty.sameElements(ToggleMap.On.iterator))
@@ -417,7 +417,7 @@ class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Ma
   test("ToggleMap.Off") {
     val toggle = ToggleMap.Off("com.off.toggle")
     forAll(IntGen) { i =>
-      assert(toggle.isDefinedAt(i))
+      assert(toggle.isDefined)
       assert(!toggle(i))
     }
     assert(Iterator.empty.sameElements(ToggleMap.Off.iterator))

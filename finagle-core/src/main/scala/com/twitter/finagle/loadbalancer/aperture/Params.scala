@@ -28,7 +28,7 @@ private[twitter] object EagerConnections {
         // server initialization has completed.
         val serverHashCode = ServerInfo().id.hashCode
         // protect against the toggle not being present
-        toggle.isDefinedAt(serverHashCode) && toggle(serverHashCode)
+        toggle.isDefined && toggle(serverHashCode)
     }
   }
 
