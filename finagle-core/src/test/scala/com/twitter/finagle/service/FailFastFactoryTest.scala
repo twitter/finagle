@@ -206,7 +206,7 @@ class FailFastFactoryTest
 
       val threadCompletionCount = new AtomicInteger(0)
 
-      thread("threadOne") {
+      threadNamed("threadOne") {
         val ctx = newCtx()
         ctx.p() = Throw(new Exception)
         ctx.failfast().poll match {
@@ -219,7 +219,7 @@ class FailFastFactoryTest
         threadCompletionCount.incrementAndGet()
       }
 
-      thread("threadTwo") {
+      threadNamed("threadTwo") {
         waitForBeat(1)
         val ctx = newCtx()
         ctx.p() = Throw(new Exception)

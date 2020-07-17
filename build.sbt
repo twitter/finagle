@@ -146,11 +146,14 @@ val sharedSettings = Seq(
   crossScalaVersions := Seq("2.11.12", "2.12.11", "2.13.1"),
   fork in Test := true, // We have to fork to get the JavaOptions
   libraryDependencies ++= Seq(
-    "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
-    "org.scalatest" %% "scalatest" % "3.0.8" % "test",
     // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
     "com.novocode" % "junit-interface" % "0.11" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test",
+    "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
+    "org.scalatest" %% "scalatest" % "3.1.1" % "test",
+    "org.scalatestplus" %% "junit" % "3.1.2.0" % "test",
+    "org.scalatestplus" %% "mockito-1-10" % "3.1.0.0" % "test",
+    "org.scalatestplus" %% "scalacheck-1-14" % "3.1.2.0" % "test",
     scalaCollectionCompat
   ),
   // Workaround for cross building Dtab.scala, which is not compatible between

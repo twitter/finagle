@@ -6,6 +6,8 @@ junit_tests(
         "3rdparty/jvm/org/apache/thrift:libthrift",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalatest",
+        "3rdparty/jvm/org/scalatestplus:junit",
+        "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "finagle/finagle-core/src/main",
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-thrift/src/test/java",

@@ -3,6 +3,7 @@ junit_tests(
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "3rdparty/jvm/junit",
+        "3rdparty/jvm/org/scalatestplus:junit",
         "finagle/finagle-base-http/src/main",
         "finagle/finagle-core/src/main",
         "finagle/finagle-core/src/main/java",

@@ -7,6 +7,8 @@ junit_tests(
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/scalacheck",
         "3rdparty/jvm/org/scalatest",
+        "3rdparty/jvm/org/scalatestplus:junit",
+        "3rdparty/jvm/org/scalatestplus:scalacheck",
         "finagle/finagle-toggle",
         "finagle/finagle-toggle/src/test/resources",
         "util/util-app/src/main/java",

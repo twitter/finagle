@@ -5,6 +5,8 @@ junit_tests(
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalatest",
+        "3rdparty/jvm/org/scalatestplus:junit",
+        "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "finagle/finagle-core/src/main",
         "finagle/finagle-core/src/test/scala:pushsession-utils",
         "finagle/finagle-http/src/main/scala",

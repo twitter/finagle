@@ -12,6 +12,7 @@ target(
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalatest",
+        "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "finagle/finagle-core",
         "finagle/finagle-serversets",
         "src/java/com/twitter/common/io",
@@ -29,6 +30,7 @@ junit_tests(
     dependencies = [
         ":core",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
+        "3rdparty/jvm/org/scalatestplus:junit",
         "finagle/finagle-core/src/main",
         "finagle/finagle-serversets/src/main/scala",
         "util/util-core:scala",
@@ -42,6 +44,7 @@ junit_tests(
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         ":core",
+        "3rdparty/jvm/org/scalatestplus:junit",
         "finagle/finagle-serversets/src/main/scala",
         "util/util-core:scala",
         "util/util-stats/src/main/scala",
@@ -61,6 +64,7 @@ junit_tests(
         ":core",
         "3rdparty/jvm/com/google/inject:guice",
         "3rdparty/jvm/org/scalacheck",
+        "3rdparty/jvm/org/scalatestplus:junit",
         "finagle/finagle-core/src/main",
         "finagle/finagle-serversets/src/main/java",
         "finagle/finagle-serversets/src/main/scala",
