@@ -475,7 +475,7 @@ lazy val finagleZipkinCore = Project(
     libraryDependencies ++= Seq(
       util("codec"),
       util("core"),
-      util("stats")) ++ scroogeLibs ++ jacksonLibs
+      util("stats")) ++ scroogeLibs
   ).dependsOn(finagleCore, finagleThrift)
 
 lazy val finagleZipkinScribe = Project(
@@ -497,8 +497,7 @@ lazy val finagleException = Project(
     name := "finagle-exception",
     libraryDependencies ++= Seq(
       util("codec")
-    ) ++ scroogeLibs,
-    libraryDependencies ++= jacksonLibs
+    ) ++ scroogeLibs
   ).dependsOn(finagleCore, finagleThrift)
 
 lazy val finagleServersets = Project(
@@ -520,7 +519,6 @@ lazy val finagleServersets = Project(
       ),
       "commons-lang" % "commons-lang" % "2.6"
     ),
-    libraryDependencies ++= jacksonLibs,
     libraryDependencies ++= scroogeLibs,
     ScroogeSBT.autoImport.scroogeLanguages in Compile := Seq("java"),
     excludeFilter in unmanagedSources := "ZkTest.scala",
@@ -557,8 +555,7 @@ lazy val finagleTunable = Project(
     libraryDependencies ++= Seq(
       util("core"),
       util("tunable")
-    ),
-    libraryDependencies ++= jacksonLibs
+    )
   ).dependsOn(finagleToggle)
 
 // Protocol support
@@ -646,8 +643,7 @@ lazy val finagleMemcached = Project(
       util("zk-test") % "test",
       "com.twitter" %% "bijection-core" % "0.9.7",
       "org.apache.thrift" % "libthrift" % libthriftVersion
-    ),
-    libraryDependencies ++= jacksonLibs
+    )
   ).dependsOn(
     // NOTE: Order is important here.
     // finagleNetty4 must come before finagleCore here, otherwise
@@ -720,7 +716,7 @@ lazy val finagleMySQL = Project(
       util("stats"),
       caffeineLib,
       jsr305Lib
-    ) ++ jacksonLibs,
+    ),
     excludeFilter in unmanagedSources := {
       "EmbeddableMysql.scala" || "ClientTest.scala"
     }
