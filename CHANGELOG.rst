@@ -129,6 +129,9 @@ Bug Fixes
 * finagle-zipkin-scribe: The scribe client should be configured using the `NullTracer`. Otherwise, spans
   produced by the client stack will be sampled at `initialSampleRate`. ``PHAB_ID=D507318``
 
+* finagle-redis: The redis client now includes the `RedisTracingFilter` and `RedisLoggingFilter` by default.
+  Previously, the filters existed but were not applied to the client or accessible.
+
 20.6.0
 ------
 
