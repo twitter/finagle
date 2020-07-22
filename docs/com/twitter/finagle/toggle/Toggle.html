@@ -327,10 +327,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd></dl></div>
-    </li><li name="com.twitter.finagle.toggle.Toggle#isDefinedAt" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="isDefinedAt(x:Int):Boolean"></a><a id="isDefinedAt(Int):Boolean"></a>
+    </li><li name="com.twitter.finagle.toggle.Toggle#isDefined" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="isDefined:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#isDefinedAt(x:Int):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#isDefined:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -339,11 +339,14 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isDefinedAt</span><span class="params">(<span name="x">x: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isDefined</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt">A Toggle should be either defined for the entire domain of Int, or undefined.</p><div class="fullcomment"><div class="comment cmt"><p>A Toggle should be either defined for the entire domain of Int, or undefined.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Parameter x will be removed in a later commit.</p></span></dd></dl></div>
+      <p class="shortcomment cmt">Whether this toggle is backed by a concrete toggle
+that will decide whether it's enabled or not.</p><div class="fullcomment"><div class="comment cmt"><p>Whether this toggle is backed by a concrete toggle
+that will decide whether it's enabled or not.
+If this is false, then apply should always return false.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -600,6 +603,22 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.toggle.Toggle#isUndefined" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="isUndefined:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/toggle/Toggle.html#isUndefined:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isUndefined</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

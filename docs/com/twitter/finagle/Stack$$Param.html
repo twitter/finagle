@@ -270,7 +270,7 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
 parameters for stack configuration. Note that the typeclass
 instance itself is used as the key in parameter maps; thus
 typeclasses should be persistent:</p><pre><span class="kw">case</span> <span class="kw">class</span> Multiplier(i: <span class="std">Int</span>) {
-  <span class="kw">def</span> mk(): (Multipler, Stack.Param[Multipler]) =
+  <span class="kw">def</span> mk(): (Multiplier, Stack.Param[Multiplier]) =
     (<span class="kw">this</span>, Multiplier.param)
 }
 <span class="kw">object</span> Multiplier {
@@ -644,7 +644,7 @@ Seq[(key, () =&gt; value)], where <code>key</code> and <code>value</code> are th
 public member variables in the class.</p><div class="fullcomment"><div class="comment cmt"><p>Method invoked to generate a way to display a P-typed param, which takes the form
 Seq[(key, () =&gt; value)], where <code>key</code> and <code>value</code> are the variable names and values for
 public member variables in the class. The function <code>() =&gt; value</code> is invoked to display the
-current value of a member variable.</p><p>This should be overriden by param classes that do not implement <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html" class="extype" name="scala.Product">scala.Product</a>
+current value of a member variable.</p><p>This should be overridden by param classes that do not implement <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html" class="extype" name="scala.Product">scala.Product</a>
 </p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>

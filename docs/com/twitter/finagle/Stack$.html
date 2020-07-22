@@ -1668,7 +1668,7 @@ parameters for stack configuration.</p><div class="fullcomment"><div class="comm
 parameters for stack configuration. Note that the typeclass
 instance itself is used as the key in parameter maps; thus
 typeclasses should be persistent:</p><pre><span class="kw">case</span> <span class="kw">class</span> Multiplier(i: <span class="std">Int</span>) {
-  <span class="kw">def</span> mk(): (Multipler, Stack.Param[Multipler]) =
+  <span class="kw">def</span> mk(): (Multiplier, Stack.Param[Multiplier]) =
     (<span class="kw">this</span>, Multiplier.param)
 }
 <span class="kw">object</span> Multiplier {

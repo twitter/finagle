@@ -635,7 +635,7 @@ connection. Default is no limit.
       
       <p class="shortcomment cmt">Configures the <code>NackAdmissionFilter</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <code>NackAdmissionFilter</code>. The <code>NackAdmissionFilter</code> is enabled
 by default and configured with the default values which can be found in
-<span class="extype" name="com.twitter.finagle.filter.NackAdmssionFilter">com.twitter.finagle.filter.NackAdmssionFilter</span>.</p><p>NOTE: Here is a brief summary of the configurable params.</p><p>A configuration with a <code>threshold</code> of N% and a <code>window</code> of duration W
+<a href="../filter/NackAdmissionFilter.html" class="extype" name="com.twitter.finagle.filter.NackAdmissionFilter">com.twitter.finagle.filter.NackAdmissionFilter</a>.</p><p>NOTE: Here is a brief summary of the configurable params.</p><p>A configuration with a <code>threshold</code> of N% and a <code>window</code> of duration W
 roughly translates as, &quot;start dropping some requests to the cluster when
 the nack rate averages at least N% over a window of duration W.&quot;</p><p>Here are some examples of situations with param values chosen to make the
 filter useful:</p><p>- Owners of Service A examine their service's nack rate over several days
@@ -649,7 +649,7 @@ filter useful:</p><p>- Owners of Service A examine their service's nack rate ove
   about avoiding cluster overload and don’t mind dropping some innocent
   requests during mild load so they choose a window of 10 seconds and a
   threshold of 0.15 (= 15%).
-</p></div><dl class="paramcmts block"><dt class="param">window</dt><dd class="cmt"><p>Duration over which to average the ratio of nackd/non-nacked
+</p></div><dl class="paramcmts block"><dt class="param">window</dt><dd class="cmt"><p>Duration over which to average the ratio of nacked/non-nacked
 responses.</p></dd><dt class="param">threshold</dt><dd class="cmt"><p>The upper limit of the fraction of responses which are
 nacks before the <code>NackAdmissionFilter</code> begins to drop requests.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Client-side admission control may not work well with clients that only very sporadically
       send requests to their backends. In this case, the view that each client has of the state

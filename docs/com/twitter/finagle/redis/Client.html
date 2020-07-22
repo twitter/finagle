@@ -1827,6 +1827,28 @@ be thrown.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>The number of removed elements.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd>ListCommands</dd><dt>Note</dt><dd><span class="cmt"><p>The sign of <code>count</code> describes whether it will remove them from the
       back or the front of the list.  If <code>count</code> is 0, it will remove all
       instances.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.ListCommands#lReset" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="lReset(key:com.twitter.io.Buf,values:List[com.twitter.io.Buf],ttl:Long,trim:Long):com.twitter.util.Future[Unit]"></a><a id="lReset(Buf,List[Buf],Long,Long):Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/Client.html#lReset(key:com.twitter.io.Buf,values:List[com.twitter.io.Buf],ttl:Long,trim:Long):com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lReset</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="values">values: <a href="../../../../scala/index.html#List[+A]=List[A]" class="extmbr" name="scala.List">List</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>, <span name="ttl">ttl: <span class="extype" name="java.lang.Long">Long</span> = <span class="symbol"><span class="name"><a href="../../../../scala/index.html">-1</a></span></span></span>, <span name="trim">trim: <span class="extype" name="java.lang.Long">Long</span> = <span class="symbol"><span class="name"><a href="../../../../scala/index.html">-1</a></span></span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Creates a list at <code>key</code>, pushes given <code>values</code> onto the end of the list,
+trims the list to <code>trim</code> length, and sets the ttl.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a list at <code>key</code>, pushes given <code>values</code> onto the end of the list,
+trims the list to <code>trim</code> length, and sets the ttl. <code>ttl</code> and <code>trim</code> are
+not used if set to -1. If a list already exists at <code>key</code>, the list will
+be overwritten. If the key is a non-list element, an exception will be thrown.</p><p>This command is Twitter-specific. Most Redis implementations do not support
+this method.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ListCommands</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.ListCommands#lSet" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="lSet(key:com.twitter.io.Buf,index:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]"></a><a id="lSet(Buf,Long,Buf):Future[Unit]"></a>
       <span class="permalink">

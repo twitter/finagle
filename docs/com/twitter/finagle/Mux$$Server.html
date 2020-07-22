@@ -1153,7 +1153,7 @@ from different clients/servers to a single stats receiver.
 (default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><p>Monitors are Finagle's out-of-band exception reporters. Whenever an exception is thrown
 on a request path, it's reported to the monitor. The default monitor implementation,
 <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>, logs these exceptions.</p><p>Monitors are wired into the server or client stacks via
-<a href="filter/MonitorFilter.html" class="extype" name="com.twitter.finagle.filter.MonitorFilter">com.twitter.finagle.filter.MonitorFilter</a> and are appl are applied to the following kinds
+<a href="filter/MonitorFilter.html" class="extype" name="com.twitter.finagle.filter.MonitorFilter">com.twitter.finagle.filter.MonitorFilter</a> and are applied to the following kinds
 of exceptions:</p><ul><li>Synchronous exceptions thrown on request path, <code>Service.apply(request)</code></li><li>Asynchronous exceptions (failed futures) thrown on request path, <code>Service.apply(request)</code></li><li>Exceptions thrown from <code>respond</code>, <code>onSuccess</code>, <code>onFailure</code> future callbacks</li><li>Fatal exceptions thrown from <code>map</code>, <code>flatMap</code>, <code>transform</code> future continuations</li></ul><p>Put it this way, we apply <code>Monitor.handle</code> to an exception if we would otherwise &quot;lose&quot; it,
 i.e. when it's not connected to the <code>Future</code>, nor is it connected to the call stack.</p><p>You can compose multiple monitors if you want to extend or override the standard behavior,
 defined in <code>DefaultMonitor</code>.</p><pre><span class="kw">import</span> com.twitter.util.Monitor
@@ -1187,9 +1187,9 @@ exceptions are propagated down to the next monitor.
 configure this to be <code>Off</code>, use <code>withOpportunisticTls(OpportunisticTls.Off)</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mux.OpportunisticTlsParams#withOpportunisticTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withOpportunisticTls(level:com.twitter.finagle.mux.transport.OpportunisticTls.Level):A"></a><a id="withOpportunisticTls(Level):Server"></a>
+      <a id="withOpportunisticTls(level:com.twitter.finagle.ssl.OpportunisticTls.Level):A"></a><a id="withOpportunisticTls(Level):Server"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$$Server.html#withOpportunisticTls(level:com.twitter.finagle.mux.transport.OpportunisticTls.Level):A" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mux$$Server.html#withOpportunisticTls(level:com.twitter.finagle.ssl.OpportunisticTls.Level):A" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1198,7 +1198,7 @@ configure this to be <code>Off</code>, use <code>withOpportunisticTls(Opportunis
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withOpportunisticTls</span><span class="params">(<span name="level">level: <span class="extype" name="com.twitter.finagle.mux.transport.OpportunisticTls.Level">Level</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Server">Server</a></span>
+        <span class="name">withOpportunisticTls</span><span class="params">(<span name="level">level: <a href="ssl/OpportunisticTls$$Level.html" class="extype" name="com.twitter.finagle.ssl.OpportunisticTls.Level">Level</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures whether to speak TLS or not.</p><div class="fullcomment"><div class="comment cmt"><p>Configures whether to speak TLS or not.</p><p>By default, don't use opportunistic TLS, and instead try to speak mux over TLS
