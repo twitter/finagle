@@ -212,23 +212,36 @@ private[finagle] object Bijections {
         }
 
         val realLength = r.content.length
+        // see https://tools.ietf.org/html/rfc7230#section-3.3.2
         contentLengthHeader match {
           case Some(l) if realLength != l =>
             // need to clean up the content length header
             result.headers.set(NettyHttp.HttpHeaderNames.CONTENT_LENGTH, realLength.toString)
 
           case None if realLength > 0 =>
-            // Only set the content length if we are sure there is content. This
-            // behavior complies with the specification that user agents should not
-            // set the content length header for messages without a payload body.
+            // Set the content length if we are sure there is content.
+            result.headers.set(NettyHttp.HttpHeaderNames.CONTENT_LENGTH, realLength.toString)
+
+          case None if shouldHaveLengthHeader(r.method) =>
+            // RFC 7230: "A user agent SHOULD send a Content-Length in a request message
+            // when no Transfer-Encoding is sent and the request method defines a meaning
+            // for an enclosed payload body."
             result.headers.set(NettyHttp.HttpHeaderNames.CONTENT_LENGTH, realLength.toString)
 
           case _ =>
           // NOP. Either the content length header already matches or
-          // it doesn't exist and there was no content, so there is nothing to do.
+          // it doesn't exist for messages that should not have 0 value (see allowEmpty),
+          // so there is nothing to do.
         }
 
         result
+      }
+    }
+
+    private[this] def shouldHaveLengthHeader(method: Method): Boolean = {
+      method match {
+        case Method.Post | Method.Put | Method.Patch => true
+        case _ => false
       }
     }
   }

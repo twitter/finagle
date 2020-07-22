@@ -69,6 +69,21 @@ object BijectionsTest {
     (req, body)
   }
 
+  val arbRequestMoreEmptyNotChunked =
+    for {
+      method <- arbMethod
+      uri <- arbUri
+      version <- Gen.oneOf(Version.Http10, Version.Http11)
+      headers <- Gen.containerOf[Seq, (String, String)](arbHeader)
+      body <- Gen.frequency((3, ""), (1, arbitrary[String]))
+    } yield {
+      val req = Request.apply(version, method, uri, BufReader(Buf.Utf8(body)))
+      headers.foreach { case (k, v) => req.headerMap.add(k, v) }
+      req.setChunked(false)
+      req.contentString = body
+      req
+    }
+
   val arbNettyMethod =
     Gen.oneOf(
       HttpMethod.GET,
@@ -228,11 +243,32 @@ class BijectionsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     assert(!HttpUtil.isTransferEncodingChunked(out))
   }
 
-  test("requests that don't have a body don't get an auto-added content-length header") {
-    val in = Request()
+  test("requests(get) that don't have a body don't get an auto-added content-length header") {
+    val in = Request(Method.Get, "/")
 
     val out = Bijections.finagle.requestToNetty(in, in.contentLength)
     assert(!out.headers.contains(Fields.ContentLength))
+  }
+
+  test("requests(post) with empty body get an auto-added content-length header") {
+    val in = Request(Method.Post, "/")
+
+    val out = Bijections.finagle.requestToNetty(in, in.contentLength)
+    assert(out.headers.get(Fields.ContentLength) == "0")
+  }
+
+  test("content-length behaviors") {
+    forAll(arbRequestMoreEmptyNotChunked) { in =>
+      val out = Bijections.finagle.requestToNetty(in, in.contentLength)
+      out.method match {
+        case HttpMethod.POST | HttpMethod.PATCH | HttpMethod.PUT =>
+          assert(out.headers.get(Fields.ContentLength) == in.content.length.toString)
+        case _ if in.content.isEmpty =>
+          assert(!out.headers.contains(Fields.ContentLength))
+        case _ =>
+          assert(out.headers.get(Fields.ContentLength) == in.content.length.toString)
+      }
+    }
   }
 
   test("finagle http request with chunked and content-length set -> netty") {

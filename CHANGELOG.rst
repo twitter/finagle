@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-netty4-http: Post, Put, Patch non-streaming outbound requests with empty bodies will
+  be added the `Content-Length` header with value `0`. ``PHAB_ID=D518010``
+
 20.7.0
 ------
 
