@@ -25,6 +25,7 @@ sealed abstract class StorageCommand(
   name: String)
     extends Command(name) {
   KeyValidation.checkKey(key)
+  ExpiryValidation.checkExpiry(name, expiry)
 }
 
 sealed abstract class NonStorageCommand(name: String) extends Command(name)
