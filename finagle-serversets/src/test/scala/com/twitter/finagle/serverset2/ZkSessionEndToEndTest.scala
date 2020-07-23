@@ -13,7 +13,14 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
   val zkTimeout = 100.milliseconds
-  val retryStream = new RetryStream(Backoff.const(zkTimeout))
+
+  // RetryStream doesn't work with MockTimer (yes, even after we tick it).
+  // So, use zero back off to make test deterministic.
+  // Alternatively, use a real timer such as ScheduledThreadPoolTimer,
+  // which also works but presumably less deterministic.
+  //
+  // TODO: figure out why MockTimer doesn't work.
+  val retryStream = new RetryStream(Backoff.const(0.milliseconds))
 
   @volatile var inst: ZkInstance = _
 
@@ -112,6 +119,8 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     }))
 
     @volatile var sessions = Seq[ZkSession]()
+    // The initial size of sessions is 1, because the current value
+    // of varZkSession (WatchState.pending) is emitted upon subscription.
     varZkSession.changes.register(Witness({ s: ZkSession => sessions = s +: sessions }))
 
     // Wait for the initial connect.
@@ -120,7 +129,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
         Var.sample(varZkState) ==
           WatchState.SessionState(SessionState.SyncConnected)
       )
-      assert(sessions.size == 1)
+      assert(sessions.size == 2)
     }
 
     val session1 = Var.sample(varZkSession)
@@ -174,6 +183,6 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
           )
       )
     }
-    assert(sessions.size == 2)
+    assert(sessions.size == 3)
   }
 }
