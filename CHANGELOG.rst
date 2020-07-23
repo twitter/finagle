@@ -13,6 +13,9 @@ Runtime Behavior Changes
 * finagle-netty4-http: Post, Put, Patch non-streaming outbound requests with empty bodies will
   be added the `Content-Length` header with value `0`. ``PHAB_ID=D518010``
 
+* finagle-core: A ServiceFactory created by ServiceFactory.const/constant propagates the wrapped
+  service status. ``PHAB_ID=D520598``
+
 20.7.0
 ------
 

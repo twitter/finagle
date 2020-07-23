@@ -131,6 +131,25 @@ class ServiceTest extends FunSuite with MockitoSugar {
     verify(service)("ok")
   }
 
+  test("ServiceFactory.const propagate the initial service status") {
+    val service = mock[Service[String, String]]
+    when(service.status) thenReturn Status.Open
+    when(service("ok")) thenReturn Future.value("ko")
+
+    val factory = ServiceFactory.const(service)
+    val newService = factory.toService
+
+    assert(Await.result(newService("ok"), 2.seconds) == "ko")
+    assert(newService.status == Status.Open)
+    assert(factory.status == Status.Open)
+
+    when(service.close(any)) thenReturn Future.Done
+    when(service.status) thenReturn Status.Closed
+    service.close()
+    assert(newService.status == Status.Closed)
+    assert(factory.status == Status.Closed)
+  }
+
   test("ServiceFactory.flatMap should release underlying service on failure") {
     val exc = new Exception
     val service = mock[Service[String, String]]

@@ -66,6 +66,7 @@ class ClientBuilderTest
     val service = mock[Service[String, String]]
     when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
     when(service.close(any[Time])) thenReturn Future.Done
+    when(service.status) thenReturn Status.Open
 
     val inMemory = new InMemoryStatsReceiver
     val numFailures = 21 // There will be 20 requeues by default
