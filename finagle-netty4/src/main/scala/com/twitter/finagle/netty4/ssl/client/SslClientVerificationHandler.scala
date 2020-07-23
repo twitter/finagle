@@ -4,6 +4,7 @@ import com.twitter.finagle.{Address, SslVerificationFailedException}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
 import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners._
+import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Return, Throw}
 import io.netty.channel._
 import io.netty.handler.ssl.SslHandler
@@ -26,6 +27,8 @@ private[netty4] class SslClientVerificationHandler(
   sessionVerifier: SslClientSessionVerifier)
     extends ChannelOutboundHandlerAdapter
     with BufferingChannelOutboundHandler { self =>
+
+  import SslClientVerificationHandler._
 
   private[this] val onHandshakeComplete = Promise[Unit]()
   private[this] val inet: Option[SocketAddress] = address match {
@@ -113,7 +116,25 @@ private[netty4] class SslClientVerificationHandler(
     sslConnectPromise.addListener(proxyFailuresTo(promise))
 
     onHandshakeComplete.respond {
-      case Return(_) => promise.setSuccess()
+      case Return(_) =>
+        // Using `trySuccess` here instead of `setSuccess` prevents the exception from
+        // going straight to the root monitor when the 'promise' has already been
+        // satisfied.
+        if (!promise.trySuccess()) {
+          // From the standpoint of the `SslClientVerificationHandler`, this `SSLSession`
+          // has been established successfully. However, we've seen that it's possible for
+          // this 'promise' to have already been failed with a cancellation and still reach
+          // this code. If that's the case, we log to further understand why. We have no
+          // reason to believe that the 'satisfy an already successful promise' condition
+          // will ever be hit, but it is there to be defensive.
+          if (promise.isSuccess)
+            log.error(
+              s"The SslClientVerificationHandler attempted to satisfy an already successful promise: $promise")
+          else
+            log.debug(
+              promise.cause,
+              "The SslClientVerificationHandler attempted to satisfy an already failed promise")
+        }
       case Throw(exn) =>
         // this is racy because we proxy failures
         promise.tryFailure(exn)
@@ -126,4 +147,8 @@ private[netty4] class SslClientVerificationHandler(
   // We don't override either `exceptionCaught` or `channelInactive` here since `SslHandler`
   // guarantees to fail the handshake promise (which we're already handling here) if any exception
   // (caused by either inbound or outbound event or closed channel) occurs during the handshake.
+}
+
+object SslClientVerificationHandler {
+  private val log = Logger.get(this.getClass)
 }
