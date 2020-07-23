@@ -45,7 +45,7 @@ private object Aperture {
   // Therefore, we've assigned the min to 12 to further decrease the probability of having a
   // aperture without any healthy nodes.
   // Note: the flag will be removed and replaced with a constant after tuning.
-  private val MinDeterministicAperture: Int = {
+  private[aperture] val MinDeterministicAperture: Int = {
     val min = minDeterminsticAperture()
     if (1 < min) min
     else {
@@ -84,6 +84,24 @@ private object Aperture {
     // practically, we take the min of 1.0 to account for any floating
     // point stability issues.
     math.min(1.0, width)
+  }
+
+  // Only an Inet address of the factory is considered and all
+  // other address types are ignored.
+  private[aperture] def computeVectorHash(it: Iterator[Address]): Int = {
+    // A specialized reimplementation of MurmurHash3.listHash
+    var n = 0
+    var h = MurmurHash3.arraySeed
+    while (it.hasNext) it.next() match {
+      case Inet(addr, _) if !addr.isUnresolved =>
+        val d = MurmurHash3.bytesHash(addr.getAddress.getAddress)
+        h = MurmurHash3.mix(h, d)
+        n += 1
+
+      case _ => // no-op
+    }
+
+    MurmurHash3.finalizeHash(h, n)
   }
 }
 
@@ -197,24 +215,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   }
 
   @volatile private[this] var _vectorHash: Int = -1
+
   // Make a hash of the passed in `vec` and set `vectorHash`.
-  // Only an Inet address of the factory is considered and all
-  // other address types are ignored.
-  private[this] def updateVectorHash(vec: Seq[Node]): Unit = {
-    // A specialized reimplementation of MurmurHash3.listHash
-    val it = vec.iterator
-    var n = 0
-    var h = MurmurHash3.arraySeed
-    while (it.hasNext) it.next().factory.address match {
-      case Inet(addr, _) if !addr.isUnresolved =>
-        val d = MurmurHash3.bytesHash(addr.getAddress.getAddress)
-        h = MurmurHash3.mix(h, d)
-        n += 1
-
-      case _ => // no-op
-    }
-
-    _vectorHash = MurmurHash3.finalizeHash(h, n)
+  private[this] def updateVectorHash(vec: Vector[Node]): Unit = {
+    val addrs = vec.iterator.map(_.factory.address)
+    _vectorHash = Aperture.computeVectorHash(addrs)
   }
 
   protected[this] def vectorHash: Int = _vectorHash
