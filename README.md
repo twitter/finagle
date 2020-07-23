@@ -55,20 +55,20 @@ The following are a few of the companies that are using Finagle:
 * [Twitter](https://twitter.com/)
 
 For a more complete list, please see
-[our adopter page](https://github.com/twitter/finagle/blob/master/ADOPTERS.md).
+[our adopter page](https://github.com/twitter/finagle/blob/release/ADOPTERS.md).
 If your organization is using Finagle, consider adding a link there and sending
 us a pull request!
 
 ## Contributing
 
 We feel that a welcoming community is important and we ask that you follow Twitter's
-[Open Source Code of Conduct](https://github.com/twitter/code-of-conduct/blob/master/code-of-conduct.md)
+[Open Source Code of Conduct](https://github.com/twitter/code-of-conduct/blob/release/code-of-conduct.md)
 in all interactions with the community.
 
-The `master` branch of this repository contains the latest stable release of
+The `release` branch of this repository contains the latest stable release of
 Finagle, and weekly snapshots are published to the `develop` branch. In general
 pull requests should be submitted against `develop`. See
-[CONTRIBUTING.md](https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/twitter/finagle/blob/release/CONTRIBUTING.md)
 for more details about how to contribute.
 
 ## License
