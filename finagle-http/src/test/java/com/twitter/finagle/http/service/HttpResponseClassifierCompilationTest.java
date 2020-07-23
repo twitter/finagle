@@ -20,7 +20,7 @@ import com.twitter.util.Return;
 public class HttpResponseClassifierCompilationTest {
 
   private ReqRep reqRep(Status status) {
-    return new ReqRep(
+    return ReqRep.apply(
         Request.apply("/"),
         new Return<Object>(Response.apply(status))
     );

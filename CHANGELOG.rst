@@ -16,6 +16,18 @@ Runtime Behavior Changes
 * finagle-core: A ServiceFactory created by ServiceFactory.const/constant propagates the wrapped
   service status. ``PHAB_ID=D520598``
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-core: introduce type-safe `ReqRep` variant ``PHAB_ID=D520027``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: `ReqRep` can no longer be created via `new ReqRep(..)`. Please use
+  `ReqRep.apply(..)` instead.
+  ``PHAB_ID=D520027``
+
 20.7.0
 ------
 

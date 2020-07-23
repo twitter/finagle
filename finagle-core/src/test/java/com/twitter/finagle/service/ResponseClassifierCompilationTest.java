@@ -30,19 +30,19 @@ public class ResponseClassifierCompilationTest {
 
     assertEquals(
         ResponseClasses.SUCCESS,
-        classifier.apply(new ReqRep(null, new Return<Object>("1"))));
+        classifier.apply(ReqRep.apply(null, new Return<Object>("1"))));
 
     assertEquals(
         ResponseClasses.NON_RETRYABLE_FAILURE,
-        classifier.apply(new ReqRep(null, new Throw<Object>(new RuntimeException()))));
+        classifier.apply(ReqRep.apply(null, new Throw<Object>(new RuntimeException()))));
 
     assertEquals(
         ResponseClasses.RETRYABLE_FAILURE,
-        classifier.apply(new ReqRep(null, new Throw<Object>(Failure.rejected()))));
+        classifier.apply(ReqRep.apply(null, new Throw<Object>(Failure.rejected()))));
 
     assertEquals(
         ResponseClasses.IGNORED,
-        classifier.apply(new ReqRep(null, new Throw<Object>(Failure.ignorable("")))));
+        classifier.apply(ReqRep.apply(null, new Throw<Object>(Failure.ignorable("")))));
   }
 
   @Test
@@ -64,16 +64,24 @@ public class ResponseClassifierCompilationTest {
           }
         };
 
-    assertTrue(classifier.isDefinedAt(new ReqRep("1", Return.False())));
-    assertFalse(classifier.isDefinedAt(new ReqRep(5, Return.False())));
+    assertTrue(classifier.isDefinedAt(ReqRep.apply("1", Return.False())));
+    assertFalse(classifier.isDefinedAt(ReqRep.apply(5, Return.False())));
 
     assertEquals(
         ResponseClasses.SUCCESS,
-        classifier.apply(new ReqRep("ok", Return.False())));
+        classifier.apply(ReqRep.apply("ok", Return.False())));
 
     assertEquals(
         ResponseClasses.NON_RETRYABLE_FAILURE,
-        classifier.apply(new ReqRep("nope", Return.False())));
+        classifier.apply(ReqRep.apply("nope", Return.False())));
+
+    assertEquals(
+        ResponseClasses.SUCCESS,
+        classifier.apply(new ReqRepT<String, Object>("ok", Return.False())));
+
+    assertEquals(
+        ResponseClasses.NON_RETRYABLE_FAILURE,
+        classifier.apply(new ReqRepT<String, Object>("nope", Return.False())));
   }
 
 }

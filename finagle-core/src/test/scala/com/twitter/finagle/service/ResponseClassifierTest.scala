@@ -65,10 +65,40 @@ class ResponseClassifierTest extends FunSuite {
     }
     val classifier = evens.orElse(odds)
 
+    // ReqRep is weakly typed, so it will match a ReqRep or ReqRepT
     assert(RetryableFailure == classifier(ReqRep(2, aThrow)))
+    assert(RetryableFailure == classifier(ReqRepT(2, aThrow)))
     assert(NonRetryableFailure == classifier(ReqRep(1, aThrow)))
+    assert(NonRetryableFailure == classifier(ReqRepT(1, aThrow)))
 
     assert(!classifier.isDefinedAt(ReqRep(0, aReturn)))
+    assert(!classifier.isDefinedAt(ReqRepT(0, aReturn)))
+    assert(Success == classifier.applyOrElse(ReqRep(0, aReturn), ResponseClassifier.Default))
+    assert(Success == classifier.applyOrElse(ReqRepT(0, aReturn), ResponseClassifier.Default))
+
+  }
+
+  test("typed composition") {
+    val aThrow = Throw(Failure("nope"))
+    val aReturn = Return(4)
+
+    val evens: ResponseClassifier = {
+      case ReqRepT(i: Int, Throw(_)) if i % 2 == 0 => RetryableFailure
+    }
+    val odds: ResponseClassifier = {
+      case ReqRepT(i: Int, Throw(_)) if i % 2 == 1 => NonRetryableFailure
+    }
+    val classifier = evens.orElse(odds)
+
+    assert(RetryableFailure == classifier(ReqRepT[Int, Int](2, aThrow)))
+    assert(RetryableFailure == classifier(ReqRep(2, aThrow)))
+    assert(NonRetryableFailure == classifier(ReqRepT[Int, Int](1, aThrow)))
+    assert(NonRetryableFailure == classifier(ReqRep(1, aThrow)))
+
+    assert(!classifier.isDefinedAt(ReqRepT[Int, Int](0, aReturn)))
+    assert(!classifier.isDefinedAt(ReqRep(0, aReturn)))
+    assert(
+      Success == classifier.applyOrElse(ReqRepT[Int, Int](0, aReturn), ResponseClassifier.Default))
     assert(Success == classifier.applyOrElse(ReqRep(0, aReturn), ResponseClassifier.Default))
   }
 
