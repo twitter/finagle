@@ -2,6 +2,7 @@ junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
+        "3rdparty/jvm/io/netty:netty4",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/apache/thrift:libthrift",
         "3rdparty/jvm/org/mockito:mockito-all",

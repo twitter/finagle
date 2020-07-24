@@ -37,6 +37,7 @@ scala_library(
     exports = [
         "finagle/finagle-toggle",
         "util/util-core:scala",
+        "util/util-hashing",
         "util/util-logging",
         "util/util-registry",
         "util/util-stats",
