@@ -111,43 +111,13 @@ class PayloadSizeFilterTest extends FunSuite with Eventually {
           Record(
             Trace.id,
             Time.now,
-            Annotation.BinaryAnnotation("srv/stream/request/chunk_payload_bytes", 1),
+            Annotation.BinaryAnnotation("srv/stream/request/chunk_payload_bytes", 6),
             None
           ),
           Record(
             Trace.id,
             Time.now,
-            Annotation.BinaryAnnotation("srv/stream/request/chunk_payload_bytes", 2),
-            None
-          ),
-          Record(
-            Trace.id,
-            Time.now,
-            Annotation.BinaryAnnotation("srv/stream/request/chunk_payload_bytes", 3),
-            None
-          ),
-          Record(
-            Trace.id,
-            Time.now,
-            Annotation.BinaryAnnotation("srv/stream/response/chunk_payload_bytes", 4),
-            None
-          ),
-          Record(
-            Trace.id,
-            Time.now,
-            Annotation.BinaryAnnotation("srv/stream/response/chunk_payload_bytes", 5),
-            None
-          ),
-          Record(
-            Trace.id,
-            Time.now,
-            Annotation.BinaryAnnotation("srv/stream/response/chunk_payload_bytes", 6),
-            None
-          ),
-          Record(
-            Trace.id,
-            Time.now,
-            Annotation.BinaryAnnotation("srv/stream/response/chunk_payload_bytes", 7),
+            Annotation.BinaryAnnotation("srv/stream/response/chunk_payload_bytes", 22),
             None
           )
         )

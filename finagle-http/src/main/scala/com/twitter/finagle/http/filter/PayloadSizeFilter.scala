@@ -6,8 +6,9 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, param}
 import com.twitter.finagle.stats.{Stat, StatsReceiver, Verbosity}
 import com.twitter.finagle.tracing.{Trace, Tracing}
-import com.twitter.io.Reader
-import com.twitter.util.Future
+import com.twitter.io.{Reader, StreamTermination}
+import com.twitter.util.{Future, Return, Throw, Try}
+import java.util.concurrent.atomic.AtomicLong
 
 private[finagle] object PayloadSizeFilter {
   val Role: Stack.Role = Stack.Role("HttpPayloadSize")
@@ -28,6 +29,38 @@ private[finagle] object PayloadSizeFilter {
 
   val clientTraceKeyPrefix: String = "clnt/"
   val serverTraceKeyPrefix: String = "srv/"
+
+  private val reqKey: String = "request_payload_bytes"
+  private val repKey: String = "response_payload_bytes"
+  private val chunkKey: String = "chunk_payload_bytes"
+
+  private final class RecordingChunkReader(
+    parent: Reader[Chunk],
+    trace: Tracing,
+    stat: Stat,
+    traceKey: String)
+      extends Reader[Chunk] { self =>
+
+    private[this] val bytesObserved = new AtomicLong()
+
+    private[this] val observeRead: Try[Option[Chunk]] => Unit = {
+      case Return(Some(chunk)) =>
+        val len = chunk.content.length
+        bytesObserved.addAndGet(len)
+        stat.add(len)
+
+      case Return(None) =>
+        if (trace.isActivelyTracing) trace.recordBinary(traceKey, bytesObserved.get)
+
+      case Throw(_) => // nop
+    }
+
+    def discard(): Unit = parent.discard()
+
+    def onClose: Future[StreamTermination] = parent.onClose
+
+    def read(): Future[Option[Chunk]] = parent.read().respond(observeRead)
+  }
 }
 
 /**
@@ -46,59 +79,35 @@ private[finagle] object PayloadSizeFilter {
  */
 private[finagle] class PayloadSizeFilter(statsReceiver: StatsReceiver, prefix: String)
     extends SimpleFilter[Request, Response] {
+  import PayloadSizeFilter._
 
-  private[this] val reqKey = "request_payload_bytes"
-  private[this] val repKey = "response_payload_bytes"
-  private[this] val chunkKey = "chunk_payload_bytes"
+  private[this] val streamReqTraceKey: String = s"${prefix}stream/request/${chunkKey}"
+  private[this] val streamRepTraceKey: String = s"${prefix}stream/response/${chunkKey}"
+  private[this] val reqTraceKey: String = prefix + reqKey
+  private[this] val repTraceKey: String = prefix + repKey
 
-  private[this] val streamReqTraceKey = s"${prefix}stream/request/${chunkKey}"
-  private[this] val streamRepTraceKey = s"${prefix}stream/response/${chunkKey}"
-  private[this] val reqTraceKey = prefix + reqKey
-  private[this] val repTraceKey = prefix + repKey
+  private[this] val requestBytes: Stat = statsReceiver.stat(Verbosity.Debug, reqKey)
+  private[this] val responseBytes: Stat = statsReceiver.stat(Verbosity.Debug, repKey)
 
-  private[this] val requestBytes = statsReceiver.stat(Verbosity.Debug, reqKey)
-  private[this] val responseBytes = statsReceiver.stat(Verbosity.Debug, repKey)
-
-  private[this] val streamRequestBytes =
+  private[this] val streamRequestBytes: Stat =
     statsReceiver.scope("stream").scope("request").stat(Verbosity.Debug, chunkKey)
-  private[this] val streamResponseBytes =
+  private[this] val streamResponseBytes: Stat =
     statsReceiver.scope("stream").scope("response").stat(Verbosity.Debug, chunkKey)
 
   private[this] def handleResponse(trace: Tracing): Response => Response = { rep =>
     if (rep.isChunked) {
       new ResponseProxy {
         override def response: Response = rep
-        override def chunkReader: Reader[Chunk] =
-          super.chunkReader
-            .map(onRead(recordRepSize, trace, streamResponseBytes, streamRepTraceKey))
+        override val chunkReader: Reader[Chunk] =
+          new RecordingChunkReader(super.chunkReader, trace, streamResponseBytes, streamRepTraceKey)
       }
     } else {
-      recordRepSize(rep.content.length, trace, responseBytes, repTraceKey)
+      recordBufferedSize(rep.content.length, trace, responseBytes, repTraceKey)
       rep
     }
   }
 
-  private[this] def onRead(
-    record: (Int, Tracing, Stat, String) => Unit,
-    trace: Tracing,
-    stat: Stat,
-    traceKey: String
-  ): Chunk => Chunk = { chunk =>
-    record(chunk.content.length, trace, stat, traceKey)
-    chunk
-  }
-
-  private[this] def recordReqSize(
-    size: Int,
-    trace: Tracing,
-    reqStat: Stat,
-    traceKey: String
-  ): Unit = {
-    reqStat.add(size.toFloat)
-    if (trace.isActivelyTracing) trace.recordBinary(traceKey, size)
-  }
-
-  private[this] def recordRepSize(
+  private[this] def recordBufferedSize(
     size: Int,
     trace: Tracing,
     repStat: Stat,
@@ -113,11 +122,11 @@ private[finagle] class PayloadSizeFilter(statsReceiver: StatsReceiver, prefix: S
     val request = if (req.isChunked) {
       new RequestProxy {
         override def request: Request = req
-        override def chunkReader: Reader[Chunk] =
-          super.chunkReader.map(onRead(recordReqSize, trace, streamRequestBytes, streamReqTraceKey))
+        override val chunkReader: Reader[Chunk] =
+          new RecordingChunkReader(super.chunkReader, trace, streamRequestBytes, streamReqTraceKey)
       }
     } else {
-      recordReqSize(req.content.length, trace, requestBytes, reqTraceKey)
+      recordBufferedSize(req.content.length, trace, requestBytes, reqTraceKey)
       req
     }
     service(request).map(handleResponse(trace))

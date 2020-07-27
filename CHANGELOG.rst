@@ -16,6 +16,10 @@ Runtime Behavior Changes
 * finagle-core: A ServiceFactory created by ServiceFactory.const/constant propagates the wrapped
   service status. ``PHAB_ID=D520598``
 
+* finagle-http: `c.t.f.http.filter.PayloadSizeFilter` no longer adds an annotation on each
+  streaming chunk and instead aggregates the byte count and adds a single record on stream
+  termination. ``PHAB_ID=D522543``
+
 New Features
 ~~~~~~~~~~~~
 
