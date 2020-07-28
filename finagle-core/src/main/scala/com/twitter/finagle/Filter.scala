@@ -127,7 +127,23 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 
   /**
    * Conditionally propagates requests down the filter chain. This may
-   * useful if you are statically wiring together filter chains based
+   * be useful if you are statically wiring together filter chains based
+   * on a configuration file, for instance.
+   *
+   * @param conditional a boolean value indicating whether the filter should be
+   *                    included in the filter chain.
+   * @param filter the filter to be conditionally included.
+   */
+  def andThenIf[Req2 >: ReqOut, Rep2 <: RepIn](
+    conditional: Boolean,
+    filter: Filter[ReqOut, RepIn, Req2, Rep2]
+  ): Filter[ReqIn, RepOut, Req2, Rep2] =
+    if (conditional) andThen(filter)
+    else this
+
+  /**
+   * Conditionally propagates requests down the filter chain. This may
+   * be useful if you are statically wiring together filter chains based
    * on a configuration file, for instance.
    *
    * @param condAndFilter a tuple of boolean and filter.

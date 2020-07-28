@@ -379,16 +379,30 @@ class FilterTest extends FunSuite {
     verify(spied).apply(any[ClientConnection])
   }
 
-  test("Filter.andThenIf: applies next filter when true") {
+  test("Filter.andThenIf (tuple): applies next filter when true") {
     val spied = spy(new PassThruFilter)
     val svc = (new PassThruFilter).andThenIf((true, spied)).andThen(constSvc)
     await(svc(4))
     verify(spied).apply(any[Int], any[Service[Int, Int]])
   }
 
-  test("Filter.andThenIf: doesn't apply next filter when false") {
+  test("Filter.andThenIf (tuple): doesn't apply next filter when false") {
     val spied = spy(new PassThruFilter)
     val svc = (new PassThruFilter).andThenIf((false, spied)).andThen(constSvc)
+    await(svc(4))
+    verify(spied, never).apply(any[Int], any[Service[Int, Int]])
+  }
+
+  test("Filter.andThenIf (params): applies next filter when true") {
+    val spied = spy(new PassThruFilter)
+    val svc = (new PassThruFilter).andThenIf(true, spied).andThen(constSvc)
+    await(svc(4))
+    verify(spied).apply(any[Int], any[Service[Int, Int]])
+  }
+
+  test("Filter.andThenIf (params): doesn't apply next filter when false") {
+    val spied = spy(new PassThruFilter)
+    val svc = (new PassThruFilter).andThenIf(false, spied).andThen(constSvc)
     await(svc(4))
     verify(spied, never).apply(any[Int], any[Service[Int, Int]])
   }

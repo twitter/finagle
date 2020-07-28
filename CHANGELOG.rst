@@ -25,6 +25,9 @@ New Features
 
 * finagle-core: introduce type-safe `ReqRep` variant ``PHAB_ID=D520027``
 
+* finagle-core: Added a new variant of `Filter.andThenIf` which allows passing the parameters
+  as individual parameters instead of a Scala tuple. ``PHAB_ID=D523010``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
