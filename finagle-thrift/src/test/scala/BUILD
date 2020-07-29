@@ -11,7 +11,6 @@ junit_tests(
         "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "finagle/finagle-core/src/main",
         "finagle/finagle-thrift/src/main/java",
-        "finagle/finagle-thrift/src/test/java",
         "finagle/finagle-thrift/src/test/resources",
         "finagle/finagle-thrift/src/test/thrift:delivery-thrift-java",
         "finagle/finagle-thrift/src/test/thrift:delivery-thrift-scala",
