@@ -107,7 +107,8 @@ object MethodBuilder {
   private[finagle] case class Config private (
     traceInitializer: Filter.TypeAgnostic,
     retry: MethodBuilderRetry.Config,
-    timeout: MethodBuilderTimeout.Config)
+    timeout: MethodBuilderTimeout.Config,
+    filter: Filter.TypeAgnostic = Filter.typeAgnosticIdentity)
 
   /** Used by the `ClientRegistry` */
   private[client] val RegistryKey = "methods"
@@ -353,6 +354,18 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   def withTraceInitializer(initializer: Filter.TypeAgnostic): MethodBuilder[Req, Rep] =
     withConfig(config.copy(traceInitializer = initializer))
 
+  /**
+   * Configure the customized filters, this is for generic configuration other
+   * than TraceInitializer, Retry, and Timeout. Example usage is for applying
+   * protocol-specific filters for MethodBuilder.
+   *
+   * Defaults is a pass-through [[TypeAgnostic]].
+   *
+   * @param filter A filter or filter chain to create a new MethodBuilder instance.
+   */
+  private[finagle] def withFilter(filter: Filter.TypeAgnostic): MethodBuilder[Req, Rep] =
+    withConfig(config.copy(filter = filter))
+
   //
   // Build
   //
@@ -432,6 +445,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     // timeout.
     //
     // - Trace Initialization
+    // - Customized filter
     // - Logical Stats
     // - Failure logging
     // - Annotate method name for a `Failure`
@@ -450,6 +464,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     }
 
     config.traceInitializer
+      .andThen(config.filter)
       .andThen(retries.logicalStatsFilter(stats))
       .andThen(retries.logFailuresFilter(clientName, methodName))
       .andThen(failureSource)
