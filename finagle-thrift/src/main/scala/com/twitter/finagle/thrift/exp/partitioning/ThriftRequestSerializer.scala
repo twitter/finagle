@@ -3,8 +3,9 @@ package com.twitter.finagle.thrift.exp.partitioning
 import com.twitter.finagle.Stack
 import com.twitter.finagle.Thrift.param
 import com.twitter.finagle.thrift.{RichClientParam, ThriftClientRequest}
-import com.twitter.scrooge.{TReusableBuffer, ThriftStruct}
+import com.twitter.scrooge.{TReusableBuffer, ThriftStruct, ThriftStructIface}
 import java.util
+import org.apache.thrift.TBase
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
 
 /**
@@ -28,12 +29,23 @@ private[partitioning] class ThriftRequestSerializer(params: Stack.Params) {
    * @param args       Thrift object request
    * @param oneWay     Expect response or not, this should inherit from the original request
    */
-  def serialize(methodName: String, args: ThriftStruct, oneWay: Boolean): ThriftClientRequest = {
+  def serialize(
+    methodName: String,
+    args: ThriftStructIface,
+    oneWay: Boolean
+  ): ThriftClientRequest = {
     val memoryBuffer = thriftReusableBuffer.get()
     try {
       val oprot = protocolFactory.getProtocol(memoryBuffer)
       oprot.writeMessageBegin(new TMessage(methodName, TMessageType.CALL, 0))
-      args.write(oprot)
+      args match {
+        case thriftStruct: ThriftStruct => thriftStruct.write(oprot)
+        case tBase if tBase.isInstanceOf[TBase[_, _]] =>
+          tBase.asInstanceOf[TBase[_, _]].write(oprot)
+        case _ =>
+          throw new IllegalArgumentException(
+            "unsupported request types: supporting scrooge generated java/scala requests")
+      }
       oprot.writeMessageEnd()
       oprot.getTransport().flush()
       val bytes = util.Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length())
