@@ -1,3 +1,11 @@
+Tracing
+<<<<<<<
+
+**finagle/tracing/sampled**
+  A counter for the number of times a positive sampling decision is made on an
+  unsampled trace. A sampling decision is made using a client's configured ``Tracer``,
+  using ``Tracer#sampleTrace``.
+
 Aperture
 <<<<<<<<
 

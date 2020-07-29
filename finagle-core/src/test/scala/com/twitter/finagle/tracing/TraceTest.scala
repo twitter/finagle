@@ -152,7 +152,9 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
   val tracer2 = mock[Tracer]
 
   when(tracer1.isActivelyTracing(any[TraceId])).thenReturn(true)
+  when(tracer1.sampleTrace(any[TraceId])).thenReturn(None)
   when(tracer2.isActivelyTracing(any[TraceId])).thenReturn(true)
+  when(tracer2.sampleTrace(any[TraceId])).thenReturn(None)
 
   test("Trace.traceService") {
     var didRun = false

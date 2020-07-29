@@ -28,6 +28,8 @@ New Features
 * finagle-core: Added a new variant of `Filter.andThenIf` which allows passing the parameters
   as individual parameters instead of a Scala tuple. ``PHAB_ID=D523010``
 
+* finagle-core: new metric (counter) for traces that are sampled. `finagle/tracing/sampled` ``PHAB_ID=D522355``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

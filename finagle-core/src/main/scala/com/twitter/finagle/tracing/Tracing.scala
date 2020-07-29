@@ -1,5 +1,6 @@
 package com.twitter.finagle.tracing
 
+import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.util.{Duration, Time}
 import java.net.InetSocketAddress
 import scala.annotation.tailrec
@@ -8,6 +9,7 @@ import scala.util.Random
 object Tracing {
 
   private val Rng = new Random
+  private[tracing] val sampled = FinagleStatsReceiver.counter("tracing", "sampled")
 
   private val DefaultId = TraceId(
     None,

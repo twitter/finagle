@@ -150,7 +150,8 @@ object Trace extends Tracing {
   }
 
   /**
-   * Run computation `f` with the given tracer and trace id.
+   * Run computation `f` with the given tracer and trace id. If a sampling decision was not made
+   * on `traceId`, one will be made using `tracer`.
    *
    * @param terminal true if the next traceId is a terminal id. Future
    *                 attempts to set nextId will be ignored.
@@ -160,8 +161,15 @@ object Trace extends Tracing {
     else {
       val oldId = if (terminal) traceId.copy(terminal = terminal) else traceId
       val newId = oldId.sampled match {
-        case None => oldId.copy(_sampled = tracer.sampleTrace(oldId))
         case Some(_) => oldId
+        case None =>
+          val sampledOption = tracer.sampleTrace(oldId)
+          sampledOption match {
+            case Some(true) => Tracing.sampled.incr()
+            case _ => //no-op
+          }
+
+          oldId.copy(_sampled = sampledOption)
       }
 
       val ts = tracers
