@@ -6,6 +6,7 @@ scala_library(
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "3rdparty/jvm/org/scalatest",
+        "finagle/finagle-core/src/main",
         "finagle/finagle-mysql/src/main/scala",
     ],
 )
@@ -14,6 +15,7 @@ junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
+        "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/mysql:mysql-connector-java",

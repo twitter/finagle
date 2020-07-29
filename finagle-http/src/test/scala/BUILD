@@ -3,6 +3,7 @@ junit_tests(
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
+        "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/io/netty:netty4-codec-http2",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static",

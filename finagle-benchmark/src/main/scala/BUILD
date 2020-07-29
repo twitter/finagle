@@ -1,6 +1,7 @@
 scala_library(
     sources = ["**/*.scala"],
     dependencies = [
+        "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/org/apache/curator:curator-framework",
         "3rdparty/jvm/org/apache/curator:curator-test",
         "3rdparty/jvm/org/apache/thrift:libthrift",
