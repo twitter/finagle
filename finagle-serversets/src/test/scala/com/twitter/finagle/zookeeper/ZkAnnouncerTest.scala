@@ -58,12 +58,6 @@ class ZkAnnouncerTest
       Address.Inet(ia, ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt, metadata))),
       1.0)
 
-  // TODO: remove when no longer flaky.
-  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
-    if (!sys.props.contains("SKIP_FLAKY"))
-      super.test(testName, testTags: _*)(f)
-  }
-
   test("announce a primary endpoint") {
     val ann = new ZkAnnouncer(factory)
     val res = new ZkResolver(factory)

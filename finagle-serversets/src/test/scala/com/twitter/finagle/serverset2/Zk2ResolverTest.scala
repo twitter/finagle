@@ -44,13 +44,6 @@ class Zk2ResolverTest
     inst.stop()
   }
 
-  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
-    // Since this test currently relies on timing, it's currently best to treat it as flaky for CI.
-    // It should be runnable, if a little slow, however.
-    if (!sys.props.contains("SKIP_FLAKY"))
-      super.test(testName, testTags: _*)(f)
-  }
-
   private[this] def zk2resolve(path: String): Name =
     Resolver.eval("zk2!" + inst.zookeeperConnectString + "!" + path)
 

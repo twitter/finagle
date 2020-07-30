@@ -46,8 +46,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     inst.stop()
   }
 
-  // COORD-339
-  if (!sys.props.contains("SKIP_FLAKY")) test("Session expiration 2") {
+  test("Session expiration 2") {
     implicit val timer = new MockTimer
     val connected: (WatchState => Boolean) = {
       case WatchState.SessionState(SessionState.SyncConnected) => true
@@ -99,8 +98,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     )
   }
 
-  // COORD-339
-  if (!sys.props.contains("SKIP_FLAKY")) test("ZkSession.retrying") {
+  test("ZkSession.retrying") {
     implicit val timer = new MockTimer
     val watch = Stopwatch.start()
     val varZkSession = ZkSession.retrying(
