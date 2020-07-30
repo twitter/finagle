@@ -12,7 +12,7 @@ junit_tests(
         "finagle/finagle-netty4/src/main/scala",
         "finagle/finagle-thrift",
         "finagle/finagle-thrift/src/main/java",
-        "finagle/finagle-thrift/src/test/scala",
+        "finagle/finagle-thrift/src/test/scala:lib",
         "finagle/finagle-thriftmux",
         "finagle/finagle-thriftmux/src/test/resources",
         "finagle/finagle-thriftmux/src/test/thrift:thrift-java",
