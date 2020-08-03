@@ -27,6 +27,25 @@ object Netty4Listener {
       Stack.Param(BackPressure(enabled = true))
   }
 
+  /**
+   * A [[com.twitter.finagle.Stack.Param]] used to configure the ability to limit the number
+   * of connections to a listener.
+   *
+   * @note that this is implemented by eagerly hanging up once the limit has been reached
+   *       and this can have detrimental effects for non-TLS protocols that don't handshake
+   *       since the client may immediately send a request before the server has hung up.
+   */
+  case class MaxConnections(maxConnections: Long) {
+    require(
+      maxConnections > 0,
+      s"MaxConnections must be a positive value. Observed: $maxConnections")
+    def mk(): (MaxConnections, Stack.Param[MaxConnections]) = (this, MaxConnections.param)
+  }
+
+  object MaxConnections {
+    implicit val param: Stack.Param[MaxConnections] = Stack.Param(MaxConnections(Long.MaxValue))
+  }
+
   def apply[In, Out](
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,

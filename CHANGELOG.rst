@@ -30,6 +30,10 @@ New Features
 
 * finagle-core: new metric (counter) for traces that are sampled. `finagle/tracing/sampled` ``PHAB_ID=D522355``
 
+* finagle-netty4: Add the `c.t.f.netty4.Netty4Listener.MaxConnections` param that can be used
+  to limit the number of connections that a listener will maintain. Connections that exceed
+  the limit are eagerly closed. ``PHAB_ID=D517737``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

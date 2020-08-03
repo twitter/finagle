@@ -2,13 +2,14 @@ package com.twitter.finagle.netty4
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.netty4.Netty4Listener.BackPressure
+import com.twitter.finagle.netty4.Netty4Listener.{BackPressure, MaxConnections}
 import com.twitter.finagle.netty4.Netty4ListenerHelpers._
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.{ListeningServer, Service}
 import com.twitter.util._
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.channel.{ChannelPipeline}
+import io.netty.channel.ChannelPipeline
+import java.io.IOException
 import java.net.{InetAddress, InetSocketAddress, Socket, SocketAddress}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -88,6 +89,37 @@ abstract class AbstractNetty4ListenerTest
 
     val bb = Await.result(TestService.requestBB, 2.seconds)
     assert(bb.refCnt == 1)
+    Await.ready(server.close(), 2.seconds)
+  }
+
+  test("We can limit the max number of sockets") {
+    val ctx = new StatsCtx
+    import ctx._
+    val p = Params.empty + Label("test") + Stats(sr) + MaxConnections(1)
+    val server = serveService(_ => (), p, noopService)
+
+    val client1 = new Socket()
+    client1.connect(server.boundAddress)
+
+    // The first client should be able to write. Note that we do this before
+    // checking the second connection so as to enforce some ordering: otherwise
+    // from the server perspective these connections might get established in a
+    // different order.
+    client1.getOutputStream.write(1)
+    client1.getOutputStream.flush()
+
+    val client2 = new Socket()
+    client2.connect(server.boundAddress)
+
+    eventually {
+      intercept[IOException] {
+        client2.getOutputStream.write(1)
+        client2.getOutputStream.flush()
+      }
+    }
+
+    client1.close()
+    client2.close()
     Await.ready(server.close(), 2.seconds)
   }
 

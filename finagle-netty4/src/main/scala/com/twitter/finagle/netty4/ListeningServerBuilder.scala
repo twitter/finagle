@@ -23,6 +23,9 @@ import io.netty.util.concurrent.{FutureListener, Future => NettyFuture}
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
+
+import com.twitter.finagle.netty4.Netty4Listener.MaxConnections
 
 /**
  * Constructs a `Listener[In, Out]` based on the Netty4 pipeline model. The [[Listener]]
@@ -43,6 +46,7 @@ private class ListeningServerBuilder(
   private[this] val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]
   private[this] val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
   private[this] val Transport.Options(noDelay, reuseAddr, reusePort) = params[Transport.Options]
+  private[this] val maxConnections = params[MaxConnections].maxConnections
 
   // listener params
   private[this] val Listener.Backlog(backlog) = params[Listener.Backlog]
@@ -139,30 +143,42 @@ private class ListeningServerBuilder(
       //
       // raw => marshalling => framed => bridge.
       bootstrap.childHandler(new ChannelInitializer[Channel] {
+        private[this] val activeConnections = new AtomicLong()
+        private[this] val closeListener = new ChannelFutureListener {
+          def operationComplete(future: ChannelFuture): Unit = {
+            activeConnections.decrementAndGet()
+          }
+        }
+
         def initChannel(ch: Channel): Unit = {
+          if (activeConnections.incrementAndGet() > maxConnections) {
+            activeConnections.decrementAndGet()
+            ch.close()
+          } else {
+            ch.closeFuture().addListener(closeListener)
+            // pipelineInit comes first so that implementors can put whatever they
+            // want in pipelineInit, without having to worry about clobbering any
+            // of the other handlers.
+            pipelineInit(ch.pipeline)
+            ch.pipeline.addLast(rawInitializer)
 
-          // pipelineInit comes first so that implementors can put whatever they
-          // want in pipelineInit, without having to worry about clobbering any
-          // of the other handlers.
-          pipelineInit(ch.pipeline)
-          ch.pipeline.addLast(rawInitializer)
+            // we use `setupMarshalling` to support protocols where the
+            // connection is multiplexed over child channels in the
+            // netty layer
+            ch.pipeline.addLast(
+              "marshalling",
+              setupMarshalling(new ChannelInitializer[Channel] {
+                def initChannel(ch: Channel): Unit = {
+                  ch.pipeline.addLast("framedInitializer", framedInitializer)
 
-          // we use `setupMarshalling` to support protocols where the
-          // connection is multiplexed over child channels in the
-          // netty layer
-          ch.pipeline.addLast(
-            "marshalling",
-            setupMarshalling(new ChannelInitializer[Channel] {
-              def initChannel(ch: Channel): Unit = {
-                ch.pipeline.addLast("framedInitializer", framedInitializer)
-
-                // The bridge handler must be last in the pipeline to ensure
-                // that the bridging code sees all encoding and transformations
-                // of inbound messages.
-                ch.pipeline.addLast("finagleBridge", bridge)
-              }
-            })
-          )
+                  // The bridge handler must be last in the pipeline to ensure
+                  // that the bridging code sees all encoding and transformations
+                  // of inbound messages.
+                  ch.pipeline.addLast("finagleBridge", bridge)
+                }
+              })
+            )
+          }
         }
       })
 
