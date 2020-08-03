@@ -411,6 +411,17 @@ public class Group {
 
     private class CancelledException extends IllegalStateException { /* marker */ }
 
+    /**
+     *
+     * Join a membership with specified memberData and nodeScheme. The membership is materialized
+     * as memberData stored in a zNode with the zNode path designated by nodePath.
+     *
+     * This function will try rejoin membership when the current appertained session is expired,
+     * or when the current appertained ephemeral zNode is deleted.
+     *
+     * This function will make several calls to ZooKeeper server and those calls could be expensive.
+     * Be cautious on calling this in threads that should not be blocked (e.g. in an event loop).
+     */
     synchronized Membership join()
         throws ZooKeeperConnectionException, InterruptedException, KeeperException {
 
@@ -428,6 +439,11 @@ public class Group {
         });
       }
 
+      if (hasJoined()) {
+        LOG.info("Already joined membership : " + nodePath);
+        return this;
+      }
+
       byte[] updatedMembershipData = memberData.get();
       String nodeName = nodeScheme.createName(updatedMembershipData);
       CreateMode createMode = nodeScheme.isSequential()
@@ -435,6 +451,7 @@ public class Group {
           : CreateMode.EPHEMERAL;
       nodePath = zkClient.get().create(
         path + "/" + nodeName, updatedMembershipData, acl, createMode);
+      LOG.info("Membership path is : " + nodePath);
       memberId = Group.this.getMemberId(nodePath);
       LOG.info("Set group member ID to " + memberId);
       this.membershipData = updatedMembershipData;
@@ -449,6 +466,35 @@ public class Group {
       });
 
       return this;
+    }
+
+    /**
+     *
+     * Decide if we already joined the membership or not.
+     *
+     * Used by Group.ActiveMembership.join to make the join idempotent, such that multiple join
+     * attempts initiated from backoffHelper.doUntilSuccess will create at most one sequential
+     * ephemeral node in ZooKeeper upon successfully joined membership.
+     *
+     * Without this membership test, it's possible to create multiple different sequential ephemeral
+     * zNodes with exact same membership data, when we lost connection to ZooKeeper and reconnect
+     * afterwards.
+     *
+     * This function might make a call to ZooKeeper server to check node existence, and potentially
+     * such call could be expensive, so be cautious on calling this in threads that should not be
+     * blocked (e.g. in an event loop).
+     *
+     * @return true if we already joined membership, false otherwise.
+     *
+     */
+    private synchronized boolean hasJoined() throws ZooKeeperConnectionException,
+        InterruptedException, KeeperException {
+      if (nodePath == null || memberId == null) {
+        return false;
+      }
+
+      // We already joined if we still have the zNode; otherwise, session expired.
+      return zkClient.get().exists(nodePath, null) != null;
     }
 
     private final ExceptionalSupplier<Boolean, InterruptedException> tryJoin =
