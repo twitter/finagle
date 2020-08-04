@@ -22,7 +22,7 @@ object OffloadFilter {
   private[this] val ClientAnnotationKey = "clnt/finagle.offload_pool_size"
   private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"
 
-  private[this] lazy val (defaultPool, defautPoolStats) = {
+  private[this] lazy val (defaultPool, defaultPoolStats) = {
     numWorkers.get match {
       case None =>
         (None, Seq.empty)
