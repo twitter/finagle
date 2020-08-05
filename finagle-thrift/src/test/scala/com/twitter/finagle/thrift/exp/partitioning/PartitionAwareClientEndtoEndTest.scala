@@ -4,19 +4,22 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.delivery.thriftscala.DeliveryService._
 import com.twitter.delivery.thriftscala._
 import com.twitter.finagle.addr.WeightedAddress
+import com.twitter.finagle.param.CommonParams
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.{
   HashingStrategyException,
   NoPartitioningKeys
 }
 import com.twitter.finagle.partitioning.PartitionNodeManager.NoPartitionException
 import com.twitter.finagle.partitioning.zk.ZkMetadata
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy._
-import com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
 import com.twitter.finagle.thrift.{ThriftRichClient, ThriftRichServer}
 import com.twitter.finagle.{Address, ListeningServer, Name, Stack}
 import com.twitter.scrooge.ThriftStructIface
 import com.twitter.util.{Await, Awaitable, Duration, Future, Return, Throw}
 import java.net.{InetAddress, InetSocketAddress}
+import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
 
 abstract class PartitionAwareClientEndToEndTest extends FunSuite {
@@ -28,9 +31,13 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
     ClientType
   ] with ThriftRichClient
 
+  type ServerType <: Stack.Parameterized[ServerType] with CommonParams[
+    ServerType
+  ] with ThriftRichServer
+
   def clientImpl(): ClientType
 
-  def serverImpl(): ThriftRichServer
+  def serverImpl(): ServerType
 
   def newAddress(inet: InetSocketAddress, weight: Int): Address = {
     val shardId = inet.getPort
@@ -75,9 +82,9 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
     val servers: Seq[ListeningServer] =
       inetAddresses.map(inet => serverImpl().serveIface(inet, iface))
 
-    val fixedInetAddresses = servers.map(_.boundAddress.asInstanceOf[InetSocketAddress])
+    def fixedInetAddresses = servers.map(_.boundAddress.asInstanceOf[InetSocketAddress])
 
-    val addresses = servers.map { server =>
+    def addresses = servers.map { server =>
       val inet = server.boundAddress.asInstanceOf[InetSocketAddress]
       newAddress(inet, 1)
     }
@@ -367,6 +374,57 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
       intercept[PartitioningStrategyException] {
         await(client.sendBoxes(Seq(Box(addrInfo1, "test1"), Box(addrInfo2, "test2"))))
       }
+    }
+  }
+
+  test("with custom strategy, partitioning strategy dynamicalky changing") {
+    new Ctx {
+      val sr0 = new InMemoryStatsReceiver
+      val sr1 = new InMemoryStatsReceiver
+      var index = 0
+      override val servers: Seq[ListeningServer] =
+        inetAddresses.map { inet =>
+          if (index == 0) {
+            index = index + 1
+            serverImpl().withStatsReceiver(sr0).serveIface(inet, iface)
+          } else if (index == 1) {
+            index = index + 1
+            serverImpl().withStatsReceiver(sr1).serveIface(inet, iface)
+          } else {
+            serverImpl().serveIface(inet, iface)
+          }
+        }
+
+      val addrInfo0 = AddrInfo("zero", 12345)
+
+      val dynamicStrategy = new ClientCustomStrategy {
+        val dynamic = new AtomicInteger(0)
+        val getPartitionIdAndRequest: ToPartitionedMap = {
+          case sendBox: SendBox.Args =>
+            val fakePartitionId = dynamic.getAndIncrement()
+            Future.value(Map(fakePartitionId -> sendBox))
+        }
+        override def getLogicalPartition(instance: Int): Int = {
+          fixedInetAddresses.indexWhere(_.getPort == instance)
+        }
+      }
+
+      val client = clientImpl().withPartitioning
+        .strategy(dynamicStrategy)
+        .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
+
+      await(client.sendBox(Box(addrInfo0, "")))
+      await(client.sendBox(Box(addrInfo0, "")))
+      val server0Request =
+        if (sr0.counters.isDefinedAt(Seq("requests"))) sr0.counters(Seq("requests"))
+        else sr0.counters(Seq("thrift", "requests"))
+
+      val server1Request =
+        if (sr1.counters.isDefinedAt(Seq("requests"))) sr1.counters(Seq("requests"))
+        else sr1.counters(Seq("thrift", "requests"))
+
+      assert(server0Request == 1)
+      assert(server1Request == 1)
     }
   }
 }

@@ -47,34 +47,6 @@ private[finagle] object ConsistentHashPartitioningService {
       Stack.leaf(role, ServiceFactory.const(service))
     }
   }
-
-  /**
-   * This method checks the given keys and returns true if they're all for the same partition in the
-   * hash ring.
-   * @param keys the keys to check
-   * @param partitionIdForKey a function that converts a Key to the partition id for that key in the
-   *                          hash ring
-   */
-  private[partitioning] def allKeysForSinglePartition[Key](
-    keys: Iterable[Key],
-    partitionIdForKey: Key => Long
-  ): Boolean = {
-    val kiter = keys.iterator
-    var seenId = 0L
-    var first = true
-
-    while (kiter.hasNext) {
-      val pid = partitionIdForKey(kiter.next())
-      if (first) {
-        first = false
-        seenId = pid
-      } else if (seenId != pid) {
-        return false
-      }
-    }
-
-    true
-  }
 }
 
 private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key](
@@ -109,18 +81,7 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
     Future.join(Seq(nodeManager.close(deadline), super.close(deadline)))
   }
 
-  override protected def getPartitionFor(partitionedRequest: Req): Future[Service[Req, Rep]] = {
-    val keys = getPartitionKeys(partitionedRequest)
-    if (keys.isEmpty) {
-      noPartitionInformationHandler(partitionedRequest)
-    } else {
-      // All keys in the request are assumed to belong to the same partition, so use the
-      // first key to find the associated partition.
-      partitionServiceForKey(keys.head)
-    }
-  }
-
-  final override protected def partitionRequest(
+  protected def partitionRequest(
     request: Req
   ): Future[Map[Req, Future[Service[Req, Rep]]]] = {
     getPartitionKeys(request) match {
@@ -143,20 +104,6 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
     }
   }
 
-  /**
-   * Extracts the keys from `req` and checks if they map to more than one partition. This
-   * method will short circuit if it detects multiple partitions for efficiency's sake.
-   *
-   * It's intended to be used in `isSinglePartition` after any type tests, with the idea
-   * that avoiding the merge phase for single-partition responses is worth paying the cost
-   * of extracting and hashing the keys up front as part of this check.
-   */
-  protected def allKeysForSinglePartition(req: Req): Boolean =
-    ConsistentHashPartitioningService.allKeysForSinglePartition(
-      getPartitionKeys(req),
-      partitionIdForKey
-    )
-
   protected[this] def groupByPartition(
     keys: Iterable[Key]
   ): Map[Future[Service[Req, Rep]], Iterable[Key]] =
@@ -167,7 +114,4 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
 
   private[this] def hashForKey(key: Key): Long =
     keyHasher.hashKey(getKeyBytes(key))
-
-  private[this] def partitionIdForKey(key: Key): Long =
-    nodeManager.getPartitionIdForHash(hashForKey(key))
 }

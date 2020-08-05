@@ -1,5 +1,6 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.thrift.{Protocols, ThriftClientRequest}
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.{
   RequestMerger,
@@ -8,12 +9,16 @@ import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.{
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
 import com.twitter.io.Buf
 import com.twitter.scrooge.{ThriftMethodIface, ThriftStruct}
-import com.twitter.util.Return
+import com.twitter.util.{Await, Awaitable, Duration, Return}
 import org.apache.thrift.protocol.{TList, TProtocol, TType}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 
 trait ThriftPartitioningTest extends MockitoSugar {
+
+  def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
+    Await.result(a, d)
+
   case class ARequest(alist: Seq[Int], serialized: Option[Array[Byte]] = None)
       extends ThriftStruct {
     def write(oprot: TProtocol): Unit = {

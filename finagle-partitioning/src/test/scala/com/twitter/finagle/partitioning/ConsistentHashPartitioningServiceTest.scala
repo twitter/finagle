@@ -211,8 +211,9 @@ class ConsistentHashPartitioningServiceTest extends PartitioningServiceTestBase 
     Time.withCurrentTimeFrozen { timeControl =>
       // Make the host throw an exception
       failingHosts.add(serverName)
-      val response = awaitResult(client(request))
-      assert(response == "com.twitter.finagle.ChannelClosedException")
+      intercept[ChannelClosedException] {
+        awaitResult(client(request))
+      }
       failingHosts.clear()
 
       // Node should have been ejected
@@ -243,8 +244,9 @@ class ConsistentHashPartitioningServiceTest extends PartitioningServiceTestBase 
     Time.withCurrentTimeFrozen { timeControl =>
       // Make the host throw an exception
       failingHosts.add(serverName)
-      val response = awaitResult(client(request))
-      assert(response == "com.twitter.finagle.ChannelClosedException")
+      intercept[ChannelClosedException] {
+        awaitResult(client(request))
+      }
       failingHosts.clear()
 
       // Node should have been ejected
@@ -252,9 +254,12 @@ class ConsistentHashPartitioningServiceTest extends PartitioningServiceTestBase 
 
       // Node should have been marked dead, and still be dead after 5 minutes
       timeControl.advance(5.minutes)
+      timer.tick()
 
       // Shard should be unavailable
-      assert(awaitResult(client(request)) == "com.twitter.finagle.ShardNotAvailableException")
+      intercept[ShardNotAvailableException] {
+        awaitResult(client(request))
+      }
 
       timeControl.advance(5.minutes)
       timer.tick()
@@ -270,31 +275,6 @@ class ConsistentHashPartitioningServiceTest extends PartitioningServiceTestBase 
     intercept[NoPartitioningKeys] {
       awaitResult(client(""))
     }
-  }
-
-  import ConsistentHashPartitioningService.allKeysForSinglePartition
-
-  def isSingleLongPartition(ids: Seq[Long]): Boolean =
-    allKeysForSinglePartition[Long](ids, identity)
-
-  test("SinglePartitionDetector when all keys map to the same partition") {
-    assert(isSingleLongPartition(Seq(1L, 1L, 1L, 1L)))
-  }
-
-  test("SinglePartitionDetector when keys map to different partitions") {
-    assert(!isSingleLongPartition(Seq(1L, 1L, 1L, 2L)))
-    assert(!isSingleLongPartition(Seq(1L, 1L, 2L, 1L)))
-    assert(!isSingleLongPartition(Seq(1L, 2L, 1L, 1L)))
-    assert(!isSingleLongPartition(Seq(2L, 1L, 1L, 1L)))
-    assert(!isSingleLongPartition(Seq(1L, 2L, 3L, 4L)))
-  }
-
-  test("SinglePartitionDetector when there is only one key") {
-    assert(isSingleLongPartition(Seq(1L)))
-  }
-
-  test("SinglePartitionDetector when the keys are empty") {
-    assert(isSingleLongPartition(Seq.empty[Long]))
   }
 }
 
@@ -359,8 +339,6 @@ private[this] class TestConsistentHashPartitioningService(
     pr: PartitionedResults[String, String]
   ): String =
     mergeStringResults(origReq, pr)
-
-  protected def isSinglePartition(request: String): Future[Boolean] = Future.False
 
   override protected def noPartitionInformationHandler(req: String): Future[Nothing] =
     Future.exception(new NoPartitioningKeys("TestConsistentHashPartitioningService"))

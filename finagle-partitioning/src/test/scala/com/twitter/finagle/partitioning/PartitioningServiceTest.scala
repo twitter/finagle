@@ -259,7 +259,7 @@ private[this] class SimplePartitioningService(
     }
   }
 
-  override protected def getPartitionFor(request: String): Future[Service[String, String]] = {
+  private[this] def getPartitionFor(request: String): Future[Service[String, String]] = {
     serviceMap.get(request) match {
       case service: Future[Service[String, String]] =>
         service
@@ -286,8 +286,6 @@ private[this] class SimplePartitioningService(
     pr: PartitionedResults[String, String]
   ): String =
     mergeStringResults(originalReq, pr)
-
-  protected def isSinglePartition(request: String): Future[Boolean] = Future.False
 
   protected def noPartitionInformationHandler(req: String): Future[Nothing] =
     Future.exception(new Exception("boom!"))

@@ -127,12 +127,6 @@ private[finagle] class MemcachedPartitioningService(
     )
   }
 
-  protected def isSinglePartition(request: Command): Future[Boolean] = request match {
-    case _: StorageCommand | _: ArithmeticCommand | _: Delete => Future.True
-    case _ if allKeysForSinglePartition(request) => Future.True
-    case _ => Future.False
-  }
-
   final protected def noPartitionInformationHandler(req: Command): Future[Nothing] = {
     val ex = new NoPartitioningKeys(s"NoPartitioningKeys in for the thrift method: ${req.name}")
     if (logger.isLoggable(Level.DEBUG))

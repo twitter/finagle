@@ -8,11 +8,14 @@ import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, PartitioningService}
 import com.twitter.finagle.thrift.ClientDeserializeCtx
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.RequestMerger
-import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.{
+  PartitioningStrategyException,
+  ReqRepMarshallable
+}
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
-import com.twitter.scrooge.{ThriftStruct, ThriftStructIface}
+import com.twitter.scrooge.ThriftStructIface
 import com.twitter.util.Future
 import scala.util.control.NonFatal
 
@@ -34,66 +37,64 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
       numReps
     ) {
 
+  private[this] val requestSerializer = new ThriftRequestSerializer(params)
+
   final protected def getKeyBytes(key: Any): Array[Byte] =
     Buf.ByteArray.Owned.extract(Buf.U32BE(key.hashCode()))
 
-  final override protected def getPartitionFor(
-    partitionedRequest: Req
-  ): Future[Service[Req, Rep]] = {
-    val keyMap = getKeyAndRequestMap
-    if (keyMap.isEmpty || keyMap.head._1 == None) {
-      // HashingPartitioningStrategy.defaultHashingKeyAndRequest set the key as None for
-      // undefined endpoints(methods) in PartitioningStrategy. It indicates those requests
-      // for certain endpoint won't be served in PartitioningService.
-      noPartitionInformationHandler(partitionedRequest)
-    } else {
-      // All keys in the request are assumed to belong to the same partition, so use the
-      // first key to find the associated partition.
-      partitionServiceForKey(keyMap.head._1)
-    }
-  }
-
   final protected def noPartitionInformationHandler(req: Req): Future[Nothing] = {
-    val ex = new NoPartitioningKeys(
-      s"No Partitioning hashing keys for the thrift method: ${ClientDeserializeCtx.get.rpcName.getOrElse("N/A")}")
+    val ex = new NoPartitioningKeys(s"No Partitioning hashing keys for the thrift method: $rpcName")
     Future.exception(ex)
   }
 
-  final override protected def getPartitionKeys(request: Req): Seq[Any] =
-    getKeyAndRequestMap.map(_._1).toSeq
+  // unused
+  final protected def getPartitionKeys(request: Req): Seq[Any] = Seq.empty
+  // unused
+  final protected def createPartitionRequestForKeys(original: Req, keys: Seq[Any]): Req = original
 
-  final protected def createPartitionRequestForKeys(original: Req, keys: Seq[Any]): Req = {
-    val requests = keys.flatMap(getKeyAndRequestMap.get)
-    val requestSerializer = new ThriftRequestSerializer(params)
-
-    val requestMerger: String => Option[RequestMerger[ThriftStructIface]] = { rpcName: String =>
-      hashingStrategy match {
-        case clientHashingStrategy: ClientHashingStrategy =>
-          clientHashingStrategy.requestMergerRegistry.get(rpcName)
-      }
-    }
-
-    val serializedRequest = for {
-      rpcName <- ClientDeserializeCtx.get.rpcName
-      merger <- requestMerger(rpcName)
-    } yield {
-      requestSerializer.serialize(
-        rpcName,
-        merger(requests).asInstanceOf[ThriftStruct],
-        thriftMarshallable.isOneway(original))
-    }
-
-    serializedRequest match {
-      case Some(r) => thriftMarshallable.framePartitionedRequest(r, original)
-      case None =>
-        throw new IllegalArgumentException(
-          s"cannot find the request merger for thrift method: " +
-            s"${ClientDeserializeCtx.get.rpcName.getOrElse("N/A")}")
+  // override the super function: Keep passing ThriftStructIface around instead of Req
+  // until it gets the final request, so that it only serializes request once
+  override protected def partitionRequest(
+    request: Req
+  ): Future[Map[Req, Future[Service[Req, Rep]]]] = {
+    val keyAndRequest = getKeyAndRequestMap
+    if (keyAndRequest.isEmpty || keyAndRequest.head._1 == None) {
+      noPartitionInformationHandler(request)
+    } else {
+      val requestAndService = keyAndRequest
+        .groupBy {
+          case (key, _) => partitionServiceForKey(key)
+        }.map {
+          case (svc, kqMap) if kqMap.size == 1 =>
+            (request, svc)
+          case (svc, kqMap) =>
+            (framePartitionedRequest(mergeRequest(rpcName)(kqMap.values.toSeq), request), svc)
+        }
+      Future.value(requestAndService)
     }
   }
 
-  final protected def isSinglePartition(request: Req): Future[Boolean] =
-    Future.value(allKeysForSinglePartition(request))
+  private[this] def framePartitionedRequest(requests: ThriftStructIface, original: Req) = {
+    val serializedRequest = requestSerializer
+      .serialize(rpcName, requests, thriftMarshallable.isOneway(original))
+    thriftMarshallable.framePartitionedRequest(serializedRequest, original)
+  }
+
+  private[this] def mergeRequest(rpcName: String): RequestMerger[ThriftStructIface] = {
+    val optMerger = hashingStrategy match {
+      case clientHashingStrategy: ClientHashingStrategy =>
+        clientHashingStrategy.requestMergerRegistry.get(rpcName)
+    }
+    optMerger match {
+      case Some(merger) => merger
+      case None =>
+        throw new PartitioningStrategyException(
+          s"cannot find the request merger for thrift method: $rpcName")
+    }
+  }
+
+  private[this] def rpcName: String =
+    ClientDeserializeCtx.get.rpcName.getOrElse("N/A")
 
   final protected def mergeResponses(
     originalReq: Req,
@@ -101,14 +102,11 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
   ): Rep = {
     val responseMerger = hashingStrategy match {
       case clientHashingStrategy: ClientHashingStrategy =>
-        ClientDeserializeCtx.get.rpcName.flatMap { rpcName =>
-          clientHashingStrategy.responseMergerRegistry.get(rpcName)
-        } match {
+        clientHashingStrategy.responseMergerRegistry.get(rpcName) match {
           case Some(merger) => merger
           case None =>
-            throw new IllegalArgumentException(
-              s"cannot find the response merger for thrift method: " +
-                s"${ClientDeserializeCtx.get.rpcName.getOrElse("N/A")}")
+            throw new PartitioningStrategyException(
+              s"cannot find the response merger for thrift method: $rpcName")
         }
     }
 
@@ -127,6 +125,7 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
 
   // apply the user provided getHashingKeyAndRequest to the original request,
   // get a map of hashing keys to sub-requests.
+  // note: this function should be only evaluate once per-request
   private[this] def getKeyAndRequestMap: Map[Any, ThriftStructIface] = {
     val inputArg = ClientDeserializeCtx.get.request.asInstanceOf[ThriftStructIface]
     try {

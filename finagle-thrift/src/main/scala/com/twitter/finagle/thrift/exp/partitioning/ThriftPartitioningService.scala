@@ -4,7 +4,8 @@ import com.twitter.finagle
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.partitioning.param
 import com.twitter.finagle.thrift.ThriftClientRequest
-import com.twitter.finagle.{ServiceFactory, Stack}
+import com.twitter.finagle.{FailureFlags, ServiceFactory, Stack}
+import com.twitter.logging.{HasLogLevel, Level}
 
 /**
  * ThriftPartitioningService applies [[PartitioningStrategy]] on the Thrift client.
@@ -18,6 +19,23 @@ private[finagle] object ThriftPartitioningService {
   object Strategy {
     implicit val strategy: Stack.Param[Strategy] =
       Stack.Param(Strategy(Disabled))
+  }
+
+  /**
+   * Failed to get Partition Ids and Requests from [[CustomPartitioningStrategy]].
+   */
+  final class PartitioningStrategyException(
+    message: String,
+    cause: Throwable = null,
+    val flags: Long = FailureFlags.Empty)
+      extends Exception(message, cause)
+      with FailureFlags[PartitioningStrategyException]
+      with HasLogLevel {
+    def this(cause: Throwable) = this(null, cause)
+    def logLevel: Level = Level.ERROR
+
+    protected def copyWithFlags(flags: Long): PartitioningStrategyException =
+      new PartitioningStrategyException(message, cause, flags)
   }
 
   /**

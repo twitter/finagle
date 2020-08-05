@@ -7,10 +7,10 @@ import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.{
   RequestMergerRegistry,
   ResponseMergerRegistry
 }
-import com.twitter.finagle.{ServiceFactory, Stack}
+import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
-import com.twitter.util.Return
+import com.twitter.util.{Future, Return}
 import org.scalatest.{FunSuite, PrivateMethodTester}
 
 class ThriftHashingPartitioningServiceTest
@@ -51,21 +51,17 @@ class ThriftHashingPartitioningServiceTest
     }
   }
 
-  test("request - createPartitionRequestForKeys") {
+  test("request - partitionRequest") {
+    val partitionRequest =
+      PrivateMethod[Future[Map[ARequest, Future[Service[ARequest, Int]]]]]('partitionRequest)
+
     val request = ARequest(List(1, 2, 3, 4))
     val serdeCtx = new ClientDeserializeCtx[Int](request, _ => Return(Int.MinValue))
-    val createPartitionRequestForKeys = PrivateMethod[ARequest]('createPartitionRequestForKeys)
+
     Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx) {
       serdeCtx.rpcName("A")
-      val mergedResult =
-        testService.invokePrivate(createPartitionRequestForKeys(request, Seq(0, 1)))
-      assert(deserialize(mergedResult.serialized.get).toSet == Set(1, 2, 3, 4))
-
-      val key0Result = testService.invokePrivate(createPartitionRequestForKeys(request, Seq(0)))
-      assert(deserialize(key0Result.serialized.get).toSet == Set(2, 4))
-
-      val key1Result = testService.invokePrivate(createPartitionRequestForKeys(request, Seq(1)))
-      assert(deserialize(key1Result.serialized.get).toSet == Set(1, 3))
+      val result = await(testService.invokePrivate(partitionRequest(request)))
+      assert(deserialize(result.keySet.head.serialized.get).toSet == Set(1, 2, 3, 4))
     }
   }
 

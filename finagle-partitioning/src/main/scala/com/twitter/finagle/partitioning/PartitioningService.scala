@@ -19,13 +19,8 @@ import scala.collection.compat.immutable.ArraySeq
 private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Req, Rep] {
   import PartitioningService._
 
-  final def apply(request: Req): Future[Rep] = {
-    // Note that the services will be constructed in the implementing classes. So the
-    // implementations will be responsible for closing them too.
-    isSinglePartition(request).flatMap {
-      case true => applyService(request, getPartitionFor(request))
-      case false => makePartitionedRequests(request).map(doMergeResponses(request))
-    }
+  def apply(request: Req): Future[Rep] = {
+    makePartitionedRequests(request).map(doMergeResponses(request))
   }
 
   private[this] def makePartitionedRequests(req: Req): Future[Seq[(Req, Try[Rep])]] =
@@ -39,24 +34,21 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
   private[this] def applyService(request: Req, fService: Future[Service[Req, Rep]]): Future[Rep] =
     fService.flatMap { svc => svc(request) }
 
-  private[this] def doMergeResponses(request: Req)(results: Seq[(Req, Try[Rep])]): Rep = {
-    val success = ArraySeq.newBuilder[(Req, Rep)]
-    val failure = ArraySeq.newBuilder[(Req, Throwable)]
+  private[this] def doMergeResponses(request: Req)(result: Seq[(Req, Try[Rep])]): Rep = {
+    result match {
+      case Seq((_, tryResponse)) => tryResponse()
+      case results: Seq[(Req, Try[Rep])] =>
+        val success = ArraySeq.newBuilder[(Req, Rep)]
+        val failure = ArraySeq.newBuilder[(Req, Throwable)]
 
-    results.foreach {
-      case (req, Return(rep)) => success += ((req, rep))
-      case (req, Throw(t)) => failure += ((req, t))
+        results.foreach {
+          case (req, Return(rep)) => success += ((req, rep))
+          case (req, Throw(t)) => failure += ((req, t))
+        }
+
+        mergeResponses(request, PartitionedResults(success.result(), failure.result()))
     }
-
-    mergeResponses(request, PartitionedResults(success.result(), failure.result()))
   }
-
-  /**
-   * Returns the partition that the request belongs to. All keys in the request are assumed to
-   * belong to the same partition. Therefore the implementation can pick one of the keys and find
-   * the partition the key belongs to.
-   */
-  protected def getPartitionFor(partitionedRequest: Req): Future[Service[Req, Rep]]
 
   /**
    * Extracts the necessary information (e.g. keys) that is needed for the partitioning logic and
@@ -85,16 +77,6 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    * @return merged response
    */
   protected def mergeResponses(originalReq: Req, results: PartitionedResults[Req, Rep]): Rep
-
-  /**
-   * Determines whether the request's keys live on only one partition or on more than one partition.
-   * In the former case we can skip `partitionRequest` and immediately call `applyService`. In the
-   * latter case we need to call `partitionRequest`.
-   *
-   * @param request: incoming request
-   * @return whether the keys live on the same partition
-   */
-  protected def isSinglePartition(request: Req): Future[Boolean]
 
   /**
    * Error handling when processing requests to retrieve partition information failed, this is

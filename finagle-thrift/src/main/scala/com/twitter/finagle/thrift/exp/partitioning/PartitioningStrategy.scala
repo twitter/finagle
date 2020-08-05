@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy._
-import com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
 import com.twitter.scrooge.{ThriftMethodIface, ThriftStructIface}
 import com.twitter.util.{Future, Try}
 import scala.collection.mutable
@@ -217,7 +217,7 @@ object ClientCustomStrategy {
    * Thrift requests not specifying partition ids will fall in here. This allows a
    * Thrift/ThriftMux partition aware client to serve a part of endpoints of a service.
    * Un-specified endpoints should not be called from this client, otherwise, throw
-   * [[com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.PartitioningStrategyException]].
+   * [[com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException]].
    */
   val defaultPartitionIdAndRequest: ThriftStructIface => Future[Map[Int, ThriftStructIface]] =
     _ =>

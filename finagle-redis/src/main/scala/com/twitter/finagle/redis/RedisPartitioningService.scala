@@ -200,13 +200,6 @@ private[finagle] class RedisPartitioningService(
     }
   }
 
-  protected def isSinglePartition(command: Command): Future[Boolean] =
-    command match {
-      case _: KeyCommand | _: Ping.type => Future.True
-      case _ if allKeysForSinglePartition(command) => Future.True
-      case _ => Future.False
-    }
-
   final protected def noPartitionInformationHandler(req: Command): Future[Nothing] = {
     val ex = new NoPartitioningKeys(
       s"NoPartitioningKeys in for the thrift method: ${BufToString(req.name)}")

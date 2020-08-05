@@ -1,25 +1,22 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
-import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.partitioning.{PartitionNodeManager, PartitioningService}
 import com.twitter.finagle.thrift.ClientDeserializeCtx
-import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry
-import com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
-import com.twitter.util.{Await, Awaitable, Duration, Future, Return}
-import org.scalatest.{FunSuite, PrivateMethodTester}
+import com.twitter.util.{Future, Return}
 import org.mockito.Mockito.when
 import org.mockito.internal.util.reflection.FieldSetter
+import org.scalatest.{FunSuite, PrivateMethodTester}
 
 class ThriftCustomPartitioningServiceTest
     extends FunSuite
     with ThriftPartitioningTest
     with PrivateMethodTester {
-  def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
-    Await.result(a, d)
 
   val customPartitioningStrategy = new ClientCustomStrategy {
     def getPartitionIdAndRequest: ToPartitionedMap = {
@@ -32,7 +29,6 @@ class ThriftCustomPartitioningServiceTest
 
     override val responseMergerRegistry: PartitioningStrategy.ResponseMergerRegistry =
       ResponseMergerRegistry.create.add(AMethod, aResponseMerger)
-
   }
 
   val testService = new ThriftCustomPartitioningService[ARequest, Int](
@@ -66,37 +62,6 @@ class ThriftCustomPartitioningServiceTest
     }
   }
 
-  test("isSinglePartition") {
-    val isSinglePartition = PrivateMethod[Future[Boolean]]('isSinglePartition)
-    val fanoutRequest = ARequest(List(1, 2, 3, 4))
-    val serdeCtx1 = new ClientDeserializeCtx[Int](fanoutRequest, _ => Return(Int.MinValue))
-    Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx1) {
-      assert(!await(testService.invokePrivate(isSinglePartition(fanoutRequest))))
-    }
-
-    val singletonRequest = ARequest(List(3, 6, 9, 12))
-    val serdeCtx2 = new ClientDeserializeCtx[Int](singletonRequest, _ => Return(Int.MinValue))
-    Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx2) {
-      assert(await(testService.invokePrivate(isSinglePartition(singletonRequest))))
-    }
-  }
-
-  test("singleton partition request - getPartitionFor") {
-    val getPartitionFor = PrivateMethod[Future[Service[ARequest, Int]]]('getPartitionFor)
-    val fakeNodeManager = mock[PartitionNodeManager[ARequest, Int]]
-    when(fakeNodeManager.getServiceByPartitionId(0)).thenReturn(Future.value {
-      Service.mk { _: ARequest => Future.value(0) }
-    })
-    new FieldSetter(testService, testService.getClass.getDeclaredField("nodeManager"))
-      .set(fakeNodeManager)
-    val singletonRequest = ARequest(List(3, 6, 9, 12))
-    val serdeCtx2 = new ClientDeserializeCtx[Int](singletonRequest, _ => Return(Int.MinValue))
-    Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx2) {
-      val service = await(testService.invokePrivate(getPartitionFor(singletonRequest)))
-      assert(await(service(singletonRequest)) == 0)
-    }
-  }
-
   test("fan-out request - partitionRequest") {
     val partitionRequest =
       PrivateMethod[Future[Map[ARequest, Future[Service[ARequest, Int]]]]]('partitionRequest)
@@ -104,13 +69,19 @@ class ThriftCustomPartitioningServiceTest
     when(fakeNodeManager.getServiceByPartitionId(0)).thenReturn(Future.value {
       Service.mk { _: ARequest => Future.value(0) }
     })
+    when(fakeNodeManager.getServiceByPartitionId(1)).thenReturn(Future.value {
+      Service.mk { _: ARequest => Future.value(1) }
+    })
+    when(fakeNodeManager.getServiceByPartitionId(2)).thenReturn(Future.value {
+      Service.mk { _: ARequest => Future.value(2) }
+    })
     new FieldSetter(testService, testService.getClass.getDeclaredField("nodeManager"))
       .set(fakeNodeManager)
     val fanoutRequest = ARequest(List(1, 2, 3, 4))
     val serdeCtx1 = new ClientDeserializeCtx[Int](fanoutRequest, _ => Return(Int.MinValue))
     Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx1) {
       serdeCtx1.rpcName("A")
-      assert(await(testService.invokePrivate(partitionRequest(fanoutRequest))).size == 3)
+      assert((await(testService.invokePrivate(partitionRequest(fanoutRequest)))).size == 3)
     }
   }
 
