@@ -101,31 +101,27 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
     val sendBoxesReqMerger: RequestMerger[SendBoxes.Args] = listSendBoxes =>
       SendBoxes.Args(listSendBoxes.flatMap(_.boxes))
 
-    val hashingPartitioningStrategy = new ClientHashingStrategy {
-      val getHashingKeyAndRequest: ToPartitionedMap = {
-        case getBox: GetBox.Args => Map(getBox.addrInfo.name -> getBox)
-        case getBoxes: GetBoxes.Args =>
-          getBoxes.listAddrInfo
-            .groupBy { _.name }.map {
-              case (hashingKey, subListAddrInfo) =>
-                hashingKey -> GetBoxes.Args(subListAddrInfo, getBoxes.passcode)
-            }
-        case sendBoxes: SendBoxes.Args =>
-          sendBoxes.boxes.groupBy(_.addrInfo.name).map {
-            case (hashingKey, boxes) => hashingKey -> SendBoxes.Args(boxes)
+    val hashingPartitioningStrategy = new ClientHashingStrategy({
+      case getBox: GetBox.Args => Map(getBox.addrInfo.name -> getBox)
+      case getBoxes: GetBoxes.Args =>
+        getBoxes.listAddrInfo
+          .groupBy { _.name }.map {
+            case (hashingKey, subListAddrInfo) =>
+              hashingKey -> GetBoxes.Args(subListAddrInfo, getBoxes.passcode)
           }
-      }
+      case sendBoxes: SendBoxes.Args =>
+        sendBoxes.boxes.groupBy(_.addrInfo.name).map {
+          case (hashingKey, boxes) => hashingKey -> SendBoxes.Args(boxes)
+        }
+    })
 
-      override val requestMergerRegistry: RequestMergerRegistry =
-        RequestMergerRegistry.create
-          .add(GetBoxes, getBoxesReqMerger)
-          .add(SendBoxes, sendBoxesReqMerger)
+    hashingPartitioningStrategy.requestMergerRegistry
+      .add(GetBoxes, getBoxesReqMerger)
+      .add(SendBoxes, sendBoxesReqMerger)
 
-      override val responseMergerRegistry: ResponseMergerRegistry =
-        ResponseMergerRegistry.create
-          .add(GetBoxes, getBoxesRepMerger)
-          .add(SendBoxes, sendBoxesRepMerger)
-    }
+    hashingPartitioningStrategy.responseMergerRegistry
+      .add(GetBoxes, getBoxesRepMerger)
+      .add(SendBoxes, sendBoxesRepMerger)
   }
 
   test("without partition strategy") {
@@ -191,11 +187,9 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
   }
 
   test("with errored hashing strategy") {
-    val erroredHashingPartitioningStrategy = new ClientHashingStrategy {
-      val getHashingKeyAndRequest: ToPartitionedMap = {
-        case getBox: GetBox.Args => throw new Exception("something wrong")
-      }
-    }
+    val erroredHashingPartitioningStrategy = new ClientHashingStrategy({
+      case getBox: GetBox.Args => throw new Exception("something wrong")
+    })
 
     new HashingPartitioningCtx {
       val client = clientImpl().withPartitioning
@@ -224,22 +218,18 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
         }
       }
 
-      val customPartitioningStrategy = new ClientCustomStrategy {
-        def getPartitionIdAndRequest: ToPartitionedMap = {
-          case getBox: GetBox.Args => Future.value(Map(lookUp(getBox.addrInfo) -> getBox))
-          case getBoxes: GetBoxes.Args =>
-            val partitionIdAndRequest: Map[Int, ThriftStructIface] =
-              getBoxes.listAddrInfo.groupBy(lookUp).map {
-                case (partitionId, listAddrInfo) =>
-                  partitionId -> GetBoxes.Args(listAddrInfo, getBoxes.passcode)
-              }
-            Future.value(partitionIdAndRequest)
-        }
+      val customPartitioningStrategy = new ClientCustomStrategy({
+        case getBox: GetBox.Args => Future.value(Map(lookUp(getBox.addrInfo) -> getBox))
+        case getBoxes: GetBoxes.Args =>
+          val partitionIdAndRequest: Map[Int, ThriftStructIface] =
+            getBoxes.listAddrInfo.groupBy(lookUp).map {
+              case (partitionId, listAddrInfo) =>
+                partitionId -> GetBoxes.Args(listAddrInfo, getBoxes.passcode)
+            }
+          Future.value(partitionIdAndRequest)
+      })
 
-        override val responseMergerRegistry: ResponseMergerRegistry = {
-          ResponseMergerRegistry.create.add(GetBoxes, getBoxesRepMerger)
-        }
-      }
+      customPartitioningStrategy.responseMergerRegistry.add(GetBoxes, getBoxesRepMerger)
 
       val client = clientImpl().withPartitioning
         .strategy(customPartitioningStrategy)
@@ -260,8 +250,8 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
     val addrInfo3 = AddrInfo("three", 34567)
     val addrInfo4 = AddrInfo("four", 45678)
 
-    val customPartitioningStrategy = new ClientCustomStrategy {
-      def getPartitionIdAndRequest: ToPartitionedMap = {
+    val customPartitioningStrategy = new ClientCustomStrategy(
+      {
         case getBox: GetBox.Args => Future.value(Map(lookUp(getBox.addrInfo) -> getBox))
         case getBoxes: GetBoxes.Args =>
           val partitionIdAndRequest: Map[Int, ThriftStructIface] =
@@ -270,20 +260,15 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
                 partitionId -> GetBoxes.Args(listAddrInfo, getBoxes.passcode)
             }
           Future.value(partitionIdAndRequest)
-      }
-
-      override val responseMergerRegistry: ResponseMergerRegistry = {
-        ResponseMergerRegistry.create.add(GetBoxes, getBoxesRepMerger)
-      }
-
-      // p0(0), p1(1,2), p3(3, 4)
-      override def getLogicalPartition(instance: Int): Int = {
+      },
+      { instance: Int => // p0(0), p1(1,2), p3(3, 4)
         val partitionPositions = List(0.to(0), 1.to(2), 3.until(fixedInetAddresses.size))
         val position = fixedInetAddresses.indexWhere(_.getPort == instance)
         partitionPositions.indexWhere(range => range.contains(position))
       }
-    }
+    )
 
+    customPartitioningStrategy.responseMergerRegistry.add(GetBoxes, getBoxesRepMerger)
   }
 
   test("with custom partitioning strategy, logical partition") {
@@ -317,11 +302,9 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
   }
 
   test("with errored custom strategy") {
-    val erroredCustomPartitioningStrategy = new ClientCustomStrategy {
-      val getPartitionIdAndRequest: ToPartitionedMap = {
-        case getBox: GetBox.Args => throw new Exception("something wrong")
-      }
-    }
+    val erroredCustomPartitioningStrategy = new ClientCustomStrategy({
+      case getBox: GetBox.Args => throw new Exception("something wrong")
+    })
 
     new Ctx {
       val addrInfo0 = AddrInfo("zero", 0)
@@ -397,17 +380,17 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
 
       val addrInfo0 = AddrInfo("zero", 12345)
 
-      val dynamicStrategy = new ClientCustomStrategy {
-        val dynamic = new AtomicInteger(0)
-        val getPartitionIdAndRequest: ToPartitionedMap = {
+      val dynamic = new AtomicInteger(0)
+      val dynamicStrategy = new ClientCustomStrategy(
+        {
           case sendBox: SendBox.Args =>
             val fakePartitionId = dynamic.getAndIncrement()
             Future.value(Map(fakePartitionId -> sendBox))
-        }
-        override def getLogicalPartition(instance: Int): Int = {
+        },
+        { instance: Int =>
           fixedInetAddresses.indexWhere(_.getPort == instance)
         }
-      }
+      )
 
       val client = clientImpl().withPartitioning
         .strategy(dynamicStrategy)

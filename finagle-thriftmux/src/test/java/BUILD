@@ -15,5 +15,6 @@ junit_tests(
         "scrooge/scrooge-core/src/main/scala",
         "util/util-core:scala",
         "util/util-core/src/main/java",
+        "util/util-hashing/src/main/scala",
     ],
 )

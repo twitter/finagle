@@ -3,8 +3,8 @@ package com.twitter.finagle.thrift.exp.partitioning
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.partitioning.{PartitionNodeManager, PartitioningService}
 import com.twitter.finagle.thrift.ClientDeserializeCtx
-import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
@@ -18,18 +18,14 @@ class ThriftCustomPartitioningServiceTest
     with ThriftPartitioningTest
     with PrivateMethodTester {
 
-  val customPartitioningStrategy = new ClientCustomStrategy {
-    def getPartitionIdAndRequest: ToPartitionedMap = {
-      case aRequest: ARequest =>
-        val idsAndRequests = aRequest.alist.groupBy(a => a % 3).map {
-          case (id, list) => id -> ARequest(list)
-        }
-        Future.value(idsAndRequests)
-    }
-
-    override val responseMergerRegistry: PartitioningStrategy.ResponseMergerRegistry =
-      ResponseMergerRegistry.create.add(AMethod, aResponseMerger)
-  }
+  val customPartitioningStrategy = new ClientCustomStrategy({
+    case aRequest: ARequest =>
+      val idsAndRequests = aRequest.alist.groupBy(a => a % 3).map {
+        case (id, list) => id -> ARequest(list)
+      }
+      Future.value(idsAndRequests)
+  })
+  customPartitioningStrategy.responseMergerRegistry.add(AMethod, aResponseMerger)
 
   val testService = new ThriftCustomPartitioningService[ARequest, Int](
     underlying = mock[Stack[ServiceFactory[ARequest, Int]]],

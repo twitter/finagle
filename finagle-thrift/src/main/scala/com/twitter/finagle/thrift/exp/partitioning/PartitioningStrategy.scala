@@ -4,7 +4,11 @@ import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy._
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
 import com.twitter.scrooge.{ThriftMethodIface, ThriftStructIface}
 import com.twitter.util.{Future, Try}
+import java.lang.{Integer => JInteger}
+import java.util.function.{BiFunction, Function => JFunction, IntUnaryOperator}
+import java.util.{List => JList, Map => JMap}
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 
 object PartitioningStrategy {
 
@@ -75,6 +79,8 @@ object PartitioningStrategy {
 
     /**
      * Register a RequestMerger for a ThriftMethod.
+     *
+     * For a Java-friendly way to do the same thing, see `addResponseMerger`
      * @param method  ThriftMethod is a method endpoint defined in a thrift service
      * @param merger  see [[RequestMerger]]
      */
@@ -85,6 +91,19 @@ object PartitioningStrategy {
       reqMergers += (method.name -> merger.asInstanceOf[RequestMerger[ThriftStructIface]])
       this
     }
+
+    /**
+     * Register a RequestMerger for a ThriftMethod.
+     *
+     * The same as add, but easier to use from Java.
+     * @param method  ThriftMethod is a method endpoint defined in a thrift service
+     * @param merger  see [[RequestMerger]]
+     */
+    def addRequestMerger[Req <: ThriftStructIface](
+      method: ThriftMethodIface,
+      // Needed for 2.11 compat. can be a scala fn A => B once we drop support
+      merger: JFunction[JList[Req], Req]
+    ): RequestMergerRegistry = add(method, { seq: Seq[Req] => seq.asJava }.andThen(merger.apply _))
 
     /**
      * Get a RequestMerger for a ThriftMethod.
@@ -115,6 +134,8 @@ object PartitioningStrategy {
 
     /**
      * Register a ResponseMerger for a ThriftMethod.
+     *
+     * For a Java-friendly way to do the same thing, see `addResponseMerger`
      * @param method  ThriftMethod is a method endpoint defined in a thrift service
      * @param merger  see [[ResponseMerger]]
      */
@@ -122,6 +143,23 @@ object PartitioningStrategy {
       repMergers += (method.name -> merger.asInstanceOf[ResponseMerger[Any]])
       this
     }
+
+    /**
+     * Register a ResponseMerger for a ThriftMethod.
+     *
+     * The same as add, but easier to use from Java.
+     * @param method  ThriftMethod is a method endpoint defined in a thrift service
+     * @param merger  see [[ResponseMerger]]
+     */
+    def addResponseMerger[Rep](
+      method: ThriftMethodIface,
+      merger: BiFunction[JList[Rep], JList[Throwable], Try[Rep]]
+    ): ResponseMergerRegistry =
+      add(
+        method,
+        { (reps: Seq[Rep], errs: Seq[Throwable]) =>
+          merger.apply(reps.asJava, errs.asJava)
+        })
 
     /**
      * Get a ResponseMerger for a ThriftMethod.
@@ -174,13 +212,28 @@ sealed trait CustomPartitioningStrategy extends PartitioningStrategy {
    *    case _ => throw ...
    *  }
    * }}}
-   * The default is each host is a partition.
    */
-  def getLogicalPartition(instance: Int): Int = instance
+  def getLogicalPartition(instance: Int): Int
 }
 private[partitioning] object Disabled extends PartitioningStrategy
 
 object ClientHashingStrategy {
+  // input: original thrift request
+  // output: a Map of hashing keys and split requests
+  type ToPartitionedMap = PartialFunction[ThriftStructIface, Map[Any, ThriftStructIface]]
+
+  /**
+   * The Java-friendly way to create a [[ClientHashingStrategy]].
+   * Scala users should construct a [[ClientHashStrategy]] directly.
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def create(
+    toPartitionedMap: PartialFunction[
+      ThriftStructIface,
+      JMap[Any, ThriftStructIface]
+    ]
+  ): ClientHashingStrategy = new ClientHashingStrategy(toPartitionedMap.andThen(_.asScala.toMap))
 
   /**
    * Thrift requests not specifying hashing keys will fall in here. This allows a
@@ -188,30 +241,62 @@ object ClientHashingStrategy {
    * Un-specified endpoints should not be called from this client, otherwise, throw
    * [[com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys]].
    */
-  val defaultHashingKeyAndRequest: ThriftStructIface => Map[Any, ThriftStructIface] = args =>
-    Map(None -> args)
+  private[finagle] val defaultHashingKeyAndRequest: ThriftStructIface => Map[
+    Any,
+    ThriftStructIface
+  ] = args => Map(None -> args)
 }
 
 /**
  * An API to set a consistent hashing partitioning strategy for a Thrift/ThriftMux Client.
+ * For a Java-friendly way to do the same thing, see `ClientHashingStrategy.create`
+ *
+ * @param getHashingKeyAndRequest A PartialFunction implemented by client that
+ *        provides the partitioning logic on a request. It takes a Thrift object
+ *        request, and returns a Map of hashing keys to sub-requests. If we
+ *        don't need to fan-out, it should return one element: hashing key to
+ *        the original request.  This PartialFunction can take multiple Thrift
+ *        request types of one Thrift service (different method endpoints of one
+ *        service).
  */
-abstract class ClientHashingStrategy extends HashingPartitioningStrategy {
-  // input: original thrift request
-  // output: a Map of hashing keys and split requests
-  type ToPartitionedMap = PartialFunction[ThriftStructIface, Map[Any, ThriftStructIface]]
-
-  /**
-   * A PartialFunction implemented by client that provides the partitioning logic on
-   * a request. It takes a Thrift object request, and returns a Map of hashing keys to
-   * sub-requests. If no fan-out needs, it should return one element: hashing key to the
-   * original request.
-   * This PartialFunction can take multiple Thrift request types of one Thrift service
-   * (different method endpoints of one service).
-   */
-  def getHashingKeyAndRequest: ToPartitionedMap
-}
+final class ClientHashingStrategy(
+  val getHashingKeyAndRequest: ClientHashingStrategy.ToPartitionedMap)
+    extends HashingPartitioningStrategy
 
 object ClientCustomStrategy {
+  // input: original thrift request
+  // output: Future Map of partition ids and split requests
+  type ToPartitionedMap = PartialFunction[ThriftStructIface, Future[Map[Int, ThriftStructIface]]]
+
+  /**
+   * The java-friendly way to create a [[ClientCustomStrategy]].
+   * Scala users should construct a [[ClientCustomStrategy]] directly.
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def create(
+    toPartitionedMap: PartialFunction[
+      ThriftStructIface,
+      Future[JMap[JInteger, ThriftStructIface]]
+    ]
+  ): ClientCustomStrategy = new ClientCustomStrategy(
+    toPartitionedMap.andThen(_.map(_.asScala.toMap.map { case (k, v) => (k.toInt, v) })))
+
+  /**
+   * The java-friendly way to create a [[ClientCustomStrategy]].
+   * Scala users should construct a [[ClientCustomStrategy]] directly.
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def create(
+    toPartitionedMap: PartialFunction[
+      ThriftStructIface,
+      Future[JMap[JInteger, ThriftStructIface]]
+    ],
+    logicalPartitionFn: IntUnaryOperator
+  ): ClientCustomStrategy = new ClientCustomStrategy(
+    toPartitionedMap.andThen(_.map(_.asScala.toMap.map { case (k, v) => (k.toInt, v) })),
+    logicalPartitionFn.applyAsInt _)
 
   /**
    * Thrift requests not specifying partition ids will fall in here. This allows a
@@ -219,32 +304,51 @@ object ClientCustomStrategy {
    * Un-specified endpoints should not be called from this client, otherwise, throw
    * [[com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException]].
    */
-  val defaultPartitionIdAndRequest: ThriftStructIface => Future[Map[Int, ThriftStructIface]] =
-    _ =>
-      Future.exception(
-        new PartitioningStrategyException(
-          "An unspecified endpoint has been applied to the partitioning service, please check " +
-            "your ClientCustomStrategy.getPartitionIdAndRequest see if the endpoint is defined"))
+  private[finagle] val defaultPartitionIdAndRequest: ThriftStructIface => Future[
+    Map[Int, ThriftStructIface]
+  ] = { _ =>
+    Future.exception(
+      new PartitioningStrategyException(
+        "An unspecified endpoint has been applied to the partitioning service, please check " +
+          "your ClientCustomStrategy.getPartitionIdAndRequest see if the endpoint is defined"))
+  }
 }
 
 /**
  * An API to set a custom partitioning strategy for a Thrift/ThriftMux Client.
+ * For a Java-friendly way to do the same thing, see `ClientCustomStrategy.create`
+ *
+ * @param getPartitionIdAndRequest A PartialFunction implemented by client that
+ *        provides the partitioning logic on a request. It takes a Thrift object
+ *        request, and returns Future Map of partition ids to sub-requests. If
+ *        we don't need to fan-out, it should return one element: partition id
+ *        to the original request.  This PartialFunction can take multiple
+ *        Thrift request types of one Thrift service (different method endpoints
+ *        of one service).
+ * @param logicalPartitionFn Gets the logical partition identifier from a host
+ *        identifier, host identifiers are derived from [[ZkMetadata]]
+ *        shardId. Indicates which logical partition a physical host belongs to,
+ *        multiple hosts can belong to the same partition, for example:
+ *        {{{
+ *          val getLogicalPartition: Int => Int = {
+ *            case a if Range(0, 10).contains(a) => 0
+ *            case b if Range(10, 20).contains(b) => 1
+ *            case c if Range(20, 30).contains(c) => 2
+ *            case _ => throw ...
+ *          }
+ *        }}}
+ *        If not provided, the default is that each instance is its own partition.
+ *
+ * @note  When updating the partition topology dynamically, there is a potential one-time
+ *        mismatch if a Service Discovery update happens after getPartitionIdAndRequest.
  */
-abstract class ClientCustomStrategy extends CustomPartitioningStrategy {
-  // input: original thrift request
-  // output: Future Map of partition ids and split requests
-  type ToPartitionedMap = PartialFunction[ThriftStructIface, Future[Map[Int, ThriftStructIface]]]
+final class ClientCustomStrategy(
+  val getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap,
+  logicalPartitionFn: Int => Int)
+    extends CustomPartitioningStrategy {
 
-  /**
-   * A PartialFunction implemented by client that provides the partitioning logic on
-   * a request. It takes a Thrift object request, and returns Future Map of partition ids to
-   * sub-requests. If no fan-out needs, it should return one element: partition id to the
-   * original request.
-   * This PartialFunction can take multiple Thrift request types of one Thrift service
-   * (different method endpoints of one service).
-   *
-   * @note  When updating the partition topology dynamically, there is a potential one-time
-   *        mismatch if a Service Discovery update happens after getPartitionIdAndRequest.
-   */
-  def getPartitionIdAndRequest: ToPartitionedMap
+  def this(getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap) =
+    this(getPartitionIdAndRequest, identity[Int])
+
+  override def getLogicalPartition(instance: Int): Int = logicalPartitionFn(instance)
 }

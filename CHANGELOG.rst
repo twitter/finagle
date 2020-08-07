@@ -34,12 +34,22 @@ New Features
   to limit the number of connections that a listener will maintain. Connections that exceed
   the limit are eagerly closed. ``PHAB_ID=D517737``
 
+* finagle-thrift: Added java-friendly `c.t.f.thrift.exp.partitioning.ClientHashingStrategy` and
+  `c.t.f.thrift.exp.partitioning.ClientCustomStrategy` `create` methods, and added java-friendly
+  `c.t.f.thrift.exp.partitioning.RequestMergerRegistry#addRequestMerger` and
+  `c.t.f.thrift.exp.partitioning.ResponseMergerRegistry#addResponseMerger` to make partitioning
+  easier to use from Java. ``PHAB_ID=D525770``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
 * finagle-core: `ReqRep` can no longer be created via `new ReqRep(..)`. Please use
   `ReqRep.apply(..)` instead.
   ``PHAB_ID=D520027``
+
+* finagle-thrift: Updated the `c.t.f.thrift.exp.partitioning.ClientHashingStrategy` and the
+  `c.t.f.thrift.exp.partitioning.ClientCustomStrategy` to take constructor arguments instead
+  of needing to override methods on construction. ``PHAB_ID=D525770``
 
 20.7.0
 ------

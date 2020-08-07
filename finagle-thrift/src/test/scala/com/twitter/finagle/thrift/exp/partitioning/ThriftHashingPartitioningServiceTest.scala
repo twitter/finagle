@@ -3,10 +3,6 @@ package com.twitter.finagle.thrift.exp.partitioning
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.partitioning.PartitioningService
 import com.twitter.finagle.thrift.ClientDeserializeCtx
-import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.{
-  RequestMergerRegistry,
-  ResponseMergerRegistry
-}
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
@@ -18,20 +14,15 @@ class ThriftHashingPartitioningServiceTest
     with ThriftPartitioningTest
     with PrivateMethodTester {
 
-  val hashingStrategy = new ClientHashingStrategy {
-    def getHashingKeyAndRequest: ToPartitionedMap = {
-      case aRequest: ARequest =>
-        aRequest.alist.groupBy(a => a % 2).map {
-          case (key, list) =>
-            key -> ARequest(list)
-        }
-    }
-    override val requestMergerRegistry: RequestMergerRegistry =
-      RequestMergerRegistry.create.add(AMethod, aRequestMerger)
-
-    override val responseMergerRegistry: ResponseMergerRegistry =
-      ResponseMergerRegistry.create.add(AMethod, aResponseMerger)
-  }
+  val hashingStrategy = new ClientHashingStrategy({
+    case aRequest: ARequest =>
+      aRequest.alist.groupBy(a => a % 2).map {
+        case (key, list) =>
+          key -> ARequest(list)
+      }
+  })
+  hashingStrategy.requestMergerRegistry.add(AMethod, aRequestMerger)
+  hashingStrategy.responseMergerRegistry.add(AMethod, aResponseMerger)
 
   val testService = new ThriftHashingPartitioningService[ARequest, Int](
     underlying = mock[Stack[ServiceFactory[ARequest, Int]]],

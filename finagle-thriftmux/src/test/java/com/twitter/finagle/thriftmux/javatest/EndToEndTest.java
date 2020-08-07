@@ -2,6 +2,7 @@ package com.twitter.finagle.thriftmux.javatest;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Collections;
 
 import scala.runtime.AbstractFunction1;
 
@@ -27,12 +28,17 @@ import com.twitter.finagle.param.Label;
 import com.twitter.finagle.thrift.ClientId;
 import com.twitter.finagle.thrift.MethodMetadata;
 import com.twitter.finagle.thrift.RichServerParam;
+import com.twitter.finagle.thrift.exp.partitioning.ClientHashingStrategy;
+import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy;
 import com.twitter.finagle.thriftmux.thriftscala.TestService;
 import com.twitter.finagle.thriftmux.thriftscala.TestService$FinagleService;
+import com.twitter.hashing.KeyHashers;
+import com.twitter.scrooge.ThriftStructIface;
 import com.twitter.util.Await;
 import com.twitter.util.Closable;
 import com.twitter.util.Closables;
 import com.twitter.util.Duration;
+import com.twitter.util.Function;
 import com.twitter.util.Future;
 
 import static junit.framework.Assert.assertEquals;
@@ -363,5 +369,16 @@ public class EndToEndTest {
       Await.result(client.asClosable().close(), Duration.fromSeconds(2));
       Await.result(server.close(), Duration.fromSeconds(2));
     }
+  }
+
+  @Test
+  public void testPartitioningParams() {
+    PartitioningStrategy myStrat = ClientHashingStrategy.create(Function.func(
+      (ThriftStructIface iface) -> Collections.emptyMap()));
+    ThriftMux.Client client = ThriftMux.client()
+      .withPartitioning().strategy(myStrat)
+      .withPartitioning().ejectFailedHost(false)
+      .withPartitioning().keyHasher(KeyHashers.KETAMA())
+      .withPartitioning().numReps(5);
   }
 }

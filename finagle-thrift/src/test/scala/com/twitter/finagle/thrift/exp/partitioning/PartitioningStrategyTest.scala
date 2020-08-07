@@ -63,12 +63,10 @@ class PartitioningStrategyTest extends FunSuite with MockitoSugar {
   }
 
   test("unset endpoints behavior has default None to original request") {
-    val hashingStrategy = new ClientHashingStrategy {
-      def getHashingKeyAndRequest: ToPartitionedMap = {
-        case a: ARequest => Map(1 -> a)
-        case b: BRequest => Map("some hashing key" -> b)
-      }
-    }
+    val hashingStrategy = new ClientHashingStrategy({
+      case a: ARequest => Map(1 -> a)
+      case b: BRequest => Map("some hashing key" -> b)
+    })
     val result = hashingStrategy.getHashingKeyAndRequest
       .applyOrElse(CRequest(1), ClientHashingStrategy.defaultHashingKeyAndRequest)
     assert(result == Map(None -> CRequest(1)))
