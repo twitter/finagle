@@ -22,7 +22,7 @@ private[finagle] object ThriftPartitioningService {
   }
 
   /**
-   * Failed to get Partition Ids and Requests from [[CustomPartitioningStrategy]].
+   * Failed to get PartitionIds/HashKeys and Requests from [[PartitioningStrategy]].
    */
   final class PartitioningStrategyException(
     message: String,

@@ -1,19 +1,25 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.{
   RequestMerger,
   RequestMergerRegistry,
   ResponseMerger,
   ResponseMergerRegistry
 }
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
 import com.twitter.scrooge.{ThriftMethodIface, ThriftStructIface}
-import com.twitter.util.{Return, Throw}
+import com.twitter.util.{Await, Awaitable, Duration, Future, Return, Throw}
 import org.apache.thrift.protocol.TProtocol
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
 class PartitioningStrategyTest extends FunSuite with MockitoSugar {
+
+  def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
+    Await.result(a, d)
+
   val AMethod = mock[ThriftMethodIface]
   when(AMethod.name).thenReturn("A")
 
@@ -62,7 +68,7 @@ class PartitioningStrategyTest extends FunSuite with MockitoSugar {
         Seq(new Exception("1"), new Exception("2"))).throwable.getMessage == "2")
   }
 
-  test("unset endpoints behavior has default None to original request") {
+  test("unset endpoints hashing strategy has default None to original request") {
     val hashingStrategy = new ClientHashingStrategy({
       case a: ARequest => Map(1 -> a)
       case b: BRequest => Map("some hashing key" -> b)
@@ -70,5 +76,37 @@ class PartitioningStrategyTest extends FunSuite with MockitoSugar {
     val result = hashingStrategy.getHashingKeyAndRequest
       .applyOrElse(CRequest(1), ClientHashingStrategy.defaultHashingKeyAndRequest)
     assert(result == Map(None -> CRequest(1)))
+  }
+
+  test("unset endpoints custom strategy throw PartitioningStrategyException by default ") {
+    val customStrategy = new ClientCustomStrategy({
+      case a: ARequest => Future.value(Map(1 -> a))
+      case b: BRequest => Future.value(Map(2 -> b))
+    })
+
+    val result = customStrategy.getPartitionIdAndRequest
+      .applyOrElse(CRequest(1), ClientCustomStrategy.defaultPartitionIdAndRequest)
+    intercept[PartitioningStrategyException](await(result))
+  }
+
+  test("methodBuilder hashing strategy") {
+    val mbHashingStrategy = new MethodBuilderHashingStrategy[ARequest, String](
+      { aRequest: ARequest => Map(aRequest.a -> aRequest) },
+      requestMerger = Some(as => as.head),
+      responseMerger = Some((success, _) => Return(success.head))
+    )
+    assert(mbHashingStrategy.getHashingKeyAndRequest(ARequest(100)) == Map(100 -> ARequest(100)))
+    assert(mbHashingStrategy.requestMerger.get(Seq(ARequest(100))) == ARequest(100))
+    assert(mbHashingStrategy.responseMerger.get(Seq("one"), Seq.empty) == Return("one"))
+  }
+
+  test("methodBuilder custom strategy") {
+    val mCustomStrategy = new MethodBuilderCustomStrategy[ARequest, String](
+      { aRequest: ARequest => Future.value(Map(aRequest.a -> aRequest)) },
+      responseMerger = Some((success, _) => Return(success.head))
+    )
+    assert(
+      await(mCustomStrategy.getPartitionIdAndRequest(ARequest(100))) == Map(100 -> ARequest(100)))
+    assert(mCustomStrategy.responseMerger.get(Seq("one"), Seq.empty) == Return("one"))
   }
 }

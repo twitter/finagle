@@ -8,7 +8,6 @@ import com.twitter.util.Try
 private[partitioning] object ThriftPartitioningUtil {
 
   def mergeResponses[Req, Rep](
-    originalReq: Req,
     results: PartitioningService.PartitionedResults[Req, Rep],
     responseMerger: ResponseMerger[Any],
     fromResponseToBytes: Rep => Array[Byte]

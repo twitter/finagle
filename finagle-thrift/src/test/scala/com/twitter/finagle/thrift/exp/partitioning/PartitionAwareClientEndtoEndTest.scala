@@ -5,10 +5,7 @@ import com.twitter.delivery.thriftscala.DeliveryService._
 import com.twitter.delivery.thriftscala._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.param.CommonParams
-import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.{
-  HashingStrategyException,
-  NoPartitioningKeys
-}
+import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.PartitionNodeManager.NoPartitionException
 import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.stats.InMemoryStatsReceiver
@@ -196,7 +193,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
         .strategy(erroredHashingPartitioningStrategy)
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 
-      intercept[HashingStrategyException] {
+      intercept[PartitioningStrategyException] {
         await(client.getBox(addrInfo1, Byte.MinValue))
       }
 
@@ -379,8 +376,8 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
         }
 
       val addrInfo0 = AddrInfo("zero", 12345)
-
       val dynamic = new AtomicInteger(0)
+
       val dynamicStrategy = new ClientCustomStrategy(
         {
           case sendBox: SendBox.Args =>

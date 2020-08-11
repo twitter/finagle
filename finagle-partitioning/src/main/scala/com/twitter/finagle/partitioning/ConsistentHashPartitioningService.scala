@@ -21,12 +21,6 @@ private[finagle] object ConsistentHashPartitioningService {
    */
   private[finagle] class NoPartitioningKeys(message: String) extends Exception(message)
 
-  /**
-   * Errored when applying the hashing strategy to a request.
-   * @param message
-   */
-  private[finagle] class HashingStrategyException(message: String) extends Exception(message)
-
   trait Module[Req, Rep, Key] extends Stack.Module[ServiceFactory[Req, Rep]] {
 
     val parameters = Seq(

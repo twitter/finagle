@@ -1,9 +1,6 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
-import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.{
-  HashingStrategyException,
-  NoPartitioningKeys
-}
+import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, PartitioningService}
 import com.twitter.finagle.thrift.ClientDeserializeCtx
@@ -41,6 +38,8 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
 
   final protected def getKeyBytes(key: Any): Array[Byte] =
     Buf.ByteArray.Owned.extract(Buf.U32BE(key.hashCode()))
+
+  private[this] def rpcName: String = ClientDeserializeCtx.get.rpcName.getOrElse("N/A")
 
   final protected def noPartitionInformationHandler(req: Req): Future[Nothing] = {
     val ex = new NoPartitioningKeys(s"No Partitioning hashing keys for the thrift method: $rpcName")
@@ -84,6 +83,11 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
     val optMerger = hashingStrategy match {
       case clientHashingStrategy: ClientHashingStrategy =>
         clientHashingStrategy.requestMergerRegistry.get(rpcName)
+      case mbHashingStrategy: MethodBuilderHashingStrategy[_, _] =>
+        mbHashingStrategy
+        //upcasting, MethodBuilderHashingStrategy[Req <: ThriftStructIface, _]
+          .asInstanceOf[MethodBuilderHashingStrategy[ThriftStructIface, _]]
+          .requestMerger
     }
     optMerger match {
       case Some(merger) => merger
@@ -93,25 +97,26 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
     }
   }
 
-  private[this] def rpcName: String =
-    ClientDeserializeCtx.get.rpcName.getOrElse("N/A")
-
   final protected def mergeResponses(
     originalReq: Req,
     results: PartitioningService.PartitionedResults[Req, Rep]
   ): Rep = {
-    val responseMerger = hashingStrategy match {
+    val mergerOption = hashingStrategy match {
       case clientHashingStrategy: ClientHashingStrategy =>
-        clientHashingStrategy.responseMergerRegistry.get(rpcName) match {
-          case Some(merger) => merger
-          case None =>
-            throw new PartitioningStrategyException(
-              s"cannot find the response merger for thrift method: $rpcName")
-        }
+        clientHashingStrategy.responseMergerRegistry.get(rpcName)
+      case mbCustomStrategy: MethodBuilderHashingStrategy[_, _] =>
+        mbCustomStrategy
+          .asInstanceOf[MethodBuilderHashingStrategy[_, Any]]
+          .responseMerger
+    }
+    val responseMerger = mergerOption match {
+      case Some(merger) => merger
+      case None =>
+        throw new PartitioningStrategyException(
+          s"cannot find the response merger for thrift method: $rpcName")
     }
 
     val mergedResponse = ThriftPartitioningUtil.mergeResponses(
-      originalReq,
       results,
       responseMerger,
       thriftMarshallable.fromResponseToBytes)
@@ -134,11 +139,22 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
           case clientHashingStrategy: ClientHashingStrategy =>
             clientHashingStrategy.getHashingKeyAndRequest
               .applyOrElse(ts, ClientHashingStrategy.defaultHashingKeyAndRequest)
+          case mbHashingStrategy: MethodBuilderHashingStrategy[_, _] =>
+            mbHashingStrategy
+            //upcasting, MethodBuilderHashingStrategy[Req <: ThriftStructIface, _]
+              .asInstanceOf[MethodBuilderHashingStrategy[ThriftStructIface, _]]
+              .getHashingKeyAndRequest(ts)
         }
       }
       getKeyAndRequest(inputArg)
     } catch {
-      case NonFatal(e) => throw new HashingStrategyException(e.getMessage)
+      case castEx: ClassCastException =>
+        // applied the wrong request type to getHashingKeyAndRequest
+        throw new PartitioningStrategyException(
+          "MethodBuilder Strategy request type doesn't match with the actual request type, " +
+            "please check the MethodBuilderHashingStrategy type.",
+          castEx)
+      case NonFatal(e) => throw new PartitioningStrategyException(e.getMessage)
     }
   }
 }

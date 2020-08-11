@@ -25,7 +25,7 @@ class PartitioningParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[
    * The failing signal currently is gathered from
    * [[com.twitter.finagle.partitioning.ConsistentHashingFailureAccrualFactory]]
    *
-   * @note: When turning on, ejection is based on the failure accrual mentioned above, so your
+   * @note When turning on, ejection is based on the failure accrual mentioned above, so your
    *       cluster may get different views of the same host. With partitioning strategy updates,
    *       this can introduce inter-process inconsistencies between hash rings.
    *       In many cases, it's better to eject failing host via a separate mechanism that's

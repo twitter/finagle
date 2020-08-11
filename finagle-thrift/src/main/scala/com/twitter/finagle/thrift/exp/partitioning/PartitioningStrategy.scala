@@ -57,20 +57,10 @@ object PartitioningStrategy {
    */
   type ResponseMerger[Rep] = (Seq[Rep], Seq[Throwable]) => Try[Rep]
 
-  object RequestMergerRegistry {
-
-    /**
-     * Create an empty RequestMergerRegistry.
-     * @note The created RequestMergerRegistry is NOT thread safe, it carries an assumption
-     *       that registries are written during client initialization.
-     */
-    def create(): RequestMergerRegistry = new RequestMergerRegistry()
-  }
-
   /**
    * Maintain a map of method name to method's [[RequestMerger]].
    */
-  class RequestMergerRegistry {
+  final class RequestMergerRegistry private[partitioning] {
 
     // reqMerger Map is not thread safe, assuming `add` only be called during client
     // initialization and the reqMerger remains the same as request threads `get` from it.
@@ -109,24 +99,14 @@ object PartitioningStrategy {
      * Get a RequestMerger for a ThriftMethod.
      * @param methodName  The Thrift method name
      */
-    def get(methodName: String): Option[RequestMerger[ThriftStructIface]] =
+    private[finagle] def get(methodName: String): Option[RequestMerger[ThriftStructIface]] =
       reqMergers.get(methodName)
-  }
-
-  object ResponseMergerRegistry {
-
-    /**
-     * Create an empty ResponseMergerRegistry.
-     * @note The created ResponseMergerRegistry is NOT thread safe, it carries an assumption
-     *       that registries are written during client initialization.
-     */
-    def create(): ResponseMergerRegistry = new ResponseMergerRegistry()
   }
 
   /**
    * Maintain a map of method name to method's [[ResponseMerger]].
    */
-  class ResponseMergerRegistry {
+  final class ResponseMergerRegistry private[partitioning] {
 
     // repMergers Map is not thread safe, assuming `add` is only called during client
     // initialization and the repMergers remains the same as request threads `get` from it.
@@ -165,7 +145,7 @@ object PartitioningStrategy {
      * Get a ResponseMerger for a ThriftMethod.
      * @param methodName  The Thrift method name
      */
-    def get(methodName: String): Option[ResponseMerger[Any]] =
+    private[finagle] def get(methodName: String): Option[ResponseMerger[Any]] =
       repMergers.get(methodName)
   }
 }
@@ -173,30 +153,15 @@ object PartitioningStrategy {
 /**
  * Service partitioning strategy to apply on the clients in order to let clients route
  * requests accordingly. Two particular partitioning strategies are going to be supported,
- * [[HashingPartitioningStrategy]] and [[CustomPartitioningStrategy]].
+ * [[HashingPartitioningStrategy]] and [[CustomPartitioningStrategy]], each one supports
+ * both configuring Finagle Client Stack and ThriftMux MethodBuilder.
  * Either one will need developers to provide a concrete function to give each request an
  * indicator of destination, for example a hashing key or a partition address.
  * Messaging fan-out is supported by leveraging RequestMerger and ResponseMerger.
  */
-sealed trait PartitioningStrategy {
+sealed trait PartitioningStrategy
 
-  /**
-   * A ResponseMergerRegistry implemented by client to supply [[ResponseMerger]]s.
-   * For message fan-out cases.
-   * @see [[ResponseMerger]]
-   */
-  val responseMergerRegistry: ResponseMergerRegistry = ResponseMergerRegistry.create()
-}
-
-sealed trait HashingPartitioningStrategy extends PartitioningStrategy {
-
-  /**
-   * A RequestMergerRegistry implemented by client to supply [[RequestMerger]]s.
-   * For message fan-out cases.
-   * @see [[RequestMerger]]
-   */
-  val requestMergerRegistry: RequestMergerRegistry = RequestMergerRegistry.create()
-}
+sealed trait HashingPartitioningStrategy extends PartitioningStrategy
 
 sealed trait CustomPartitioningStrategy extends PartitioningStrategy {
 
@@ -215,6 +180,7 @@ sealed trait CustomPartitioningStrategy extends PartitioningStrategy {
    */
   def getLogicalPartition(instance: Int): Int
 }
+
 private[partitioning] object Disabled extends PartitioningStrategy
 
 object ClientHashingStrategy {
@@ -261,7 +227,50 @@ object ClientHashingStrategy {
  */
 final class ClientHashingStrategy(
   val getHashingKeyAndRequest: ClientHashingStrategy.ToPartitionedMap)
-    extends HashingPartitioningStrategy
+    extends HashingPartitioningStrategy {
+
+  /**
+   * A RequestMergerRegistry implemented by client to supply [[RequestMerger]]s
+   * for message fan-out cases.
+   * @see [[RequestMerger]]
+   */
+  val requestMergerRegistry: RequestMergerRegistry = new RequestMergerRegistry()
+
+  /**
+   * A ResponseMergerRegistry implemented by client to supply [[ResponseMerger]]s
+   * for message fan-out cases.
+   * @see [[ResponseMerger]]
+   */
+  val responseMergerRegistry: ResponseMergerRegistry = new ResponseMergerRegistry()
+}
+
+object MethodBuilderHashingStrategy {
+  // input: original thrift request
+  // output: a Map of hashing keys and split requests
+  type ToPartitionedMap[Req] = Req => Map[Any, Req]
+}
+
+/**
+ * An API to set a hashing partitioning strategy for a client MethodBuilder.
+ * For a Java-friendly way to do the same thing, see `MethodBuilderHashingStrategy.create`
+ *
+ * @param getHashingKeyAndRequest A function for the partitioning logic. MethodBuilder is
+ *                                customized per-method so that this method only takes one
+ *                                Thrift request type.
+ * @param requestMerger           Supplies a [[RequestMerger]] for messaging fan-out.
+ *                                Non-fan-out case the default is [[None]].
+ * @param responseMerger          Supplies a [[ResponseMerger]] for messaging fan-out.
+ *                                Non-fan-out case the default is [[None]].
+ */
+final class MethodBuilderHashingStrategy[Req <: ThriftStructIface, Rep](
+  val getHashingKeyAndRequest: MethodBuilderHashingStrategy.ToPartitionedMap[Req],
+  val requestMerger: Option[RequestMerger[Req]],
+  val responseMerger: Option[ResponseMerger[Rep]])
+    extends HashingPartitioningStrategy {
+
+  def this(getHashingKeyAndRequest: MethodBuilderHashingStrategy.ToPartitionedMap[Req]) =
+    this(getHashingKeyAndRequest, None, None)
+}
 
 object ClientCustomStrategy {
   // input: original thrift request
@@ -350,5 +359,70 @@ final class ClientCustomStrategy(
   def this(getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap) =
     this(getPartitionIdAndRequest, identity[Int])
 
-  override def getLogicalPartition(instance: Int): Int = logicalPartitionFn(instance)
+  def getLogicalPartition(instance: Int): Int = logicalPartitionFn(instance)
+
+  /**
+   * A ResponseMergerRegistry implemented by client to supply [[ResponseMerger]]s
+   * for message fan-out cases.
+   * @see [[ResponseMerger]]
+   */
+  val responseMergerRegistry: ResponseMergerRegistry = new ResponseMergerRegistry()
+}
+
+object MethodBuilderCustomStrategy {
+  // input: original thrift request
+  // output: Future Map of partition ids and split requests
+  type ToPartitionedMap[Req] = Req => Future[Map[Int, Req]]
+}
+
+/**
+ * An API to set a custom partitioning strategy for a client MethodBuilder.
+ *
+ * @param getPartitionIdAndRequest A function for the partitioning logic.
+ *        MethodBuilder is customized per-method so that this method only takes one
+ *        Thrift request type.
+ * @param logicalPartitionFn Gets the logical partition identifier from a host
+ *        identifier, host identifiers are derived from [[ZkMetadata]]
+ *        shardId. Indicates which logical partition a physical host belongs to,
+ *        multiple hosts can belong to the same partition, for example:
+ *        {{{
+ *          val getLogicalPartition: Int => Int = {
+ *            case a if Range(0, 10).contains(a) => 0
+ *            case b if Range(10, 20).contains(b) => 1
+ *            case c if Range(20, 30).contains(c) => 2
+ *            case _ => throw ...
+ *          }
+ *        }}}
+ *        If not provided, the default is that each instance is its own partition.
+ * @param responseMerger  Supplies a [[ResponseMerger]] for messaging fan-out.
+ *        Non-fan-out case the default is [[None]].
+ */
+final class MethodBuilderCustomStrategy[Req <: ThriftStructIface, Rep](
+  val getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req],
+  logicalPartitionFn: Int => Int,
+  val responseMerger: Option[ResponseMerger[Rep]])
+    extends CustomPartitioningStrategy {
+
+  def this(
+    getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req],
+    logicalPartitionFn: Int => Int
+  ) = this(
+    getPartitionIdAndRequest,
+    logicalPartitionFn,
+    None
+  )
+
+  def this(getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req]) =
+    this(getPartitionIdAndRequest, identity(_))
+
+  def this(
+    getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req],
+    responseMerger: Option[ResponseMerger[Rep]]
+  ) = this(
+    getPartitionIdAndRequest,
+    identity[Int],
+    responseMerger
+  )
+
+  def getLogicalPartition(instance: Int): Int = logicalPartitionFn(instance)
 }

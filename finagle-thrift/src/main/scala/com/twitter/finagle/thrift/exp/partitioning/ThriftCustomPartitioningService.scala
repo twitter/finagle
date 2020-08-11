@@ -17,7 +17,7 @@ import scala.util.control.NonFatal
  * partitioning topologies.
  * @see [[PartitioningService]].
  */
-class ThriftCustomPartitioningService[Req, Rep](
+private[finagle] class ThriftCustomPartitioningService[Req, Rep](
   underlying: Stack[ServiceFactory[Req, Rep]],
   thriftMarshallable: ReqRepMarshallable[Req, Rep],
   params: Stack.Params,
@@ -27,10 +27,11 @@ class ThriftCustomPartitioningService[Req, Rep](
   private[this] val nodeManager =
     new PartitionNodeManager(underlying, customStrategy.getLogicalPartition, params)
 
+  private[this] def rpcName: String = ClientDeserializeCtx.get.rpcName.getOrElse("N/A")
+
   final protected def noPartitionInformationHandler(req: Req): Future[Nothing] = {
     val ex = new PartitioningStrategyException(
-      s"No Partitioning Ids for the thrift method: ${ClientDeserializeCtx.get.rpcName
-        .getOrElse("N/A")}")
+      s"No Partitioning Ids for the thrift method: $rpcName")
     Future.exception(ex)
   }
 
@@ -40,32 +41,27 @@ class ThriftCustomPartitioningService[Req, Rep](
   ): Future[Map[Req, Future[Service[Req, Rep]]]] = {
     val serializer = new ThriftRequestSerializer(params)
     val partitionIdAndRequest = getPartitionIdAndRequestMap(original)
-    ClientDeserializeCtx.get.rpcName match {
-      case Some(rpcName) =>
-        partitionIdAndRequest.flatMap { idsAndRequests =>
-          if (idsAndRequests.isEmpty) {
-            noPartitionInformationHandler(original)
-          } else if (idsAndRequests.size == 1) {
-            // optimization: won't serialize request if it is a singleton partition
-            Future.value(Map(original -> partitionServiceForPartitionId(idsAndRequests.head._1)))
-          } else {
-            Future.value(idsAndRequests.map {
-              case (id, request) =>
-                val thriftClientRequest =
-                  serializer.serialize(rpcName, request, thriftMarshallable.isOneway(original))
+    partitionIdAndRequest.flatMap { idsAndRequests =>
+      if (idsAndRequests.isEmpty) {
+        noPartitionInformationHandler(original)
+      } else if (idsAndRequests.size == 1) {
+        // optimization: won't serialize request if it is a singleton partition
+        Future.value(Map(original -> partitionServiceForPartitionId(idsAndRequests.head._1)))
+      } else {
+        Future.value(idsAndRequests.map {
+          case (id, request) =>
+            val thriftClientRequest =
+              serializer.serialize(rpcName, request, thriftMarshallable.isOneway(original))
 
-                val partitionedReq =
-                  thriftMarshallable.framePartitionedRequest(thriftClientRequest, original)
+            val partitionedReq =
+              thriftMarshallable.framePartitionedRequest(thriftClientRequest, original)
 
-                // we assume NodeManager updates always happen before getPartitionIdAndRequestMap
-                // updates. When updating the partitioning topology, it should do proper locking
-                // before returning a lookup map.
-                (partitionedReq, partitionServiceForPartitionId(id))
-            })
-          }
-        }
-      case None =>
-        Future.exception(new IllegalArgumentException("cannot find the thrift method rpcName"))
+            // we assume NodeManager updates always happen before getPartitionIdAndRequestMap
+            // updates. When updating the partitioning topology, it should do proper locking
+            // before returning a lookup map.
+            (partitionedReq, partitionServiceForPartitionId(id))
+        })
+      }
     }
   }
 
@@ -73,22 +69,25 @@ class ThriftCustomPartitioningService[Req, Rep](
     originalReq: Req,
     results: PartitioningService.PartitionedResults[Req, Rep]
   ): Rep = {
-    val responseMerger = customStrategy match {
+    val mergerOption = customStrategy match {
       case clientCustomStrategy: ClientCustomStrategy =>
-        ClientDeserializeCtx.get.rpcName.flatMap { rpcName =>
-          clientCustomStrategy.responseMergerRegistry.get(rpcName)
-        } match {
-          case Some(merger) => merger
-          case None =>
-            throw new IllegalArgumentException(
-              s"cannot find the response merger for thrift method: " +
-                s"${ClientDeserializeCtx.get.rpcName.getOrElse("N/A")}"
-            )
-        }
+        clientCustomStrategy.responseMergerRegistry.get(rpcName)
+      case mbCustomStrategy: MethodBuilderCustomStrategy[_, _] =>
+        mbCustomStrategy
+        //upcasting, MethodBuilderCustomStrategy[Req <: ThriftStructIface, _]
+          .asInstanceOf[MethodBuilderCustomStrategy[_, Any]]
+          .responseMerger
+    }
+
+    val responseMerger = mergerOption match {
+      case Some(merger) => merger
+      case None =>
+        throw new IllegalArgumentException(
+          s"cannot find the response merger for thrift method: $rpcName"
+        )
     }
 
     val mergedResponse = ThriftPartitioningUtil.mergeResponses(
-      originalReq,
       results,
       responseMerger,
       thriftMarshallable.fromResponseToBytes)
@@ -109,13 +108,25 @@ class ThriftCustomPartitioningService[Req, Rep](
           case clientCustomStrategy: ClientCustomStrategy =>
             clientCustomStrategy.getPartitionIdAndRequest
               .applyOrElse(ts, ClientCustomStrategy.defaultPartitionIdAndRequest)
+          case mbCustomStrategy: MethodBuilderCustomStrategy[_, _] =>
+            mbCustomStrategy
+            //upcasting, MethodBuilderCustomStrategy[Req <: ThriftStructIface, _]
+              .asInstanceOf[MethodBuilderCustomStrategy[ThriftStructIface, _]]
+              .getPartitionIdAndRequest(ts)
         }
       }
-      // CustomPartitioningStrategy.defaultPartitionIdAndRequest throws a Future.exception
+      // ClientCustomStrategy.defaultPartitionIdAndRequest throws a Future.exception
       // for undefined endpoints(methods) in PartitioningStrategy. It indicates
       // those requests for certain endpoint won't be served in PartitioningService.
       getPartitionIdAndRequest(inputArg)
     } catch {
+      case castEx: ClassCastException =>
+        // applied the wrong request type to getPartitionIdAndRequest
+        Future.exception(
+          new PartitioningStrategyException(
+            "MethodBuilder Strategy request type doesn't match with the actual request type, " +
+              "please check the MethodBuilderCustomStrategy type.",
+            castEx))
       case NonFatal(e) => Future.exception(new PartitioningStrategyException(e))
     }
   }
