@@ -160,7 +160,7 @@ class FilterTest extends FunSuite {
       andThenAgnosticSvc.toString == "agnosticFilter1.andThen(com.twitter.finagle.FilterTest$AgnosticFilter2).andThen(agnosticFilter3).andThen(com.twitter.finagle.service.ConstantService(ConstFuture(Return(2))))"
     )
 
-    // chained agnostic filters andThen chained agnostic filters andThen service -- composes like typed filters when composed with a service/servicefactory (since it uses toFilter)
+    // chained agnostic filters andThen chained agnostic filters andThen service -- composes like typed filters when composed with a service/serviceFactory (since it uses toFilter)
     assert(
       andThenAgnostic
         .andThen(andThenAgnostic)

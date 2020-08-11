@@ -874,7 +874,7 @@ class MethodBuilderTest
     }
     assert(exc1 == myException1)
 
-    // ensure exceptions that fall under exisitng classifier, and those that fall under the
+    // ensure exceptions that fall under existing classifier, and those that fall under the
     // new classifier, are retried
     eventually {
       assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 1)

@@ -202,7 +202,7 @@ class RequeueFilterTest extends FunSuite {
     var recordedTraces: Seq[TraceId] = Seq.empty
     val svcFactory = ServiceFactory.const(
       filter.andThen(Service.mk[Throwable, Int] { req =>
-        // capture the trace for this requeust
+        // capture the trace for this request
         recordedTraces = recordedTraces :+ Trace.id
         Future.exception(req)
       })
@@ -239,7 +239,7 @@ class RequeueFilterTest extends FunSuite {
     var recordedTraces: Seq[TraceId] = Seq.empty
     val svcFactory = ServiceFactory.const(
       filter.andThen(Service.mk[Throwable, Int] { req =>
-        // capture the trace for this requeust
+        // capture the trace for this request
         recordedTraces = recordedTraces :+ Trace.id
         Future.exception(req)
       })

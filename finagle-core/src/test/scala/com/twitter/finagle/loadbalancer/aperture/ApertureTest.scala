@@ -232,7 +232,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     bal.update(counts.range(10))
 
-    // Sanity check custom minAperture enforced.
+    // Check that the custom minAperture is enforced.
     bal.adjustx(-100)
     bal.applyn(1000)
     assert(counts.nonzero.size == 4)
@@ -320,7 +320,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     assert(bal.status == Status.Open)
   }
 
-  test("status, unavailabe endpoints in the aperture") {
+  test("status, unavailable endpoints in the aperture") {
     val counts = new Counts
     val bal = new Bal {
       override protected val useDeterministicOrdering = Some(true)

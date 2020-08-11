@@ -62,7 +62,7 @@ class ApplicationProtocolsTest extends FunSuite {
     }
   }
 
-  test("combine results in Unspecified for two Unspecifed items") {
+  test("combine results in Unspecified for two Unspecified items") {
     val appProtos1 = ApplicationProtocols.Unspecified
     val appProtos2 = ApplicationProtocols.Unspecified
     val combined = ApplicationProtocols.combine(appProtos1, appProtos2)

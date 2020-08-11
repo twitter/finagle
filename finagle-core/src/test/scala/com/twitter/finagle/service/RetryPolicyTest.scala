@@ -194,7 +194,7 @@ class RetryPolicyTest extends FunSpec {
       assert(f.toString == "foo")
     }
 
-    it("preserves the behavior of the underlying patial function") {
+    it("preserves the behavior of the underlying partial function") {
       val f: PartialFunction[Int, Boolean] = { case i if i >= 0 => true }
       val f1 = RetryPolicy.namedPF("foo")(f)
 

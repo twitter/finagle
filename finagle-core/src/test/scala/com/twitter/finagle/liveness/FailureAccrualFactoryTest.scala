@@ -426,7 +426,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timer.tick()
       }
 
-      // Now succeed; markdead should be reset
+      // Now succeed; markDead should be reset
       Await.result(service(456), 5.seconds)
 
       // Fail again

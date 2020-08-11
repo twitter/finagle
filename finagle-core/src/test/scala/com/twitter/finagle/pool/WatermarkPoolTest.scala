@@ -297,7 +297,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
     val pool = new WatermarkPool(factory, 1, highWaterMark, sr)
   }
 
-  describe("Watermark service lifecyle") {
+  describe("Watermark service lifecycle") {
     it("is resilient to multiple closes on a single service instance") {
       val svcFac = new ServiceFactory[Int, Int] {
         def apply(conn: ClientConnection): Future[Service[Int, Int]] =
@@ -402,7 +402,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         when(factory()).thenReturn(new Promise[Service[Int, Int]])
         when(service.status).thenReturn(Status.Closed)
 
-        // The service is now unhealty, so it should be discarded, and a
+        // The service is now unhealthy, so it should be discarded, and a
         // new one should be made.
         assert(!pool().isDefined)
         verify(service).close(any[Time])

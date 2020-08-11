@@ -86,7 +86,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     assert(policy.markDeadOnFailure() == Some(5.seconds))
   }
 
-  test("Success rate policy markDeadOnFailure() returns Some(Duration) when succes rate not met") {
+  test("Success rate policy markDeadOnFailure() returns Some(Duration) when success rate not met") {
     val policy = FailureAccrualPolicy.successRate(0.5, 100, constantBackoff)
 
     for (i <- 0 until 100) policy.recordSuccess()
@@ -115,7 +115,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     for (i <- 0 until 5) assert(policy.markDeadOnFailure() == Some(300.seconds))
   }
 
-  test("Sucess rate policy: markDeadFor resets on revived()") {
+  test("Success rate policy: markDeadFor resets on revived()") {
     val policy = FailureAccrualPolicy.successRate(1, 2, expBackoff)
 
     // At least 2 requests need to fail before markDeadOnFailure() returns Some(_)

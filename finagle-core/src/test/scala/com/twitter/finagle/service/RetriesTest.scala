@@ -49,7 +49,8 @@ class RetriesTest extends FunSuite {
       nowMillis = Stopwatch.timeMillis
     )
 
-  test("moduleRequeable retries service acquisition `Retries.Effort` times on retryable failure") {
+  test(
+    "moduleRequeueable retries service acquisition `Retries.Effort` times on retryable failure") {
     val stats = new InMemoryStatsReceiver()
 
     val params = Stack.Params.empty +
@@ -72,7 +73,7 @@ class RetriesTest extends FunSuite {
   }
 
   test(
-    "moduleRequeable retries service acquisition `Retries.Effort` times on retryable failure " +
+    "moduleRequeueable retries service acquisition `Retries.Effort` times on retryable failure " +
       "for each service application when using FactoryToService"
   ) {
     val stats = new InMemoryStatsReceiver()
@@ -229,7 +230,7 @@ class RetriesTest extends FunSuite {
     assert(1 == stats.counter("retries", "budget_exhausted")())
   }
 
-  test("moduleWithRetryPolicy neither requeued nor netried") {
+  test("moduleWithRetryPolicy neither requeued nor retried") {
     val stats = new InMemoryStatsReceiver()
 
     val params = Stack.Params.empty +

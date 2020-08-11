@@ -127,7 +127,7 @@ class EndToEndTest extends FunSuite {
           )
         )
 
-        // The upstream addr isn't available for us to check, but we'll do a sanity check that it's not
+        // The upstream address isn't available for us to check, but we'll check that it's not
         // Server C's address and is actually filled in.
         e.remoteInfo match {
           case RemoteInfo.Available(Some(u), _, _, _, _) =>

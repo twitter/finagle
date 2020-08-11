@@ -15,7 +15,7 @@ import scala.language.reflectiveCalls
 
 class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
 
-  // Don't let the Scala compiler get confused about which `thenREturn`
+  // Don't let the Scala compiler get confused about which `thenReturn`
   // method we want to use.
   private[this] def when[T](o: T) =
     Mockito.when(o).asInstanceOf[{ def thenReturn[RT](s: RT): OngoingStubbing[RT] }]

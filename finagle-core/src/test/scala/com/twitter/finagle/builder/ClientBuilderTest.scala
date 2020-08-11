@@ -36,7 +36,7 @@ class ClientBuilderTest
     { case Throw(_: MyException) => true }
   )
 
-  test("ClientBuilder should collect stats on 'tries' for retrypolicy") {
+  test("ClientBuilder should collect stats on 'tries' for retryPolicy") {
     val service = mock[Service[String, String]]
     when(service("123")) thenReturn Future.exception(new MyException())
     when(service.close(any[Time])) thenReturn Future.Done
@@ -62,7 +62,7 @@ class ClientBuilderTest
     assert(inMemory.counters(Seq("test", "requests")) == 2)
   }
 
-  test("ClientBuilder should collect stats on 'tries' with no retrypolicy") {
+  test("ClientBuilder should collect stats on 'tries' with no retryPolicy") {
     val service = mock[Service[String, String]]
     when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
     when(service.close(any[Time])) thenReturn Future.Done
