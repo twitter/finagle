@@ -4,10 +4,10 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.partitioning.PartitioningService
 import com.twitter.finagle.thrift.ClientDeserializeCtx
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
-import com.twitter.finagle.{Service, ServiceFactory, Stack}
+import com.twitter.finagle.{ServiceFactory, Stack}
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
-import com.twitter.util.{Future, Return}
+import com.twitter.util.Return
 import org.scalatest.{FunSuite, PrivateMethodTester}
 
 class ThriftHashingPartitioningServiceTest
@@ -78,20 +78,6 @@ class ThriftHashingPartitioningServiceTest
       assert(
         e.getMessage.contains(
           "MethodBuilder Strategy request type doesn't match with the actual request type"))
-    }
-  }
-
-  test("request - partitionRequest") {
-    val partitionRequest =
-      PrivateMethod[Future[Map[ARequest, Future[Service[ARequest, Int]]]]]('partitionRequest)
-
-    val request = ARequest(List(1, 2, 3, 4))
-    val serdeCtx = new ClientDeserializeCtx[Int](request, _ => Return(Int.MinValue))
-
-    Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx) {
-      serdeCtx.rpcName("A")
-      val result = await(serviceWithClientStrategy.invokePrivate(partitionRequest(request)))
-      assert(deserialize(result.keySet.head.serialized.get).toSet == Set(1, 2, 3, 4))
     }
   }
 

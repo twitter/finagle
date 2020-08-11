@@ -18,3 +18,7 @@ service TestService {
       1: InvalidQueryException ex
     )
 }
+
+service FanoutTestService {
+  list<string> query(1: list<string> x)
+}

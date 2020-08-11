@@ -60,16 +60,26 @@ final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
     if (keyAndRequest.isEmpty || keyAndRequest.head._1 == None) {
       noPartitionInformationHandler(request)
     } else {
-      val requestAndService = keyAndRequest
+      val grouped = keyAndRequest
         .groupBy {
           case (key, _) => partitionServiceForKey(key)
-        }.map {
-          case (svc, kqMap) if kqMap.size == 1 =>
-            (request, svc)
-          case (svc, kqMap) =>
-            (framePartitionedRequest(mergeRequest(rpcName)(kqMap.values.toSeq), request), svc)
         }
-      Future.value(requestAndService)
+      // if everything is going to the same partition, we can avoid reserializing
+      Future.value(if (grouped.size == 1) {
+        grouped.map { case (fsvc, _) => request -> fsvc }
+      } else {
+        grouped.map {
+          // if there's only one request going to a given partition, we don't need to remerge the requests
+          case (svc, shardKeyAndRequestMap) if shardKeyAndRequestMap.size == 1 =>
+            (framePartitionedRequest(shardKeyAndRequestMap.head._2, request), svc)
+          case (svc, shardKeyAndRequestMap) =>
+            (
+              framePartitionedRequest(
+                mergeRequest(rpcName)(shardKeyAndRequestMap.values.toSeq),
+                request),
+              svc)
+        }
+      })
     }
   }
 

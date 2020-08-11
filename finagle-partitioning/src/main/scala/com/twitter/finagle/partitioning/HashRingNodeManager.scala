@@ -82,6 +82,58 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   // Node represents backend partition
   private[this] case class Node(node: HashNode[Future[Service[Req, Rep]]], var state: NodeState)
 
+  // constructs the appropriate HashNode entry
+  private[this] def constructAddressEntry(
+    node: PartitionNode,
+    service: Future[Service[Req, Rep]]
+  ): (HashNodeKey, HashNode[Future[Service[Req, Rep]]]) = {
+    val key = HashNodeKey.fromPartitionNode(node)
+    key -> HashNode[Future[Service[Req, Rep]]](
+      key.identifier,
+      node.weight,
+      service
+    )
+  }
+
+  // converts from the finagle `Address` format to the finagle-partitioning
+  // HashNode entry format.
+  private[this] val addressToEntry: PartialFunction[
+    Address,
+    (Address, (HashNodeKey, HashNode[Future[Service[Req, Rep]]]))
+  ] = {
+    case address =>
+      address -> (address match {
+        case WeightedAddress(addr @ Address.Inet(ia, metadata), w) =>
+          val (shardIdOpt: Option[String], boundAddress: Addr) =
+            metadata match {
+              case PartitionNodeMetadata(_, shardId) =>
+                // This means the destination was resolved by TwitterCacheResolver.
+                twcacheConversion(shardId, ia)
+              case _ =>
+                ZkMetadata.fromAddrMetadata(metadata) match {
+                  case Some(ZkMetadata(Some(shardId), _)) =>
+                    (Some(shardId.toString), Addr.Bound(addr))
+                  case _ =>
+                    (None, Addr.Bound(addr))
+                }
+            }
+          val node = PartitionNode(ia.getHostName, ia.getPort, w.toInt, shardIdOpt)
+          val key = HashNodeKey.fromPartitionNode(node)
+          val service = mkService(boundAddress, key)
+          constructAddressEntry(node, service)
+        case WeightedAddress(Address.ServiceFactory(factory, metadata), w) =>
+          val shardIdOpt = ZkMetadata.fromAddrMetadata(metadata).flatMap(_.shardId.map(_.toString))
+          val node = PartitionNode(
+            metadata("hostname").toString,
+            metadata("port").asInstanceOf[Int],
+            w.toInt,
+            shardIdOpt
+          )
+          val service = factory().asInstanceOf[Future[Service[Req, Rep]]]
+          constructAddressEntry(node, service)
+      })
+  }
+
   private[this] val hashRingNodesChanges: Event[Set[HashNodeKeyAndNode]] = {
 
     // Addresses in the current serverset that have been processed and have associated cache nodes.
@@ -102,34 +154,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
         case Addr.Bound(currAddrs, _) =>
           self.synchronized {
             // Add new nodes for new addresses by finding the difference between the two sets
-            mapped ++= (currAddrs &~ prevAddrs).collect {
-              case weightedAddr @ WeightedAddress(addr @ Address.Inet(ia, metadata), w) =>
-                val (shardIdOpt: Option[String], boundAddress: Addr) =
-                  metadata match {
-                    case PartitionNodeMetadata(_, shardId) =>
-                      // This means the destination was resolved by TwitterCacheResolver.
-                      twcacheConversion(shardId, ia)
-                    case _ =>
-                      ZkMetadata.fromAddrMetadata(metadata) match {
-                        case Some(ZkMetadata(Some(shardId), _)) =>
-                          (Some(shardId.toString), Addr.Bound(addr))
-                        case _ =>
-                          (None, Addr.Bound(addr))
-                      }
-                  }
-                val node =
-                  PartitionNode(ia.getHostName, ia.getPort, w.toInt, shardIdOpt)
-                val key = HashNodeKey.fromPartitionNode(node)
-                val service = mkService(boundAddress, key)
-
-                weightedAddr -> (
-                  key -> HashNode[Future[Service[Req, Rep]]](
-                    key.identifier,
-                    node.weight,
-                    service
-                  )
-                )
-            }
+            mapped ++= (currAddrs &~ prevAddrs).collect(addressToEntry)
             // Remove old nodes no longer in the serverset.
             mapped --= prevAddrs &~ currAddrs
             prevAddrs = currAddrs

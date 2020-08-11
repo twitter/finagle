@@ -144,23 +144,26 @@ private[finagle] class PartitionNodeManager[Req, Rep](
       }
     }
 
-    val getShardIdFromAddress: Address => Try[Int] = {
-      case WeightedAddress(Address.Inet(_, metadata), _) =>
-        ZkMetadata.fromAddrMetadata(metadata).flatMap(_.shardId) match {
-          case Some(id) =>
-            try {
-              val partitionId = getLogicalPartition(id)
-              Return(partitionId)
-            } catch {
-              case NonFatal(e) =>
-                logger.log(Level.ERROR, "getLogicalPartition failed with: ", e)
-                Throw(e)
-            }
-          case None =>
-            val ex = new NoShardIdException(s"cannot get shardId from $metadata")
-            logger.log(Level.ERROR, "getLogicalPartition failed with: ", ex)
-            Throw(ex)
-        }
+    val getShardIdFromAddress: Address => Try[Int] = { address =>
+      val addressMetadata = address match {
+        case WeightedAddress(Address.Inet(_, metadata), _) => metadata
+        case Address.ServiceFactory(_, metadata) => metadata
+      }
+      ZkMetadata.fromAddrMetadata(addressMetadata).flatMap(_.shardId) match {
+        case Some(id) =>
+          try {
+            val partitionId = getLogicalPartition(id)
+            Return(partitionId)
+          } catch {
+            case NonFatal(e) =>
+              logger.log(Level.ERROR, "getLogicalPartition failed with: ", e)
+              Throw(e)
+          }
+        case None =>
+          val ex = new NoShardIdException(s"cannot get shardId from $addressMetadata")
+          logger.log(Level.ERROR, "getLogicalPartition failed with: ", ex)
+          Throw(ex)
+      }
     }
 
     val init = Map.empty[Try[Int], CachedServiceFactory[Req, Rep]]
