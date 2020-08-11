@@ -1,6 +1,5 @@
 package com.twitter.finagle.zipkin.thrift
 
-import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.zipkin.{core, host => Host}
 
 /**
@@ -16,8 +15,7 @@ class ScribeZipkinTracer(tracer: ScribeRawZipkinTracer, sampler: core.Sampler)
     this(
       ScribeRawZipkinTracer(
         scribeHost = Host().getHostName,
-        scribePort = Host().getPort,
-        statsReceiver = DefaultStatsReceiver.scope("zipkin-scribe")
+        scribePort = Host().getPort
       ),
       core.DefaultSampler
     )

@@ -23,6 +23,8 @@ Runtime Behavior Changes
   streaming chunk and instead aggregates the byte count and adds a single record on stream
   termination. ``PHAB_ID=D522543``
 
+* finagle-zipkin-scribe: zipkin scribe `log_span` prefix replaced with `scribe`. `zipkin-scribe/scribe/<stats>`. ``PHAB_ID=D527531``
+
 New Features
 ~~~~~~~~~~~~
 
@@ -53,6 +55,8 @@ Breaking API Changes
 * finagle-thrift: Updated the `c.t.f.thrift.exp.partitioning.ClientHashingStrategy` and the
   `c.t.f.thrift.exp.partitioning.ClientCustomStrategy` to take constructor arguments instead
   of needing to override methods on construction. ``PHAB_ID=D525770``
+
+* finagle-zipkin-core: Removed unused `statsReceiver` constructor argument from `RawZipkinTracer`. ``PHAB_ID=D527531``
 
 20.7.0
 ------

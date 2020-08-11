@@ -1,18 +1,22 @@
 package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Service, WriteException}
-import com.twitter.finagle.service.{RetryBudget, RetryFilter, TimeoutFilter}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.{Service, ChannelWriteException}
+import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.scribe.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.zipkin.core.{BinaryAnnotation, Endpoint, Span, ZipkinAnnotation}
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util._
+import com.twitter.util.{Await, Awaitable, Future, MockTimer, Time}
 import java.net.{InetAddress, InetSocketAddress}
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
 import org.scalatest.FunSuite
+import org.scalatestplus.mockito.MockitoSugar
 
-class ScribeRawZipkinTracerTest extends FunSuite {
+class ScribeRawZipkinTracerTest extends FunSuite with MockitoSugar {
+
+  def await[A](a: Awaitable[A]): A = Await.result(a, 5.seconds)
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
@@ -25,37 +29,119 @@ class ScribeRawZipkinTracerTest extends FunSuite {
     }
   }
 
-  test("logical retry mechanism") {
-    val stats = new InMemoryStatsReceiver
-    val retryFilter = new RetryFilter(
-      ScribeRawZipkinTracer.retryPolicy,
-      DefaultTimer,
-      stats,
-      RetryBudget.Infinite
-    )
+  test("exhaustively retries TryLater responses") {
+    val sr = new InMemoryStatsReceiver()
+    val scribeStats = new ScribeStats(sr)
+    val alwaysTryLaterSvc = Service.const(Future.value(ResultCode.TryLater))
+    val clnt =
+      ScribeRawZipkinTracer.newClient(
+        "",
+        1234,
+        scribeStats,
+        "zipkin-scribe",
+        sr.scope("clnt"),
+        Some(alwaysTryLaterSvc))
+    await(clnt.log(Seq.empty))
 
-    @volatile var throwExc = false
-    val svc = retryFilter.andThen(Service.mk { _: Scribe.Log.Args =>
-      if (throwExc) Future.exception(WriteException(new Exception))
-      else Future.value(ResultCode.TryLater)
-    })
+    assert(sr.counter("scribe", "try_later")() == 3)
+    assert(sr.counter("scribe", "ok")() == 0)
+    assert(sr.stat("clnt", "zipkin-scribe", "retries")().map(_.toInt) == Seq(2))
+  }
 
-    // MethodBuilder maximum 3 tries. 2 retries including the original request
-    Await.result(svc(Scribe.Log.Args(Seq.empty)), 5.second)
-    assert(stats.stat("retries")().map(_.toInt) == Seq(2))
+  test("marks unknown result code as non-retryable failures") {
+    val sr = new InMemoryStatsReceiver()
+    val scribeStats = new ScribeStats(sr)
+    val unknownResultCodeSvc = Service.const(Future.value(ResultCode.EnumUnknownResultCode(100)))
+    val clnt =
+      ScribeRawZipkinTracer.newClient(
+        "",
+        1234,
+        scribeStats,
+        "zipkin-scribe",
+        sr.scope("clnt"),
+        Some(unknownResultCodeSvc))
+    await(clnt.log(Seq.empty))
 
-    // The retry filter will not retry what the requeue filter should handle
-    stats.clear()
-    throwExc = true
-    intercept[WriteException] {
-      Await.result(svc(Scribe.Log.Args(Seq.empty)), 5.second)
+    assert(sr.counter("clnt", "zipkin-scribe", "logical", "requests")() == 1)
+    assert(sr.counter("clnt", "zipkin-scribe", "logical", "failures")() == 1)
+    assert(sr.counter("scribe", "error", "EnumUnknownResultCode100")() == 1)
+    assert(sr.counter("scribe", "try_later")() == 0)
+    assert(sr.counter("scribe", "ok")() == 0)
+    assert(sr.stat("clnt", "zipkin-scribe", "retries")().map(_.toInt) == Seq(0))
+  }
+
+  test("does not retry failures handled by the RequeueFilter") {
+    val sr = new InMemoryStatsReceiver()
+    val scribeStats = new ScribeStats(sr)
+    val failingLogSvc = Service.const(Future.exception(new ChannelWriteException(None)))
+    val clnt =
+      ScribeRawZipkinTracer.newClient(
+        "",
+        1234,
+        scribeStats,
+        "zipkin-scribe",
+        sr.scope("clnt"),
+        Some(failingLogSvc))
+    intercept[ChannelWriteException] {
+      await(clnt.log(Seq.empty))
     }
-    assert(stats.stat("retries")().map(_.toInt) == Seq(0))
+
+    assert(sr.counter("clnt", "zipkin-scribe", "logical", "requests")() == 1)
+    assert(sr.counter("clnt", "zipkin-scribe", "logical", "failures")() == 1)
+    assert(sr.stat("clnt", "zipkin-scribe", "retries")().map(_.toInt) == Seq(0))
+  }
+
+  test("reports correct metrics after a successful retry") {
+    val sr = new InMemoryStatsReceiver()
+    val scribeStats = new ScribeStats(sr)
+    val tryLaterThenOkSvc = mock[Service[Scribe.Log.Args, ResultCode]]
+    when(tryLaterThenOkSvc.apply(any[Scribe.Log.Args]))
+      .thenReturn(Future.value(ResultCode.TryLater))
+      .thenReturn(Future.value(ResultCode.Ok))
+
+    val clnt =
+      ScribeRawZipkinTracer.newClient(
+        "",
+        1234,
+        scribeStats,
+        "zipkin-scribe",
+        sr.scope("clnt"),
+        Some(tryLaterThenOkSvc))
+    await(clnt.log(Seq.empty))
+
+    assert(sr.counter("clnt", "zipkin-scribe", "logical", "requests")() == 1)
+    assert(sr.counter("clnt", "zipkin-scribe", "logical", "success")() == 1)
+    assert(sr.counter("scribe", "try_later")() == 1)
+    assert(sr.counter("scribe", "ok")() == 1)
+    assert(sr.stat("clnt", "zipkin-scribe", "retries")().map(_.toInt) == Seq(1))
+  }
+
+  test("reports errors") {
+    val sr = new InMemoryStatsReceiver()
+    val scribeStats = new ScribeStats(sr)
+    val failingLogSvc = Service.const(Future.exception(new IllegalArgumentException))
+    val clnt =
+      ScribeRawZipkinTracer.newClient(
+        "",
+        1234,
+        scribeStats,
+        "zipkin-scribe",
+        sr.scope("clnt"),
+        Some(failingLogSvc))
+    intercept[IllegalArgumentException] {
+      await(clnt.log(Seq.empty))
+    }
+
+    assert(sr.counter("clnt", "zipkin-scribe", "logical", "requests")() == 1)
+    assert(sr.counter("clnt", "zipkin-scribe", "logical", "failures")() == 1)
+    assert(sr.counter("scribe", "try_later")() == 0)
+    assert(sr.counter("scribe", "ok")() == 0)
+    assert(sr.counter("scribe", "error", "java.lang.IllegalArgumentException")() == 1)
   }
 
   test("formulate scribe log message correctly") {
     val scribe = new ScribeClient
-    val tracer = new ScribeRawZipkinTracer(scribe, NullStatsReceiver)
+    val tracer = new ScribeRawZipkinTracer(scribe, ScribeStats.empty)
 
     val localEndpoint = Endpoint(2323, 23)
     val remoteEndpoint = Endpoint(333, 22)
@@ -97,7 +183,8 @@ class ScribeRawZipkinTracerTest extends FunSuite {
     Time.withCurrentTimeFrozen { tc =>
       val scribe = new ScribeClient
       val timer = new MockTimer
-      val tracer = new ScribeRawZipkinTracer(scribe, NullStatsReceiver, timer = timer)
+      val tracer =
+        new ScribeRawZipkinTracer(scribe, ScribeStats.empty, timer = timer)
 
       val localAddress = InetAddress.getByAddress(Array.fill(4) {
         1
@@ -165,7 +252,8 @@ class ScribeRawZipkinTracerTest extends FunSuite {
 
       val scribe = new ScribeClient
       val timer = new MockTimer
-      val tracer = new ScribeRawZipkinTracer(scribe, NullStatsReceiver, timer = timer)
+      val tracer =
+        new ScribeRawZipkinTracer(scribe, ScribeStats.empty, timer = timer)
 
       tracer.record(Record(traceId, Time.fromSeconds(1), ann1))
       tracer.record(Record(traceId, Time.fromSeconds(2), ann2))

@@ -25,7 +25,7 @@ object ZipkinTracer {
   /**
    * @param host Host to send trace data to
    * @param port Port to send trace data to
-   * @param statsReceiver Where to log information about tracing success/failures
+   * @param statsReceiver Where to record tracer stats
    * @param sampleRate How much data to collect. Default sample rate 0.1%. Max is 1, min 0.
    */
   def mk(

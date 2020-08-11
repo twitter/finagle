@@ -1,7 +1,6 @@
 package com.twitter.finagle.zipkin.core
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift.thrift
 import com.twitter.finagle.tracing
 import com.twitter.finagle.tracing._
@@ -16,13 +15,11 @@ private object RawZipkinTracer {
 
 /**
  * Receives the Finagle generated traces and sends them off to Zipkin
- * @param statsReceiver We generate stats to keep track of traces sent, failures and so on
  * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
  */
 // Not private, so that this can be extended to support other transports, such as Kafka.
 // See https://github.com/openzipkin/zipkin-finagle
-abstract class RawZipkinTracer(statsReceiver: StatsReceiver, timer: Timer = DefaultTimer)
-    extends Tracer {
+abstract class RawZipkinTracer(timer: Timer = DefaultTimer) extends Tracer {
   import RawZipkinTracer._
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.

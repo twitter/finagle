@@ -2,7 +2,7 @@ package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.Thrift
+import com.twitter.finagle.{Service, SimpleFilter, Thrift}
 import com.twitter.finagle.service.{
   ResponseClassifier,
   ResponseClass,
@@ -13,12 +13,7 @@ import com.twitter.finagle.service.{
   RequeueFilter,
   StatsFilter
 }
-import com.twitter.finagle.stats.{
-  DenylistStatsReceiver,
-  ClientStatsReceiver,
-  NullStatsReceiver,
-  StatsReceiver
-}
+import com.twitter.finagle.stats.{DenylistStatsReceiver, DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.thrift.scribe.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.finagle.tracing.{NullTracer, TracelessFilter}
@@ -37,30 +32,40 @@ import scala.util.control.NonFatal
 
 object ScribeRawZipkinTracer {
   private[this] val tracerCache = new TracerCache[ScribeRawZipkinTracer]
-  private[this] val clientLabel = "zipkin-scribe"
+  private[this] val label = "zipkin-scribe"
+
+  private class ScribeMetricsFilter(stats: ScribeStats)
+      extends SimpleFilter[Scribe.Log.Args, Scribe.Log.SuccessType] {
+    def apply(
+      req: Scribe.Log.Args,
+      svc: Service[Scribe.Log.Args, Scribe.Log.SuccessType]
+    ): Future[Scribe.Log.SuccessType] =
+      svc(req).respond(stats.respond)
+  }
 
   // only report these finagle metrics (including counters for individual exceptions)
-  private[this] val clientStatsReceiver: StatsReceiver = new DenylistStatsReceiver(
-    ClientStatsReceiver,
-    {
-      // StatsFilter
-      case Seq(_, "requests") => false
-      case Seq(_, "success") => false
-      case Seq(_, "pending") => false
-      case Seq(_, "failures", _*) => false
-      case Seq(_, "logical", _*) => false // MethodBuilder StatsFilter
+  private[this] def filteredStatsReceiver(sr: StatsReceiver): StatsReceiver =
+    new DenylistStatsReceiver(
+      sr,
+      {
+        // MethodBuilder StatsFilter & RetryFilter
+        case Seq(_, "logical", _*) => false
+        case Seq(_, "retries", _*) => false
 
-      // RetryFilter
-      case Seq(_, "retries", _*) => false
+        // Basic Finagle stats
+        case Seq(_, "requests") => false
+        case Seq(_, "success") => false
+        case Seq(_, "pending") => false
+        case Seq(_, "failures", _*) => false
 
-      case _ => true
-    }
-  )
+        case _ => true
+      })
 
   // we must use a response classifer as the finagle Thrift client deals with raw
   // bytes and not the scrooge generated types.
   private[finagle] val responseClassifier: ResponseClassifier = {
     case ReqRep(_, Return(ResultCode.TryLater)) => ResponseClass.RetryableFailure
+    case ReqRep(_, Return(_: ResultCode.EnumUnknownResultCode)) => ResponseClass.NonRetryableFailure
   }
 
   private[this] val shouldRetry: PartialFunction[
@@ -76,51 +81,68 @@ object ScribeRawZipkinTracer {
       }
   }
 
-  // exposed for testing
-  private[thrift] val retryPolicy = RetryPolicy.tries(
+  private[this] val retryPolicy = RetryPolicy.tries(
     numTries = 3, // MethodBuilder default
     shouldRetry = shouldRetry
   )
 
-  private[this] def newClient(
+  // exposed for testing
+  private[thrift] def newClient(
     scribeHost: String,
     scribePort: Int,
+    scribeStats: ScribeStats,
     clientName: String,
-    timer: Timer
+    clientStatsReceiver: StatsReceiver,
+    scribeLogSvc: Option[Service[Scribe.Log.Args, ResultCode]] = None
   ): Scribe.MethodPerEndpoint = {
+    val scopedStatsReceiver = filteredStatsReceiver(clientStatsReceiver).scope(clientName)
+    val logicalStatsReceiver = scopedStatsReceiver.scope("logical")
+
     // share the retryBudget between the retry and requeue filter
     val retryBudget = RetryBudget()
     val retryFilter = new RetryFilter(
       retryPolicy = retryPolicy,
       retryBudget = retryBudget,
-      timer = timer,
-      statsReceiver = clientStatsReceiver
+      timer = DefaultTimer,
+      statsReceiver = scopedStatsReceiver
     )
 
     val statsFilter = StatsFilter.typeAgnostic(
-      clientStatsReceiver.scope(clientName).scope("logical"),
+      logicalStatsReceiver,
       responseClassifier,
       StatsFilter.DefaultExceptions,
       TimeUnit.MILLISECONDS
     )
 
-    val transport = Thrift.client
-      .withRetryBudget(retryBudget)
-      .withSessionPool.maxSize(5)
-      .withSessionPool.maxWaiters(250)
-      .withSessionQualifier.noFailFast
-      .withSessionQualifier.noFailureAccrual
-      .withStatsReceiver(clientStatsReceiver)
-      .withTracer(NullTracer)
-      .withRequestTimeout(1.second) // each "logical" retry will have this timeout
-      .servicePerEndpoint[Scribe.ServicePerEndpoint](s"inet!$scribeHost:$scribePort", clientName)
+    val transport = scribeLogSvc match {
+      case Some(logSvc) => Scribe.ServicePerEndpoint(log = logSvc)
+      case None =>
+        Thrift.client
+          .withRetryBudget(retryBudget)
+          .withSessionPool.maxSize(5)
+          .withSessionPool.maxWaiters(250)
+          .withSessionQualifier.noFailFast
+          .withSessionQualifier.noFailureAccrual
+          .withStatsReceiver(scopedStatsReceiver)
+          .withTracer(NullTracer)
+          .withRequestTimeout(1.second) // each "logical" retry will have this timeout
+          .servicePerEndpoint[Scribe.ServicePerEndpoint](
+            s"inet!$scribeHost:$scribePort",
+            clientName)
+    }
 
-    val filteredTransport = transport
-      .withLog(
-        log = (new TracelessFilter)
+    val tracelessFilter = new TracelessFilter
+    val scribeMetricsFilter = new ScribeMetricsFilter(scribeStats)
+    val filteredTransport =
+      transport.withLog(
+        log = tracelessFilter
           .andThen(statsFilter)
           .andThen(retryFilter)
-          .andThen(transport.log))
+          // This is placed after the retry filter so
+          // that we update stats on retried requests
+          .andThen(scribeMetricsFilter)
+          .andThen(transport.log)
+      )
 
     Thrift.Client.methodPerEndpoint(filteredTransport)
   }
@@ -132,25 +154,28 @@ object ScribeRawZipkinTracer {
    * @param scribePort Port to send trace data to
    * @param scribeCategory scribe category under which traces will be logged
    * @param statsReceiver Where to log information about tracing success/failures
-   * @param clientName Name of the scribe finagle client
+   * @param label label to use for Scribe stats and the associated Finagle client
    * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
    */
   def apply(
     scribeHost: String = Host().getHostName,
     scribePort: Int = Host().getPort,
     scribeCategory: String = "zipkin",
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    clientName: String = clientLabel,
+    statsReceiver: StatsReceiver = DefaultStatsReceiver,
+    label: String = label,
     timer: Timer = DefaultTimer
-  ): ScribeRawZipkinTracer =
+  ): ScribeRawZipkinTracer = {
+    val scribeStats = new ScribeStats(statsReceiver.scope(label))
     tracerCache.getOrElseUpdate(
       scribeHost + scribePort + scribeCategory,
       apply(
-        newClient(scribeHost, scribePort, clientName, timer),
+        newClient(scribeHost, scribePort, scribeStats, label, statsReceiver.scope("clnt")),
         scribeCategory,
         statsReceiver,
-        timer)
+        timer
+      )
     )
+  }
 
   /**
    * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to scribe with the specified
@@ -158,7 +183,7 @@ object ScribeRawZipkinTracer {
    *
    * @param client The scribe client used to send traces to scribe
    * @param scribeCategory Category under which the trace data should be scribed
-   * @param statsReceiver Where to log information about tracing success/failures
+   * @param statsReceiver where to record Scribe stats
    * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
    */
   def apply(
@@ -167,12 +192,8 @@ object ScribeRawZipkinTracer {
     statsReceiver: StatsReceiver,
     timer: Timer
   ): ScribeRawZipkinTracer = {
-    new ScribeRawZipkinTracer(
-      client,
-      statsReceiver,
-      scribeCategory,
-      timer
-    )
+    val scribeStats = new ScribeStats(statsReceiver)
+    new ScribeRawZipkinTracer(client, scribeStats, scribeCategory, timer)
   }
 
 }
@@ -191,17 +212,13 @@ object ScribeRawZipkinTracer {
  */
 private[thrift] class ScribeRawZipkinTracer(
   client: Scribe.MethodPerEndpoint,
-  statsReceiver: StatsReceiver,
+  scribeStats: ScribeStats,
   scribeCategory: String = "zipkin",
   timer: Timer = DefaultTimer,
   poolSize: Int = 10,
   initialBufferSize: StorageUnit = 512.bytes,
   maxBufferSize: StorageUnit = 1.megabyte)
-    extends RawZipkinTracer(statsReceiver, timer) {
-  private[this] val scopedReceiver = statsReceiver.scope("log_span")
-  private[this] val okCounter = scopedReceiver.counter("ok")
-  private[this] val tryLaterCounter = scopedReceiver.counter("try_later")
-  private[this] val errorReceiver = scopedReceiver.scope("error")
+    extends RawZipkinTracer(timer) {
 
   private[this] val initialSizeInBytes = initialBufferSize.inBytes.toInt
   private[this] val maxSizeInBytes = maxBufferSize.inBytes.toInt
@@ -272,7 +289,7 @@ private[thrift] class ScribeRawZipkinTracer(
         span.toThrift.write(transport.protocol)
         entries.append(LogEntry(category = scribeCategory, message = transport.toBase64Line))
       } catch {
-        case NonFatal(e) => errorReceiver.counter(e.getClass.getName).incr()
+        case NonFatal(e) => scribeStats.handleError(e)
       } finally {
         transport.reset()
         bufferPool.add(transport)
@@ -286,14 +303,8 @@ private[thrift] class ScribeRawZipkinTracer(
    * Log the span data via Scribe.
    */
   def sendSpans(spans: Seq[Span]): Future[Unit] = {
-    client
-      .log(createLogEntries(spans))
-      .respond {
-        case Return(ResultCode.Ok) => okCounter.incr()
-        case Return(ResultCode.TryLater) => tryLaterCounter.incr()
-        case Return(_) => ()
-        case Throw(e) => errorReceiver.counter(e.getClass.getName).incr()
-      }
-      .unit
+    val logEntries = createLogEntries(spans)
+    if (logEntries.isEmpty) Future.Done
+    else client.log(logEntries).unit
   }
 }

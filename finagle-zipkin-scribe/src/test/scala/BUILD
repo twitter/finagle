@@ -12,7 +12,6 @@ junit_tests(
         "finagle/finagle-thrift/src/main/thrift:scribe",
         "finagle/finagle-zipkin-core/src/main/scala",
         "finagle/finagle-zipkin-scribe",
-        "scrooge/scrooge-core/src/main/scala",
         "util/util-core:scala",
         "util/util-stats/src/main/scala",
     ],
