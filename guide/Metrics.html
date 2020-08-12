@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 20.7.0 documentation</title>
+    <title>Metrics &#8212; Finagle 20.8.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '20.7.0',
+        VERSION:     '20.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -205,6 +205,15 @@ connections in the load balancer.</dd>
 <div class="section" id="finagle">
 <h2>Finagle<a class="headerlink" href="#finagle" title="Permalink to this headline">¶</a></h2>
 <p id="finagle-stats">These metrics track various Finagle internals.</p>
+<div class="section" id="tracing">
+<h3>Tracing<a class="headerlink" href="#tracing" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>finagle/tracing/sampled</strong></dt>
+<dd>A counter for the number of times a positive sampling decision is made on an
+unsampled trace. A sampling decision is made using a client’s configured <code class="docutils literal"><span class="pre">Tracer</span></code>,
+using <code class="docutils literal"><span class="pre">Tracer#sampleTrace</span></code>.</dd>
+</dl>
+</div>
 <div class="section" id="aperture">
 <h3>Aperture<a class="headerlink" href="#aperture" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -1444,6 +1453,7 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 </ul>
 </li>
 <li><a class="reference internal" href="#finagle">Finagle</a><ul>
+<li><a class="reference internal" href="#tracing">Tracing</a></li>
 <li><a class="reference internal" href="#aperture">Aperture</a></li>
 <li><a class="reference internal" href="#futurepool">FuturePool</a></li>
 <li><a class="reference internal" href="#push-based-abstractions">Push Based Abstractions</a></li>
