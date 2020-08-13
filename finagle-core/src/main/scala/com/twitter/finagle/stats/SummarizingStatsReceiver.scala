@@ -44,9 +44,9 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
       new Gauge { def remove(): Unit = () }
     }
 
-  protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
+  protected[this] def registerGauge(schema: GaugeSchema, f: => Float): Unit =
     synchronized {
-      _gauges += (name -> (() => f))
+      _gauges += (schema.metricBuilder.name -> (() => f))
     }
 
   protected[this] def deregisterGauge(name: Seq[String]): Unit = synchronized {

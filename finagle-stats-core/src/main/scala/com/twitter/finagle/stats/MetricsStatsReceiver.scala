@@ -142,9 +142,6 @@ class MetricsStatsReceiver(val registry: Metrics)
     registry.registerGauge(gaugeSchema, f)
   }
 
-  protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
-    registerGauge(GaugeSchema(this.metricBuilder().withVerbosity(verbosity).withName(name)), f)
-
   protected[this] def deregisterGauge(name: Seq[String]): Unit = {
     registry.unregisterGauge(name)
   }

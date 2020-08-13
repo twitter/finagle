@@ -34,20 +34,21 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
   }
 
   override def addGauge(schema: GaugeSchema)(f: => Float): Gauge = {
-    registerGauge(schema.metricBuilder.verbosity, schema.metricBuilder.name, f)
+    registerGauge(schema, f)
 
     // dummy gauge to make type signature happy.
     new Gauge { def remove(): Unit = () }
   }
 
-  protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
+  protected[this] def registerGauge(schema: GaugeSchema, f: => Float): Unit =
     synchronized {
-      deregisterGauge(name)
+      deregisterGauge(schema.metricBuilder.name)
 
-      val level = if (verbosity == Verbosity.Debug) Level.FINEST else Level.INFO
+      val level =
+        if (schema.metricBuilder.verbosity == Verbosity.Debug) Level.FINEST else Level.INFO
 
-      timerTasks(name) = timer.schedule(10.seconds) {
-        logger.log(level, "%s %2f".format(formatName(name), f))
+      timerTasks(schema.metricBuilder.name) = timer.schedule(10.seconds) {
+        logger.log(level, "%s %2f".format(formatName(schema.metricBuilder.name), f))
       }
     }
 

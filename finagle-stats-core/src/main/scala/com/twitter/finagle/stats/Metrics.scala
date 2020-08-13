@@ -225,7 +225,7 @@ private[finagle] class Metrics private (
     if (curNameUsage == null) {
       val next = new Metrics.StoreGaugeImpl(formatted, f)
       gaugesMap.putIfAbsent(schema.metricBuilder.name, next)
-      metricSchemas.put(formatted, schema)
+      metricSchemas.putIfAbsent(formatted, schema)
 
       if (schema.metricBuilder.verbosity != Verbosity.Default) {
         verbosityMap.put(formatted, schema.metricBuilder.verbosity)
@@ -236,6 +236,7 @@ private[finagle] class Metrics private (
       // we replace existing gauges to support commons metrics behavior.
       val next = new Metrics.StoreGaugeImpl(formatted, f)
       gaugesMap.put(schema.metricBuilder.name, next)
+      metricSchemas.put(formatted, schema)
     } else {
       throw new MetricCollisionException(
         s"A Counter with the name $formatted had already" +

@@ -159,8 +159,8 @@ private object TrafficDistributorTest {
     override def stat(schema: HistogramSchema): ReadableStat =
       underlying.stat(schema)
 
-    protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
-      underlying.addGauge(name: _*)(f)
+    protected[this] def registerGauge(schema: GaugeSchema, f: => Float): Unit =
+      underlying.addGauge(schema.metricBuilder.name: _*)(f)
 
     protected[this] def deregisterGauge(name: Seq[String]): Unit =
       underlying.gauges -= name
