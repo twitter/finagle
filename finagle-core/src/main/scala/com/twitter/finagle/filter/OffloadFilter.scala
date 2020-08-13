@@ -5,8 +5,14 @@ import com.twitter.finagle.offload.numWorkers
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
-import com.twitter.util.{Future, FutureNonLocalReturnControl, FuturePool, Promise}
-import java.util.concurrent.{ExecutorService, Executors}
+import com.twitter.util.{
+  ExecutorServiceFuturePool,
+  Future,
+  FutureNonLocalReturnControl,
+  FuturePool,
+  Promise
+}
+import java.util.concurrent.{ExecutorService, Executors, ThreadPoolExecutor}
 import scala.runtime.NonLocalReturnControl
 
 /**
@@ -28,12 +34,20 @@ object OffloadFilter {
         (None, Seq.empty)
       case Some(threads) =>
         val factory = new NamedPoolThreadFactory("finagle/offload", makeDaemons = true)
-        val pool = FuturePool(Executors.newFixedThreadPool(threads, factory))
+        val threadPool = Executors.newFixedThreadPool(threads, factory)
+        val pool = new ExecutorServiceFuturePool(threadPool)
+
         val stats = FinagleStatsReceiver.scope("offload_pool")
         val gauges = Seq(
           stats.addGauge("pool_size") { pool.poolSize },
           stats.addGauge("active_tasks") { pool.numActiveTasks },
-          stats.addGauge("completed_tasks") { pool.numCompletedTasks }
+          stats.addGauge("completed_tasks") { pool.numCompletedTasks },
+          stats.addGauge("queue_depth") {
+            threadPool match {
+              case executor: ThreadPoolExecutor => executor.getQueue.size
+              case _ => -1
+            }
+          }
         )
         (Some(pool), gauges)
     }

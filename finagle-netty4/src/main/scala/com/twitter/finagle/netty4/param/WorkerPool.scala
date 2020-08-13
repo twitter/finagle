@@ -1,5 +1,7 @@
 package com.twitter.finagle.netty4.param
 
+import com.twitter.finagle.netty4.param.WorkerPool.toEventLoopGroup
+import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.{numWorkers, useNativeEpoll}
 import com.twitter.finagle.util.BlockingTimeTrackingThreadFactory
@@ -8,6 +10,7 @@ import io.netty.channel.epoll.{Epoll, EpollEventLoopGroup}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.util.concurrent.DefaultThreadFactory
 import java.util.concurrent.{Executor, Executors, ThreadFactory}
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * A class eligible for configuring the [[io.netty.channel.EventLoopGroup]] used
@@ -20,17 +23,26 @@ import java.util.concurrent.{Executor, Executors, ThreadFactory}
  */
 case class WorkerPool(eventLoopGroup: EventLoopGroup) {
   def this(executor: Executor, numWorkers: Int) =
-    this(
-      if (useNativeEpoll() && Epoll.isAvailable)
-        WorkerPool.mkEpollEventLoopGroup(numWorkers, executor)
-      else WorkerPool.mkNioEventLoopGroup(numWorkers, executor)
-    )
+    this(toEventLoopGroup(executor, numWorkers))
 
   def mk(): (WorkerPool, Stack.Param[WorkerPool]) =
     (this, WorkerPool.workerPoolParam)
 }
 
 object WorkerPool {
+
+  private[this] val workerPoolSize = new AtomicInteger(0)
+
+  // We hold onto the reference so the gauge doesn't get GC'd
+  private[this] val workerGauge = FinagleStatsReceiver.addGauge("netty4", "worker_threads") {
+    workerPoolSize.get
+  }
+
+  private def toEventLoopGroup(executor: Executor, numWorkers: Int): EventLoopGroup = {
+    workerPoolSize.addAndGet(numWorkers)
+    if (useNativeEpoll() && Epoll.isAvailable) mkEpollEventLoopGroup(numWorkers, executor)
+    else mkNioEventLoopGroup(numWorkers, executor)
+  }
 
   // This uses the netty DefaultThreadFactory to create thread pool threads. This factory creates
   // special FastThreadLocalThreads that netty has specific optimizations for.

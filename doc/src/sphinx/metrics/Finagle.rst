@@ -68,6 +68,9 @@ These metrics correspond to the state of the offload filter thread pool when con
 **finagle/offload_pool/completed_tasks**
   A gauge of the number of total tasks that have completed execution.
 
+**finagle/offload_pool/queue_depth**
+  A Gauge of the number of tasks that are waiting to be executed.
+
 Timer
 <<<<<
 
@@ -138,6 +141,11 @@ Netty 4
 These metrics are exported from Finagle's underlying transport
 implementation, the Netty 4 library and available under `finagle/netty4`
 on any instance running Finagle with Netty 4.
+
+**worker_threads**
+  A gauge for the size of the Netty worker pool. This will only
+  reflect `EventLoopGroup`s constructed by Finagle and not those
+  manually created by the application.
 
 **pooling/allocations/huge** `verbosity:debug`
   A gauge of the total number of HUGE *direct allocations*
