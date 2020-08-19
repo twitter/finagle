@@ -181,7 +181,7 @@ sealed trait CustomPartitioningStrategy extends PartitioningStrategy {
   def getLogicalPartition(instance: Int): Int
 }
 
-private[partitioning] object Disabled extends PartitioningStrategy
+private[finagle] object Disabled extends PartitioningStrategy
 
 object ClientHashingStrategy {
   // input: original thrift request

@@ -114,27 +114,25 @@ object ThriftMux
     extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
 
+  /** ThriftMux helper for message marshalling */
+  private[finagle] object ThriftMuxMarshallable
+      extends ReqRepMarshallable[mux.Request, mux.Response] {
+    def framePartitionedRequest(
+      rawRequest: ThriftClientRequest,
+      original: mux.Request
+    ): mux.Request =
+      mux.Request(original.destination, original.contexts, Buf.ByteArray.Owned(rawRequest.message))
+    def isOneway(original: mux.Request): Boolean = false
+    def fromResponseToBytes(rep: mux.Response): Array[Byte] =
+      Buf.ByteArray.Owned.extract(rep.body)
+    val emptyResponse: mux.Response = mux.Response.empty
+  }
+
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
    */
   val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] = {
     val stack = ThriftMuxUtil.protocolRecorder +: Mux.client.stack
-
-    /** ThriftMux helper for message marshalling */
-    object ThriftMuxMarshallable extends ReqRepMarshallable[mux.Request, mux.Response] {
-      def framePartitionedRequest(
-        rawRequest: ThriftClientRequest,
-        original: mux.Request
-      ): mux.Request =
-        mux.Request(
-          original.destination,
-          original.contexts,
-          Buf.ByteArray.Owned(rawRequest.message))
-      def isOneway(original: mux.Request): Boolean = false
-      def fromResponseToBytes(rep: mux.Response): Array[Byte] =
-        Buf.ByteArray.Owned.extract(rep.body)
-      val emptyResponse: mux.Response = mux.Response.empty
-    }
 
     // this module does Tracing and as such it's important to be added
     // after the tracing context is initialized.

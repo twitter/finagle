@@ -1115,8 +1115,8 @@ class MethodBuilderTest
       TestStackClient(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)), Stack.Params.empty)
     val methodBuilder = MethodBuilder.from("withFilter", stackClient)
 
-    val clientA = methodBuilder.withFilter(filterBoom).newService("a_client")
-    val clientB = methodBuilder.withFilter(filterCalled).newService("b_client")
+    val clientA = methodBuilder.filtered(filterBoom).newService("a_client")
+    val clientB = methodBuilder.filtered(filterCalled).newService("b_client")
 
     intercept[Exception](await(clientA(1)))
     await(clientB(1))

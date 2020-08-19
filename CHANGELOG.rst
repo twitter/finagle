@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-thriftmux: Add MethodBuilder specific APIs for ThriftMux partition aware client.
+  ``PHAB_ID=D531900``
+
 20.8.0
 ------
 

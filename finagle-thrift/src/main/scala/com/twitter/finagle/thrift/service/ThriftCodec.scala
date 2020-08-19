@@ -45,6 +45,7 @@ private[thrift] object ThriftCodec {
       ): Future[method.SuccessType] = {
         val request = encodeRequest(method.name, args, pf, method.oneway)
         val serdeCtx = new ClientDeserializeCtx[method.SuccessType](args, decodeRepFn)
+        serdeCtx.rpcName(method.name)
         Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx) {
           service(request).flatMap { response => Future.const(serdeCtx.deserialize(response)) }
         }

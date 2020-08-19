@@ -363,7 +363,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    *
    * @param filter A filter or filter chain to create a new MethodBuilder instance.
    */
-  private[finagle] def withFilter(filter: Filter.TypeAgnostic): MethodBuilder[Req, Rep] =
+  private[finagle] def filtered(filter: Filter.TypeAgnostic): MethodBuilder[Req, Rep] =
     withConfig(config.copy(filter = filter))
 
   //

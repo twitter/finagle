@@ -85,13 +85,15 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
       val inet = server.boundAddress.asInstanceOf[InetSocketAddress]
       newAddress(inet, 1)
     }
+    val addrInfo0 = AddrInfo("zero", 12345)
+    val addrInfo1 = AddrInfo("one", 11111)
+    val addrInfo11 = AddrInfo("one", 11112)
+    val addrInfo2 = AddrInfo("two", 22222)
+    val addrInfo3 = AddrInfo("three", 33333)
+    val addrInfo4 = AddrInfo("four", 44444)
   }
 
   trait HashingPartitioningCtx extends Ctx {
-    val addrInfo1 = AddrInfo("one", 12345)
-    val addrInfo2 = AddrInfo("two", 54321)
-    val addrInfo3 = AddrInfo("one", 98765)
-
     // request merger functions -- only used for hashing case when multiple keys fall in the same shard
     val getBoxesReqMerger: RequestMerger[GetBoxes.Args] = listGetBoxes =>
       GetBoxes.Args(listGetBoxes.map(_.listAddrInfo).flatten, listGetBoxes.head.passcode)
@@ -123,10 +125,6 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
 
   test("without partition strategy") {
     new Ctx {
-      val addrInfo1 = AddrInfo("one", 12345)
-      val addrInfo2 = AddrInfo("two", 54321)
-      val addrInfo3 = AddrInfo("one", 98765)
-
       val client = clientImpl()
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 
@@ -151,16 +149,17 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
         .strategy(hashingPartitioningStrategy)
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 
-      // addrInfo1 and addrInfo3 have the same key ("one")
+      // addrInfo1 and addrInfo11 have the same key ("one")
       // addrInfo2 key ("two")
       val expectedTwoNodes =
-        Seq(Box(addrInfo1, "size: 2"), Box(addrInfo3, "size: 2"), Box(addrInfo2, "size: 1")).toSet
+        Seq(Box(addrInfo1, "size: 2"), Box(addrInfo11, "size: 2"), Box(addrInfo2, "size: 1")).toSet
       val expectedOneNode =
-        Seq(Box(addrInfo1, "size: 3"), Box(addrInfo3, "size: 3"), Box(addrInfo2, "size: 3")).toSet
+        Seq(Box(addrInfo1, "size: 3"), Box(addrInfo11, "size: 3"), Box(addrInfo2, "size: 3")).toSet
 
       val result =
-        await(client.getBoxes(Seq(addrInfo1, addrInfo2, addrInfo3), Byte.MinValue)).toSet
+        await(client.getBoxes(Seq(addrInfo1, addrInfo2, addrInfo11), Byte.MinValue)).toSet
       // if two keys hash to a singleton partition, expect one node, otherwise, two nodes.
+      // local servers have random ports that are not consistent
       assert(result == expectedOneNode || result == expectedTwoNodes)
 
       client.asClosable.close()
@@ -204,10 +203,6 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
 
   test("with custom partitioning strategy, each shard is a partition") {
     new Ctx {
-      val addrInfo0 = AddrInfo("zero", 12345)
-      val addrInfo1 = AddrInfo("one", 54321)
-      val addrInfo2 = AddrInfo("two", 98765)
-
       def lookUp(addrInfo: AddrInfo): Int = {
         addrInfo.name match {
           case "zero" | "two" => fixedInetAddresses(0).getPort
@@ -241,12 +236,6 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
   }
 
   class CustomPartitioningCtx(lookUp: AddrInfo => Int) extends Ctx {
-    val addrInfo0 = AddrInfo("zero", 0)
-    val addrInfo1 = AddrInfo("one", 12345)
-    val addrInfo2 = AddrInfo("two", 23456)
-    val addrInfo3 = AddrInfo("three", 34567)
-    val addrInfo4 = AddrInfo("four", 45678)
-
     val customPartitioningStrategy = new ClientCustomStrategy(
       {
         case getBox: GetBox.Args => Future.value(Map(lookUp(getBox.addrInfo) -> getBox))
@@ -258,7 +247,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
             }
           Future.value(partitionIdAndRequest)
       },
-      { instance: Int => // p0(0), p1(1,2), p3(3, 4)
+      { instance: Int => // p0(0), p1(1,2), p2(3, 4)
         val partitionPositions = List(0.to(0), 1.to(2), 3.until(fixedInetAddresses.size))
         val position = fixedInetAddresses.indexWhere(_.getPort == instance)
         partitionPositions.indexWhere(range => range.contains(position))
@@ -304,8 +293,6 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
     })
 
     new Ctx {
-      val addrInfo0 = AddrInfo("zero", 0)
-
       val client = clientImpl().withPartitioning
         .strategy(erroredCustomPartitioningStrategy)
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
@@ -375,9 +362,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
           }
         }
 
-      val addrInfo0 = AddrInfo("zero", 12345)
       val dynamic = new AtomicInteger(0)
-
       val dynamicStrategy = new ClientCustomStrategy(
         {
           case sendBox: SendBox.Args =>

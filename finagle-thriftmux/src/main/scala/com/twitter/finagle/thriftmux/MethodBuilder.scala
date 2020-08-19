@@ -4,8 +4,10 @@ import com.twitter.finagle.{client, _}
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.RefcountedClosable
 import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.thrift.exp.partitioning.{PartitioningStrategy, ThriftPartitioningService}
 import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
 import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest}
+import com.twitter.finagle.thriftmux.exp.partitioning.DynamicPartitioningService
 import com.twitter.util.{Duration, Future, Time}
 import com.twitter.util.tunable.Tunable
 
@@ -49,6 +51,7 @@ object MethodBuilder {
    */
   def from(dest: Name, thriftMuxClient: ThriftMux.Client): MethodBuilder = {
     val stack = modifiedStack(thriftMuxClient.stack)
+      .replace(ThriftPartitioningService.role, DynamicPartitioningService.perRequestModule)
     val params = thriftMuxClient.params
     val service: Service[ThriftClientRequest, Array[Byte]] = thriftMuxClient
       .withStack(stack)
@@ -272,6 +275,46 @@ class MethodBuilder(
 
   def withRetryDisabled: MethodBuilder =
     new MethodBuilder(thriftMuxClient, mb.withRetry.disabled)
+
+  /**
+   * Set a [[PartitioningStrategy]] for a MethodBuilder endpoint to enable
+   * partitioning awareness. See [[PartitioningStrategy]].
+   *
+   * Default is [[com.twitter.finagle.thrift.exp.partitioning.Disabled]]
+   *
+   * @example
+   * To set a hashing strategy to MethodBuilder:
+   * {{{
+   * import com.twitter.finagle.ThriftMux.Client
+   * import com.twitter.finagle.thrift.exp.partitioning.MethodBuilderHashingStrategy
+   *
+   * val hashingStrategy = new MethodBuilderHashingStrategy[RequestType, ResponseType](...)
+   *
+   * val client: ThriftMux.Client = ???
+   * val builder = client.methodBuilder($address)
+   *
+   * builder
+   *   .withPartitioningStrategy(hashingStrategy)
+   *   .servicePerEndpoint...
+   * ...
+   * }}}
+   */
+  def withPartitioningStrategy(strategy: PartitioningStrategy): MethodBuilder =
+    new MethodBuilder(thriftMuxClient, mb.filtered(partitioningFilter(strategy)))
+
+  private[this] def partitioningFilter(
+    partitionStrategy: PartitioningStrategy
+  ): Filter.TypeAgnostic = {
+    new Filter.TypeAgnostic {
+      def toFilter[Req, Rep] = new SimpleFilter[Req, Rep] {
+        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+          DynamicPartitioningService.letStrategy(partitionStrategy) {
+            service(request)
+          }
+        }
+      }
+    }
+  }
 
   /**
    * @inheritdoc

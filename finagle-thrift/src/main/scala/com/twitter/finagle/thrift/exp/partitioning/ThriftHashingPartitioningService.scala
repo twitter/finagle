@@ -20,7 +20,7 @@ import scala.util.control.NonFatal
  * A [[ConsistentHashPartitioningService]] for Thrift messages.
  * @see [[PartitioningService]].
  */
-final private[partitioning] class ThriftHashingPartitioningService[Req, Rep](
+final private[finagle] class ThriftHashingPartitioningService[Req, Rep](
   underlying: Stack[ServiceFactory[Req, Rep]],
   thriftMarshallable: ReqRepMarshallable[Req, Rep],
   params: Stack.Params,
