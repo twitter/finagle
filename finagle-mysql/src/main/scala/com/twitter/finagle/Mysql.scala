@@ -5,8 +5,8 @@ import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.param._
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.finagle.param.{
-  ExceptionStatsHandler => _,
   Monitor => ParamMonitor,
+  ExceptionStatsHandler => _,
   ResponseClassifier => _,
   Tracer => _,
   _
@@ -15,8 +15,9 @@ import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Duration, Monitor}
+import com.twitter.util.{Duration, FuturePool, Monitor}
 import java.net.SocketAddress
+import java.util.concurrent.ExecutorService
 
 /**
  * Supplements a [[com.twitter.finagle.Client]] with convenient
@@ -253,6 +254,10 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       fn: Stack[ServiceFactory[Request, Result]] => Stack[ServiceFactory[Request, Result]]
     ): Client =
       super.withStack(fn)
+    override def withExecutionOffloaded(executor: ExecutorService): Client =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Client =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Request, Result, Request, Result]): Client =
       super.filtered(filter)

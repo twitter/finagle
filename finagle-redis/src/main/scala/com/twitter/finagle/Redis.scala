@@ -14,16 +14,16 @@ import com.twitter.finagle.param.{
 }
 import com.twitter.finagle.redis.RedisPartitioningService
 import com.twitter.finagle.redis.exp.{ConnectionInitCommand, RedisPool}
+import com.twitter.finagle.redis.param.{Database, Password}
 import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
-import com.twitter.util.{Duration, Monitor}
+import com.twitter.util.{Duration, FuturePool, Monitor}
 import java.net.SocketAddress
-
-import com.twitter.finagle.redis.param.{Database, Password}
+import java.util.concurrent.ExecutorService
 
 trait RedisRichClient { self: Client[Command, Reply] =>
 
@@ -152,6 +152,10 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
       fn: Stack[ServiceFactory[Command, Reply]] => Stack[ServiceFactory[Command, Reply]]
     ): Client =
       super.withStack(fn)
+    override def withExecutionOffloaded(executor: ExecutorService): Client =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Client =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Command, Reply, Command, Reply]): Client =
       super.filtered(filter)

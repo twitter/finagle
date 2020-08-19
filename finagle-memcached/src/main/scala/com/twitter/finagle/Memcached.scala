@@ -53,6 +53,7 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
 import java.net.SocketAddress
+import java.util.concurrent.ExecutorService
 
 /**
  * Factory methods to build a finagle-memcached client.
@@ -352,6 +353,10 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       fn: Stack[ServiceFactory[Command, Response]] => Stack[ServiceFactory[Command, Response]]
     ): Client =
       super.withStack(fn)
+    override def withExecutionOffloaded(executor: ExecutorService): Client =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Client =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Command, Response, Command, Response]): Client =
       super.filtered(filter)
@@ -424,7 +429,10 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       fn: Stack[ServiceFactory[Command, Response]] => Stack[ServiceFactory[Command, Response]]
     ): Server =
       super.withStack(fn)
-
+    override def withExecutionOffloaded(executor: ExecutorService): Server =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Server =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 

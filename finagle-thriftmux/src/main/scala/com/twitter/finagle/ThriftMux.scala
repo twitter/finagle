@@ -41,6 +41,7 @@ import com.twitter.io.Buf
 import com.twitter.scrooge.TReusableBuffer
 import com.twitter.util._
 import java.net.SocketAddress
+import java.util.concurrent.ExecutorService
 import org.apache.thrift.TException
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -420,7 +421,10 @@ object ThriftMux
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
     override def withRetryBackoff(backoff: Stream[Duration]): Client =
       super.withRetryBackoff(backoff)
-
+    override def withExecutionOffloaded(executor: ExecutorService): Client =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Client =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
 
@@ -668,7 +672,10 @@ object ThriftMux
     override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Server =
       super.withExceptionStatsHandler(exceptionStatsHandler)
     override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
-
+    override def withExecutionOffloaded(executor: ExecutorService): Server =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Server =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 

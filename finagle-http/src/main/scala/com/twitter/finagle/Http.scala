@@ -17,8 +17,9 @@ import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Duration, Future, Monitor, StorageUnit}
+import com.twitter.util.{Duration, Future, FuturePool, Monitor, StorageUnit}
 import java.net.SocketAddress
+import java.util.concurrent.ExecutorService
 
 /**
  * A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
@@ -327,6 +328,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       fn: Stack[ServiceFactory[Request, Response]] => Stack[ServiceFactory[Request, Response]]
     ): Client =
       super.withStack(fn)
+    override def withExecutionOffloaded(executor: ExecutorService): Client =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Client =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def configuredParams(newParams: Stack.Params): Client =
       super.configuredParams(newParams)
@@ -562,7 +567,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       fn: Stack[ServiceFactory[Request, Response]] => Stack[ServiceFactory[Request, Response]]
     ): Server =
       super.withStack(fn)
-
+    override def withExecutionOffloaded(executor: ExecutorService): Server =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Server =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
     override def configuredParams(newParams: Stack.Params): Server =
       super.configuredParams(newParams)

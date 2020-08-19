@@ -27,8 +27,9 @@ import com.twitter.finagle.thrift.{ClientId => FinagleClientId, _}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.scrooge.TReusableBuffer
-import com.twitter.util.{Closable, Duration, Future, Monitor}
+import com.twitter.util.{Closable, Duration, Future, FuturePool, Monitor}
 import java.net.SocketAddress
+import java.util.concurrent.ExecutorService
 import org.apache.thrift.protocol.TProtocolFactory
 
 /**
@@ -418,6 +419,10 @@ object Thrift
       ]
     ): Client =
       super.withStack(fn)
+    override def withExecutionOffloaded(executor: ExecutorService): Client =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Client =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(
       filter: Filter[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]]
@@ -599,7 +604,10 @@ object Thrift
       ]
     ): Server =
       super.withStack(fn)
-
+    override def withExecutionOffloaded(executor: ExecutorService): Server =
+      super.withExecutionOffloaded(executor)
+    override def withExecutionOffloaded(pool: FuturePool): Server =
+      super.withExecutionOffloaded(pool)
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
