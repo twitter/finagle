@@ -4,6 +4,7 @@ junit_tests(
     dependencies = [
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/apache/thrift:libthrift",
+        "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "3rdparty/jvm/org/scalatest",
         "3rdparty/jvm/org/scalatestplus:junit",
         "finagle/finagle-core/src/main",
@@ -13,6 +14,7 @@ junit_tests(
         "finagle/finagle-thrift",
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-thrift/src/test/scala:lib",
+        "finagle/finagle-thrift/src/test/thrift:delivery-thrift-scala",
         "finagle/finagle-thriftmux",
         "finagle/finagle-thriftmux/src/test/resources",
         "finagle/finagle-thriftmux/src/test/thrift:thrift-java",
