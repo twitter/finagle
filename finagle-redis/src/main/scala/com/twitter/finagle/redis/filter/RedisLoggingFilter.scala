@@ -19,7 +19,7 @@ private[finagle] object RedisLoggingFilter {
         if (statsParam.statsReceiver.isNull)
           next
         else
-          new RedisLoggingFilter(statsParam.statsReceiver.scope("http")).andThen(next)
+          new RedisLoggingFilter(statsParam.statsReceiver).andThen(next)
       }
     }
 }
