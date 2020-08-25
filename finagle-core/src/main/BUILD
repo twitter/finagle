@@ -30,6 +30,7 @@ scala_library(
         ),
         "util/util-logging",
         "util/util-registry",
+        "util/util-routing/src/main/scala/com/twitter/util/routing",
         "util/util-security",
         "util/util-stats",
         "util/util-tunable/src/main/scala",

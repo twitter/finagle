@@ -398,6 +398,7 @@ lazy val finagleCore = Project(
       util("lint"),
       util("logging"),
       util("registry"),
+      util("routing"),
       util("security"),
       util("stats"),
       util("tunable"),
