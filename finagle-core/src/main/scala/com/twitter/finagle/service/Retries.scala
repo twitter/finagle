@@ -1,7 +1,11 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.finagle.param.{HighResTimer, Stats}
+import com.twitter.finagle.param.{
+  HighResTimer,
+  Stats,
+  ResponseClassifier => ParamResponseClassifier
+}
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.util._
 
@@ -124,7 +128,8 @@ object Retries {
       val parameters = Seq(
         implicitly[Stack.Param[Stats]],
         implicitly[Stack.Param[Budget]],
-        implicitly[Stack.Param[HighResTimer]]
+        implicitly[Stack.Param[HighResTimer]],
+        implicitly[Stack.Param[ParamResponseClassifier]]
       )
 
       def make(
@@ -136,6 +141,7 @@ object Retries {
         val requeues = scoped.counter("requeues")
         val budget = params[Budget]
         val timer = params[HighResTimer].timer
+        val classifier = params[ParamResponseClassifier].responseClassifier
 
         // Filters/factories lower in the stack may also make use of the [[RetryBudget]] param.
         // However, if this param is not configured explicitly, the default is used, which creates
@@ -150,6 +156,7 @@ object Retries {
           withdrawsOnly = false,
           scoped,
           timer,
+          classifier,
           nextSvcFac
         )
 
@@ -170,11 +177,12 @@ object Retries {
    *       include exceptions, such as `Thrift`.
    */
   private[finagle] def moduleWithRetryPolicy[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module4[
+    new Stack.Module5[
       Stats,
       Budget,
       Policy,
       HighResTimer,
+      ParamResponseClassifier,
       ServiceFactory[Req, Rep]
     ] {
       def role: Stack.Role = Retries.Role
@@ -188,6 +196,7 @@ object Retries {
         budgetP: Budget,
         policyP: Policy,
         timerP: HighResTimer,
+        responseClassifier: ParamResponseClassifier,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val statsRecv = statsP.statsReceiver
@@ -195,6 +204,7 @@ object Retries {
         val requeues = scoped.counter("requeues")
         val retryBudget = budgetP.retryBudget
         val retryPolicy = policyP.retryPolicy
+        val classifier = responseClassifier.responseClassifier
 
         val filters =
           if (retryPolicy eq RetryPolicy.Never) {
@@ -204,6 +214,7 @@ object Retries {
               withdrawsOnly = false,
               scoped,
               timerP.timer,
+              classifier,
               next
             )
           } else {
@@ -216,6 +227,7 @@ object Retries {
               withdrawsOnly = true,
               scoped,
               timerP.timer,
+              classifier,
               next
             )
             retryFilter.andThen(requeueFilter)
@@ -231,6 +243,7 @@ object Retries {
     withdrawsOnly: Boolean,
     statsReceiver: StatsReceiver,
     timer: Timer,
+    classifier: ResponseClassifier,
     next: ServiceFactory[Req, Rep]
   ): RequeueFilter[Req, Rep] = {
     val budget =
@@ -239,10 +252,10 @@ object Retries {
     new RequeueFilter[Req, Rep](
       budget,
       retrySchedule,
-      statsReceiver,
       MaxRequeuesPerReq,
-      timer
-    )
+      classifier,
+      statsReceiver,
+      timer)
   }
 
   private[this] def svcFactory[Req, Rep](

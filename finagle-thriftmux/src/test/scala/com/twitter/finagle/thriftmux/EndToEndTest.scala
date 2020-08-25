@@ -33,8 +33,8 @@ import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol._
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatest.{FunSuite, Tag}
+import org.scalatestplus.junit.AssertionsForJUnit
 import scala.language.reflectiveCalls
 
 class EndToEndTest
@@ -1907,6 +1907,33 @@ class EndToEndTest
     await(server2.close())
   }
 
+  // Use this for testing retry logic.
+  // We need to succeed at least once in order to deposit into our RetryBudget.
+  trait ThriftMuxSucceedOnceServer {
+    @volatile var hasSucceededBefore = false
+    val succeedOnceThenFail: (String) => Future[String] = { arg =>
+      if (hasSucceededBefore) {
+        Future.exception(Failure.rejected("unhappy"))
+      } else {
+        hasSucceededBefore = true
+        Future.value(s"${arg} is happy")
+      }
+    }
+
+    val serverSr = new InMemoryStatsReceiver
+    val server =
+      serverImpl
+        .configured(Stats(serverSr))
+        .serveIface(
+          new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+          new TestService.MethodPerEndpoint {
+            def query(x: String): Future[String] = succeedOnceThenFail(x)
+            def question(y: String): Future[String] = succeedOnceThenFail(y)
+            def inquiry(z: String): Future[String] = succeedOnceThenFail(z)
+          }
+        )
+  }
+
   trait ThriftMuxFailServer {
     val serverSr = new InMemoryStatsReceiver
     val server =
@@ -1927,7 +1954,7 @@ class EndToEndTest
     RetryBudget(1.minute, minRetriesPerSec = 0, percentCanRetry = 1.0)
 
   test("thriftmux server + thriftmux client: auto requeues retryable failures") {
-    new ThriftMuxFailServer {
+    new ThriftMuxSucceedOnceServer {
       val sr = new InMemoryStatsReceiver
       val client =
         clientImpl
@@ -1938,15 +1965,18 @@ class EndToEndTest
             "client"
           )
 
+      // We need to succeed at least once in order to deposit into our RetryBudget.
+      val firstQuery = await(client.query("succeed once"))
+
       val failure = intercept[Exception](await(client.query("ok")))
       assert(failure.getMessage == "The request was Nacked by the server")
 
       assert(serverSr.counters(Seq("thrift", "thriftmux", "connects")) == 1)
-      assert(serverSr.counters(Seq("thrift", "requests")) == 2)
+      assert(serverSr.counters(Seq("thrift", "requests")) == 3)
       assert(serverSr.counters(Seq("thrift", "failures")) == 2)
 
-      assert(sr.counters(Seq("client", "query", "requests")) == 1)
-      assert(sr.counters(Seq("client", "requests")) == 2)
+      assert(sr.counters(Seq("client", "query", "requests")) == 2)
+      assert(sr.counters(Seq("client", "requests")) == 3)
       assert(sr.counters(Seq("client", "failures")) == 2)
 
       // reuse connection
@@ -2100,10 +2130,11 @@ class EndToEndTest
       // the server asks the client to drain immediately so we may never get a live
       // session out of the singleton pool.
 
-      // We requeue once since the first try will fail so it will try another server
-      assert(sr.counters(Seq("client", "retries", "requeues")) == 2 - 1)
-      assert(sr.counters(Seq("client", "connects")) == 2)
-      assert(sr.counters(Seq("client", "mux", "draining")) == 2)
+      // Because no requests succeeded, our retry budget should be empty, and therefore
+      // we don't expect to see any retries.
+      assert(sr.counters(Seq("client", "retries", "requeues")) == 0)
+      assert(sr.counters(Seq("client", "connects")) == 1)
+      assert(sr.counters(Seq("client", "mux", "draining")) == 1)
       await(closeServers())
     }
   }
@@ -2120,7 +2151,7 @@ class EndToEndTest
           )
 
       intercept[ChannelClosedException](await(client.query("ok")))
-      // We may have had some retries because the connection get's closed eagerly
+      // We may have had some retries because the connection gets closed eagerly
       // so there is some racing between a dispatch writing it's message and being
       // hung up on.
       assert(sr.counters(Seq("client", "connects")) >= 1)

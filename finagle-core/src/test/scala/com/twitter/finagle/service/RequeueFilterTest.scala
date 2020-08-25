@@ -19,10 +19,10 @@ class RequeueFilterTest extends FunSuite {
     val filter = new RequeueFilter[Throwable, Int](
       RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis),
       Backoff.constant(Duration.Zero),
-      stats,
       percentRequeues,
-      DefaultTimer
-    )
+      ResponseClassifier.Default,
+      stats,
+      DefaultTimer)
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
@@ -48,10 +48,10 @@ class RequeueFilterTest extends FunSuite {
     val filter = new RequeueFilter[Throwable, Int](
       RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis),
       Backoff.constant(Duration.Zero),
-      stats,
       percentRequeues,
-      DefaultTimer
-    )
+      ResponseClassifier.Default,
+      stats,
+      DefaultTimer)
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
@@ -76,10 +76,10 @@ class RequeueFilterTest extends FunSuite {
     val filter = new RequeueFilter[String, Int](
       retryBudget,
       Backoff.constant(Duration.Zero),
-      stats,
       percentRequeues,
-      DefaultTimer
-    )
+      ResponseClassifier.Default,
+      stats,
+      DefaultTimer)
 
     var numNos = 0
     val svc = filter.andThen(Service.mk { s: String =>
@@ -121,10 +121,10 @@ class RequeueFilterTest extends FunSuite {
       val filter = new RequeueFilter[Throwable, Int](
         RetryBudget(1.second, 10, 0.0, Stopwatch.timeMillis),
         schedule,
-        stats,
         1.0,
-        timer
-      )
+        ResponseClassifier.Default,
+        stats,
+        timer)
 
       val svc = filter.andThen(Service.mk(Future.exception))
       val response = svc(new FailedFastException("12345"))
@@ -158,10 +158,10 @@ class RequeueFilterTest extends FunSuite {
     val filter = new RequeueFilter[Throwable, Int](
       RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis),
       Backoff.constant(Duration.Zero),
-      NullStatsReceiver,
       percentRequeues,
-      DefaultTimer
-    )
+      ResponseClassifier.Default,
+      NullStatsReceiver,
+      DefaultTimer)
 
     val stats = new InMemoryStatsReceiver()
 
@@ -194,10 +194,10 @@ class RequeueFilterTest extends FunSuite {
     val filter = new RequeueFilter[Throwable, Int](
       RetryBudget(1.second, minRetries, percentRequeues, Stopwatch.timeMillis),
       Backoff.constant(Duration.Zero),
-      NullStatsReceiver,
       percentRequeues,
-      DefaultTimer
-    )
+      ResponseClassifier.Default,
+      NullStatsReceiver,
+      DefaultTimer)
 
     var recordedTraces: Seq[TraceId] = Seq.empty
     val svcFactory = ServiceFactory.const(
@@ -231,10 +231,10 @@ class RequeueFilterTest extends FunSuite {
     val filter = new RequeueFilter[Throwable, Int](
       RetryBudget(1.second, minRetries, percentRequeues, Stopwatch.timeMillis),
       Backoff.constant(Duration.Zero),
-      NullStatsReceiver,
       percentRequeues,
-      DefaultTimer
-    )
+      ResponseClassifier.Default,
+      NullStatsReceiver,
+      DefaultTimer)
 
     var recordedTraces: Seq[TraceId] = Seq.empty
     val svcFactory = ServiceFactory.const(
@@ -281,10 +281,10 @@ class RequeueFilterTest extends FunSuite {
     val filter = new RequeueFilter[Unit, Unit](
       retryBudget,
       Backoff.constant(Duration.Zero),
-      stats,
       percentRequeues,
-      DefaultTimer
-    )
+      ResponseClassifier.Default,
+      stats,
+      DefaultTimer)
 
     val requeueableSvc = filter.andThen(svc)
     for (_ <- 0 until 5)

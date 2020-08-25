@@ -19,12 +19,15 @@ import com.twitter.util._
  *                      first element is used to delay the first retry, 2nd for
  *                      the second retry and so on)
  *
- * @param statsReceiver for stats reporting, typically scoped to ".../retries/"
+ * @param responseClassifier for determining which responses qualify as "successful" for
+ *                           the purposes of incrementing our retryBudget.
  *
  * @param maxRetriesPerReq The maximum number of retries to make for a given request
  * computed as a percentage of `retryBudget.balance`.
  * Used to prevent a single request from using up a disproportionate amount of the budget.
  * Must be non-negative.
+ *
+ * @param statsReceiver for stats reporting, typically scoped to ".../retries/"
  *
  * @param timer Timer used to schedule retries
  *
@@ -37,8 +40,9 @@ import com.twitter.util._
 private[finagle] class RequeueFilter[Req, Rep](
   retryBudget: RetryBudget,
   retryBackoffs: Stream[Duration],
-  statsReceiver: StatsReceiver,
   maxRetriesPerReq: Double,
+  responseClassifier: ResponseClassifier,
+  statsReceiver: StatsReceiver,
   timer: Timer)
     extends SimpleFilter[Req, Rep] {
   import RequeueFilter._
@@ -148,9 +152,18 @@ private[finagle] class RequeueFilter[Req, Rep](
   }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-    retryBudget.deposit()
     val maxRetries = Math.ceil(maxRetriesPerReq * retryBudget.balance).toInt
-    applyService(req, service, 0, maxRetries, retryBackoffs)
+    applyService(req, service, 0, maxRetries, retryBackoffs).respond { rep: Try[Rep] =>
+      // Ignorables are never safe to retry, so for our
+      // purposes here, we don't increment the retry budget.
+      val shouldDeposit =
+        responseClassifier.applyOrElse(ReqRep(req, rep), ResponseClassifier.Default) match {
+          case ResponseClass.Successful(_) => true
+          case ResponseClass.Failed(_) => false
+          case ResponseClass.Ignorable => false
+        }
+      if (shouldDeposit) { retryBudget.deposit() }
+    }
   }
 }
 
