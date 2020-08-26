@@ -232,6 +232,14 @@ generator.
                         <a class="trait" href="HashingPartitioningStrategy.html" title=""></a>
                         <a href="HashingPartitioningStrategy.html" title="">HashingPartitioningStrategy</a>
                       </li><li class="current-entities indented6">
+                        <a class="object" href="MethodBuilderCustomStrategy$.html" title=""></a>
+                        <a class="class" href="" title="An API to set a custom partitioning strategy for a client MethodBuilder."></a>
+                        <a href="" title="An API to set a custom partitioning strategy for a client MethodBuilder.">MethodBuilderCustomStrategy</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="MethodBuilderHashingStrategy$.html" title=""></a>
+                        <a class="class" href="MethodBuilderHashingStrategy.html" title="An API to set a hashing partitioning strategy for a client MethodBuilder."></a>
+                        <a href="MethodBuilderHashingStrategy.html" title="An API to set a hashing partitioning strategy for a client MethodBuilder.">MethodBuilderHashingStrategy</a>
+                      </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="PartitioningParams.html" title="A collection of methods for configuring the PartitioningService of Thrift clients"></a>
                         <a href="PartitioningParams.html" title="A collection of methods for configuring the PartitioningService of Thrift clients">PartitioningParams</a>
@@ -239,10 +247,6 @@ generator.
                         <a class="object" href="PartitioningStrategy$.html" title=""></a>
                         <a class="trait" href="PartitioningStrategy.html" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly."></a>
                         <a href="PartitioningStrategy.html" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly.">PartitioningStrategy</a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="class" href="" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy."></a>
-                        <a href="" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy.">ThriftCustomPartitioningService</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="WithThriftPartitioningStrategy.html" title="Provides the withPartitioning API entry point"></a>
@@ -254,34 +258,35 @@ generator.
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <div class="big-circle class">c</div>
+        <a href="MethodBuilderCustomStrategy$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
         <p id="owner"><a href="../../../../../index.html" class="extype" name="com">com</a>.<a href="../../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.thrift.exp">exp</a>.<a href="index.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning">partitioning</a></p>
-        <h1>ThriftCustomPartitioningService<span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html" title="Permalink">
+        <h1><a href="MethodBuilderCustomStrategy$.html" title="See companion object">MethodBuilderCustomStrategy</a><span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="MethodBuilderCustomStrategy$.html" title="See companion object">object MethodBuilderCustomStrategy</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ThriftCustomPartitioningService</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.partitioning.PartitioningService">PartitioningService</span>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</span>
+        <span class="name">MethodBuilderCustomStrategy</span><span class="tparams">[<span name="Req">Req &lt;: <span class="extype" name="com.twitter.scrooge.ThriftStructIface">ThriftStructIface</span></span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>This custom partitioning service integrates with the user supplied
-<a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a>. This provides users direct setup for their
-partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="PartitioningService">PartitioningService</span>.</p></span></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An API to set a custom partitioning strategy for a client MethodBuilder.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.partitioning.PartitioningService">PartitioningService</span>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>], <a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>], <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a>, (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>], <a href="../../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a>, <a href="PartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy">PartitioningStrategy</a>, <a href="../../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -307,7 +312,7 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService"><span>ThriftCustomPartitioningService</span></li><li class="in" name="com.twitter.finagle.partitioning.PartitioningService"><span>PartitioningService</span></li><li class="in" name="com.twitter.finagle.Service"><span>Service</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy"><span>MethodBuilderCustomStrategy</span></li><li class="in" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy"><span>CustomPartitioningStrategy</span></li><li class="in" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy"><span>PartitioningStrategy</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -327,10 +332,10 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(underlying:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]],thriftMarshallable:com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable[Req,Rep],params:com.twitter.finagle.Stack.Params,customStrategy:com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy):com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService[Req,Rep]"></a><a id="&lt;init&gt;:ThriftCustomPartitioningService[Req,Rep]"></a>
+              <ol><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req],responseMerger:Option[com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger[Rep]]):com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy[Req,Rep]"></a><a id="&lt;init&gt;:MethodBuilderCustomStrategy[Req,Rep]"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#&lt;init&gt;(underlying:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]],thriftMarshallable:com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable[Req,Rep],params:com.twitter.finagle.Stack.Params,customStrategy:com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy):com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService[Req,Rep]" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#&lt;init&gt;(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req],responseMerger:Option[com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger[Rep]]):com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy[Req,Rep]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -339,10 +344,69 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ThriftCustomPartitioningService</span><span class="params">(<span name="underlying">underlying: <a href="../../../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="../../../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]]</span>, <span name="thriftMarshallable">thriftMarshallable: <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable">ReqRepMarshallable</span>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</span>, <span name="params">params: <a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>, <span name="customStrategy">customStrategy: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>)</span>
+        <span class="name">MethodBuilderCustomStrategy</span><span class="params">(<span name="getPartitionIdAndRequest">getPartitionIdAndRequest: <a href="MethodBuilderCustomStrategy$.html#ToPartitionedMap[Req]=Req=&gt;com.twitter.util.Future[Map[Int,Req]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap">ToPartitionedMap</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.Req">Req</span>]</span>, <span name="responseMerger">responseMerger: <a href="https://www.scala-lang.org/api/2.12.11/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="PartitioningStrategy$.html#ResponseMerger[Rep]=(Seq[Rep],Seq[Throwable])=&gt;com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger">ResponseMerger</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.Rep">Rep</span>]]</span>)</span>
       </span>
       
       
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req]):com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy[Req,Rep]"></a><a id="&lt;init&gt;:MethodBuilderCustomStrategy[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#&lt;init&gt;(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req]):com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MethodBuilderCustomStrategy</span><span class="params">(<span name="getPartitionIdAndRequest">getPartitionIdAndRequest: <a href="MethodBuilderCustomStrategy$.html#ToPartitionedMap[Req]=Req=&gt;com.twitter.util.Future[Map[Int,Req]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap">ToPartitionedMap</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.Req">Req</span>]</span>)</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req],logicalPartitionFn:Int=&gt;Int):com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy[Req,Rep]"></a><a id="&lt;init&gt;:MethodBuilderCustomStrategy[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#&lt;init&gt;(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req],logicalPartitionFn:Int=&gt;Int):com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MethodBuilderCustomStrategy</span><span class="params">(<span name="getPartitionIdAndRequest">getPartitionIdAndRequest: <a href="MethodBuilderCustomStrategy$.html#ToPartitionedMap[Req]=Req=&gt;com.twitter.util.Future[Map[Int,Req]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap">ToPartitionedMap</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.Req">Req</span>]</span>, <span name="logicalPartitionFn">logicalPartitionFn: (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req],logicalPartitionFn:Int=&gt;Int,responseMerger:Option[com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger[Rep]]):com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy[Req,Rep]"></a><a id="&lt;init&gt;:MethodBuilderCustomStrategy[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#&lt;init&gt;(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req],logicalPartitionFn:Int=&gt;Int,responseMerger:Option[com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger[Rep]]):com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MethodBuilderCustomStrategy</span><span class="params">(<span name="getPartitionIdAndRequest">getPartitionIdAndRequest: <a href="MethodBuilderCustomStrategy$.html#ToPartitionedMap[Req]=Req=&gt;com.twitter.util.Future[Map[Int,Req]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap">ToPartitionedMap</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.Req">Req</span>]</span>, <span name="logicalPartitionFn">logicalPartitionFn: (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="responseMerger">responseMerger: <a href="https://www.scala-lang.org/api/2.12.11/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="PartitioningStrategy$.html#ResponseMerger[Rep]=(Seq[Rep],Seq[Throwable])=&gt;com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger">ResponseMerger</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.Rep">Rep</span>]]</span>)</span>
+      </span>
+      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">getPartitionIdAndRequest</dt><dd class="cmt"><p>A function for the partitioning logic.
+       MethodBuilder is customized per-method so that this method only takes one
+       Thrift request type.</p></dd><dt class="param">logicalPartitionFn</dt><dd class="cmt"><p>Gets the logical partition identifier from a host
+       identifier, host identifiers are derived from <span class="extype" name="ZkMetadata">ZkMetadata</span>
+       shardId. Indicates which logical partition a physical host belongs to,
+       multiple hosts can belong to the same partition, for example:</p><pre><span class="kw">val</span> getLogicalPartition: <span class="std">Int</span> <span class="kw">=&gt;</span> <span class="std">Int</span> = {
+  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="num">0</span>
+  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="num">1</span>
+  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="num">2</span>
+  <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">throw</span> ...
+}</pre><p>       If not provided, the default is that each instance is its own partition.</p></dd><dt class="param">responseMerger</dt><dd class="cmt"><p>Supplies a <span class="extype" name="ResponseMerger">ResponseMerger</span> for messaging fan-out.
+       Non-fan-out case the default is <span class="extype" name="None">None</span>.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -356,7 +420,7 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -372,7 +436,7 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html###():Int" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -388,7 +452,7 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -401,46 +465,10 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.Function1#andThen" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="andThen[A](g:R=&gt;A):T1=&gt;A"></a><a id="andThen[A]((Future[Rep])⇒A):(Req)⇒A"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#andThen[A](g:R=&gt;A):T1=&gt;A" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
-                <span class="name">@unspecialized</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li name="com.twitter.finagle.partitioning.PartitioningService#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(request:Req):com.twitter.util.Future[Rep]"></a><a id="apply(Req):Future[Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#apply(request:Req):com.twitter.util.Future[Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>PartitioningService → <a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Function1</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -456,7 +484,7 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#clone():Object" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -477,77 +505,10 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Service#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a><a id="close(Time):Future[Unit]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Closable</dd></dl></div>
-    </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a><a id="close(Duration):Future[Unit]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="close():com.twitter.util.Future[Unit]"></a><a id="close():Future[Unit]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#close():com.twitter.util.Future[Unit]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li name="scala.Function1#compose" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="compose[A](g:A=&gt;T1):A=&gt;R"></a><a id="compose[A]((A)⇒Req):(A)⇒Future[Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#compose[A](g:A=&gt;T1):A=&gt;R" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
-                <span class="name">@unspecialized</span><span class="args">()</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -563,7 +524,7 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -579,7 +540,7 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -601,7 +562,7 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -617,10 +578,50 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy#getLogicalPartition" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getLogicalPartition(instance:Int):Int"></a><a id="getLogicalPartition(Int):Int"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#getLogicalPartition(instance:Int):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getLogicalPartition</span><span class="params">(<span name="instance">instance: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Gets the logical partition identifier from a host identifier, host identifiers are derived
+from <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the logical partition identifier from a host identifier, host identifiers are derived
+from <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId. Indicates which logical partition a physical host belongs to,
+multiple hosts can belong to the same partition, for example:</p><pre><span class="kw">val</span> getLogicalPartition: <span class="std">Int</span> <span class="kw">=&gt;</span> <span class="std">Int</span> = {
+  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="num">0</span>
+  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="num">1</span>
+  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="num">2</span>
+  <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">throw</span> ...
+}</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy">MethodBuilderCustomStrategy</a> → <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy#getPartitionIdAndRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req]"></a><a id="getPartitionIdAndRequest:ToPartitionedMap[Req]"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap[Req]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getPartitionIdAndRequest</span><span class="result">: <a href="MethodBuilderCustomStrategy$.html#ToPartitionedMap[Req]=Req=&gt;com.twitter.util.Future[Map[Int,Req]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.ToPartitionedMap">ToPartitionedMap</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.Req">Req</span>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#hashCode():Int" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -636,29 +637,10 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Service#isAvailable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="isAvailable:Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#isAvailable:Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isAvailable</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Determines whether this <code>Service</code> is available (can accept requests
-with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this <code>Service</code> is available (can accept requests
-with a reasonable likelihood of success).
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -671,50 +653,10 @@ with a reasonable likelihood of success).
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Service#map" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="map[Req1](f:Req1=&gt;Req):com.twitter.finagle.Service[Req1,Rep]"></a><a id="map[Req1]((Req1)⇒Req):Service[Req1,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#map[Req1](f:Req1=&gt;Req):com.twitter.finagle.Service[Req1,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">map</span><span class="tparams">[<span name="Req1">Req1</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.Service.map.Req1">Req1</span>) ⇒ <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span></span>)</span><span class="result">: <a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Service.map.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService#mergeResponses" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mergeResponses(originalReq:Req,results:com.twitter.finagle.partitioning.PartitioningService.PartitionedResults[Req,Rep]):Rep"></a><a id="mergeResponses(Req,PartitionedResults[Req,Rep]):Rep"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#mergeResponses(originalReq:Req,results:com.twitter.finagle.partitioning.PartitioningService.PartitionedResults[Req,Rep]):Rep" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">mergeResponses</span><span class="params">(<span name="originalReq">originalReq: <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span></span>, <span name="results">results: <a href="../../../partitioning/PartitioningService$$PartitionedResults.html" class="extype" name="com.twitter.finagle.partitioning.PartitioningService.PartitionedResults">PartitionedResults</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">This method is used for the batched request case.</p><div class="fullcomment"><div class="comment cmt"><p>This method is used for the batched request case. When the keys belong to multiple partitions,
-the request is forked and sent to multiple partitions in parallel. After the responses come
-back, this method is used to combine the response into a single Response, so that the combined
-result can be returned back to the caller. Typically the implementations will be combining the
-response key-value maps into a merged key-value map. The PartitioningService groups the
-successful and failed responses from various partitions into 'successes' and 'failures' so that
-the caller can retry the failed batches again. The mergeResponses implementations should
-construct the response object accordingly.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>merged response</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService">ThriftCustomPartitioningService</a> → PartitioningService</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -727,29 +669,10 @@ construct the response object accordingly.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService#noPartitionInformationHandler" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="noPartitionInformationHandler(req:Req):com.twitter.util.Future[Nothing]"></a><a id="noPartitionInformationHandler(Req):Future[Nothing]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#noPartitionInformationHandler(req:Req):com.twitter.util.Future[Nothing]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">noPartitionInformationHandler</span><span class="params">(<span name="req">req: <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Nothing.html#scala.Nothing" class="extype" name="scala.Nothing">Nothing</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Error handling when processing requests to retrieve partition information failed, this is
-implemented by each protocol to log proper information.</p><div class="fullcomment"><div class="comment cmt"><p>Error handling when processing requests to retrieve partition information failed, this is
-implemented by each protocol to log proper information.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService">ThriftCustomPartitioningService</a> → PartitioningService</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#notify():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -768,7 +691,7 @@ implemented by each protocol to log proper information.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -784,47 +707,26 @@ implemented by each protocol to log proper information.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService#partitionRequest" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="partitionRequest(original:Req):com.twitter.util.Future[Map[Req,com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]]]"></a><a id="partitionRequest(Req):Future[Map[Req,Future[Service[Req,Rep]]]]"></a>
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy#responseMerger" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="responseMerger:Option[com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger[Rep]]"></a><a id="responseMerger:Option[ResponseMerger[Rep]]"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#partitionRequest(original:Req):com.twitter.util.Future[Map[Req,com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]]]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">partitionRequest</span><span class="params">(<span name="original">original: <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]]]]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Extracts the necessary information (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>Extracts the necessary information (e.g. keys) that is needed for the partitioning logic and
-groups them by partition. The keys present in the request could belong to multiple partitions.
-The implementations will examine the keys, group them by partition, clone the request into
-per-partition requests and return the map of partitioned requests.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A map of the partitioned request to its service</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService">ThriftCustomPartitioningService</a> → PartitioningService</dd></dl></div>
-    </li><li name="com.twitter.finagle.Service#status" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="status:com.twitter.finagle.Status"></a><a id="status:Status"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#status:com.twitter.finagle.Status" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#responseMerger:Option[com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger[Rep]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">status</span><span class="result">: <a href="../../../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+        <span class="name">responseMerger</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="PartitioningStrategy$.html#ResponseMerger[Rep]=(Seq[Rep],Seq[Throwable])=&gt;com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger">ResponseMerger</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy.Rep">Rep</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">The current availability <a href="../../../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this <code>Service</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../../../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this <code>Service</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -837,10 +739,10 @@ per-partition requests and return the map of partitioned requests.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.Service#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#toString():String" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -849,14 +751,14 @@ per-partition requests and return the map of partitioned requests.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Function1 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#wait():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -878,7 +780,7 @@ per-partition requests and return the map of partitioned requests.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -900,7 +802,7 @@ per-partition requests and return the map of partitioned requests.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -931,14 +833,10 @@ per-partition requests and return the map of partitioned requests.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.partitioning.PartitioningService">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.partitioning.PartitioningService">PartitioningService</span>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</h3>
-            </div><div class="parent" name="com.twitter.finagle.Service">
-              <h3>Inherited from <a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</h3>
-            </div><div class="parent" name="com.twitter.util.Closable">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></h3>
-            </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</h3>
+        <div class="parent" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">
+              <h3>Inherited from <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy">
+              <h3>Inherited from <a href="PartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy">PartitioningStrategy</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

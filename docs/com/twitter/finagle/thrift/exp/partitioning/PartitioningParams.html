@@ -232,6 +232,14 @@ generator.
                         <a class="trait" href="HashingPartitioningStrategy.html" title=""></a>
                         <a href="HashingPartitioningStrategy.html" title="">HashingPartitioningStrategy</a>
                       </li><li class="current-entities indented6">
+                        <a class="object" href="MethodBuilderCustomStrategy$.html" title=""></a>
+                        <a class="class" href="MethodBuilderCustomStrategy.html" title="An API to set a custom partitioning strategy for a client MethodBuilder."></a>
+                        <a href="MethodBuilderCustomStrategy.html" title="An API to set a custom partitioning strategy for a client MethodBuilder.">MethodBuilderCustomStrategy</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="MethodBuilderHashingStrategy$.html" title=""></a>
+                        <a class="class" href="MethodBuilderHashingStrategy.html" title="An API to set a hashing partitioning strategy for a client MethodBuilder."></a>
+                        <a href="MethodBuilderHashingStrategy.html" title="An API to set a hashing partitioning strategy for a client MethodBuilder.">MethodBuilderHashingStrategy</a>
+                      </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="" title="A collection of methods for configuring the PartitioningService of Thrift clients"></a>
                         <a href="" title="A collection of methods for configuring the PartitioningService of Thrift clients">PartitioningParams</a>
@@ -239,10 +247,6 @@ generator.
                         <a class="object" href="PartitioningStrategy$.html" title=""></a>
                         <a class="trait" href="PartitioningStrategy.html" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly."></a>
                         <a href="PartitioningStrategy.html" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly.">PartitioningStrategy</a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="class" href="ThriftCustomPartitioningService.html" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy."></a>
-                        <a href="ThriftCustomPartitioningService.html" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy.">ThriftCustomPartitioningService</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="WithThriftPartitioningStrategy.html" title="Provides the withPartitioning API entry point"></a>
@@ -458,7 +462,11 @@ generator.
       <p class="shortcomment cmt">Whether to eject failing hosts from the hash ring based on failure accrual.</p><div class="fullcomment"><div class="comment cmt"><p>Whether to eject failing hosts from the hash ring based on failure accrual.
 By default, this is off.</p><p>The failing signal currently is gathered from
 <span class="extype" name="com.twitter.finagle.partitioning.ConsistentHashingFailureAccrualFactory">com.twitter.finagle.partitioning.ConsistentHashingFailureAccrualFactory</span>
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>When turning on, ejection is based on the failure accrual mentioned above, so your
+      cluster may get different views of the same host. With partitioning strategy updates,
+      this can introduce inter-process inconsistencies between hash rings.
+      In many cases, it's better to eject failing host via a separate mechanism that's
+      based on a global view.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">

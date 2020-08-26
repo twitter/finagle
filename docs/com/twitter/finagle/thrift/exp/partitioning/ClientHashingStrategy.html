@@ -232,6 +232,14 @@ generator.
                         <a class="trait" href="HashingPartitioningStrategy.html" title=""></a>
                         <a href="HashingPartitioningStrategy.html" title="">HashingPartitioningStrategy</a>
                       </li><li class="current-entities indented6">
+                        <a class="object" href="MethodBuilderCustomStrategy$.html" title=""></a>
+                        <a class="class" href="MethodBuilderCustomStrategy.html" title="An API to set a custom partitioning strategy for a client MethodBuilder."></a>
+                        <a href="MethodBuilderCustomStrategy.html" title="An API to set a custom partitioning strategy for a client MethodBuilder.">MethodBuilderCustomStrategy</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="MethodBuilderHashingStrategy$.html" title=""></a>
+                        <a class="class" href="MethodBuilderHashingStrategy.html" title="An API to set a hashing partitioning strategy for a client MethodBuilder."></a>
+                        <a href="MethodBuilderHashingStrategy.html" title="An API to set a hashing partitioning strategy for a client MethodBuilder.">MethodBuilderHashingStrategy</a>
+                      </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="PartitioningParams.html" title="A collection of methods for configuring the PartitioningService of Thrift clients"></a>
                         <a href="PartitioningParams.html" title="A collection of methods for configuring the PartitioningService of Thrift clients">PartitioningParams</a>
@@ -239,10 +247,6 @@ generator.
                         <a class="object" href="PartitioningStrategy$.html" title=""></a>
                         <a class="trait" href="PartitioningStrategy.html" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly."></a>
                         <a href="PartitioningStrategy.html" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly.">PartitioningStrategy</a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="class" href="ThriftCustomPartitioningService.html" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy."></a>
-                        <a href="ThriftCustomPartitioningService.html" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy.">ThriftCustomPartitioningService</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="WithThriftPartitioningStrategy.html" title="Provides the withPartitioning API entry point"></a>
@@ -627,7 +631,7 @@ For a Java-friendly way to do the same thing, see <code>ClientHashingStrategy.cr
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.exp.partitioning.HashingPartitioningStrategy#requestMergerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientHashingStrategy#requestMergerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="requestMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.RequestMergerRegistry"></a><a id="requestMergerRegistry:RequestMergerRegistry"></a>
       <span class="permalink">
       <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientHashingStrategy.html#requestMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.RequestMergerRegistry" title="Permalink">
@@ -642,9 +646,10 @@ For a Java-friendly way to do the same thing, see <code>ClientHashingStrategy.cr
         <span class="name">requestMergerRegistry</span><span class="result">: <a href="PartitioningStrategy$$RequestMergerRegistry.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.RequestMergerRegistry">RequestMergerRegistry</a></span>
       </span>
       
-      <p class="shortcomment cmt">A RequestMergerRegistry implemented by client to supply <span class="extype" name="RequestMerger">RequestMerger</span>s.</p><div class="fullcomment"><div class="comment cmt"><p>A RequestMergerRegistry implemented by client to supply <span class="extype" name="RequestMerger">RequestMerger</span>s.
-For message fan-out cases.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="HashingPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.HashingPartitioningStrategy">HashingPartitioningStrategy</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="RequestMerger">RequestMerger</span></p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy#responseMergerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">A RequestMergerRegistry implemented by client to supply <span class="extype" name="RequestMerger">RequestMerger</span>s
+for message fan-out cases.</p><div class="fullcomment"><div class="comment cmt"><p>A RequestMergerRegistry implemented by client to supply <span class="extype" name="RequestMerger">RequestMerger</span>s
+for message fan-out cases.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="RequestMerger">RequestMerger</span></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientHashingStrategy#responseMergerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="responseMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry"></a><a id="responseMergerRegistry:ResponseMergerRegistry"></a>
       <span class="permalink">
       <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientHashingStrategy.html#responseMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry" title="Permalink">
@@ -659,8 +664,9 @@ For message fan-out cases.</p></div><dl class="attributes block"> <dt>Definition
         <span class="name">responseMergerRegistry</span><span class="result">: <a href="PartitioningStrategy$$ResponseMergerRegistry.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry">ResponseMergerRegistry</a></span>
       </span>
       
-      <p class="shortcomment cmt">A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s.</p><div class="fullcomment"><div class="comment cmt"><p>A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s.
-For message fan-out cases.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy">PartitioningStrategy</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="ResponseMerger">ResponseMerger</span></p></span></dd></dl></div>
+      <p class="shortcomment cmt">A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s
+for message fan-out cases.</p><div class="fullcomment"><div class="comment cmt"><p>A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s
+for message fan-out cases.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="ResponseMerger">ResponseMerger</span></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

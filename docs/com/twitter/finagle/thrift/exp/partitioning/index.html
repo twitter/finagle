@@ -232,6 +232,14 @@ generator.
                         <a class="trait" href="HashingPartitioningStrategy.html" title=""></a>
                         <a href="HashingPartitioningStrategy.html" title="">HashingPartitioningStrategy</a>
                       </li><li class="current-entities indented6">
+                        <a class="object" href="MethodBuilderCustomStrategy$.html" title=""></a>
+                        <a class="class" href="MethodBuilderCustomStrategy.html" title="An API to set a custom partitioning strategy for a client MethodBuilder."></a>
+                        <a href="MethodBuilderCustomStrategy.html" title="An API to set a custom partitioning strategy for a client MethodBuilder.">MethodBuilderCustomStrategy</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="MethodBuilderHashingStrategy$.html" title=""></a>
+                        <a class="class" href="MethodBuilderHashingStrategy.html" title="An API to set a hashing partitioning strategy for a client MethodBuilder."></a>
+                        <a href="MethodBuilderHashingStrategy.html" title="An API to set a hashing partitioning strategy for a client MethodBuilder.">MethodBuilderHashingStrategy</a>
+                      </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="PartitioningParams.html" title="A collection of methods for configuring the PartitioningService of Thrift clients"></a>
                         <a href="PartitioningParams.html" title="A collection of methods for configuring the PartitioningService of Thrift clients">PartitioningParams</a>
@@ -239,10 +247,6 @@ generator.
                         <a class="object" href="PartitioningStrategy$.html" title=""></a>
                         <a class="trait" href="PartitioningStrategy.html" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly."></a>
                         <a href="PartitioningStrategy.html" title="Service partitioning strategy to apply on the clients in order to let clients route requests accordingly.">PartitioningStrategy</a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="class" href="ThriftCustomPartitioningService.html" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy."></a>
-                        <a href="ThriftCustomPartitioningService.html" title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy.">ThriftCustomPartitioningService</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="WithThriftPartitioningStrategy.html" title="Provides the withPartitioning API entry point"></a>
@@ -379,6 +383,40 @@ For a Java-friendly way to do the same thing, see <code>ClientHashingStrategy.cr
       </span>
       
       
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MethodBuilderCustomStrategy[Req&lt;:com.twitter.scrooge.ThriftStructIface,Rep]extendsCustomPartitioningStrategy"></a><a id="MethodBuilderCustomStrategy[Req&lt;:ThriftStructIface,Rep]:MethodBuilderCustomStrategy[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An API to set a custom partitioning strategy for a client MethodBuilder." href="MethodBuilderCustomStrategy.html"><span class="name">MethodBuilderCustomStrategy</span></a><span class="tparams">[<span name="Req">Req &lt;: <span class="extype" name="com.twitter.scrooge.ThriftStructIface">ThriftStructIface</span></span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An API to set a custom partitioning strategy for a client MethodBuilder.</p>
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderHashingStrategy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MethodBuilderHashingStrategy[Req&lt;:com.twitter.scrooge.ThriftStructIface,Rep]extendsHashingPartitioningStrategy"></a><a id="MethodBuilderHashingStrategy[Req&lt;:ThriftStructIface,Rep]:MethodBuilderHashingStrategy[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderHashingStrategy.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An API to set a hashing partitioning strategy for a client MethodBuilder." href="MethodBuilderHashingStrategy.html"><span class="name">MethodBuilderHashingStrategy</span></a><span class="tparams">[<span name="Req">Req &lt;: <span class="extype" name="com.twitter.scrooge.ThriftStructIface">ThriftStructIface</span></span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="HashingPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.HashingPartitioningStrategy">HashingPartitioningStrategy</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An API to set a hashing partitioning strategy for a client MethodBuilder.</p><div class="fullcomment"><div class="comment cmt"><p>An API to set a hashing partitioning strategy for a client MethodBuilder.
+For a Java-friendly way to do the same thing, see <code>MethodBuilderHashingStrategy.create</code>
+</p></div></div>
     </li><li name="com.twitter.finagle.thrift.exp.partitioning.PartitioningParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PartitioningParams[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef"></a><a id="PartitioningParams[A&lt;:Parameterized[A]]:PartitioningParams[A]"></a>
       <span class="permalink">
@@ -415,30 +453,12 @@ For a Java-friendly way to do the same thing, see <code>ClientHashingStrategy.cr
       <p class="shortcomment cmt">Service partitioning strategy to apply on the clients in order to let clients route
 requests accordingly.</p><div class="fullcomment"><div class="comment cmt"><p>Service partitioning strategy to apply on the clients in order to let clients route
 requests accordingly. Two particular partitioning strategies are going to be supported,
-<a href="HashingPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.HashingPartitioningStrategy">HashingPartitioningStrategy</a> and <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a>.
+<a href="HashingPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.HashingPartitioningStrategy">HashingPartitioningStrategy</a> and <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a>, each one supports
+both configuring Finagle Client Stack and ThriftMux MethodBuilder.
 Either one will need developers to provide a concrete function to give each request an
 indicator of destination, for example a hashing key or a partition address.
 Messaging fan-out is supported by leveraging RequestMerger and ResponseMerger.
 </p></div></div>
-    </li><li name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftCustomPartitioningService[Req,Rep]extendsPartitioningService[Req,Rep]"></a><a id="ThriftCustomPartitioningService[Req,Rep]:ThriftCustomPartitioningService[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ThriftCustomPartitioningService.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="This custom partitioning service integrates with the user supplied CustomPartitioningStrategy." href="ThriftCustomPartitioningService.html"><span class="name">ThriftCustomPartitioningService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.partitioning.PartitioningService">PartitioningService</span>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService.Rep">Rep</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">This custom partitioning service integrates with the user supplied
-<a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a>.</p><div class="fullcomment"><div class="comment cmt"><p>This custom partitioning service integrates with the user supplied
-<a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a>. This provides users direct setup for their
-partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="PartitioningService">PartitioningService</span>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.exp.partitioning.WithThriftPartitioningStrategy" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="WithThriftPartitioningStrategy[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef"></a><a id="WithThriftPartitioningStrategy[A&lt;:Parameterized[A]]:WithThriftPartitioningStrategy[A]"></a>
       <span class="permalink">
@@ -494,6 +514,38 @@ partitioning topologies.</p></div><dl class="attributes block"> <dt>See also</dt
       </span>
       <span class="symbol">
         <a title="" href="ClientHashingStrategy$.html"><span class="name">ClientHashingStrategy</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderCustomStrategy" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MethodBuilderCustomStrategy"></a><a id="MethodBuilderCustomStrategy:MethodBuilderCustomStrategy"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderCustomStrategy$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MethodBuilderCustomStrategy$.html"><span class="name">MethodBuilderCustomStrategy</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.MethodBuilderHashingStrategy" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MethodBuilderHashingStrategy"></a><a id="MethodBuilderHashingStrategy:MethodBuilderHashingStrategy"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/MethodBuilderHashingStrategy$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MethodBuilderHashingStrategy$.html"><span class="name">MethodBuilderHashingStrategy</span></a>
       </span>
       
       

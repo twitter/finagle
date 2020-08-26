@@ -853,6 +853,39 @@ retries are removed.
                   has been exhausted (whichever occurs first).</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#withRetryDisabled:com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.thriftmux.MethodBuilder#withRetryDisabled">withRetryDisabled</a></p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#response-classification" target="_blank">response classification user guide</a></p></span><span class="cmt"><p>The MethodBuilder section in the
      <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#retries" target="_blank">user guide</a>
      for further details.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#withPartitioningStrategy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withPartitioningStrategy(strategy:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="withPartitioningStrategy(PartitioningStrategy):MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thriftmux/MethodBuilder.html#withPartitioningStrategy(strategy:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy):com.twitter.finagle.thriftmux.MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withPartitioningStrategy</span><span class="params">(<span name="strategy">strategy: <a href="../thrift/exp/partitioning/PartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy">PartitioningStrategy</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Set a <span class="extype" name="PartitioningStrategy">PartitioningStrategy</span> for a MethodBuilder endpoint to enable
+partitioning awareness.</p><div class="fullcomment"><div class="comment cmt"><p>Set a <span class="extype" name="PartitioningStrategy">PartitioningStrategy</span> for a MethodBuilder endpoint to enable
+partitioning awareness. See <span class="extype" name="PartitioningStrategy">PartitioningStrategy</span>.</p><p>Default is <span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.Disabled">com.twitter.finagle.thrift.exp.partitioning.Disabled</span>
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p>
+To set a hashing strategy to MethodBuilder:</p><pre><span class="kw">import</span> com.twitter.finagle.ThriftMux.Client
+<span class="kw">import</span> com.twitter.finagle.thrift.exp.partitioning.MethodBuilderHashingStrategy
+
+<span class="kw">val</span> hashingStrategy = <span class="kw">new</span> MethodBuilderHashingStrategy[RequestType, ResponseType](...)
+
+<span class="kw">val</span> client: ThriftMux.Client = ???
+<span class="kw">val</span> builder = client.methodBuilder($address)
+
+builder
+  .withPartitioningStrategy(hashingStrategy)
+  .servicePerEndpoint...
+...</pre></li></ol>
+            </div></dl></div>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#withRetryDisabled" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRetryDisabled:com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="withRetryDisabled:MethodBuilder"></a>
       <span class="permalink">

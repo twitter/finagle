@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 20.8.0 documentation</title>
+    <title>Metrics &#8212; Finagle 20.8.1 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '20.8.0',
+        VERSION:     '20.8.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -271,6 +271,8 @@ outside of <code class="docutils literal"><span class="pre">com.twitter.util.Awa
 <dd>A gauge of the number of tasks actively executing.</dd>
 <dt><strong>finagle/offload_pool/completed_tasks</strong></dt>
 <dd>A gauge of the number of total tasks that have completed execution.</dd>
+<dt><strong>finagle/offload_pool/queue_depth</strong></dt>
+<dd>A Gauge of the number of tasks that are waiting to be executed.</dd>
 </dl>
 </div>
 <div class="section" id="timer">
@@ -332,6 +334,10 @@ evicted from <a class="reference external" href="https://github.com/twitter/fina
 implementation, the Netty 4 library and available under <cite>finagle/netty4</cite>
 on any instance running Finagle with Netty 4.</p>
 <dl class="docutils">
+<dt><strong>worker_threads</strong></dt>
+<dd>A gauge for the size of the Netty worker pool. This will only
+reflect <a href="#id1"><span class="problematic" id="id2">`</span></a>EventLoopGroup`s constructed by Finagle and not those
+manually created by the application.</dd>
 <dt><strong>pooling/allocations/huge</strong> <cite>verbosity:debug</cite></dt>
 <dd>A gauge of the total number of HUGE <em>direct allocations</em>
 (i.e., unpooled allocations that exceed the current chunk size).</dd>
@@ -574,7 +580,7 @@ died and must be retried.</dd>
 </div>
 <div class="section" id="retries">
 <h2>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h2>
-<p id="id1">These metrics track the retries of failed requests
+<p id="id3">These metrics track the retries of failed requests
 via the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/Retries.scala">Retries module</a>.</p>
 <p>Requeues represent requests that were automatically retried by Finagle.
@@ -625,7 +631,7 @@ status of <code class="docutils literal"><span class="pre">Open</span></code>.</
 </div>
 <div class="section" id="backup-requests">
 <h2>Backup Requests<a class="headerlink" href="#backup-requests" title="Permalink to this headline">¶</a></h2>
-<p id="id2">These stats provide information on the state and behavior of
+<p id="id4">These stats provide information on the state and behavior of
 <cite>com.twitter.finagle.client.BackupRequestFilter</cite>.</p>
 <dl class="docutils">
 <dt><strong>backups/send_backup_after_ms</strong></dt>
@@ -644,7 +650,7 @@ sent.</dd>
 </div>
 <div class="section" id="dispatching">
 <h2>Dispatching<a class="headerlink" href="#dispatching" title="Permalink to this headline">¶</a></h2>
-<p id="id3">The client metrics scoped under <cite>dispatcher</cite> represent information about a
+<p id="id5">The client metrics scoped under <cite>dispatcher</cite> represent information about a
 client’s dispatching layer.</p>
 <p>Depending on the underlying protocol, dispatchers may have different request
 queueing rules.</p>
@@ -704,7 +710,7 @@ milliseconds.</dd>
 </div>
 <div class="section" id="nack-admission-control">
 <h3>Nack Admission Control<a class="headerlink" href="#nack-admission-control" title="Permalink to this headline">¶</a></h3>
-<p id="id4">These metrics reflect the behavior of the
+<p id="id6">These metrics reflect the behavior of the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>.</p>
 <dl class="docutils">
 <dt><strong>dropped_requests</strong></dt>
@@ -893,9 +899,9 @@ given idle state.</dd>
 </div>
 <div class="section" id="service-discovery">
 <h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
-<p id="id5">These metrics track the state of name resolution and service discovery.</p>
-<div class="section" id="id6">
-<h3>Name Resolution<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p id="id7">These metrics track the state of name resolution and service discovery.</p>
+<div class="section" id="id8">
+<h3>Name Resolution<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <p>Finagle clients resolve <a class="reference internal" href="Names.html"><span class="doc">names</span></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e.
@@ -1517,7 +1523,7 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 </ul>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>
-<li><a class="reference internal" href="#id6">Name Resolution</a></li>
+<li><a class="reference internal" href="#id8">Name Resolution</a></li>
 <li><a class="reference internal" href="#initial-resolution">Initial Resolution</a></li>
 <li><a class="reference internal" href="#address-stabilization">Address Stabilization</a></li>
 <li><a class="reference internal" href="#zookeeper-diagnostics">ZooKeeper Diagnostics</a><ul>
