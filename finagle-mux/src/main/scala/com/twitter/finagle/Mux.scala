@@ -83,7 +83,18 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         (this, OppTls.param)
     }
     object OppTls {
-      implicit val param = Stack.Param(OppTls(None))
+      implicit val param = new Stack.Param[OppTls] {
+        val default: OppTls = OppTls(None)
+
+        // override this to have a "cleaner" output in the registry
+        override def show(value: OppTls): Seq[(String, () => String)] = {
+          val levelStr = value match {
+            case OppTls(Some(oppTls)) => oppTls.value.toString
+            case OppTls(None) => "none"
+          }
+          Seq(("opportunisticTlsLevel", () => levelStr))
+        }
+      }
 
       /** Determine whether opportunistic TLS is configured to `Desired` or `Required`. */
       def enabled(params: Stack.Params): Boolean = params[OppTls].level match {
