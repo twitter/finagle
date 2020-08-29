@@ -74,7 +74,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
       .insertBefore(DefaultPool.Role, RedisPool.module)
       .insertAfter(StackClient.Role.prepConn, ConnectionInitCommand.module)
       .replace(StackClient.Role.protoTracing, RedisTracingFilter.module)
-      .insertAfter(RedisLoggingFilter.role, RedisLoggingFilter.module)
+      .insertBefore(StackClient.Role.protoTracing, RedisLoggingFilter.module)
 
     private[finagle] val hashRingStack: Stack[ServiceFactory[Command, Reply]] =
       stack.insertAfter(BindingFactory.role, RedisPartitioningService.module)
