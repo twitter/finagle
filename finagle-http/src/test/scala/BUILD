@@ -6,7 +6,6 @@ junit_tests(
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/io/netty:netty4-codec-http2",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
-        "3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalacheck",
@@ -14,6 +13,10 @@ junit_tests(
         "3rdparty/jvm/org/scalatestplus:junit",
         "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "3rdparty/jvm/org/scalatestplus:scalacheck",
+        scoped(
+            "3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static",
+            scope = "runtime",
+        ),
         "finagle/finagle-base-http",
         "finagle/finagle-core",
         "finagle/finagle-http",

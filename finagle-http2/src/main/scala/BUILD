@@ -12,7 +12,10 @@ scala_library(
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/io/netty:netty4-codec-http2",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
-        "3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static",
+        scoped(
+            "3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static",
+            scope = "runtime",
+        ),
         "finagle/finagle-base-http",
         "finagle/finagle-core",
         "finagle/finagle-netty4",
