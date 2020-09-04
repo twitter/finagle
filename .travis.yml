@@ -32,6 +32,7 @@ env:
     - PROJECT=finagle-opencensus-tracing
     - PROJECT=finagle-partitioning
     - PROJECT=finagle-redis
+    - PROJECT=finagle-scribe
     - PROJECT=finagle-serversets
     - PROJECT=finagle-stats
     - PROJECT=finagle-stats-core
