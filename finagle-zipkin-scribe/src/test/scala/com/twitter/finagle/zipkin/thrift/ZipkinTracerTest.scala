@@ -3,9 +3,9 @@ package com.twitter.finagle.zipkin.thrift
 import com.twitter.app.Flags
 import com.twitter.finagle.zipkin.core.Sampler
 import com.twitter.finagle.zipkin.initialSampleRate
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ZipkinTracerTest extends FunSuite {
+class ZipkinTracerTest extends AnyFunSuite {
 
   test("sampling uses the static default sampling rate if not overridden") {
     val tracer = new ScribeZipkinTracer()

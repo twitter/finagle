@@ -295,6 +295,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleGrpcContext,
   finagleOpenCensusTracing,
   finagleInit,
+  finagleScribe,
   // Protocols
   finagleHttp,
   finagleBaseHttp,
@@ -487,7 +488,7 @@ lazy val finagleZipkinScribe = Project(
   ).settings(
     name := "finagle-zipkin-scribe",
     libraryDependencies ++= scroogeLibs
-  ).dependsOn(finagleCore, finagleThrift, finagleZipkinCore)
+  ).dependsOn(finagleCore, finagleScribe, finagleThrift, finagleZipkinCore)
 
 lazy val finagleException = Project(
   id = "finagle-exception",
@@ -561,6 +562,19 @@ lazy val finagleTunable = Project(
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleToggle)
+
+lazy val finagleScribe = Project(
+  id = "finagle-scribe",
+  base = file("finagle-scribe")
+).settings(
+    sharedSettings
+  ).settings(
+    name := "finagle-scribe",
+    libraryDependencies ++= Seq(
+      util("core")
+    ),
+    libraryDependencies ++= scroogeLibs
+  ).dependsOn(finagleCore, finagleThrift)
 
 // Protocol support
 

@@ -1,5 +1,5 @@
+# runtime only dependency
 scala_library(
-    sources = ["com/twitter/finagle/zipkin/thrift/ScribeZipkinTracer.scala"],
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-zipkin-scribe",
@@ -9,8 +9,6 @@ scala_library(
     scope = "forced",
     dependencies = [
         ":core",
-        "finagle/finagle-core/src/main",
-        "finagle/finagle-zipkin-core/src/main/scala",
         "finagle/finagle-zipkin-scribe/src/main/resources",
     ],
     exports = [
@@ -29,6 +27,7 @@ scala_library(
     dependencies = [
         "3rdparty/jvm/org/apache/thrift:libthrift",
         "finagle/finagle-core/src/main",
+        "finagle/finagle-scribe/src/main/scala/com/twitter/finagle/scribe",
         "finagle/finagle-thrift",
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-thrift/src/main/thrift:scribe",

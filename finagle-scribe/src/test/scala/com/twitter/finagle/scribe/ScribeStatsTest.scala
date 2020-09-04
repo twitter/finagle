@@ -1,11 +1,12 @@
-package com.twitter.finagle.zipkin.thrift
+package com.twitter.finagle.scribe
 
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.scribe.thriftscala.ResultCode
 import com.twitter.util.{Return, Throw}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ScribeStatsTest extends FunSuite {
+class ScribeStatsTest extends AnyFunSuite {
+
   test("records an unexpected ResultCode enum") {
     val sr = new InMemoryStatsReceiver()
     val stats = new ScribeStats(sr)

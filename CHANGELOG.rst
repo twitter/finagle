@@ -7,12 +7,18 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-scribe: Add `c.t.finagle.scribe.Publisher` for publishing messages to a
+  Scribe process. ``PHAB_ID=D539003``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 * finagle: Bump version of Jackson to 2.11.2. ``PHAB_ID=D538440``
 
-  20.8.1
+20.8.1
 ------
 
 New Features
@@ -34,7 +40,7 @@ Runtime Behavior Changes
   service status. ``PHAB_ID=D520598``
 
 * finagle-core: Only deposit into the RetryBudget after a request succeeds. 
-This should help mitigate retry storm behavior. ``PHAB_ID=D528880``
+  This should help mitigate retry storm behavior. ``PHAB_ID=D528880``
 
 * finagle-http: `c.t.f.http.filter.PayloadSizeFilter` no longer adds an annotation on each
   streaming chunk and instead aggregates the byte count and adds a single record on stream

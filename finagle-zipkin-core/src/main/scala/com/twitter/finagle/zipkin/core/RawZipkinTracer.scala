@@ -26,7 +26,8 @@ abstract class RawZipkinTracer(timer: Timer = DefaultTimer) extends Tracer {
   private[this] val spanMap: DeadlineSpanMap =
     new DeadlineSpanMap(sendSpans, 120.seconds, timer)
 
-  protected[core] def flush(): Future[Unit] = spanMap.flush()
+  /* exposed for testing */
+  protected[finagle] def flush(): Future[Unit] = spanMap.flush()
 
   /**
    * Always sample the request.
@@ -121,7 +122,7 @@ abstract class RawZipkinTracer(timer: Timer = DefaultTimer) extends Tracer {
         )
       case tracing.Annotation.BinaryAnnotation(key: String, value: String) =>
         binaryAnnotation(record, key, ByteBuffer.wrap(value.getBytes), thrift.AnnotationType.STRING)
-      case tracing.Annotation.BinaryAnnotation(key: String, value) => // Throw error?
+      case tracing.Annotation.BinaryAnnotation(key @ _, value @ _) => // Throw error?
       case tracing.Annotation.LocalAddr(ia: InetSocketAddress) =>
         setEndpoint(record, ia)
       case tracing.Annotation.ClientAddr(ia: InetSocketAddress) =>
