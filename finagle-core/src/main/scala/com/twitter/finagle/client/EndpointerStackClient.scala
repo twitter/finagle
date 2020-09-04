@@ -5,6 +5,7 @@ import com.twitter.finagle.filter.RequestLogger
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param._
 import com.twitter.finagle.stack.nilStack
+import com.twitter.finagle.stats.{Client, RoleConfiguredStatsReceiver}
 import com.twitter.finagle.util.Showable
 
 /**
@@ -134,9 +135,11 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
       }
     }
 
+    val clientSr = new RoleConfiguredStatsReceiver(stats.scope(clientLabel), Client)
+
     val clientParams = params +
       Label(clientLabel) +
-      Stats(stats.scope(clientLabel)) +
+      Stats(clientSr) +
       BindingFactory.Dest(dest)
 
     clientStack.make(clientParams)

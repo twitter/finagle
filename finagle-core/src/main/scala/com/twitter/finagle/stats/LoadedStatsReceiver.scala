@@ -52,10 +52,11 @@ private[finagle] object FinagleStatsReceiver extends StatsReceiverProxy {
  * are prefixed with the string "clnt" by default.
  */
 object ClientStatsReceiver extends StatsReceiverProxy {
-  @volatile protected var self: StatsReceiver = LoadedStatsReceiver.scope("clnt")
+  @volatile protected var self: StatsReceiver =
+    new RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope("clnt"), Client)
 
   def setRootScope(rootScope: String): Unit = {
-    self = LoadedStatsReceiver.scope(rootScope)
+    self = new RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope(rootScope), Client)
   }
 
   override def repr: ClientStatsReceiver.type = this
@@ -68,10 +69,11 @@ object ClientStatsReceiver extends StatsReceiverProxy {
  * are prefixed with the string "srv" by default.
  */
 object ServerStatsReceiver extends StatsReceiverProxy {
-  @volatile protected var self: StatsReceiver = LoadedStatsReceiver.scope("srv")
+  @volatile protected var self: StatsReceiver =
+    new RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope("srv"), Server)
 
   def setRootScope(rootScope: String): Unit = {
-    self = LoadedStatsReceiver.scope(rootScope)
+    self = new RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope(rootScope), Server)
   }
 
   override def repr: ServerStatsReceiver.type = this

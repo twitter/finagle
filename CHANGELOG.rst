@@ -24,6 +24,8 @@ Runtime Behavior Changes
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: Populate SourceRole field of Metric Metadata for client and server metrics.
+  ``PHAB_ID=D542596``
 * finagle-thriftmux: Add MethodBuilder specific APIs for ThriftMux partition aware client.
   ``PHAB_ID=D531900``
 

@@ -19,7 +19,12 @@ import com.twitter.finagle.ssl.client.{
   SslContextClientEngineFactory
 }
 import com.twitter.finagle.ssl.TrustCredentials
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{
+  NullStatsReceiver,
+  RoleConfiguredStatsReceiver,
+  StatsReceiver,
+  Client => ClientRole
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util
@@ -1121,7 +1126,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private[finagle] lazy val statsReceiver = {
     val Stats(sr) = params[Stats]
     val Label(label) = params[Label]
-    sr.scope(label)
+    new RoleConfiguredStatsReceiver(sr.scope(label), ClientRole)
   }
 
   /**
@@ -1233,7 +1238,8 @@ private[finagle] object ClientBuilderClient {
       val Stats(statsReceiver) = statsP
       val ExceptionStatsHandler(categorizer) = exceptionStatsHandlerP
 
-      val stats = new StatsFilter[Req, Rep](statsReceiver.scope("tries"), categorizer)
+      val stats =
+        new StatsFilter[Req, Rep](statsReceiver.scope("tries"), categorizer)
       stats.andThen(next)
     }
   }

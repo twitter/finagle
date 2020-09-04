@@ -5,6 +5,7 @@ import com.twitter.finagle.filter.RequestLogger
 import com.twitter.finagle.param._
 import com.twitter.finagle.{ClientConnection, ListeningServer, ServiceFactory, Stack}
 import com.twitter.finagle.stack.Endpoint
+import com.twitter.finagle.stats.{RoleConfiguredStatsReceiver, Server}
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{CloseAwaitably, Future, Time}
 import java.net.SocketAddress
@@ -53,8 +54,8 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       private[this] val serverLabel = ServerRegistry.nameOf(addr).getOrElse(label)
 
       private[this] val statsReceiver =
-        if (serverLabel.isEmpty) stats
-        else stats.scope(serverLabel)
+        if (serverLabel.isEmpty) new RoleConfiguredStatsReceiver(stats, Server)
+        else new RoleConfiguredStatsReceiver(stats.scope(serverLabel), Server)
 
       private[this] val serverParams = params +
         Label(serverLabel) +
