@@ -140,10 +140,10 @@ class TimeoutFilterTest extends FunSuite with Matchers with MockitoSugar {
     }
   }
 
-  private def verifyFilterAddedOrNot(timoutModule: Stackable[ServiceFactory[Int, Int]]) = {
+  private def verifyFilterAddedOrNot(timeoutModule: Stackable[ServiceFactory[Int, Int]]) = {
     val svc = Service.mk { i: Int => Future.value(i) }
     val svcFactory = ServiceFactory.const(svc)
-    val stack = timoutModule.toStack(Stack.leaf(Stack.Role("test"), svcFactory))
+    val stack = timeoutModule.toStack(Stack.leaf(Stack.Role("test"), svcFactory))
 
     def assertNoTimeoutFilter(duration: Duration): Unit = {
       val params = Stack.Params.empty + TimeoutFilter.Param(duration)

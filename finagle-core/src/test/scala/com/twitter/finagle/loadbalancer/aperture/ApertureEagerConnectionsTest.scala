@@ -15,7 +15,7 @@ class ApertureEagerConnectionsTest extends FunSuite with Eventually {
     }
   }
 
-  test("limits the maximum number of conurrent connections") {
+  test("limits the maximum number of concurrent connections") {
     val endpoints = 0
       .until(ApertureEagerConnections.MaxConcurrentConnections + 2)
       .map(i => new SampleConnection)

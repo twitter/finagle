@@ -22,7 +22,7 @@ class AnnouncerTest extends FunSuite {
   }
 
   test("reject unknown announcers") {
-    assert(Await.ready(Announcer.announce(addr, "unkown!foobar")).poll.get.isThrow)
+    assert(Await.ready(Announcer.announce(addr, "unknown!foobar")).poll.get.isThrow)
   }
 
   test("resolve ServiceLoaded announcers") {

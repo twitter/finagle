@@ -9,7 +9,7 @@ import com.twitter.util.{Await, Future}
 
 class OptionallyServableFilterTest extends FunSuite with MockitoSugar {
 
-  class OptionnallyServableFilterHelper {
+  class OptionallyServableFilterHelper {
     val underlying = mock[Service[String, String]]
     when(underlying.close(any)) thenReturn Future.Done
 
@@ -20,7 +20,7 @@ class OptionallyServableFilterTest extends FunSuite with MockitoSugar {
   }
 
   test("OptionallyServableFilter should passes through when fn returns true") {
-    val h = new OptionnallyServableFilterHelper
+    val h = new OptionallyServableFilterHelper
     import h._
 
     when(fn.apply(request)) thenReturn Future.value(true)
@@ -31,7 +31,7 @@ class OptionallyServableFilterTest extends FunSuite with MockitoSugar {
   }
 
   test("OptionallyServableFilter should throws NotServableException when fn returns false") {
-    val h = new OptionnallyServableFilterHelper
+    val h = new OptionallyServableFilterHelper
     import h._
 
     when(fn.apply(request)) thenReturn Future.value(false)
