@@ -29,6 +29,8 @@ New Features
 * finagle-thriftmux: Add MethodBuilder specific APIs for ThriftMux partition aware client.
   ``PHAB_ID=D531900``
 
+* finagle-netty4: Upgrade to Netty 4.1.51.Final and TcNative 2.0.34.Final. ``PHAB_ID=D536904``
+
 20.8.0
 ------
 

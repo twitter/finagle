@@ -3,6 +3,7 @@ package com.twitter.finagle.util
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Stopwatch, Time}
 import org.scalatest.FunSuite
+import org.scalatest.Matchers.convertNumericToPlusOrMinusWrapper
 
 class LossyEmaTest extends FunSuite {
 
@@ -44,23 +45,24 @@ class LossyEmaTest extends FunSuite {
 
   test("update over durations greater than window") {
     Time.withCurrentTimeFrozen { tc =>
+      val epsilon = 0.000000000000025
       val value = 100.0
       val ema = new LossyEma(300.millis.inMillis, Stopwatch.timeMillis, value)
 
       tc.advance(100.millis)
-      assert(ema.update(0.0) == 71.65313105737893)
+      assert(ema.update(0.0) === 71.65313105737893 +- epsilon)
 
       tc.advance(100.millis)
-      assert(ema.update(0.0) == 51.34171190325921)
+      assert(ema.update(0.0) === 51.34171190325921 +- epsilon)
 
       tc.advance(100.millis)
-      assert(ema.update(0.0) == 36.787944117144235)
+      assert(ema.update(0.0) === 36.787944117144235 +- epsilon)
 
       tc.advance(100.millis)
-      assert(ema.update(0.0) == 26.35971381157268)
+      assert(ema.update(0.0) === 26.35971381157268 +- epsilon)
 
       tc.advance(100.millis)
-      assert(ema.update(0.0) == 18.887560283756187)
+      assert(ema.update(0.0) === 18.887560283756187 +- epsilon)
     }
   }
 
