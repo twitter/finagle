@@ -150,7 +150,7 @@ final case class TraceId(
     _sampled: Option[Boolean],
     flags: Flags,
     traceIdHigh: Option[SpanId]
-  ) = this(_traceId, _parentId, spanId, _sampled: Option[Boolean], flags: Flags, None, false)
+  ) = this(_traceId, _parentId, spanId, _sampled: Option[Boolean], flags: Flags, traceIdHigh, false)
 
   def this(
     _traceId: Option[SpanId],

@@ -18,6 +18,12 @@ Runtime Behavior Changes
 
 * finagle: Bump version of Jackson to 2.11.2. ``PHAB_ID=D538440``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-core: The TraceId alternative constructor now forwards the `traceIdHigh` parameter to
+  the primary constructor. ``PHAB_ID=D546612``
+
 20.8.1
 ------
 
