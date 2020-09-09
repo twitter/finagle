@@ -1,27 +1,8 @@
-# runtime only dependency
 scala_library(
-    provides = scala_artifact(
-        org = "com.twitter",
-        name = "finagle-zipkin-scribe",
-        repo = artifactory,
-    ),
-    # Exposes a service-loaded class.
-    scope = "forced",
-    dependencies = [
-        ":core",
-        "finagle/finagle-zipkin-scribe/src/main/resources",
-    ],
-    exports = [
-        ":core",
-    ],
-)
-
-scala_library(
-    name = "core",
     sources = ["**/*.scala"],
     provides = scala_artifact(
         org = "com.twitter",
-        name = "finagle-zipkin-scribe-core",
+        name = "finagle-zipkin-scribe",
         repo = artifactory,
     ),
     dependencies = [
