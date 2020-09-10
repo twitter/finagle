@@ -1,55 +1,50 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.thrift.{Protocols, ThriftClientRequest}
+import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.{
   RequestMerger,
   ResponseMerger
 }
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
 import com.twitter.io.Buf
-import com.twitter.scrooge.{ThriftMethodIface, ThriftStruct}
+import com.twitter.scrooge.ThriftStructIface
+import com.twitter.test.thriftscala.B
 import com.twitter.util.{Await, Awaitable, Duration, Return}
-import org.apache.thrift.protocol.{TList, TProtocol, TType}
-import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
+
+import org.apache.thrift.transport.TMemoryInputTransport
+import com.twitter.finagle.thrift.Protocols
 
 trait ThriftPartitioningTest extends MockitoSugar {
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)
 
-  case class ARequest(alist: Seq[Int], serialized: Option[Array[Byte]] = None)
-      extends ThriftStruct {
-    def write(oprot: TProtocol): Unit = {
-      oprot.writeListBegin(new TList(TType.I32, alist.size))
-      alist.foreach { elem => oprot.writeI32(elem) }
-      oprot.writeListEnd()
+  val AMethod = B.MergeableAdd
+  val aResponseMerger: ResponseMerger[Int] = (success, _) => Return(success.sum)
+  val aRequestMerger: RequestMerger[B.MergeableAdd.Args] =
+    (aRequests: Seq[B.MergeableAdd.Args]) => B.MergeableAdd.Args(aRequests.flatten(_.alist))
+
+  val thriftMarshallable: ReqRepMarshallable[ThriftStructIface, Int] =
+    new ReqRepMarshallable[ThriftStructIface, Int] {
+      def framePartitionedRequest(
+        thriftClientRequest: ThriftClientRequest,
+        original: ThriftStructIface
+      ): ThriftStructIface = {
+        val transport = new TMemoryInputTransport(thriftClientRequest.message)
+        val protoFactory = Protocols.binaryFactory()
+        val prot = protoFactory.getProtocol(transport)
+        prot.readMessageBegin()
+        B.MergeableAdd.Args.decode(prot)
+      }
+
+      def isOneway(original: ThriftStructIface): Boolean = false
+
+      def fromResponseToBytes(rep: Int): Array[Byte] = {
+        Buf.ByteArray.Owned.extract(Buf.U32BE(rep))
+      }
+
+      def emptyResponse: Int = 0
     }
-  }
-
-  val AMethod = mock[ThriftMethodIface]
-  when(AMethod.name).thenReturn("A")
-  val aResponseMerger: ResponseMerger[Int] = (success, _) => Return(success.head)
-  val aRequestMerger: RequestMerger[ARequest] = (aRequests: Seq[ARequest]) =>
-    ARequest(aRequests.flatten(_.alist))
-
-  val thriftMarshallable = new ReqRepMarshallable[ARequest, Int] {
-    def framePartitionedRequest(rawRequest: ThriftClientRequest, original: ARequest): ARequest =
-      ARequest(original.alist, Some(rawRequest.message))
-    def isOneway(original: ARequest): Boolean = false
-    def fromResponseToBytes(rep: Int): Array[Byte] = Buf.ByteArray.Owned.extract(Buf.U32BE(rep))
-    val emptyResponse: Int = Int.MinValue
-  }
-
-  def deserialize(resBytes: Array[Byte]): Seq[Int] = {
-    val iprot = Protocols
-      .binaryFactory().getProtocol(new org.apache.thrift.transport.TMemoryInputTransport(resBytes))
-    iprot.readMessageBegin()
-    val tlist = iprot.readListBegin()
-    val result: Seq[Int] = (0 until tlist.size).map { _ => iprot.readI32() }
-    iprot.readListEnd()
-    iprot.readMessageEnd()
-    result
-  }
 }

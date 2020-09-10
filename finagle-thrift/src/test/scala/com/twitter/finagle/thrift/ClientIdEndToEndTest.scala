@@ -5,6 +5,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.test._
 import com.twitter.util.{Await, Future}
+import java.util.{List => JList}
 import org.apache.thrift.protocol.TProtocolFactory
 import org.scalatest.FunSuite
 import scala.reflect.ClassTag
@@ -14,17 +15,19 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
   def ifaceManifest = implicitly[ClassTag[B.ServiceIface]]
 
   val processor = new B.ServiceIface {
-    def add(a: Int, b: Int) = Future.exception(new AnException)
-    def add_one(a: Int, b: Int) = Future.Void
-    def multiply(a: Int, b: Int) = Future { a * b }
+    def add(a: Int, b: Int): Future[Integer] = Future.exception(new AnException)
+    def add_one(a: Int, b: Int): Future[Void] = Future.Void
+    def multiply(a: Int, b: Int): Future[Integer] = Future { a * b }
     // Re-purpose `complex_return` to return the serversize ClientId.
-    def complex_return(someString: String) = Future {
+    def complex_return(someString: String): Future[SomeStruct] = Future {
       val clientIdStr = ClientId.current.map(_.name).getOrElse("")
       new SomeStruct(123, clientIdStr)
     }
-    def someway() = Future.Void
-    def show_me_your_dtab() = Future.value("")
-    def show_me_your_dtab_size() = Future.value(0)
+    def someway(): Future[Void] = Future.Void
+    def show_me_your_dtab(): Future[String] = Future.value("")
+    def show_me_your_dtab_size(): Future[Integer] = Future.value(0)
+
+    def mergeable_add(alist: JList[Integer]): Future[Integer] = Future.value(0)
   }
 
   val ifaceToService = new B.Service(_: Iface, _: RichServerParam)

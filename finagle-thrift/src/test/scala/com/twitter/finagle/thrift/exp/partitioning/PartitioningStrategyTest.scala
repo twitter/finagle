@@ -7,27 +7,22 @@ import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.{
   ResponseMerger,
   ResponseMergerRegistry
 }
-import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
-import com.twitter.scrooge.{ThriftMethodIface, ThriftStructIface}
+import com.twitter.scrooge.ThriftStructIface
+import com.twitter.test.thriftscala.{A, B}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Return, Throw}
 import org.apache.thrift.protocol.TProtocol
-import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatestplus.mockito.MockitoSugar
 
-class PartitioningStrategyTest extends FunSuite with MockitoSugar {
+class PartitioningStrategyTest extends FunSuite {
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)
 
-  val AMethod = mock[ThriftMethodIface]
-  when(AMethod.name).thenReturn("A")
+  val AMethod = B.Add
 
-  val BMethod = mock[ThriftMethodIface]
-  when(BMethod.name).thenReturn("B")
+  val BMethod = B.AddOne
 
-  val CMethod = mock[ThriftMethodIface]
-  when(CMethod.name).thenReturn("C")
+  val CMethod = A.Multiply
 
   case class ARequest(a: Int) extends ThriftStructIface {
     def write(oprot: TProtocol): Unit = ()
@@ -76,17 +71,6 @@ class PartitioningStrategyTest extends FunSuite with MockitoSugar {
     val result = hashingStrategy.getHashingKeyAndRequest
       .applyOrElse(CRequest(1), ClientHashingStrategy.defaultHashingKeyAndRequest)
     assert(result == Map(None -> CRequest(1)))
-  }
-
-  test("unset endpoints custom strategy throw PartitioningStrategyException by default ") {
-    val customStrategy = new ClientCustomStrategy({
-      case a: ARequest => Future.value(Map(1 -> a))
-      case b: BRequest => Future.value(Map(2 -> b))
-    })
-
-    val result = customStrategy.getPartitionIdAndRequest
-      .applyOrElse(CRequest(1), ClientCustomStrategy.defaultPartitionIdAndRequest)
-    intercept[PartitioningStrategyException](await(result))
   }
 
   test("methodBuilder hashing strategy") {

@@ -14,9 +14,8 @@ import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.Par
 import com.twitter.finagle.thrift.{ThriftRichClient, ThriftRichServer}
 import com.twitter.finagle.{Address, ListeningServer, Name, Stack}
 import com.twitter.scrooge.ThriftStructIface
-import com.twitter.util.{Await, Awaitable, Duration, Future, Return, Throw}
+import com.twitter.util.{Activity, Await, Awaitable, Duration, Future, Return, Throw, Var}
 import java.net.{InetAddress, InetSocketAddress}
-import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
 
 abstract class PartitionAwareClientEndToEndTest extends FunSuite {
@@ -210,7 +209,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
         }
       }
 
-      val customPartitioningStrategy = new ClientCustomStrategy({
+      val customPartitioningStrategy = ClientCustomStrategy.noResharding({
         case getBox: GetBox.Args => Future.value(Map(lookUp(getBox.addrInfo) -> getBox))
         case getBoxes: GetBoxes.Args =>
           val partitionIdAndRequest: Map[Int, ThriftStructIface] =
@@ -236,7 +235,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
   }
 
   class CustomPartitioningCtx(lookUp: AddrInfo => Int) extends Ctx {
-    val customPartitioningStrategy = new ClientCustomStrategy(
+    val customPartitioningStrategy = ClientCustomStrategy.noResharding(
       {
         case getBox: GetBox.Args => Future.value(Map(lookUp(getBox.addrInfo) -> getBox))
         case getBoxes: GetBoxes.Args =>
@@ -288,7 +287,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
   }
 
   test("with errored custom strategy") {
-    val erroredCustomPartitioningStrategy = new ClientCustomStrategy({
+    val erroredCustomPartitioningStrategy = ClientCustomStrategy.noResharding({
       case getBox: GetBox.Args => throw new Exception("something wrong")
     })
 
@@ -333,6 +332,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
         case "one" | "zero" => 2
       }
     }
+
     new CustomPartitioningCtx(lookUp) {
       val client = clientImpl().withPartitioning
         .strategy(customPartitioningStrategy)
@@ -344,7 +344,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
     }
   }
 
-  test("with custom strategy, partitioning strategy dynamicalky changing") {
+  test("with custom strategy, partitioning strategy dynamically changing") {
     new Ctx {
       val sr0 = new InMemoryStatsReceiver
       val sr1 = new InMemoryStatsReceiver
@@ -362,16 +362,22 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
           }
         }
 
-      val dynamic = new AtomicInteger(0)
-      val dynamicStrategy = new ClientCustomStrategy(
-        {
-          case sendBox: SendBox.Args =>
-            val fakePartitionId = dynamic.getAndIncrement()
-            Future.value(Map(fakePartitionId -> sendBox))
+      val dynamic = Var(0)
+
+      val dynamicStrategy = ClientCustomStrategy.resharding[Int](
+        { fakePartitionId: Int =>
+          {
+            case sendBox: SendBox.Args =>
+              Future.value(Map(fakePartitionId -> sendBox))
+          }: PartialFunction[ThriftStructIface, Future[Map[Int, ThriftStructIface]]]
         },
-        { instance: Int =>
-          fixedInetAddresses.indexWhere(_.getPort == instance)
-        }
+        {
+          _: Int =>
+            { instance: Int =>
+              fixedInetAddresses.indexWhere(_.getPort == instance)
+            }
+        },
+        Activity(dynamic.map(Activity.Ok(_)))
       )
 
       val client = clientImpl().withPartitioning
@@ -379,7 +385,9 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 
       await(client.sendBox(Box(addrInfo0, "")))
+      dynamic() += 1
       await(client.sendBox(Box(addrInfo0, "")))
+      dynamic() += 1
       val server0Request =
         if (sr0.counters.isDefinedAt(Seq("requests"))) sr0.counters(Seq("requests"))
         else sr0.counters(Seq("thrift", "requests"))

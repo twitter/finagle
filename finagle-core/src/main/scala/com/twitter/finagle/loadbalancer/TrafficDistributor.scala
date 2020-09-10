@@ -77,12 +77,12 @@ private[finagle] object TrafficDistributor {
    */
   private[finagle] def safelyScanLeft[T, U](
     init: U,
-    stream: Event[Activity.State[T]]
+    stream: Activity[T]
   )(
     f: (U, T) => U
-  ): Event[Activity.State[U]] = {
+  ): Activity[U] = {
     val initState: Activity.State[U] = Activity.Ok(init)
-    stream.foldLeft(initState) {
+    Activity(stream.states.foldLeft(initState) {
       case (Activity.Pending, Activity.Ok(update)) => Activity.Ok(f(init, update))
       case (Activity.Failed(_), Activity.Ok(update)) => Activity.Ok(f(init, update))
       case (Activity.Ok(state), Activity.Ok(update)) => Activity.Ok(f(state, update))
@@ -90,7 +90,7 @@ private[finagle] object TrafficDistributor {
       case (stale @ Activity.Ok(state), Activity.Pending) if init != state => stale
       case (_, failed @ Activity.Failed(_)) => failed
       case (_, Activity.Pending) => Activity.Pending
-    }
+    })
   }
 
   /**
@@ -252,8 +252,8 @@ private class TrafficDistributor[Req, Rep](
    * the [[Address]] does not have a weight, a default weight of 1.0 is used.
    */
   private[this] def weightEndpoints(
-    addrs: Event[Activity.State[Set[Address]]]
-  ): Event[Activity.State[Set[WeightedFactory[Req, Rep]]]] = {
+    addrs: Activity[Set[Address]]
+  ): Activity[Set[WeightedFactory[Req, Rep]]] = {
     val init = Map.empty[Address, WeightedFactory[Req, Rep]]
     safelyScanLeft(init, addrs) {
       case (active, addrs) =>
@@ -291,11 +291,7 @@ private class TrafficDistributor[Req, Rep](
               case _ => cache
             }
         }
-    }.map {
-      case Activity.Ok(cache) => Activity.Ok(cache.values.toSet)
-      case Activity.Pending => Activity.Pending
-      case failed @ Activity.Failed(_) => failed
-    }
+    }.map(_.values.toSet)
   }
 
   /**
@@ -303,8 +299,8 @@ private class TrafficDistributor[Req, Rep](
    * Because balancer instances are stateful, they need to be cached across updates.
    */
   private[this] def partition(
-    endpoints: Event[Activity.State[Set[WeightedFactory[Req, Rep]]]]
-  ): Event[Activity.State[Iterable[WeightClass[Req, Rep]]]] = {
+    endpoints: Activity[Set[WeightedFactory[Req, Rep]]]
+  ): Activity[Iterable[WeightClass[Req, Rep]]] = {
     // Cache entries are balancer instances together with their backing collection
     // which is updatable. The entries are keyed by weight class.
     val init = Map.empty[Double, CachedBalancer[Req, Rep]]
@@ -355,18 +351,15 @@ private class TrafficDistributor[Req, Rep](
         val bal = newBalancer(Activity(endpoints))
         Map(1.0 -> CachedBalancer(bal, endpoints, 0))
       }
-    }.map {
-      case Activity.Ok(cache) =>
-        Activity.Ok(cache.map {
-          case (weight, CachedBalancer(bal, endpoints, size)) =>
-            WeightClass(bal, endpoints, weight, size)
-        })
-      case Activity.Pending => Activity.Pending
-      case failed @ Activity.Failed(_) => failed
+    }.map { cache =>
+      cache.map {
+        case (weight, CachedBalancer(bal, endpoints, size)) =>
+          WeightClass(bal, endpoints, weight, size)
+      }
     }
   }
 
-  private[this] val weightClasses = partition(weightEndpoints(dest.states))
+  private[this] val weightClasses = partition(weightEndpoints(dest))
   private[this] val pending = new Promise[ServiceFactory[Req, Rep]]
   private[this] val init: ServiceFactory[Req, Rep] = new DelayedFactory(pending)
 
@@ -394,7 +387,7 @@ private class TrafficDistributor[Req, Rep](
   // Translate the stream of weightClasses into a stream of underlying
   // ServiceFactories that can service requests.
   private[this] val underlying: Event[ServiceFactory[Req, Rep]] =
-    weightClasses.foldLeft(init) {
+    weightClasses.states.foldLeft(init) {
       case (_, Activity.Ok(wcs)) =>
         val dist = new Distributor(wcs, busyWeightClasses, rng)
         updateGauges(wcs)

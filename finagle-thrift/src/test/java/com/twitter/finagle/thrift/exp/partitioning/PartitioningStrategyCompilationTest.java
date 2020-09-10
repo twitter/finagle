@@ -28,11 +28,10 @@ public class PartitioningStrategyCompilationTest {
   @Test
   public void testCustomStrategyCompiles() {
     Map<Integer, ThriftStructIface> myMap = new HashMap<>();
-    ClientCustomStrategy myCustomStrat =
-      ClientCustomStrategy.create(Function.func((ThriftStructIface iface) -> Future.value(myMap)));
-    ClientCustomStrategy myOtherCustomStrat =
-      ClientCustomStrategy.create(Function.func((ThriftStructIface iface) -> Future.value(myMap)), num -> num * 2);
-    int whichInstance = myCustomStrat.getLogicalPartition(0);
+    CustomPartitioningStrategy myCustomStrat =
+      ClientCustomStrategies.noResharding(Function.func((ThriftStructIface iface) -> Future.value(myMap)));
+    CustomPartitioningStrategy myOtherCustomStrat =
+      ClientCustomStrategies.noResharding(Function.func((ThriftStructIface iface) -> Future.value(myMap)), num -> num * 2);
     PartitioningStrategy myStrat = myCustomStrat;
   }
 

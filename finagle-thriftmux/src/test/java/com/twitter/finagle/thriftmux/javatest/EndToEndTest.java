@@ -43,8 +43,9 @@ import com.twitter.finagle.partitioning.zk.ZkMetadata;
 import com.twitter.finagle.thrift.ClientId;
 import com.twitter.finagle.thrift.MethodMetadata;
 import com.twitter.finagle.thrift.RichServerParam;
-import com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy;
+import com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies;
 import com.twitter.finagle.thrift.exp.partitioning.ClientHashingStrategy;
+import com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy;
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy;
 import com.twitter.finagle.thriftmux.thriftjava.FanoutTestService;
 import com.twitter.finagle.thriftmux.thriftjava.TestService;
@@ -477,14 +478,15 @@ public class EndToEndTest {
   }
 
   private PartitioningStrategy getCustomStrategy() {
-    ClientCustomStrategy strategy = ClientCustomStrategy.create(com.twitter.util.Function.func(
-      (ThriftStructIface struct) -> {
-        Map<Integer, ThriftStructIface> map = new HashMap<>();
-        for (String item : ((FanoutTestService.query_args) struct).x) {
-          map.put(item.length() % 2, new FanoutTestService.query_args(Arrays.asList(item)));
-        }
-        return Future.value(map);
-      }));
+    CustomPartitioningStrategy strategy =
+      ClientCustomStrategies.noResharding(com.twitter.util.Function.func(
+        (ThriftStructIface struct) -> {
+          Map<Integer, ThriftStructIface> map = new HashMap<>();
+          for (String item : ((FanoutTestService.query_args) struct).x) {
+            map.put(item.length() % 2, new FanoutTestService.query_args(Arrays.asList(item)));
+          }
+          return Future.value(map);
+        }));
     strategy.responseMergerRegistry().addResponseMerger(
       new FanoutTestService.query(),
       flatListResponse

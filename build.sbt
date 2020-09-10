@@ -14,14 +14,7 @@ val useNettySnapshot: Boolean = sys.env.get("FINAGLE_USE_NETTY_4_SNAPSHOT") matc
   case _ => false
 }
 
-// we only want to allow for resolving dependencies from the snapshots repo IF we're using a
-// Netty SNAPSHOT build.
-val extraSnapshotResolvers =
-  if (useNettySnapshot) {
-    Seq(Resolver.sonatypeRepo("snapshots"))
-  } else {
-    Seq.empty
-  }
+val extraSnapshotResolvers = Seq(Resolver.sonatypeRepo("snapshots"))
 
 val netty4Version: String =
   if (useNettySnapshot) {

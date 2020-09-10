@@ -25,6 +25,7 @@ import com.twitter.test._
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import java.util.{List => JList}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolFactory}
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -48,24 +49,26 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   def ifaceManifest = implicitly[ClassTag[B.ServiceIface]]
 
   class BServiceImpl extends B.ServiceIface {
-    def add(a: Int, b: Int) = Future.exception(new AnException)
-    def add_one(a: Int, b: Int) = Future.Void
-    def multiply(a: Int, b: Int) = Future { a * b }
-    def complex_return(someString: String) = Future {
+    def add(a: Int, b: Int): Future[Integer] = Future.exception(new AnException)
+    def add_one(a: Int, b: Int): Future[Void] = Future.Void
+    def multiply(a: Int, b: Int): Future[Integer] = Future { a * b }
+    def complex_return(someString: String): Future[SomeStruct] = Future {
       Trace.record("hey it's me!")
       new SomeStruct(123, Trace.id.parentId.toString)
     }
-    def someway() = Future.Void
-    def show_me_your_dtab() = Future {
+    def someway(): Future[Void] = Future.Void
+    def show_me_your_dtab(): Future[String] = Future {
       val stringer = new StringWriter
       val printer = new PrintWriter(stringer)
       Dtab.local.print(printer)
       stringer.toString
     }
 
-    def show_me_your_dtab_size() = Future {
+    def show_me_your_dtab_size(): Future[Integer] = Future {
       Dtab.local.length
     }
+
+    override def mergeable_add(alist: JList[Integer]): Future[Integer] = Future.value(0)
   }
 
   val processor = new BServiceImpl()

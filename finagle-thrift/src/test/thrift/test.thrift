@@ -22,6 +22,7 @@ service B extends A {
   i32 add(1: i32 a, 2: i32 b) throws (1: AnException ae);
   void add_one(1: i32 a, 2: i32 b) throws (1:AnException ae);
   SomeStruct complex_return(1: string some_string);
+  i32 mergeable_add(1: list<i32> alist);
 
   oneway void someway();
   

@@ -1,14 +1,17 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
+import com.twitter.finagle.partitioning.PartitionNodeManager
+import com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy._
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.{Address, ServiceFactory, Stack}
 import com.twitter.scrooge.{ThriftMethodIface, ThriftStructIface}
-import com.twitter.util.{Future, Try}
+import com.twitter.util.{Activity, Future, Try}
 import java.lang.{Integer => JInteger}
-import java.util.function.{BiFunction, Function => JFunction, IntUnaryOperator}
-import java.util.{List => JList, Map => JMap}
-import scala.collection.mutable
+import java.util.function.{BiFunction, IntUnaryOperator, Function => JFunction}
+import java.util.{List => JList, Map => JMap, Set => JSet}
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object PartitioningStrategy {
 
@@ -164,21 +167,18 @@ sealed trait PartitioningStrategy
 sealed trait HashingPartitioningStrategy extends PartitioningStrategy
 
 sealed trait CustomPartitioningStrategy extends PartitioningStrategy {
+  private[finagle] def newNodeManager[Req, Rep](
+    underlying: Stack[ServiceFactory[Req, Rep]],
+    params: Stack.Params
+  ): PartitionNodeManager[Req, Rep, _, ClientCustomStrategy.ToPartitionedMap]
 
   /**
-   * Gets the logical partition identifier from a host identifier, host identifiers are derived
-   * from [[ZkMetadata]] shardId. Indicates which logical partition a physical host belongs to,
-   * multiple hosts can belong to the same partition, for example:
-   * {{{
-   *  val getLogicalPartition: Int => Int = {
-   *    case a if Range(0, 10).contains(a) => 0
-   *    case b if Range(10, 20).contains(b) => 1
-   *    case c if Range(20, 30).contains(c) => 2
-   *    case _ => throw ...
-   *  }
-   * }}}
+   * A ResponseMergerRegistry implemented by client to supply [[ResponseMerger]]s
+   * for message fan-out cases.
+   *
+   * @see [[ResponseMerger]]
    */
-  def getLogicalPartition(instance: Int): Int
+  val responseMergerRegistry: ResponseMergerRegistry = new ResponseMergerRegistry()
 }
 
 private[finagle] object Disabled extends PartitioningStrategy
@@ -278,34 +278,217 @@ object ClientCustomStrategy {
   type ToPartitionedMap = PartialFunction[ThriftStructIface, Future[Map[Int, ThriftStructIface]]]
 
   /**
-   * The java-friendly way to create a [[ClientCustomStrategy]].
-   * Scala users should construct a [[ClientCustomStrategy]] directly.
+   * Constructs a [[ClientCustomStrategy]] that does not reshard.
    *
-   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   * This is appropriate for simple custom strategies where you never need to
+   * change which shard a given request would go to, and you neither add nor
+   * remove shards.
+   *
+   * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
+   *
+   * @param getPartitionIdAndRequest A PartialFunction implemented by client that
+   *        provides the partitioning logic on a request. It takes a Thrift object
+   *        request, and returns Future Map of partition ids to sub-requests. If
+   *        we don't need to fan-out, it should return one element: partition id
+   *        to the original request.  This PartialFunction can take multiple
+   *        Thrift request types of one Thrift service (different method endpoints
+   *        of one service).  In this context, the returned partition id is also
+   *        the shard id.  Each instance is its own partition.
    */
-  def create(
-    toPartitionedMap: PartialFunction[
-      ThriftStructIface,
-      Future[JMap[JInteger, ThriftStructIface]]
-    ]
-  ): ClientCustomStrategy = new ClientCustomStrategy(
-    toPartitionedMap.andThen(_.map(_.asScala.toMap.map { case (k, v) => (k.toInt, v) })))
+  def noResharding(
+    getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap
+  ): CustomPartitioningStrategy =
+    noResharding(getPartitionIdAndRequest, identity[Int])
 
   /**
-   * The java-friendly way to create a [[ClientCustomStrategy]].
-   * Scala users should construct a [[ClientCustomStrategy]] directly.
+   * Constructs a [[ClientCustomStrategy]] that does not reshard.
    *
-   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   * This is appropriate for simple custom strategies where you never need to
+   * change which shard a given request would go to, and you neither add nor
+   * remove shards.
+   *
+   * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
+   *
+   * @param getPartitionIdAndRequest A PartialFunction implemented by client that
+   *        provides the partitioning logic on a request. It takes a Thrift object
+   *        request, and returns Future Map of partition ids to sub-requests. If
+   *        we don't need to fan-out, it should return one element: partition id
+   *        to the original request.  This PartialFunction can take multiple
+   *        Thrift request types of one Thrift service (different method endpoints
+   *        of one service).
+   * @param getLogicalPartitionId Gets the logical partition identifier from a host
+   *        identifier, host identifiers are derived from [[ZkMetadata]]
+   *        shardId. Indicates which logical partition a physical host belongs to,
+   *        multiple hosts can belong to the same partition, for example:
+   *        {{{
+   *          {
+   *            case a if Range(0, 10).contains(a) => 0
+   *            case b if Range(10, 20).contains(b) => 1
+   *            case c if Range(20, 30).contains(c) => 2
+   *            case _ => throw ...
+   *          }
+   *        }}}
    */
-  def create(
-    toPartitionedMap: PartialFunction[
-      ThriftStructIface,
-      Future[JMap[JInteger, ThriftStructIface]]
-    ],
-    logicalPartitionFn: IntUnaryOperator
-  ): ClientCustomStrategy = new ClientCustomStrategy(
-    toPartitionedMap.andThen(_.map(_.asScala.toMap.map { case (k, v) => (k.toInt, v) })),
-    logicalPartitionFn.applyAsInt _)
+  def noResharding(
+    getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap,
+    getLogicalPartitionId: Int => Int
+  ): CustomPartitioningStrategy =
+    new ClientCustomStrategy[Unit](
+      _ => getPartitionIdAndRequest,
+      _ => getLogicalPartitionId,
+      Activity.value(()))
+
+  /**
+   * Constructs a [[ClientCustomStrategy]] that reshards based on the remote cluster state.
+   *
+   * This is appropriate for simple custom strategies where you only need to
+   * know information about the remote cluster in order to reshard. For example,
+   * if you want to be able to add or remove capacity safely.
+   *
+   * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
+   *
+   * @param getPartitionIdAndRequestFn A function that given the current state of the
+   *        remote cluster, returns a function that gets the logical partition
+   *        identifier from a host identifier, host identifiers are derived from
+   *        [[ZkMetadata]] shardId. Indicates which logical partition a physical
+   *        host belongs to, multiple hosts can belong to the same partition,
+   *        for example:
+   *        {{{
+   *          {
+   *            case a if Range(0, 10).contains(a) => 0
+   *            case b if Range(10, 20).contains(b) => 1
+   *            case c if Range(20, 30).contains(c) => 2
+   *            case _ => throw ...
+   *          }
+   *        }}}
+   *        Note that this function must be pure (ie referentially transparent).
+   *        It cannot change based on anything other than the state of the
+   *        remote cluster it is provided with, or else it will malfunction.
+   */
+  def clusterResharding(
+    getPartitionIdAndRequestFn: Set[Address] => ClientCustomStrategy.ToPartitionedMap
+  ): CustomPartitioningStrategy =
+    clusterResharding(getPartitionIdAndRequestFn, _ => identity[Int])
+
+  /**
+   * Constructs a [[ClientCustomStrategy]] that reshards based on the remote cluster state.
+   *
+   * This is appropriate for simple custom strategies where you only need to
+   * know information about the remote cluster in order to reshard. For example,
+   * if you want to be able to add or remove capacity safely.
+   *
+   * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
+   *
+   * @param getPartitionIdAndRequestFn A function that given the current state of
+   *        the remote cluster, returns a PartialFunction implemented by client
+   *        that provides the partitioning logic on a request. It takes a Thrift
+   *        object request, and returns Future Map of partition ids to
+   *        sub-requests. If we don't need to fan-out, it should return one
+   *        element: partition id to the original request.  This PartialFunction
+   *        can take multiple Thrift request types of one Thrift service
+   *        (different method endpoints of one service).  Note that this function
+   *        must be pure (ie referentially transparent).  It cannot change
+   *        based on anything other than the state of the remote cluster it is
+   *        provided with, or else it will malfunction.
+   * @param getLogicalPartitionIdFn A function that given the current state of the
+   *        remote cluster, returns a function that gets the logical partition
+   *        identifier from a host identifier, host identifiers are derived from
+   *        [[ZkMetadata]] shardId. Indicates which logical partition a physical
+   *        host belongs to, multiple hosts can belong to the same partition,
+   *        for example:
+   *        {{{
+   *          {
+   *            case a if Range(0, 10).contains(a) => 0
+   *            case b if Range(10, 20).contains(b) => 1
+   *            case c if Range(20, 30).contains(c) => 2
+   *            case _ => throw ...
+   *          }
+   *        }}}
+   *        Note that this function must be pure (ie referentially transparent).
+   *        It cannot change based on anything other than the state of the
+   *        remote cluster it is provided with, or else it will malfunction.
+   */
+  def clusterResharding(
+    getPartitionIdAndRequestFn: Set[Address] => ClientCustomStrategy.ToPartitionedMap,
+    getLogicalPartitionIdFn: Set[Address] => Int => Int
+  ): CustomPartitioningStrategy =
+    new ClientClusterStrategy(getPartitionIdAndRequestFn, getLogicalPartitionIdFn)
+
+  /**
+   * Constructs a [[ClientCustomStrategy]] that reshards based on the remote cluster state.
+   *
+   * This is appropriate for simple custom strategies where you only need to
+   * know information about the remote cluster in order to reshard. For example,
+   * if you want to be able to add or remove capacity safely.
+   *
+   * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
+   *
+   * @param getPartitionIdAndRequestFn A function that given the current state of
+   *        `observable`, returns a PartialFunction implemented by client that
+   *        provides the partitioning logic on a request. It takes a Thrift
+   *        object request, and returns Future Map of partition ids to
+   *        sub-requests. If we don't need to fan-out, it should return one
+   *        element: partition id to the original request.  This PartialFunction
+   *        can take multiple Thrift request types of one Thrift service
+   *        (different method endpoints of one service).  Note that this
+   *        function must be pure (ie referentially transparent).  It cannot
+   *        change based on anything other than the state of `observable`, or
+   *        else it will malfunction.
+   * @param observable The state that is used for deciding how to reshard the
+   *        cluster.
+   */
+  def resharding[A](
+    getPartitionIdAndRequestFn: A => ClientCustomStrategy.ToPartitionedMap,
+    observable: Activity[A]
+  ): CustomPartitioningStrategy =
+    resharding[A](getPartitionIdAndRequestFn, (_: A) => (identity[Int](_)), observable)
+
+  /**
+   * Constructs a [[ClientCustomStrategy]] that reshards based on the remote cluster state.
+   *
+   * This is appropriate for simple custom strategies where you only need to
+   * know information about the remote cluster in order to reshard. For example,
+   * if you want to be able to add or remove capacity safely.
+   *
+   * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
+   *
+   * @param getPartitionIdAndRequestFn A function that given the current state of
+   *        `observable`, returns a PartialFunction implemented by client that
+   *        provides the partitioning logic on a request. It takes a Thrift
+   *        object request, and returns Future Map of partition ids to
+   *        sub-requests. If we don't need to fan-out, it should return one
+   *        element: partition id to the original request.  This PartialFunction
+   *        can take multiple Thrift request types of one Thrift service
+   *        (different method endpoints of one service).  Note that this
+   *        function must be pure (ie referentially transparent).  It cannot
+   *        change based on anything other than the state of `observable`, or
+   *        else it will malfunction.
+   * @param getLogicalPartitionIdFn A function that given the current state
+   *        `observable`, returns a function that gets the logical partition
+   *        identifier from a host identifier, host identifiers are derived from
+   *        [[ZkMetadata]] shardId. Indicates which logical partition a physical
+   *        host belongs to, multiple hosts can belong to the same partition,
+   *        for example:
+   *        {{{
+   *          {
+   *            case a if Range(0, 10).contains(a) => 0
+   *            case b if Range(10, 20).contains(b) => 1
+   *            case c if Range(20, 30).contains(c) => 2
+   *            case _ => throw ...
+   *          }
+   *        }}}
+   *        Note that this function must be pure (ie referentially transparent).
+   *        It cannot change based on anything other than the state of
+   *        `observable`, or else it will malfunction.
+   * @param observable The state that is used for deciding how to reshard the
+   *        cluster.
+   */
+  def resharding[A](
+    getPartitionIdAndRequestFn: A => ClientCustomStrategy.ToPartitionedMap,
+    getLogicalPartitionIdFn: A => Int => Int,
+    observable: Activity[A]
+  ): CustomPartitioningStrategy =
+    new ClientCustomStrategy(getPartitionIdAndRequestFn, getLogicalPartitionIdFn, observable)
 
   /**
    * Thrift requests not specifying partition ids will fall in here. This allows a
@@ -324,6 +507,129 @@ object ClientCustomStrategy {
 }
 
 /**
+ * The java-friendly way to create a [[ClientCustomStrategy]].
+ * Scala users should instead use the parallel methods on [[ClientCustomStrategy$]].
+ *
+ * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+ */
+object ClientCustomStrategies {
+
+  type ToPartitionedMap = PartialFunction[
+    ThriftStructIface,
+    Future[JMap[JInteger, ThriftStructIface]]
+  ]
+
+  private[this] def toJavaSet[A]: PartialFunction[Set[A], JSet[A]] = { case set => set.asJava }
+  private[this] val toScalaFutureMap: Future[JMap[JInteger, ThriftStructIface]] => Future[
+    Map[Int, ThriftStructIface]
+  ] = (_.map(_.asScala.toMap.map {
+    case (k, v) => (k.toInt, v)
+  }))
+
+  /**
+   * The java-friendly way to create a [[ClientCustomStrategy]].
+   * Scala users should instead use the parallel methods on [[ClientCustomStrategy$]].
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def noResharding(toPartitionedMap: ToPartitionedMap): CustomPartitioningStrategy =
+    ClientCustomStrategy.noResharding(toPartitionedMap.andThen(toScalaFutureMap))
+
+  /**
+   * The java-friendly way to create a [[ClientCustomStrategy]].
+   * Scala users should instead use the parallel methods on [[ClientCustomStrategy$]].
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def noResharding(
+    toPartitionedMap: ToPartitionedMap,
+    getLogicalPartitionId: IntUnaryOperator
+  ): CustomPartitioningStrategy = ClientCustomStrategy.noResharding(
+    toPartitionedMap.andThen(toScalaFutureMap),
+    getLogicalPartitionId.applyAsInt _)
+
+  /**
+   * The java-friendly way to create a [[ClientCustomStrategy]].
+   * Scala users should instead use the parallel methods on [[ClientCustomStrategy$]].
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def clusterResharding(
+    getPartitionIdAndRequestFn: JFunction[JSet[Address], ToPartitionedMap]
+  ): CustomPartitioningStrategy =
+    ClientCustomStrategy.clusterResharding(
+      toJavaSet[Address]
+        .andThen(getPartitionIdAndRequestFn.apply(_).andThen(toScalaFutureMap)))
+
+  /**
+   * The java-friendly way to create a [[ClientCustomStrategy]].
+   * Scala users should instead use the parallel methods on [[ClientCustomStrategy$]].
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def clusterResharding(
+    getPartitionIdAndRequestFn: JFunction[JSet[Address], ToPartitionedMap],
+    getLogicalPartitionIdFn: JFunction[JSet[Address], IntUnaryOperator]
+  ): CustomPartitioningStrategy =
+    ClientCustomStrategy.clusterResharding(
+      toJavaSet[Address]
+        .andThen(getPartitionIdAndRequestFn.apply(_).andThen(toScalaFutureMap)),
+      toJavaSet[Address].andThen(getLogicalPartitionIdFn.apply _).andThen(op => op.applyAsInt _)
+    )
+
+  /**
+   * The java-friendly way to create a [[ClientCustomStrategy]].
+   * Scala users should instead use the parallel methods on [[ClientCustomStrategy$]].
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def resharding[A](
+    getPartitionIdAndRequestFn: JFunction[A, ToPartitionedMap],
+    observable: Activity[A]
+  ): CustomPartitioningStrategy =
+    ClientCustomStrategy
+      .resharding[A](
+        { a: A =>
+          getPartitionIdAndRequestFn.apply(a).andThen(toScalaFutureMap)
+        },
+        observable)
+
+  /**
+   * The java-friendly way to create a [[ClientCustomStrategy]].
+   * Scala users should instead use the parallel methods on [[ClientCustomStrategy$]].
+   *
+   * @note [[com.twitter.util.Function]] may be useful in helping create a [[scala.PartialFunction]].
+   */
+  def resharding[A](
+    getPartitionIdAndRequestFn: JFunction[A, ToPartitionedMap],
+    getLogicalPartitionIdFn: JFunction[A, IntUnaryOperator],
+    observable: Activity[A]
+  ): CustomPartitioningStrategy =
+    ClientCustomStrategy
+      .resharding[A](
+        { a: A =>
+          getPartitionIdAndRequestFn.apply(a).andThen(toScalaFutureMap)
+        },
+        { a: A => getLogicalPartitionIdFn.apply(a).applyAsInt _ },
+        observable)
+}
+
+private[partitioning] final class ClientClusterStrategy(
+  val getPartitionIdAndRequestFn: Set[Address] => ClientCustomStrategy.ToPartitionedMap,
+  val getLogicalPartitionIdFn: Set[Address] => Int => Int)
+    extends CustomPartitioningStrategy {
+
+  // we don't have a real implementation here because the understanding
+  // is that implementors will not use ClientClusterStrategy directly, but
+  // instead use it to derive a ClientCustomStrategy where the implementors
+  // provides access to the remote cluster's state.
+  override def newNodeManager[Req, Rep](
+    underlying: Stack[ServiceFactory[Req, Rep]],
+    params: Stack.Params
+  ): PartitionNodeManager[Req, Rep, _, ToPartitionedMap] = ???
+}
+
+/**
  * An API to set a custom partitioning strategy for a Thrift/ThriftMux Client.
  * For a Java-friendly way to do the same thing, see `ClientCustomStrategy.create`
  *
@@ -334,7 +640,7 @@ object ClientCustomStrategy {
  *        to the original request.  This PartialFunction can take multiple
  *        Thrift request types of one Thrift service (different method endpoints
  *        of one service).
- * @param logicalPartitionFn Gets the logical partition identifier from a host
+ * @param getLogicalPartitionId Gets the logical partition identifier from a host
  *        identifier, host identifiers are derived from [[ZkMetadata]]
  *        shardId. Indicates which logical partition a physical host belongs to,
  *        multiple hosts can belong to the same partition, for example:
@@ -351,22 +657,24 @@ object ClientCustomStrategy {
  * @note  When updating the partition topology dynamically, there is a potential one-time
  *        mismatch if a Service Discovery update happens after getPartitionIdAndRequest.
  */
-final class ClientCustomStrategy(
-  val getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap,
-  logicalPartitionFn: Int => Int)
+
+final class ClientCustomStrategy[A] private[partitioning] (
+  val getPartitionIdAndRequest: A => ClientCustomStrategy.ToPartitionedMap,
+  val getLogicalPartitionId: A => Int => Int,
+  val state: Activity[A])
     extends CustomPartitioningStrategy {
 
-  def this(getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap) =
-    this(getPartitionIdAndRequest, identity[Int])
+  def newNodeManager[Req, Rep](
+    underlying: Stack[ServiceFactory[Req, Rep]],
+    params: Stack.Params
+  ): PartitionNodeManager[Req, Rep, _, ClientCustomStrategy.ToPartitionedMap] =
+    new PartitionNodeManager(
+      underlying,
+      state,
+      getPartitionIdAndRequest,
+      getLogicalPartitionId,
+      params)
 
-  def getLogicalPartition(instance: Int): Int = logicalPartitionFn(instance)
-
-  /**
-   * A ResponseMergerRegistry implemented by client to supply [[ResponseMerger]]s
-   * for message fan-out cases.
-   * @see [[ResponseMerger]]
-   */
-  val responseMergerRegistry: ResponseMergerRegistry = new ResponseMergerRegistry()
 }
 
 object MethodBuilderCustomStrategy {
@@ -381,7 +689,7 @@ object MethodBuilderCustomStrategy {
  * @param getPartitionIdAndRequest A function for the partitioning logic.
  *        MethodBuilder is customized per-method so that this method only takes one
  *        Thrift request type.
- * @param logicalPartitionFn Gets the logical partition identifier from a host
+ * @param getLogicalPartitionId Gets the logical partition identifier from a host
  *        identifier, host identifiers are derived from [[ZkMetadata]]
  *        shardId. Indicates which logical partition a physical host belongs to,
  *        multiple hosts can belong to the same partition, for example:
@@ -399,16 +707,16 @@ object MethodBuilderCustomStrategy {
  */
 final class MethodBuilderCustomStrategy[Req <: ThriftStructIface, Rep](
   val getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req],
-  logicalPartitionFn: Int => Int,
+  getLogicalPartitionId: Int => Int,
   val responseMerger: Option[ResponseMerger[Rep]])
     extends CustomPartitioningStrategy {
 
   def this(
     getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req],
-    logicalPartitionFn: Int => Int
+    getLogicalPartitionId: Int => Int
   ) = this(
     getPartitionIdAndRequest,
-    logicalPartitionFn,
+    getLogicalPartitionId,
     None
   )
 
@@ -424,5 +732,22 @@ final class MethodBuilderCustomStrategy[Req <: ThriftStructIface, Rep](
     responseMerger
   )
 
-  def getLogicalPartition(instance: Int): Int = logicalPartitionFn(instance)
+  // TODO reconcile these types w/ req / rep
+  def newNodeManager[U, T](
+    underlying: Stack[ServiceFactory[U, T]],
+    params: Stack.Params
+  ): PartitionNodeManager[U, T, _, ClientCustomStrategy.ToPartitionedMap] =
+    new PartitionNodeManager[U, T, Unit, ClientCustomStrategy.ToPartitionedMap](
+      underlying,
+      Activity.value(()),
+      _ => {
+        case req: ThriftStructIface =>
+          getPartitionIdAndRequest.asInstanceOf[
+            ThriftStructIface => Future[Map[Int, ThriftStructIface]]
+          ](req)
+      },
+      _ => getLogicalPartitionId,
+      params
+    )
+
 }

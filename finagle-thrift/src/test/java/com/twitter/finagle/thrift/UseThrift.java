@@ -1,5 +1,7 @@
 package com.twitter.finagle.thrift;
 
+import java.util.List;
+
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.junit.Test;
 
@@ -51,6 +53,11 @@ public class UseThrift {
     @Override
     public Future<Void> add_one(int a, int b) {
       return Future.Void();
+    }
+
+    @Override
+    public Future<Integer> mergeable_add(List<Integer> alist) {
+      return Future.value(0);
     }
 
     @Override

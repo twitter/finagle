@@ -10,7 +10,7 @@ import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Awaitable, Duration, Future, Time, Var}
+import com.twitter.util.{Activity, Await, Awaitable, Duration, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import org.scalatest.FunSuite
@@ -87,33 +87,57 @@ class PartitionNodeManagerTest extends FunSuite {
     }
   }
 
+  def noReshardingManager(
+    stack: Stack[ServiceFactory[String, String]],
+    params: Stack.Params,
+    getLogicalPartition: Int => Int = identity[Int]
+  ): PartitionNodeManager[String, String, Unit, PartialFunction[String, Future[String]]] = {
+    new PartitionNodeManager(
+      stack,
+      Activity.value(()),
+      _ => { case s => Future.value(s) },
+      _ => getLogicalPartition,
+      params
+    )
+  }
+
+  def reshardingManager(
+    stack: Stack[ServiceFactory[String, String]],
+    params: Stack.Params,
+    pfMaker: Int => PartialFunction[String, Future[String]] = _ => { case s => Future.value(s) },
+    getLogicalPartition: Int => Int => Int = _ => identity[Int],
+    observable: Activity[Int]
+  ): PartitionNodeManager[String, String, Int, PartialFunction[String, Future[String]]] = {
+    new PartitionNodeManager(
+      stack,
+      observable,
+      pfMaker,
+      getLogicalPartition,
+      params
+    )
+  }
+
   test("Remove a partition, each node is a partition") {
     new Ctx(addressSize = 5) {
-      val nodeManager = new PartitionNodeManager[String, String](
-        stack,
-        i => i,
-        defaultParams
-      )
+      val nodeManager = noReshardingManager(stack, defaultParams)
 
-      val svc0 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
+      val svc0 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(0).getPort))
 
       varAddr.update(Addr.Bound(weightedAddress.drop(1): _*))
 
       intercept[NoPartitionException] {
-        await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(0).getPort))
       }
-      val svc1 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(1).getPort))
+      val svc1 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(1).getPort))
       assert(await(svc1("any")) == "service")
     }
   }
 
   test("Add a partition, each node is a partition") {
     new Ctx(addressSize = 5) {
-      val nodeManager = new PartitionNodeManager[String, String](
-        stack,
-        i => i,
-        defaultParams
-      )
+      val nodeManager = noReshardingManager(stack, defaultParams)
       assert(sr.gauges(Seq("partitioner", "nodes"))() == 5)
 
       val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
@@ -122,35 +146,40 @@ class PartitionNodeManagerTest extends FunSuite {
         StringServer.server.serve(inet, stringService).boundAddress.asInstanceOf[InetSocketAddress]
 
       intercept[NoPartitionException] {
-        await(nodeManager.getServiceByPartitionId(newIsa.getPort))
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(newIsa.getPort))
       }
 
       varAddr.update(Addr.Bound((weightedAddress :+ newAddress(newIsa, 1)): _*))
       assert(sr.gauges(Seq("partitioner", "nodes"))() == 6)
 
-      await(nodeManager.getServiceByPartitionId(newIsa.getPort))
+      await(nodeManager.snapshotSharder().getServiceByPartitionId(newIsa.getPort))
     }
   }
 
   test("replicas belong to the same logical partition") {
     new Ctx(addressSize = 7) {
       val logicalPartition = getLogicalPartition(Var(fixedInetAddresses))
-      val nodeManager = new PartitionNodeManager[String, String](
-        stack,
-        logicalPartition,
-        defaultParams
-      )
+      val nodeManager = noReshardingManager(stack, defaultParams, logicalPartition)
       assert(sr.gauges(Seq("partitioner", "nodes"))() == 4)
 
-      val svc00 = await(nodeManager.getServiceByPartitionId(0))
+      val svc00 = await(nodeManager.snapshotSharder().getServiceByPartitionId(0))
       val svc0 =
-        await(nodeManager.getServiceByPartitionId(logicalPartition(fixedInetAddresses(0).getPort)))
+        await(
+          nodeManager
+            .snapshotSharder().getServiceByPartitionId(
+              logicalPartition(fixedInetAddresses(0).getPort)))
 
-      val svc10 = await(nodeManager.getServiceByPartitionId(1))
+      val svc10 = await(nodeManager.snapshotSharder().getServiceByPartitionId(1))
       val svc11 =
-        await(nodeManager.getServiceByPartitionId(logicalPartition(fixedInetAddresses(1).getPort)))
+        await(
+          nodeManager
+            .snapshotSharder().getServiceByPartitionId(
+              logicalPartition(fixedInetAddresses(1).getPort)))
       val svc12 =
-        await(nodeManager.getServiceByPartitionId(logicalPartition(fixedInetAddresses(2).getPort)))
+        await(
+          nodeManager
+            .snapshotSharder().getServiceByPartitionId(
+              logicalPartition(fixedInetAddresses(2).getPort)))
       assert(svc00 eq svc0)
       assert((svc10 eq svc11) && (svc10 eq svc12))
       assert(svc00 ne svc10)
@@ -161,11 +190,7 @@ class PartitionNodeManagerTest extends FunSuite {
     new Ctx(addressSize = 7) {
       val varInetAddress = Var(fixedInetAddresses)
       val logicalPartition = getLogicalPartition(varInetAddress)
-      val nodeManager = new PartitionNodeManager[String, String](
-        stack,
-        logicalPartition,
-        defaultParams
-      )
+      val nodeManager = noReshardingManager(stack, defaultParams, logicalPartition)
       val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
       // to get the port
       val newIsa =
@@ -173,35 +198,32 @@ class PartitionNodeManagerTest extends FunSuite {
 
       // before adding, cannot find the logical partition
       intercept[AssertionError] {
-        await(nodeManager.getServiceByPartitionId(logicalPartition(newIsa.getPort)))
+        await(
+          nodeManager.snapshotSharder().getServiceByPartitionId(logicalPartition(newIsa.getPort)))
       }
 
       val newAddresses = fixedInetAddresses :+ newIsa
       varInetAddress.update(newAddresses)
       varAddr.update(Addr.Bound(newAddresses.map(newAddress(_, 1)): _*))
 
-      val svc4 = await(nodeManager.getServiceByPartitionId(3))
-      val svc44 = await(nodeManager.getServiceByPartitionId(logicalPartition(newIsa.getPort)))
-      assert(svc4 eq svc44)
+      // not throwing an exception here verifies that the service exists
+      await(nodeManager.snapshotSharder().getServiceByPartitionId(3))
+      assert(3 == logicalPartition(newIsa.getPort))
     }
   }
 
   test("Remove a node from a partition has == 1 node") {
     new Ctx(addressSize = 7) {
       val logicalPartition = getLogicalPartition(Var(fixedInetAddresses))
-      val nodeManager = new PartitionNodeManager[String, String](
-        stack,
-        logicalPartition,
-        defaultParams
-      )
+      val nodeManager = noReshardingManager(stack, defaultParams, logicalPartition)
 
-      await(nodeManager.getServiceByPartitionId(0))
+      await(nodeManager.snapshotSharder().getServiceByPartitionId(0))
 
       // topology: p0(0), p1(1,2), p2(3,4,5), p3(6)
       // partition 0 has one address, drop it
       varAddr.update(Addr.Bound(weightedAddress.drop(1): _*))
       val e = intercept[NoPartitionException] {
-        await(nodeManager.getServiceByPartitionId(0))
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(0))
       }
       assert(e.getMessage.contains("No partition: 0 found in the node manager"))
     }
@@ -209,25 +231,25 @@ class PartitionNodeManagerTest extends FunSuite {
 
   test("Remove a node from a partition has > 1 nodes") {
     new Ctx(addressSize = 8) {
-      val nodeManager = new PartitionNodeManager[String, String](
+      val nodeManager = noReshardingManager(
         stack,
-        getLogicalPartition(Var(fixedInetAddresses)),
-        defaultParams
+        defaultParams,
+        getLogicalPartition(Var(fixedInetAddresses))
       )
       assert(sr.gauges(Seq("partitioner", "nodes"))() == 4)
 
-      await(nodeManager.getServiceByPartitionId(0))
+      await(nodeManager.snapshotSharder().getServiceByPartitionId(0))
 
       // topology: p0(0), p1(1,2), p2(3,4,5), p3(6,7)
       // partition 3 has two address, remove one.
       varAddr.update(Addr.Bound(weightedAddress.dropRight(1): _*))
 
-      await(nodeManager.getServiceByPartitionId(3))
+      await(nodeManager.snapshotSharder().getServiceByPartitionId(3))
       // remove both
       varAddr.update(Addr.Bound(weightedAddress.dropRight(2): _*))
 
       val e = intercept[NoPartitionException] {
-        await(nodeManager.getServiceByPartitionId(3))
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(3))
       }
       assert(e.getMessage.contains("No partition: 3 found in the node manager"))
     }
@@ -236,10 +258,10 @@ class PartitionNodeManagerTest extends FunSuite {
   test("Node manager listens to weight changes") {
     new Ctx(addressSize = 8) {
       val varInetAddressHelper = Var(fixedInetAddresses)
-      val nodeManager = new PartitionNodeManager[String, String](
+      val nodeManager = noReshardingManager(
         stack,
-        getLogicalPartition(varInetAddressHelper),
-        defaultParams
+        defaultParams,
+        getLogicalPartition(varInetAddressHelper)
       )
 
       val newWeightedAddress =
@@ -257,48 +279,47 @@ class PartitionNodeManagerTest extends FunSuite {
 
   test("Addresses refresh, each node is a partition") {
     new Ctx(addressSize = 3) {
-      val nodeManager = new PartitionNodeManager[String, String](
-        stack,
-        i => i,
-        defaultParams
-      )
+      val nodeManager = noReshardingManager(stack, defaultParams)
       assert(sr.gauges(Seq("partitioner", "nodes"))() == 3)
 
-      val svc0 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
+      val svc0 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(0).getPort))
 
       // wipe out addresses won't trigger rebuild
       varAddr.update(Addr.Bound(Set.empty[Address]))
-      val svc1 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
+      val svc1 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(0).getPort))
       assert(svc0 eq svc1)
 
       // rebuild
       varAddr.update(Addr.Bound(fixedInetAddresses.map(newAddress(_, 2)): _*))
-      val svc2 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
+      val svc2 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(0).getPort))
       assert(svc0 ne svc2)
 
       // Neg won't trigger rebuild
       varAddr.update(Addr.Neg)
-      val svc3 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
+      val svc3 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(0).getPort))
       assert(svc2 eq svc3)
 
       // rebuild
       varAddr.update(Addr.Bound(fixedInetAddresses.map(newAddress(_, 3)): _*))
-      val svc4 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
+      val svc4 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(0).getPort))
       assert(svc4 ne svc0)
     }
   }
 
   test("close the node manager will close all ServiceFactories") {
     new Ctx(addressSize = 5) {
-      val nodeManager = new PartitionNodeManager[String, String](
-        stack,
-        i => i,
-        defaultParams
-      )
-      val svc0 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(0).getPort))
+      val nodeManager = noReshardingManager(stack, defaultParams)
+      val svc0 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(0).getPort))
       assert(svc0.status == Status.Open)
       await(nodeManager.close())
-      val svc1 = await(nodeManager.getServiceByPartitionId(fixedInetAddresses(1).getPort))
+      val svc1 =
+        await(nodeManager.snapshotSharder().getServiceByPartitionId(fixedInetAddresses(1).getPort))
       assert(svc0.status == Status.Closed)
       assert(svc1.status == Status.Closed)
     }
@@ -310,16 +331,73 @@ class PartitionNodeManagerTest extends FunSuite {
         case even if even % 2 == 0 => 0
         case odd => throw new Exception("failed")
       }
-      val nodeManager = new PartitionNodeManager[String, String](
+      val nodeManager = noReshardingManager(
         stack,
-        getLogicalPartition,
-        defaultParams
+        defaultParams,
+        getLogicalPartition
       )
 
       val succeedPort = fixedInetAddresses.map(_.getPort).filter(_ % 2 == 0)
       if (succeedPort.nonEmpty) {
-        val svc0 = await(nodeManager.getServiceByPartitionId(0))
+        val svc0 = await(nodeManager.snapshotSharder().getServiceByPartitionId(0))
         assert(await(svc0("any")) == "service")
+      }
+    }
+  }
+
+  test("Reshard based on the state that's passed in safely") {
+    new Ctx(addressSize = 7) {
+      val varInetAddress = Var(fixedInetAddresses)
+      val logicalPartition: Int => Int => Int = { observed =>
+        if (observed % 2 == 0) {
+          getLogicalPartition(varInetAddress).andThen(_ % 3)
+        } else {
+          getLogicalPartition(varInetAddress)
+        }
+      }
+      val observed = Var(0)
+      val observable = Activity(observed.map(Activity.Ok(_)))
+      val oldPf: PartialFunction[String, Future[String]] = { case s => Future.value(s) }
+      val newPf: PartialFunction[String, Future[String]] = { case s => Future.value(s.reverse) }
+      val nodeManager = reshardingManager(
+        stack,
+        defaultParams,
+        {
+          case 0 => oldPf
+          case 1 => newPf
+        },
+        logicalPartition,
+        observable
+      )
+      val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+      // to get the port
+      val newIsa =
+        StringServer.server.serve(inet, stringService).boundAddress.asInstanceOf[InetSocketAddress]
+
+      val oldSnap = nodeManager.snapshotSharder()
+
+      // before adding, cannot find the logical partition
+      intercept[PartitionNodeManager.NoPartitionException] {
+        await(oldSnap.getServiceByPartitionId(3))
+      }
+      assert(oldSnap.partitionFunction eq oldPf)
+
+      observed() = 1
+
+      val newSnap = nodeManager.snapshotSharder()
+      // not throwing an exception here verifies that the service exists
+      await(newSnap.getServiceByPartitionId(3)) // the one we couldn't find before
+      assert(newSnap.partitionFunction eq newPf)
+    }
+  }
+
+  test("Empty serverset means we can't find a shard") {
+    new Ctx(addressSize = 0) {
+      val nodeManager = noReshardingManager(stack, defaultParams)
+      val snap = nodeManager.snapshotSharder()
+
+      intercept[NoPartitionException] {
+        await(snap.getServiceByPartitionId(0))
       }
     }
   }

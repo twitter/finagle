@@ -1,78 +1,114 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.partitioning.{PartitionNodeManager, PartitioningService}
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.partitioning.PartitioningService
+import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.thrift.ClientDeserializeCtx
-import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.{Addr, Address, Service, ServiceFactory, Stack}
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
-import com.twitter.util.{Future, Return}
-import org.mockito.Mockito.when
-import org.mockito.internal.util.reflection.FieldSetter
+import com.twitter.test.thriftscala.B
+import com.twitter.util.{Future, Return, Var}
 import org.scalatest.{FunSuite, PrivateMethodTester}
+import org.mockito.Mockito.when
+import org.mockito.Matchers.any
 
 class ThriftCustomPartitioningServiceTest
     extends FunSuite
     with ThriftPartitioningTest
     with PrivateMethodTester {
 
-  val customPartitioningStrategy = new ClientCustomStrategy({
-    case aRequest: ARequest =>
-      val idsAndRequests = aRequest.alist.groupBy(a => a % 3).map {
-        case (id, list) => id -> ARequest(list)
-      }
-      Future.value(idsAndRequests)
-  })
+  val customPartitioningStrategy = ClientCustomStrategy.noResharding(
+    {
+      case args: B.MergeableAdd.Args =>
+        val idsAndRequests = args.alist.groupBy(a => a % 3).map {
+          case (id, list) => id -> B.MergeableAdd.Args(list)
+        }
+        Future.value(idsAndRequests)
+    },
+    { shardId => shardId % 3 }
+  )
   customPartitioningStrategy.responseMergerRegistry.add(AMethod, aResponseMerger)
 
-  val mbCustomStrategy = new MethodBuilderCustomStrategy[ARequest, Int](
+  val mbCustomStrategy = new MethodBuilderCustomStrategy[B.MergeableAdd.Args, Int](
     getPartitionIdAndRequest = {
-      case aRequest: ARequest =>
-        val idsAndRequests = aRequest.alist.groupBy(a => a % 3).map {
-          case (id, list) => id -> ARequest(list)
+      case args: B.MergeableAdd.Args =>
+        val idsAndRequests = args.alist.groupBy(a => a % 3).map {
+          case (id, list) => id -> B.MergeableAdd.Args(list)
         }
         Future.value(idsAndRequests)
     },
     responseMerger = Some(aResponseMerger)
   )
 
+  val mockStack = mock[Stack[ServiceFactory[ThriftStructIface, Int]]]
+
+  val sf = ServiceFactory.const(Service.const(Future.value(0)))
+  when(mockStack.make(any())).thenReturn(sf)
+
+  def addresses(num: Int): Var[Addr] = {
+    val sfAddresses: Seq[Address] = for {
+      shardId <- 0 until num
+    } yield Address.ServiceFactory(sf, ZkMetadata.toAddrMetadata(ZkMetadata(Some(shardId))))
+    Var.value(Addr.Bound(sfAddresses.toSet))
+  }
+
   def testService(strategy: CustomPartitioningStrategy) =
-    new ThriftCustomPartitioningService[ARequest, Int](
-      underlying = mock[Stack[ServiceFactory[ARequest, Int]]],
+    new ThriftCustomPartitioningService[ThriftStructIface, Int](
+      underlying = mockStack,
       thriftMarshallable = thriftMarshallable,
-      params = Stack.Params.empty,
+      params = Stack.Params.empty + LoadBalancerFactory.Dest(addresses(4)),
       strategy
     )
 
   val serviceWithClientStrategy = testService(customPartitioningStrategy)
   val serviceWithMbStrategy = testService(mbCustomStrategy)
 
-  test("getPartitionIdAndRequestMap") {
-    val request = ARequest(List(1, 2, 3, 4))
+  test(
+    "getPartitionIdAndRequestMap uses the provided partitiong function and request to pick an appropriate service") {
+    val request = B.MergeableAdd.Args(List(1, 2, 3, 4))
     val serdeCtx = new ClientDeserializeCtx[Int](request, _ => Return(Int.MinValue))
-    val getPartitionIdAndRequestMap =
-      PrivateMethod[Future[Map[Int, ThriftStructIface]]]('getPartitionIdAndRequestMap)
+    val toPartitionedMap: PartialFunction[
+      ThriftStructIface,
+      Future[Map[Int, ThriftStructIface]]
+    ] = {
+      case args: B.MergeableAdd.Args =>
+        Future.value(args.alist.groupBy(_ % 3).mapValues(B.MergeableAdd.Args(_)).toMap)
+    }
     Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx) {
       assert(
-        await(serviceWithClientStrategy.invokePrivate(getPartitionIdAndRequestMap(request))) ==
-          Map(0 -> ARequest(Seq(3)), 1 -> ARequest(Seq(1, 4)), 2 -> ARequest(Seq(2))))
+        await(serviceWithClientStrategy.getPartitionIdAndRequestMap(toPartitionedMap)) ==
+          Map(
+            0 -> B.MergeableAdd.Args(Seq(3)),
+            1 -> B.MergeableAdd.Args(Seq(1, 4)),
+            2 -> B.MergeableAdd.Args(Seq(2))))
 
       //methodbuilder
       assert(
-        await(serviceWithMbStrategy.invokePrivate(getPartitionIdAndRequestMap(request))) ==
-          Map(0 -> ARequest(Seq(3)), 1 -> ARequest(Seq(1, 4)), 2 -> ARequest(Seq(2))))
+        await(serviceWithMbStrategy.getPartitionIdAndRequestMap(toPartitionedMap)) ==
+          Map(
+            0 -> B.MergeableAdd.Args(Seq(3)),
+            1 -> B.MergeableAdd.Args(Seq(1, 4)),
+            2 -> B.MergeableAdd.Args(Seq(2)))
+      )
     }
   }
 
   test("getPartitionIdAndRequestMap -- exception when request type is not registered") {
     val request = mock[ThriftStructIface]
     val serdeCtx = new ClientDeserializeCtx[Int](request, _ => Return(Int.MinValue))
-    val getPartitionIdAndRequestMap =
-      PrivateMethod[Future[Map[Int, ThriftStructIface]]]('getPartitionIdAndRequestMap)
+    val toPartitionedMap: PartialFunction[
+      ThriftStructIface,
+      Future[Map[Int, ThriftStructIface]]
+    ] = {
+      case args: B.MergeableAdd.Args =>
+        Future.value(args.alist.groupBy(_ % 3).mapValues(B.MergeableAdd.Args(_)).toMap)
+    }
     Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx) {
       val ex1 = intercept[PartitioningStrategyException] {
-        await(serviceWithClientStrategy.invokePrivate(getPartitionIdAndRequestMap(request)))
+        await(serviceWithClientStrategy.getPartitionIdAndRequestMap(toPartitionedMap))
       }
       assert(
         ex1.getMessage.contains(
@@ -80,7 +116,7 @@ class ThriftCustomPartitioningServiceTest
 
       // methodBuilder
       val ex2 = intercept[PartitioningStrategyException] {
-        await(serviceWithMbStrategy.invokePrivate(getPartitionIdAndRequestMap(request)))
+        await(serviceWithMbStrategy.getPartitionIdAndRequestMap(toPartitionedMap))
       }
       assert(
         ex2.getMessage.contains(
@@ -89,53 +125,54 @@ class ThriftCustomPartitioningServiceTest
   }
 
   test("fan-out request - partitionRequest") {
-    val partitionRequest =
-      PrivateMethod[Future[Map[ARequest, Future[Service[ARequest, Int]]]]]('partitionRequest)
-    val fakeNodeManager = mock[PartitionNodeManager[ARequest, Int]]
-    when(fakeNodeManager.getServiceByPartitionId(0)).thenReturn(Future.value {
-      Service.mk { _: ARequest => Future.value(0) }
-    })
-    when(fakeNodeManager.getServiceByPartitionId(1)).thenReturn(Future.value {
-      Service.mk { _: ARequest => Future.value(1) }
-    })
-    when(fakeNodeManager.getServiceByPartitionId(2)).thenReturn(Future.value {
-      Service.mk { _: ARequest => Future.value(2) }
-    })
+    /*
+    val fakeNodeManager =
+      mock[PartitionNodeManager[B.MergeableAdd, Int, Unit, ClientCustomStrategy.ToPartitionedMap]]
+    when(fakeNodeManager.snapshotSharder()).thenReturn {
+      (
+        partitionId =>
+          Future.value {
+            Service.mk { _: B.MergeableAdd => Future.value(partitionId) }
+          }, { case B.MergeableAdd: B.MergeableAdd =>
+
+      }
+      )
+    }
     new FieldSetter(
       serviceWithClientStrategy,
       serviceWithClientStrategy.getClass.getDeclaredField("nodeManager"))
       .set(fakeNodeManager)
-    val fanoutRequest = ARequest(List(1, 2, 3, 4))
+     */
+    val fanoutRequest = B.MergeableAdd.Args(List(1, 2, 3, 4))
     val serdeCtx1 = new ClientDeserializeCtx[Int](fanoutRequest, _ => Return(Int.MinValue))
     Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx1) {
-      serdeCtx1.rpcName("A")
-      assert(
-        (await(serviceWithClientStrategy.invokePrivate(partitionRequest(fanoutRequest)))).size == 3)
+      serdeCtx1.rpcName("mergeable_add")
+      assert((await(serviceWithClientStrategy.partitionRequest(fanoutRequest)).size == 3))
     }
   }
 
   test("response - mergeResponses") {
     val toBeMergedHeadIsOne = PartitioningService.PartitionedResults(
-      successes = List((ARequest(List(1)), 1), (ARequest(List(2)), 2)),
-      failures = List((ARequest(List(3)), new Exception))
+      successes = List((B.MergeableAdd.Args(List(1)), 1), (B.MergeableAdd.Args(List(2)), 2)),
+      failures = List((B.MergeableAdd.Args(List(3)), new Exception))
     )
-    val request = ARequest(List(1, 2, 3, 4))
+    val request = B.MergeableAdd.Args(List(2, 3, 4, 1))
     val serdeCtx = new ClientDeserializeCtx[Int](
       request,
       rep => Return(Buf.U32BE.unapply(Buf.ByteArray.Owned(rep)).get._1))
     val mergeResponses = PrivateMethod[Int]('mergeResponses)
 
     Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx) {
-      serdeCtx.rpcName("A")
+      serdeCtx.rpcName("mergeable_add")
       val rep1 =
         serviceWithClientStrategy.invokePrivate(mergeResponses(request, toBeMergedHeadIsOne))
       assert(rep1 == thriftMarshallable.emptyResponse)
       val resultInCtx1 = ClientDeserializeCtx.get.deserialize(Array.emptyByteArray)
-      assert(resultInCtx1 == Return(1))
+      assert(resultInCtx1 == Return(3))
 
       val toBeMergedHeadIsTwo = PartitioningService.PartitionedResults(
-        successes = List((ARequest(List(2)), 2), (ARequest(List(1)), 1)),
-        failures = List((ARequest(List(3)), new Exception))
+        successes = List((B.MergeableAdd.Args(List(2)), 2), (B.MergeableAdd.Args(List(1)), 1)),
+        failures = List((B.MergeableAdd.Args(List(3)), new Exception))
       )
       // mergeResponses should be called once during one reqRep travel
       // mimic multiple requests in one local scope per testing
@@ -143,14 +180,14 @@ class ThriftCustomPartitioningServiceTest
         serviceWithClientStrategy.invokePrivate(mergeResponses(request, toBeMergedHeadIsTwo))
       assert(rep2 == thriftMarshallable.emptyResponse)
       val resultInCtx2 = ClientDeserializeCtx.get.deserialize(Array.emptyByteArray)
-      assert(resultInCtx2 == Return(2))
+      assert(resultInCtx2 == Return(3))
 
       //methodBuilder
       val rep3 =
         serviceWithMbStrategy.invokePrivate(mergeResponses(request, toBeMergedHeadIsTwo))
       assert(rep3 == thriftMarshallable.emptyResponse)
       val resultInCtx3 = ClientDeserializeCtx.get.deserialize(Array.emptyByteArray)
-      assert(resultInCtx3 == Return(2))
+      assert(resultInCtx3 == Return(3))
     }
   }
 

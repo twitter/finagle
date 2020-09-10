@@ -2,8 +2,10 @@ package com.twitter.finagle.thriftmux.exp.partitioning
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mux.{Request, Response}
+import com.twitter.finagle.partitioning.{PartitionNodeManager, SnapPartitioner}
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
 import com.twitter.finagle.thrift.exp.partitioning.{
+  ClientCustomStrategy,
   CustomPartitioningStrategy,
   HashingPartitioningStrategy,
   ThriftCustomPartitioningService,
@@ -12,6 +14,8 @@ import com.twitter.finagle.thrift.exp.partitioning.{
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future}
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -36,6 +40,17 @@ class DynamicPartitioningServiceTest extends FunSuite with MockitoSugar {
     assert(await(a).body == Buf.Utf8("hi"))
 
     val customStrategy = mock[CustomPartitioningStrategy]
+    val nodeManager =
+      mock[PartitionNodeManager[Request, Response, _, ClientCustomStrategy.ToPartitionedMap]]
+    when[PartitionNodeManager[Request, Response, _, ClientCustomStrategy.ToPartitionedMap]](
+      customStrategy.newNodeManager[Request, Response](any(), any())
+    ).thenReturn(nodeManager)
+    when(nodeManager.snapshotSharder()).thenReturn(
+      SnapPartitioner[Request, Response, ClientCustomStrategy.ToPartitionedMap](
+        PartialFunction.empty,
+        Map.empty
+      )
+    )
     DynamicPartitioningService.letStrategy(customStrategy) {
 
       intercept[PartitioningStrategyException](await(testService(Request.empty)))

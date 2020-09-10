@@ -82,7 +82,16 @@ private[finagle] object PartitionNodeManager {
  *
  * @param underlying          Finagle client stack
  *
- * @param getLogicalPartition Getting the logical partition identifier from a host identifier.
+ * @param observable          The state that determines the sharding scheme we use.  The updated values
+ *                            are used by `getPartitionFunctionPerState` and `getLogicalPartitionPerState`
+ *                            as soon as they're updated.
+ *
+ * @param getPartitionFunctionPerState When given a state, gets the partitioning function, which can be used
+ *                            to describe which partitions a request should be subdivided into, and how a request
+ *                            should be sliced and diced for each partition.
+ *                            Note that this function must be referentially transparent.
+ *
+ * @param getLogicalPartitionPerState When given a state, gets the logical partition identifier from a host identifier.
  *                            Reverse lookup. Indicates which logical partition a physical host
  *                            belongs to, this is provided by client configuration when needed,
  *                            multiple hosts can belong to the same partition, for example:
@@ -97,12 +106,30 @@ private[finagle] object PartitionNodeManager {
  *                            if not provided, each host is a partition.
  *                            Host identifiers are derived from [[ZkMetadata]] shardId, logical
  *                            partition identifiers are defined by users in [[PartitioningStrategy]]
+ *                            Note that this function must be referentially transparent.
  *
  * @param params              Configured Finagle client params
+ *
+ * @tparam Req the request type
+ *
+ * @tparam Rep the response type
+ *
+ * @tparam A   parameterizes the observable.  this is the type of the state that determines how
+ *             requests get partitioned.
+ *
+ * @tparam B   the type of a partitioning function that will be snapshotted given a new state of
+ *             type B.
  */
-private[finagle] class PartitionNodeManager[Req, Rep](
+private[finagle] class PartitionNodeManager[
+  Req,
+  Rep,
+  A,
+  B >: PartialFunction[Any, Future[Nothing]]
+](
   underlying: Stack[ServiceFactory[Req, Rep]],
-  getLogicalPartition: Int => Int,
+  observable: Activity[A],
+  getPartitionFunctionPerState: A => B,
+  getLogicalPartitionPerState: A => Int => Int,
   params: Stack.Params)
     extends Closable { self =>
 
@@ -115,21 +142,24 @@ private[finagle] class PartitionNodeManager[Req, Rep](
     stats.scope("partitioner")
   }
 
-  private[this] val partitionServiceNodes =
-    new AtomicReference[Map[Int, ServiceFactory[Req, Rep]]]()
+  // we initialize this immediately because we filter the event that keeps
+  // track of partitions later.  if some of them are empty, this will be null.
+  // it should at least be shaped right, so that the exceptions we get are more
+  // useful than NPEs
+  // TODO we should return a DelayingServiceFactory until `observable` is no
+  // longer pending
+  private[this] val partitionServiceNodes = new AtomicReference(
+    SnapPartitioner.uninitialized[Req, Rep, B]
+  )
 
   private[this] val partitionerMetrics =
-    statsReceiver.addGauge("nodes") { partitionServiceNodes.get.size }
+    statsReceiver.addGauge("nodes") { partitionServiceNodes.get.partitionMapping.size }
 
   // Keep track of addresses in the current set that already have associate instances
   private[this] val destActivity = varAddrToActivity(params[LoadBalancerFactory.Dest].va, label)
 
-  // listen to the WeightedAddress changes, transform the changes to a stream of
-  // partition id (includes errors) to [[CachedServiceFactory]].
-  private[this] val partitionAddressChanges: Event[
-    Activity.State[Map[Try[Int], CachedServiceFactory[Req, Rep]]]
-  ] = {
-    val cachedServiceFactoryDiffOps = new DiffOps[Address, CachedServiceFactory[Req, Rep]] {
+  private[this] val cachedServiceFactoryDiffOps =
+    new DiffOps[Address, CachedServiceFactory[Req, Rep]] {
       def remove(factory: CachedServiceFactory[Req, Rep]): Unit = factory.close()
 
       def add(addresses: Set[Address]): CachedServiceFactory[Req, Rep] =
@@ -144,79 +174,88 @@ private[finagle] class PartitionNodeManager[Req, Rep](
       }
     }
 
-    val getShardIdFromAddress: Address => Try[Int] = { address =>
-      val addressMetadata = address match {
-        case WeightedAddress(Address.Inet(_, metadata), _) => metadata
-        case Address.ServiceFactory(_, metadata) => metadata
+  private[this] val getShardIdFromAddress: A => Address => Try[Int] = {
+    state =>
+      { addr =>
+        val metadata = addr match {
+          case WeightedAddress(Address.Inet(_, metadata), _) => metadata
+          case Address.ServiceFactory(_, metadata) => metadata
+        }
+        ZkMetadata.fromAddrMetadata(metadata).flatMap(_.shardId) match {
+          case Some(id) =>
+            try {
+              val partitionId = getLogicalPartitionPerState(state)(id)
+              Return(partitionId)
+            } catch {
+              case NonFatal(e) =>
+                logger.log(Level.ERROR, "getLogicalPartition failed with: ", e)
+                Throw(e)
+            }
+          case None =>
+            val ex = new NoShardIdException(s"cannot get shardId from $metadata")
+            logger.log(Level.ERROR, "getLogicalPartition failed with: ", ex)
+            Throw(ex)
+        }
       }
-      ZkMetadata.fromAddrMetadata(addressMetadata).flatMap(_.shardId) match {
-        case Some(id) =>
-          try {
-            val partitionId = getLogicalPartition(id)
-            Return(partitionId)
-          } catch {
-            case NonFatal(e) =>
-              logger.log(Level.ERROR, "getLogicalPartition failed with: ", e)
-              Throw(e)
-          }
-        case None =>
-          val ex = new NoShardIdException(s"cannot get shardId from $addressMetadata")
-          logger.log(Level.ERROR, "getLogicalPartition failed with: ", ex)
-          Throw(ex)
-      }
-    }
+  }
 
-    val init = Map.empty[Try[Int], CachedServiceFactory[Req, Rep]]
-    safelyScanLeft(init, destActivity.states) { (partitionNodes, activeSet) =>
-      updatePartitionMap[Try[Int], CachedServiceFactory[Req, Rep], Address](
-        partitionNodes,
-        activeSet,
-        getShardIdFromAddress,
-        cachedServiceFactoryDiffOps
-      )
+  // listen to the WeightedAddress changes, transform the changes to a stream of
+  // partition id (includes errors) to [[CachedServiceFactory]].
+  private[this] val partitionAddressChanges: Activity[
+    (B, Map[Try[Int], CachedServiceFactory[Req, Rep]])
+  ] = {
+    val init: (B, Map[Try[Int], CachedServiceFactory[Req, Rep]]) =
+      (PartialFunction.empty, Map.empty)
+    safelyScanLeft(init, destActivity.join(observable)) {
+      case ((_, partitionNodes), (activeSet, state)) =>
+        (
+          getPartitionFunctionPerState(state),
+          updatePartitionMap[Try[Int], CachedServiceFactory[Req, Rep], Address](
+            partitionNodes,
+            activeSet,
+            getShardIdFromAddress(state),
+            cachedServiceFactoryDiffOps
+          ))
     }
   }
 
   // Transform the stream of [[CachedServiceFactory]] to ServiceFactory and filter out
   // the failed partition id
-  private[this] val partitionNodesChange: Event[Map[Int, ServiceFactory[Req, Rep]]] = {
-    val init = Map.empty[Int, ServiceFactory[Req, Rep]]
+  private[this] val partitionNodesChange: Event[SnapPartitioner[Req, Rep, B]] = {
+    val init = SnapPartitioner.uninitialized[Req, Rep, B]
     partitionAddressChanges
+      .states
       .foldLeft(init) {
-        case (_, Activity.Ok(partitions)) =>
+        case (_, Activity.Ok((partitionFn, partitions))) =>
           // this could possibly be an empty update if getLogicalPartition returns all Throws
-          partitions.filter(_._1.isReturn).map {
-            case (key, sf) => (key.get() -> sf.factory)
-          }
+          SnapPartitioner(
+            partitionFn,
+            partitions.collect {
+              case (Return(key), sf) => (key -> sf.factory)
+            })
         case (staleState, _) => staleState
-      }.filter(_.nonEmpty)
+      }.filter(_.partitionMapping.nonEmpty)
   }
 
   private[this] val nodeWatcher: Closable =
     partitionNodesChange.register(Witness(partitionServiceNodes))
 
   /**
-   * Returns a Future of [[Service]] which maps to the given partitionId.
-   *
-   * Note: The caller is responsible for relinquishing the use of the returned [[Service]
-   * by calling [[Service#close()]]. Close this node manager will close all underlying services.
-   *
-   * @param partitionId logical partition id
+   * Returns a [[SnapPartitioner]] which describes how to partition requests.
    */
-  def getServiceByPartitionId(partitionId: Int): Future[Service[Req, Rep]] = {
-    partitionServiceNodes.get.get(partitionId) match {
-      case Some(factory) => factory()
-      case None =>
-        Future.exception(
-          new NoPartitionException(s"No partition: $partitionId found in the node manager"))
-    }
-  }
+  def snapshotSharder(): SnapPartitioner[Req, Rep, B] = partitionServiceNodes.get
 
   /**
-   * When close the node manager, all underlying services are closed.
+   * When we close the node manager, all underlying services are closed.
    */
-  def close(deadline: Time): Future[Unit] = self.synchronized {
-    nodeWatcher.close(deadline)
-    Closable.all(partitionServiceNodes.get.values.toSeq: _*).close(deadline)
+  def close(deadline: Time): Future[Unit] = {
+    partitionerMetrics.remove()
+    // we want to ensure that nodeWatcher stops updating the partitionServiceNodes
+    // before we start closing them
+    Closable
+      .sequence(
+        nodeWatcher,
+        Closable.all(partitionServiceNodes.get.partitionMapping.values.toSeq: _*)
+      ).close(deadline)
   }
 }
