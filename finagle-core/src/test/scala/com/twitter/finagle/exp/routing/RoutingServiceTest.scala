@@ -32,19 +32,18 @@ private object RoutingServiceTest {
     ): StringRouter = StringRouter(label, routes)
   }
 
-  private val transformer: RequestTransformingFilter[Int, String, Int] =
-    new RequestTransformingFilter(i => i)
+  private val notFoundHandler: Int => Future[String] = _ => Future.const(Return("not found"))
 
-  // note: in practice each RoutingService shouldn't directly expose the RoutingServiceBuilder, but
-  // instead a more user-friendly facade. See how MethodBuilder is used for inspiration.
-  def newBuilder: RoutingServiceBuilder[Int, String, SvcSchema, Int] =
-    RoutingServiceBuilder
-      .newBuilder(RouterBuilder.newBuilder[Int, Route, StringRouter](generator))
-      .withNotFoundHandler(_ => Future.const(Return("not found")))
-      .withExceptionHandler {
-        case ReqRepT(_, Throw(NonFatal(t))) =>
-          Future.value(s"${t.getClass.getSimpleName}: ${t.getMessage}")
-      }
+  private val defaultExceptionHandler: PartialFunction[
+    ReqRepT[Int, String],
+    Future[String]
+  ] = {
+    case ReqRepT(_, Throw(NonFatal(t))) =>
+      Future.value(s"${t.getClass.getSimpleName}: ${t.getMessage}")
+  }
+
+  private def newBuilder: RouterBuilder[Int, Route, StringRouter] =
+    RouterBuilder.newBuilder(generator)
 
 }
 
@@ -54,42 +53,58 @@ class RoutingServiceTest extends FunSuite {
   def await[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 1.second)
 
   test("routes to destinations") {
-    val evenRouter: Service[Int, String] = newBuilder
-      .withRoute { r =>
-        r.withLabel("evens")
-          .withSchema(SvcSchema(_ % 2 == 0))
-          .withRequestTransformer(transformer)
-          .withService(Service.mk[Int, String](i => Future.value(i.toString)))
-      }
-      .build()
-    assert(await(evenRouter(1)) == "not found")
-    assert(await(evenRouter(2)) == "2")
-    assert(await(evenRouter(-1)) == "IllegalArgumentException: BANG!")
+    val evenRouter = newBuilder
+      .withRoute(
+        Route(
+          label = "evens",
+          schema = SvcSchema(_ % 2 == 0),
+          service = Service.mk[Int, String](i => Future.value(i.toString))
+        )
+      )
+      .newRouter()
 
-    val oddRouter: Service[Int, String] = newBuilder
-      .withRoute { r =>
-        r.withLabel("odds")
-          .withSchema(SvcSchema(_ % 2 != 0))
-          .withRequestTransformer(transformer)
-          .withService(Service.mk[Int, String](i => Future.value(i.toString)))
-      }
-      .withRoute { r =>
-        r.withLabel("error")
-          .withSchema(SvcSchema(_ == 8))
-          .withRequestTransformer(transformer)
-          .withService(Service.const(Future.exception(new IllegalStateException("8's BAD!"))))
-      }
-      .withExceptionHandler {
-        case ReqRepT(_, Throw(e: IllegalStateException)) if e.getMessage == "8's BAD!" =>
-          Future.value("8's GOOD!")
-      }
-      .build()
+    val evenSvc: Service[Int, String] = new RoutingService(
+      router = evenRouter,
+      notFoundHandler = notFoundHandler,
+      exceptionHandler = defaultExceptionHandler)
 
-    assert(await(oddRouter(1)) == "1")
-    assert(await(oddRouter(2)) == "not found")
-    assert(await(oddRouter(8)) == "8's GOOD!")
+    assert(await(evenSvc(1)) == "not found")
+    assert(await(evenSvc(2)) == "2")
+    assert(await(evenSvc(-1)) == "IllegalArgumentException: BANG!")
+
+    val customExceptionHandler: PartialFunction[ReqRepT[Int, String], Future[String]] = {
+      case ReqRepT(_, Throw(e: IllegalStateException)) if e.getMessage == "8's BAD!" =>
+        Future.value("8's GOOD!")
+    }
+
+    val oddRouter = newBuilder
+      .withRoute(
+        Route(
+          label = "odds",
+          schema = SvcSchema(_ % 2 != 0),
+          service = Service.mk[Int, String](i => Future.value(i.toString))
+        )
+      )
+      .withRoute(
+        Route(
+          label = "error",
+          schema = SvcSchema(_ == 8),
+          service = Service.const(Future.exception(new IllegalStateException("8's BAD!")))
+        )
+      )
+      .newRouter()
+
+    val oddSvc: Service[Int, String] = new RoutingService(
+      router = oddRouter,
+      notFoundHandler = notFoundHandler,
+      exceptionHandler = customExceptionHandler
+    ) // override the exception handler for our test
+
+    assert(await(oddSvc(1)) == "1")
+    assert(await(oddSvc(2)) == "not found")
+    assert(await(oddSvc(8)) == "8's GOOD!")
     intercept[IllegalArgumentException] {
-      await(oddRouter(-1)) // we have overridden the default error handler
+      await(oddSvc(-1)) // we have overridden the default error handler
     }
   }
 

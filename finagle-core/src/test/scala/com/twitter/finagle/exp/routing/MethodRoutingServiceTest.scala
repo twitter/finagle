@@ -3,14 +3,7 @@ package com.twitter.finagle.exp.routing
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.Contexts
-import com.twitter.util.routing.{
-  Generator,
-  Router,
-  RouterBuilder,
-  ValidationError,
-  ValidationException,
-  Validator
-}
+import com.twitter.util.routing.{Generator, Router, RouterBuilder, ValidationError, Validator}
 import com.twitter.util.{Await, Awaitable, Future, Throw}
 import org.scalatest.FunSuite
 
@@ -86,16 +79,14 @@ private object MethodRoutingServiceTest {
     ): MethodRouter = MethodRouter(label, routes)
   }
 
-  // note: in practice each RoutingService shouldn't directly expose the RoutingServiceBuilder, but
-  // instead a more user-friendly facade.
-  def newBuilder: RoutingServiceBuilder[Request, Response, MethodSchema, MethodRequest[_]] =
-    RoutingServiceBuilder
-      .newBuilder(RouterBuilder.newBuilder[Request, Route, MethodRouter](generator))
-      .withValidator(validator)
-      .withNotFoundHandler(r =>
-        Future.const(
-          Throw(new IllegalArgumentException(
-            s"Method not defined that can handle request $r for this service"))))
+  private val notFoundHandler: Request => Future[Response] = r =>
+    Future.const(
+      Throw(
+        new IllegalArgumentException(
+          s"Method not defined that can handle request $r for this service")))
+
+  private def newBuilder: RouterBuilder[Request, Route, MethodRouter] =
+    RouterBuilder.newBuilder(generator).withValidator(validator)
 
 }
 
@@ -105,27 +96,40 @@ class MethodRoutingServiceTest extends FunSuite {
   def await[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 1.second)
 
   test("routes to destinations") {
-    val svc = newBuilder
-      .withRoute { r =>
-        r.withLabel("get_user")
-          .withSchema(MethodSchema(GetUser))
-          .withRequestTransformer(new RequestTransformingFilter(req => MethodRequest(GetUser, req)))
-          .withService(Service.mk { req =>
-            val id = req.request.asInstanceOf[GetUser.Args].id
-            Future.value(UserResponse(id, s"Hello, $id"))
-          })
-      }
-      .withRoute { r =>
-        r.withLabel("delete_user")
-          .withSchema(MethodSchema(DeleteUser))
-          .withRequestTransformer(new RequestTransformingFilter(req =>
-            MethodRequest(DeleteUser, req)))
-          .withService(Service.mk { req =>
-            val id = req.request.asInstanceOf[DeleteUser.Args].id
-            Future.value(UserResponse(id, s"Goodbye, $id"))
-          })
-      }
-      .build
+    val router = newBuilder
+      .withRoute(
+        Route.transformed[Request, Response, MethodSchema, MethodRequest[_]](
+          transformer = new RequestTransformingFilter(req => MethodRequest(GetUser, req)),
+          route = Route(
+            label = "get_user",
+            schema = MethodSchema(GetUser),
+            service = Service.mk { req =>
+              val id = req.request.asInstanceOf[GetUser.Args].id
+              Future.value(UserResponse(id, s"Hello, $id"))
+            }
+          )
+        )
+      )
+      .withRoute(
+        Route.transformed[Request, Response, MethodSchema, MethodRequest[_]](
+          transformer = new RequestTransformingFilter(req => MethodRequest(DeleteUser, req)),
+          route = Route(
+            label = "delete_user",
+            schema = MethodSchema(DeleteUser),
+            service = Service.mk { req =>
+              val id = req.request.asInstanceOf[DeleteUser.Args].id
+              Future.value(UserResponse(id, s"Goodbye, $id"))
+            }
+          )
+        )
+      )
+      .newRouter()
+
+    val svc: Service[Request, Response] = new RoutingService(
+      router = router,
+      notFoundHandler = notFoundHandler,
+      exceptionHandler = PartialFunction.empty
+    )
 
     GetUser.asCurrent {
       assert(await(svc(UserRequest("123"))) == UserResponse("123", "Hello, 123"))
@@ -137,23 +141,6 @@ class MethodRoutingServiceTest extends FunSuite {
 
     intercept[IllegalArgumentException] {
       await(svc(UserRequest("123")))
-    }
-  }
-
-  test("validation errors when not all methods are defined") {
-    val builder = newBuilder
-      .withRoute { r =>
-        r.withLabel("delete_user")
-          .withSchema(MethodSchema(DeleteUser))
-          .withRequestTransformer(new RequestTransformingFilter(req =>
-            MethodRequest(DeleteUser, req)))
-          .withService(Service.mk { req =>
-            val id = req.request.asInstanceOf[DeleteUser.Args].id
-            Future.value(UserResponse(id, s"Goodbye, $id"))
-          })
-      }
-    intercept[ValidationException] {
-      builder.build()
     }
   }
 
