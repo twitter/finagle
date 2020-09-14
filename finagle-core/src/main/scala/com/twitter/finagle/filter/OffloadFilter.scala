@@ -62,8 +62,17 @@ object OffloadFilter {
     final case class Enabled(pool: FuturePool) extends Param
     final case object Disabled extends Param
 
-    implicit val param: Stack.Param[Param] =
-      Stack.Param(defaultPool.map(Enabled(_)).getOrElse(Disabled))
+    implicit val param: Stack.Param[Param] = new Stack.Param[Param] {
+      lazy val default: Param = defaultPool.map(Enabled(_)).getOrElse(Disabled)
+
+      override def show(p: Param): Seq[(String, () => String)] = {
+        val enabledStr = p match {
+          case Enabled(executorServiceFuturePool) => executorServiceFuturePool.toString
+          case Disabled => "Disabled"
+        }
+        Seq(("pool", () => enabledStr))
+      }
+    }
   }
 
   private[finagle] def client[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =

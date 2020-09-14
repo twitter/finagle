@@ -421,8 +421,8 @@ object StackClient {
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
     stk.push(ForwardAnnotation.module)
-    stk.push(RegistryEntryLifecycle.module)
     stk.push(OffloadFilter.client)
+    stk.push(RegistryEntryLifecycle.module)
     stk.push(TraceInitializerFilter.clientModule)
     stk.result
   }
