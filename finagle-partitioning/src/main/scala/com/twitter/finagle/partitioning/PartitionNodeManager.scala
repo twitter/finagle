@@ -206,7 +206,7 @@ private[finagle] class PartitionNodeManager[
   ] = {
     val init: (B, Map[Try[Int], CachedServiceFactory[Req, Rep]]) =
       (PartialFunction.empty, Map.empty)
-    safelyScanLeft(init, destActivity.join(observable)) {
+    Activity(safelyScanLeft(init, destActivity.join(observable).run.changes) {
       case ((_, partitionNodes), (activeSet, state)) =>
         (
           getPartitionFunctionPerState(state),
@@ -216,7 +216,7 @@ private[finagle] class PartitionNodeManager[
             getShardIdFromAddress(state),
             cachedServiceFactoryDiffOps
           ))
-    }
+    })
   }
 
   // Transform the stream of [[CachedServiceFactory]] to ServiceFactory and filter out
