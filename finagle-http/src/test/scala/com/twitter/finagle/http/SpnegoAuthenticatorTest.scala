@@ -31,7 +31,7 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   }
 
   test("malformed token") {
-    // TODO: c.t.u.Base64StringEncoder is crazy permissive: the only way to win is not to play
+    // TODO: c.t.u.Base64StringEncoder is too permissive: the only way to win is not to play
     negative {
       builder.setHeader(Fields.Authorization, AuthScheme).buildGet()
     }

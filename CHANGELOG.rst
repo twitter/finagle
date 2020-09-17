@@ -2521,7 +2521,7 @@ New Features
 
 * finagle-stats: `JsonExporter` now respects verbosity levels (current default behavior is
   to keep exporting "debug" metrics). Adjust `com.twitter.finagle.stats.verbose` tunable
-  whitelist to change it.  ``PHAB_ID=D79571``
+  allowlist to change it.  ``PHAB_ID=D79571``
 
 * finagle-tunable: `StandardTunableMap` is now public. Users can access file-based, in-memory,
   and service-loaded tunable values using the map.
@@ -4291,7 +4291,7 @@ New Features
 * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
   method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
 
-* finagle-stats: Added `c.t.f.stats` now has a `statsFilterFile` flag which will read a blacklist
+* finagle-stats: Added `c.t.f.stats` now has a `statsFilterFile` flag which will read a denylist
   of regex, newline-separated values. It will be used along with the `statsFilter` flag for stats
   filtering. ``RB_ID=764914``
 

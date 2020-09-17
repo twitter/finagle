@@ -102,11 +102,6 @@ object OffloadFilter {
       //
       // You would be surprised but this can happen. Same simulations report that we lose a race in
       // about 1 in 1 000 000 of cases this way (0.0001%).
-      //
-      // There is no better explanation to this than in Bryce's own words:
-      //
-      // > Thread pauses are nuts.
-      // > Kernels are crazy.
       val response = service(request)
       val shifted = Promise.interrupts[Rep](response)
       response.respond { t =>
