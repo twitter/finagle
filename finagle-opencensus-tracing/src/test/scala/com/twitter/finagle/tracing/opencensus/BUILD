@@ -12,7 +12,9 @@ junit_tests(
         "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "3rdparty/jvm/org/scalatestplus:scalacheck",
         "finagle/finagle-grpc-context/src/main/java/io/grpc/override",
+        "finagle/finagle-http/src/main/scala",
         "finagle/finagle-opencensus-tracing/src/main/scala/com/twitter/finagle/tracing/opencensus",
+        "finagle/finagle-thriftmux/src/main/scala",
         "finagle/finagle-thriftmux/src/test/thrift:thrift-scala",
     ],
 )

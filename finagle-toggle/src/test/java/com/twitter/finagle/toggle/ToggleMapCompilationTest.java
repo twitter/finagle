@@ -5,7 +5,7 @@ import scala.collection.immutable.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-class ToggleMapCompilationTest {
+public class ToggleMapCompilationTest {
   @Test
   public void testMutableIsToggleMap() {
     ToggleMap toggleMap = ToggleMap.newMutable();
