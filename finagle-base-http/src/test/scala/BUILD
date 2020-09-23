@@ -17,3 +17,13 @@ junit_tests(
         "finagle/finagle-toggle/src/main/scala",
     ],
 )
+
+scala_library(
+    name = "cookie-map-test-lib",
+    sources = ["com/twitter/finagle/http/CookieMapTest.scala"],
+    compiler_option_sets = ["fatal_warnings"],
+    dependencies = [
+        "3rdparty/jvm/org/scalatest",
+        "finagle/finagle-base-http",
+    ],
+)
