@@ -36,6 +36,8 @@ public class ContextStorageOverrideTest {
   }
 
   @Test
+  // because `storage.doAttach` returns a value that is ignored.
+  @SuppressWarnings("CheckReturnValue")
   public void testWithFutures() throws Exception {
     Context.Storage storage = new ContextStorageOverride();
 
