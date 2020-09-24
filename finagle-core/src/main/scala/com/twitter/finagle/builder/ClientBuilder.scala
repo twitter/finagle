@@ -21,6 +21,7 @@ import com.twitter.finagle.ssl.client.{
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.stats.{
   NullStatsReceiver,
+  RelativeNameMarkingStatsReceiver,
   RoleConfiguredStatsReceiver,
   StatsReceiver,
   Client => ClientRole
@@ -1126,7 +1127,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   private[finagle] lazy val statsReceiver = {
     val Stats(sr) = params[Stats]
     val Label(label) = params[Label]
-    new RoleConfiguredStatsReceiver(sr.scope(label), ClientRole)
+    new RoleConfiguredStatsReceiver(
+      new RelativeNameMarkingStatsReceiver(sr.scope(label)),
+      ClientRole)
   }
 
   /**

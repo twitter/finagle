@@ -13,6 +13,9 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: Add RelativeName field to Metric Metadata and populate it for
+  client and server metrics. ``PHAB_ID=D552357``
+
 * finagle-scribe: Add `c.t.finagle.scribe.Publisher` for publishing messages to a
   Scribe process. ``PHAB_ID=D539003``
 

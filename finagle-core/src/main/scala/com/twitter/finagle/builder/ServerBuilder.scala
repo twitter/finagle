@@ -10,7 +10,12 @@ import com.twitter.finagle.ssl.server.{
   SslServerEngineFactory,
   SslServerSessionVerifier
 }
-import com.twitter.finagle.stats.{RoleConfiguredStatsReceiver, Server, StatsReceiver}
+import com.twitter.finagle.stats.{
+  RelativeNameMarkingStatsReceiver,
+  RoleConfiguredStatsReceiver,
+  Server,
+  StatsReceiver
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
@@ -660,7 +665,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     val Logger(logger) = params[Logger]
     val Daemonize(daemon) = params[Daemonize]
     val MonitorFactory(newMonitor) = params[MonitorFactory]
-    val statsReceiver = new RoleConfiguredStatsReceiver(params[Stats].statsReceiver, Server)
+    val statsReceiver = new RoleConfiguredStatsReceiver(
+      new RelativeNameMarkingStatsReceiver(params[Stats].statsReceiver),
+      Server)
 
     val monitor = newMonitor(lbl, InetSocketAddressUtil.toPublic(addr)) andThen
       new SourceTrackingMonitor(logger, label)
