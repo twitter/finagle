@@ -216,6 +216,10 @@ generator.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.thrift.exp">exp</a></dd></dl></div>
     </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="ClientCustomStrategies$.html" title="The java-friendly way to create a ClientCustomStrategy."></a>
+                        <a href="ClientCustomStrategies$.html" title="The java-friendly way to create a ClientCustomStrategy.">ClientCustomStrategies</a>
+                      </li><li class="current-entities indented6">
                         <a class="object" href="ClientCustomStrategy$.html" title=""></a>
                         <a class="class" href="ClientCustomStrategy.html" title="An API to set a custom partitioning strategy for a Thrift/ThriftMux Client."></a>
                         <a href="ClientCustomStrategy.html" title="An API to set a custom partitioning strategy for a Thrift/ThriftMux Client.">ClientCustomStrategy</a>
@@ -336,37 +340,10 @@ generator.
 
         
 
-        <div class="values members">
-              <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy#getLogicalPartition" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="getLogicalPartition(instance:Int):Int"></a><a id="getLogicalPartition(Int):Int"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/CustomPartitioningStrategy.html#getLogicalPartition(instance:Int):Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getLogicalPartition</span><span class="params">(<span name="instance">instance: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Gets the logical partition identifier from a host identifier, host identifiers are derived
-from <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the logical partition identifier from a host identifier, host identifiers are derived
-from <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId. Indicates which logical partition a physical host belongs to,
-multiple hosts can belong to the same partition, for example:</p><pre><span class="kw">val</span> getLogicalPartition: <span class="std">Int</span> <span class="kw">=&gt;</span> <span class="std">Int</span> = {
-  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="num">0</span>
-  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="num">1</span>
-  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="num">2</span>
-  <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">throw</span> ...
-}</pre></div></div>
-    </li></ol>
-            </div>
+        
 
         <div class="values members">
-              <h3>Concrete Value Members</h3>
+              <h3>Value Members</h3>
               <ol>
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
@@ -618,6 +595,25 @@ multiple hosts can belong to the same partition, for example:</p><pre><span clas
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy#responseMergerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="responseMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry"></a><a id="responseMergerRegistry:ResponseMergerRegistry"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/CustomPartitioningStrategy.html#responseMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">responseMergerRegistry</span><span class="result">: <a href="PartitioningStrategy$$ResponseMergerRegistry.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry">ResponseMergerRegistry</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s
+for message fan-out cases.</p><div class="fullcomment"><div class="comment cmt"><p>A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s
+for message fan-out cases.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="ResponseMerger">ResponseMerger</span></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

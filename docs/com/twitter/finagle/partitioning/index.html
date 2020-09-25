@@ -666,6 +666,10 @@ finagle clients and servers.
                         <span class="separator"></span>
                         <a class="object" href="PartitioningService$.html" title=""></a>
                         <a href="PartitioningService$.html" title="">PartitioningService</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="SnapPartitioner$.html" title=""></a>
+                        <a class="class" href="SnapPartitioner.html" title="Represents the snapshot of the information needed to determine how to carve up the request, and where to send those carved-up slices to."></a>
+                        <a href="SnapPartitioner.html" title="Represents the snapshot of the information needed to determine how to carve up the request, and where to send those carved-up slices to.">SnapPartitioner</a>
                       </li><li name="com.twitter.finagle.pool" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pool"></a><a id="pool:pool"></a>
       <span class="permalink">
@@ -711,6 +715,22 @@ finagle clients and servers.
       </span>
       <span class="symbol">
         <a title="" href="../redis/index.html"><span class="name">redis</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.scribe" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="scribe"></a><a id="scribe:scribe"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/scribe/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../scribe/index.html"><span class="name">scribe</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
@@ -1086,6 +1106,23 @@ on consistent-hashing hash ring.</p>
       </span>
       
       
+    </li><li name="com.twitter.finagle.partitioning.SnapPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SnapPartitioner[Req,Rep,B&gt;:PartialFunction[Any,com.twitter.util.Future[Nothing]]]extendsProductwithSerializable"></a><a id="SnapPartitioner[Req,Rep,B&gt;:PartialFunction[Any,Future[Nothing]]]:SnapPartitioner[Req,Rep,B]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/partitioning/SnapPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Represents the snapshot of the information needed to determine how to carve up the request, and where to send those carved-up slices to." href="SnapPartitioner.html"><span class="name">SnapPartitioner</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="B">B &gt;: <a href="https://www.scala-lang.org/api/2.12.11/scala/PartialFunction.html#scala.PartialFunction" class="extype" name="scala.PartialFunction">PartialFunction</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Nothing.html#scala.Nothing" class="extype" name="scala.Nothing">Nothing</a>]]</span>]</span><span class="params">(<span name="partitionFunction">partitionFunction: <span class="extype" name="com.twitter.finagle.partitioning.SnapPartitioner.B">B</span></span>, <span name="partitionMapping">partitionMapping: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>, <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.partitioning.SnapPartitioner.Req">Req</span>, <span class="extype" name="com.twitter.finagle.partitioning.SnapPartitioner.Rep">Rep</span>]]</span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Represents the snapshot of the information needed to determine how to
+carve up the request, and where to send those carved-up slices to.</p>
     </li></ol>
             </div>
 
@@ -1157,6 +1194,22 @@ a &quot;host:port&quot; format or custom format.
       </span>
       <span class="symbol">
         <a title="" href="PartitioningService$.html"><span class="name">PartitioningService</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.partitioning.SnapPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SnapPartitioner"></a><a id="SnapPartitioner:SnapPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/partitioning/SnapPartitioner$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SnapPartitioner$.html"><span class="name">SnapPartitioner</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
