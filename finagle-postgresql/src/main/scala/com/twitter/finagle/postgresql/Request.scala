@@ -19,5 +19,4 @@ object Request {
     maxResults: Int = 0,
   ) extends Execute
   case class ResumePortal(name: Name, maxResults: Int) extends Execute
-//  case class Execute(prepared: Prepared, parameters: IndexedSeq[Buf], portalName: Name = Name.Unnamed) extends Request
 }

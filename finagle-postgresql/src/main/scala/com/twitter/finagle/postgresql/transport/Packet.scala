@@ -3,7 +3,7 @@ package com.twitter.finagle.postgresql.transport
 import com.twitter.io.Buf
 
 case class Packet(cmd: Option[Byte], body: Buf) {
-  def toBuf =
+  def toBuf: Buf =
     PgBuf.writer
       .opt(cmd) { (c, w) => w.byte(c) }
       .int(body.length + 4)
@@ -12,7 +12,7 @@ case class Packet(cmd: Option[Byte], body: Buf) {
 }
 
 object Packet {
-  def parse(b: Buf) = {
+  def parse(b: Buf): Packet = {
     val reader = PgBuf.reader(b)
     val cmd = reader.byte()
     val body = if(reader.remaining == 0) Buf.Empty else {

@@ -27,7 +27,9 @@ object Types {
   sealed trait Name
   object Name {
     case object Unnamed extends Name
-    case class Named(value: String) extends Name
+    case class Named(value: String) extends Name {
+      require(value.length > 0, "named prepared statement cannot be empty")
+    }
   }
 
   sealed trait WireValue
