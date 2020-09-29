@@ -628,7 +628,7 @@ class TrafficDistributorTest extends FunSuite {
       }
     }
 
-    def getPartitionKey(i: Int) = i % 3
+    def getPartitionKey(i: Int) = Seq(i % 3)
   }
 
   test("updatePartitionMap - add new partitions") {

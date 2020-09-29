@@ -7,6 +7,8 @@ import com.twitter.finagle.stats.{Counter, NullStatsReceiver, StatsReceiver, Ver
 import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.logging.Logger
 import com.twitter.util._
+import scala.collection.mutable.Builder
+import scala.collection.{immutable, mutable}
 import scala.util.control.NonFatal
 
 private[finagle] object TrafficDistributor {
@@ -114,7 +116,7 @@ private[finagle] object TrafficDistributor {
    *
    * @param accumulated Previous Partition Map
    * @param current     Current Set of elements
-   * @param getKey      A discriminator function for current Set to get key
+   * @param getKeys      A discriminator function for current Set to get keys
    * @param diffOps     [[DiffOps]] to handle the diff between the previous partition map and
    *                    newly transformed partition map from the current Set. This function
    *                    usually handles transactions during creating, updating, and removing.
@@ -122,10 +124,10 @@ private[finagle] object TrafficDistributor {
   private[finagle] def updatePartitionMap[Key, Partition, U](
     accumulated: Map[Key, Partition],
     current: Set[U],
-    getKey: U => Key,
+    getKeys: U => Seq[Key],
     diffOps: DiffOps[U, Partition]
   ): Map[Key, Partition] = {
-    val grouped = current.groupBy(getKey)
+    val grouped = groupBy(current, getKeys)
     val removals = accumulated.keySet &~ grouped.keySet
     val additions = grouped.keySet &~ accumulated.keySet
     val updates = grouped.keySet & accumulated.keySet
@@ -133,6 +135,25 @@ private[finagle] object TrafficDistributor {
     val added = additions.map { key => key -> diffOps.add(grouped(key)) }.toMap
     val updated = updates.map { key => key -> diffOps.update(grouped(key), accumulated(key)) }.toMap
     added ++ updated
+  }
+
+  /**
+   * A modified version of scala collection's groupBy function. `f` is a multi-mapping function
+   * and this achieves many to many mapping.
+   */
+  private def groupBy[U, Key](coll: Set[U], f: U => Seq[Key]): immutable.Map[Key, Set[U]] = {
+    val m = mutable.Map.empty[Key, Builder[U, Set[U]]]
+    for (elem <- coll) {
+      val keys = f(elem)
+      for (k <- keys) {
+        val bldr = m.getOrElseUpdate(k, Set.newBuilder)
+        bldr += elem
+      }
+    }
+    val b = immutable.Map.newBuilder[Key, Set[U]]
+    for ((k, v) <- m)
+      b += ((k, v.result))
+    b.result
   }
 
   /**
@@ -341,7 +362,7 @@ private class TrafficDistributor[Req, Rep](
       val result = updatePartitionMap(
         balancers,
         activeSet,
-        (weightedFactory: WeightedFactory[Req, Rep]) => weightedFactory.weight,
+        (weightedFactory: WeightedFactory[Req, Rep]) => Seq(weightedFactory.weight),
         balancerDiffOps)
 
       // Intercept the empty balancer set and replace it with a single balancer

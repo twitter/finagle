@@ -1,19 +1,18 @@
 package com.twitter.finagle.thrift.exp.partitioning;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import scala.Function1;
-import scala.PartialFunction;
-import scala.runtime.AbstractPartialFunction;
+import java.util.function.IntFunction;
 
 import org.junit.Test;
 
 import com.twitter.scrooge.ThriftStructIface;
+import com.twitter.test.A;
 import com.twitter.util.Function;
 import com.twitter.util.Future;
 import com.twitter.util.Return;
-import com.twitter.test.A;
 
 public class PartitioningStrategyCompilationTest {
 
@@ -30,8 +29,9 @@ public class PartitioningStrategyCompilationTest {
     Map<Integer, ThriftStructIface> myMap = new HashMap<>();
     CustomPartitioningStrategy myCustomStrat =
       ClientCustomStrategies.noResharding(Function.func((ThriftStructIface iface) -> Future.value(myMap)));
+    IntFunction<List<Integer>> getLogicalPartitions = num -> Arrays.asList(num * 2);
     CustomPartitioningStrategy myOtherCustomStrat =
-      ClientCustomStrategies.noResharding(Function.func((ThriftStructIface iface) -> Future.value(myMap)), num -> num * 2);
+      ClientCustomStrategies.noResharding(Function.func((ThriftStructIface iface) -> Future.value(myMap)), getLogicalPartitions);
     PartitioningStrategy myStrat = myCustomStrat;
   }
 

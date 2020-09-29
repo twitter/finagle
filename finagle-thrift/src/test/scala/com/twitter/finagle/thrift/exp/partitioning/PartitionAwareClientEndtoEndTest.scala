@@ -246,10 +246,11 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
             }
           Future.value(partitionIdAndRequest)
       },
-      { instance: Int => // p0(0), p1(1,2), p2(3, 4)
-        val partitionPositions = List(0.to(0), 1.to(2), 3.until(fixedInetAddresses.size))
+      { instance: Int => // p0(0,1), p1(1,2), p2(3, 4)
+        val partitionPositions = List(0.to(1), 1.to(2), 3.until(fixedInetAddresses.size))
         val position = fixedInetAddresses.indexWhere(_.getPort == instance)
-        partitionPositions.indexWhere(range => range.contains(position))
+        partitionPositions.zipWithIndex
+          .filter { case (range, index) => range.contains(position) }.map(_._2)
       }
     )
 
@@ -282,7 +283,6 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
           Seq(addrInfo0, addrInfo1, addrInfo2, addrInfo3, addrInfo4),
           Byte.MinValue)).toSet
       assert(result == expectedThreeNodes)
-
     }
   }
 
@@ -374,7 +374,7 @@ abstract class PartitionAwareClientEndToEndTest extends FunSuite {
         {
           _: Int =>
             { instance: Int =>
-              fixedInetAddresses.indexWhere(_.getPort == instance)
+              Seq(fixedInetAddresses.indexWhere(_.getPort == instance))
             }
         },
         Activity(dynamic.map(Activity.Ok(_)))

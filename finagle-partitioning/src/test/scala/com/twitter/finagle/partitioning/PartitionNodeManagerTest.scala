@@ -76,21 +76,22 @@ class PartitionNodeManagerTest extends FunSuite {
 
     // p0(0), p1(1,2), p2(3,4,5), p3(6,...)
     // use port number to mock shardId
-    def getLogicalPartition(varAddresses: Var[Seq[InetSocketAddress]]): Int => Int = { replica =>
-      val addresses = varAddresses.sample()
-      require(addresses.size >= 7)
-      val partitionPositions = List(0.to(0), 1.to(2), 3.to(5), 6.until(addresses.size))
-      val position = addresses.indexWhere(_.getPort == replica)
-      val partitionId = partitionPositions.indexWhere(range => range.contains(position))
-      scala.Predef.assert(partitionId > -1)
-      partitionId
+    def getLogicalPartition(varAddresses: Var[Seq[InetSocketAddress]]): Int => Seq[Int] = {
+      replica =>
+        val addresses = varAddresses.sample()
+        require(addresses.size >= 7)
+        val partitionPositions = List(0.to(0), 1.to(2), 3.to(5), 6.until(addresses.size))
+        val position = addresses.indexWhere(_.getPort == replica)
+        val partitionId = partitionPositions.indexWhere(range => range.contains(position))
+        scala.Predef.assert(partitionId > -1)
+        Seq(partitionId)
     }
   }
 
   def noReshardingManager(
     stack: Stack[ServiceFactory[String, String]],
     params: Stack.Params,
-    getLogicalPartition: Int => Int = identity[Int]
+    getLogicalPartition: Int => Seq[Int] = Seq(_)
   ): PartitionNodeManager[String, String, Unit, PartialFunction[String, Future[String]]] = {
     new PartitionNodeManager(
       stack,
@@ -105,7 +106,7 @@ class PartitionNodeManagerTest extends FunSuite {
     stack: Stack[ServiceFactory[String, String]],
     params: Stack.Params,
     pfMaker: Int => PartialFunction[String, Future[String]] = _ => { case s => Future.value(s) },
-    getLogicalPartition: Int => Int => Int = _ => identity[Int],
+    getLogicalPartition: Int => Int => Seq[Int] = _ => Seq(_),
     observable: Activity[Int]
   ): PartitionNodeManager[String, String, Int, PartialFunction[String, Future[String]]] = {
     new PartitionNodeManager(
@@ -167,19 +168,19 @@ class PartitionNodeManagerTest extends FunSuite {
         await(
           nodeManager
             .snapshotSharder().getServiceByPartitionId(
-              logicalPartition(fixedInetAddresses(0).getPort)))
+              logicalPartition(fixedInetAddresses(0).getPort).head))
 
       val svc10 = await(nodeManager.snapshotSharder().getServiceByPartitionId(1))
       val svc11 =
         await(
           nodeManager
             .snapshotSharder().getServiceByPartitionId(
-              logicalPartition(fixedInetAddresses(1).getPort)))
+              logicalPartition(fixedInetAddresses(1).getPort).head))
       val svc12 =
         await(
           nodeManager
             .snapshotSharder().getServiceByPartitionId(
-              logicalPartition(fixedInetAddresses(2).getPort)))
+              logicalPartition(fixedInetAddresses(2).getPort).head))
       assert(svc00 eq svc0)
       assert((svc10 eq svc11) && (svc10 eq svc12))
       assert(svc00 ne svc10)
@@ -199,7 +200,8 @@ class PartitionNodeManagerTest extends FunSuite {
       // before adding, cannot find the logical partition
       intercept[AssertionError] {
         await(
-          nodeManager.snapshotSharder().getServiceByPartitionId(logicalPartition(newIsa.getPort)))
+          nodeManager
+            .snapshotSharder().getServiceByPartitionId(logicalPartition(newIsa.getPort).head))
       }
 
       val newAddresses = fixedInetAddresses :+ newIsa
@@ -208,7 +210,7 @@ class PartitionNodeManagerTest extends FunSuite {
 
       // not throwing an exception here verifies that the service exists
       await(nodeManager.snapshotSharder().getServiceByPartitionId(3))
-      assert(3 == logicalPartition(newIsa.getPort))
+      assert(3 == logicalPartition(newIsa.getPort).head)
     }
   }
 
@@ -327,8 +329,8 @@ class PartitionNodeManagerTest extends FunSuite {
 
   test("log errors when getLogicalPartition throws exceptions for certain shards") {
     new Ctx(addressSize = 8) {
-      def getLogicalPartition: Int => Int = {
-        case even if even % 2 == 0 => 0
+      def getLogicalPartition: Int => Seq[Int] = {
+        case even if even % 2 == 0 => Seq(0)
         case odd => throw new Exception("failed")
       }
       val nodeManager = noReshardingManager(
@@ -348,9 +350,9 @@ class PartitionNodeManagerTest extends FunSuite {
   test("Reshard based on the state that's passed in safely") {
     new Ctx(addressSize = 7) {
       val varInetAddress = Var(fixedInetAddresses)
-      val logicalPartition: Int => Int => Int = { observed =>
+      val logicalPartition: Int => Int => Seq[Int] = { observed =>
         if (observed % 2 == 0) {
-          getLogicalPartition(varInetAddress).andThen(_ % 3)
+          getLogicalPartition(varInetAddress).andThen(_.map(_ % 3))
         } else {
           getLogicalPartition(varInetAddress)
         }

@@ -91,15 +91,17 @@ private[finagle] object PartitionNodeManager {
  *                            should be sliced and diced for each partition.
  *                            Note that this function must be referentially transparent.
  *
- * @param getLogicalPartitionPerState When given a state, gets the logical partition identifier from a host identifier.
- *                            Reverse lookup. Indicates which logical partition a physical host
+ * @param getLogicalPartitionPerState When given a state, gets the logical partition identifiers
+ *                            from a host identifier.
+ *                            Reverse lookup. Indicates which logical partitions a physical host
  *                            belongs to, this is provided by client configuration when needed,
- *                            multiple hosts can belong to the same partition, for example:
+ *                            multiple hosts can belong to the same partition, one host can belong
+ *                            to multiple hosts, for example:
  *                            {{{
- *                                val getLogicalPartition: Int => Int = {
- *                                  case a if Range(0, 10).contains(a) => 0
- *                                  case b if Range(10, 20).contains(b) => 1
- *                                  case c if Range(20, 30).contains(c) => 2
+ *                                val getLogicalPartition: Int => Seq[Int] = {
+ *                                  case a if Range(0, 10).contains(a) => Seq(0, 1)
+ *                                  case b if Range(10, 20).contains(b) => Seq(1)
+ *                                  case c if Range(20, 30).contains(c) => Seq(2)
  *                                  case _ => throw ...
  *                                }
  *                            }}}
@@ -129,7 +131,7 @@ private[finagle] class PartitionNodeManager[
   underlying: Stack[ServiceFactory[Req, Rep]],
   observable: Activity[A],
   getPartitionFunctionPerState: A => B,
-  getLogicalPartitionPerState: A => Int => Int,
+  getLogicalPartitionPerState: A => Int => Seq[Int],
   params: Stack.Params)
     extends Closable { self =>
 
@@ -174,7 +176,7 @@ private[finagle] class PartitionNodeManager[
       }
     }
 
-  private[this] val getShardIdFromAddress: A => Address => Try[Int] = {
+  private[this] val getShardIdFromAddress: A => Address => Seq[Try[Int]] = {
     state =>
       { addr =>
         val metadata = addr match {
@@ -184,17 +186,17 @@ private[finagle] class PartitionNodeManager[
         ZkMetadata.fromAddrMetadata(metadata).flatMap(_.shardId) match {
           case Some(id) =>
             try {
-              val partitionId = getLogicalPartitionPerState(state)(id)
-              Return(partitionId)
+              val partitionIds = getLogicalPartitionPerState(state)(id)
+              partitionIds.map(Return(_))
             } catch {
               case NonFatal(e) =>
                 logger.log(Level.ERROR, "getLogicalPartition failed with: ", e)
-                Throw(e)
+                Seq(Throw(e))
             }
           case None =>
             val ex = new NoShardIdException(s"cannot get shardId from $metadata")
             logger.log(Level.ERROR, "getLogicalPartition failed with: ", ex)
-            Throw(ex)
+            Seq(Throw(ex))
         }
       }
   }
@@ -223,8 +225,7 @@ private[finagle] class PartitionNodeManager[
   // the failed partition id
   private[this] val partitionNodesChange: Event[SnapPartitioner[Req, Rep, B]] = {
     val init = SnapPartitioner.uninitialized[Req, Rep, B]
-    partitionAddressChanges
-      .states
+    partitionAddressChanges.states
       .foldLeft(init) {
         case (_, Activity.Ok((partitionFn, partitions))) =>
           // this could possibly be an empty update if getLogicalPartition returns all Throws

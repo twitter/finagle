@@ -28,7 +28,7 @@ class ThriftCustomPartitioningServiceTest
         }
         Future.value(idsAndRequests)
     },
-    { shardId => shardId % 3 }
+    { shardId => Seq(shardId % 3) }
   )
   customPartitioningStrategy.responseMergerRegistry.add(AMethod, aResponseMerger)
 

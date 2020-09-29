@@ -8,7 +8,7 @@ import com.twitter.finagle.{Address, ServiceFactory, Stack}
 import com.twitter.scrooge.{ThriftMethodIface, ThriftStructIface}
 import com.twitter.util.{Activity, Future, Try}
 import java.lang.{Integer => JInteger}
-import java.util.function.{BiFunction, IntUnaryOperator, Function => JFunction}
+import java.util.function.{BiFunction, IntFunction, Function => JFunction}
 import java.util.{List => JList, Map => JMap, Set => JSet}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -298,7 +298,7 @@ object ClientCustomStrategy {
   def noResharding(
     getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap
   ): CustomPartitioningStrategy =
-    noResharding(getPartitionIdAndRequest, identity[Int])
+    noResharding(getPartitionIdAndRequest, { a: Int => Seq(a) })
 
   /**
    * Constructs a [[ClientCustomStrategy]] that does not reshard.
@@ -316,22 +316,23 @@ object ClientCustomStrategy {
    *        to the original request.  This PartialFunction can take multiple
    *        Thrift request types of one Thrift service (different method endpoints
    *        of one service).
-   * @param getLogicalPartitionId Gets the logical partition identifier from a host
+   * @param getLogicalPartitionId Gets the logical partition identifiers from a host
    *        identifier, host identifiers are derived from [[ZkMetadata]]
-   *        shardId. Indicates which logical partition a physical host belongs to,
-   *        multiple hosts can belong to the same partition, for example:
+   *        shardId. Indicates which logical partitions a physical host belongs to,
+   *        multiple hosts can belong to the same partition, and one host can belong
+   *        to multiple partitions, for example:
    *        {{{
    *          {
-   *            case a if Range(0, 10).contains(a) => 0
-   *            case b if Range(10, 20).contains(b) => 1
-   *            case c if Range(20, 30).contains(c) => 2
+   *            case a if Range(0, 10).contains(a) => Seq(0, 1)
+   *            case b if Range(10, 20).contains(b) => Seq(1)
+   *            case c if Range(20, 30).contains(c) => Seq(2)
    *            case _ => throw ...
    *          }
    *        }}}
    */
   def noResharding(
     getPartitionIdAndRequest: ClientCustomStrategy.ToPartitionedMap,
-    getLogicalPartitionId: Int => Int
+    getLogicalPartitionId: Int => Seq[Int]
   ): CustomPartitioningStrategy =
     new ClientCustomStrategy[Unit](
       _ => getPartitionIdAndRequest,
@@ -351,13 +352,13 @@ object ClientCustomStrategy {
    *        remote cluster, returns a function that gets the logical partition
    *        identifier from a host identifier, host identifiers are derived from
    *        [[ZkMetadata]] shardId. Indicates which logical partition a physical
-   *        host belongs to, multiple hosts can belong to the same partition,
-   *        for example:
+   *        host belongs to, multiple hosts can belong to the same partition, and one host
+   *        can belong to multiple partitions, for example:
    *        {{{
    *          {
-   *            case a if Range(0, 10).contains(a) => 0
-   *            case b if Range(10, 20).contains(b) => 1
-   *            case c if Range(20, 30).contains(c) => 2
+   *            case a if Range(0, 10).contains(a) => Seq(0, 1)
+   *            case b if Range(10, 20).contains(b) => Seq(1)
+   *            case c if Range(20, 30).contains(c) => Seq(2)
    *            case _ => throw ...
    *          }
    *        }}}
@@ -368,7 +369,7 @@ object ClientCustomStrategy {
   def clusterResharding(
     getPartitionIdAndRequestFn: Set[Address] => ClientCustomStrategy.ToPartitionedMap
   ): CustomPartitioningStrategy =
-    clusterResharding(getPartitionIdAndRequestFn, _ => identity[Int])
+    clusterResharding(getPartitionIdAndRequestFn, _ => { a: Int => Seq(a) })
 
   /**
    * Constructs a [[ClientCustomStrategy]] that reshards based on the remote cluster state.
@@ -392,15 +393,15 @@ object ClientCustomStrategy {
    *        provided with, or else it will malfunction.
    * @param getLogicalPartitionIdFn A function that given the current state of the
    *        remote cluster, returns a function that gets the logical partition
-   *        identifier from a host identifier, host identifiers are derived from
-   *        [[ZkMetadata]] shardId. Indicates which logical partition a physical
+   *        identifiers from a host identifier, host identifiers are derived from
+   *        [[ZkMetadata]] shardId. Indicates which logical partitions a physical
    *        host belongs to, multiple hosts can belong to the same partition,
-   *        for example:
+   *        and one host can belong to multiple partitions, for example:
    *        {{{
    *          {
-   *            case a if Range(0, 10).contains(a) => 0
-   *            case b if Range(10, 20).contains(b) => 1
-   *            case c if Range(20, 30).contains(c) => 2
+   *            case a if Range(0, 10).contains(a) => Seq(0, 1)
+   *            case b if Range(10, 20).contains(b) => Seq(1)
+   *            case c if Range(20, 30).contains(c) => Seq(2)
    *            case _ => throw ...
    *          }
    *        }}}
@@ -410,7 +411,7 @@ object ClientCustomStrategy {
    */
   def clusterResharding(
     getPartitionIdAndRequestFn: Set[Address] => ClientCustomStrategy.ToPartitionedMap,
-    getLogicalPartitionIdFn: Set[Address] => Int => Int
+    getLogicalPartitionIdFn: Set[Address] => Int => Seq[Int]
   ): CustomPartitioningStrategy =
     new ClientClusterStrategy(getPartitionIdAndRequestFn, getLogicalPartitionIdFn)
 
@@ -441,7 +442,7 @@ object ClientCustomStrategy {
     getPartitionIdAndRequestFn: A => ClientCustomStrategy.ToPartitionedMap,
     observable: Activity[A]
   ): CustomPartitioningStrategy =
-    resharding[A](getPartitionIdAndRequestFn, (_: A) => (identity[Int](_)), observable)
+    resharding[A](getPartitionIdAndRequestFn, (_: A) => { a: Int => Seq(a) }, observable)
 
   /**
    * Constructs a [[ClientCustomStrategy]] that reshards based on the remote cluster state.
@@ -465,15 +466,15 @@ object ClientCustomStrategy {
    *        else it will malfunction.
    * @param getLogicalPartitionIdFn A function that given the current state
    *        `observable`, returns a function that gets the logical partition
-   *        identifier from a host identifier, host identifiers are derived from
-   *        [[ZkMetadata]] shardId. Indicates which logical partition a physical
+   *        identifiers from a host identifier, host identifiers are derived from
+   *        [[ZkMetadata]] shardId. Indicates which logical partitions a physical
    *        host belongs to, multiple hosts can belong to the same partition,
-   *        for example:
+   *        and one host can belong to multiple partitions, for example:
    *        {{{
    *          {
-   *            case a if Range(0, 10).contains(a) => 0
-   *            case b if Range(10, 20).contains(b) => 1
-   *            case c if Range(20, 30).contains(c) => 2
+   *            case a if Range(0, 10).contains(a) => Seq(0, 1)
+   *            case b if Range(10, 20).contains(b) => Seq(1)
+   *            case c if Range(20, 30).contains(c) => Seq(2)
    *            case _ => throw ...
    *          }
    *        }}}
@@ -485,7 +486,7 @@ object ClientCustomStrategy {
    */
   def resharding[A](
     getPartitionIdAndRequestFn: A => ClientCustomStrategy.ToPartitionedMap,
-    getLogicalPartitionIdFn: A => Int => Int,
+    getLogicalPartitionIdFn: A => Int => Seq[Int],
     observable: Activity[A]
   ): CustomPartitioningStrategy =
     new ClientCustomStrategy(getPartitionIdAndRequestFn, getLogicalPartitionIdFn, observable)
@@ -543,10 +544,10 @@ object ClientCustomStrategies {
    */
   def noResharding(
     toPartitionedMap: ToPartitionedMap,
-    getLogicalPartitionId: IntUnaryOperator
+    getLogicalPartitionId: IntFunction[JList[Integer]]
   ): CustomPartitioningStrategy = ClientCustomStrategy.noResharding(
     toPartitionedMap.andThen(toScalaFutureMap),
-    getLogicalPartitionId.applyAsInt _)
+    getLogicalPartitionId.apply(_).asScala.toSeq.map(_.toInt))
 
   /**
    * The java-friendly way to create a [[ClientCustomStrategy]].
@@ -569,12 +570,13 @@ object ClientCustomStrategies {
    */
   def clusterResharding(
     getPartitionIdAndRequestFn: JFunction[JSet[Address], ToPartitionedMap],
-    getLogicalPartitionIdFn: JFunction[JSet[Address], IntUnaryOperator]
+    getLogicalPartitionIdFn: JFunction[JSet[Address], JFunction[Int, JList[Int]]]
   ): CustomPartitioningStrategy =
     ClientCustomStrategy.clusterResharding(
       toJavaSet[Address]
         .andThen(getPartitionIdAndRequestFn.apply(_).andThen(toScalaFutureMap)),
-      toJavaSet[Address].andThen(getLogicalPartitionIdFn.apply _).andThen(op => op.applyAsInt _)
+      toJavaSet[Address]
+        .andThen(getLogicalPartitionIdFn.apply _).andThen(op => op.apply(_).asScala.toSeq)
     )
 
   /**
@@ -602,7 +604,7 @@ object ClientCustomStrategies {
    */
   def resharding[A](
     getPartitionIdAndRequestFn: JFunction[A, ToPartitionedMap],
-    getLogicalPartitionIdFn: JFunction[A, IntUnaryOperator],
+    getLogicalPartitionIdFn: JFunction[A, JFunction[Int, Seq[Int]]],
     observable: Activity[A]
   ): CustomPartitioningStrategy =
     ClientCustomStrategy
@@ -610,13 +612,13 @@ object ClientCustomStrategies {
         { a: A =>
           getPartitionIdAndRequestFn.apply(a).andThen(toScalaFutureMap)
         },
-        { a: A => getLogicalPartitionIdFn.apply(a).applyAsInt _ },
+        { a: A => getLogicalPartitionIdFn.apply(a).apply _ },
         observable)
 }
 
 private[partitioning] final class ClientClusterStrategy(
   val getPartitionIdAndRequestFn: Set[Address] => ClientCustomStrategy.ToPartitionedMap,
-  val getLogicalPartitionIdFn: Set[Address] => Int => Int)
+  val getLogicalPartitionIdFn: Set[Address] => Int => Seq[Int])
     extends CustomPartitioningStrategy {
 
   // we don't have a real implementation here because the understanding
@@ -640,15 +642,16 @@ private[partitioning] final class ClientClusterStrategy(
  *        to the original request.  This PartialFunction can take multiple
  *        Thrift request types of one Thrift service (different method endpoints
  *        of one service).
- * @param getLogicalPartitionId Gets the logical partition identifier from a host
+ * @param getLogicalPartitionId Gets the logical partition identifiers from a host
  *        identifier, host identifiers are derived from [[ZkMetadata]]
- *        shardId. Indicates which logical partition a physical host belongs to,
- *        multiple hosts can belong to the same partition, for example:
+ *        shardId. Indicates which logical partitions a physical host belongs to,
+ *        multiple hosts can belong to the same partition, and one host can belong to
+ *        multiple partitions, for example:
  *        {{{
- *          val getLogicalPartition: Int => Int = {
- *            case a if Range(0, 10).contains(a) => 0
- *            case b if Range(10, 20).contains(b) => 1
- *            case c if Range(20, 30).contains(c) => 2
+ *          val getLogicalPartition: Int => Seq[Int] = {
+ *            case a if Range(0, 10).contains(a) => Seq(0, 1)
+ *            case b if Range(10, 20).contains(b) => Seq(1)
+ *            case c if Range(20, 30).contains(c) => Seq(2)
  *            case _ => throw ...
  *          }
  *        }}}
@@ -660,7 +663,7 @@ private[partitioning] final class ClientClusterStrategy(
 
 final class ClientCustomStrategy[A] private[partitioning] (
   val getPartitionIdAndRequest: A => ClientCustomStrategy.ToPartitionedMap,
-  val getLogicalPartitionId: A => Int => Int,
+  val getLogicalPartitionId: A => Int => Seq[Int],
   val state: Activity[A])
     extends CustomPartitioningStrategy {
 
@@ -689,15 +692,16 @@ object MethodBuilderCustomStrategy {
  * @param getPartitionIdAndRequest A function for the partitioning logic.
  *        MethodBuilder is customized per-method so that this method only takes one
  *        Thrift request type.
- * @param getLogicalPartitionId Gets the logical partition identifier from a host
+ * @param getLogicalPartitionId Gets the logical partition identifiers from a host
  *        identifier, host identifiers are derived from [[ZkMetadata]]
- *        shardId. Indicates which logical partition a physical host belongs to,
- *        multiple hosts can belong to the same partition, for example:
+ *        shardId. Indicates which logical partitions a physical host belongs to,
+ *        multiple hosts can belong to the same partition, and one host can belong to
+ *        multiple partitions, for example:
  *        {{{
- *          val getLogicalPartition: Int => Int = {
- *            case a if Range(0, 10).contains(a) => 0
- *            case b if Range(10, 20).contains(b) => 1
- *            case c if Range(20, 30).contains(c) => 2
+ *          val getLogicalPartition: Int => Seq[Int] = {
+ *            case a if Range(0, 10).contains(a) => Seq(0, 1)
+ *            case b if Range(10, 20).contains(b) => Seq(1)
+ *            case c if Range(20, 30).contains(c) => Seq(2)
  *            case _ => throw ...
  *          }
  *        }}}
@@ -707,13 +711,13 @@ object MethodBuilderCustomStrategy {
  */
 final class MethodBuilderCustomStrategy[Req <: ThriftStructIface, Rep](
   val getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req],
-  getLogicalPartitionId: Int => Int,
+  getLogicalPartitionId: Int => Seq[Int],
   val responseMerger: Option[ResponseMerger[Rep]])
     extends CustomPartitioningStrategy {
 
   def this(
     getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req],
-    getLogicalPartitionId: Int => Int
+    getLogicalPartitionId: Int => Seq[Int]
   ) = this(
     getPartitionIdAndRequest,
     getLogicalPartitionId,
@@ -721,14 +725,14 @@ final class MethodBuilderCustomStrategy[Req <: ThriftStructIface, Rep](
   )
 
   def this(getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req]) =
-    this(getPartitionIdAndRequest, identity(_))
+    this(getPartitionIdAndRequest, Seq(_))
 
   def this(
     getPartitionIdAndRequest: MethodBuilderCustomStrategy.ToPartitionedMap[Req],
     responseMerger: Option[ResponseMerger[Rep]]
   ) = this(
     getPartitionIdAndRequest,
-    identity[Int],
+    Seq(_),
     responseMerger
   )
 

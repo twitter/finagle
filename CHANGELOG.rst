@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-thrift: Change the partition locator function getLogicalPartitionId in
+  PartitioningStrategy from Int => Int to Int => Seq[Int], which supports many to many mapping
+  from hosts and logical partitions. ``PHAB_ID=D550789``
+
 20.9.0
 ------
 
@@ -18,6 +25,9 @@ New Features
 
 * finagle-scribe: Add `c.t.finagle.scribe.Publisher` for publishing messages to a
   Scribe process. ``PHAB_ID=D539003``
+
+* finagle-thrift/partitioning: Support dynamic resharding for partition aware thriftmux client.
+  ``PHAB_ID=D543466``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

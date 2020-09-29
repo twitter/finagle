@@ -53,10 +53,10 @@ class ThriftMuxPartitionAwareClientTest extends PartitionAwareClientEndToEndTest
     }
 
     // p0(0), p1(1,2), p2(3, 4)
-    val getLogicalPartition: Int => Int = { instance: Int =>
+    val getLogicalPartition: Int => Seq[Int] = { instance: Int =>
       val partitionPositions = List(0.until(1), 1.until(3), 3.until(fixedInetAddresses.size))
       val position = fixedInetAddresses.indexWhere(_.getPort == instance)
-      partitionPositions.indexWhere(range => range.contains(position))
+      Seq(partitionPositions.indexWhere(range => range.contains(position)))
     }
 
     val mbCustomStrategy1 = new MethodBuilderCustomStrategy[GetBoxes.Args, Seq[Box]](
