@@ -1,11 +1,13 @@
 package com.twitter.finagle.redis
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.{param => ctfparam}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
-import com.twitter.finagle.Redis
+import com.twitter.finagle.{Redis, redis}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Awaitable, Duration, Future, Try}
+import com.twitter.util.{Await, Awaitable, Duration, Future, Timer, Try}
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Tag}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalacheck.{Arbitrary, Gen}
@@ -358,6 +360,24 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
     Await.result(client.flushAll())
     try { testCode(client) }
     finally { client.close() }
+  }
+
+  protected def withRedisPartitionedClient(
+    timer: Timer,
+    statsReceiver: StatsReceiver,
+    maxLifeTime: Duration = Duration.Top
+  )(
+    testCode: PartitionedClient => Any
+  ): Unit = {
+    val partitionedClient = redis.PartitionedClient.apply(
+      Redis.partitionedClient
+        .configured(ctfparam.Timer(timer))
+        .configured(ctfparam.Stats(statsReceiver))
+        .withSession.maxLifeTime(maxLifeTime)
+        .newClient(RedisCluster.hostAddresses())
+    )
+    try { testCode(partitionedClient) }
+    finally { partitionedClient.close() }
   }
 
   protected def assertMBulkReply(

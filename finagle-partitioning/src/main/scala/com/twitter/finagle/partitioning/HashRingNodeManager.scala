@@ -7,7 +7,7 @@ import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.partitioning.zk.ZkMetadata
-import com.twitter.finagle.service.FailedService
+import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing._
 import com.twitter.util._
@@ -47,16 +47,16 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   }
 
   // used when all cache nodes are ejected from the cache ring
-  private[this] val shardNotAvailableDistributor: Distributor[Future[Service[Req, Rep]]] =
-    new SingletonDistributor(Future.value(new FailedService(new ShardNotAvailableException)))
+  private[this] val shardNotAvailableDistributor: Distributor[ServiceFactory[Req, Rep]] =
+    new SingletonDistributor(new FailingFactory(new ShardNotAvailableException))
 
   // We update those out of the request path so we need to make sure to synchronize on
   // read-modify-write operations on `currentDistributor` and `distributor`.
   // Note: Volatile-read from `partitionForKey` safety (not raciness) is guaranteed by JMM.
-  @volatile private[this] var currentDistributor: Distributor[Future[Service[Req, Rep]]] =
+  @volatile private[this] var currentDistributor: Distributor[ServiceFactory[Req, Rep]] =
     shardNotAvailableDistributor
 
-  private[this] type HashNodeKeyAndNode = (HashNodeKey, HashNode[Future[Service[Req, Rep]]])
+  private[this] type HashNodeKeyAndNode = (HashNodeKey, HashNode[ServiceFactory[Req, Rep]])
 
   // snapshot is used to detect new nodes when there is a change in bound addresses
   @volatile private[this] var snapshot: Set[HashNodeKeyAndNode] = Set.empty
@@ -80,15 +80,15 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   }
 
   // Node represents backend partition
-  private[this] case class Node(node: HashNode[Future[Service[Req, Rep]]], var state: NodeState)
+  private[this] case class Node(node: HashNode[ServiceFactory[Req, Rep]], var state: NodeState)
 
   // constructs the appropriate HashNode entry
   private[this] def constructAddressEntry(
     node: PartitionNode,
-    service: Future[Service[Req, Rep]]
-  ): (HashNodeKey, HashNode[Future[Service[Req, Rep]]]) = {
+    service: ServiceFactory[Req, Rep]
+  ): (HashNodeKey, HashNode[ServiceFactory[Req, Rep]]) = {
     val key = HashNodeKey.fromPartitionNode(node)
-    key -> HashNode[Future[Service[Req, Rep]]](
+    key -> HashNode[ServiceFactory[Req, Rep]](
       key.identifier,
       node.weight,
       service
@@ -99,7 +99,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   // HashNode entry format.
   private[this] val addressToEntry: PartialFunction[
     Address,
-    (Address, (HashNodeKey, HashNode[Future[Service[Req, Rep]]]))
+    (Address, (HashNodeKey, HashNode[ServiceFactory[Req, Rep]]))
   ] = {
     case address =>
       address -> (address match {
@@ -119,7 +119,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
             }
           val node = PartitionNode(ia.getHostName, ia.getPort, w.toInt, shardIdOpt)
           val key = HashNodeKey.fromPartitionNode(node)
-          val service = mkService(boundAddress, key)
+          val service = mkServiceFactory(boundAddress, key)
           constructAddressEntry(node, service)
         case WeightedAddress(Address.ServiceFactory(factory, metadata), w) =>
           val shardIdOpt = ZkMetadata.fromAddrMetadata(metadata).flatMap(_.shardId.map(_.toString))
@@ -129,7 +129,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
             w.toInt,
             shardIdOpt
           )
-          val service = factory().asInstanceOf[Future[Service[Req, Rep]]]
+          val service = factory.asInstanceOf[ServiceFactory[Req, Rep]]
           constructAddressEntry(node, service)
       })
   }
@@ -194,7 +194,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
   // We listen for changes to the set of nodes to update the cache ring.
   private[this] val nodeWatcher: Closable = hashRingNodesChanges.respond(updateNodes)
 
-  private[this] def mkService(addr: Addr, key: HashNodeKey): Future[Service[Req, Rep]] = {
+  private[this] def mkServiceFactory(addr: Addr, key: HashNodeKey): ServiceFactory[Req, Rep] = {
     val modifiedParams = params + LoadBalancerFactory.Dest(Var.value(addr))
 
     val next = underlying
@@ -204,13 +204,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
       )
       .make(modifiedParams)
 
-    next().map { svc =>
-      new ServiceProxy(svc) {
-        override def close(deadline: Time): Future[Unit] = {
-          Future.join(Seq(Closable.all(svc, next).close(deadline), super.close(deadline)))
-        }
-      }
-    }
+    next
   }
 
   private[this] def rebuildDistributor(): Unit = self.synchronized {
@@ -234,14 +228,14 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
       // remove old nodes and release clients
       nodes --= (old &~ current).collect {
         case (key, node) =>
-          node.handle.map { (service: Service[Req, Rep]) => service.close() }
+          node.handle.close()
           nodeLeaveCount.incr()
           key
       }
 
       // new joined node appears as Live state
       nodes ++= (current &~ old).collect {
-        case (key, node: HashNode[Future[Service[Req, Rep]]]) =>
+        case (key, node: HashNode[ServiceFactory[Req, Rep]]) =>
           nodeJoinCount.incr()
           key -> Node(node, NodeState.Live)
       }
@@ -271,7 +265,7 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
     }
   }
 
-  def getServiceForHash(hash: Long): Future[Service[Req, Rep]] =
+  def getServiceForHash(hash: Long): ServiceFactory[Req, Rep] =
     currentDistributor.nodeForHash(hash)
 
   def getPartitionIdForHash(hash: Long): Long =

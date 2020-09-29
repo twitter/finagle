@@ -104,7 +104,7 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
     keys.groupBy(partitionServiceForKey)
 
   protected[this] def partitionServiceForKey(key: Key): Future[Service[Req, Rep]] =
-    nodeManager.getServiceForHash(hashForKey(key))
+    nodeManager.getServiceForHash(hashForKey(key))()
 
   private[this] def hashForKey(key: Key): Long =
     keyHasher.hashKey(getKeyBytes(key))

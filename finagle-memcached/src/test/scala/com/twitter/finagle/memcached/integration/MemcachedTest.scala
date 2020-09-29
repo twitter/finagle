@@ -22,8 +22,8 @@ abstract class MemcachedTest
 
   private val ValueSuffix = ":" + Time.now.inSeconds
 
-  private def randomString(length: Int): String = {
-    Random.alphanumeric.take(length).mkString
+  private def randomString(rng: Random, length: Int): String = {
+    rng.alphanumeric.take(length).mkString
   }
 
   protected[this] val NumServers = 5
@@ -428,8 +428,11 @@ abstract class MemcachedTest
   def writeKeys(client: Client, numKeys: Int, keyLength: Int): Seq[String] = {
     // creating multiple random strings so that we get a uniform distribution of keys the
     // ketama ring and thus the Memcached shards
-    val keys = 1 to numKeys map { _ => randomString(keyLength) }
-    val writes = keys map { key => client.set(key, Buf.Utf8(s"$key$ValueSuffix")) }
+    val rng = new Random("seed1".hashCode)
+    val keys = 1 to numKeys map { _ => randomString(rng, keyLength) }
+    val writes = keys map { key =>
+      client.set(key, Buf.Utf8(s"$key$ValueSuffix"))
+    }
     awaitResult(Future.join(writes))
     keys
   }
@@ -494,7 +497,7 @@ abstract class MemcachedTest
       assert(getResult.failures.nonEmpty)
       getResult.failures.foreach {
         case (_, e) =>
-          assert(e.isInstanceOf[Failure])
+          assert(e.isInstanceOf[Exception])
       }
       // there should be no misses as all keys are known
       assert(getResult.misses.isEmpty)
