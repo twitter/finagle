@@ -2,12 +2,12 @@ package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Memcached.UsePartitioningMemcachedClientToggle
+import com.twitter.finagle.{param => ctfparam, _}
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.memcached.{Client, TwemcacheClient}
 import com.twitter.finagle.partitioning.param
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
-import com.twitter.finagle.{param => ctfparam, _}
 import com.twitter.util.ReadWriteVar
 import java.net.InetSocketAddress
 

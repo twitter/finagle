@@ -1,6 +1,8 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.{param => ctfparam, _}
+import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
@@ -10,7 +12,6 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.partitioning.param
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{param => ctfparam, _}
 import com.twitter.hashing.KeyHasher
 import com.twitter.util._
 import java.net.InetSocketAddress
@@ -31,13 +32,10 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
   protected[this] val revivalsKey: Seq[String] = Seq(clientName, "partitioner", "revivals")
   protected[this] val ejectionsKey: Seq[String] = Seq(clientName, "partitioner", "ejections")
 
-  private[this] def modifyStack(
-    stk: Stack[ServiceFactory[Command, Response]]
-  ): Stack[ServiceFactory[Command, Response]] = {
-    // insert the `PartitioningService` after `BindingFactory` from the existing client stack.
-    // we want to manipulate the stack here instead of creating a new one to respect the stack
-    // configuration in `Memcached.client`.
-    stk
+  private[this] def newClientStack(): Stack[ServiceFactory[Command, Response]] = {
+    // create a partitioning aware finagle client by inserting the PartitioningService appropriately
+    StackClient
+      .newStack[Command, Response]
       .insertAfter(
         BindingFactory.role,
         MemcachedPartitioningService.module
@@ -51,7 +49,7 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
         .configured(TimeoutFilter.Param(10000.milliseconds))
         .configured(param.EjectFailedHost(false))
         .configured(LoadBalancerFactory.ReplicateAddresses(2))
-        .withStack(modifyStack(_))
+        .withStack(newClientStack())
         .newService(dest, label)
     )
   }
@@ -65,7 +63,7 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
         .configured(param.EjectFailedHost(true))
         .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
         .configured(ctfparam.Stats(sr))
-        .withStack(modifyStack(_))
+        .withStack(newClientStack())
         .newService(Name.bound(servers.map { s => Address(s.address) }: _*), clientName)
     )
     testRehashUponEject(client, sr)
@@ -82,7 +80,7 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
           .configured(param.EjectFailedHost(true))
           .configured(ctfparam.Timer(timer))
           .configured(ctfparam.Stats(statsReceiver))
-          .withStack(modifyStack(_))
+          .withStack(newClientStack())
           .newService(
             Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])),
             clientName
@@ -105,7 +103,7 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
         .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
         .configured(param.EjectFailedHost(true))
         .connectionsPerEndpoint(NumConnections)
-        .withStack(modifyStack(_))
+        .withStack(newClientStack())
         .withStatsReceiver(sr)
         .newService(
           Name.Bound.singleton(mutableAddrs),
@@ -124,7 +122,7 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
         .configured(FailureAccrualFactory.Param(1, 10.minutes))
         .configured(param.EjectFailedHost(false))
         .connectionsPerEndpoint(1)
-        .withStack(modifyStack(_))
+        .withStack(newClientStack())
         .newService(Name.bound(Address("localhost", 1234)), clientName)
     )
     testFailureAccrualFactoryExceptionHasRemoteAddress(client)
@@ -133,42 +131,5 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
 
   test("data read/write consistency between old and new clients") {
     testCompatibility()
-  }
-
-  test("Partitioning partial success") {
-    val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver
-    val client = TwemcacheClient(
-      Memcached.client
-        .configured(param.KeyHasher(KeyHasher.FNV1_32))
-        .configured(TimeoutFilter.Param(10000.milliseconds))
-        .configured(FailureAccrualFactory.Param(1, 10.minutes))
-        .configured(param.EjectFailedHost(false))
-        .configured(ctfparam.Stats(statsReceiver))
-        .connectionsPerEndpoint(1)
-        .withStack(modifyStack(_))
-        .newService(Name.bound(servers.map(s => Address(s.address)): _*), clientName)
-    )
-
-    val keys = writeKeys(client, 100, 20)
-    assertRead(client, keys)
-
-    val initialResult = awaitResult { client.getResult(keys) }
-    assert(initialResult.failures.isEmpty)
-    assert(initialResult.misses.isEmpty)
-    assert(initialResult.values.size == keys.size)
-
-    // now kill one server
-    servers.head.stop()
-
-    val getResult = awaitResult { client.getResult(keys) }
-
-    // assert the failures are set to the exception received from the failing partition
-    assert(getResult.failures.nonEmpty)
-    getResult.failures.foreach {
-      case (_, e) =>
-        assert(e.isInstanceOf[Exception])
-    }
-
-    client.close()
   }
 }
