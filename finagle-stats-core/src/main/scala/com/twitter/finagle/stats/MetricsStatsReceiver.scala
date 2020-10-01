@@ -103,7 +103,10 @@ class MetricsStatsReceiver(val registry: Metrics)
   )
 
   // Scope separator, a string value used to separate scopes defined by `StatsReceiver`.
-  private[this] val separator: String = scopeSeparator()
+  private[this] val separator: String = {
+    metadataScopeSeparator.setSeparator(scopeSeparator())
+    scopeSeparator()
+  }
   require(separator.length == 1, s"Scope separator should be one symbol: '$separator'")
 
   override def toString: String = "MetricsStatsReceiver"
