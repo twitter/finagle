@@ -40,6 +40,8 @@ Bug Fixes
 * finagle-core: The TraceId alternative constructor now forwards the `traceIdHigh` parameter to
   the primary constructor. ``PHAB_ID=D546612``
 
+* finagle-stats: Handle Double percentile rounding error in stat format. ``PHAB_ID=D554778``
+
 20.8.1
 ------
 
