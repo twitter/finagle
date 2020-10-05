@@ -280,9 +280,7 @@ object ClientCustomStrategy {
   /**
    * Constructs a [[ClientCustomStrategy]] that does not reshard.
    *
-   * This is appropriate for simple custom strategies where you never need to
-   * change which shard a given request would go to, and you neither add nor
-   * remove shards.
+   * This is appropriate for static partitioning backend topologies.
    *
    * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
    *
@@ -303,9 +301,7 @@ object ClientCustomStrategy {
   /**
    * Constructs a [[ClientCustomStrategy]] that does not reshard.
    *
-   * This is appropriate for simple custom strategies where you never need to
-   * change which shard a given request would go to, and you neither add nor
-   * remove shards.
+   * This is appropriate for static partitioning backend topologies.
    *
    * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
    *
@@ -416,11 +412,14 @@ object ClientCustomStrategy {
     new ClientClusterStrategy(getPartitionIdAndRequestFn, getLogicalPartitionIdFn)
 
   /**
-   * Constructs a [[ClientCustomStrategy]] that reshards based on the remote cluster state.
+   * Constructs a [[ClientCustomStrategy]] that reshards based on the user provided state.
    *
-   * This is appropriate for simple custom strategies where you only need to
-   * know information about the remote cluster in order to reshard. For example,
-   * if you want to be able to add or remove capacity safely.
+   * This lets the client be aware of the backend dynamic resharding by providing the
+   * fully described state of resharding. The partitioning schema needs to be configured
+   * to react to each state, and it needs to be a pure function (see param below).
+   * When the state got successfully updated, the partitioning strategy will move
+   * to the new schema. See [[clusterResharding]] if only the backend cluster information
+   * needs to be observed in order to reshard.
    *
    * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
    *
@@ -445,11 +444,14 @@ object ClientCustomStrategy {
     resharding[A](getPartitionIdAndRequestFn, (_: A) => { a: Int => Seq(a) }, observable)
 
   /**
-   * Constructs a [[ClientCustomStrategy]] that reshards based on the remote cluster state.
+   * Constructs a [[ClientCustomStrategy]] that reshards based on the user provided state.
    *
-   * This is appropriate for simple custom strategies where you only need to
-   * know information about the remote cluster in order to reshard. For example,
-   * if you want to be able to add or remove capacity safely.
+   * This lets the client be aware of the backend dynamic resharding by providing the
+   * fully described state of resharding. The partitioning schema needs to be configured
+   * to react to each state, and it needs to be a pure function (see param below).
+   * When the state got successfully updated, the partitioning strategy will move
+   * to the new schema. See [[clusterResharding]] if only the backend cluster information
+   * needs to be observed in order to reshard.
    *
    * Java users should see [[ClientCustomStrategies$]] for an easier to use API.
    *
@@ -656,15 +658,12 @@ private[partitioning] final class ClientClusterStrategy(
  *          }
  *        }}}
  *        If not provided, the default is that each instance is its own partition.
- *
- * @note  When updating the partition topology dynamically, there is a potential one-time
- *        mismatch if a Service Discovery update happens after getPartitionIdAndRequest.
+ * @param observable  The state that is used for deciding how to reshard the cluster.
  */
-
 final class ClientCustomStrategy[A] private[partitioning] (
   val getPartitionIdAndRequest: A => ClientCustomStrategy.ToPartitionedMap,
   val getLogicalPartitionId: A => Int => Seq[Int],
-  val state: Activity[A])
+  val observable: Activity[A])
     extends CustomPartitioningStrategy {
 
   def newNodeManager[Req, Rep](
@@ -673,7 +672,7 @@ final class ClientCustomStrategy[A] private[partitioning] (
   ): PartitionNodeManager[Req, Rep, _, ClientCustomStrategy.ToPartitionedMap] =
     new PartitionNodeManager(
       underlying,
-      state,
+      observable,
       getPartitionIdAndRequest,
       getLogicalPartitionId,
       params)
