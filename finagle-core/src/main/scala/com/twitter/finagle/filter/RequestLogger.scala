@@ -122,10 +122,16 @@ private class RequestLogger(logger: Logger, label: String, name: String, nowNano
   }
 
   def endAsync[T](startNanos: Long, future: Future[T]): Future[T] = {
-    future.ensure {
+    // We use `future.transform` to make sure that we have the right order of execution
+    // for the logging. If we instead used `future.ensure` we attach a continuation but
+    // have no guarantees as to whether it will execute before or after any other composition
+    // operations, potentially bundling expensive synchronous work from higher in the call
+    // chain into the recorded time.
+    future.transform { _ =>
       val traceId = Trace.id
       val elapsedUs = elapsedMicros(startNanos)
       logger.trace(s"traceId=$traceId $label $name end cumulative async elapsed $elapsedUs us")
+      future
     }
   }
 
