@@ -17,18 +17,37 @@ private[mysql] final class SecureHandshake(
   private[this] def onHandshakeComplete(p: Promise[Unit])(result: Try[Unit]): Unit =
     p.updateIfEmpty(result)
 
-  // We purposefully do not set an interrupt handler on this promise, since
-  // there is no meaningful way to gracefully interrupt an SSL/TLS handshake.
-  // This is very similar to how SSL/TLS negotiation works in finagle-mux.
-  // See `Negotiation` for more details.
-  private[this] def negotiateTls(): Future[Unit] = {
+  /**
+   * Returns modified stack params based on the initial server handshake message.
+   *
+   * @note We purposefully do not set an interrupt handler on this promise, since
+   *       there is no meaningful way to gracefully interrupt an SSL/TLS handshake.
+   *       This is very similar to how SSL/TLS negotiation works in finagle-mux.
+   *       See `Negotiation` for more details.
+   * @note We call the `HandshakeModifier` to make configuration decisions based on values
+   *       only known at connection time. For example, community version 5.x of MySQL uses yaSSL,
+   *       a non-standard security library. yaSSL only supports up to TLSv1.1 and fails to negotiate
+   *       TLS properly when version TLSv1.2 is specified as an option. Therefore, for versions of
+   *       MySQL using yaSSL, we only want to specify TLSv1.1, but we want to specify TLSv1.2 in all
+   *       other cases.
+   *
+   * @param handshakeInit the initial server handshake message
+   * @param p the promise updated on SSL handshake completion
+   * @return the stack params modified according to the handshake message
+   */
+  // Visible for testing
+  private[finagle] def getTlsParams(handshakeInit: HandshakeInit, p: Promise[Unit]): Stack.Params =
+    params[HandshakeStackModifier].modifyParams(params, handshakeInit) + OnSslHandshakeComplete(
+      onHandshakeComplete(p))
+
+  private[this] def negotiateTls(handshakeInit: HandshakeInit): Future[Unit] = {
     val p = new Promise[Unit]
-    val sslParams = params + OnSslHandshakeComplete(onHandshakeComplete(p))
+    val tlsParams = getTlsParams(handshakeInit, p)
     val context: TransportContext = transport.context
     context match {
       case ctContext: ChannelTransportContext =>
         val channel: Channel = ctContext.ch
-        channel.pipeline.addFirst("mysqlSslInit", new Netty4ClientSslChannelInitializer(sslParams))
+        channel.pipeline.addFirst("mysqlSslInit", new Netty4ClientSslChannelInitializer(tlsParams))
         p
       case other =>
         Future.exception(
@@ -64,7 +83,7 @@ private[mysql] final class SecureHandshake(
     readHandshakeInit()
       .flatMap { handshakeInit =>
         writeSslConnectionRequest(handshakeInit)
-          .flatMap(_ => negotiateTls())
+          .flatMap(_ => negotiateTls(handshakeInit))
           .map(_ => handshakeInit)
       }
       .map(makeSecureHandshakeResponse)
