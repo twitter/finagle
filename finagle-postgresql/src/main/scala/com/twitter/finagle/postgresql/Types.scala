@@ -10,7 +10,7 @@ object Types {
     case object Binary extends Format
   }
 
-  case class Oid(value: Int)
+  case class Oid(value: Long)
   case class AttributeId(value: Int)
 
   case class FieldDescription(

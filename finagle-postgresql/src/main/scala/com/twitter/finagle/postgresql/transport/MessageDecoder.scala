@@ -158,7 +158,7 @@ object MessageDecoder {
       reader.collect { r =>
         FieldDescription(
           name = r.string(),
-          tableOid = r.int() match {
+          tableOid = r.unsignedInt() match {
             case 0 => None
             case oid => Some(Oid(oid))
           },

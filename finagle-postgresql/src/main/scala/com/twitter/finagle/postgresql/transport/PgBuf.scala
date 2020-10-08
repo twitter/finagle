@@ -43,6 +43,11 @@ object PgBuf {
       this
     }
 
+    def unsignedInt(v: Long): Writer = {
+      w.writeIntBE(v)
+      this
+    }
+
     def string(v: String): Writer = {
       w.writeString(v, StandardCharsets.UTF_8)
       byte(0)
@@ -90,6 +95,8 @@ object PgBuf {
     def byte(): Byte = reader.readByte()
     def short(): Short = reader.readShortBE()
     def int(): Int = reader.readIntBE()
+    def long(): Long = reader.readLongBE()
+    def unsignedInt(): Long = reader.readUnsignedIntBE()
     def string(): String = {
       val length = reader.remainingUntil(0)
 
