@@ -48,7 +48,7 @@ object MessageEncoder {
       .name(msg.name)
       .string(msg.statement)
       .foreach(msg.dataTypes) { (oid, w) =>
-        w.int(oid.value)
+        w.unsignedInt(oid.value)
       }
   }
 

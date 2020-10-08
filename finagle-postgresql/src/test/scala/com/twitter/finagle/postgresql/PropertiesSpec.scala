@@ -15,7 +15,7 @@ import org.specs2.ScalaCheck
 trait PropertiesSpec extends ScalaCheck {
 
   // TODO: Once we have actual data types, Gen.oneOf(...)
-  implicit lazy val arbOid = Arbitrary(Arbitrary.arbitrary[Int].map(Oid))
+  implicit lazy val arbOid = Arbitrary(Gen.chooseNum(0, Int.MaxValue.toLong * 2).map(Oid))
 
   implicit lazy val arbParam : Arbitrary[BackendMessage.ParameterStatus] = Arbitrary {
     for {
