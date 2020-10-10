@@ -25,7 +25,7 @@ object MessageEncoder {
       .short(msg.version.major)
       .short(msg.version.minor)
       .string("user").string(msg.user)
-      .opt(msg.database) { (db, w) =>
+      .opt(msg.database) { (w, db) =>
         w.string("database").string(db)
       }
       .foreachUnframed(msg.params) { case(w, (key, value)) => w.string(key).string(value) }
