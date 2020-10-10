@@ -28,7 +28,7 @@ object MessageEncoder {
       .opt(msg.database) { (db, w) =>
         w.string("database").string(db)
       }
-      .foreachUnframed(msg.params) { case((key, value), w) => w.string(key).string(value) }
+      .foreachUnframed(msg.params) { case(w, (key, value)) => w.string(key).string(value) }
       .byte(0)
   }
 
@@ -47,7 +47,7 @@ object MessageEncoder {
     writer
       .name(msg.name)
       .string(msg.statement)
-      .foreach(msg.dataTypes) { (oid, w) =>
+      .foreach(msg.dataTypes) { (w, oid) =>
         w.unsignedInt(oid.value)
       }
   }
@@ -56,9 +56,9 @@ object MessageEncoder {
     writer
       .name(msg.portal)
       .name(msg.statement)
-      .foreach(msg.formats) { (f, w) => w.format(f) }
-      .foreach(msg.values) { (v, w) => w.value(v) }
-      .foreach(msg.resultFormats) { (f, w) => w.format(f) }
+      .foreach(msg.formats) { (w, f) => w.format(f) }
+      .foreach(msg.values) { (w, v) => w.value(v) }
+      .foreach(msg.resultFormats) { (w, f) => w.format(f) }
   }
 
   implicit val describeEncoder: MessageEncoder[FrontendMessage.Describe] = MessageEncoder('D') { (writer, msg) =>

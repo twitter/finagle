@@ -18,12 +18,10 @@ object PgBuf {
       case None => this
     }
 
-    def foreachUnframed[T](xs: TraversableOnce[T])(f: (T, Writer) => Writer): Writer = {
-      xs.map { x => f(x, this) }
-      this
-    }
+    def foreachUnframed[T](xs: TraversableOnce[T])(f: (Writer, T) => Writer): Writer =
+      xs.foldLeft(this)(f)
 
-    def foreach[T](xs: Seq[T])(f: (T, Writer) => Writer): Writer = {
+    def foreach[T](xs: Seq[T])(f: (Writer, T) => Writer): Writer = {
       short(xs.length.toShort)
       foreachUnframed(xs)(f)
     }
