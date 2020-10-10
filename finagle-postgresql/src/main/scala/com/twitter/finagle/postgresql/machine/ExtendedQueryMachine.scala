@@ -22,6 +22,7 @@ import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.ResultSet
+import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.NoOp
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
@@ -61,7 +62,13 @@ class ExtendedQueryMachine(req: Request.Execute) extends StateMachine[Response.Q
       Transition(
         Binding,
         SendSeveral(
-          Bind(portalName, prepared.name, Nil, Nil, Nil), // TODO: deal with parameters
+          Bind(
+            portal = portalName,
+            statement = prepared.name,
+            formats = Nil, // TODO: deal with parameters
+            values = Nil, // TODO: deal with parameters
+            resultFormats = Format.Binary :: Nil // request all results in binary format
+          ),
           Describe(portalName, DescriptionTarget.Portal), // TODO: we can avoid sending this one when the Prepare phase already returned NoData.
           Execute(portalName, maxResults),
           Flush

@@ -19,6 +19,7 @@ import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.Prepared
+import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.NoOp
@@ -38,7 +39,7 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
       case Transition(_, SendSeveral(msgs)) =>
         msgs.toList must beLike {
           case a :: b :: c :: d :: Nil =>
-            a must beEqualTo(Send(Bind(portalName, name, Nil, Nil, Nil)))
+            a must beEqualTo(Send(Bind(portalName, name, Nil, Nil, Format.Binary :: Nil)))
             b must beEqualTo(Send(Describe(portalName, DescriptionTarget.Portal)))
             c must beEqualTo(Send(Execute(portalName, 0)))
             d must beEqualTo(Send(Flush))
