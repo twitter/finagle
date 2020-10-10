@@ -77,4 +77,7 @@ trait PropertiesSpec extends ScalaCheck {
   implicit lazy val arbErrorResponse: Arbitrary[BackendMessage.ErrorResponse] =
     Arbitrary(Gen.const(BackendMessage.ErrorResponse(Map.empty)))
 
+  implicit val arbFormat: Arbitrary[Format] =
+    Arbitrary(Gen.oneOf(Format.Text, Format.Binary))
+
 }

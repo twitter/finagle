@@ -5,7 +5,7 @@ import com.twitter.io.Buf
 case class Packet(cmd: Option[Byte], body: Buf) {
   def toBuf: Buf =
     PgBuf.writer
-      .opt(cmd) { (c, w) => w.byte(c) }
+      .opt(cmd) { (w, c) => w.byte(c) }
       .int(body.length + 4)
       .buf(body)
       .build

@@ -13,8 +13,8 @@ object PgBuf {
 
   class Writer(w: BufByteWriter) {
 
-    def opt[T](o: Option[T])(f: (T, Writer) => Writer): Writer = o match {
-      case Some(v) => f(v, this)
+    def opt[T](o: Option[T])(f: (Writer, T) => Writer): Writer = o match {
+      case Some(v) => f(this, v)
       case None => this
     }
 
@@ -124,6 +124,7 @@ object PgBuf {
       }
     }
     def buf(length: Int): Buf = reader.readBytes(length)
+    def framedBuf(): Buf = reader.readBytes(int())
     def remainingBuf(): Buf = reader.readAll()
 
     def remaining: Int = reader.remaining
