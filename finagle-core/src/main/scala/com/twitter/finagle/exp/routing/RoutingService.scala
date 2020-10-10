@@ -1,6 +1,7 @@
 package com.twitter.finagle.exp.routing
 
 import com.twitter.finagle.service.ReqRepT
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.finagle.{Service, Status}
 import com.twitter.util.routing.Router
 import com.twitter.util.{Future, Return, Throw, Time}
@@ -26,6 +27,8 @@ import scala.util.control.NonFatal
  *                        when no matching [[Route route]] is found for the input [[Req request]].
  * @param exceptionHandler PartialFunction to handle returning an expected [[Rep]] type when an
  *                         exception is encountered within the [[RoutingService]] lifecycle.
+ * @param statsReceiver The [[StatsReceiver]] that will be used to expose metrics for
+ *                      [[RoutingService]] behavior.
  * @tparam Req The [[RoutingService]] service request type.
  * @tparam Rep The [[RoutingService]] service response type.
  *
@@ -35,26 +38,60 @@ import scala.util.control.NonFatal
  *       underlying [[Service services]] defined within the [[Router]]. If a [[Service]] has been
  *       closed outside of this [[RoutingService]], the availability of this [[RoutingService]] will
  *       be marked as [[Status.Closed]].
+ *
+ * @note The [[statsReceiver]] will expose the following metrics:
+ *         router/found - A counter indicating requests to the [[RoutingService]] that
+ *         resulted in a matching [[Route]]. (Verbosity.Debug)
+ *
+ *         router/not_found - A counter indicating requests to the [[RoutingService]] that
+ *         could not find a matching route and subsequently triggered the [[notFoundHandler]].
+ *         (Verbosity.Debug)
+ *
+ *         router/failures/handled - A counter indicating requests to the [[RoutingService]]
+ *         that resulted in an exception being thrown, but returned a successful [[Rep response]]
+ *         via the [[exceptionHandler]]. (Verbosity.Debug)
+ *
+ *         router/failures/unhandled - A counter indicating requests to the [[RoutingService]]
+ *         that resulted in an exception being thrown and propagated as a [[Future.exception()]],
+ *         because the [[exceptionHandler]] could NOT handle it. (Verbosity.Debug)
+ *
  */
 private[finagle] class RoutingService[Req, Rep](
   router: Router[Req, Service[Req, Rep]],
   notFoundHandler: Req => Future[Rep],
-  exceptionHandler: PartialFunction[ReqRepT[Req, Rep], Future[Rep]])
+  exceptionHandler: PartialFunction[ReqRepT[Req, Rep], Future[Rep]],
+  statsReceiver: StatsReceiver)
     extends Service[Req, Rep] {
 
-  private[this] val errorHandler: PartialFunction[ReqRepT[Req, Rep], Future[Rep]] = {
-    exceptionHandler.orElse {
-      case ReqRepT(_, t @ Throw(NonFatal(_))) =>
-        // TODO - increment unhandled error counter
-        Future.const(t)
+  private[this] val routingStats = statsReceiver.scope("router")
+  private[this] val foundCounter = routingStats.counter(Verbosity.Debug, "found")
+  private[this] val notFoundCounter = routingStats.counter(Verbosity.Debug, "not_found")
+
+  private[this] val failuresStats = routingStats.scope("failures")
+  private[this] val handledFailuresCounter = failuresStats.counter(Verbosity.Debug, "handled")
+  private[this] val unhandledFailuresCounter = failuresStats.counter(Verbosity.Debug, "unhandled")
+
+  private[this] def handleError(request: Req, error: Throw[Rep]): Future[Rep] = {
+    val reqRepT = ReqRepT(request, error)
+
+    // ensure that we can handle the error and handle it if we can
+    if (exceptionHandler.isDefinedAt(reqRepT)) {
+      handledFailuresCounter.incr()
+      exceptionHandler(reqRepT)
+    } else {
+      // otherwise the error is unhandled and we propagate it
+      unhandledFailuresCounter.incr()
+      Future.const(error)
     }
   }
 
   override def apply(request: Req): Future[Rep] = try {
     val rep = router(request) match {
       case Some(svc) =>
+        foundCounter.incr()
         svc(request)
       case _ =>
+        notFoundCounter.incr()
         notFoundHandler(request)
     }
 
@@ -62,11 +99,12 @@ private[finagle] class RoutingService[Req, Rep](
       case r @ Return(_) =>
         Future.const(r)
       case t @ Throw(NonFatal(_)) =>
-        errorHandler(ReqRepT(request, t))
+        handleError(request, t)
     }
 
   } catch {
-    case NonFatal(t) => errorHandler(ReqRepT(request, Throw(t)))
+    case NonFatal(t) =>
+      handleError(request, Throw(t))
   }
 
   override def close(deadline: Time): Future[Unit] = router.close(deadline)

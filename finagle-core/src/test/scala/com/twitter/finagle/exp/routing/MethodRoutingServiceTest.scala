@@ -3,6 +3,7 @@ package com.twitter.finagle.exp.routing
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.routing.{Generator, Router, RouterBuilder, ValidationError, Validator}
 import com.twitter.util.{Await, Awaitable, Future, Throw}
 import org.scalatest.FunSuite
@@ -128,7 +129,8 @@ class MethodRoutingServiceTest extends FunSuite {
     val svc: Service[Request, Response] = new RoutingService(
       router = router,
       notFoundHandler = notFoundHandler,
-      exceptionHandler = PartialFunction.empty
+      exceptionHandler = PartialFunction.empty,
+      statsReceiver = NullStatsReceiver
     )
 
     GetUser.asCurrent {
