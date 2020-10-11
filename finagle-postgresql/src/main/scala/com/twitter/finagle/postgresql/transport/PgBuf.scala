@@ -4,6 +4,9 @@ import java.nio.charset.StandardCharsets
 
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.Oid
+import com.twitter.finagle.postgresql.Types.PgArray
+import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import com.twitter.io.BufByteWriter
@@ -128,6 +131,24 @@ object PgBuf {
     def remainingBuf(): Buf = reader.readAll()
 
     def remaining: Int = reader.remaining
+
+    // https://github.com/postgres/postgres/blob/master/src/include/utils/array.h
+    def array(): PgArray = {
+      val dims = int()
+      val offset = int()
+      val tpe = Oid(unsignedInt())
+      val arrayDims = for(_ <- 0 until dims) yield PgArrayDim(int(), int())
+      val elements = arrayDims.map(_.size).sum
+      val values = for(_ <- 0 until elements) yield value()
+      if(remaining > 0) sys.error(s"error decoding array, remaining bytes is non zero: $remaining")
+      PgArray(
+        dimensions = dims,
+        dataOffset = offset,
+        elemType = tpe,
+        arrayDims = arrayDims,
+        data = values
+      )
+    }
   }
 
   def reader(b: Buf): Reader = new Reader(b)
