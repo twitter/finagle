@@ -9,10 +9,12 @@ import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
 
+import scala.collection.generic.CanBuildFrom
+
 trait ValueReads[T] {
 
   def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T]
-  def readsNull(tpe: PgType): Try[T]
+  def readsNull(tpe: PgType): Try[T] = Throw(new IllegalArgumentException()) // TODO
 
   def reads(tpe: PgType, value: WireValue, charset: Charset): Try[T] = value match {
     case WireValue.Null => readsNull(tpe)
@@ -27,7 +29,6 @@ object ValueReads {
 
   def simple[T](expect: PgType)(f: PgBuf.Reader => T): ValueReads[T] = new ValueReads[T] {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T] = Try(f(new PgBuf.Reader(buf)))
-    override def readsNull(tpe: PgType): Try[T] = Throw(new IllegalStateException()) // TODO
     override def accepts(tpe: PgType): Boolean = expect == tpe
   }
 
@@ -43,4 +44,29 @@ object ValueReads {
     override def accepts(tpe: PgType): Boolean = treads.accepts(tpe)
   }
 
+  implicit def traversableReads[F[_], T](implicit treads: ValueReads[T],
+   cbf: CanBuildFrom[F[_], T, F[T]]
+  ): ValueReads[F[T]] = new ValueReads[F[T]] {
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[F[T]] = {
+      val underlying = tpe.kind match {
+        case Kind.Array(underlying) => underlying
+        case _ => sys.error("not an array type")
+      }
+      Try {
+        val array = PgBuf.reader(buf).array()
+        require(array.dimensions == 1, s"unsupported dimensions: ${array.dimensions}")
+        val builder = cbf.apply()
+        array.data.foreach { value =>
+          builder += treads.reads(underlying, value, charset).get
+        }
+        builder.result()
+      }
+    }
+
+    override def accepts(tpe: PgType): Boolean =
+      tpe.kind match {
+        case Kind.Array(underlying) => treads.accepts(underlying)
+        case _ => false
+      }
+  }
 }
