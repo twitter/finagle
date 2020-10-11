@@ -38,4 +38,13 @@ object Types {
     case class Value(buf: Buf) extends WireValue
   }
 
+  case class PgArrayDim(size: Int, lowerBound: Int)
+  case class PgArray(
+    dimensions: Int,
+    dataOffset: Int, // 0 means no null values,
+    elemType: Oid,
+    arrayDims: IndexedSeq[PgArrayDim],
+    data: IndexedSeq[WireValue]
+  )
+
 }
