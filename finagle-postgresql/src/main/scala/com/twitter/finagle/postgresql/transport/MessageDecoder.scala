@@ -101,7 +101,7 @@ object MessageDecoder {
       nextField match {
         case None => fields
         case Some(field) =>
-          val value = reader.string()
+          val value = reader.cstring()
           loop(fields + (field -> value))
       }
 
@@ -121,7 +121,7 @@ object MessageDecoder {
   }
 
   implicit lazy val commandCompleteDecoder: MessageDecoder[CommandComplete] = MessageDecoder { reader =>
-    CommandComplete(reader.string())
+    CommandComplete(reader.cstring())
   }
 
   implicit lazy val authenticationMessageDecoder: MessageDecoder[AuthenticationMessage] = MessageDecoder { reader =>
@@ -134,14 +134,14 @@ object MessageDecoder {
       case 7 => AuthenticationGSS
       case 8 => AuthenticationGSSContinue(reader.remainingBuf())
       case 9 => AuthenticationSSPI
-      case 10 => AuthenticationSASL(reader.string())
+      case 10 => AuthenticationSASL(reader.cstring())
       case 11 => AuthenticationSASLContinue(reader.remainingBuf())
       case 12 => AuthenticationSASLFinal(reader.remainingBuf())
     }
   }
 
   implicit lazy val parameterStatusDecoder: MessageDecoder[ParameterStatus] = MessageDecoder { reader =>
-    ParameterStatus(reader.string(), reader.string())
+    ParameterStatus(reader.cstring(), reader.cstring())
   }
 
   implicit lazy val readyForQueryDecoder: MessageDecoder[ReadyForQuery] = MessageDecoder { reader =>
@@ -157,7 +157,7 @@ object MessageDecoder {
     RowDescription(
       reader.collect { r =>
         FieldDescription(
-          name = r.string(),
+          name = r.cstring(),
           tableOid = r.unsignedInt() match {
             case 0 => None
             case oid => Some(Oid(oid))

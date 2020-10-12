@@ -24,20 +24,20 @@ object MessageEncoder {
     writer
       .short(msg.version.major)
       .short(msg.version.minor)
-      .string("user").string(msg.user)
+      .cstring("user").cstring(msg.user)
       .opt(msg.database) { (w, db) =>
-        w.string("database").string(db)
+        w.cstring("database").cstring(db)
       }
-      .foreachUnframed(msg.params) { case(w, (key, value)) => w.string(key).string(value) }
+      .foreachUnframed(msg.params) { case(w, (key, value)) => w.cstring(key).cstring(value) }
       .byte(0)
   }
 
   implicit val passwordEncoder: MessageEncoder[FrontendMessage.PasswordMessage] = MessageEncoder('p') { (writer, msg) =>
-    writer.string(msg.password)
+    writer.cstring(msg.password)
   }
 
   implicit val queryEncoder: MessageEncoder[FrontendMessage.Query] = MessageEncoder('Q') { (writer, msg) =>
-    writer.string(msg.value)
+    writer.cstring(msg.value)
   }
 
   implicit val syncEncoder: MessageEncoder[FrontendMessage.Sync.type] = emptyMessageEncoder('S')
@@ -46,7 +46,7 @@ object MessageEncoder {
   implicit val parseEncoder: MessageEncoder[FrontendMessage.Parse] = MessageEncoder('P') { (writer, msg) =>
     writer
       .name(msg.name)
-      .string(msg.statement)
+      .cstring(msg.statement)
       .foreach(msg.dataTypes) { (w, oid) =>
         w.unsignedInt(oid.value)
       }
