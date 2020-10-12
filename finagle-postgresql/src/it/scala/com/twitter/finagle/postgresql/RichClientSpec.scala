@@ -23,8 +23,7 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
     "read" in {
       newRichClient
         .read("select 1;")
-        .flatMap(_.toSeq)
-        .map(_ must haveSize(1))
+        .map(_.rows must haveSize(1))
     }
 
     "modify" in {
@@ -37,8 +36,7 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       newRichClient
         .prepare("select 1")
         .read(Nil)
-        .flatMap(_.toSeq)
-        .map(_ must haveSize(1))
+        .map(_.rows must haveSize(1))
     }
 
     "prepare modify" in {
