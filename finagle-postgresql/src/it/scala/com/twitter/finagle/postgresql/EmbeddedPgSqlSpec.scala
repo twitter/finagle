@@ -24,15 +24,20 @@ trait EmbeddedPgSqlSpec extends BeforeAfterAll { _: PgSqlSpec =>
   def prep(e: EmbeddedPostgres): EmbeddedPostgres = e
 
   def randomTableName = util.Random.alphanumeric.filter(c => c >= 'a' && c <= 'z').take(10).mkString
-  def withTmpTable[T](f: String => T) = withPgSql { pgsql =>
+  def withStatement[T](f: java.sql.Statement => T) = withPgSql { pgsql =>
     using(pgsql.getDatabase(TestDbUser, TestDbName).getConnection()) { conn =>
       using(conn.createStatement()) { stmt =>
-        val tableName = randomTableName
-        stmt.execute(s"CREATE TABLE $tableName(int_col int)") // TODO: allow specifying the table spec
-        f(tableName)
+        f(stmt)
       }
     }
   }
+
+  def withTmpTable[T](f: String => T) =
+    withStatement { stmt =>
+      val tableName = randomTableName
+      stmt.execute(s"CREATE TABLE $tableName(int_col int)") // TODO: allow specifying the table spec
+      f(tableName)
+    }
 
   def newClient(cfg: PostgreSql.Client => PostgreSql.Client): ServiceFactory[Request, Response] = withPgSql { pgsql =>
     cfg(

@@ -4,15 +4,15 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
+import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
-import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragment
 import org.specs2.specification.core.Fragments
 
-class ValueReadsSpec extends Specification with PropertiesSpec {
+class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
 
   val utf8 = StandardCharsets.UTF_8
 
@@ -24,13 +24,13 @@ class ValueReadsSpec extends Specification with PropertiesSpec {
   }
 
   def acceptFragments(reads: ValueReads[_], accept: PgType, accepts: PgType*): Fragments = {
-    val fragments = (accept +: accepts).map { tpe =>
+    val typeFragments = (accept +: accepts).map { tpe =>
       s"accept the ${tpe.name} type" in {
         reads.accepts(accept) must beTrue
       }
     }
 
-    Fragments(fragments: _*)
+    fragments(typeFragments)
   }
 
   def readsFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType)(encode: T => Buf): Fragment = {
