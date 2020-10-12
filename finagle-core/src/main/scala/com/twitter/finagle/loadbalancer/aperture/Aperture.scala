@@ -542,14 +542,16 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     def indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
 
-    private[this] def nodes: Seq[(Int, Double, Address)] = {
+    private[this] def nodes: Seq[(Int, Double, Address, Status)] = {
       val offset = coord.offset
       val width = apertureWidth
       val indices = ring.indices(offset, width)
       indices.map { i =>
-        val addr = vector(i).factory.address
+        val factory = vector(i).factory
+        val addr = factory.address
         val weight = ring.weight(i, offset, width)
-        (i, weight, addr)
+        val status = factory.status
+        (i, weight, addr, status)
       }
     }
 
@@ -583,8 +585,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         val indices = ring.indices(offset, width)
         nodes
           .map {
-            case (i, weight, addr) =>
-              f"(index=$i, weight=$weight%1.6f, addr=$addr)"
+            case (i, weight, addr, status) =>
+              f"(index=$i, weight=$weight%1.6f, addr=$addr, status=$status)"
           }.mkString("[", ", ", "]")
       }
       rebuildLog.debug(s"[DeterministicAperture.rebuild $lbl] nodes=$apertureSlice")
@@ -648,11 +650,12 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       "peer_unit_width" -> coord.unitWidth,
       "aperture_width" -> apertureWidth,
       "nodes" -> nodes.map {
-        case (i, weight, addr) =>
+        case (i, weight, addr, status) =>
           Map[String, Any](
             "index" -> i,
             "weight" -> weight,
-            "address" -> addr.toString
+            "address" -> addr.toString,
+            "status" -> status.toString
           )
       }
     )
