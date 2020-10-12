@@ -6,6 +6,8 @@ import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
+import com.twitter.finagle.postgresql.Types.PgArray
+import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
@@ -101,5 +103,25 @@ trait PropertiesSpec extends ScalaCheck {
       }
     }
   }
+
+  val genArrayDim = Gen.chooseNum(1, 100).map { size =>
+    PgArrayDim(size, 1)
+  }
+  val genArray = for {
+    dimensions <- Gen.chooseNum(1, 4)
+    oid <- arbOid.arbitrary
+    dims <- Gen.containerOfN[IndexedSeq, PgArrayDim](dimensions, genArrayDim)
+    data <- Gen.containerOfN[IndexedSeq, WireValue](dims.map(_.size).sum, genValue)
+  } yield {
+    PgArray(
+      dimensions = dimensions,
+      dataOffset = 0,
+      elemType = oid,
+      arrayDims = dims,
+      data = data,
+    )
+  }
+
+  implicit val arbPgArray: Arbitrary[PgArray] = Arbitrary(genArray)
 
 }

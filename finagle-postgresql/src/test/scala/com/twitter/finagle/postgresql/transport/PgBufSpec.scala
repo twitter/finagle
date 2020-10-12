@@ -6,6 +6,7 @@ import java.nio.ByteOrder
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
@@ -26,35 +27,35 @@ class PgBufSpec extends Specification with PropertiesSpec {
 
   "PgBuf" should {
 
-    def expectedBytes[T](value: T)(expect: (ByteBuffer, T) => ByteBuffer): Array[Byte] = {
-      val bb = expect(ByteBuffer.allocate(1024).order(ByteOrder.BIG_ENDIAN), value)
+    def expectedBytes[T](value: T, capacity: Int)(expect: (ByteBuffer, T) => ByteBuffer): Array[Byte] = {
+      val bb = expect(ByteBuffer.allocate(capacity).order(ByteOrder.BIG_ENDIAN), value)
       bb.array().slice(bb.arrayOffset(), bb.position())
     }
 
-    def writeFragment[T: Arbitrary](name: String)
+    def writeFragment[T: Arbitrary](name: String, capacity: Int = 1024)
                                    (write: (PgBuf.Writer, T) => PgBuf.Writer)
                                    (expect: (ByteBuffer, T) => ByteBuffer) = {
       s"write $name" in prop { value: T =>
         val bufWrite = write(PgBuf.writer, value).build
-        Buf.ByteArray.Owned.extract(bufWrite) must_== expectedBytes(value)(expect)
+        Buf.ByteArray.Owned.extract(bufWrite) must_== expectedBytes(value, capacity)(expect)
       }
     }
 
-    def readFragment[T: Arbitrary](name: String)
+    def readFragment[T: Arbitrary](name: String, capacity: Int = 1024)
                                   (read: PgBuf.Reader => T)
                                   (expect: (ByteBuffer, T) => ByteBuffer) = {
 
       s"read $name" in prop { value: T =>
-        read(PgBuf.reader(Buf.ByteArray.Owned(expectedBytes(value)(expect)))) must_== value
+        read(PgBuf.reader(Buf.ByteArray.Owned(expectedBytes(value, capacity)(expect)))) must_== value
       }
     }
 
-    def fragments[T: Arbitrary](name: String)
+    def fragments[T: Arbitrary](name: String, capacity: Int = 1024)
                               (write: (PgBuf.Writer, T) => PgBuf.Writer)
                               (read: PgBuf.Reader => T)
                               (expect: (ByteBuffer, T) => ByteBuffer) = {
-      writeFragment[T](name)(write)(expect)
-      readFragment[T](name)(read)(expect)
+      writeFragment[T](name, capacity)(write)(expect)
+      readFragment[T](name, capacity)(read)(expect)
 
       s"round trip $name" in prop { value: T =>
         read(PgBuf.reader(write(PgBuf.writer, value).build)) must_== value
@@ -95,6 +96,21 @@ class PgBufSpec extends Specification with PropertiesSpec {
     fragments[List[Int]]("foreach")(_.foreach(_)(_.int(_)))(_.collect(_.int()).toList) { (bb, xs) =>
       bb.putShort(xs.length.toShort)
       xs.foreach(v => bb.putInt(v))
+      bb
+    }
+
+    fragments[PgArray]("pgArray", capacity = 65536)(_.array(_))(_.array()) { (bb, arr) =>
+      bb.putInt(arr.dimensions)
+      bb.putInt(arr.dataOffset)
+      bb.putInt(arr.elemType.value.toInt)
+      arr.arrayDims.foreach { ad =>
+        bb.putInt(ad.size).putInt(ad.lowerBound)
+      }
+      arr.data.foreach {
+        case WireValue.Null => bb.putInt(-1)
+        case WireValue.Value(buf) =>
+          bb.putInt(buf.length).put(Buf.ByteBuffer.Shared.extract(buf))
+      }
       bb
     }
 
