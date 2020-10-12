@@ -14,7 +14,8 @@ import scala.collection.generic.CanBuildFrom
 trait ValueReads[T] {
 
   def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T]
-  def readsNull(tpe: PgType): Try[T] = Throw(new IllegalArgumentException()) // TODO
+  def readsNull(tpe: PgType): Try[T] =
+    Throw(new IllegalArgumentException(s"Type ${tpe.name} has no reasonable null value. If you intended to make this field nullable, you must read it as an Option[T]."))
 
   def reads(tpe: PgType, value: WireValue, charset: Charset): Try[T] = value match {
     case WireValue.Null => readsNull(tpe)
@@ -31,11 +32,6 @@ object ValueReads {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T] = Try(f(new PgBuf.Reader(buf)))
     override def accepts(tpe: PgType): Boolean = expect == tpe
   }
-
-  implicit lazy val readsBoolean: ValueReads[Boolean] = simple(PgType.Bool)(_.byte() != 0)
-  implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
-  implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())
-  implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
 
   implicit def optionReads[T](implicit treads: ValueReads[T]): ValueReads[Option[T]] = new ValueReads[Option[T]] {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[Option[T]] =
@@ -68,5 +64,25 @@ object ValueReads {
         case Kind.Array(underlying) => treads.accepts(underlying)
         case _ => false
       }
+  }
+
+  implicit lazy val readsBoolean: ValueReads[Boolean] = simple(PgType.Bool)(_.byte() != 0)
+  implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
+  implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())
+  implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
+  implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Char)(_.byte())
+  implicit lazy val readsBuf: ValueReads[Buf] = simple(PgType.Bytea)(_.remainingBuf())
+  implicit lazy val readsString: ValueReads[String] = new ValueReads[String] {
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[String] = {
+      // TODO: this uses the lenient codec, we should use the strict one
+      Try(Buf.decodeString(buf, charset))
+    }
+
+    override def accepts(tpe: PgType): Boolean =
+      tpe == PgType.Text ||
+        tpe == PgType.Varchar ||
+        tpe == PgType.Bpchar || // CHAR(n)
+        tpe == PgType.Name || // system identifiers
+        tpe == PgType.Unknown // probably used as a fallback to text serialization?
   }
 }
