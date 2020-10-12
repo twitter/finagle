@@ -49,7 +49,9 @@ object PgBuf {
       this
     }
 
-    def string(v: String): Writer = {
+    // writes a null-terminated string (C-style string)
+    def cstring(v: String): Writer = {
+      // TODO: not clear what to do about strings that contain the null byte?
       w.writeString(v, StandardCharsets.UTF_8)
       byte(0)
     }
@@ -75,8 +77,8 @@ object PgBuf {
     }
 
     def name(n: Name): Writer = n match {
-      case Name.Unnamed => string("")
-      case Name.Named(value) => string(value)
+      case Name.Unnamed => cstring("")
+      case Name.Named(value) => cstring(value)
     }
 
     def format(f: Format): Writer = f match {
@@ -98,7 +100,9 @@ object PgBuf {
     def int(): Int = reader.readIntBE()
     def long(): Long = reader.readLongBE()
     def unsignedInt(): Long = reader.readUnsignedIntBE()
-    def string(): String = {
+
+    // reads a null-terminated string (C-style string)
+    def cstring(): String = {
       val length = reader.remainingUntil(0)
 
       val str = if(length < 0) sys.error(s"invalid string length $length")
