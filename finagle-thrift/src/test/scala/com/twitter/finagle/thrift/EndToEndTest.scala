@@ -27,7 +27,8 @@ import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.{List => JList}
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolFactory}
+import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocol, TProtocolFactory}
+import org.apache.thrift.transport.TTransport
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import scala.reflect.ClassTag
 
@@ -1248,6 +1249,84 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     strictWriteField.get(clientParamSysProp.protocolFactory) == false
     readLimitField.get(clientParamSysProp.protocolFactory) == 1000
     System.clearProperty("org.apache.thrift.readLength")
+  }
+
+  private[this] val exceptionProtocol = new TProtocolFactory {
+    override def getProtocol(trans: TTransport): TProtocol = {
+      throw new Exception("Evidence to show when Rich[Server|Client]Params are passed through")
+    }
+  }
+
+  test("verify using stack API's .with... works to set RichServerParams when using ServerBuilder") {
+    val server = ServerBuilder()
+      .stack(Thrift.server.withProtocolFactory(exceptionProtocol))
+      .name("exception-service")
+      .bindTo(new InetSocketAddress(0))
+      .build(ifaceToService(processor, RichServerParam()))
+
+    val client = Thrift.client.build[B.ServiceIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    intercept[Exception] {
+      await(client.show_me_your_dtab())
+    }
+    await(server.close())
+  }
+
+  test(
+    "passing RichServerParams through the service when creating a server with ServerBuilder works") {
+    val server = ServerBuilder()
+      .stack(Thrift.server)
+      .name("exception-service")
+      .bindTo(new InetSocketAddress(0))
+      .build(ifaceToService(processor, RichServerParam(protocolFactory = exceptionProtocol)))
+
+    val client = Thrift.client.build[B.ServiceIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    intercept[Exception] {
+      await(client.show_me_your_dtab())
+    }
+    await(server.close())
+  }
+
+  test("verify using stack API's .with... works to set RichClientParams when using ClientBuilder") {
+    val server =
+      Thrift.server.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), processor)
+
+    val builder = ClientBuilder()
+      .stack(Thrift.client.withProtocolFactory(exceptionProtocol))
+      .name("exception-client")
+      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+      .build()
+    val client = serviceToIface(builder, Protocols.binaryFactory())
+
+    intercept[Exception] {
+      await(client.show_me_your_dtab())
+    }
+    await(server.close())
+  }
+
+  test(
+    "passing RichClientParams to the FinagleClient when creating a client with ClientBuilder works") {
+    val server =
+      Thrift.server.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), processor)
+
+    val builder = ClientBuilder()
+      .stack(Thrift.client)
+      .name("exception-client")
+      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+      .build()
+    val client = serviceToIface(builder, exceptionProtocol)
+
+    intercept[Exception] {
+      await(client.show_me_your_dtab())
+    }
+    await(server.close())
   }
 }
 
