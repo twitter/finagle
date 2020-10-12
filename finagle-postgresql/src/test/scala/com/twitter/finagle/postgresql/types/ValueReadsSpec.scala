@@ -6,7 +6,11 @@ import java.nio.charset.StandardCharsets
 
 import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
+import com.twitter.finagle.postgresql.Types.Oid
+import com.twitter.finagle.postgresql.Types.PgArray
+import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.transport.PgBuf
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.specs2.specification.core.Fragment
@@ -39,6 +43,24 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       ret must beSuccessfulTry(value)
     }
   }
+  def arrayReadsFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType)(encode: T => Buf) = {
+    val arrayReads = ValueReads.traversableReads[List, T](reads, implicitly)
+    s"read one-dimensional array of non-null values" in prop { values: List[T] =>
+      val data = values.map(v => encode(v)).map(WireValue.Value).toIndexedSeq
+      val pgArray = PgArray(
+        dimensions = 1,
+        dataOffset = 0,
+        elemType = accept.oid,
+        arrayDims = IndexedSeq(PgArrayDim(values.length, 1)),
+        data = data,
+      )
+      val arrayWire = WireValue.Value(PgBuf.writer.array(pgArray).build)
+      // TODO: it'd be better to take the actual array type here...
+      val arrayPgType = PgType(name = "fake", oid = Oid(0), Kind.Array(accept))
+      val ret = arrayReads.reads(arrayPgType, arrayWire, utf8).asScala
+      ret must beSuccessfulTry(values)
+    }
+  }
   def nonNullableFragment(reads: ValueReads[_], accept: PgType): Fragment =
     s"fail to read a null value" in {
       reads.reads(accept, WireValue.Null, utf8).asScala must beFailedTry
@@ -54,6 +76,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       .append(
         Fragments(
           readsFragment(reads, accept)(encode),
+          arrayReadsFragment(reads, accept)(encode),
           nonNullableFragment(reads, accept),
           nullableFragment(reads, accept),
         )
