@@ -15,15 +15,14 @@ object Response {
   case class BackendResponse(e: BackendMessage) extends Response
 
   sealed trait QueryResponse extends Response
-  // TODO: make this useful
   type Row = IndexedSeq[WireValue]
   case class ResultSet(fields: IndexedSeq[FieldDescription], rows: Reader[Row]) extends QueryResponse {
     def toSeq: Future[Seq[Row]] = Reader.toAsyncStream(rows).toSeq()
     def buffered: Future[ResultSet] = toSeq.map { rows => ResultSet(fields, Reader.fromSeq(rows)) }
   }
-  object ResultSet {
+  object Result {
     // def because Reader is stateful
-    def empty = ResultSet(IndexedSeq.empty, Reader.empty)
+    def empty: ResultSet = ResultSet(IndexedSeq.empty, Reader.empty)
   }
   case object Empty extends QueryResponse
   case class Command(commandTag: String) extends QueryResponse
