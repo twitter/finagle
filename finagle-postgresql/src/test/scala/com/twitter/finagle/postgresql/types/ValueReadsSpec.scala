@@ -44,12 +44,18 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       reads.reads(accept, WireValue.Null, utf8).asScala must beFailedTry
     }
 
+  def nullableFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType): Fragment =
+    "is nullable when wrapped in Option" in {
+      ValueReads.optionReads(reads).reads(accept, WireValue.Null, utf8).asScala must beSuccessfulTry(beNone)
+    }
+
   def simpleSpec[T: Arbitrary](reads: ValueReads[T], accept: PgType, accepts: PgType*)(encode: T => Buf): Fragments =
     acceptFragments(reads, accept, accepts: _*)
       .append(
         Fragments(
           readsFragment(reads, accept)(encode),
           nonNullableFragment(reads, accept),
+          nullableFragment(reads, accept),
         )
       )
 
