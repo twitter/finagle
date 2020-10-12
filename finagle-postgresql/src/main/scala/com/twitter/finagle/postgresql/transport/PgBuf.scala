@@ -86,6 +86,18 @@ object PgBuf {
       case Format.Binary => short(1)
     }
 
+    def array(a: PgArray): Writer = {
+      int(a.dimensions)
+      int(a.dataOffset)
+      unsignedInt(a.elemType.value)
+      foreachUnframed(a.arrayDims) { (w,d) =>
+        w.int(d.size).int(d.lowerBound)
+      }
+      foreachUnframed(a.data) { (w, v) =>
+        w.value(v)
+      }
+    }
+
     def build: Buf =
       w.owned
   }
