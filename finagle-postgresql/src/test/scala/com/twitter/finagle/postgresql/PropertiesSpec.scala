@@ -11,6 +11,8 @@ import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import org.specs2.ScalaCheck
+import org.specs2.matcher.describe.ComparisonResult
+import org.specs2.matcher.describe.Diffable
 
 trait PropertiesSpec extends ScalaCheck {
 
@@ -79,5 +81,25 @@ trait PropertiesSpec extends ScalaCheck {
 
   implicit val arbFormat: Arbitrary[Format] =
     Arbitrary(Gen.oneOf(Format.Text, Format.Binary))
+
+  /**
+   * Diffable[Buf] so we can `buf must_=== anotherBuf`
+   */
+  implicit val bufDiffable: Diffable[Buf] = new Diffable[Buf] {
+    override def diff(actual: Buf, expected: Buf): ComparisonResult = {
+      val acArr = Buf.ByteArray.Shared.extract(actual)
+      val exArr = Buf.ByteArray.Shared.extract(expected)
+      new ComparisonResult {
+        def hex(arr: Array[Byte]): String = {
+          val h = arr.map(s => f"$s%02X").mkString
+          s"0x$h"
+        }
+
+        override def identical: Boolean = acArr.deep == exArr.deep
+
+        override def render: String = s"${hex(acArr)} != ${hex(exArr)}"
+      }
+    }
+  }
 
 }

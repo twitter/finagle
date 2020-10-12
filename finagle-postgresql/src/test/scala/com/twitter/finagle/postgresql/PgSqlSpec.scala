@@ -11,5 +11,5 @@ trait PgSqlSpec extends Specification with FutureResult {
     try { f(c) } finally { c.close() }
   }
 
-  def fragments(f: List[Fragment]) = Fragments(f: _*)
+  def fragments(f: Seq[Fragment]) = Fragments(f: _*)
 }
