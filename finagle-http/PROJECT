@@ -10,3 +10,8 @@ owners:
   - yufang
 watchers:
   - csl-team:ldap
+
+fileOwners:
+  src/main/scala/com/twitter/finagle/http/SpnegoAuthenticator.scala:
+    - csl-core-security:phab
+    - platform-security:ldap
