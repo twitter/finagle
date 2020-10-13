@@ -15,9 +15,11 @@ private[finagle] object TrafficDistributor {
   val log = Logger.get(classOf[TrafficDistributor[_, _]])
 
   /**
-   * A [[ServiceFactory]] and its associated weight.
+   * A [[ServiceFactory]] and its associated [[Address]].
    */
-  case class WeightedFactory[Req, Rep](factory: EndpointFactory[Req, Rep], weight: Double)
+  case class AddressedFactory[Req, Rep](factory: EndpointFactory[Req, Rep], address: Address) {
+    def weight: Double = WeightedAddress.extract(address)._2
+  }
 
   /**
    * An intermediate representation of the endpoints that a load balancer
@@ -138,6 +140,70 @@ private[finagle] object TrafficDistributor {
   }
 
   /**
+   * Creates a `newEndpoint` for each distinct [[Address]] in the `addrs`
+   * stream. Calls to `newEndpoint` are cached based on the input address. The cache is
+   * privy to [[Address]] with weight metadata and unwraps them. Weights
+   * are extracted and coupled with the their respective result from `newEndpoint`. If
+   * the [[Address]] does not have a weight, a default weight of 1.0 is used.
+   *
+   * For every distinct [[Address]] observed in `addrs`, it creates a `newEndpoint`.
+   * Each resulting `newEndpoint` is paired with a weight extracted from the [[Address]].
+   * Calls to `newEndpoint` are assumed to be expensive, so they are cached by input address.
+   *
+   * @param eagerEviction When set to false, an [[Address]] cache entry is only removed
+   * when its associated [[ServiceFactory]] has a status that is not Status.Open. This allows
+   * for stale cache entries across updates that are only evicted when a [[ServiceFactory]]
+   * is no longer eligible to receive traffic (as indicated by its `status` field).
+   */
+  private[finagle] def weightEndpoints[Req, Rep](
+    addrs: Activity[Set[Address]],
+    newEndpoint: Address => ServiceFactory[Req, Rep],
+    eagerEviction: Boolean
+  ): Event[Activity.State[Set[AddressedFactory[Req, Rep]]]] = {
+    val init = Map.empty[Address, AddressedFactory[Req, Rep]]
+    safelyScanLeft(init, addrs.run.changes) {
+      case (active, addrs) =>
+        // Note, if an update contains multiple `Address` instances that are the same
+        // with duplicate `weight` metadata, only one of the instances and its associated
+        // factory is cached. Last write wins.
+        val merged = addrs.foldLeft(active) {
+          case (cache, weightedAddr @ WeightedAddress(addr, weight)) =>
+            cache.get(addr) match {
+              // An update with an existing Address that has a new weight
+              // results in the the weight being overwritten but the [[ServiceFactory]]
+              // instance is maintained.
+              case Some(af @ AddressedFactory(_, WeightedAddress(_, w))) if w != weight =>
+                cache.updated(addr, af.copy(address = weightedAddr))
+              case None =>
+                val endpoint = new LazyEndpointFactory(() => newEndpoint(addr), addr)
+                cache.updated(addr, AddressedFactory(endpoint, weightedAddr))
+              case _ => cache
+            }
+        }
+
+        // Remove stale cache entries. When `eagerEviction` is false cache
+        // entries are only removed in subsequent stream updates.
+        val removed = merged.keySet -- addrs.map { case WeightedAddress(addr, _) => addr }
+        removed.foldLeft(merged) {
+          case (cache, addr) =>
+            cache.get(addr) match {
+              case Some(AddressedFactory(f, _)) if eagerEviction || f.status != Status.Open =>
+                try f.close()
+                catch {
+                  case NonFatal(t) => log.warning(t, s"unable to close endpoint $addr")
+                }
+                cache - addr
+              case _ => cache
+            }
+        }
+    }.map {
+      case Activity.Ok(cache) => Activity.Ok(cache.values.toSet)
+      case Activity.Pending => Activity.Pending
+      case failed @ Activity.Failed(_) => failed
+    }
+  }
+
+  /**
    * A modified version of scala collection's groupBy function. `f` is a multi-mapping function
    * and this achieves many to many mapping.
    */
@@ -240,97 +306,32 @@ private[finagle] object TrafficDistributor {
  * A traffic distributor groups the input `dest` into distinct weight classes and
  * allocates traffic to each class. Classes are encoded in the stream of [[Address]]
  * instances in `dest`. The class operates with the following regime:
-
- * 1. For every distinct [[Address]] observed in `dest`, it creates a `newEndpoint`.
- * Each resulting `newEndpoint` is paired with a weight extracted from the [[Address]].
- * Calls to `newEndpoint` are assumed to be expensive, so they are cached by input address.
  *
- * 2. The weighted endpoints are partitioned into weight classes and each class is
+ * The weighted endpoints are partitioned into weight classes and each class is
  * serviced by a distinct `newBalancer` instance. That is, load offered to a weight
  * class is also load balanced across its members. Offered load is distributed according
  * to the classes weight and number of members that belong to the class.
- *
- * @param eagerEviction When set to false, an [[Address]] cache entry is only removed
- * when its associated [[ServiceFactory]] has a status that is not Status.Open. This allows
- * for stale cache entries across updates that are only evicted when a [[ServiceFactory]]
- * is no longer eligible to receive traffic (as indicated by its `status` field).
  */
 private class TrafficDistributor[Req, Rep](
-  dest: Activity[Set[Address]],
-  newEndpoint: Address => ServiceFactory[Req, Rep],
+  dest: Event[Activity.State[Set[TrafficDistributor.AddressedFactory[Req, Rep]]]],
   newBalancer: Activity[Set[EndpointFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
-  eagerEviction: Boolean,
   rng: Rng = Rng.threadLocal,
   statsReceiver: StatsReceiver = NullStatsReceiver)
     extends ServiceFactory[Req, Rep] {
   import TrafficDistributor._
 
-  /**
-   * Creates a `newEndpoint` for each distinct [[Address]] in the `addrs`
-   * stream. Calls to `newEndpoint` are cached based on the input address. The cache is
-   * privy to [[Address]] with weight metadata and unwraps them. Weights
-   * are extracted and coupled with the their respective result from `newEndpoint`. If
-   * the [[Address]] does not have a weight, a default weight of 1.0 is used.
-   */
-  private[this] def weightEndpoints(
-    addrs: Event[Activity.State[Set[Address]]]
-  ): Event[Activity.State[Set[WeightedFactory[Req, Rep]]]] = {
-    val init = Map.empty[Address, WeightedFactory[Req, Rep]]
-    safelyScanLeft(init, addrs) {
-      case (active, addrs) =>
-        // Note, if an update contains multiple `Address` instances
-        // with duplicate `weight` metadata, only one of the instances and its associated
-        // factory is cached. Last write wins.
-        val weightedAddrs: Set[(Address, Double)] = addrs.map(WeightedAddress.extract)
-        val merged = weightedAddrs.foldLeft(active) {
-          case (cache, (addr, weight)) =>
-            cache.get(addr) match {
-              // An update with an existing Address that has a new weight
-              // results in the the weight being overwritten but the [[ServiceFactory]]
-              // instance is maintained.
-              case Some(wf @ WeightedFactory(_, w)) if w != weight =>
-                cache.updated(addr, wf.copy(weight = weight))
-              case None =>
-                val endpoint = new LazyEndpointFactory(() => newEndpoint(addr), addr)
-                cache.updated(addr, WeightedFactory(endpoint, weight))
-              case _ => cache
-            }
-        }
-
-        // Remove stale cache entries. When `eagerEviction` is false cache
-        // entries are only removed in subsequent stream updates.
-        val removed = merged.keySet -- weightedAddrs.map(_._1)
-        removed.foldLeft(merged) {
-          case (cache, addr) =>
-            cache.get(addr) match {
-              case Some(WeightedFactory(f, _)) if eagerEviction || f.status != Status.Open =>
-                try f.close()
-                catch {
-                  case NonFatal(t) => log.warning(t, s"unable to close endpoint $addr")
-                }
-                cache - addr
-              case _ => cache
-            }
-        }
-    }.map {
-      case Activity.Ok(cache) => Activity.Ok(cache.values.toSet)
-      case Activity.Pending => Activity.Pending
-      case failed @ Activity.Failed(_) => failed
-    }
-  }
-
-  /**
+  /*
    * Partitions `endpoints` and assigns a `newBalancer` instance to each partition.
    * Because balancer instances are stateful, they need to be cached across updates.
    */
   private[this] def partition(
-    endpoints: Event[Activity.State[Set[WeightedFactory[Req, Rep]]]]
+    endpoints: Event[Activity.State[Set[AddressedFactory[Req, Rep]]]]
   ): Event[Activity.State[Iterable[WeightClass[Req, Rep]]]] = {
     // Cache entries are balancer instances together with their backing collection
     // which is updatable. The entries are keyed by weight class.
     val init = Map.empty[Double, CachedBalancer[Req, Rep]]
 
-    val balancerDiffOps = new DiffOps[WeightedFactory[Req, Rep], CachedBalancer[Req, Rep]] {
+    val balancerDiffOps = new DiffOps[AddressedFactory[Req, Rep], CachedBalancer[Req, Rep]] {
       // Close balancers that don't correspond to new endpoints.
       def remove(cachedBalancer: CachedBalancer[Req, Rep]): Unit =
         try cachedBalancer.balancer.close()
@@ -339,7 +340,7 @@ private class TrafficDistributor[Req, Rep](
         }
 
       // Construct new balancers from new endpoints.
-      def add(factories: Set[WeightedFactory[Req, Rep]]): CachedBalancer[Req, Rep] = {
+      def add(factories: Set[AddressedFactory[Req, Rep]]): CachedBalancer[Req, Rep] = {
         val group = factories.map(_.factory)
         val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(group))
         val bal = newBalancer(Activity(endpoints))
@@ -348,7 +349,7 @@ private class TrafficDistributor[Req, Rep](
 
       // Update existing balancers with new endpoints.
       def update(
-        factories: Set[WeightedFactory[Req, Rep]],
+        factories: Set[AddressedFactory[Req, Rep]],
         cachedBalancer: CachedBalancer[Req, Rep]
       ): CachedBalancer[Req, Rep] = {
         val group = factories.map(_.factory)
@@ -362,7 +363,7 @@ private class TrafficDistributor[Req, Rep](
       val result = updatePartitionMap(
         balancers,
         activeSet,
-        (weightedFactory: WeightedFactory[Req, Rep]) => Seq(weightedFactory.weight),
+        (addressedFactory: AddressedFactory[Req, Rep]) => Seq(addressedFactory.weight),
         balancerDiffOps)
 
       // Intercept the empty balancer set and replace it with a single balancer
@@ -387,7 +388,7 @@ private class TrafficDistributor[Req, Rep](
     }
   }
 
-  private[this] val weightClasses = partition(weightEndpoints(dest.states))
+  private[this] val weightClasses = partition(dest)
   private[this] val pending = new Promise[ServiceFactory[Req, Rep]]
   private[this] val init: ServiceFactory[Req, Rep] = new DelayedFactory(pending)
 

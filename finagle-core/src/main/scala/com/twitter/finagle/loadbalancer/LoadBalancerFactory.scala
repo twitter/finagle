@@ -5,7 +5,7 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultMonitor
-import com.twitter.util.{Activity, Var}
+import com.twitter.util.{Activity, Event, Var}
 import java.util.logging.{Level, Logger}
 import scala.util.control.NonFatal
 
@@ -61,6 +61,20 @@ object LoadBalancerFactory {
 
   object Dest {
     implicit val param = Stack.Param(Dest(Var.value(Addr.Neg)))
+  }
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a collection
+   * of endpoints.
+   *
+   * If this is configured, the [[Dest]] param will be ignored.
+   */
+  private[finagle] case class Endpoints(va: Event[Activity.State[Set[TrafficDistributor.AddressedFactory[_, _]]]])
+
+  private[finagle] object Endpoints {
+    implicit val param = Stack.Param(
+      Endpoints(Event[Activity.State[Set[TrafficDistributor.AddressedFactory[_, _]]]]()))
   }
 
   /**
@@ -162,6 +176,93 @@ object LoadBalancerFactory {
     }
   }
 
+  // Creates a ServiceFactory from `next` with the given `addr`.
+  private[finagle] def newEndpointFn[Req, Rep](
+    params: Stack.Params,
+    next: Stack[ServiceFactory[Req, Rep]]
+  ): Address => ServiceFactory[Req, Rep] = {
+    val param.Stats(statsReceiver) = params[param.Stats]
+    val param.Label(label) = params[param.Label]
+    val param.Monitor(monitor) = params[param.Monitor]
+    val param.Reporter(reporter) = params[param.Reporter]
+
+    // Determine which stats receiver to use based on `perHostStats`
+    // flag and the configured `HostStats` param. Report per-host stats
+    // only when the flag is set.
+    val hostStatsReceiver =
+      if (!perHostStats()) NullStatsReceiver
+      else params[LoadBalancerFactory.HostStats].hostStatsReceiver
+
+    { addr: Address =>
+      val stats =
+        if (hostStatsReceiver.isNull) statsReceiver
+        else {
+          val scope = addr match {
+            case Address.Inet(ia, _) =>
+              "%s:%d".format(ia.getHostName, ia.getPort)
+            case other => other.toString
+          }
+          val host = hostStatsReceiver.scope(label).scope(scope)
+          BroadcastStatsReceiver(Seq(host, statsReceiver))
+        }
+
+      val composite = {
+        val ia = addr match {
+          case Address.Inet(isa, _) => Some(isa)
+          case _ => None
+        }
+
+        // We always install a `DefaultMonitor` that handles all the un-handled
+        // exceptions propagated from the user-defined monitor.
+        val defaultMonitor = DefaultMonitor(label, ia.map(_.toString).getOrElse("n/a"))
+        reporter(label, ia).andThen(monitor.orElse(defaultMonitor))
+      }
+
+      // If we only have one endpoint in our collection, we construct our configuration
+      // for the endpoint to disable circuit breakers which fail closed. Otherwise, we will
+      // "fail fast" with no reasonable options for the finagle stack to gracefully handle
+      // the failure. This improves the ergonomics of using a Finagle client since it's
+      // recommended to disable these type of circuit breakers for clients connected to
+      // a single endpoint anyway.
+      val failFastParam: FailFastFactory.FailFast = {
+        if (params.contains[FailFastFactory.FailFast]) {
+          params[FailFastFactory.FailFast]
+        } else {
+          // Note, this isn't perfect. The life of this endpoint can outlive the life of
+          // the `sample`. That is, our destination size can change from 1 and we've
+          // still disabled failfast on this endpoint. If this happens to become an
+          // unacceptable trade-off, we'd have to recreate this endpoint based on
+          // destination changes.
+          getDest(params).sample() match {
+            case Addr.Bound(addrs, _) if addrs.size == 1 => FailFastFactory.FailFast(false)
+            case _ => params[FailFastFactory.FailFast]
+          }
+        }
+      }
+
+      next.make(
+        params +
+          failFastParam +
+          Transporter.EndpointAddr(addr) +
+          param.Stats(stats) +
+          param.Monitor(composite)
+      )
+    }
+  }
+
+  private[this] def getDest(params: Stack.Params): Var[Addr] = {
+    val _dest = params[Dest].va
+    val count = params[ReplicateAddresses].count
+    if (count == 1) _dest
+    else {
+      val f = ReplicateAddresses.replicateFunc(count)
+      _dest.map {
+        case bound @ Addr.Bound(set, _) => bound.copy(addrs = set.flatMap(f))
+        case addr => addr
+      }
+    }
+  }
+
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    * The module creates a new `ServiceFactory` based on the module above it for each `Addr`
@@ -188,17 +289,7 @@ object LoadBalancerFactory {
       next: Stack[ServiceFactory[Req, Rep]]
     ): Stack[ServiceFactory[Req, Rep]] = {
 
-      val _dest = params[Dest].va
-      val count = params[ReplicateAddresses].count
-      val dest =
-        if (count == 1) _dest
-        else {
-          val f = ReplicateAddresses.replicateFunc(count)
-          _dest.map {
-            case bound @ Addr.Bound(set, _) => bound.copy(addrs = set.flatMap(f))
-            case addr => addr
-          }
-        }
+      val dest = getDest(params)
 
       val Param(loadBalancerFactory) = params[Param]
       val EnableProbation(probationEnabled) = params[EnableProbation]
@@ -207,75 +298,10 @@ object LoadBalancerFactory {
       val param.Logger(log) = params[param.Logger]
       val param.Label(label) = params[param.Label]
       val param.Monitor(monitor) = params[param.Monitor]
-      val param.Reporter(reporter) = params[param.Reporter]
 
       val rawStatsReceiver = statsReceiver match {
         case sr: RollupStatsReceiver => sr.underlying.head
         case sr => sr
-      }
-
-      // Determine which stats receiver to use based on `perHostStats`
-      // flag and the configured `HostStats` param. Report per-host stats
-      // only when the flag is set.
-      val hostStatsReceiver =
-        if (!perHostStats()) NullStatsReceiver
-        else params[LoadBalancerFactory.HostStats].hostStatsReceiver
-
-      // Creates a ServiceFactory from `next` with the given `addr`.
-      def newEndpoint(addr: Address): ServiceFactory[Req, Rep] = {
-        val stats =
-          if (hostStatsReceiver.isNull) statsReceiver
-          else {
-            val scope = addr match {
-              case Address.Inet(ia, _) =>
-                "%s:%d".format(ia.getHostName, ia.getPort)
-              case other => other.toString
-            }
-            val host = hostStatsReceiver.scope(label).scope(scope)
-            BroadcastStatsReceiver(Seq(host, statsReceiver))
-          }
-
-        val composite = {
-          val ia = addr match {
-            case Address.Inet(isa, _) => Some(isa)
-            case _ => None
-          }
-
-          // We always install a `DefaultMonitor` that handles all the un-handled
-          // exceptions propagated from the user-defined monitor.
-          val defaultMonitor = DefaultMonitor(label, ia.map(_.toString).getOrElse("n/a"))
-          reporter(label, ia).andThen(monitor.orElse(defaultMonitor))
-        }
-
-        // If we only have one endpoint in our collection, we construct our configuration
-        // for the endpoint to disable circuit breakers which fail closed. Otherwise, we will
-        // "fail fast" with no reasonable options for the finagle stack to gracefully handle
-        // the failure. This improves the ergonomics of using a Finagle client since it's
-        // recommended to disable these type of circuit breakers for clients connected to
-        // a single endpoint anyway.
-        val failFastParam: FailFastFactory.FailFast = {
-          if (params.contains[FailFastFactory.FailFast]) {
-            params[FailFastFactory.FailFast]
-          } else {
-            // Note, this isn't perfect. The life of this endpoint can outlive the life of
-            // the `sample`. That is, our destination size can change from 1 and we've
-            // still disabled failfast on this endpoint. If this happens to become an
-            // unacceptable trade-off, we'd have to recreate this endpoint based on
-            // destination changes.
-            dest.sample() match {
-              case Addr.Bound(addrs, _) if addrs.size == 1 => FailFastFactory.FailFast(false)
-              case _ => params[FailFastFactory.FailFast]
-            }
-          }
-        }
-
-        next.make(
-          params +
-            failFastParam +
-            Transporter.EndpointAddr(addr) +
-            param.Stats(stats) +
-            param.Monitor(composite)
-        )
       }
 
       val balancerStats = rawStatsReceiver.scope("loadbalancer")
@@ -310,17 +336,27 @@ object LoadBalancerFactory {
         }
       }
 
-      val destActivity: Activity[Set[Address]] = TrafficDistributor.varAddrToActivity(dest, label)
+      // we directly pass in these endpoints, instead of keeping track of them ourselves.
+      // this allows higher abstractions (like partitioners) to move endpoints from one
+      // cluster to another, and crucially, to share data between endpoints
+      val endpoints = if (params.contains[LoadBalancerFactory.Endpoints]) {
+        params[LoadBalancerFactory.Endpoints].va
+          .asInstanceOf[Event[Activity.State[Set[TrafficDistributor.AddressedFactory[Req, Rep]]]]]
+      } else {
+        TrafficDistributor.weightEndpoints(
+          TrafficDistributor.varAddrToActivity(dest, label),
+          newEndpointFn(params, next),
+          !probationEnabled
+        )
+      }
 
       // Instead of simply creating a newBalancer here, we defer to the
       // traffic distributor to interpret weighted `Addresses`.
       Stack.leaf(
         role,
         new TrafficDistributor[Req, Rep](
-          dest = destActivity,
-          newEndpoint = newEndpoint,
+          dest = endpoints,
           newBalancer = newBalancer,
-          eagerEviction = !probationEnabled,
           statsReceiver = balancerStats
         )
       )

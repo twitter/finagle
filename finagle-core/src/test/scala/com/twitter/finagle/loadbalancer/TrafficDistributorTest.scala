@@ -10,9 +10,12 @@ import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Function => _, _}
 import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicReference
 import org.scalatest.FunSuite
 
 private object TrafficDistributorTest {
+  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
+
   // The distributor is not privy to this wrapped socket address and
   // it allows us to retrieve the weight class.
   object WeightedTestAddr {
@@ -109,7 +112,7 @@ private object TrafficDistributorTest {
       // underlying `AddressFactory`
       val addressFactories = eps.map { set =>
         set.map { epsf =>
-          Await.result(epsf())
+          await(epsf())
           epsf.asInstanceOf[LazyEndpointFactory[Int, Int]].self.get.asInstanceOf[AddressFactory]
         }
       }
@@ -124,11 +127,15 @@ private object TrafficDistributorTest {
       statsReceiver: StatsReceiver = NullStatsReceiver,
       autoPrime: Boolean = false
     ): TrafficDistributor[Int, Int] = {
+      val endpoints = TrafficDistributor.weightEndpoints(
+        Activity(dest),
+        newEndpoint,
+        eagerEviction
+      )
+
       val dist = new TrafficDistributor[Int, Int](
-        dest = Activity(dest),
-        newEndpoint = newEndpoint,
+        dest = endpoints,
         newBalancer = newBalancer,
-        eagerEviction = eagerEviction,
         statsReceiver = statsReceiver,
         rng = Rng("seed".hashCode)
       )
@@ -384,7 +391,7 @@ class TrafficDistributorTest extends FunSuite {
     val q = Future.select(for (_ <- 0 to 100) yield dist())
     assert(!q.isDefined)
     dest() = Activity.Ok(Set(1).map(Address(_)))
-    val (first, _) = Await.result(q, 1.second)
+    val (first, _) = await(q)
     assert(first.isReturn)
     assert(
       balancers.head.endpoints.sample() ==
@@ -394,21 +401,21 @@ class TrafficDistributorTest extends FunSuite {
     // initial resolution
     val resolved: Set[Address] = Set(1, 2, 3).map(Address(_))
     dest() = Activity.Ok(resolved)
-    val bal0 = Await.result(dist())
-    assert(Await.result(bal0(10)) == 10)
+    val bal0 = await(dist())
+    assert(await(bal0(10)) == 10)
     assert(balancers.head.endpoints.sample() == resolved.map(AddressFactory))
 
     // subsequent `Pending` will propagate stale state
     dest() = Activity.Pending
-    val bal1 = Await.result(dist())
-    assert(Await.result(bal1(10)) == 10)
+    val bal1 = await(dist())
+    assert(await(bal1(10)) == 10)
     assert(balancers.head.endpoints.sample() == resolved.map(AddressFactory))
 
     // subsequent `Failed` will propagate stale state
     val exc = new Exception("failed activity")
     dest() = Activity.Failed(exc)
-    val bal2 = Await.result(dist())
-    assert(Await.result(bal2(10)) == 10)
+    val bal2 = await(dist())
+    assert(await(bal2(10)) == 10)
     assert(balancers.head.endpoints.sample() == resolved.map(AddressFactory))
   })
 
@@ -419,15 +426,15 @@ class TrafficDistributorTest extends FunSuite {
 
     // Failure is only allowed as an initial state
     dest() = Activity.Failed(new Exception)
-    intercept[Exception] { Await.result(dist()) }
+    intercept[Exception] { await(dist()) }
 
     // now give it a good value and then make sure that
     // failed never comes back.
     dest() = Activity.Ok(Set(1).map(Address(_)))
-    Await.result(dist())
+    await(dist())
 
     dest() = Activity.Failed(new Exception)
-    Await.result(dist())
+    await(dist())
   })
 
   test("status is bestOf all weight classes")(new Ctx {
@@ -443,11 +450,15 @@ class TrafficDistributorTest extends FunSuite {
       )
     }
 
+    val endpoints = TrafficDistributor.weightEndpoints(
+      Activity(dest),
+      newEndpoint,
+      true
+    )
+
     val dist = new TrafficDistributor[Int, Int](
-      dest = Activity(dest),
-      newEndpoint = newEndpoint,
+      dest = endpoints,
       newBalancer = mkBalancer,
-      eagerEviction = true,
       statsReceiver = NullStatsReceiver,
       rng = Rng("seed".hashCode)
     )
@@ -478,7 +489,7 @@ class TrafficDistributorTest extends FunSuite {
         val addr =
           WeightedAddress(Address(server.boundAddress.asInstanceOf[InetSocketAddress]), i.toDouble)
         va() = Addr.Bound(addr)
-        assert(Await.result(client("hello")) == "hello".reverse)
+        assert(await(client("hello")) == "hello".reverse)
         assert(sr.counters(Seq("test", "requests")) == i)
         assert(sr.counters(Seq("test", "connects")) == 1)
         // each WC gets a new balancer which adds the addr
@@ -516,9 +527,9 @@ class TrafficDistributorTest extends FunSuite {
       .newClient(Name.Bound.singleton(va), "test")
       .toService
 
-    assert(Await.result(client("hello")) == "hello".reverse)
+    assert(await(client("hello")) == "hello".reverse)
     Await.ready(client.close())
-    intercept[ServiceClosedException] { Await.result(client("x")) }
+    intercept[ServiceClosedException] { await(client("x")) }
   }
 
   test("transition to empty balancer on empty address state")(new Ctx {
@@ -529,18 +540,18 @@ class TrafficDistributorTest extends FunSuite {
 
     dest() =
       Activity.Ok(Set((1, 2.0), (2, 3.0), (3, 2.0)).map(x => WeightedAddress(Address(x._1), x._2)))
-    val bal0 = Await.result(dist())
+    val bal0 = await(dist())
     assert(numWeightClasses(sr) == 2)
 
     dest() = Activity.Ok(Set.empty[Address])
-    val ex = intercept[NoBrokersAvailableException] { Await.result(dist()) }
+    val ex = intercept[NoBrokersAvailableException] { await(dist()) }
     assert(numWeightClasses(sr) == 1)
     assert(closeBalancerCalls == 2)
 
     // Update 1.0 which is the "empty" balancer index. An update means that we
     // reused the "empty" balancer, tested by the closeBalancerCalls assertion.
     dest() = Activity.Ok(weightClass(1.0, 10))
-    val bal1 = Await.result(dist())
+    val bal1 = await(dist())
     assert(numWeightClasses(sr) == 1)
     assert(closeBalancerCalls == 2)
   })
@@ -553,15 +564,15 @@ class TrafficDistributorTest extends FunSuite {
 
     dest() =
       Activity.Ok(Set((1, 2.0), (2, 1.0), (3, 2.0)).map(x => WeightedAddress(Address(x._1), x._2)))
-    val bal0 = Await.result(dist())
+    val bal0 = await(dist())
     assert(numWeightClasses(sr) == 2)
 
     dest() = Activity.Ok(Set.empty[Address])
-    val ex = intercept[NoBrokersAvailableException] { Await.result(dist()) }
+    val ex = intercept[NoBrokersAvailableException] { await(dist()) }
     assert(numWeightClasses(sr) == 1)
 
     dest() = Activity.Ok(Set((1, 1.0)).map(x => WeightedAddress(Address(x._1), x._2)))
-    val bal2 = Await.result(dist())
+    val bal2 = await(dist())
 
     val emptyBalancer = balancers.find(b => b.numOfEndpoints == 0)
     emptyBalancer match {
@@ -577,7 +588,7 @@ class TrafficDistributorTest extends FunSuite {
     val dist = newDist(dest, statsReceiver = sr)
     for (i <- 0 to 2) {
       dest() = Activity.Ok(Set.empty[Address])
-      intercept[NoBrokersAvailableException] { Await.result(dist()) }
+      intercept[NoBrokersAvailableException] { await(dist()) }
     }
     // numWeightClasses is the number of balancers emitted by the partition.
     assert(numWeightClasses(sr) == 1.toFloat)
@@ -591,7 +602,7 @@ class TrafficDistributorTest extends FunSuite {
 
     // Finally, we give the distributor an endpoint.
     dest() = Activity.Ok(weightClass(2.0, 100))
-    Await.result(dist())
+    await(dist())
 
     // Verify that there's still one balancer in the distribution, because we
     // close the "empty" balancer.
@@ -739,6 +750,172 @@ class TrafficDistributorTest extends FunSuite {
       assert(added == 1)
       assert(updated == 1)
       assert(closeIsCalled == 1)
+    }
+  }
+
+  test("weightEndpoints splits addresses based on weight and address") {
+    new Ctx {
+      val weightClasses = Seq((1.0, 1), (busyWeight, 2))
+      val classes = weightClasses.flatMap(weightClass.tupled).toSet
+      val dest = Var(Activity.Ok(classes))
+
+      val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
+      val ref =
+        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+      val closable = evt.register(Witness(ref))
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 3)
+          assert(set.count(_.weight == 1.0) == 1)
+          assert(set.count(_.weight == busyWeight) == 2)
+        case _ => fail
+      }
+
+      closable.close()
+    }
+  }
+
+  test("weightEndpoints handles additions gracefully") {
+    new Ctx {
+      val weightClasses = Seq((1.0, 1), (busyWeight, 2))
+      val classes = weightClasses.flatMap(weightClass.tupled).toSet
+      val dest = Var(Activity.Ok(classes))
+
+      val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
+      val ref =
+        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+      val closable = evt.register(Witness(ref))
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 3)
+          assert(set.count(_.weight == 1.0) == 1)
+          assert(set.count(_.weight == busyWeight) == 2)
+        case _ => fail
+      }
+
+      // adds a new address with a weight we've seen before
+      dest() = Activity.Ok(classes + WeightedAddress(WeightedTestAddr(1, 1), 1))
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 4)
+          assert(set.count(_.weight == 1.0) == 2)
+          assert(set.count(_.weight == busyWeight) == 2)
+        case _ => fail
+      }
+
+      closable.close()
+    }
+  }
+
+  test("weightEndpoints handles removals gracefully if they're not open") {
+    new Ctx {
+      val weightClass1 = weightClass(1.0, 1)
+      val weightClass2 = weightClass(busyWeight, 2)
+      val dest = Var(Activity.Ok(weightClass1 ++ weightClass2))
+
+      val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
+      val ref =
+        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+      val closable = evt.register(Witness(ref))
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 3)
+          assert(set.count(_.weight == 1.0) == 1)
+          assert(set.count(_.weight == busyWeight) == 2)
+          // and now we open them up so that they transition to a state where we can examine
+          // their statuses. weightEndpoints will only close factories that do not have
+          // status `Open`, unless you enable eagerEvictions
+          await(Future.join(set.map {
+            case TrafficDistributor.AddressedFactory(factory, _) =>
+              factory().flatMap(_.close())
+          }.toSeq))
+        case _ => fail
+      }
+
+      // adds a new address with a weight we've seen before
+      dest() = Activity.Ok(weightClass1)
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 1)
+          assert(set.count(_.weight == 1.0) == 1)
+        case _ => fail
+      }
+
+      closable.close()
+    }
+  }
+
+  test(
+    "weightEndpoints doesn't remove addresses while they're still open (if eagerEvictions disabled)") {
+    new Ctx {
+      val weightClass1 = weightClass(1.0, 1)
+      val weightClass2 = weightClass(busyWeight, 2)
+      val dest = Var(Activity.Ok(weightClass1 ++ weightClass2))
+
+      val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
+      val ref =
+        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+      val closable = evt.register(Witness(ref))
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 3)
+          assert(set.count(_.weight == 1.0) == 1)
+          assert(set.count(_.weight == busyWeight) == 2)
+        case _ => fail
+      }
+
+      // adds a new address with a weight we've seen before
+      dest() = Activity.Ok(weightClass2)
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 3)
+          assert(set.count(_.weight == 1.0) == 1)
+          assert(set.count(_.weight == busyWeight) == 2)
+        case _ => fail
+      }
+
+      closable.close()
+    }
+  }
+
+  test(
+    "weightEndpoints removes addresses gracefully while they're still open (if eagerEvictions enabled)") {
+    new Ctx {
+      val weightClass1 = weightClass(1.0, 1)
+      val weightClass2 = weightClass(busyWeight, 2)
+      val dest = Var(Activity.Ok(weightClass1 ++ weightClass2))
+
+      val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, true)
+      val ref =
+        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+      val closable = evt.register(Witness(ref))
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 3)
+          assert(set.count(_.weight == 1.0) == 1)
+          assert(set.count(_.weight == busyWeight) == 2)
+        case _ => fail
+      }
+
+      // adds a new address with a weight we've seen before
+      dest() = Activity.Ok(weightClass2)
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 2)
+          assert(set.count(_.weight == busyWeight) == 2)
+        case _ => fail
+      }
+
+      closable.close()
     }
   }
 }
