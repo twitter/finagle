@@ -58,7 +58,7 @@ class ExtendedQueryMachine(req: Request.Execute) extends StateMachine[Response.Q
   case class Syncing(response: Option[Try[Response.QueryResponse]]) extends State
 
   override def start: TransitionResult[State, Response.QueryResponse] = req match {
-    case Request.ExecutePortal(prepared, _, portalName, maxResults) =>
+    case Request.ExecutePortal(prepared, parameters, portalName, maxResults) =>
       Transition(
         Binding,
         SendSeveral(
@@ -66,7 +66,7 @@ class ExtendedQueryMachine(req: Request.Execute) extends StateMachine[Response.Q
             portal = portalName,
             statement = prepared.name,
             formats = Nil, // TODO: deal with parameters
-            values = Nil, // TODO: deal with parameters
+            values = parameters, // TODO: deal with parameters
             resultFormats = Format.Binary :: Nil // request all results in binary format
           ),
           Describe(portalName, DescriptionTarget.Portal), // TODO: we can avoid sending this one when the Prepare phase already returned NoData.

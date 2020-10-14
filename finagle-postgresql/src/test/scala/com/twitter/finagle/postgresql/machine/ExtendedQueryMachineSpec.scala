@@ -21,25 +21,25 @@ import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.Prepared
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.NoOp
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.SendSeveral
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
-import com.twitter.io.Buf
 import com.twitter.util.Await
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
 class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with PropertiesSpec {
 
-  def checkStartup(name: Name, portalName: Name, parameters: IndexedSeq[Buf]): StepSpec =
+  def checkStartup(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): StepSpec =
     checkResult("start is several messages") {
       case Transition(_, SendSeveral(msgs)) =>
         msgs.toList must beLike {
           case a :: b :: c :: d :: Nil =>
-            a must beEqualTo(Send(Bind(portalName, name, Nil, Nil, Format.Binary :: Nil)))
+            a must beEqualTo(Send(Bind(portalName, name, Nil, parameters, Format.Binary :: Nil)))
             b must beEqualTo(Send(Describe(portalName, DescriptionTarget.Portal)))
             c must beEqualTo(Send(Execute(portalName, 0)))
             d must beEqualTo(Send(Flush))
@@ -60,17 +60,17 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
   // The ExtendedQueryMachine needs to send a Sync message to get the connection back to normal before completing
   val errorHandler: ErrorHandler = error => handleSync ++ defaultErrorHandler(error)
 
-  def mkMachine(name: Name, portalName: Name, parameters: IndexedSeq[Buf]): ExtendedQueryMachine =
+  def mkMachine(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): ExtendedQueryMachine =
     new ExtendedQueryMachine(Request.ExecutePortal(Prepared(name, IndexedSeq.empty), parameters, portalName))
 
   "ExtendedQueryMachine" should {
-    "send multiple messages on start" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf]) =>
+    "send multiple messages on start" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue]) =>
       machineSpec(mkMachine(name, portalName, parameters), errorHandler) {
         checkStartup(name, portalName, parameters)
       }
     }
 
-    def baseSpec(name: Name, portalName: Name, parameters: IndexedSeq[Buf], describeMessage: BackendMessage)(tail: StepSpec*) = {
+    def baseSpec(name: Name, portalName: Name, parameters: IndexedSeq[WireValue], describeMessage: BackendMessage)(tail: StepSpec*) = {
       val head = List(
         checkStartup(name, portalName, parameters),
         receive(BindComplete),
@@ -85,7 +85,7 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
     def nominalSpec(
       name: Name,
       portalName: Name,
-      parameters: IndexedSeq[Buf],
+      parameters: IndexedSeq[WireValue],
       describeMessage: BackendMessage,
       executeMessage: BackendMessage,
       expectedResponse: Response.QueryResponse,
@@ -103,15 +103,15 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
       )
     }
 
-    "support empty queries" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf], desc: RowDescription) =>
+    "support empty queries" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], desc: RowDescription) =>
       nominalSpec(name, portalName, parameters, desc, EmptyQueryResponse, Response.Empty)
     }
 
-    "support commands" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf], commandTag: String) =>
+    "support commands" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], commandTag: String) =>
       nominalSpec(name, portalName, parameters, NoData, CommandComplete(commandTag), Response.Command(commandTag))
     }
 
-    "support result sets" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[Buf], rs: TestResultSet) =>
+    "support result sets" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], rs: TestResultSet) =>
       rs.rows.nonEmpty ==> {
         var rowReader: Option[Response.ResultSet] = None
         val steps = rs.rows match {
@@ -138,7 +138,7 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
           //   Ideally we would only expect an error when one was injected
           rows must beLike {
             case Return(rows) => rows must beEqualTo(rs.rows.map(_.values))
-            case Throw(PgSqlServerError(e)) => ok // injected error case
+            case Throw(PgSqlServerError(_)) => ok // injected error case
           }
         }
       }

@@ -2,7 +2,7 @@ package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.postgresql.Response.Prepared
 import com.twitter.finagle.postgresql.Types.Name
-import com.twitter.io.Buf
+import com.twitter.finagle.postgresql.Types.WireValue
 
 trait Request
 object Request {
@@ -14,7 +14,7 @@ object Request {
   sealed trait Execute extends Request
   case class ExecutePortal(
     prepared: Prepared,
-    parameters: Seq[Buf],
+    parameters: Seq[WireValue],
     portalName: Name = Name.Unnamed,
     maxResults: Int = 0,
   ) extends Execute
