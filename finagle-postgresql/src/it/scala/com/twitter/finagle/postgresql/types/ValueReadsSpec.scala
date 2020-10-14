@@ -9,7 +9,6 @@ import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.types.ValueReadsSpec.ToSqlString
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
-import org.scalacheck.Gen
 import org.specs2.matcher.describe.Diffable
 
 /**
@@ -54,7 +53,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     }
   }
 
-  def fragment[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], pgType: PgType*) = {
+  def simpleSpec[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], pgType: PgType*) = {
     val typeFragments = pgType.map { tpe =>
       s"successfully read value from ${tpe.name}" in prop { value: T =>
         val bytes = pgBytes(tpe, value)
@@ -67,26 +66,24 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
   }
 
   "ValueReads" should {
-    "readsBool" should fragment(ValueReads.readsBoolean, PgType.Bool)
+    "readsBool" should simpleSpec(ValueReads.readsBoolean, PgType.Bool)
     // TODO: figure out why charsend(character) doesn't work
-//    "readsByte" should fragment(ValueReads.readsByte, PgType.Char)
-    "readsShort" should fragment(ValueReads.readsShort, PgType.Int2)
-    "readsInt" should fragment(ValueReads.readsInt, PgType.Int4)
-    "readsLong" should fragment(ValueReads.readsLong, PgType.Int8)
-    "readsBuf" should fragment(ValueReads.readsBuf, PgType.Bytea)
+//    "readsByte" should simpleSpec(ValueReads.readsByte, PgType.Char)
+    "readsShort" should simpleSpec(ValueReads.readsShort, PgType.Int2)
+    "readsInt" should simpleSpec(ValueReads.readsInt, PgType.Int4)
+    "readsLong" should simpleSpec(ValueReads.readsLong, PgType.Int8)
+    "readsBuf" should simpleSpec(ValueReads.readsBuf, PgType.Bytea)
     "readsString" should {
       // "The character with the code zero cannot be in a string constant."
       // https://www.postgresql.org/docs/9.1/sql-syntax-lexical.html#SQL-SYNTAX-STRINGS-ESCAPE
       implicit val noZeroByteString = implicitly[Arbitrary[String]].arbitrary
         .suchThat(str => !str.getBytes("UTF8").contains(0))
-      fragment(ValueReads.readsString, PgType.Text, PgType.Varchar, PgType.Bpchar, PgType.Unknown)
+      simpleSpec(ValueReads.readsString, PgType.Text, PgType.Varchar, PgType.Bpchar, PgType.Unknown)
         .append {
-          implicit val nameString = Arbitrary(
-            Gen.listOf(Gen.choose(32.toChar, 126.toChar))
-            .map(_.mkString)
-            .suchThat(_.length < 64)
-          ) // names are 63 bytes long
-          fragment(ValueReads.readsString, PgType.Name)
+          // names are limited to ascii, 63 bytes long
+          implicit val nameString: Arbitrary[String] =
+            Arbitrary(asciiString.arbitrary.map(_.value).suchThat(_.length < 64))
+          simpleSpec(ValueReads.readsString, PgType.Name)
         }
     }
   }

@@ -124,4 +124,8 @@ trait PropertiesSpec extends ScalaCheck {
 
   implicit val arbPgArray: Arbitrary[PgArray] = Arbitrary(genArray)
 
+  case class AsciiString(value: String)
+  implicit val asciiString: Arbitrary[AsciiString] =
+    Arbitrary(Gen.listOf(Gen.choose(32.toChar, 126.toChar)).map(_.mkString).map(AsciiString))
+
 }
