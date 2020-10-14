@@ -38,7 +38,7 @@ class PgBufSpec extends Specification with PropertiesSpec {
       }
     }
 
-    def readFragment[T: Arbitrary](name: String, capacity: Int = 1024)
+    def readFragment[T: Arbitrary](name: String, capacity: Int)
                                   (read: PgBuf.Reader => T)
                                   (expect: (ByteBuffer, T) => ByteBuffer) = {
 
