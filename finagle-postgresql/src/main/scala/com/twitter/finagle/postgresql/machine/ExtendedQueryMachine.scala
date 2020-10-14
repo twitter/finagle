@@ -58,7 +58,7 @@ class ExtendedQueryMachine(req: Request.Execute) extends StateMachine[Response.Q
   case class Syncing(response: Option[Try[Response.QueryResponse]]) extends State
 
   override def start: TransitionResult[State, Response.QueryResponse] = req match {
-    case Request.ExecutePortal(prepared, parameters, portalName, maxResults) =>
+    case Request.ExecutePortal(prepared, _, portalName, maxResults) =>
       Transition(
         Binding,
         SendSeveral(
