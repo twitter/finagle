@@ -50,7 +50,7 @@ object ValueReads {
       }
       Try {
         val array = PgBuf.reader(buf).array()
-        require(array.dimensions == 1, s"unsupported dimensions: ${array.dimensions}")
+        require(array.dimensions <= 1, s"unsupported dimensions: ${array.dimensions}")
         val builder = cbf.apply()
         array.data.foreach { value =>
           builder += treads.reads(underlying, value, charset).get
