@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets
 
 import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
-import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -55,9 +54,8 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         data = data,
       )
       val arrayWire = WireValue.Value(PgBuf.writer.array(pgArray).build)
-      // TODO: it'd be better to take the actual array type here...
-      val arrayPgType = PgType(name = "fake", oid = Oid(0), Kind.Array(accept))
-      val ret = arrayReads.reads(arrayPgType, arrayWire, utf8).asScala
+      val arrayType = PgType.arrayOf(accept).getOrElse(sys.error(s"no array type for ${accept.name}"))
+      val ret = arrayReads.reads(arrayType, arrayWire, utf8).asScala
       ret must beSuccessfulTry(values)
     }
   }
