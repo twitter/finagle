@@ -22,7 +22,6 @@ import io.netty.channel.Channel
 class TlsHandshakeTransporter(
   val remoteAddress: SocketAddress,
   params: Stack.Params,
-  config: Transport.ClientSsl,
   framer: Framer,
 ) extends Transporter[Buf, Buf, TransportContext] {
 

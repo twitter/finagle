@@ -33,8 +33,8 @@ class PgSqlTransporter(
         remoteAddress,
         params
       )
-    case p@Transport.ClientSsl(Some(_)) =>
-      new TlsHandshakeTransporter(remoteAddress, params, p, framer)
+    case Transport.ClientSsl(Some(_)) =>
+      new TlsHandshakeTransporter(remoteAddress, params, framer)
   }
 
   override def apply(): Future[Transport[Buf, Buf] {

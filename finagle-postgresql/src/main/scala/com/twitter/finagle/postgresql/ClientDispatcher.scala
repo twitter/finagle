@@ -72,8 +72,7 @@ class ClientDispatcher(
   def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] = {
     run(machine, promise)
       .transform {
-        // TODO: this value may be necessary to keep around
-        case Return(ready) =>
+        case Return(_) =>
           Future.Done
         case Throw(e) =>
           promise.raise(e)
