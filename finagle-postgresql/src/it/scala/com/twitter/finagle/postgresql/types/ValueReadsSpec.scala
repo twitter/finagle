@@ -9,6 +9,7 @@ import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.types.ValueReadsSpec.ToSqlString
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
+import org.scalacheck.Gen
 import org.specs2.matcher.describe.Diffable
 
 /**
@@ -38,9 +39,9 @@ import org.specs2.matcher.describe.Diffable
  */
 class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpec {
 
-  def pgBytes[T](pgType: PgType, value: T)(implicit toSqlString: ToSqlString[T]): Buf = {
+  def pgBytes(statement: String) = {
     withStatement { stmt =>
-      using(stmt.executeQuery(s"SELECT ${pgType.name}send('${toSqlString.toString(value)}'::${pgType.name});")) { rs =>
+      using(stmt.executeQuery(statement)) { rs =>
         require(rs.next, "no result in result set")
         val hex = rs.getString(1)
         // format is `\xcafe01234
@@ -53,16 +54,44 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     }
   }
 
-  def simpleSpec[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], pgType: PgType*) = {
-    val typeFragments = pgType.map { tpe =>
-      s"successfully read value from ${tpe.name}" in prop { value: T =>
-        val bytes = pgBytes(tpe, value)
-        val read = valueReads.reads(tpe, WireValue.Value(bytes), StandardCharsets.UTF_8)
-        read.asScala must beSuccessfulTry(be_===(value)) // === delegates to Diffable
-      }
-    }
+  def pgBytes[T](pgType: PgType, value: T)(implicit toSqlString: ToSqlString[T]): Buf =
+    // e.g.: `SELECT int4send('1234'::int4)`
+    pgBytes(s"SELECT ${pgType.name}send('${toSqlString.toString(value)}'::${pgType.name});")
 
-    fragments(typeFragments)
+  def pgArrayBytes[T](pgType: PgType, values: List[T])(implicit toSqlString: ToSqlString[T]): Buf = {
+    // e.g.: `SELECT array_send('{1,2,3,4}'::int4[])`
+    val arrStr = values.map { v => toSqlString.toString(v) }.map(v => s"""'$v'""").mkString("ARRAY[", ",", "]")
+    pgBytes(s"SELECT array_send($arrStr::${pgType.name}[]);")
+  }
+
+  def readFragment[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], tpe: PgType) = {
+    s"successfully read value of type ${tpe.name}" in prop { value: T =>
+      val bytes = pgBytes(tpe, value)
+      val read = valueReads.reads(tpe, WireValue.Value(bytes), StandardCharsets.UTF_8)
+      read.asScala must beSuccessfulTry(be_===(value)) // === delegates to Diffable
+    }
+  }
+
+  def arrayFragment[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], arrayType: PgType, tpe: PgType) = {
+    s"successfully read one-dimensional array of values of type ${tpe.name}" in prop { values: List[T] =>
+      val bytes = pgArrayBytes(tpe, values)
+      val arrayReads = ValueReads.traversableReads[List, T](valueReads, implicitly)
+      val read = arrayReads.reads(arrayType, WireValue.Value(bytes), StandardCharsets.UTF_8)
+      read.asScala must beSuccessfulTry(be_===(values)) // === delegates to Diffable
+    }
+  }
+
+  def simpleSpec[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], pgType: PgType*) = {
+    val fs = pgType
+      .flatMap { tpe =>
+        lazy val af = PgType.arrayOf(tpe).map { arrayType =>
+          arrayFragment(valueReads, arrayType, tpe)
+        }
+
+        readFragment(valueReads, tpe) :: af.toList
+      }
+
+    fragments(fs)
   }
 
   "ValueReads" should {
@@ -84,8 +113,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     }
     "readsString" should {
       // names are limited to ascii, 63 bytes long
-      implicit val nameString: Arbitrary[String] =
-        Arbitrary(asciiString.arbitrary.map(_.value).suchThat(_.length < 64))
+      implicit val nameString: Arbitrary[String] = Arbitrary(Gen.listOfN(63, genAsciiChar).map(_.mkString))
       simpleSpec(ValueReads.readsString, PgType.Name)
     }
   }
