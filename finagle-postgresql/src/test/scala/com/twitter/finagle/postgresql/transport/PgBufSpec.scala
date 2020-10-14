@@ -22,9 +22,6 @@ class PgBufSpec extends Specification with PropertiesSpec {
   implicit val arbUInt: Arbitrary[UInt] =
     Arbitrary(Gen.chooseNum(0, Int.MaxValue.toLong * 2).map(UInt(_)))
 
-  implicit val asciiString: Arbitrary[String] =
-    Arbitrary(Gen.listOf(Gen.choose(32.toChar, 126.toChar)).map(_.mkString))
-
   "PgBuf" should {
 
     def expectedBytes[T](value: T, capacity: Int)(expect: (ByteBuffer, T) => ByteBuffer): Array[Byte] = {
@@ -65,10 +62,11 @@ class PgBufSpec extends Specification with PropertiesSpec {
     fragments[Byte]("byte")(_.byte(_))(_.byte())(_.put(_))
     fragments[Int]("int")(_.int(_))(_.int())(_.putInt(_))
     fragments[UInt]("unsigned int")((w,uint) => w.unsignedInt(uint.bits))(r => UInt(r.unsignedInt()))((b,uint) => b.putInt(uint.bits))
-    fragments[String]("cstring")(_.cstring(_))(_.cstring()) { (bb, str) =>
-      bb.put(str.getBytes("UTF8"))
+    // C-style strings only
+    fragments[AsciiString]("cstring")((w,str) => w.cstring(str.value))(r => AsciiString(r.cstring())) { (bb, str) =>
+      bb.put(str.value.getBytes("UTF8"))
       bb.put(0.toByte)
-    }(asciiString) // C-style strings only
+    }
     fragments[Buf]("buf")(_.buf(_))(_.remainingBuf()) { (bb, buf) =>
       bb.put(Buf.ByteBuffer.Shared.extract(buf))
     }
