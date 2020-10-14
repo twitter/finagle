@@ -76,15 +76,17 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     "readsString" should {
       // "The character with the code zero cannot be in a string constant."
       // https://www.postgresql.org/docs/9.1/sql-syntax-lexical.html#SQL-SYNTAX-STRINGS-ESCAPE
-      implicit val noZeroByteString = implicitly[Arbitrary[String]].arbitrary
+      val genNonZeroByte = implicitly[Arbitrary[List[Char]]].arbitrary
+        .map(_.mkString)
         .suchThat(str => !str.getBytes("UTF8").contains(0))
+      implicit val noZeroByteString: Arbitrary[String] = Arbitrary(genNonZeroByte)
       simpleSpec(ValueReads.readsString, PgType.Text, PgType.Varchar, PgType.Bpchar, PgType.Unknown)
-        .append {
-          // names are limited to ascii, 63 bytes long
-          implicit val nameString: Arbitrary[String] =
-            Arbitrary(asciiString.arbitrary.map(_.value).suchThat(_.length < 64))
-          simpleSpec(ValueReads.readsString, PgType.Name)
-        }
+    }
+    "readsString" should {
+      // names are limited to ascii, 63 bytes long
+      implicit val nameString: Arbitrary[String] =
+        Arbitrary(asciiString.arbitrary.map(_.value).suchThat(_.length < 64))
+      simpleSpec(ValueReads.readsString, PgType.Name)
     }
   }
 }
