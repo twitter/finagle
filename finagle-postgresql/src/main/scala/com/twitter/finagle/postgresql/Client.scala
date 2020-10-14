@@ -10,7 +10,6 @@ import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.types.PgType
 import com.twitter.finagle.postgresql.types.ValueReads
-import com.twitter.io.Buf
 import com.twitter.io.Reader
 import com.twitter.util.Closable
 import com.twitter.util.Future
@@ -112,7 +111,7 @@ object Client {
 
 // TODO
 trait Parameter {
-  def buf: Buf
+  def buf: WireValue
 }
 
 trait PreparedStatement extends QueryClient[Seq[Parameter]]

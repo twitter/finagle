@@ -2,7 +2,7 @@ package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.postgresql.Types.Name
-import com.twitter.io.Buf
+import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Reader
 import com.twitter.util.Future
 import org.specs2.matcher.MatchResult
@@ -27,7 +27,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
           }
         }
 
-    def executeSpec(s: String, parameters: IndexedSeq[Buf] = IndexedSeq.empty, maxResults: Int = 0)(f: (Service[Request, Response], Response) => Future[MatchResult[_]]) =
+    def executeSpec(s: String, parameters: IndexedSeq[WireValue] = IndexedSeq.empty, maxResults: Int = 0)(f: (Service[Request, Response], Response) => Future[MatchResult[_]]) =
       newClient(identity)()
         .flatMap { client =>
           client(Request.Prepare(s))
@@ -41,7 +41,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
             }
         }
 
-    def fullSpec(name: String, query: String, parameters: IndexedSeq[Buf] = IndexedSeq.empty)(f: Response => Future[MatchResult[_]]) =
+    def fullSpec(name: String, query: String, parameters: IndexedSeq[WireValue] = IndexedSeq.empty)(f: Response => Future[MatchResult[_]]) =
       fragments(
         List(
           s"support preparing $name" in {
