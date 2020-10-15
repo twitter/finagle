@@ -67,11 +67,13 @@ object ValueReads {
   }
 
   implicit lazy val readsBoolean: ValueReads[Boolean] = simple(PgType.Bool)(_.byte() != 0)
+  implicit lazy val readsBuf: ValueReads[Buf] = simple(PgType.Bytea)(_.remainingBuf())
+  implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Char)(_.byte())
+  implicit lazy val readsDouble: ValueReads[Double] = simple(PgType.Float8)(_.double())
+  implicit lazy val readsFloat: ValueReads[Float] = simple(PgType.Float4)(_.float())
+  implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
   implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
   implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())
-  implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
-  implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Char)(_.byte())
-  implicit lazy val readsBuf: ValueReads[Buf] = simple(PgType.Bytea)(_.remainingBuf())
   implicit lazy val readsString: ValueReads[String] = new ValueReads[String] {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[String] = {
       // TODO: this uses the lenient codec, we should use the strict one

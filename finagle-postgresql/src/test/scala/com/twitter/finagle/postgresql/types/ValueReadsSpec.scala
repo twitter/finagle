@@ -86,6 +86,16 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       case false => Buf.ByteArray(0x00)
     }
     "readsByte" should simpleSpec[Byte](ValueReads.readsByte, PgType.Char) { byte => Buf.ByteArray(byte) }
+    "readsDouble" should simpleSpec[Double](ValueReads.readsDouble, PgType.Float8) { double =>
+      mkBuf() { bb =>
+        bb.putDouble(double)
+      }
+    }
+    "readsFloat" should simpleSpec[Float](ValueReads.readsFloat, PgType.Float4) { float =>
+      mkBuf() { bb =>
+        bb.putFloat(float)
+      }
+    }
     "readsShort" should simpleSpec[Short](ValueReads.readsShort, PgType.Int2) { short =>
       mkBuf() { bb =>
         bb.putShort(short)

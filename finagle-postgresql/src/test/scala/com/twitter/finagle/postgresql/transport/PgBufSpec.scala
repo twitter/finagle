@@ -61,6 +61,8 @@ class PgBufSpec extends Specification with PropertiesSpec {
 
     fragments[Byte]("byte")(_.byte(_))(_.byte())(_.put(_))
     fragments[Int]("int")(_.int(_))(_.int())(_.putInt(_))
+    fragments[Double]("double")(_.double(_))(_.double())(_.putDouble(_))
+    fragments[Float]("float")(_.float(_))(_.float())(_.putFloat(_))
     fragments[UInt]("unsigned int")((w,uint) => w.unsignedInt(uint.bits))(r => UInt(r.unsignedInt()))((b,uint) => b.putInt(uint.bits))
     // C-style strings only
     fragments[AsciiString]("cstring")((w,str) => w.cstring(str.value))(r => AsciiString(r.cstring())) { (bb, str) =>
