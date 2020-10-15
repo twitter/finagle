@@ -56,6 +56,7 @@ extlinks = {
   'finagle-base-http-src': ("https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/%s", 'finagle-base-http github repo'),
   'finagle-netty4-src': ("https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/%s", 'finagle-netty4 github repo'),
   'finagle-mux-src': ("https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/%s", 'finagle-mux github repo'),
+  'finagle-thrift-src': ("https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/scala/%s", 'finagle-thrift github repo'),
   'finagle-thriftmux-src': ("https://github.com/twitter/finagle/blob/master/finagle-thriftmux/src/main/scala/%s", 'finagle-thriftmux github repo'),
   'finagle-toggle-src': ("https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/%s", 'finagle-toggle github repo'),
   'finagle-tunable-src': ("https://github.com/twitter/finagle/blob/master/finagle-tunable/src/main/scala/%s", 'finagle-tunable github repo'),

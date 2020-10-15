@@ -1062,6 +1062,18 @@ level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the de
 
 :doc:`Learn more <MethodBuilder>` about ``MethodBuilder``.
 
+Partition Aware Client
+----------------------
+
+Partition Aware Client is a client configured with a
+partitioning layer in the client stack that understands the service partitioning strategy.
+It routes requests to the partitioned service shards and supports scatter-gather.
+Finagle Memcached client and Redis PartitionedClient have the consistent hashing partitioning
+strategy configuration by default, ThriftMux client has partitioning support as an opt-in
+configuration by calling ``.withPartitioning``.
+
+:doc:`Learn more <PartitionAwareClient>` about ThriftMux Partition Aware Client.
+
 .. rubric:: Footnotes
 
 .. [#backoff] Most of the backoff strategies implemented in Finagle are inspired by Mark
