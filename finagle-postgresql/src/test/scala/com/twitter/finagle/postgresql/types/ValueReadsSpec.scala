@@ -85,6 +85,11 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       case true => Buf.ByteArray(0x01)
       case false => Buf.ByteArray(0x00)
     }
+    "readsBuf" should simpleSpec[Buf](ValueReads.readsBuf, PgType.Bytea) { buf =>
+      mkBuf() { bb =>
+        bb.put(Buf.ByteArray.Shared.extract(buf))
+      }
+    }
     "readsByte" should simpleSpec[Byte](ValueReads.readsByte, PgType.Char) { byte => Buf.ByteArray(byte) }
     "readsDouble" should simpleSpec[Double](ValueReads.readsDouble, PgType.Float8) { double =>
       mkBuf() { bb =>
@@ -94,11 +99,6 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     "readsFloat" should simpleSpec[Float](ValueReads.readsFloat, PgType.Float4) { float =>
       mkBuf() { bb =>
         bb.putFloat(float)
-      }
-    }
-    "readsShort" should simpleSpec[Short](ValueReads.readsShort, PgType.Int2) { short =>
-      mkBuf() { bb =>
-        bb.putShort(short)
       }
     }
     "readsInt" should simpleSpec[Int](ValueReads.readsInt, PgType.Int4) { int =>
@@ -111,14 +111,20 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         bb.putLong(long)
       }
     }
+    "readsShort" should simpleSpec[Short](ValueReads.readsShort, PgType.Int2) { short =>
+      mkBuf() { bb =>
+        bb.putShort(short)
+      }
+    }
     "readsString" should simpleSpec[String](ValueReads.readsString, PgType.Text, PgType.Varchar, PgType.Bpchar, PgType.Name, PgType.Unknown) { string =>
       mkBuf() { bb =>
         bb.put(string.getBytes(utf8))
       }
     }
-    "readsBuf" should simpleSpec[Buf](ValueReads.readsBuf, PgType.Bytea) { buf =>
+    "readsUuid" should simpleSpec[java.util.UUID](ValueReads.readsUuid, PgType.Uuid) { uuid =>
       mkBuf() { bb =>
-        bb.put(Buf.ByteArray.Shared.extract(buf))
+        bb.putLong(uuid.getMostSignificantBits)
+        bb.putLong(uuid.getLeastSignificantBits)
       }
     }
   }
