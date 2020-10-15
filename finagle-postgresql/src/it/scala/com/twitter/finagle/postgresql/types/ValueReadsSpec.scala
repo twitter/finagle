@@ -96,12 +96,14 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
 
   "ValueReads" should {
     "readsBool" should simpleSpec(ValueReads.readsBoolean, PgType.Bool)
+    "readsBuf" should simpleSpec(ValueReads.readsBuf, PgType.Bytea)
     // TODO: figure out why charsend(character) doesn't work
 //    "readsByte" should simpleSpec(ValueReads.readsByte, PgType.Char)
-    "readsShort" should simpleSpec(ValueReads.readsShort, PgType.Int2)
+    "readsDouble" should simpleSpec(ValueReads.readsDouble, PgType.Float8)
+    "readsFloat" should simpleSpec(ValueReads.readsFloat, PgType.Float4)
     "readsInt" should simpleSpec(ValueReads.readsInt, PgType.Int4)
     "readsLong" should simpleSpec(ValueReads.readsLong, PgType.Int8)
-    "readsBuf" should simpleSpec(ValueReads.readsBuf, PgType.Bytea)
+    "readsShort" should simpleSpec(ValueReads.readsShort, PgType.Int2)
     "readsString" should {
       // "The character with the code zero cannot be in a string constant."
       // https://www.postgresql.org/docs/9.1/sql-syntax-lexical.html#SQL-SYNTAX-STRINGS-ESCAPE

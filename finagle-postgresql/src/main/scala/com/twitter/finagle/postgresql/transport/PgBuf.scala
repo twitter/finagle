@@ -49,6 +49,16 @@ object PgBuf {
       this
     }
 
+    def double(v: Double): Writer = {
+      w.writeDoubleBE(v)
+      this
+    }
+
+    def float(v: Float): Writer = {
+      w.writeFloatBE(v)
+      this
+    }
+
     // writes a null-terminated string (C-style string)
     def cstring(v: String): Writer = {
       // TODO: not clear what to do about strings that contain the null byte?
@@ -112,6 +122,8 @@ object PgBuf {
     def int(): Int = reader.readIntBE()
     def long(): Long = reader.readLongBE()
     def unsignedInt(): Long = reader.readUnsignedIntBE()
+    def float(): Float = reader.readFloatBE()
+    def double(): Double = reader.readDoubleBE()
 
     // reads a null-terminated string (C-style string)
     def cstring(): String = {
