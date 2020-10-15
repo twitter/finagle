@@ -39,6 +39,13 @@ import org.specs2.matcher.describe.Diffable
  */
 class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpec {
 
+  // The function to convert a type to its wire representation is mostly guessable from its name, but not always.
+  // This maps types to custom names, otherwise, we use the typical naming scheme.
+  // NOTE: we can extract the function name from the pg_type.dat file, but let's not add this to PgType if not necessary.
+  val customFuncs = Map(PgType.Uuid -> "uuid_send")
+  def sendFunc(tpe: PgType) =
+    customFuncs.getOrElse(tpe, s"${tpe.name}send")
+
   def pgBytes(statement: String) = {
     withStatement { stmt =>
       using(stmt.executeQuery(statement)) { rs =>
@@ -56,7 +63,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
 
   def pgBytes[T](pgType: PgType, value: T)(implicit toSqlString: ToSqlString[T]): Buf =
     // e.g.: `SELECT int4send('1234'::int4)`
-    pgBytes(s"SELECT ${pgType.name}send('${toSqlString.toString(value)}'::${pgType.name});")
+    pgBytes(s"SELECT ${sendFunc(pgType)}('${toSqlString.toString(value)}'::${pgType.name});")
 
   def pgArrayBytes[T](pgType: PgType, values: List[T])(implicit toSqlString: ToSqlString[T]): Buf = {
     // e.g.: `SELECT array_send('{1,2,3,4}'::int4[])`
@@ -118,6 +125,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
       implicit val nameString: Arbitrary[String] = Arbitrary(Gen.listOfN(63, genAsciiChar).map(_.mkString))
       simpleSpec(ValueReads.readsString, PgType.Name)
     }
+    "readsUuid" should simpleSpec(ValueReads.readsUuid, PgType.Uuid)
   }
 }
 

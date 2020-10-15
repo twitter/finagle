@@ -87,4 +87,8 @@ object ValueReads {
         tpe == PgType.Name || // system identifiers
         tpe == PgType.Unknown // probably used as a fallback to text serialization?
   }
+  implicit lazy val readsUuid: ValueReads[java.util.UUID] = simple(PgType.Uuid) { reader =>
+    new java.util.UUID(reader.long(), reader.long())
+  }
+
 }
