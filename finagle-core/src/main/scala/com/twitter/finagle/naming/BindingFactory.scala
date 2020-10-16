@@ -44,7 +44,7 @@ import com.twitter.util._
  *
  * @bug 'status' has a funny definition.
  */
-private[finagle] class BindingFactory[Req, Rep](
+class BindingFactory[Req, Rep] private[naming] (
   path: Path,
   newFactory: Name.Bound => ServiceFactory[Req, Rep],
   timer: Timer,
@@ -148,12 +148,12 @@ private[finagle] class BindingFactory[Req, Rep](
   override def status: Status = dtabCache.status(Dtabs(baseDtab(), Dtab.local))
 }
 
-private[finagle] object BindingFactory {
+object BindingFactory {
   private val log = Logger.get()
 
-  val NamerNameAnnotationKey = "clnt/namer.name"
-  val NamerPathAnnotationKey = "clnt/namer.path"
-  val DtabBaseAnnotationKey = "clnt/namer.dtab.base"
+  private[finagle] val NamerNameAnnotationKey = "clnt/namer.name"
+  private[finagle] val NamerPathAnnotationKey = "clnt/namer.path"
+  private[finagle] val DtabBaseAnnotationKey = "clnt/namer.dtab.base"
 
   private case class Dtabs(base: Dtab, local: Dtab) extends CachedHashCode.ForClass {
     override protected def computeHashCode: Int = {
@@ -164,7 +164,7 @@ private[finagle] object BindingFactory {
     }
   }
 
-  val role = Stack.Role("Binding")
+  private[finagle] val role = Stack.Role("Binding")
 
   /**
    * A class eligible for configuring a
@@ -172,11 +172,11 @@ private[finagle] object BindingFactory {
    * [[com.twitter.finagle.naming.BindingFactory]] with a destination
    * [[com.twitter.finagle.Name]] to bind.
    */
-  case class Dest(dest: Name) {
+  private[finagle] case class Dest(dest: Name) {
     def mk(): (Dest, Stack.Param[Dest]) =
       (this, Dest.param)
   }
-  object Dest {
+  private[finagle] object Dest {
     implicit val param = Stack.Param(Dest(Name.Path(Path.read("/$/fail"))))
   }
 
