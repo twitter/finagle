@@ -54,9 +54,17 @@ object Types {
     case class Micros(offset: Long) extends Timestamp
   }
 
+  sealed trait NumericSign
+  object NumericSign {
+    case object Positive extends NumericSign
+    case object Negative extends NumericSign
+    case object NaN extends NumericSign
+    case object Infinity extends NumericSign
+    case object NegInfinity extends NumericSign
+  }
   case class Numeric(
     weight: Short, // unsigned?
-    sign: Short, // unsigned?
+    sign: NumericSign,
     displayScale: Int, // unsigned short
     digits: Seq[Int] // NumericDigit
   )
