@@ -7,7 +7,7 @@ case class PgSqlServerError(error: BackendMessage.ErrorResponse)
 }
 case object PgSqlTlsUnsupportedError extends PgSqlException("TLS is not supported by the server.")
 
-abstract class PgSqlClientError(message: String) extends PgSqlException(message)
+class PgSqlClientError(message: String) extends PgSqlException(message)
 case class PgSqlUnsupportedError(msg: String) extends PgSqlClientError(msg)
 case object PgSqlPasswordRequired extends PgSqlClientError("Password was not provided but is required.")
 case class PgSqlUnsupportedAuthenticationMechanism(method: BackendMessage.AuthenticationMessage)

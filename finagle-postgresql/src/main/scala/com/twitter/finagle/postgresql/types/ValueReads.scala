@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql.types
 
 import java.nio.charset.Charset
 
+import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlUnsupportedError
 import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -32,7 +33,15 @@ object ValueReads {
 
   def simple[T](expect: PgType*)(f: PgBuf.Reader => T): ValueReads[T] = new ValueReads[T] {
     val accept: Set[PgType] = expect.toSet
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T] = Try(f(new PgBuf.Reader(buf)))
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T] =
+      Try {
+        val reader = new PgBuf.Reader(buf)
+        val value = f(reader)
+        if(reader.remaining != 0) {
+          throw new PgSqlClientError(s"Reading value of type ${tpe.name} should have consumed the whole value's buffer, but ${reader.remaining} bytes remained.")
+        }
+        value
+      }
     override def accepts(tpe: PgType): Boolean = accept(tpe)
   }
 
@@ -49,11 +58,13 @@ object ValueReads {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[F[T]] = {
       val underlying = tpe.kind match {
         case Kind.Array(underlying) => underlying
-        case _ => sys.error("not an array type")
+        case _ => throw new PgSqlClientError(s"Type ${tpe.name} is not an array type and cannot be read as such.")
       }
       Try {
         val array = PgBuf.reader(buf).array()
-        require(array.dimensions <= 1, s"unsupported dimensions: ${array.dimensions}")
+        if(array.dimensions > 1) {
+          throw PgSqlUnsupportedError(s"Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got ${array.dimensions}")
+        }
         val builder = cbf.apply()
         array.data.foreach { value =>
           builder += treads.reads(underlying, value, charset).get
@@ -76,7 +87,7 @@ object ValueReads {
   implicit lazy val readsFloat: ValueReads[Float] = simple(PgType.Float4)(_.float())
   implicit lazy val readsInstant: ValueReads[java.time.Instant] = simple(PgType.Timestamptz, PgType.Timestamp) { reader =>
     reader.timestamp() match {
-      case Timestamp.NegInfinity | Timestamp.Infinity => throw PgSqlUnsupportedError("-Infinity and Infinity timestamps are not supported")
+      case Timestamp.NegInfinity | Timestamp.Infinity => throw PgSqlUnsupportedError("-Infinity and Infinity timestamps cannot be read as java.time.Instant.")
       case Timestamp.Micros(offset) => PgTime.usecOffsetAsInstant(offset)
     }
   }
