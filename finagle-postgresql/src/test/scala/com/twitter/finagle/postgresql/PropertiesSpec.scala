@@ -8,6 +8,7 @@ import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.Numeric
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
@@ -144,5 +145,20 @@ trait PropertiesSpec extends ScalaCheck {
   val genTimestamp: Gen[Timestamp] =
     Gen.frequency(99 -> genMicros, 1 -> Gen.oneOf(Timestamp.NegInfinity, Timestamp.Infinity))
   implicit lazy val arbTimestamp = Arbitrary(genTimestamp)
+
+  // TODO: make this sensical
+  val genNumeric = for {
+    ndigits <- Gen.chooseNum(1, 64) // TODO: what's the maximum number of digits?
+    weight <- Gen.chooseNum(0.toShort, Short.MaxValue)
+    sign <- Gen.chooseNum(0.toShort, Short.MaxValue)
+    displayScale <- Gen.chooseNum(0, Short.MaxValue)
+    digits <- Gen.listOfN(ndigits, Gen.chooseNum(0, Short.MaxValue))
+  } yield Numeric(
+    weight = weight,
+    sign = sign,
+    displayScale = displayScale,
+    digits = digits
+  )
+  implicit lazy val arbNumeric: Arbitrary[Numeric] = Arbitrary(genNumeric)
 
 }

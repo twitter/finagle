@@ -54,4 +54,11 @@ object Types {
     case class Micros(offset: Long) extends Timestamp
   }
 
+  case class Numeric(
+    weight: Short, // unsigned?
+    sign: Short, // unsigned?
+    displayScale: Int, // unsigned short
+    digits: Seq[Int] // NumericDigit
+  )
+
 }
