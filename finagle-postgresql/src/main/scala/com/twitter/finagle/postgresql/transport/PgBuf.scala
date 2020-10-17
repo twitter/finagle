@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets
 
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.Numeric
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
@@ -46,6 +47,11 @@ object PgBuf {
     }
 
     def short(v: Short): Writer = {
+      w.writeShortBE(v)
+      this
+    }
+
+    def unsignedShort(v: Int): Writer = {
       w.writeShortBE(v)
       this
     }
@@ -131,6 +137,14 @@ object PgBuf {
         case Timestamp.Micros(v) => long(v)
       }
 
+    def numeric(n: Numeric): Writer = {
+      unsignedShort(n.digits.length.toShort)
+      short(n.weight)
+      short(n.sign)
+      unsignedShort(n.displayScale)
+      foreachUnframed(n.digits)(_.unsignedShort(_))
+    }
+
     def build: Buf =
       w.owned
   }
@@ -142,6 +156,7 @@ object PgBuf {
 
     def byte(): Byte = reader.readByte()
     def short(): Short = reader.readShortBE()
+    def unsignedShort(): Int = reader.readUnsignedShortBE()
     def int(): Int = reader.readIntBE()
     def long(): Long = reader.readLongBE()
     def unsignedInt(): Long = reader.readUnsignedIntBE()
@@ -207,6 +222,16 @@ object PgBuf {
         case Infinity => Timestamp.Infinity
         case v => Timestamp.Micros(v)
       }
+    }
+
+    def numeric(): Numeric = {
+      val len = unsignedShort()
+      Numeric(
+        weight = short(),
+        sign = short(),
+        displayScale = unsignedShort(),
+        digits = Seq.fill(len)(unsignedShort())
+      )
     }
   }
 

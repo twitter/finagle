@@ -6,6 +6,7 @@ import java.nio.ByteOrder
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.Numeric
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -61,10 +62,18 @@ class PgBufSpec extends Specification with PropertiesSpec {
     }
 
     fragments[Byte]("byte")(_.byte(_))(_.byte())(_.put(_))
-    fragments[Int]("int")(_.int(_))(_.int())(_.putInt(_))
-    fragments[Long]("long")(_.long(_))(_.long())(_.putLong(_))
     fragments[Double]("double")(_.double(_))(_.double())(_.putDouble(_))
     fragments[Float]("float")(_.float(_))(_.float())(_.putFloat(_))
+    fragments[Int]("int")(_.int(_))(_.int())(_.putInt(_))
+    fragments[Long]("long")(_.long(_))(_.long())(_.putLong(_))
+    fragments[Numeric]("numeric")(_.numeric(_))(_.numeric()) { (bb, n) =>
+      bb.putShort(n.digits.length.toShort)
+      bb.putShort(n.weight)
+      bb.putShort(n.sign)
+      bb.putShort(n.displayScale.toShort)
+      n.digits.foreach { d => bb.putShort(d.toShort) }
+      bb
+    }
     fragments[UInt]("unsigned int")((w,uint) => w.unsignedInt(uint.bits))(r => UInt(r.unsignedInt()))((b,uint) => b.putInt(uint.bits))
     // C-style strings only
     fragments[AsciiString]("cstring")((w,str) => w.cstring(str.value))(r => AsciiString(r.cstring())) { (bb, str) =>
