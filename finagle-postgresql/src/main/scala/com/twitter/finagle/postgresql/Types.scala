@@ -47,4 +47,11 @@ object Types {
     data: IndexedSeq[WireValue]
   )
 
+  sealed trait Timestamp
+  object Timestamp {
+    case object NegInfinity extends Timestamp
+    case object Infinity extends Timestamp
+    case class Micros(offset: Long) extends Timestamp
+  }
+
 }

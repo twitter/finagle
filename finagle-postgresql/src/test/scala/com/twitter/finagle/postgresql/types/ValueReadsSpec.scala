@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
+import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.PgArray
@@ -100,6 +101,28 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       mkBuf() { bb =>
         bb.putFloat(float)
       }
+    }
+    "readsInstant" should simpleSpec[java.time.Instant](ValueReads.readsInstant, PgType.Timestamptz, PgType.Timestamp) { ts =>
+      mkBuf() { bb =>
+        val sincePgEpoch = java.time.Duration.between(PgTime.Epoch, ts)
+        val secs = sincePgEpoch.getSeconds
+        val nanos = sincePgEpoch.getNano
+        val micros = secs * 1000000 + nanos / 1000
+        bb.putLong(micros)
+      }
+    }
+    "readsInstant" should {
+      def failFor(name: String, value: Long) = {
+        s"fail for $name" in {
+          val buf = mkBuf() { bb =>
+            bb.putLong(value)
+          }
+          val read = ValueReads.readsInstant.reads(PgType.Timestamptz, WireValue.Value(buf), utf8)
+          read.asScala must beAFailedTry(beAnInstanceOf[PgSqlClientError])
+        }
+      }
+      failFor("-Infinity", 0x8000000000000000L)
+      failFor("Infinity", 0x7fffffffffffffffL)
     }
     "readsInt" should simpleSpec[Int](ValueReads.readsInt, PgType.Int4) { int =>
       mkBuf() { bb =>

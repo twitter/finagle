@@ -2,6 +2,8 @@ package com.twitter.finagle.postgresql.types
 
 import java.nio.charset.Charset
 
+import com.twitter.finagle.postgresql.PgSqlUnsupportedError
+import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.transport.PgBuf
 import com.twitter.io.Buf
@@ -28,9 +30,10 @@ trait ValueReads[T] {
 
 object ValueReads {
 
-  def simple[T](expect: PgType)(f: PgBuf.Reader => T): ValueReads[T] = new ValueReads[T] {
+  def simple[T](expect: PgType*)(f: PgBuf.Reader => T): ValueReads[T] = new ValueReads[T] {
+    val accept: Set[PgType] = expect.toSet
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T] = Try(f(new PgBuf.Reader(buf)))
-    override def accepts(tpe: PgType): Boolean = expect == tpe
+    override def accepts(tpe: PgType): Boolean = accept(tpe)
   }
 
   implicit def optionReads[T](implicit treads: ValueReads[T]): ValueReads[Option[T]] = new ValueReads[Option[T]] {
@@ -71,6 +74,12 @@ object ValueReads {
   implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Char)(_.byte())
   implicit lazy val readsDouble: ValueReads[Double] = simple(PgType.Float8)(_.double())
   implicit lazy val readsFloat: ValueReads[Float] = simple(PgType.Float4)(_.float())
+  implicit lazy val readsInstant: ValueReads[java.time.Instant] = simple(PgType.Timestamptz, PgType.Timestamp) { reader =>
+    reader.timestamp() match {
+      case Timestamp.NegInfinity | Timestamp.Infinity => throw PgSqlUnsupportedError("-Infinity and Infinity timestamps are not supported")
+      case Timestamp.Micros(offset) => PgTime.usecOffsetAsInstant(offset)
+    }
+  }
   implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
   implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
   implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())

@@ -7,6 +7,7 @@ import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.PgArray
+import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
@@ -61,6 +62,7 @@ class PgBufSpec extends Specification with PropertiesSpec {
 
     fragments[Byte]("byte")(_.byte(_))(_.byte())(_.put(_))
     fragments[Int]("int")(_.int(_))(_.int())(_.putInt(_))
+    fragments[Long]("long")(_.long(_))(_.long())(_.putLong(_))
     fragments[Double]("double")(_.double(_))(_.double())(_.putDouble(_))
     fragments[Float]("float")(_.float(_))(_.float())(_.putFloat(_))
     fragments[UInt]("unsigned int")((w,uint) => w.unsignedInt(uint.bits))(r => UInt(r.unsignedInt()))((b,uint) => b.putInt(uint.bits))
@@ -112,6 +114,13 @@ class PgBufSpec extends Specification with PropertiesSpec {
           bb.putInt(buf.length).put(Buf.ByteBuffer.Shared.extract(buf))
       }
       bb
+    }
+    fragments[Timestamp]("timestamp")(_.timestamp(_))(_.timestamp()) { (bb, ts) =>
+      ts match {
+        case Timestamp.NegInfinity => bb.putLong(0x8000000000000000L)
+        case Timestamp.Infinity => bb.putLong(0x7fffffffffffffffL)
+        case Timestamp.Micros(v) => bb.putLong(v)
+      }
     }
 
     "writer" should {

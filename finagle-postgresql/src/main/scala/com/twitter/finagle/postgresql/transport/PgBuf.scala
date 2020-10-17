@@ -7,12 +7,23 @@ import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
+import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import com.twitter.io.BufByteWriter
 import com.twitter.io.ByteReader
 
 object PgBuf {
+
+  /**
+   * Wire value for the -Infinity timestamp
+   */
+  private[postgresql] val NegInfinity: Long = 0x8000000000000000L
+
+  /**
+   * Wire value for the Infinity timestamp
+   */
+  private[postgresql] val Infinity: Long = 0x7fffffffffffffffL
 
   class Writer(w: BufByteWriter) {
 
@@ -46,6 +57,11 @@ object PgBuf {
 
     def unsignedInt(v: Long): Writer = {
       w.writeIntBE(v)
+      this
+    }
+
+    def long(v: Long): Writer = {
+      w.writeLongBE(v)
       this
     }
 
@@ -107,6 +123,13 @@ object PgBuf {
         w.value(v)
       }
     }
+
+    def timestamp(ts: Timestamp): Writer =
+      ts match {
+        case Timestamp.NegInfinity => long(NegInfinity)
+        case Timestamp.Infinity => long(Infinity)
+        case Timestamp.Micros(v) => long(v)
+      }
 
     def build: Buf =
       w.owned
@@ -176,6 +199,14 @@ object PgBuf {
         arrayDims = arrayDims,
         data = values
       )
+    }
+
+    def timestamp(): Timestamp = {
+      long() match {
+        case NegInfinity => Timestamp.NegInfinity
+        case Infinity => Timestamp.Infinity
+        case v => Timestamp.Micros(v)
+      }
     }
   }
 

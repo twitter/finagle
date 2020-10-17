@@ -1,5 +1,8 @@
 package com.twitter.finagle.postgresql
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.Types.FieldDescription
@@ -8,7 +11,9 @@ import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
+import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.types.PgTime
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
@@ -128,5 +133,16 @@ trait PropertiesSpec extends ScalaCheck {
   val genAsciiChar: Gen[Char] = Gen.choose(32.toChar, 126.toChar)
   val genAsciiString: Gen[AsciiString] = Gen.listOf(genAsciiChar).map(_.mkString).map(AsciiString)
   implicit val arbAsciiString: Arbitrary[AsciiString] = Arbitrary(genAsciiString)
+
+  val genInstant: Gen[Instant] = for {
+    secs <- Gen.chooseNum(PgTime.Min.getEpochSecond, PgTime.Max.getEpochSecond)
+    nanos <- Gen.chooseNum(PgTime.Min.getNano, PgTime.Max.getNano)
+  } yield Instant.ofEpochSecond(secs, nanos).truncatedTo(ChronoUnit.MICROS)
+  implicit val arbInstant: Arbitrary[Instant] = Arbitrary(genInstant)
+
+  val genMicros = genInstant.map(i => i.getEpochSecond * 1000000 + i.getNano / 1000).map(Timestamp.Micros)
+  val genTimestamp: Gen[Timestamp] =
+    Gen.frequency(99 -> genMicros, 1 -> Gen.oneOf(Timestamp.NegInfinity, Timestamp.Infinity))
+  implicit lazy val arbTimestamp = Arbitrary(genTimestamp)
 
 }

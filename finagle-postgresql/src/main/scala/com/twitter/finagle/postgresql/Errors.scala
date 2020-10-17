@@ -9,6 +9,9 @@ case class PgSqlServerError(error: BackendMessage.ErrorResponse) extends PgSqlEx
 case object PgSqlTlsUnsupportedError extends PgSqlException
 
 abstract class PgSqlClientError extends PgSqlException
+case class PgSqlUnsupportedError(msg: String) extends PgSqlClientError {
+  override def getMessage: String = msg
+}
 case object PgSqlPasswordRequired extends PgSqlClientError
 case class PgSqlUnsupportedAuthenticationMechanism(method: BackendMessage.AuthenticationMessage) extends PgSqlClientError
 
