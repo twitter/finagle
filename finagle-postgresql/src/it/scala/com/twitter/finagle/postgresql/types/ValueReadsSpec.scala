@@ -1,8 +1,12 @@
 package com.twitter.finagle.postgresql.types
 
 import java.nio.charset.StandardCharsets
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 import com.twitter.finagle.postgresql.EmbeddedPgSqlSpec
+import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -42,7 +46,11 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
   // The function to convert a type to its wire representation is mostly guessable from its name, but not always.
   // This maps types to custom names, otherwise, we use the typical naming scheme.
   // NOTE: we can extract the function name from the pg_type.dat file, but let's not add this to PgType if not necessary.
-  val customFuncs = Map(PgType.Uuid -> "uuid_send")
+  val customFuncs = Map(
+    PgType.Timestamptz -> "timestamptz_send",
+    PgType.Timestamp -> "timestamp_send",
+    PgType.Uuid -> "uuid_send"
+  )
   def sendFunc(tpe: PgType) =
     customFuncs.getOrElse(tpe, s"${tpe.name}send")
 
@@ -108,6 +116,18 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
 //    "readsByte" should simpleSpec(ValueReads.readsByte, PgType.Char)
     "readsDouble" should simpleSpec(ValueReads.readsDouble, PgType.Float8)
     "readsFloat" should simpleSpec(ValueReads.readsFloat, PgType.Float4)
+    "readsInstant" should simpleSpec(ValueReads.readsInstant, PgType.Timestamptz, PgType.Timestamp)
+    "readsInstant" should {
+      def failFor(s: String) = {
+        s"fail for ${s}" in {
+          val bytes = pgBytes(PgType.Timestamptz, s)
+          val read = ValueReads.readsInstant.reads(PgType.Timestamptz, WireValue.Value(bytes), StandardCharsets.UTF_8)
+          read.asScala must beAFailedTry(beAnInstanceOf[PgSqlClientError])
+        }
+      }
+      failFor("-Infinity")
+      failFor("Infinity")
+    }
     "readsInt" should simpleSpec(ValueReads.readsInt, PgType.Int4)
     "readsLong" should simpleSpec(ValueReads.readsLong, PgType.Int8)
     "readsShort" should simpleSpec(ValueReads.readsShort, PgType.Int2)
@@ -149,6 +169,26 @@ object ValueReadsSpec {
       }
       override def toString(value: Buf): String = {
         hex(Buf.ByteArray.Shared.extract(value))
+      }
+    }
+
+    implicit val instantToSqlString: ToSqlString[Instant] = new ToSqlString[Instant] {
+
+      // Postgres says they allow reading ISO 8601 strings, but it's not quite the case.
+      // ISO 8601 allows prefixing the year with a + or - to disambiguate years before 0000 and after 9999
+      // https://en.wikipedia.org/wiki/ISO_8601#Years
+      // Postgres wants AD/BC instead.
+      // Note that this also means that year "-1" is 2 BC.
+      val fmt = DateTimeFormatter
+        .ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS'Z' GG")
+        .withZone(ZoneId.of("UTC"))
+
+      override def toString(value: Instant): String = {
+        val str = fmt.format(value)
+        str.charAt(0) match {
+          case '+' | '-' => str.drop(1).mkString
+          case _ => str
+        }
       }
     }
   }
