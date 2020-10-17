@@ -9,6 +9,7 @@ import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Numeric
+import com.twitter.finagle.postgresql.Types.NumericSign
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
@@ -150,7 +151,7 @@ trait PropertiesSpec extends ScalaCheck {
   val genNumeric = for {
     ndigits <- Gen.chooseNum(1, 64) // TODO: what's the maximum number of digits?
     weight <- Gen.chooseNum(0.toShort, Short.MaxValue)
-    sign <- Gen.chooseNum(0.toShort, Short.MaxValue)
+    sign <- Gen.oneOf(NumericSign.Positive, NumericSign.Negative, NumericSign.NaN, NumericSign.Infinity, NumericSign.NegInfinity)
     displayScale <- Gen.chooseNum(0, Short.MaxValue)
     digits <- Gen.listOfN(ndigits, Gen.chooseNum(0, Short.MaxValue))
   } yield Numeric(

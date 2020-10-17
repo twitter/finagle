@@ -7,6 +7,7 @@ import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Numeric
+import com.twitter.finagle.postgresql.Types.NumericSign
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -69,7 +70,14 @@ class PgBufSpec extends Specification with PropertiesSpec {
     fragments[Numeric]("numeric")(_.numeric(_))(_.numeric()) { (bb, n) =>
       bb.putShort(n.digits.length.toShort)
       bb.putShort(n.weight)
-      bb.putShort(n.sign)
+      val sign = n.sign match {
+        case NumericSign.Positive => 0
+        case NumericSign.Negative => 0x4000
+        case NumericSign.NaN => 0xC000
+        case NumericSign.Infinity => 0xD000
+        case NumericSign.NegInfinity => 0xF000
+      }
+      bb.putShort(sign.toShort)
       bb.putShort(n.displayScale.toShort)
       n.digits.foreach { d => bb.putShort(d.toShort) }
       bb

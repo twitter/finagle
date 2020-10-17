@@ -2,9 +2,11 @@ package com.twitter.finagle.postgresql.transport
 
 import java.nio.charset.StandardCharsets
 
+import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Numeric
+import com.twitter.finagle.postgresql.Types.NumericSign
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
@@ -137,10 +139,19 @@ object PgBuf {
         case Timestamp.Micros(v) => long(v)
       }
 
+    def numericSign(sign: NumericSign): Writer =
+      sign match {
+        case NumericSign.Positive => short(0)
+        case NumericSign.Negative => short(0x4000)
+        case NumericSign.NaN => unsignedShort(0xC000)
+        case NumericSign.Infinity => unsignedShort(0xD000)
+        case NumericSign.NegInfinity => unsignedShort(0xF000)
+      }
+
     def numeric(n: Numeric): Writer = {
       unsignedShort(n.digits.length.toShort)
       short(n.weight)
-      short(n.sign)
+      numericSign(n.sign)
       unsignedShort(n.displayScale)
       foreachUnframed(n.digits)(_.unsignedShort(_))
     }
@@ -224,11 +235,22 @@ object PgBuf {
       }
     }
 
+    // TODO: this is actually a bit mask, but it's not clear if any other values are possible anyway
+    def numericSign(): NumericSign =
+      unsignedShort() match {
+        case 0 => NumericSign.Positive
+        case 0x4000 => NumericSign.Negative
+        case 0xC000 => NumericSign.NaN
+        case 0xD000 => NumericSign.Infinity
+        case 0xF000 => NumericSign.NegInfinity
+        case v => throw new PgSqlClientError(f"unexpected numeric sign value: $v%04X")
+      }
+
     def numeric(): Numeric = {
       val len = unsignedShort()
       Numeric(
         weight = short(),
-        sign = short(),
+        sign = numericSign(),
         displayScale = unsignedShort(),
         digits = Seq.fill(len)(unsignedShort())
       )
