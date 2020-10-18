@@ -1,6 +1,7 @@
 package com.twitter.finagle.postgresql.types
 
 import java.nio.charset.Charset
+import java.nio.charset.CodingErrorAction
 
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlUnsupportedError
@@ -98,10 +99,12 @@ object ValueReads {
   implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
   implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())
   implicit lazy val readsString: ValueReads[String] = new ValueReads[String] {
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[String] = {
-      // TODO: this uses the lenient codec, we should use the strict one
-      Try(Buf.decodeString(buf, charset))
-    }
+    def strictDecoder(charset: Charset) =
+      charset.newDecoder()
+        .onMalformedInput(CodingErrorAction.REPORT)
+        .onUnmappableCharacter(CodingErrorAction.REPORT)
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[String] =
+      Try(strictDecoder(charset).decode(Buf.ByteBuffer.Owned.extract(buf)).toString)
 
     override def accepts(tpe: PgType): Boolean =
       tpe == PgType.Text ||

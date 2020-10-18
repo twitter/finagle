@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql.types
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.charset.MalformedInputException
 import java.nio.charset.StandardCharsets
 
 import com.twitter.finagle.postgresql.PgSqlClientError
@@ -159,6 +160,12 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     "readsString" should simpleSpec[String](ValueReads.readsString, PgType.Text, PgType.Varchar, PgType.Bpchar, PgType.Name, PgType.Unknown) { string =>
       mkBuf() { bb =>
         bb.put(string.getBytes(utf8))
+      }
+    }
+    "readsString" should {
+      "fail for malformed utf8" in {
+        val read = ValueReads.readsString.reads(PgType.Text, Buf.ByteArray(0xc3.toByte, 0x28.toByte), utf8)
+        read.asScala must beAFailedTry(beAnInstanceOf[MalformedInputException])
       }
     }
     "readsUuid" should simpleSpec[java.util.UUID](ValueReads.readsUuid, PgType.Uuid) { uuid =>
