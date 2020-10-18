@@ -9,12 +9,12 @@ import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Numeric
-import com.twitter.finagle.postgresql.Types.NumericSign
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.types.PgNumeric
 import com.twitter.finagle.postgresql.types.PgTime
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
@@ -142,24 +142,12 @@ trait PropertiesSpec extends ScalaCheck {
   } yield Instant.ofEpochSecond(secs, nanos).truncatedTo(ChronoUnit.MICROS)
   implicit val arbInstant: Arbitrary[Instant] = Arbitrary(genInstant)
 
-  val genMicros = genInstant.map(i => i.getEpochSecond * 1000000 + i.getNano / 1000).map(Timestamp.Micros)
+  val genMicros: Gen[Timestamp.Micros] = genInstant.map(i => i.getEpochSecond * 1000000 + i.getNano / 1000).map(Timestamp.Micros)
   val genTimestamp: Gen[Timestamp] =
     Gen.frequency(99 -> genMicros, 1 -> Gen.oneOf(Timestamp.NegInfinity, Timestamp.Infinity))
   implicit lazy val arbTimestamp = Arbitrary(genTimestamp)
 
-  // TODO: make this sensical
-  val genNumeric = for {
-    ndigits <- Gen.chooseNum(1, 64) // TODO: what's the maximum number of digits?
-    weight <- Gen.chooseNum(0.toShort, Short.MaxValue)
-    sign <- Gen.oneOf(NumericSign.Positive, NumericSign.Negative, NumericSign.NaN, NumericSign.Infinity, NumericSign.NegInfinity)
-    displayScale <- Gen.chooseNum(0, Short.MaxValue)
-    digits <- Gen.listOfN(ndigits, Gen.chooseNum(0, Short.MaxValue))
-  } yield Numeric(
-    weight = weight,
-    sign = sign,
-    displayScale = displayScale,
-    digits = digits
-  )
+  val genNumeric: Gen[Numeric] = implicitly[Arbitrary[BigDecimal]].arbitrary.map(PgNumeric.bigDecimalToNumeric)
   implicit lazy val arbNumeric: Arbitrary[Numeric] = Arbitrary(genNumeric)
 
 }

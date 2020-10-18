@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
+import com.twitter.finagle.postgresql.Types.NumericSign
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -82,6 +83,22 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       )
 
   "ValueReads" should {
+    "readsBigDecimal" should simpleSpec[BigDecimal](ValueReads.readsBigDecimal, PgType.Numeric) { bd =>
+      mkBuf() { bb =>
+        // converting to numeric is non-trivial, so we don't re-write it here.
+        val numeric = PgNumeric.bigDecimalToNumeric(bd)
+        bb.putShort(numeric.digits.length.toShort)
+        bb.putShort(numeric.weight)
+        numeric.sign match {
+          case NumericSign.Positive => bb.putShort(0)
+          case NumericSign.Negative => bb.putShort(0x4000)
+          case _ => sys.error("unexpected sign")
+        }
+        bb.putShort(numeric.displayScale.toShort)
+        numeric.digits.foreach(bb.putShort)
+        bb
+      }
+    }
     "readsBoolean" should simpleSpec[Boolean](ValueReads.readsBoolean, PgType.Bool) {
       case true => Buf.ByteArray(0x01)
       case false => Buf.ByteArray(0x00)

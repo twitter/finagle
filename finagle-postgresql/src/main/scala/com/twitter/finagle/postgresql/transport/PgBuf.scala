@@ -252,7 +252,7 @@ object PgBuf {
         weight = short(),
         sign = numericSign(),
         displayScale = unsignedShort(),
-        digits = Seq.fill(len)(unsignedShort())
+        digits = Seq.fill(len)(short())
       )
     }
   }

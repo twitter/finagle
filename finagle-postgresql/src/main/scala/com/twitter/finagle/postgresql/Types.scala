@@ -66,7 +66,7 @@ object Types {
     weight: Short, // unsigned?
     sign: NumericSign,
     displayScale: Int, // unsigned short
-    digits: Seq[Int] // NumericDigit
+    digits: Seq[Short] // NumericDigit
   )
 
 }

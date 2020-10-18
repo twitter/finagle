@@ -47,6 +47,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
   // This maps types to custom names, otherwise, we use the typical naming scheme.
   // NOTE: we can extract the function name from the pg_type.dat file, but let's not add this to PgType if not necessary.
   val customFuncs = Map(
+    PgType.Numeric -> "numeric_send",
     PgType.Timestamptz -> "timestamptz_send",
     PgType.Timestamp -> "timestamp_send",
     PgType.Uuid -> "uuid_send"
@@ -109,7 +110,17 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     fragments(fs)
   }
 
+  def failFor(valueReads: ValueReads[_], s: String, tpe: PgType) = {
+    s"fail for $s" in {
+      val bytes = pgBytes(tpe, s)
+      val read = valueReads.reads(tpe, WireValue.Value(bytes), StandardCharsets.UTF_8)
+      read.asScala must beAFailedTry(beAnInstanceOf[PgSqlClientError])
+    }
+  }
+
   "ValueReads" should {
+    "readsBigDecimal" should simpleSpec(ValueReads.readsBigDecimal, PgType.Numeric)
+    "readsBigDecimal" should failFor(ValueReads.readsBigDecimal, "NaN", PgType.Numeric)
     "readsBool" should simpleSpec(ValueReads.readsBoolean, PgType.Bool)
     "readsBuf" should simpleSpec(ValueReads.readsBuf, PgType.Bytea)
     // TODO: figure out why charsend(character) doesn't work
@@ -118,15 +129,8 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     "readsFloat" should simpleSpec(ValueReads.readsFloat, PgType.Float4)
     "readsInstant" should simpleSpec(ValueReads.readsInstant, PgType.Timestamptz, PgType.Timestamp)
     "readsInstant" should {
-      def failFor(s: String) = {
-        s"fail for ${s}" in {
-          val bytes = pgBytes(PgType.Timestamptz, s)
-          val read = ValueReads.readsInstant.reads(PgType.Timestamptz, WireValue.Value(bytes), StandardCharsets.UTF_8)
-          read.asScala must beAFailedTry(beAnInstanceOf[PgSqlClientError])
-        }
-      }
-      failFor("-Infinity")
-      failFor("Infinity")
+      failFor(ValueReads.readsInstant, "Infinity", PgType.Timestamptz)
+      failFor(ValueReads.readsInstant, "-Infinity", PgType.Timestamptz)
     }
     "readsInt" should simpleSpec(ValueReads.readsInt, PgType.Int4)
     "readsLong" should simpleSpec(ValueReads.readsLong, PgType.Int8)

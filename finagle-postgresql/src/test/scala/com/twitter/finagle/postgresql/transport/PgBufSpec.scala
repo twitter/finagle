@@ -79,7 +79,7 @@ class PgBufSpec extends Specification with PropertiesSpec {
       }
       bb.putShort(sign.toShort)
       bb.putShort(n.displayScale.toShort)
-      n.digits.foreach { d => bb.putShort(d.toShort) }
+      n.digits.foreach { d => bb.putShort(d) }
       bb
     }
     fragments[UInt]("unsigned int")((w,uint) => w.unsignedInt(uint.bits))(r => UInt(r.unsignedInt()))((b,uint) => b.putInt(uint.bits))
