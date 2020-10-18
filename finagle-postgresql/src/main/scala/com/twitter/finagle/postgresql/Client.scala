@@ -5,11 +5,8 @@ import java.nio.charset.Charset
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.postgresql.Response.Command
 import com.twitter.finagle.postgresql.Response.QueryResponse
-import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.WireValue
-import com.twitter.finagle.postgresql.types.PgType
-import com.twitter.finagle.postgresql.types.ValueReads
 import com.twitter.io.Reader
 import com.twitter.util.Closable
 import com.twitter.util.Future
@@ -118,30 +115,3 @@ trait PreparedStatement extends QueryClient[Seq[Parameter]]
 
 // TODO
 trait CursoredStatement
-
-case class Row(fields: IndexedSeq[FieldDescription], values: IndexedSeq[WireValue], charset: Charset) {
-  def get[T](index: Int)(implicit treads: ValueReads[T]): T = {
-    val field = fields(index)
-    val value = values(index)
-    PgType.byOid(field.dataType) match {
-      case None => sys.error(s"unsupported type ${field.name} (${field.dataType.value})")
-      case Some(tpe) =>
-        if(!treads.accepts(tpe)) sys.error("value decoder doesn't support type") else {
-          treads.reads(tpe, value, charset).get
-        }
-    }
-  }
-}
-case class ResultSet(fields: IndexedSeq[FieldDescription], wireRows: Seq[IndexedSeq[WireValue]], charset: Charset) {
-  def rows: Iterable[Row] =
-    wireRows.map { columns => Row(fields, columns, charset) }
-}
-object ResultSet {
-  def apply(result: Response.ResultSet, charset: Charset): Future[ResultSet] = {
-    result
-      .toSeq
-      .map { rows =>
-        ResultSet(result.fields, rows, charset)
-      }
-  }
-}

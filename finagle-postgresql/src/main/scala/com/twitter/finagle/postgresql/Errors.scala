@@ -1,13 +1,13 @@
 package com.twitter.finagle.postgresql
 
-abstract class PgSqlException(message: String) extends RuntimeException(message)
+abstract class PgSqlException(message: String, cause: Option[Throwable] = None) extends RuntimeException(message, cause.orNull)
 case class PgSqlServerError(error: BackendMessage.ErrorResponse)
   extends PgSqlException(error.values.getOrElse(BackendMessage.Field.Message, "Server error")) {
   def field(f: BackendMessage.Field): Option[String] = error.values.get(f)
 }
 case object PgSqlTlsUnsupportedError extends PgSqlException("TLS is not supported by the server.")
 
-class PgSqlClientError(message: String) extends PgSqlException(message)
+class PgSqlClientError(message: String, cause: Option[Throwable] = None) extends PgSqlException(message, cause)
 case class PgSqlUnsupportedError(msg: String) extends PgSqlClientError(msg)
 case object PgSqlPasswordRequired extends PgSqlClientError("Password was not provided but is required.")
 case class PgSqlUnsupportedAuthenticationMechanism(method: BackendMessage.AuthenticationMessage)
