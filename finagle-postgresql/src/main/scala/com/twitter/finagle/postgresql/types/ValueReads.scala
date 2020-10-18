@@ -80,6 +80,9 @@ object ValueReads {
       }
   }
 
+  implicit lazy val readsBigDecimal: ValueReads[BigDecimal] = simple(PgType.Numeric) { reader =>
+    PgNumeric.numericToBigDecimal(reader.numeric())
+  }
   implicit lazy val readsBoolean: ValueReads[Boolean] = simple(PgType.Bool)(_.byte() != 0)
   implicit lazy val readsBuf: ValueReads[Buf] = simple(PgType.Bytea)(_.remainingBuf())
   implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Char)(_.byte())
