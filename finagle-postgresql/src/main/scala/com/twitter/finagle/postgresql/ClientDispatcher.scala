@@ -99,6 +99,12 @@ class ClientDispatcher(
         }
         .toMap
 
+      // make sure the backend uses integers to store date time values.
+      // Ancient Postgres versions used double and made this a compilation option.
+      // Since Postgres 10, this is "on" by default and cannot be changed.
+      // We still check, since this would have dire consequences on timestamp values.
+      require(params(BackendMessage.Parameter.IntegerDateTimes) == "on", "integer_datetimes must be on.")
+
       ConnectionParameters(
         serverEncoding = Charset.forName(params(BackendMessage.Parameter.ServerEncoding)),
         clientEncoding = Charset.forName(params(BackendMessage.Parameter.ClientEncoding)),
