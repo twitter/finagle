@@ -7,6 +7,7 @@ import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Response.Row
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
@@ -22,7 +23,7 @@ import org.specs2.matcher.MatchResult
 
 class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
-  def mkMachine(q: String): SimpleQueryMachine = new SimpleQueryMachine(q)
+  def mkMachine(q: String): SimpleQueryMachine = new SimpleQueryMachine(q, ConnectionParameters.default)
 
   val readyForQuery = BackendMessage.ReadyForQuery(BackendMessage.NoTx)
 
@@ -125,7 +126,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
         checkSingleResponse {
           case Return(value) =>
             value must beLike {
-              case rs@Response.ResultSet(desc, _) =>
+              case rs@Response.ResultSet(desc, _, _) =>
                 rowReader = Some(rs)
                 desc must beEqualTo(rowDesc.rowFields)
             }

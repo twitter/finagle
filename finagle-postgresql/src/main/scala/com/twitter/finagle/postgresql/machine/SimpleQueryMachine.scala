@@ -12,6 +12,7 @@ import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Response.ResultSet
 import com.twitter.finagle.postgresql.Response.SimpleQueryResponse
 import com.twitter.io.Pipe
@@ -19,7 +20,7 @@ import com.twitter.util.Future
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
-class SimpleQueryMachine(query: String) extends StateMachine[SimpleQueryResponse] {
+class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extends StateMachine[SimpleQueryResponse] {
 
   import StateMachine._
 
@@ -35,7 +36,7 @@ class SimpleQueryMachine(query: String) extends StateMachine[SimpleQueryResponse
   case class StreamResult(responses: StreamResponses, rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
     def append(row: DataRow): StreamResult =
       StreamResult(responses, rowDescription, pipe, lastWrite before pipe.write(row))
-    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values))
+    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values), parameters)
   }
 
   override def start: StateMachine.TransitionResult[State, SimpleQueryResponse] =

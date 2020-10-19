@@ -54,7 +54,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       )
 
     fullSpec("select statements with no arguments", "select 1") {
-      case Response.ResultSet(_, rows) => Reader.toAsyncStream(rows).toSeq.map(r => r must haveSize(1))
+      case Response.ResultSet(_, rows, _) => Reader.toAsyncStream(rows).toSeq.map(r => r must haveSize(1))
       case _ => Future(ko)
     }
 
@@ -77,13 +77,13 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       val firstBatchSize = 17
       val secondBatchSize = 143
       executeSpec(InfiniteResultSetQuery, maxResults = firstBatchSize) {
-        case (client, rs@Response.ResultSet(_, _)) =>
+        case (client, rs@Response.ResultSet(_, _, _)) =>
           rs.toSeq
             .flatMap { batch =>
               batch must haveSize(firstBatchSize)
               client(Request.ResumePortal(Name.Unnamed, maxResults = secondBatchSize))
                 .flatMap {
-                  case rs@Response.ResultSet(_, _) =>
+                  case rs@Response.ResultSet(_, _, _) =>
                     rs.toSeq.map(_ must haveSize(secondBatchSize))
                   case _ => Future.value(ko)
                 }

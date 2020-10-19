@@ -28,11 +28,25 @@ trait PropertiesSpec extends ScalaCheck {
   // TODO: Once we have actual data types, Gen.oneOf(...)
   implicit lazy val arbOid = Arbitrary(Gen.chooseNum(0, Int.MaxValue.toLong * 2).map(Oid))
 
+  val genParameter: Gen[BackendMessage.Parameter] = Gen.oneOf(
+    BackendMessage.Parameter.ServerVersion,
+    BackendMessage.Parameter.ServerEncoding,
+    BackendMessage.Parameter.ClientEncoding,
+    BackendMessage.Parameter.ApplicationName,
+    BackendMessage.Parameter.IsSuperUser,
+    BackendMessage.Parameter.SessionAuthorization,
+    BackendMessage.Parameter.DateStyle,
+    BackendMessage.Parameter.IntervalStyle,
+    BackendMessage.Parameter.TimeZone,
+    BackendMessage.Parameter.IntegerDateTimes,
+    BackendMessage.Parameter.StandardConformingStrings,
+    BackendMessage.Parameter.Other("other_param"),
+  )
   implicit lazy val arbParam : Arbitrary[BackendMessage.ParameterStatus] = Arbitrary {
     for {
-      name <- Gen.alphaLowerStr.suchThat(_.nonEmpty)
+      param <- genParameter
       value <- Gen.alphaLowerStr.suchThat(_.nonEmpty)
-    } yield BackendMessage.ParameterStatus(name, value)
+    } yield BackendMessage.ParameterStatus(param, value)
   }
   implicit lazy val arbBackendKeyData : Arbitrary[BackendMessage.BackendKeyData] = Arbitrary {
     for {

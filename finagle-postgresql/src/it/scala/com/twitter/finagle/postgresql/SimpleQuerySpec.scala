@@ -47,7 +47,7 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
     }
     "return a ResultSet for a SELECT query" in {
       one(Request.Query("SELECT 1 AS one;")) {
-        case rs@Response.ResultSet(desc, _) =>
+        case rs@Response.ResultSet(desc, _, _) =>
           desc must haveSize(1)
           desc.head.name must beEqualTo("one")
           rs.toSeq.map { rowSeq =>
@@ -71,7 +71,7 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
                     case Response.Command(tag) => tag must_== "CREATE ROLE"
                   }
                   rs must beLike {
-                    case rs@Response.ResultSet(desc, _) =>
+                    case rs@Response.ResultSet(desc, _, _) =>
                       desc must haveSize(1)
                       desc.head.name must beEqualTo("one")
                       Await.result(rs.toSeq.map { rowSeq =>

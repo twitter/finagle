@@ -21,6 +21,7 @@ import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Response.ResultSet
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
@@ -43,7 +44,7 @@ import com.twitter.util.Try
  * For this reason, this machine issues several messages on startup and expects the responses to happen in order.
  * It's not clear if the backend is allowed to send them in a different order.
  */
-class ExtendedQueryMachine(req: Request.Execute) extends StateMachine[Response.QueryResponse] {
+class ExtendedQueryMachine(req: Request.Execute, parameters: ConnectionParameters) extends StateMachine[Response.QueryResponse] {
 
   sealed trait State
   case object Binding extends State
@@ -53,7 +54,7 @@ class ExtendedQueryMachine(req: Request.Execute) extends StateMachine[Response.Q
   case class StreamResult(rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
     def append(row: DataRow): StreamResult =
       StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
-    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values))
+    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values), parameters)
   }
   case class Syncing(response: Option[Try[Response.QueryResponse]]) extends State
 

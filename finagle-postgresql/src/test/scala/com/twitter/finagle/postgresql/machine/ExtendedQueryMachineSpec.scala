@@ -18,6 +18,7 @@ import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Response.Prepared
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
@@ -61,7 +62,10 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
   val errorHandler: ErrorHandler = error => handleSync ++ defaultErrorHandler(error)
 
   def mkMachine(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): ExtendedQueryMachine =
-    new ExtendedQueryMachine(Request.ExecutePortal(Prepared(name, IndexedSeq.empty), parameters, portalName))
+    new ExtendedQueryMachine(
+      req = Request.ExecutePortal(Prepared(name, IndexedSeq.empty), parameters, portalName),
+      parameters = ConnectionParameters.default,
+    )
 
   "ExtendedQueryMachine" should {
     "send multiple messages on start" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue]) =>
@@ -120,7 +124,7 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
             List(
               receive(head),
               checkResult("responds") {
-                case Transition(_, Respond(Return(r@Response.ResultSet(fields, _)))) =>
+                case Transition(_, Respond(Return(r@Response.ResultSet(fields, _, _)))) =>
                   rowReader = Some(r)
                   fields must beEqualTo(rs.desc.rowFields)
               }
