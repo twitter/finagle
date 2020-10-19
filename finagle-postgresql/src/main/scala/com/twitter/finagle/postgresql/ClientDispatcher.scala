@@ -1,5 +1,9 @@
 package com.twitter.finagle.postgresql
 
+import java.nio.charset.Charset
+import java.time.ZoneId
+import java.util.concurrent.atomic.AtomicReference
+
 import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
@@ -8,6 +12,7 @@ import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Response.BackendResponse
+import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.machine.ExtendedQueryMachine
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
 import com.twitter.finagle.postgresql.machine.PrepareMachine
@@ -21,6 +26,7 @@ import com.twitter.util.Future
 import com.twitter.util.Promise
 import com.twitter.util.Return
 import com.twitter.util.Throw
+import com.twitter.util.Try
 
 class ClientDispatcher(
   transport: Transport[Packet, Packet],
@@ -83,18 +89,44 @@ class ClientDispatcher(
       }
   }
 
+  val connectionParameters = new AtomicReference[Try[ConnectionParameters]]
   val handshakeResult: Promise[Response.HandshakeResult] = new Promise()
+  handshakeResult
+    .map { result =>
+      val params = result.parameters
+        .map { p =>
+          p.key -> p.value
+        }
+        .toMap
 
-  val startup = machineDispatch(HandshakeMachine(params[Credentials], params[Database]), handshakeResult)
+      ConnectionParameters(
+        serverEncoding = Charset.forName(params(BackendMessage.Parameter.ServerEncoding)),
+        clientEncoding = Charset.forName(params(BackendMessage.Parameter.ClientEncoding)),
+        timeZone = ZoneId.of(params(BackendMessage.Parameter.TimeZone))
+      )
+    }
+    .respond(connectionParameters.set)
+
+  val startup: Future[Unit] = machineDispatch(HandshakeMachine(params[Credentials], params[Database]), handshakeResult)
 
   override def apply(req: Request): Future[Response] =
     startup before { super.apply(req) }
 
-  override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
-    req match {
-      case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(BackendResponse(_)), p)
-      case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q), p)
-      case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
-      case e: Request.Execute => machineDispatch(new ExtendedQueryMachine(e), p)
+  override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
+    connectionParameters.get() match {
+      case null => Future.exception(new PgSqlClientError("Handshake result should be available at this point."))
+      case Throw(t) => {
+        p.setException(t)
+        Future.Done
+      }
+      case Return(parameters) =>
+        req match {
+          case Request.ConnectionParameters => handshakeResult.respond(p.update).unit
+          case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(BackendResponse(_)), p)
+          case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
+          case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
+          case e: Request.Execute => machineDispatch(new ExtendedQueryMachine(e, parameters), p)
+        }
     }
+  }
 }

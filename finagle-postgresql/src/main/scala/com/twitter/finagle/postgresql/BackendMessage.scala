@@ -28,7 +28,22 @@ object BackendMessage {
   case class AuthenticationSASLContinue(challenge: Buf) extends AuthenticationMessage
   case class AuthenticationSASLFinal(challenge: Buf) extends AuthenticationMessage
 
-  case class ParameterStatus(name: String, value: String) extends BackendMessage
+  sealed trait Parameter
+  object Parameter {
+    case object ServerVersion extends Parameter
+    case object ServerEncoding extends Parameter
+    case object ClientEncoding extends Parameter
+    case object ApplicationName extends Parameter
+    case object IsSuperUser extends Parameter
+    case object SessionAuthorization extends Parameter
+    case object DateStyle extends Parameter
+    case object IntervalStyle extends Parameter
+    case object TimeZone extends Parameter
+    case object IntegerDateTimes extends Parameter
+    case object StandardConformingStrings extends Parameter
+    case class Other(name: String) extends Parameter
+  }
+  case class ParameterStatus(key: Parameter, value: String) extends BackendMessage
 
   case class BackendKeyData(pid: Int, secret: Int) extends BackendMessage
 

@@ -1,7 +1,5 @@
 package com.twitter.finagle.postgresql
 
-import java.nio.charset.Charset
-
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.postgresql.Response.Command
 import com.twitter.finagle.postgresql.Response.QueryResponse
@@ -21,7 +19,7 @@ trait QueryClient[Q] {
   def read(sql: Q): Future[ResultSet] =
     query(sql)
       .flatMap(Client.Expect.ResultSet)
-      .flatMap(ResultSet(_, Charset.defaultCharset())) // TODO
+      .flatMap(ResultSet(_))
 
   def select[T](sql: Q)(f: Row => T): Future[Iterable[T]] =
     read(sql)

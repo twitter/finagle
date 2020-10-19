@@ -25,6 +25,7 @@ import com.twitter.finagle.postgresql.BackendMessage.InTx
 import com.twitter.finagle.postgresql.BackendMessage.NoData
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
+import com.twitter.finagle.postgresql.BackendMessage.Parameter
 import com.twitter.finagle.postgresql.BackendMessage.ParameterDescription
 import com.twitter.finagle.postgresql.BackendMessage.ParameterStatus
 import com.twitter.finagle.postgresql.BackendMessage.ParseComplete
@@ -38,13 +39,15 @@ import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
 
+import scala.annotation.tailrec
+
 trait MessageDecoder[M <: BackendMessage] {
   def decode(b: PgBuf.Reader): Try[M]
 }
 
 object MessageDecoder {
 
-  def decode[M <: BackendMessage](reader: PgBuf.Reader)(implicit decoder: MessageDecoder[M]) =
+  def decode[M <: BackendMessage](reader: PgBuf.Reader)(implicit decoder: MessageDecoder[M]): Try[M] =
     decoder.decode(reader)
 
   def fromPacket(p: Packet): Try[BackendMessage] = {
@@ -97,6 +100,7 @@ object MessageDecoder {
         case unk => Some(Unknown(unk))
       }
 
+    @tailrec
     def loop(fields: Map[Field, String]): Map[Field, String] =
       nextField match {
         case None => fields
@@ -141,7 +145,21 @@ object MessageDecoder {
   }
 
   implicit lazy val parameterStatusDecoder: MessageDecoder[ParameterStatus] = MessageDecoder { reader =>
-    ParameterStatus(reader.cstring(), reader.cstring())
+    val parameter = reader.cstring() match {
+      case "server_version" => Parameter.ServerVersion
+      case "server_encoding" => Parameter.ServerEncoding
+      case "client_encoding" => Parameter.ClientEncoding
+      case "application_name" => Parameter.ApplicationName
+      case "is_superuser" => Parameter.IsSuperUser
+      case "session_authorization" => Parameter.SessionAuthorization
+      case "DateStyle" => Parameter.DateStyle
+      case "IntervalStyle" => Parameter.IntervalStyle
+      case "TimeZone" => Parameter.TimeZone
+      case "integer_datetimes" => Parameter.IntegerDateTimes
+      case "standard_conforming_strings" => Parameter.IntegerDateTimes
+      case other => Parameter.Other(other)
+    }
+    ParameterStatus(parameter, reader.cstring())
   }
 
   implicit lazy val readyForQueryDecoder: MessageDecoder[ReadyForQuery] = MessageDecoder { reader =>

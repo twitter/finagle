@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql
 
 import java.nio.charset.Charset
 
+import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.types.PgType
@@ -45,19 +46,19 @@ case class Row(
       .getOrElse(throw new PgSqlClientError(s"No such column $column. Expected one of ${fields.map(_.name).mkString(", ")}")))
 }
 
-case class ResultSet(fields: IndexedSeq[FieldDescription], wireRows: Seq[IndexedSeq[WireValue]], charset: Charset) {
+case class ResultSet(fields: IndexedSeq[FieldDescription], wireRows: Seq[IndexedSeq[WireValue]], parameters: ConnectionParameters) {
 
   val columnIndex: Map[String, Int] = fields.map(_.name).zipWithIndex.toMap
 
   lazy val rows: Iterable[Row] =
-    wireRows.map { columns => Row(fields, columns, charset, columnIndex) }
+    wireRows.map { columns => Row(fields, columns, parameters.serverEncoding, columnIndex) }
 }
 object ResultSet {
-  def apply(result: Response.ResultSet, charset: Charset): Future[ResultSet] = {
+  def apply(result: Response.ResultSet): Future[ResultSet] = {
     result
       .toSeq
       .map { rows =>
-        ResultSet(result.fields, rows, charset)
+        ResultSet(result.fields, rows, result.parameters)
       }
   }
 }
