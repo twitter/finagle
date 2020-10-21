@@ -14,6 +14,7 @@ import com.twitter.finagle.param.{
 }
 import com.twitter.finagle.redis.RedisPartitioningService
 import com.twitter.finagle.redis.exp.{ConnectionInitCommand, RedisPool}
+import com.twitter.finagle.redis.filter.{RedisLoggingFilter, RedisTracingFilter}
 import com.twitter.finagle.redis.param.{Database, Password}
 import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -72,6 +73,8 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     private val stack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
       .insertBefore(DefaultPool.Role, RedisPool.module)
       .insertAfter(StackClient.Role.prepConn, ConnectionInitCommand.module)
+      .replace(StackClient.Role.protoTracing, RedisTracingFilter.module)
+      .insertBefore(StackClient.Role.protoTracing, RedisLoggingFilter.module)
 
     private[finagle] val hashRingStack: Stack[ServiceFactory[Command, Reply]] =
       stack.insertAfter(BindingFactory.role, RedisPartitioningService.module)
