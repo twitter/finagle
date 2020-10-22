@@ -14,6 +14,11 @@ Breaking API Changes
   PartitioningStrategy from Int => Int to Int => Seq[Int], which supports many to many mapping
   from hosts and logical partitions. ``PHAB_ID=D550789``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Disable eager connections for balancers with a non 1.0 weight. ``PHAB_ID=D567842``
+
 20.9.0
 ------
 

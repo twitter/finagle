@@ -2,6 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultMonitor
@@ -70,7 +71,8 @@ object LoadBalancerFactory {
    *
    * If this is configured, the [[Dest]] param will be ignored.
    */
-  private[finagle] case class Endpoints(va: Event[Activity.State[Set[TrafficDistributor.AddressedFactory[_, _]]]])
+  private[finagle] case class Endpoints(
+    va: Event[Activity.State[Set[TrafficDistributor.AddressedFactory[_, _]]]])
 
   private[finagle] object Endpoints {
     implicit val param = Stack.Param(
@@ -308,7 +310,8 @@ object LoadBalancerFactory {
       val balancerExc = new NoBrokersAvailableException(params[ErrorLabel].label)
 
       def newBalancer(
-        endpoints: Activity[Set[EndpointFactory[Req, Rep]]]
+        endpoints: Activity[Set[EndpointFactory[Req, Rep]]],
+        disableEagerConnections: Boolean
       ): ServiceFactory[Req, Rep] = {
         val ordering = params[AddressOrdering].ordering
         val orderedEndpoints = endpoints.map { set =>
@@ -325,10 +328,15 @@ object LoadBalancerFactory {
           }
         }
 
+        val paramsWithStats = params + param.Stats(balancerStats)
+        val finalParams =
+          if (disableEagerConnections) paramsWithStats + EagerConnections(false)
+          else paramsWithStats
+
         val underlying = loadBalancerFactory.newBalancer(
           orderedEndpoints,
           balancerExc,
-          params + param.Stats(balancerStats)
+          finalParams
         )
         params[WhenNoNodesOpenParam].whenNoNodesOpen match {
           case WhenNoNodesOpen.PickOne => underlying

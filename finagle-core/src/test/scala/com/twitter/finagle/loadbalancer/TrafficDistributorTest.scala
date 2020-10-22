@@ -48,6 +48,7 @@ private object TrafficDistributorTest {
 
   private case class Balancer(
     endpoints: Activity[Iterable[AddressFactory]],
+    val disableEagerConnections: Boolean,
     onClose: scala.Function0[Unit] = () => ())
       extends ServiceFactory[Int, Int] {
     var offeredLoad = 0
@@ -106,7 +107,11 @@ private object TrafficDistributorTest {
     var closeBalancerCalls = 0
     var newBalancerCalls = 0
     var balancers: Set[Balancer] = Set.empty
-    def newBalancer(eps: Activity[Set[EndpointFactory[Int, Int]]]): ServiceFactory[Int, Int] = {
+    def newBalancer(
+      eps: Activity[Set[EndpointFactory[Int, Int]]],
+      disableEagerConnections: Boolean
+    ): ServiceFactory[Int, Int] = {
+
       newBalancerCalls += 1
       // eagerly establish the lazy endpoints and extract the
       // underlying `AddressFactory`
@@ -116,7 +121,7 @@ private object TrafficDistributorTest {
           epsf.asInstanceOf[LazyEndpointFactory[Int, Int]].self.get.asInstanceOf[AddressFactory]
         }
       }
-      val b = Balancer(addressFactories, () => closeBalancerCalls += 1)
+      val b = Balancer(addressFactories, disableEagerConnections, () => closeBalancerCalls += 1)
       balancers += b
       b
     }
@@ -442,7 +447,10 @@ class TrafficDistributorTest extends FunSuite {
     val classes = weightClasses.flatMap(weightClass.tupled).toSet
     val dest = Var(Activity.Ok(classes))
 
-    def mkBalancer(set: Activity[Set[EndpointFactory[Int, Int]]]): ServiceFactory[Int, Int] = {
+    def mkBalancer(
+      set: Activity[Set[EndpointFactory[Int, Int]]],
+      disableEagerConnections: Boolean
+    ): ServiceFactory[Int, Int] = {
       defaultBalancerFactory.newBalancer(
         set.map(_.toVector),
         new NoBrokersAvailableException("test"),
@@ -916,6 +924,23 @@ class TrafficDistributorTest extends FunSuite {
       }
 
       closable.close()
+    }
+  }
+
+  test("does not eagerly connect to endpoints in a balancer with a non 1.0 weight class") {
+    new Ctx {
+      val weightClass1 = weightClass(1.0, 1)
+      val weightClass2 = weightClass(1.1, 2)
+      val dest = Var(Activity.Ok(weightClass1 ++ weightClass2))
+      newDist(dest)
+
+      // we want to populate `numOfEndpoints`
+      balancers.foreach(bal => bal())
+      val non1Bal = balancers.find(_.numOfEndpoints == 2)
+      assert(non1Bal.get.disableEagerConnections == true)
+
+      val normalBal = balancers.find(_.numOfEndpoints == 1)
+      assert(normalBal.get.disableEagerConnections == false)
     }
   }
 }

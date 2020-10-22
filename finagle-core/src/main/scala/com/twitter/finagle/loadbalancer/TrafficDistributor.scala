@@ -311,10 +311,14 @@ private[finagle] object TrafficDistributor {
  * serviced by a distinct `newBalancer` instance. That is, load offered to a weight
  * class is also load balanced across its members. Offered load is distributed according
  * to the classes weight and number of members that belong to the class.
+ *
+ * @param newBalancer A lambda to create a new balancer from a set of endpoints and a boolean
+ * indicator, `disableEagerConnection`, if the balancer should have the
+ * [[c.t.f.loadbalancer.aperture.EagerConnections]] feature disabled.
  */
 private class TrafficDistributor[Req, Rep](
   dest: Event[Activity.State[Set[TrafficDistributor.AddressedFactory[Req, Rep]]]],
-  newBalancer: Activity[Set[EndpointFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
+  newBalancer: (Activity[Set[EndpointFactory[Req, Rep]]], Boolean) => ServiceFactory[Req, Rep],
   rng: Rng = Rng.threadLocal,
   statsReceiver: StatsReceiver = NullStatsReceiver)
     extends ServiceFactory[Req, Rep] {
@@ -342,8 +346,14 @@ private class TrafficDistributor[Req, Rep](
       // Construct new balancers from new endpoints.
       def add(factories: Set[AddressedFactory[Req, Rep]]): CachedBalancer[Req, Rep] = {
         val group = factories.map(_.factory)
+        val weight = if (factories.isEmpty) 1D else factories.head.weight
         val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(group))
-        val bal = newBalancer(Activity(endpoints))
+
+        // we disable eager connections for non 1.0 weight class balancers. We assume the 1.0
+        // weight balancer to be the main balancer and because sessions are managed independently
+        // by each balancer, we avoid eagerly creating connections for balancers that may not be
+        // long-lived.
+        val bal = newBalancer(Activity(endpoints), weight != 1.0)
         CachedBalancer(bal, endpoints, group.size)
       }
 
@@ -374,7 +384,7 @@ private class TrafficDistributor[Req, Rep](
         // so a subsequent iteration has a chance to close it. This way,
         // scanLeft is responsible for creating and managing the resource.
         val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(Set.empty))
-        val bal = newBalancer(Activity(endpoints))
+        val bal = newBalancer(Activity(endpoints), false)
         Map(1.0 -> CachedBalancer(bal, endpoints, 0))
       }
     }.map {
