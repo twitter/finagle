@@ -28,6 +28,27 @@ import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
 
+/**
+ * Handles transforming the Postgres protocol to an RPC style.
+ *
+ * The Postgres protocol is not of the style `request => Future[Response]`.
+ * Instead, it uses a stateful protocol where each connection is in a particular state and streams of requests / responses
+ * take place to move the connection from one state to another.
+ *
+ * The dispatcher is responsible for managing this connection state and transforming the stream of request / response to
+ * a single request / response style that conforms to Finagle's request / response style.
+ *
+ * The dispatcher uses state machines to handle the connection state management.
+ *
+ * When a connection is established, the [[HandshakeMachine]] is immediately executed and takes care of authentication.
+ * Subsequent machines to execute are based on the client's query. For example, if the client submits a [[Request.Query]],
+ * then the [[SimpleQueryMachine]] will be dispatched to manage the connection's state.
+ *
+ * Any unexpected error from the state machine will lead to tearing down the connection to make sure we don't
+ * reuse a connection in an unknown / bad state.
+ *
+ * @see [[StateMachine]]
+ */
 class ClientDispatcher(
   transport: Transport[Packet, Packet],
   params: Stack.Params,
@@ -36,14 +57,20 @@ class ClientDispatcher(
   params[Stats].statsReceiver
 ) {
 
-  def write[M <: FrontendMessage](msg: M)(implicit encoder: MessageEncoder[M]): Future[Unit] =
+  /**
+   * Send a single message to the backend.
+   */
+  private[this] def write[M <: FrontendMessage](msg: M)(implicit encoder: MessageEncoder[M]): Future[Unit] =
     transport
       .write(encoder.toPacket(msg))
       .rescue {
         case exc => wrapWriteException(exc)
       }
 
-  def read(): Future[BackendMessage] =
+  /**
+   * Read a single message from the backend.
+   */
+  private[this] def read(): Future[BackendMessage] =
     transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry // TODO: better error handling
 
   def run[R <: Response](machine: StateMachine[R], promise: Promise[R]) = {
@@ -91,6 +118,8 @@ class ClientDispatcher(
 
   val connectionParameters = new AtomicReference[Try[ConnectionParameters]]
   val handshakeResult: Promise[Response.HandshakeResult] = new Promise()
+
+  // TODO: this really belongs in the higher-level client.
   handshakeResult
     .map { result =>
       val params = result.parameters
