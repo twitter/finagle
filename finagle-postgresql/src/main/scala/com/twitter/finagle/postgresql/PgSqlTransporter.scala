@@ -12,6 +12,11 @@ import com.twitter.finagle.transport.TransportContext
 import com.twitter.io.Buf
 import com.twitter.util.Future
 
+/**
+ * Transport for the Postgres protocol.
+ *
+ * This is responsible for properly framing the bytes on the wire to form Postgres protocol packets.
+ */
 class PgSqlTransporter(
   val remoteAddress: SocketAddress,
   params: Stack.Params
@@ -22,10 +27,11 @@ class PgSqlTransporter(
       lengthFieldBegin = 1,
       lengthFieldLength = 4,
       lengthAdjust = 1,
-      maxFrameLength = Int.MaxValue, // TODO
+      maxFrameLength = Int.MaxValue, // TODO: what's an appropriate value here?
       bigEndian = true
     )
 
+  // We have to special-case TLS because Postgres doesn't use the same transport format during TLS negotiation.
   val transporter: Transporter[Buf, Buf, TransportContext] = params[Transport.ClientSsl] match {
     case Transport.ClientSsl(None) =>
       Netty4Transporter.framedBuf(
