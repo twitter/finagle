@@ -22,12 +22,11 @@ import com.twitter.finagle.postgresql.PgSqlPasswordRequired
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PgSqlUnsupportedAuthenticationMechanism
 import com.twitter.finagle.postgresql.Response
-import com.twitter.finagle.postgresql.Response.HandshakeResult
 import com.twitter.io.Buf
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
-case class HandshakeMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[Response.HandshakeResult] {
+case class HandshakeMachine(credentials: Params.Credentials, database: Params.Database) extends StateMachine[Response.ConnectionParameters] {
 
   import StateMachine._
 
@@ -35,10 +34,10 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
   case object Authenticating extends State
   case class BackendStarting(params: List[BackendMessage.ParameterStatus], bkd: Option[BackendMessage.BackendKeyData]) extends State
 
-  override def start: StateMachine.TransitionResult[State, Response.HandshakeResult] =
+  override def start: StateMachine.TransitionResult[State, Response.ConnectionParameters] =
     Transition(Authenticating, Send(FrontendMessage.StartupMessage(user = credentials.username, database = database.name)))
 
-  override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, Response.HandshakeResult] = (state, msg) match {
+  override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, Response.ConnectionParameters] = (state, msg) match {
     case (Authenticating, AuthenticationMD5Password(salt)) =>
       def hex(input: Array[Byte]) = input.map(s => f"$s%02x").mkString
       def bytes(str: String) = str.getBytes(StandardCharsets.UTF_8)
@@ -73,7 +72,7 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
     case (BackendStarting(params, bkd), ready: BackendMessage.ReadyForQuery) =>
       bkd match {
         case Some(b) =>
-          Complete(ready, Some(Return(HandshakeResult(params, b))))
+          Complete(ready, Some(Return(Response.ConnectionParameters(params, b))))
         case None =>
           Complete(ready, Some(Throw(PgSqlInvalidMachineStateError("HandshakeMachine did not receive BackendKeyData before ReadyForQuery"))))
       }

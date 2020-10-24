@@ -24,7 +24,7 @@ import com.twitter.io.Buf
 import com.twitter.util.Return
 import org.specs2.matcher.MatchResult
 
-class HandshakeMachineSpec extends MachineSpec[Response.HandshakeResult] with PropertiesSpec {
+class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] with PropertiesSpec {
 
   val checkStartup = checkResult("start is a startup message") {
     case Transition(_, Send(s)) => s must beAnInstanceOf[FrontendMessage.StartupMessage]

@@ -1,9 +1,5 @@
 package com.twitter.finagle.postgresql
 
-import java.nio.charset.Charset
-import java.time.ZoneId
-import java.util.concurrent.atomic.AtomicReference
-
 import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
@@ -11,8 +7,6 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
-import com.twitter.finagle.postgresql.Response.BackendResponse
-import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.machine.ExtendedQueryMachine
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
 import com.twitter.finagle.postgresql.machine.PrepareMachine
@@ -26,7 +20,6 @@ import com.twitter.util.Future
 import com.twitter.util.Promise
 import com.twitter.util.Return
 import com.twitter.util.Throw
-import com.twitter.util.Try
 
 /**
  * Handles transforming the Postgres protocol to an RPC style.
@@ -73,7 +66,7 @@ class ClientDispatcher(
   private[this] def read(): Future[BackendMessage] =
     transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry // TODO: better error handling
 
-  def run[R <: Response](machine: StateMachine[R], promise: Promise[R]) = {
+  private[this] def run[R <: Response](machine: StateMachine[R], promise: Promise[R]) = {
 
     var state: machine.State = null.asInstanceOf[machine.State] // TODO
 
@@ -102,7 +95,7 @@ class ClientDispatcher(
     step(machine.start)
   }
 
-  def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] = {
+  private[this] def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] = {
     run(machine, promise)
       .transform {
         case Return(_) =>
@@ -116,48 +109,25 @@ class ClientDispatcher(
       }
   }
 
-  val connectionParameters = new AtomicReference[Try[ConnectionParameters]]
-  val handshakeResult: Promise[Response.HandshakeResult] = new Promise()
+  val connectionParameters: Promise[Response.ConnectionParameters] = new Promise()
 
-  // TODO: this really belongs in the higher-level client.
-  handshakeResult
-    .map { result =>
-      val params = result.parameters
-        .map { p =>
-          p.key -> p.value
-        }
-        .toMap
-
-      // make sure the backend uses integers to store date time values.
-      // Ancient Postgres versions used double and made this a compilation option.
-      // Since Postgres 10, this is "on" by default and cannot be changed.
-      // We still check, since this would have dire consequences on timestamp values.
-      require(params(BackendMessage.Parameter.IntegerDateTimes) == "on", "integer_datetimes must be on.")
-
-      ConnectionParameters(
-        serverEncoding = Charset.forName(params(BackendMessage.Parameter.ServerEncoding)),
-        clientEncoding = Charset.forName(params(BackendMessage.Parameter.ClientEncoding)),
-        timeZone = ZoneId.of(params(BackendMessage.Parameter.TimeZone))
-      )
-    }
-    .respond(connectionParameters.set)
-
-  val startup: Future[Unit] = machineDispatch(HandshakeMachine(params[Credentials], params[Database]), handshakeResult)
+  val startup: Future[Unit] = machineDispatch(HandshakeMachine(params[Credentials], params[Database]), connectionParameters)
 
   override def apply(req: Request): Future[Response] =
     startup before { super.apply(req) }
 
   override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
-    connectionParameters.get() match {
-      case null => Future.exception(new PgSqlClientError("Handshake result should be available at this point."))
-      case Throw(t) => {
+    connectionParameters.poll match {
+      case None => Future.exception(new PgSqlClientError("Handshake result should be available at this point."))
+      case Some(Throw(t)) =>
         p.setException(t)
         Future.Done
-      }
-      case Return(parameters) =>
+      case Some(Return(parameters)) =>
         req match {
-          case Request.ConnectionParameters => handshakeResult.respond(p.update).unit
-          case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(BackendResponse(_)), p)
+          case Request.ConnectionParameters =>
+            p.setValue(parameters)
+            Future.Done
+          case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(_ => Response.Ready), p)
           case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
           case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
           case e: Request.Execute => machineDispatch(new ExtendedQueryMachine(e, parameters), p)

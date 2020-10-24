@@ -23,7 +23,7 @@ import org.specs2.matcher.MatchResult
 
 class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
-  def mkMachine(q: String): SimpleQueryMachine = new SimpleQueryMachine(q, ConnectionParameters.default)
+  def mkMachine(q: String): SimpleQueryMachine = new SimpleQueryMachine(q, ConnectionParameters.empty)
 
   val readyForQuery = BackendMessage.ReadyForQuery(BackendMessage.NoTx)
 

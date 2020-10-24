@@ -3,7 +3,6 @@ package com.twitter.finagle.postgresql
 import java.nio.file.Files
 import java.nio.file.attribute.PosixFilePermission
 
-import com.twitter.finagle.postgresql.Response.BackendResponse
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.io.StreamIO
@@ -37,7 +36,7 @@ class TlsSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       client(_.withTransport.tls(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)))
         .apply(Request.Sync)
         .map { response =>
-          response must beEqualTo(BackendResponse(BackendMessage.ReadyForQuery(BackendMessage.NoTx)))
+          response must beEqualTo(Response.Ready)
         }
     }
   }
