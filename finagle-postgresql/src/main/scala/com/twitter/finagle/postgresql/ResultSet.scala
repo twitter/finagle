@@ -51,7 +51,7 @@ case class ResultSet(fields: IndexedSeq[FieldDescription], wireRows: Seq[Indexed
   val columnIndex: Map[String, Int] = fields.map(_.name).zipWithIndex.toMap
 
   lazy val rows: Iterable[Row] =
-    wireRows.map { columns => Row(fields, columns, parameters.serverEncoding, columnIndex) }
+    wireRows.map { columns => Row(fields, columns, parameters.parsedParameters.serverEncoding, columnIndex) }
 }
 object ResultSet {
   def apply(result: Response.ResultSet): Future[ResultSet] = {

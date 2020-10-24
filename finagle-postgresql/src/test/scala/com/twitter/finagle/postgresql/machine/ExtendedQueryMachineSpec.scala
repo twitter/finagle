@@ -64,7 +64,7 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
   def mkMachine(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): ExtendedQueryMachine =
     new ExtendedQueryMachine(
       req = Request.ExecutePortal(Prepared(name, IndexedSeq.empty), parameters, portalName),
-      parameters = ConnectionParameters.default,
+      parameters = ConnectionParameters.empty,
     )
 
   "ExtendedQueryMachine" should {

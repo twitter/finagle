@@ -12,20 +12,36 @@ import com.twitter.util.Future
 sealed trait Response
 object Response {
 
-  private[postgresql] case class HandshakeResult(parameters: List[BackendMessage.ParameterStatus], backendData: BackendMessage.BackendKeyData) extends Response
+  // For the Sync Query
+  case object Ready extends Response
 
-  case class ConnectionParameters(
+  case class ParsedParameters(
     serverEncoding: Charset,
     clientEncoding: Charset,
     timeZone: ZoneId,
   )
-  object ConnectionParameters {
-    // TODO: get rid of this
-    val default = ConnectionParameters(Charset.defaultCharset(), Charset.defaultCharset(), ZoneId.systemDefault())
-  }
+  case class ConnectionParameters(parameters: List[BackendMessage.ParameterStatus], backendData: BackendMessage.BackendKeyData) extends Response {
 
-  // TODO: remove this
-  case class BackendResponse(e: BackendMessage) extends Response
+    lazy val parameterMap: Map[BackendMessage.Parameter, String] =
+      parameters.map { param => param.key -> param.value }.toMap
+
+    lazy val parsedParameters: ParsedParameters = {
+      // make sure the backend uses integers to store date time values.
+      // Ancient Postgres versions used double and made this a compilation option.
+      // Since Postgres 10, this is "on" by default and cannot be changed.
+      // We still check, since this would have dire consequences on timestamp values.
+      require(parameterMap(BackendMessage.Parameter.IntegerDateTimes) == "on", "integer_datetimes must be on.")
+
+      ParsedParameters(
+        serverEncoding = Charset.forName(parameterMap(BackendMessage.Parameter.ServerEncoding)),
+        clientEncoding = Charset.forName(parameterMap(BackendMessage.Parameter.ClientEncoding)),
+        timeZone = ZoneId.of(parameterMap(BackendMessage.Parameter.TimeZone))
+      )
+    }
+  }
+  object ConnectionParameters {
+    val empty: ConnectionParameters = ConnectionParameters(Nil, BackendMessage.BackendKeyData(pid = -1, secret = -1))
+  }
 
   sealed trait QueryResponse extends Response
   type Row = IndexedSeq[WireValue]
@@ -35,7 +51,7 @@ object Response {
   }
   object Result {
     // def because Reader is stateful
-    def empty: ResultSet = ResultSet(IndexedSeq.empty, Reader.empty, ConnectionParameters.default)
+    def empty: ResultSet = ResultSet(IndexedSeq.empty, Reader.empty, ConnectionParameters.empty)
   }
   case object Empty extends QueryResponse
   case class Command(commandTag: String) extends QueryResponse
