@@ -29,14 +29,29 @@ class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extend
   case class StreamResponses(pipe: Pipe[Response.QueryResponse], lastWrite: Future[Unit]) extends State {
     def append(response: Response.QueryResponse): StreamResponses =
       StreamResponses(pipe, lastWrite before pipe.write(response))
+    def close(): Future[Unit] = lastWrite.liftToTry.unit before pipe.close()
   }
   object StreamResponses {
-    def init = StreamResponses(new Pipe, Future.Done)
+    def init: StreamResponses = StreamResponses(new Pipe, Future.Done)
   }
-  case class StreamResult(responses: StreamResponses, rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
+
+  case class StreamResult(rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) {
     def append(row: DataRow): StreamResult =
-      StreamResult(responses, rowDescription, pipe, lastWrite before pipe.write(row))
+      StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
     def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values), parameters)
+    def close(): Future[Unit] = lastWrite.liftToTry.unit before pipe.close()
+  }
+  object StreamResult {
+    def init(rd: RowDescription): StreamResult = StreamResult(rd, new Pipe, Future.Done)
+  }
+  case class StreamResultState(responses: StreamResponses, result: StreamResult) extends State {
+    def append(row: DataRow): StreamResultState = StreamResultState(responses, result.append(row))
+    // closes the current result set stream and returns the response stream
+    def close(): StreamResponses = {
+      result.close()
+      responses
+    }
+    def fail(exception: Throwable): Unit = result.pipe.fail(exception)
   }
 
   override def start: StateMachine.TransitionResult[State, SimpleQueryResponse] =
@@ -46,9 +61,8 @@ class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extend
     case EmptyQueryResponse => responses.append(Response.Empty)
     case CommandComplete(commandTag) => responses.append(Response.Command(commandTag))
     case rd: RowDescription =>
-      val state = StreamResult(responses, rd, new Pipe, Future.Done)
-      responses.append(state.resultSet)
-      state
+      val result = StreamResult.init(rd)
+      StreamResultState(responses.append(result.resultSet), result)
     case _ => sys.error("") // TODO
   }
 
@@ -59,19 +73,18 @@ class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extend
     case (s: StreamResponses, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
       Transition(handleResponse(s, msg), NoOp)
 
-    case (r: StreamResult, dr: DataRow) => Transition(r.append(dr), NoOp)
-    case (r: StreamResult, _: CommandComplete) =>
+    case (r: StreamResultState, dr: DataRow) => Transition(r.append(dr), NoOp)
+    case (r: StreamResultState, _: CommandComplete) =>
       // TODO: handle discard() to client can cancel the stream
-      r.lastWrite.liftToTry.unit before r.pipe.close()
-      Transition(r.responses, NoOp)
-    case (r: StreamResult, e: ErrorResponse) =>
+      Transition(r.close(), NoOp)
+    case (r: StreamResultState, e: ErrorResponse) =>
       val exception = PgSqlServerError(e)
-      r.pipe.fail(exception)
+      r.fail(exception)
       // We've already responded at this point, so this will likely not do anything.
       Transition(r.responses, Respond(Throw(exception)))
 
     case (s: StreamResponses, r: ReadyForQuery) =>
-      s.lastWrite.liftToTry.unit before s.pipe.close()
+      s.close()
       Complete(r, None)
 
     case (s: StreamResponses, e: ErrorResponse) =>
