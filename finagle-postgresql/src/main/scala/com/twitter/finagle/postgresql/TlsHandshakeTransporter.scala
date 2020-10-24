@@ -19,17 +19,28 @@ import com.twitter.util.Future
 import com.twitter.util.Promise
 import io.netty.channel.Channel
 
+/**
+ * The Postgres protocol doesn't use its standard packet format during TLS negotiation.
+ *
+ * https://www.postgresql.org/docs/9.3/protocol-flow.html#AEN100021
+ *
+ * The flow is that the client should request TLS using the [[FrontendMessage.SslRequest]] message.
+ * The backend responds with a single, unframed byte: either 'S' or 'N'.
+ *
+ * * 'S' means that the backend is willing to continue with TLS negotiation
+ * * 'N' means that the backend doesn't support TLS
+ *
+ * Once TLS negotiation is successful, this transport will insert the provided [[Framer]] into the netty pipeline,
+ * where it would have been inserted by [[Netty4ClientChannelInitializer]].
+ *
+ * This unfortunately requires reaching behind Finagle's abstractions a little bit.
+ */
 class TlsHandshakeTransporter(
   val remoteAddress: SocketAddress,
   params: Stack.Params,
   framer: Framer,
 ) extends Transporter[Buf, Buf, TransportContext] {
 
-  /** Unfortunately, the Postgres protocol doesn't use its standard packet format
-   * during TLS negotiation. It responds simply with a single, unframed byte.
-   *
-   * So to compensate, we insert the framer manually into the netty pipeline after TLS negotiation.
-   */
   private[this] val netty4Transporter =
     Netty4Transporter.framedBuf(
       None, // skip the framer during tls handshake
