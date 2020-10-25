@@ -33,7 +33,7 @@ import com.twitter.util.Await
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
-class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with PropertiesSpec {
+class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with PropertiesSpec {
 
   def checkStartup(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): StepSpec =
     checkResult("start is several messages") {
@@ -58,16 +58,16 @@ class ExtendedQueryMachineSpec extends MachineSpec[Response.QueryResponse] with 
     },
     receive(ReadyForQuery(NoTx))
   )
-  // The ExtendedQueryMachine needs to send a Sync message to get the connection back to normal before completing
+  // The ExecuteMachine needs to send a Sync message to get the connection back to normal before completing
   val errorHandler: ErrorHandler = error => handleSync ++ defaultErrorHandler(error)
 
-  def mkMachine(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): ExtendedQueryMachine =
-    new ExtendedQueryMachine(
+  def mkMachine(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): ExecuteMachine =
+    new ExecuteMachine(
       req = Request.ExecutePortal(Prepared(name, IndexedSeq.empty), parameters, portalName),
       parameters = ConnectionParameters.empty,
     )
 
-  "ExtendedQueryMachine" should {
+  "ExecuteMachine" should {
     "send multiple messages on start" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue]) =>
       machineSpec(mkMachine(name, portalName, parameters), errorHandler) {
         checkStartup(name, portalName, parameters)

@@ -7,7 +7,7 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
-import com.twitter.finagle.postgresql.machine.ExtendedQueryMachine
+import com.twitter.finagle.postgresql.machine.ExecuteMachine
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
 import com.twitter.finagle.postgresql.machine.PrepareMachine
 import com.twitter.finagle.postgresql.machine.SimpleQueryMachine
@@ -157,7 +157,7 @@ class ClientDispatcher(
           case Request.Sync => machineDispatch(syncMachine, p)
           case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
           case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
-          case e: Request.Execute => machineDispatch(new ExtendedQueryMachine(e, parameters), p)
+          case e: Request.Execute => machineDispatch(new ExecuteMachine(e, parameters), p)
         }
     }
   }
