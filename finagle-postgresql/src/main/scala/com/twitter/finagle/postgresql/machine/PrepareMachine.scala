@@ -20,6 +20,15 @@ import com.twitter.finagle.postgresql.machine.StateMachine.TransitionResult
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
+/**
+ * Implements part of the "Extended Query" message flow described here https://www.postgresql.org/docs/current/protocol-flow.html#PROTOCOL-FLOW-EXT-QUERY.
+ *
+ * This machine is used in combination with [[ExtendedQueryMachine]]. That is, after executing this machine,
+ * an execution of [[ExtendedQueryMachine]] is required to obtain the results.
+ *
+ * @param name the portal's name to create or overwrite.
+ * @param statement the statement to prepare.
+ */
 class PrepareMachine(name: Name, statement: String) extends StateMachine[Response.ParseComplete] {
 
   sealed trait State
@@ -43,7 +52,8 @@ class PrepareMachine(name: Name, statement: String) extends StateMachine[Respons
 
     // NOTE: According to the documentation, because Bind hasn't been issued here,
     //   the format for the returned fields is unknown at this point.
-    //   Because we issue a Describe on the portal, this incomplete information is not useful, so we ignore it.
+    //   Because we issue a Describe on the portal in the ExtendedQueryMachine,
+    //   this incomplete information is not useful, so we ignore it.
     case (p: Parsed, _: BackendMessage.RowDescription) => Transition(p, NoOp)
     case (p: Parsed, BackendMessage.NoData) => Transition(p, NoOp)
     case (Parsed(desc), r: ReadyForQuery) =>
