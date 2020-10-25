@@ -11,7 +11,6 @@ import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.transport.TransportContext
-import com.twitter.io.Buf
 
 object PostgreSql {
 
@@ -23,8 +22,8 @@ object PostgreSql {
     params: Stack.Params = defaultParams
   ) extends StdStackClient[Request, Response, Client] {
 
-    override type In = Buf
-    override type Out = Buf
+    override type In = Packet
+    override type Out = Packet
     override type Context = TransportContext
 
     type ClientTransport = Transport[In, Out] { type Context <: TransportContext }
@@ -38,11 +37,11 @@ object PostgreSql {
     def newRichClient(dest: String): postgresql.Client =
       postgresql.Client(newClient(dest))
 
-    override protected def newTransporter(addr: SocketAddress): Transporter[Buf, Buf, TransportContext] =
+    override protected def newTransporter(addr: SocketAddress): Transporter[Packet, Packet, TransportContext] =
       new postgresql.PgSqlTransporter(addr, params)
 
     override protected def newDispatcher(transport: ClientTransport): Service[Request, Response] =
-      new postgresql.ClientDispatcher(transport.map[Packet, Packet](_.toBuf, Packet.parse), params)
+      new postgresql.ClientDispatcher(transport, params)
 
     override protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
