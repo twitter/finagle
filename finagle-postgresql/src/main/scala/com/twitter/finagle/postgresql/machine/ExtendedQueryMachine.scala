@@ -38,11 +38,17 @@ import com.twitter.util.Throw
 import com.twitter.util.Try
 
 /**
- * Unfortunately, postgresql has a different behaviour for this, it does not eagerly respond to individual request,
- * but expects that you simply send them in sequence or issue a [[Flush]] to get the response "synchronously".
+ * Implements part of the "Extended Query" message flow described here https://www.postgresql.org/docs/current/protocol-flow.html#PROTOCOL-FLOW-EXT-QUERY.
  *
- * For this reason, this machine issues several messages on startup and expects the responses to happen in order.
- * It's not clear if the backend is allowed to send them in a different order.
+ * This machine is used in combination with [[PrepareMachine]]. That is, before executing this machine, a prior
+ * execution of [[PrepareMachine]] must have taken place.
+ *
+ * NOTE: this machine is slightly different from other ones in that it will send multiple messages on start and then
+ * a [[Flush]]. The reason is because the message flow is different in this case and the backend does not send
+ * individual responses until the [[Flush]] is received. The machine expects responses to come back in order,
+ * but it's not entirely clear if the backend is allowed to send them in a different order.
+ *
+ * Also note that this machine is used for both executing a portal as well as resuming a previously executed one.
  */
 class ExtendedQueryMachine(req: Request.Execute, parameters: ConnectionParameters) extends StateMachine[Response.QueryResponse] {
 

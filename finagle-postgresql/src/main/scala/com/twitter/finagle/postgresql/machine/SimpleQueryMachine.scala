@@ -20,6 +20,15 @@ import com.twitter.util.Future
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
+/**
+ * Implements the "Simple Query" flow described here https://www.postgresql.org/docs/current/protocol-flow.html#id-1.10.5.7.4
+ *
+ * Note that the name is somewhat misleading since the flow is not particularly simple due to the fact that it supports
+ * an arbitrary number of queries in a single message, i.e.: "multi-line queries".
+ *
+ * For example, the client may send `CREATE TABLE (...); CREATE INDEX ...` in a single query. All types of queries
+ * are supported.
+ */
 class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extends StateMachine[SimpleQueryResponse] {
 
   import StateMachine._
