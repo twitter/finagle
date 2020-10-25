@@ -2,6 +2,12 @@ package com.twitter.finagle.postgresql.transport
 
 import com.twitter.finagle.postgresql.FrontendMessage
 
+/**
+ * A typeclass for encoding [[FrontendMessage]] to a [[Packet]].
+ *
+ * @see [[MessageDecoder]]
+ * @see [[PgBuf.Writer]]
+ */
 trait MessageEncoder[M <: FrontendMessage] {
   def toPacket(m: M): Packet
 }
@@ -17,6 +23,8 @@ object MessageEncoder {
   def emptyMessageEncoder[M <: FrontendMessage](b: Byte): MessageEncoder[M] = MessageEncoder(Some(b)) { (writer, _) => writer }
 
   implicit val sslRequestEncoder: MessageEncoder[FrontendMessage.SslRequest.type] = MessageEncoder(None) { (writer, _) =>
+    // "The SSL request code. The value is chosen to contain 1234 in the most significant 16 bits, and 5679 in the least significant 16 bits.
+    // (To avoid confusion, this code must not be the same as any protocol version number.)"
     writer.int(80877103)
   }
 

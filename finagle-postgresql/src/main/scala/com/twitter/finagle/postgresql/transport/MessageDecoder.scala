@@ -41,6 +41,12 @@ import com.twitter.util.Try
 
 import scala.annotation.tailrec
 
+/**
+ * A typeclass for decoding [[BackendMessage]] from a [[Packet]].
+ *
+ * @see [[MessageEncoder]]
+ * @see [[PgBuf.Reader]]
+ */
 trait MessageDecoder[M <: BackendMessage] {
   def decode(b: PgBuf.Reader): Try[M]
 }
@@ -52,7 +58,7 @@ object MessageDecoder {
 
   def fromPacket(p: Packet): Try[BackendMessage] = {
     lazy val reader = PgBuf.reader(p.body)
-    p.cmd.getOrElse(Throw(new IllegalStateException("invalid backend packet, missing type."))) match {
+    p.cmd.getOrElse(Throw(new IllegalStateException("invalid backend packet, missing message type."))) match {
       case '1' => Return(ParseComplete)
       case '2' => Return(BindComplete)
       case 'C' => decode[CommandComplete](reader)
