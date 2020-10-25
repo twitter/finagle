@@ -7,6 +7,7 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.decoder.Framer
 import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.netty4.Netty4Transporter
+import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.transport.TransportContext
 import com.twitter.io.Buf
@@ -20,7 +21,7 @@ import com.twitter.util.Future
 class PgSqlTransporter(
   val remoteAddress: SocketAddress,
   params: Stack.Params
-) extends Transporter[Buf, Buf, TransportContext] {
+) extends Transporter[Packet, Packet, TransportContext] {
 
   private[this] def framer: Framer =
     new LengthFieldFramer(
@@ -32,7 +33,7 @@ class PgSqlTransporter(
     )
 
   // We have to special-case TLS because Postgres doesn't use the same transport format during TLS negotiation.
-  val transporter: Transporter[Buf, Buf, TransportContext] = params[Transport.ClientSsl] match {
+  private[this] val transporter: Transporter[Buf, Buf, TransportContext] = params[Transport.ClientSsl] match {
     case Transport.ClientSsl(None) =>
       Netty4Transporter.framedBuf(
         Some(framer _),
@@ -43,9 +44,9 @@ class PgSqlTransporter(
       new TlsHandshakeTransporter(remoteAddress, params, framer)
   }
 
-  override def apply(): Future[Transport[Buf, Buf] {
+  override def apply(): Future[Transport[Packet, Packet] {
     type Context <: TransportContext
   }] = {
-    transporter()
+    transporter().map(_.map(_.toBuf, Packet.parse))
   }
 }
