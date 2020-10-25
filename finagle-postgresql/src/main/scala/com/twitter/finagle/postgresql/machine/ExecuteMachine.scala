@@ -50,7 +50,7 @@ import com.twitter.util.Try
  *
  * Also note that this machine is used for both executing a portal as well as resuming a previously executed one.
  */
-class ExtendedQueryMachine(req: Request.Execute, parameters: ConnectionParameters) extends StateMachine[Response.QueryResponse] {
+class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters) extends StateMachine[Response.QueryResponse] {
 
   sealed trait State
   case object Binding extends State
@@ -131,7 +131,7 @@ class ExtendedQueryMachine(req: Request.Execute, parameters: ConnectionParameter
     case (_, e: ErrorResponse) =>
       Transition(Syncing(Some(Throw(PgSqlServerError(e)))), Send(Sync))
 
-    case (state, msg) => throw PgSqlNoSuchTransition("ExtendedQueryMachine", state, msg)
+    case (state, msg) => throw PgSqlNoSuchTransition("ExecuteMachine", state, msg)
   }
 
 }
