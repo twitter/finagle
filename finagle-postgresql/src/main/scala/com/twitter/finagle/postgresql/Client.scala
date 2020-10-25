@@ -77,7 +77,8 @@ object Client {
         .map(_.responses)
 
     override def query(sql: String): Future[QueryResponse] =
-      prepare(Name.Unnamed, sql).query(Seq.empty) // this uses an unnamed prepared statement to guarantee that the sql string only has one statement
+      // this uses an unnamed prepared statement to guarantee that the sql string only has one statement
+      prepare(Name.Unnamed, sql).query(Seq.empty)
 
     override def prepare(sql: String): PreparedStatement =
       prepare(Name.Named(MurmurHash3.stringHash(sql).toString), sql)
