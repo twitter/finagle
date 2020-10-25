@@ -13,7 +13,6 @@ import com.twitter.finagle.postgresql.machine.PrepareMachine
 import com.twitter.finagle.postgresql.machine.SimpleQueryMachine
 import com.twitter.finagle.postgresql.machine.StateMachine
 import com.twitter.finagle.postgresql.transport.MessageDecoder
-import com.twitter.finagle.postgresql.transport.MessageEncoder
 import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
@@ -53,9 +52,9 @@ class ClientDispatcher(
   /**
    * Send a single message to the backend.
    */
-  private[this] def write[M <: FrontendMessage](msg: M)(implicit encoder: MessageEncoder[M]): Future[Unit] =
+  private[this] def send[M <: FrontendMessage](s: StateMachine.Send[M]): Future[Unit] =
     transport
-      .write(encoder.toPacket(msg))
+      .write(s.encoder.toPacket(s.msg))
       .rescue {
         case exc => wrapWriteException(exc)
       }
@@ -63,21 +62,22 @@ class ClientDispatcher(
   /**
    * Read a single message from the backend.
    */
-  private[this] def read(): Future[BackendMessage] =
+  private[this] def receive(): Future[BackendMessage] =
     transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry // TODO: better error handling
 
   private[this] def run[R <: Response](machine: StateMachine[R], promise: Promise[R]) = {
 
-    var state: machine.State = null.asInstanceOf[machine.State] // TODO
+    // NOTE: this is initialized to null, but is immediately set to the start state before doing anything else.
+    var state: machine.State = null.asInstanceOf[machine.State]
 
     def step(transition: StateMachine.TransitionResult[machine.State, R]): Future[ReadyForQuery] = transition match {
       case StateMachine.Transition(s, action) =>
         state = s
         val doAction = action match {
           case StateMachine.NoOp => Future.Done
-          case a@StateMachine.Send(msg) => write(msg)(a.encoder)
+          case s@StateMachine.Send(_) => send(s)
           case StateMachine.SendSeveral(msgs) => Future.traverseSequentially(msgs) {
-            case a@StateMachine.Send(msg) => write(msg)(a.encoder)
+            case s@StateMachine.Send(_) => send(s)
           }.unit
           case StateMachine.Respond(r) =>
             promise.updateIfEmpty(r)
@@ -86,22 +86,32 @@ class ClientDispatcher(
         doAction before readAndStep
       case StateMachine.Complete(ready, response) =>
         response.foreach(promise.updateIfEmpty)
+
+        // Make sure the state machine produced a response for the client.
+        if(!promise.isDefined) {
+          // NOTE: we still use updateIfEmpty since the promise may still be canceled.
+          promise.updateIfEmpty(
+            Throw(PgSqlInvalidMachineStateError(s"State machine ${machine.getClass} was in state $state and completed without producing a response for the client."))
+          )
+        }
         Future.value(ready)
     }
 
-    def readAndStep =
-      read().flatMap { msg => step(machine.receive(state, msg)) }
+    def readAndStep: Future[ReadyForQuery] =
+      receive().flatMap { msg => step(machine.receive(state, msg)) }
 
     step(machine.start)
   }
 
+  /**
+   * Runs a state machine to completion and fulfills the client response.
+   */
   private[this] def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] = {
     run(machine, promise)
       .transform {
-        case Return(_) =>
-          Future.Done
-        case Throw(e) =>
-          promise.raise(e)
+        case Return(_) => Future.Done
+        case t: Throw[_] =>
+          promise.updateIfEmpty(t.cast)
           // the state machine failed unexpectedly, which leaves the connection in a bad state
           //   let's close the transport
           // TODO: is this the appropriate way to handle "bad connections" in finagle?
@@ -109,9 +119,25 @@ class ClientDispatcher(
       }
   }
 
-  val connectionParameters: Promise[Response.ConnectionParameters] = new Promise()
+  /**
+   * This is used to keep the result of the startup sequence.
+   *
+   * The startup sequence is initiated when the connection is established, so there's no client response to fulfill.
+   * Instead, we fulfill this promise to keep the data available subsequently.
+   */
+  private[this] val connectionParameters: Promise[Response.ConnectionParameters] = new Promise()
 
-  val startup: Future[Unit] = machineDispatch(HandshakeMachine(params[Credentials], params[Database]), connectionParameters)
+  /**
+   * Immediately start the handshaking upon connection establishment, before any client requests.
+   */
+  private[this] val startup: Future[Unit] = machineDispatch(
+    HandshakeMachine(params[Credentials], params[Database]),
+    connectionParameters
+  )
+
+  // Simple machine for the Sync request which immediately responds with a "ReadyForQuery".
+  val syncMachine: StateMachine[Response.Ready.type] =
+    StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(_ => Response.Ready)
 
   override def apply(req: Request): Future[Response] =
     startup before { super.apply(req) }
@@ -120,14 +146,15 @@ class ClientDispatcher(
     connectionParameters.poll match {
       case None => Future.exception(new PgSqlClientError("Handshake result should be available at this point."))
       case Some(Throw(t)) =>
+        // If handshaking failed, we cannot proceed with sending requests
         p.setException(t)
-        Future.Done
+        close() // TODO: is it okay to close the connection here?
       case Some(Return(parameters)) =>
         req match {
           case Request.ConnectionParameters =>
             p.setValue(parameters)
             Future.Done
-          case Request.Sync => machineDispatch(StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(_ => Response.Ready), p)
+          case Request.Sync => machineDispatch(syncMachine, p)
           case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
           case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
           case e: Request.Execute => machineDispatch(new ExtendedQueryMachine(e, parameters), p)
