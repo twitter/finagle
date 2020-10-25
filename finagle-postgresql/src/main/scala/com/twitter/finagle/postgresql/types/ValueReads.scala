@@ -15,17 +15,71 @@ import com.twitter.util.Try
 
 import scala.collection.generic.CanBuildFrom
 
+/**
+ * Typeclass for decoding wire values to Scala/Java types.
+ *
+ * Postgres has its own type system, so the mapping of postgres types to scala types is not 1:1.
+ * Furthermore, postgres allows creating custom types (i.e.: commonly enums, but any arbitrary type can effectively
+ * be created) which also require their own mapping to scala types.
+ *
+ * The following built-in types and their corresponding scala / java types are provided:
+ *
+ * | Postgres Type | Scala / Java Type |
+ * | --- | --- |
+ * | BIGINT (int8) | [[Long]] |
+ * | BOOL | [[Boolean]] |
+ * | BYTEA (byte[]) | [[Buf]] |
+ * | CHAR | [[Byte]] |
+ * | CHARACTER(n) | [[String]] |
+ * | DOUBLE (float8) | [[Double]] |
+ * | INTEGER (int, int4) | [[Int]] |
+ * | NUMERIC (decimal) | [[BigDecimal]] |
+ * | REAL (float4) | [[Float]] |
+ * | SMALLINT (int2) | [[Short]] |
+ * | TEXT | [[String]] |
+ * | TIMESTAMP | [[java.time.Instant]] |
+ * | TIMESTAMP WITH TIME ZONE | [[java.time.Instant]] |
+ * | UUID | [[java.util.UUID]] |
+ * | VARCHAR | [[String]] |
+ *
+ * @see [[PgType]]
+ */
 trait ValueReads[T] {
 
+  /**
+   * Decodes a non-null value from the wire.
+   */
   def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T]
+
+  /**
+   * Produce the value corresponding to the SQL NULL.
+   * Note that typically, there is no sensical value (i.e.: there's no Int value to produce for a NULL), thus this
+   * method has a default implementation of producing an error.
+   */
   def readsNull(tpe: PgType): Try[T] =
     Throw(new IllegalArgumentException(s"Type ${tpe.name} has no reasonable null value. If you intended to make this field nullable, you must read it as an Option[T]."))
 
+  /**
+   * Decode a potentially `NULL` wire value into the requested scala type.
+   * Note that no further validation is done on the passed in `PgType`, the client is expected to have
+   * invoked [[accepts()]] first. Not respecting this may lead to successfully reading an invalid value.
+   *
+   * @param tpe the postgres type to decode (used when the typeclass supports more than one).
+   * @param value the value on the wire. This may be NULL.
+   * @param charset the server's character set (necessary for decoding strings).
+   * @return the decoded value or an exception
+   */
   def reads(tpe: PgType, value: WireValue, charset: Charset): Try[T] = value match {
     case WireValue.Null => readsNull(tpe)
     case WireValue.Value(buf) => reads(tpe, buf, charset)
   }
 
+  /**
+   * Returns true if this typeclass is able to decode a wire value of the specified type.
+   *
+   * @param tpe the type of the wire value to decode.
+   * @return true if this typeclass can decode the value, false otherwise.
+   */
   def accepts(tpe: PgType): Boolean
 
 }
