@@ -9,7 +9,7 @@ import com.twitter.io.StreamIO
 import com.twitter.io.TempFile
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class TlsSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 

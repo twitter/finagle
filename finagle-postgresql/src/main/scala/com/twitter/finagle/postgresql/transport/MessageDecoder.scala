@@ -1,6 +1,7 @@
 package com.twitter.finagle.postgresql.transport
 
-import com.twitter.finagle.postgresql.{BackendMessage, PgSqlClientError}
+import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationCleartextPassword
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSSContinue

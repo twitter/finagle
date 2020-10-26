@@ -71,7 +71,9 @@ class TlsHandshakeTransporter(
 
   private[this] def negotiateTls(transport: Transport[Buf, Buf]): Future[Unit] = {
     val p = new Promise[Unit]
-    val sslParams = params + OnSslHandshakeComplete { result => val _ = p.updateIfEmpty(result) }
+    val sslParams = params + OnSslHandshakeComplete { result =>
+      val _ = p.updateIfEmpty(result)
+    }
     val context: TransportContext = transport.context
     context match {
       case ctContext: ChannelTransportContext =>
