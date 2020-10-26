@@ -74,11 +74,10 @@ class PgNumericSpec extends PgSqlSpec with PropertiesSpec {
         numericToBigDecimal(PgNumeric.NumericZero) must_== BigDecimal(0)
       }
 
-      def failFor(s: NumericSign) = {
+      def failFor(s: NumericSign) =
         s"fail for $s" in {
           numericToBigDecimal(Numeric(0, NumericSign.NaN, 0, Nil)) must throwAn[PgSqlClientError]
         }
-      }
       failFor(NumericSign.NaN)
       failFor(NumericSign.Infinity)
       failFor(NumericSign.NegInfinity)

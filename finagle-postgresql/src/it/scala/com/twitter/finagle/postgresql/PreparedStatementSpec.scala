@@ -27,7 +27,11 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
           }
         }
 
-    def executeSpec(s: String, parameters: IndexedSeq[WireValue] = IndexedSeq.empty, maxResults: Int = 0)(f: (Service[Request, Response], Response) => Future[MatchResult[_]]) =
+    def executeSpec(
+      s: String,
+      parameters: IndexedSeq[WireValue] = IndexedSeq.empty,
+      maxResults: Int = 0
+    )(f: (Service[Request, Response], Response) => Future[MatchResult[_]]) =
       newClient(identity)()
         .flatMap { client =>
           client(Request.Prepare(s))
@@ -41,14 +45,18 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
             }
         }
 
-    def fullSpec(name: String, query: String, parameters: IndexedSeq[WireValue] = IndexedSeq.empty)(f: Response => Future[MatchResult[_]]) =
+    def fullSpec(
+      name: String,
+      query: String,
+      parameters: IndexedSeq[WireValue] = IndexedSeq.empty
+    )(f: Response => Future[MatchResult[_]]) =
       fragments(
         List(
           s"support preparing $name" in {
             prepareSpec(query)
           },
           s"support executing $name" in {
-            executeSpec(query, parameters) { case(_, response) => f(response) }
+            executeSpec(query, parameters) { case (_, response) => f(response) }
           }
         )
       )
@@ -77,13 +85,13 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       val firstBatchSize = 17
       val secondBatchSize = 143
       executeSpec(InfiniteResultSetQuery, maxResults = firstBatchSize) {
-        case (client, rs@Response.ResultSet(_, _, _)) =>
+        case (client, rs @ Response.ResultSet(_, _, _)) =>
           rs.toSeq
             .flatMap { batch =>
               batch must haveSize(firstBatchSize)
               client(Request.ResumePortal(Name.Unnamed, maxResults = secondBatchSize))
                 .flatMap {
-                  case rs@Response.ResultSet(_, _, _) =>
+                  case rs @ Response.ResultSet(_, _, _) =>
                     rs.toSeq.map(_ must haveSize(secondBatchSize))
                   case _ => Future.value(ko)
                 }

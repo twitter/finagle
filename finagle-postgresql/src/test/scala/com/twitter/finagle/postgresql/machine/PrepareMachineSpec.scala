@@ -41,7 +41,7 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
     }
 
   def mkMachine(name: Name, q: String): PrepareMachine = new PrepareMachine(name, q)
-  def mkMachine: PrepareMachine = mkMachine(Name.Unnamed,"")
+  def mkMachine: PrepareMachine = mkMachine(Name.Unnamed, "")
 
   "PrepareMachine" should {
     "send multiple messages on start" in prop { (name: Name, query: String) =>
@@ -50,7 +50,7 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
       }
     }
 
-    def nominalSpec(name: Name, query: String, parametersTypes: IndexedSeq[Oid], describeMessage: BackendMessage) = {
+    def nominalSpec(name: Name, query: String, parametersTypes: IndexedSeq[Oid], describeMessage: BackendMessage) =
       machineSpec(mkMachine(name, query))(
         checkStartup(name, query),
         receive(ParseComplete),
@@ -66,10 +66,10 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
             prepared.parameterTypes must beEqualTo(parametersTypes)
         }
       )
-    }
 
-    "support RowDescription describe response" in prop { (name: Name, query: String, parametersTypes: IndexedSeq[Oid], desc: RowDescription) =>
-      nominalSpec(name, query, parametersTypes, desc)
+    "support RowDescription describe response" in prop {
+      (name: Name, query: String, parametersTypes: IndexedSeq[Oid], desc: RowDescription) =>
+        nominalSpec(name, query, parametersTypes, desc)
     }
 
     "support NoData describe response" in prop { (name: Name, query: String, parametersTypes: IndexedSeq[Oid]) =>

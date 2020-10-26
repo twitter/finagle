@@ -16,7 +16,8 @@ import org.specs2.matcher.MatchResult
 abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSpec =>
 
   sealed trait StepSpec
-  case class checkResult(name: String)(val spec: PartialFunction[StateMachine.TransitionResult[_, R], MatchResult[_]]) extends StepSpec
+  case class checkResult(name: String)(val spec: PartialFunction[StateMachine.TransitionResult[_, R], MatchResult[_]])
+      extends StepSpec
   case class checkFailure(name: String)(val spec: Throwable => MatchResult[_]) extends StepSpec
   case class receive(msg: BackendMessage) extends StepSpec
 
@@ -24,29 +25,32 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
     def error: BackendMessage.ErrorResponse = BackendMessage.ErrorResponse(Map.empty) // TODO
   }
 
-  def oneMachineSpec(machine: StateMachine[R], allowPreemptiveFailure: Boolean = false)(checks: StepSpec*): MatchResult[_] = {
-    def step(previous: StateMachine.TransitionResult[machine.State, R], remains: List[StepSpec]): MatchResult[_] = remains match {
-      case Nil => ok
-      case (c@checkResult(name)) :: tail =>
-        previous must beLike(c.spec).updateMessage(msg => s"$name: $msg")
-        step(previous, tail)
-      case (c@checkFailure(name)) :: tail =>
+  def oneMachineSpec(
+    machine: StateMachine[R],
+    allowPreemptiveFailure: Boolean = false
+  )(checks: StepSpec*): MatchResult[_] = {
+    def step(previous: StateMachine.TransitionResult[machine.State, R], remains: List[StepSpec]): MatchResult[_] =
+      remains match {
+        case Nil => ok
+        case (c @ checkResult(name)) :: tail =>
+          previous must beLike(c.spec).updateMessage(msg => s"$name: $msg")
+          step(previous, tail)
+        case (c @ checkFailure(name)) :: tail =>
+          previous must beLike[StateMachine.TransitionResult[machine.State, R]] {
+            case StateMachine.Transition(_, Respond(Throw(ex))) => c.spec(ex)
+            case StateMachine.Complete(_, Some(Throw(ex))) => c.spec(ex)
+          }.updateMessage(msg => s"$name: $msg")
 
-        previous must beLike[StateMachine.TransitionResult[machine.State, R]] {
-          case StateMachine.Transition(_, Respond(Throw(ex))) => c.spec(ex)
-          case StateMachine.Complete(_, Some(Throw(ex))) => c.spec(ex)
-        }.updateMessage(msg => s"$name: $msg")
-
-        step(previous, tail)
-      case receive(msg) :: tail =>
-        previous must beLike[StateMachine.TransitionResult[machine.State, R]] {
-          case StateMachine.Transition(s, _) =>
-            step(machine.receive(s, msg), tail)
-          // This allows inejecting backend messages in random places, which can result in
-          //   inserting in a place where the machine wouldn't actually read the message.
-          case StateMachine.Complete(_, Some(Throw(_: PgSqlClientError))) if allowPreemptiveFailure => ok
-        }
-    }
+          step(previous, tail)
+        case receive(msg) :: tail =>
+          previous must beLike[StateMachine.TransitionResult[machine.State, R]] {
+            case StateMachine.Transition(s, _) =>
+              step(machine.receive(s, msg), tail)
+            // This allows inejecting backend messages in random places, which can result in
+            //   inserting in a place where the machine wouldn't actually read the message.
+            case StateMachine.Complete(_, Some(Throw(_: PgSqlClientError))) if allowPreemptiveFailure => ok
+          }
+      }
 
     step(machine.start, checks.toList)
   }
@@ -76,11 +80,10 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
     }
   }
 
-  def machineErrorSpec(machine: StateMachine[R], errorHandler: ErrorHandler = defaultErrorHandler)(steps: StepSpec*) = {
+  def machineErrorSpec(machine: StateMachine[R], errorHandler: ErrorHandler = defaultErrorHandler)(steps: StepSpec*) =
     Prop.forAllNoShrink(genError(steps.toList, errorHandler)) { errorSteps =>
       oneMachineSpec(machine, allowPreemptiveFailure = true)(errorSteps: _*)
     }
-  }
 
   // TODO: ideally we generate fragments here, but not sure how to do that with scalacheck
   def machineSpec(machine: StateMachine[R], errorHandler: ErrorHandler = defaultErrorHandler)(steps: StepSpec*) = {

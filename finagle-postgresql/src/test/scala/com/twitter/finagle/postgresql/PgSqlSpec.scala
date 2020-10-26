@@ -8,7 +8,8 @@ trait PgSqlSpec extends Specification with FutureResult {
 
   def using[I <: java.lang.AutoCloseable, T](io: => I)(f: I => T) = {
     val c = io
-    try { f(c) } finally { c.close() }
+    try f(c)
+    finally c.close()
   }
 
   def fragments(f: Seq[Fragment]) = Fragments(f: _*)

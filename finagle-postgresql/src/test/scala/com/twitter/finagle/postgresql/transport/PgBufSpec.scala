@@ -20,7 +20,7 @@ class PgBufSpec extends Specification with PropertiesSpec {
 
   case class UInt(bits: Int)
   object UInt {
-    def apply(l: Long): UInt = UInt((l & 0xFFFFFFFF).toInt)
+    def apply(l: Long): UInt = UInt((l & 0xffffffff).toInt)
   }
   implicit val arbUInt: Arbitrary[UInt] =
     Arbitrary(Gen.chooseNum(0, Int.MaxValue.toLong * 2).map(UInt(_)))
@@ -32,28 +32,27 @@ class PgBufSpec extends Specification with PropertiesSpec {
       bb.array().slice(bb.arrayOffset(), bb.position())
     }
 
-    def writeFragment[T: Arbitrary](name: String, capacity: Int = 1024)
-                                   (write: (PgBuf.Writer, T) => PgBuf.Writer)
-                                   (expect: (ByteBuffer, T) => ByteBuffer) = {
+    def writeFragment[T: Arbitrary](
+      name: String,
+      capacity: Int = 1024
+    )(write: (PgBuf.Writer, T) => PgBuf.Writer)(expect: (ByteBuffer, T) => ByteBuffer) =
       s"write $name" in prop { value: T =>
         val bufWrite = write(PgBuf.writer, value).build
         Buf.ByteArray.Owned.extract(bufWrite) must_== expectedBytes(value, capacity)(expect)
       }
-    }
 
-    def readFragment[T: Arbitrary](name: String, capacity: Int)
-                                  (read: PgBuf.Reader => T)
-                                  (expect: (ByteBuffer, T) => ByteBuffer) = {
-
+    def readFragment[T: Arbitrary](
+      name: String,
+      capacity: Int
+    )(read: PgBuf.Reader => T)(expect: (ByteBuffer, T) => ByteBuffer) =
       s"read $name" in prop { value: T =>
         read(PgBuf.reader(Buf.ByteArray.Owned(expectedBytes(value, capacity)(expect)))) must_== value
       }
-    }
 
-    def fragments[T: Arbitrary](name: String, capacity: Int = 1024)
-                              (write: (PgBuf.Writer, T) => PgBuf.Writer)
-                              (read: PgBuf.Reader => T)
-                              (expect: (ByteBuffer, T) => ByteBuffer) = {
+    def fragments[T: Arbitrary](
+      name: String,
+      capacity: Int = 1024
+    )(write: (PgBuf.Writer, T) => PgBuf.Writer)(read: PgBuf.Reader => T)(expect: (ByteBuffer, T) => ByteBuffer) = {
       writeFragment[T](name, capacity)(write)(expect)
       readFragment[T](name, capacity)(read)(expect)
 
@@ -73,18 +72,20 @@ class PgBufSpec extends Specification with PropertiesSpec {
       val sign = n.sign match {
         case NumericSign.Positive => 0
         case NumericSign.Negative => 0x4000
-        case NumericSign.NaN => 0xC000
-        case NumericSign.Infinity => 0xD000
-        case NumericSign.NegInfinity => 0xF000
+        case NumericSign.NaN => 0xc000
+        case NumericSign.Infinity => 0xd000
+        case NumericSign.NegInfinity => 0xf000
       }
       bb.putShort(sign.toShort)
       bb.putShort(n.displayScale.toShort)
-      n.digits.foreach { d => bb.putShort(d) }
+      n.digits.foreach(d => bb.putShort(d))
       bb
     }
-    fragments[UInt]("unsigned int")((w,uint) => w.unsignedInt(uint.bits))(r => UInt(r.unsignedInt()))((b,uint) => b.putInt(uint.bits))
+    fragments[UInt]("unsigned int")((w, uint) => w.unsignedInt(uint.bits))(r => UInt(r.unsignedInt()))((b, uint) =>
+      b.putInt(uint.bits)
+    )
     // C-style strings only
-    fragments[AsciiString]("cstring")((w,str) => w.cstring(str.value))(r => AsciiString(r.cstring())) { (bb, str) =>
+    fragments[AsciiString]("cstring")((w, str) => w.cstring(str.value))(r => AsciiString(r.cstring())) { (bb, str) =>
       bb.put(str.value.getBytes("UTF8"))
       bb.put(0.toByte)
     }
@@ -99,11 +100,10 @@ class PgBufSpec extends Specification with PropertiesSpec {
     fragments[WireValue]("wire value")(_.value(_))(_.value()) { (bb, value) =>
       value match {
         case WireValue.Null => bb.putInt(-1)
-        case WireValue.Value(buf) => {
+        case WireValue.Value(buf) =>
           val value = Buf.ByteArray.Shared.extract(buf)
           bb.putInt(value.length)
           bb.put(value)
-        }
       }
     }
     fragments[Format]("format")(_.format(_))(_.format()) { (bb, format) =>
@@ -149,10 +149,9 @@ class PgBufSpec extends Specification with PropertiesSpec {
       writeFragment[Name]("name")(_.name(_)) { (bb, name) =>
         name match {
           case Name.Unnamed => bb.put(Array(0.toByte))
-          case Name.Named(name) => {
+          case Name.Named(name) =>
             bb.put(name.getBytes("UTF-8"))
             bb.put(0.toByte)
-          }
         }
       }
       writeFragment[List[Int]]("write foreachUnframed")(_.foreachUnframed(_)(_.int(_))) { (bb, xs) =>

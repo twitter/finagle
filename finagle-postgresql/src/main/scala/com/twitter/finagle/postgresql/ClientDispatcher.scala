@@ -45,9 +45,9 @@ class ClientDispatcher(
   transport: Transport[Packet, Packet],
   params: Stack.Params,
 ) extends GenSerialClientDispatcher[Request, Response, Packet, Packet](
-  transport,
-  params[Stats].statsReceiver
-) {
+      transport,
+      params[Stats].statsReceiver
+    ) {
 
   /**
    * Send a single message to the backend.
@@ -75,10 +75,11 @@ class ClientDispatcher(
         state = s
         val doAction = action match {
           case StateMachine.NoOp => Future.Done
-          case s@StateMachine.Send(_) => send(s)
-          case StateMachine.SendSeveral(msgs) => Future.traverseSequentially(msgs) {
-            case s@StateMachine.Send(_) => send(s)
-          }.unit
+          case s @ StateMachine.Send(_) => send(s)
+          case StateMachine.SendSeveral(msgs) =>
+            Future.traverseSequentially(msgs) {
+              case s @ StateMachine.Send(_) => send(s)
+            }.unit
           case StateMachine.Respond(r) =>
             promise.updateIfEmpty(r)
             Future.Done
@@ -88,17 +89,19 @@ class ClientDispatcher(
         response.foreach(promise.updateIfEmpty)
 
         // Make sure the state machine produced a response for the client.
-        if(!promise.isDefined) {
+        if (!promise.isDefined) {
           // NOTE: we still use updateIfEmpty since the promise may still be canceled.
           promise.updateIfEmpty(
-            Throw(PgSqlInvalidMachineStateError(s"State machine ${machine.getClass} was in state $state and completed without producing a response for the client."))
+            Throw(PgSqlInvalidMachineStateError(
+              s"State machine ${machine.getClass} was in state $state and completed without producing a response for the client."
+            ))
           )
         }
         Future.value(ready)
     }
 
     def readAndStep: Future[ReadyForQuery] =
-      receive().flatMap { msg => step(machine.receive(state, msg)) }
+      receive().flatMap(msg => step(machine.receive(state, msg)))
 
     step(machine.start)
   }
@@ -106,7 +109,7 @@ class ClientDispatcher(
   /**
    * Runs a state machine to completion and fulfills the client response.
    */
-  private[this] def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] = {
+  private[this] def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] =
     run(machine, promise)
       .transform {
         case Return(_) => Future.Done
@@ -117,7 +120,6 @@ class ClientDispatcher(
           // TODO: is this the appropriate way to handle "bad connections" in finagle?
           close()
       }
-  }
 
   /**
    * This is used to keep the result of the startup sequence.
@@ -140,9 +142,9 @@ class ClientDispatcher(
     StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(_ => Response.Ready)
 
   override def apply(req: Request): Future[Response] =
-    startup before { super.apply(req) }
+    startup before super.apply(req)
 
-  override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
+  override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
     connectionParameters.poll match {
       case None => Future.exception(new PgSqlClientError("Handshake result should be available at this point."))
       case Some(Throw(t)) =>
@@ -160,5 +162,4 @@ class ClientDispatcher(
           case e: Request.Execute => machineDispatch(new ExecuteMachine(e, parameters), p)
         }
     }
-  }
 }

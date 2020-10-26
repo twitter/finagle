@@ -20,10 +20,13 @@ object Response {
     clientEncoding: Charset,
     timeZone: ZoneId,
   )
-  case class ConnectionParameters(parameters: List[BackendMessage.ParameterStatus], backendData: BackendMessage.BackendKeyData) extends Response {
+  case class ConnectionParameters(
+    parameters: List[BackendMessage.ParameterStatus],
+    backendData: BackendMessage.BackendKeyData
+  ) extends Response {
 
     lazy val parameterMap: Map[BackendMessage.Parameter, String] =
-      parameters.map { param => param.key -> param.value }.toMap
+      parameters.map(param => param.key -> param.value).toMap
 
     lazy val parsedParameters: ParsedParameters = {
       // make sure the backend uses integers to store date time values.
@@ -45,9 +48,10 @@ object Response {
 
   sealed trait QueryResponse extends Response
   type Row = IndexedSeq[WireValue]
-  case class ResultSet(fields: IndexedSeq[FieldDescription], rows: Reader[Row], parameters: ConnectionParameters) extends QueryResponse {
+  case class ResultSet(fields: IndexedSeq[FieldDescription], rows: Reader[Row], parameters: ConnectionParameters)
+      extends QueryResponse {
     def toSeq: Future[Seq[Row]] = Reader.toAsyncStream(rows).toSeq()
-    def buffered: Future[ResultSet] = toSeq.map { rows => ResultSet(fields, Reader.fromSeq(rows), parameters) }
+    def buffered: Future[ResultSet] = toSeq.map(rows => ResultSet(fields, Reader.fromSeq(rows), parameters))
   }
   object Result {
     // def because Reader is stateful
@@ -62,7 +66,7 @@ object Response {
   }
 
   // Extended query
-  case class Prepared private[postgresql](name: Name, parameterTypes: IndexedSeq[Types.Oid])
+  case class Prepared private[postgresql] (name: Name, parameterTypes: IndexedSeq[Types.Oid])
   case class ParseComplete(statement: Prepared) extends Response
 
 }

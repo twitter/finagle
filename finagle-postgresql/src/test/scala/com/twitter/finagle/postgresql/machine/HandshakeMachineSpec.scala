@@ -68,7 +68,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
       )
     }
 
-    def passwordAuthSpec(username: String, password: String)(f: => BackendMessage)(check: String => MatchResult[_]) = {
+    def passwordAuthSpec(username: String, password: String)(f: => BackendMessage)(check: String => MatchResult[_]) =
       machineSpec(mkMachine(username, Some(password), "database"))(
         checkStartup,
         receive(f),
@@ -78,7 +78,6 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
         receive(BackendMessage.AuthenticationOk),
         checkAuthSuccess
       )
-    }
 
     "support clear text password authentication" in prop { (username: String, password: String) =>
       passwordAuthSpec(username, password)(BackendMessage.AuthenticationCleartextPassword)(_ must_== password)
@@ -87,17 +86,24 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
     def hex(input: Array[Byte]) = input.map(s => f"$s%02x").mkString
     def bytes(str: String) = str.getBytes(StandardCharsets.UTF_8)
     def md5(input: Array[Byte]*): String =
-      hex(input.foldLeft(MessageDigest.getInstance("MD5")) { case(d,v) => d.update(v);d }.digest())
+      hex(input.foldLeft(MessageDigest.getInstance("MD5")) { case (d, v) => d.update(v); d }.digest())
 
     "support md5 password authentication" in prop { (username: String, password: String, salt: Array[Byte]) =>
-      passwordAuthSpec(username, password)(BackendMessage.AuthenticationMD5Password(Buf.ByteArray.Owned(salt))) { hashed =>
-        val expectedHash = md5(bytes(md5(bytes(password), bytes(username))), salt)
-        hashed must_== s"md5$expectedHash"
+      passwordAuthSpec(username, password)(BackendMessage.AuthenticationMD5Password(Buf.ByteArray.Owned(salt))) {
+        hashed =>
+          val expectedHash = md5(bytes(md5(bytes(password), bytes(username))), salt)
+          hashed must_== s"md5$expectedHash"
       }
     }
 
     fragments {
-      List(AuthenticationGSS, AuthenticationKerberosV5, AuthenticationSCMCredential, AuthenticationSSPI, AuthenticationSASL("bogus"))
+      List(
+        AuthenticationGSS,
+        AuthenticationKerberosV5,
+        AuthenticationSCMCredential,
+        AuthenticationSSPI,
+        AuthenticationSASL("bogus")
+      )
         .map { method =>
           s"fails with unsupported authentication method for $method" in {
             machineSpec(mkMachine("username", Some("password"), "database"))(
@@ -115,23 +121,24 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
   "HandshakeMachine Startup" should {
     val authSuccess = checkStartup :: receive(BackendMessage.AuthenticationOk) :: checkAuthSuccess :: Nil
 
-    "accumulate backend parameters" in prop { (parameters: List[BackendMessage.ParameterStatus], bkd: BackendMessage.BackendKeyData) =>
-      val receiveParams = parameters.map(receive(_))
-      // shuffle the BackendKeyData in he ParameterStatus messages
-      val startupPhase = util.Random.shuffle(receive(bkd) :: receiveParams)
+    "accumulate backend parameters" in prop {
+      (parameters: List[BackendMessage.ParameterStatus], bkd: BackendMessage.BackendKeyData) =>
+        val receiveParams = parameters.map(receive(_))
+        // shuffle the BackendKeyData in he ParameterStatus messages
+        val startupPhase = util.Random.shuffle(receive(bkd) :: receiveParams)
 
-      val checks = List(
-        receive(BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
-        checkResult("responds success") {
-          case Complete(_, Some(Return(result))) =>
-            result.parameters must containTheSameElementsAs(parameters)
-            result.backendData must beEqualTo(bkd)
-        }
-      )
+        val checks = List(
+          receive(BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
+          checkResult("responds success") {
+            case Complete(_, Some(Return(result))) =>
+              result.parameters must containTheSameElementsAs(parameters)
+              result.backendData must beEqualTo(bkd)
+          }
+        )
 
-      machineSpec(mkMachine)(
-        authSuccess ++ startupPhase ++ checks: _*
-      )
+        machineSpec(mkMachine)(
+          authSuccess ++ startupPhase ++ checks: _*
+        )
     }
 
     "fails if missing BackendKeyData" in {

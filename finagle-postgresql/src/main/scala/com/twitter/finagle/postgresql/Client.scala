@@ -23,7 +23,7 @@ trait QueryClient[Q] {
 
   def select[T](sql: Q)(f: Row => T): Future[Iterable[T]] =
     read(sql)
-      .map { rs => rs.rows.map(f) }
+      .map(rs => rs.rows.map(f))
 
   def modify(sql: Q): Future[Command] =
     query(sql).flatMap(Client.Expect.Command)

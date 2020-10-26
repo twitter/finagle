@@ -20,15 +20,18 @@ object MessageEncoder {
   def apply[M <: FrontendMessage](c: Char)(f: (PgBuf.Writer, M) => PgBuf.Writer): MessageEncoder[M] =
     apply(Some(c.toByte))(f)
 
-  def emptyMessageEncoder[M <: FrontendMessage](b: Byte): MessageEncoder[M] = MessageEncoder(Some(b)) { (writer, _) => writer }
-
-  implicit val sslRequestEncoder: MessageEncoder[FrontendMessage.SslRequest.type] = MessageEncoder(None) { (writer, _) =>
-    // "The SSL request code. The value is chosen to contain 1234 in the most significant 16 bits, and 5679 in the least significant 16 bits.
-    // (To avoid confusion, this code must not be the same as any protocol version number.)"
-    writer.int(80877103)
+  def emptyMessageEncoder[M <: FrontendMessage](b: Byte): MessageEncoder[M] = MessageEncoder(Some(b)) { (writer, _) =>
+    writer
   }
 
-  implicit val startupEncoder: MessageEncoder[FrontendMessage.StartupMessage]  = MessageEncoder(None) { (writer, msg) =>
+  implicit val sslRequestEncoder: MessageEncoder[FrontendMessage.SslRequest.type] = MessageEncoder(None) {
+    (writer, _) =>
+      // "The SSL request code. The value is chosen to contain 1234 in the most significant 16 bits, and 5679 in the least significant 16 bits.
+      // (To avoid confusion, this code must not be the same as any protocol version number.)"
+      writer.int(80877103)
+  }
+
+  implicit val startupEncoder: MessageEncoder[FrontendMessage.StartupMessage] = MessageEncoder(None) { (writer, msg) =>
     writer
       .short(msg.version.major)
       .short(msg.version.minor)
@@ -36,7 +39,7 @@ object MessageEncoder {
       .opt(msg.database) { (w, db) =>
         w.cstring("database").cstring(db)
       }
-      .foreachUnframed(msg.params) { case(w, (key, value)) => w.cstring(key).cstring(value) }
+      .foreachUnframed(msg.params) { case (w, (key, value)) => w.cstring(key).cstring(value) }
       .byte(0)
   }
 
@@ -64,9 +67,9 @@ object MessageEncoder {
     writer
       .name(msg.portal)
       .name(msg.statement)
-      .foreach(msg.formats) { (w, f) => w.format(f) }
-      .foreach(msg.values) { (w, v) => w.value(v) }
-      .foreach(msg.resultFormats) { (w, f) => w.format(f) }
+      .foreach(msg.formats)((w, f) => w.format(f))
+      .foreach(msg.values)((w, v) => w.value(v))
+      .foreach(msg.resultFormats)((w, f) => w.format(f))
   }
 
   implicit val describeEncoder: MessageEncoder[FrontendMessage.Describe] = MessageEncoder('D') { (writer, msg) =>

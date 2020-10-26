@@ -70,6 +70,7 @@ object StateMachine {
    * Send the specified [[FrontendMessage]] after transitioning to the new sate.
    */
   case class Send[M <: FrontendMessage](msg: M)(implicit val encoder: MessageEncoder[M]) extends Action[Nothing]
+
   /**
    * Send multiple messages to the backend after transitioning to the new sate.
    * This allows sending multiple messages in a row without waiting for a message from the backend between each of them.
@@ -122,10 +123,16 @@ object StateMachine {
    *                 action must have been produced during the state machine's lifecycle to guarantee the client
    *                 receives a response.
    */
-  case class Complete[R <: Response](ready: ReadyForQuery, response: Option[Try[R]]) extends TransitionResult[Nothing, R]
+  case class Complete[R <: Response](ready: ReadyForQuery, response: Option[Try[R]])
+      extends TransitionResult[Nothing, R]
 
-  /** A machine that sends a single frontend message and expects a ReadyForQuery response */
-  def singleMachine[M <: FrontendMessage: MessageEncoder, R <: Response](name: String, msg: M)(f: BackendMessage.ReadyForQuery => R): StateMachine[R] = new StateMachine[R] {
+  /**
+   * A machine that sends a single frontend message and expects a ReadyForQuery response
+   */
+  def singleMachine[M <: FrontendMessage: MessageEncoder, R <: Response](
+    name: String,
+    msg: M
+  )(f: BackendMessage.ReadyForQuery => R): StateMachine[R] = new StateMachine[R] {
     override type State = Unit
     override def start: TransitionResult[State, R] = Transition((), Send(msg))
     override def receive(state: State, msg: BackendMessage): TransitionResult[State, R] = msg match {

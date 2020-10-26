@@ -18,7 +18,7 @@ object PostgreSql {
   val defaultParams: Stack.Params = StackClient.defaultParams
 
   case class Client(
-    stack:  Stack[ServiceFactory[Request, Response]] = defaultStack,
+    stack: Stack[ServiceFactory[Request, Response]] = defaultStack,
     params: Stack.Params = defaultParams
   ) extends StdStackClient[Request, Response, Client] {
 

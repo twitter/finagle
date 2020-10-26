@@ -75,38 +75,39 @@ class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extend
     case _ => sys.error("") // TODO
   }
 
-  override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, SimpleQueryResponse] = (state, msg) match {
-    case (Sent, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
-      val response = StreamResponses.init
-      Transition(handleResponse(response, msg), Respond(Return(Response.SimpleQueryResponse(response.pipe))))
-    case (s: StreamResponses, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
-      Transition(handleResponse(s, msg), NoOp)
+  override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, SimpleQueryResponse] =
+    (state, msg) match {
+      case (Sent, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
+        val response = StreamResponses.init
+        Transition(handleResponse(response, msg), Respond(Return(Response.SimpleQueryResponse(response.pipe))))
+      case (s: StreamResponses, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
+        Transition(handleResponse(s, msg), NoOp)
 
-    case (r: StreamResultState, dr: DataRow) => Transition(r.append(dr), NoOp)
-    case (r: StreamResultState, _: CommandComplete) =>
-      // TODO: handle discard() to client can cancel the stream
-      Transition(r.close(), NoOp)
-    case (r: StreamResultState, e: ErrorResponse) =>
-      val exception = PgSqlServerError(e)
-      r.fail(exception)
-      // We've already responded at this point, so this will likely not do anything.
-      Transition(r.responses, Respond(Throw(exception)))
+      case (r: StreamResultState, dr: DataRow) => Transition(r.append(dr), NoOp)
+      case (r: StreamResultState, _: CommandComplete) =>
+        // TODO: handle discard() to client can cancel the stream
+        Transition(r.close(), NoOp)
+      case (r: StreamResultState, e: ErrorResponse) =>
+        val exception = PgSqlServerError(e)
+        r.fail(exception)
+        // We've already responded at this point, so this will likely not do anything.
+        Transition(r.responses, Respond(Throw(exception)))
 
-    case (s: StreamResponses, r: ReadyForQuery) =>
-      s.close()
-      Complete(r, None)
+      case (s: StreamResponses, r: ReadyForQuery) =>
+        s.close()
+        Complete(r, None)
 
-    case (s: StreamResponses, e: ErrorResponse) =>
-      val exception = PgSqlServerError(e)
-      s.pipe.fail(exception)
-      // We've already responded at this point, so this will likely not do anything.
-      Transition(s, Respond(Throw(exception)))
+      case (s: StreamResponses, e: ErrorResponse) =>
+        val exception = PgSqlServerError(e)
+        s.pipe.fail(exception)
+        // We've already responded at this point, so this will likely not do anything.
+        Transition(s, Respond(Throw(exception)))
 
-    case (state, _: NoticeResponse) => Transition(state, NoOp) // TODO: don't ignore
+      case (state, _: NoticeResponse) => Transition(state, NoOp) // TODO: don't ignore
 
-    case (Sent, e: ErrorResponse) => Transition(Sent, Respond(Throw(PgSqlServerError(e))))
-    case (Sent, r:ReadyForQuery) => Complete(r, None)
+      case (Sent, e: ErrorResponse) => Transition(Sent, Respond(Throw(PgSqlServerError(e))))
+      case (Sent, r: ReadyForQuery) => Complete(r, None)
 
-    case (state, msg) => throw PgSqlNoSuchTransition("SimpleQueryMachine", state, msg)
-  }
+      case (state, msg) => throw PgSqlNoSuchTransition("SimpleQueryMachine", state, msg)
+    }
 }

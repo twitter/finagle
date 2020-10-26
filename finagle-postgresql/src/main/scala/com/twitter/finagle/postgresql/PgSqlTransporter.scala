@@ -46,7 +46,6 @@ class PgSqlTransporter(
 
   override def apply(): Future[Transport[Packet, Packet] {
     type Context <: TransportContext
-  }] = {
+  }] =
     transporter().map(_.map(_.toBuf, Packet.parse))
-  }
 }

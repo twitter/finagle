@@ -74,7 +74,12 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
       }
     }
 
-    def baseSpec(name: Name, portalName: Name, parameters: IndexedSeq[WireValue], describeMessage: BackendMessage)(tail: StepSpec*) = {
+    def baseSpec(
+      name: Name,
+      portalName: Name,
+      parameters: IndexedSeq[WireValue],
+      describeMessage: BackendMessage
+    )(tail: StepSpec*) = {
       val head = List(
         checkStartup(name, portalName, parameters),
         receive(BindComplete),
@@ -93,7 +98,7 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
       describeMessage: BackendMessage,
       executeMessage: BackendMessage,
       expectedResponse: Response.QueryResponse,
-    )= {
+    ) =
       baseSpec(name, portalName, parameters, describeMessage)(
         receive(executeMessage),
         checkResult("sends sync") {
@@ -105,47 +110,49 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
             response must beEqualTo(expectedResponse)
         }
       )
+
+    "support empty queries" in prop {
+      (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], desc: RowDescription) =>
+        nominalSpec(name, portalName, parameters, desc, EmptyQueryResponse, Response.Empty)
     }
 
-    "support empty queries" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], desc: RowDescription) =>
-      nominalSpec(name, portalName, parameters, desc, EmptyQueryResponse, Response.Empty)
+    "support commands" in prop {
+      (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], commandTag: String) =>
+        nominalSpec(name, portalName, parameters, NoData, CommandComplete(commandTag), Response.Command(commandTag))
     }
 
-    "support commands" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], commandTag: String) =>
-      nominalSpec(name, portalName, parameters, NoData, CommandComplete(commandTag), Response.Command(commandTag))
-    }
-
-    "support result sets" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], rs: TestResultSet) =>
-      rs.rows.nonEmpty ==> {
-        var rowReader: Option[Response.ResultSet] = None
-        val steps = rs.rows match {
-          case Nil => sys.error("unexpected result set")
-          case head :: tail =>
-            List(
-              receive(head),
-              checkResult("responds") {
-                case Transition(_, Respond(Return(r@Response.ResultSet(fields, _, _)))) =>
-                  rowReader = Some(r)
-                  fields must beEqualTo(rs.desc.rowFields)
-              }
-            ) ++ tail.map(receive(_))
-        }
-        val postSteps = List(
-          receive(CommandComplete("TODO"))
-        )
-        baseSpec(name, portalName, parameters, rs.desc)(
-          steps ++ postSteps: _*
-        ) && {
-          rowReader must beSome
-          val rows = Await.result(rowReader.get.toSeq.liftToTry)
-          // NOTE: this isn't as strict as it could be.
-          //   Ideally we would only expect an error when one was injected
-          rows must beLike {
-            case Return(rows) => rows must beEqualTo(rs.rows.map(_.values))
-            case Throw(PgSqlServerError(_)) => ok // injected error case
+    "support result sets" in prop {
+      (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], rs: TestResultSet) =>
+        rs.rows.nonEmpty ==> {
+          var rowReader: Option[Response.ResultSet] = None
+          val steps = rs.rows match {
+            case Nil => sys.error("unexpected result set")
+            case head :: tail =>
+              List(
+                receive(head),
+                checkResult("responds") {
+                  case Transition(_, Respond(Return(r @ Response.ResultSet(fields, _, _)))) =>
+                    rowReader = Some(r)
+                    fields must beEqualTo(rs.desc.rowFields)
+                }
+              ) ++ tail.map(receive(_))
+          }
+          val postSteps = List(
+            receive(CommandComplete("TODO"))
+          )
+          baseSpec(name, portalName, parameters, rs.desc)(
+            steps ++ postSteps: _*
+          ) && {
+            rowReader must beSome
+            val rows = Await.result(rowReader.get.toSeq.liftToTry)
+            // NOTE: this isn't as strict as it could be.
+            //   Ideally we would only expect an error when one was injected
+            rows must beLike {
+              case Return(rows) => rows must beEqualTo(rs.rows.map(_.values))
+              case Throw(PgSqlServerError(_)) => ok // injected error case
+            }
           }
         }
-      }
     }
 
   }

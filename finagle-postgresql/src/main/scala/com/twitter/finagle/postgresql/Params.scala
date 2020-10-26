@@ -6,10 +6,9 @@ object Params {
   case class Credentials(username: String, password: Option[String])
   object Credentials {
     implicit val param: Stack.Param[Credentials] = new Stack.Param[Credentials] {
-      override def show(p: Credentials): Seq[(String, () => String)] = {
+      override def show(p: Credentials): Seq[(String, () => String)] =
         // do not show the password for security reasons
         Seq(("username", () => p.username))
-      }
 
       override def default: Credentials = ???
     }
