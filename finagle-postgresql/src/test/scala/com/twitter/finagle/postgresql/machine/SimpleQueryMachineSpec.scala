@@ -46,13 +46,17 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       case Transition(_, Respond(value)) =>
         value.asScala must beSuccessfulTry {
           beLike[Response] {
-            case r@Response.SimpleQueryResponse(_) =>
+            case r @ Response.SimpleQueryResponse(_) =>
               Await.result(r.next.liftToTry) must beLike(f)
           }
         }
     }
 
-  def multiQuerySpec(query: String, first: (BackendMessage, QueryResponseCheck), others: (BackendMessage, QueryResponseCheck)*) = {
+  def multiQuerySpec(
+    query: String,
+    first: (BackendMessage, QueryResponseCheck),
+    others: (BackendMessage, QueryResponseCheck)*
+  ) = {
 
     var sqr: Option[Response.SimpleQueryResponse] = None
 
@@ -94,7 +98,10 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
     }
   }
 
-  def singleQuerySpec(query: String, msg: BackendMessage)(f: PartialFunction[Try[Response.QueryResponse], MatchResult[_]]) =
+  def singleQuerySpec(
+    query: String,
+    msg: BackendMessage
+  )(f: PartialFunction[Try[Response.QueryResponse], MatchResult[_]]) =
     multiQuerySpec(query, msg -> f)
 
   "SimpleQueryMachine" should {
@@ -126,7 +133,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
         checkSingleResponse {
           case Return(value) =>
             value must beLike {
-              case rs@Response.ResultSet(desc, _, _) =>
+              case rs @ Response.ResultSet(desc, _, _) =>
                 rowReader = Some(rs)
                 desc must beEqualTo(rowDesc.rowFields)
             }
@@ -178,10 +185,15 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
     }
 
     "support multiline queries" in prop { (command: String, firstTag: String, secondTag: String) =>
-      multiQuerySpec(command,
-        BackendMessage.CommandComplete(firstTag) -> { case Return(value) => value must beEqualTo(Response.Command(firstTag)) },
+      multiQuerySpec(
+        command,
+        BackendMessage.CommandComplete(firstTag) -> { case Return(value) =>
+          value must beEqualTo(Response.Command(firstTag))
+        },
         BackendMessage.EmptyQueryResponse -> { case Return(value) => value must beEqualTo(Response.Empty) },
-        BackendMessage.CommandComplete(secondTag) -> { case Return(value) => value must beEqualTo(Response.Command(secondTag)) }
+        BackendMessage.CommandComplete(secondTag) -> { case Return(value) =>
+          value must beEqualTo(Response.Command(secondTag))
+        }
       )
     }
   }

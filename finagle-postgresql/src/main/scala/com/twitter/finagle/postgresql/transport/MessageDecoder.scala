@@ -201,13 +201,13 @@ object MessageDecoder {
 
   implicit lazy val dataRowDecoder: MessageDecoder[DataRow] = MessageDecoder { reader =>
     DataRow(
-      reader.collect { _.value() }
+      reader.collect(_.value())
     )
   }
 
   implicit lazy val parameterDescriptionDecoder: MessageDecoder[ParameterDescription] = MessageDecoder { reader =>
     ParameterDescription(
-      reader.collect { r => Oid(r.unsignedInt()) }
+      reader.collect(r => Oid(r.unsignedInt()))
     )
   }
 }

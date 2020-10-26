@@ -19,8 +19,9 @@ object PgNumeric {
   val Zero = BigDecimal(0)
 
   private[this] def numericToUnsignedBigDecimal(n: Numeric): java.math.BigDecimal =
-    if(n.digits.isEmpty) java.math.BigDecimal.ZERO else {
-      val unscaled = n.digits.foldLeft(java.math.BigDecimal.ZERO) { case(acc, d) =>
+    if (n.digits.isEmpty) java.math.BigDecimal.ZERO
+    else {
+      val unscaled = n.digits.foldLeft(java.math.BigDecimal.ZERO) { case (acc, d) =>
         acc.movePointRight(NumericBase).add(java.math.BigDecimal.valueOf(d))
       }
 
@@ -48,8 +49,9 @@ object PgNumeric {
       case NumericSign.NegInfinity => throw new PgSqlClientError("-Inf cannot be converted to BigDecimal")
     }
 
-  def bigDecimalToNumeric(bd: BigDecimal): Numeric = {
-    if(bd.signum == 0) NumericZero else {
+  def bigDecimalToNumeric(bd: BigDecimal): Numeric =
+    if (bd.signum == 0) NumericZero
+    else {
 
       val striped = bd.underlying.stripTrailingZeros()
       val unscaled = BigInt(striped.unscaledValue().abs())
@@ -60,13 +62,15 @@ object PgNumeric {
       // Taking % 4 of that number tells us how many non-zero digits there are
       // So subtracting from 4 tells us how many zeroes to add (% 4 again since adding 4 is the same as adding none)
       val pad = (4 - striped.scale() % 4) % 4
-      var padded = if(pad == 0) unscaled.underlying else {
-        (unscaled * BigInt(math.pow(10, pad).toInt)).underlying
-      }
+      var padded =
+        if (pad == 0) unscaled.underlying
+        else {
+          (unscaled * BigInt(math.pow(10, pad).toInt)).underlying
+        }
 
       var digits = List.empty[Short]
       // We iteratively divide by 10000 to get the individual "numeric digits"
-      while(padded.signum() != 0) {
+      while (padded.signum() != 0) {
         val Array(p, digit) = padded.divideAndRemainder(Base10000)
         digits = digit.shortValueExact() :: digits
         padded = p
@@ -82,21 +86,21 @@ object PgNumeric {
       // We compute the number digits right of the point by taking scale and adding the number of zeroes we added when padding.
       // We divide that by 4 to get the number of "numeric digits" right of the point.
       // Then we subtract that from the number of total digits (this also means weight can be null).
-      val weight = if(striped.scale <= 0) {
-        striped.scale.abs / 4 + digits.length
-      } else {
-        val decimalDigits = striped.scale + pad
-        digits.length - decimalDigits / 4
-      }
+      val weight =
+        if (striped.scale <= 0) {
+          striped.scale.abs / 4 + digits.length
+        } else {
+          val decimalDigits = striped.scale + pad
+          digits.length - decimalDigits / 4
+        }
 
       Numeric(
-        sign = if(bd.signum > 0) NumericSign.Positive else NumericSign.Negative,
+        sign = if (bd.signum > 0) NumericSign.Positive else NumericSign.Negative,
         // we have to subtract 1 since the definition is "weight + 1 digits before the point"
         weight = (weight - 1).toShort,
-        displayScale = if(bd.scale < 0) 0 else bd.scale,
+        displayScale = if (bd.scale < 0) 0 else bd.scale,
         digits = digits
       )
     }
-  }
 
 }

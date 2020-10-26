@@ -39,12 +39,11 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     fragments(typeFragments)
   }
 
-  def readsFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType)(encode: T => Buf): Fragment = {
+  def readsFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType)(encode: T => Buf): Fragment =
     s"read non-null value" in prop { value: T =>
       val ret = reads.reads(accept, WireValue.Value(encode(value)), utf8).asScala
       ret must beSuccessfulTry(value)
     }
-  }
   def arrayReadsFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType)(encode: T => Buf) = {
     val arrayReads = ValueReads.traversableReads[List, T](reads, implicitly)
     s"read one-dimensional array of non-null values" in prop { values: List[T] =>
@@ -109,7 +108,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         bb.put(Buf.ByteArray.Shared.extract(buf))
       }
     }
-    "readsByte" should simpleSpec[Byte](ValueReads.readsByte, PgType.Char) { byte => Buf.ByteArray(byte) }
+    "readsByte" should simpleSpec[Byte](ValueReads.readsByte, PgType.Char)(byte => Buf.ByteArray(byte))
     "readsDouble" should simpleSpec[Double](ValueReads.readsDouble, PgType.Float8) { double =>
       mkBuf() { bb =>
         bb.putDouble(double)
@@ -120,17 +119,18 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         bb.putFloat(float)
       }
     }
-    "readsInstant" should simpleSpec[java.time.Instant](ValueReads.readsInstant, PgType.Timestamptz, PgType.Timestamp) { ts =>
-      mkBuf() { bb =>
-        val sincePgEpoch = java.time.Duration.between(PgTime.Epoch, ts)
-        val secs = sincePgEpoch.getSeconds
-        val nanos = sincePgEpoch.getNano
-        val micros = secs * 1000000 + nanos / 1000
-        bb.putLong(micros)
-      }
+    "readsInstant" should simpleSpec[java.time.Instant](ValueReads.readsInstant, PgType.Timestamptz, PgType.Timestamp) {
+      ts =>
+        mkBuf() { bb =>
+          val sincePgEpoch = java.time.Duration.between(PgTime.Epoch, ts)
+          val secs = sincePgEpoch.getSeconds
+          val nanos = sincePgEpoch.getNano
+          val micros = secs * 1000000 + nanos / 1000
+          bb.putLong(micros)
+        }
     }
     "readsInstant" should {
-      def failFor(name: String, value: Long) = {
+      def failFor(name: String, value: Long) =
         s"fail for $name" in {
           val buf = mkBuf() { bb =>
             bb.putLong(value)
@@ -138,7 +138,6 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
           val read = ValueReads.readsInstant.reads(PgType.Timestamptz, WireValue.Value(buf), utf8)
           read.asScala must beAFailedTry(beAnInstanceOf[PgSqlClientError])
         }
-      }
       failFor("-Infinity", 0x8000000000000000L)
       failFor("Infinity", 0x7fffffffffffffffL)
     }
@@ -157,7 +156,14 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         bb.putShort(short)
       }
     }
-    "readsString" should simpleSpec[String](ValueReads.readsString, PgType.Text, PgType.Varchar, PgType.Bpchar, PgType.Name, PgType.Unknown) { string =>
+    "readsString" should simpleSpec[String](
+      ValueReads.readsString,
+      PgType.Text,
+      PgType.Varchar,
+      PgType.Bpchar,
+      PgType.Name,
+      PgType.Unknown
+    ) { string =>
       mkBuf() { bb =>
         bb.put(string.getBytes(utf8))
       }

@@ -57,7 +57,9 @@ trait ValueReads[T] {
    * method has a default implementation of producing an error.
    */
   def readsNull(tpe: PgType): Try[T] =
-    Throw(new IllegalArgumentException(s"Type ${tpe.name} has no reasonable null value. If you intended to make this field nullable, you must read it as an Option[T]."))
+    Throw(new IllegalArgumentException(
+      s"Type ${tpe.name} has no reasonable null value. If you intended to make this field nullable, you must read it as an Option[T]."
+    ))
 
   /**
    * Decode a potentially `NULL` wire value into the requested scala type.
@@ -92,8 +94,10 @@ object ValueReads {
       Try {
         val reader = new PgBuf.Reader(buf)
         val value = f(reader)
-        if(reader.remaining != 0) {
-          throw new PgSqlClientError(s"Reading value of type ${tpe.name} should have consumed the whole value's buffer, but ${reader.remaining} bytes remained.")
+        if (reader.remaining != 0) {
+          throw new PgSqlClientError(
+            s"Reading value of type ${tpe.name} should have consumed the whole value's buffer, but ${reader.remaining} bytes remained."
+          )
         }
         value
       }
@@ -107,8 +111,9 @@ object ValueReads {
     override def accepts(tpe: PgType): Boolean = treads.accepts(tpe)
   }
 
-  implicit def traversableReads[F[_], T](implicit treads: ValueReads[T],
-   cbf: CanBuildFrom[F[_], T, F[T]]
+  implicit def traversableReads[F[_], T](implicit
+    treads: ValueReads[T],
+    cbf: CanBuildFrom[F[_], T, F[T]]
   ): ValueReads[F[T]] = new ValueReads[F[T]] {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[F[T]] = {
       val underlying = tpe.kind match {
@@ -117,8 +122,10 @@ object ValueReads {
       }
       Try {
         val array = PgBuf.reader(buf).array()
-        if(array.dimensions > 1) {
-          throw PgSqlUnsupportedError(s"Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got ${array.dimensions}")
+        if (array.dimensions > 1) {
+          throw PgSqlUnsupportedError(
+            s"Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got ${array.dimensions}"
+          )
         }
         val builder = cbf.apply()
         array.data.foreach { value =>
@@ -143,12 +150,14 @@ object ValueReads {
   implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Char)(_.byte())
   implicit lazy val readsDouble: ValueReads[Double] = simple(PgType.Float8)(_.double())
   implicit lazy val readsFloat: ValueReads[Float] = simple(PgType.Float4)(_.float())
-  implicit lazy val readsInstant: ValueReads[java.time.Instant] = simple(PgType.Timestamptz, PgType.Timestamp) { reader =>
-    reader.timestamp() match {
-      case Timestamp.NegInfinity | Timestamp.Infinity => throw PgSqlUnsupportedError("-Infinity and Infinity timestamps cannot be read as java.time.Instant.")
-      case Timestamp.Micros(offset) => PgTime.usecOffsetAsInstant(offset)
+  implicit lazy val readsInstant: ValueReads[java.time.Instant] =
+    simple(PgType.Timestamptz, PgType.Timestamp) { reader =>
+      reader.timestamp() match {
+        case Timestamp.NegInfinity | Timestamp.Infinity =>
+          throw PgSqlUnsupportedError("-Infinity and Infinity timestamps cannot be read as java.time.Instant.")
+        case Timestamp.Micros(offset) => PgTime.usecOffsetAsInstant(offset)
+      }
     }
-  }
   implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
   implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
   implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())

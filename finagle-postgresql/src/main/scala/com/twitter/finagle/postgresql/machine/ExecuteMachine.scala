@@ -50,7 +50,8 @@ import com.twitter.util.Try
  *
  * Also note that this machine is used for both executing a portal as well as resuming a previously executed one.
  */
-class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters) extends StateMachine[Response.QueryResponse] {
+class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters)
+    extends StateMachine[Response.QueryResponse] {
 
   sealed trait State
   case object Binding extends State
@@ -76,7 +77,11 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters) ext
             values = parameters, // TODO: deal with parameters
             resultFormats = Format.Binary :: Nil // request all results in binary format
           ),
-          Describe(portalName, DescriptionTarget.Portal), // TODO: we can avoid sending this one when the Prepare phase already returned NoData.
+          // TODO: we can avoid sending this one when the Prepare phase already returned NoData.
+          Describe(
+            portalName,
+            DescriptionTarget.Portal
+          ),
           Execute(portalName, maxResults),
           Flush
         )
@@ -94,44 +99,45 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters) ext
 
   }
 
-  override def receive(state: State, msg: BackendMessage): TransitionResult[State, Response.QueryResponse] = (state, msg) match {
-    case (Binding, BindComplete) =>
-      Transition(Describing, NoOp)
+  override def receive(state: State, msg: BackendMessage): TransitionResult[State, Response.QueryResponse] =
+    (state, msg) match {
+      case (Binding, BindComplete) =>
+        Transition(Describing, NoOp)
 
-    case (Describing, NoData) =>
-      Transition(ExecutingCommand, NoOp)
-    case (ExecutingCommand, CommandComplete(tag)) =>
-      Transition(Syncing(Some(Return(Response.Command(tag)))), Send(Sync))
+      case (Describing, NoData) =>
+        Transition(ExecutingCommand, NoOp)
+      case (ExecutingCommand, CommandComplete(tag)) =>
+        Transition(Syncing(Some(Return(Response.Command(tag)))), Send(Sync))
 
-    case (Describing, r: RowDescription) =>
-      Transition(Executing(r), NoOp)
+      case (Describing, r: RowDescription) =>
+        Transition(Executing(r), NoOp)
 
-    case (Executing(_), EmptyQueryResponse) =>
-      Transition(Syncing(Some(Return(Response.Empty))), Send(Sync))
-    case (Executing(r), row: DataRow) =>
-      val stream = StreamResult(r, new Pipe, Future.Done).append(row)
-      Transition(stream, Respond(Return(stream.resultSet)))
+      case (Executing(_), EmptyQueryResponse) =>
+        Transition(Syncing(Some(Return(Response.Empty))), Send(Sync))
+      case (Executing(r), row: DataRow) =>
+        val stream = StreamResult(r, new Pipe, Future.Done).append(row)
+        Transition(stream, Respond(Return(stream.resultSet)))
 
-    case (r: StreamResult, dr: DataRow) => Transition(r.append(dr), NoOp)
-    case (r: StreamResult, PortalSuspended) =>
-      r.lastWrite.liftToTry.unit before r.pipe.close()
-      // TODO: the ReadyForQuery here is fake
-      Complete(ReadyForQuery(InTx), None)
-    case (r: StreamResult, _: CommandComplete) =>
-      // TODO: handle discard() to client can cancel the stream
-      r.lastWrite.liftToTry.unit before r.pipe.close()
-      Transition(Syncing(None), Send(Sync))
-    case (r: StreamResult, e: ErrorResponse) =>
-      val exception = PgSqlServerError(e)
-      r.pipe.fail(exception)
-      Transition(Syncing(Some(Throw(exception))), Send(Sync))
+      case (r: StreamResult, dr: DataRow) => Transition(r.append(dr), NoOp)
+      case (r: StreamResult, PortalSuspended) =>
+        r.lastWrite.liftToTry.unit before r.pipe.close()
+        // TODO: the ReadyForQuery here is fake
+        Complete(ReadyForQuery(InTx), None)
+      case (r: StreamResult, _: CommandComplete) =>
+        // TODO: handle discard() to client can cancel the stream
+        r.lastWrite.liftToTry.unit before r.pipe.close()
+        Transition(Syncing(None), Send(Sync))
+      case (r: StreamResult, e: ErrorResponse) =>
+        val exception = PgSqlServerError(e)
+        r.pipe.fail(exception)
+        Transition(Syncing(Some(Throw(exception))), Send(Sync))
 
-    case (Syncing(response), r: ReadyForQuery) => Complete(r, response)
+      case (Syncing(response), r: ReadyForQuery) => Complete(r, response)
 
-    case (_, e: ErrorResponse) =>
-      Transition(Syncing(Some(Throw(PgSqlServerError(e)))), Send(Sync))
+      case (_, e: ErrorResponse) =>
+        Transition(Syncing(Some(Throw(PgSqlServerError(e)))), Send(Sync))
 
-    case (state, msg) => throw PgSqlNoSuchTransition("ExecuteMachine", state, msg)
-  }
+      case (state, msg) => throw PgSqlNoSuchTransition("ExecuteMachine", state, msg)
+    }
 
 }

@@ -1,12 +1,43 @@
 package com.twitter.finagle.postgresql.transport
 
-import java.nio.{ByteBuffer, ByteOrder}
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
-import com.twitter.finagle.postgresql.BackendMessage.{AuthenticationCleartextPassword, AuthenticationGSS, AuthenticationGSSContinue, AuthenticationKerberosV5, AuthenticationMD5Password, AuthenticationMessage, AuthenticationOk, AuthenticationSASL, AuthenticationSASLContinue, AuthenticationSASLFinal, AuthenticationSCMCredential, AuthenticationSSPI, BindComplete, CommandComplete, EmptyQueryResponse, FailedTx, Field, InTx, NoData, NoTx, Parameter, ParameterDescription, ParseComplete, PortalSuspended, ReadyForQuery, TxState}
-import com.twitter.finagle.postgresql.Types.{AttributeId, Format, Oid, WireValue}
-import com.twitter.finagle.postgresql.{BackendMessage, PropertiesSpec}
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationCleartextPassword
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSSContinue
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationKerberosV5
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationMD5Password
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationMessage
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationOk
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASL
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASLContinue
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSASLFinal
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
+import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
+import com.twitter.finagle.postgresql.BackendMessage.BindComplete
+import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
+import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
+import com.twitter.finagle.postgresql.BackendMessage.FailedTx
+import com.twitter.finagle.postgresql.BackendMessage.Field
+import com.twitter.finagle.postgresql.BackendMessage.InTx
+import com.twitter.finagle.postgresql.BackendMessage.NoData
+import com.twitter.finagle.postgresql.BackendMessage.NoTx
+import com.twitter.finagle.postgresql.BackendMessage.Parameter
+import com.twitter.finagle.postgresql.BackendMessage.ParameterDescription
+import com.twitter.finagle.postgresql.BackendMessage.ParseComplete
+import com.twitter.finagle.postgresql.BackendMessage.PortalSuspended
+import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
+import com.twitter.finagle.postgresql.BackendMessage.TxState
+import com.twitter.finagle.postgresql.Types.AttributeId
+import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Oid
+import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.io.Buf
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Arbitrary
+import org.scalacheck.Gen
 import org.specs2.mutable.Specification
 
 class MessageDecoderSpec extends Specification with PropertiesSpec {
@@ -19,7 +50,7 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
   }
   def cstring(s: String) = s.getBytes("UTF8") :+ 0x00.toByte
 
-  def unsignedInt(v: Long) = (v & 0xFFFFFFFFL).toInt
+  def unsignedInt(v: Long) = (v & 0xffffffffL).toInt
 
   def fieldByte(field: Field): Byte =
     field match {
@@ -44,7 +75,8 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       case Field.Unknown(c) => c.toByte
     }
 
-  implicit lazy val arbCommandComplete: Arbitrary[CommandComplete] = Arbitrary(genAsciiString.map(_.value).map(CommandComplete))
+  implicit lazy val arbCommandComplete: Arbitrary[CommandComplete] =
+    Arbitrary(genAsciiString.map(_.value).map(CommandComplete))
 
   lazy val genAuthenticationMessage: Gen[AuthenticationMessage] =
     Gen.oneOf(
@@ -52,7 +84,9 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       Gen.const(AuthenticationKerberosV5),
       Gen.const(AuthenticationCleartextPassword),
       Gen.const(AuthenticationSCMCredential),
-      Gen.containerOfN[Array, Byte](4, Arbitrary.arbitrary[Byte]).map(Buf.ByteArray.Owned(_)).map(AuthenticationMD5Password),
+      Gen.containerOfN[Array, Byte](4, Arbitrary.arbitrary[Byte]).map(Buf.ByteArray.Owned(_)).map(
+        AuthenticationMD5Password
+      ),
       Gen.const(AuthenticationGSS),
       Gen.const(AuthenticationSSPI),
       genBuf.map(AuthenticationGSSContinue),
@@ -65,7 +99,8 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
   lazy val genTxState: Gen[TxState] = Gen.oneOf(NoTx, InTx, FailedTx)
   implicit lazy val arbReadyForQuery: Arbitrary[ReadyForQuery] = Arbitrary(genTxState.map(ReadyForQuery))
 
-  implicit lazy val arbParameterDescription: Arbitrary[ParameterDescription] = Arbitrary(Arbitrary.arbitrary[IndexedSeq[Oid]].map(ParameterDescription))
+  implicit lazy val arbParameterDescription: Arbitrary[ParameterDescription] =
+    Arbitrary(Arbitrary.arbitrary[IndexedSeq[Oid]].map(ParameterDescription))
 
   def decodeFragment[M <: BackendMessage: Arbitrary](dec: MessageDecoder[M])(toPacket: M => Packet) = {
     "decode packet body correctly" in prop { msg: M =>
@@ -76,18 +111,17 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
     }
   }
 
-  def singleton[M <: BackendMessage](key: Byte, msg: M) = {
+  def singleton[M <: BackendMessage](key: Byte, msg: M) =
     "decode packet correctly" in {
       MessageDecoder.fromPacket(Packet(Some(key), Buf.Empty)).asScala must beSuccessfulTry(msg)
     }
-  }
 
   "MessageDecoder" should {
     "ErrorResponse" should decodeFragment(MessageDecoder.errorResponseDecoder) { msg =>
       Packet(
         cmd = Some('E'),
         body = mkBuf() { bb =>
-          msg.values.foreach { case(field, value) =>
+          msg.values.foreach { case (field, value) =>
             bb.put(fieldByte(field)).put(cstring(value))
           }
           bb.put(0.toByte)
@@ -99,7 +133,7 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       Packet(
         cmd = Some('N'),
         body = mkBuf() { bb =>
-          msg.values.foreach { case(field, value) =>
+          msg.values.foreach { case (field, value) =>
             bb.put(fieldByte(field)).put(cstring(value))
           }
           bb.put(0.toByte)
@@ -231,7 +265,7 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
         cmd = Some('t'),
         body = mkBuf() { bb =>
           bb.putShort(msg.parameters.size.toShort)
-          msg.parameters.foreach { oid => bb.putInt(unsignedInt(oid.value)) }
+          msg.parameters.foreach(oid => bb.putInt(unsignedInt(oid.value)))
           bb
         }
       )

@@ -11,8 +11,8 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
         .multiQuery("select 1;select 2;")
         .flatMap { statements =>
           Reader.toAsyncStream(statements)
-            .mapF { s => Client.Expect.ResultSet(s) }
-            .mapF { s => s.toSeq }
+            .mapF(s => Client.Expect.ResultSet(s))
+            .mapF(s => s.toSeq)
             .toSeq
         }
         .map { rs =>

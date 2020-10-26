@@ -95,9 +95,8 @@ object PgBuf {
       this
     }
 
-    def framedBuf(b: Buf): Writer = {
+    def framedBuf(b: Buf): Writer =
       int(b.length).buf(b)
-    }
 
     def framed(f: Writer => Buf): Writer = {
       val b = f(writer)
@@ -124,7 +123,7 @@ object PgBuf {
       int(a.dimensions)
       int(a.dataOffset)
       unsignedInt(a.elemType.value)
-      foreachUnframed(a.arrayDims) { (w,d) =>
+      foreachUnframed(a.arrayDims) { (w, d) =>
         w.int(d.size).int(d.lowerBound)
       }
       foreachUnframed(a.data) { (w, v) =>
@@ -143,9 +142,9 @@ object PgBuf {
       sign match {
         case NumericSign.Positive => short(0)
         case NumericSign.Negative => short(0x4000)
-        case NumericSign.NaN => unsignedShort(0xC000)
-        case NumericSign.Infinity => unsignedShort(0xD000)
-        case NumericSign.NegInfinity => unsignedShort(0xF000)
+        case NumericSign.NaN => unsignedShort(0xc000)
+        case NumericSign.Infinity => unsignedShort(0xd000)
+        case NumericSign.NegInfinity => unsignedShort(0xf000)
       }
 
     def numeric(n: Numeric): Writer = {
@@ -178,9 +177,10 @@ object PgBuf {
     def cstring(): String = {
       val length = reader.remainingUntil(0)
 
-      val str = if(length < 0) sys.error(s"invalid string length $length")
-      else if(length == 0) ""
-      else reader.readString(length, StandardCharsets.UTF_8)
+      val str =
+        if (length < 0) sys.error(s"invalid string length $length")
+        else if (length == 0) ""
+        else reader.readString(length, StandardCharsets.UTF_8)
 
       reader.skip(1) // skip the null-terminating byte
       str
@@ -194,15 +194,14 @@ object PgBuf {
       val size = short()
       val builder = IndexedSeq.newBuilder[T]
       builder.sizeHint(size)
-      for(_ <- 0 until size) { builder += f(this) }
+      for (_ <- 0 until size) builder += f(this)
       builder.result()
     }
-    def value(): WireValue = {
+    def value(): WireValue =
       int() match {
         case -1 => WireValue.Null
         case length => WireValue.Value(buf(length))
       }
-    }
     def buf(length: Int): Buf = reader.readBytes(length)
     def framedBuf(): Buf = reader.readBytes(int())
     def remainingBuf(): Buf = reader.readAll()
@@ -214,10 +213,10 @@ object PgBuf {
       val dims = int()
       val offset = int()
       val tpe = Oid(unsignedInt())
-      val arrayDims = for(_ <- 0 until dims) yield PgArrayDim(int(), int())
+      val arrayDims = for (_ <- 0 until dims) yield PgArrayDim(int(), int())
       val elements = arrayDims.map(_.size).sum
-      val values = for(_ <- 0 until elements) yield value()
-      if(remaining > 0) sys.error(s"error decoding array, remaining bytes is non zero: $remaining")
+      val values = for (_ <- 0 until elements) yield value()
+      if (remaining > 0) sys.error(s"error decoding array, remaining bytes is non zero: $remaining")
       PgArray(
         dimensions = dims,
         dataOffset = offset,
@@ -227,22 +226,21 @@ object PgBuf {
       )
     }
 
-    def timestamp(): Timestamp = {
+    def timestamp(): Timestamp =
       long() match {
         case NegInfinity => Timestamp.NegInfinity
         case Infinity => Timestamp.Infinity
         case v => Timestamp.Micros(v)
       }
-    }
 
     // TODO: this is actually a bit mask, but it's not clear if any other values are possible anyway
     def numericSign(): NumericSign =
       unsignedShort() match {
         case 0 => NumericSign.Positive
         case 0x4000 => NumericSign.Negative
-        case 0xC000 => NumericSign.NaN
-        case 0xD000 => NumericSign.Infinity
-        case 0xF000 => NumericSign.NegInfinity
+        case 0xc000 => NumericSign.NaN
+        case 0xd000 => NumericSign.Infinity
+        case 0xf000 => NumericSign.NegInfinity
         case v => throw new PgSqlClientError(f"unexpected numeric sign value: $v%04X")
       }
 
@@ -259,4 +257,3 @@ object PgBuf {
 
   def reader(b: Buf): Reader = new Reader(b)
 }
-

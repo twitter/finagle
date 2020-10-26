@@ -50,7 +50,7 @@ class TlsHandshakeTransporter(
 
   override def apply(): Future[Transport[Buf, Buf] {
     type Context <: TransportContext
-  }] = {
+  }] =
     netty4Transporter().flatMap { transport =>
       transport
         .write(MessageEncoder.sslRequestEncoder.toPacket(FrontendMessage.SslRequest).toBuf)
@@ -68,7 +68,6 @@ class TlsHandshakeTransporter(
           transport
         }
     }
-  }
 
   private[this] def negotiateTls(transport: Transport[Buf, Buf]): Future[Unit] = {
     val p = new Promise[Unit]

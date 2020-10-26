@@ -13,23 +13,24 @@ import scala.collection.JavaConverters._
 
 class TlsSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
-  def toTmpFile(name: String) = {
+  def toTmpFile(name: String) =
     using(getClass.getResourceAsStream(name)) { is =>
       val file = TempFile.fromResourcePath(name)
-      Files.setPosixFilePermissions(file.toPath, Set(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE).asJava)
+      Files.setPosixFilePermissions(
+        file.toPath,
+        Set(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE).asJava
+      )
       using(new java.io.FileOutputStream(file)) { os =>
         StreamIO.copy(is, os)
         file
       }
     }
-  }
 
-  override def configure(builder: EmbeddedPostgres.Builder): EmbeddedPostgres.Builder = {
+  override def configure(builder: EmbeddedPostgres.Builder): EmbeddedPostgres.Builder =
     builder
       .setServerConfig("ssl", "true")
       .setServerConfig("ssl_cert_file", toTmpFile("/server.crt").getAbsolutePath)
       .setServerConfig("ssl_key_file", toTmpFile("/server.key").getAbsolutePath)
-  }
 
   "TLS" should {
     "support tls" in {

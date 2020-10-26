@@ -1,12 +1,29 @@
 package com.twitter.finagle.postgresql.transport
 
-import java.nio.{ByteBuffer, ByteOrder}
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
-import com.twitter.finagle.postgresql.FrontendMessage.{Bind, Describe, DescriptionTarget, Execute, Flush, Parse, PasswordMessage, Query, SslRequest, StartupMessage, Sync, Version}
-import com.twitter.finagle.postgresql.Types.{Format, Name, Oid, WireValue}
-import com.twitter.finagle.postgresql.{FrontendMessage, PropertiesSpec}
+import com.twitter.finagle.postgresql.FrontendMessage.Bind
+import com.twitter.finagle.postgresql.FrontendMessage.Describe
+import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
+import com.twitter.finagle.postgresql.FrontendMessage.Execute
+import com.twitter.finagle.postgresql.FrontendMessage.Flush
+import com.twitter.finagle.postgresql.FrontendMessage.Parse
+import com.twitter.finagle.postgresql.FrontendMessage.PasswordMessage
+import com.twitter.finagle.postgresql.FrontendMessage.Query
+import com.twitter.finagle.postgresql.FrontendMessage.SslRequest
+import com.twitter.finagle.postgresql.FrontendMessage.StartupMessage
+import com.twitter.finagle.postgresql.FrontendMessage.Sync
+import com.twitter.finagle.postgresql.FrontendMessage.Version
+import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.Oid
+import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.io.Buf
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Arbitrary
+import org.scalacheck.Gen
 import org.specs2.mutable.Specification
 
 class MessageEncoderSpec extends Specification with PropertiesSpec {
@@ -28,7 +45,7 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
       nbOptions <- Gen.chooseNum(0, 10)
       keys <- Gen.containerOfN[List, AsciiString](nbOptions, genAsciiString).map(_.map(_.value))
       values <- Gen.containerOfN[List, AsciiString](nbOptions, genAsciiString).map(_.map(_.value))
-    } yield  StartupMessage(
+    } yield StartupMessage(
       version = Version(major, minor),
       user = user,
       database = database,
@@ -39,63 +56,66 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
   implicit val arbStartupMessage: Arbitrary[StartupMessage] = Arbitrary(genStartupMessage)
 
   val genPasswordMessage = genAsciiString.map(_.value).map(PasswordMessage)
-  implicit val arbPasswordMessage: Arbitrary[PasswordMessage]  = Arbitrary(genPasswordMessage)
+  implicit val arbPasswordMessage: Arbitrary[PasswordMessage] = Arbitrary(genPasswordMessage)
 
   val genQuery = genAsciiString.map(_.value).map(Query)
-  implicit val arbQueryMessage: Arbitrary[Query]  = Arbitrary(genQuery)
+  implicit val arbQueryMessage: Arbitrary[Query] = Arbitrary(genQuery)
 
-  val genParse: Gen[Parse] = for {
-    name <- Arbitrary.arbitrary[Name]
-    statement <- genAsciiString.map(_.value)
-    nbParams <- Gen.chooseNum(0, 32)
-    paramTypes <- Gen.containerOfN[List, Oid](nbParams, arbOid.arbitrary)
-  } yield Parse(
-    name = name,
-    statement = statement,
-    dataTypes = paramTypes,
-  )
+  val genParse: Gen[Parse] =
+    for {
+      name <- Arbitrary.arbitrary[Name]
+      statement <- genAsciiString.map(_.value)
+      nbParams <- Gen.chooseNum(0, 32)
+      paramTypes <- Gen.containerOfN[List, Oid](nbParams, arbOid.arbitrary)
+    } yield Parse(
+      name = name,
+      statement = statement,
+      dataTypes = paramTypes,
+    )
   implicit lazy val arbParse: Arbitrary[Parse] = Arbitrary(genParse)
 
-  val genBind: Gen[Bind] = for {
-    portal <- Arbitrary.arbitrary[Name]
-    statement <- Arbitrary.arbitrary[Name]
-    nbValues <- Gen.chooseNum(0, 32)
-    paramFormats <- Gen.containerOfN[List, Format](nbValues, arbFormat.arbitrary)
-    values <- Gen.containerOfN[List, WireValue](nbValues, arbValue.arbitrary)
-    nbResults <- Gen.chooseNum(0, 32)
-    resultFormats <- Gen.containerOfN[List, Format](nbResults, arbFormat.arbitrary)
-  } yield Bind(
-    portal = portal,
-    statement = statement,
-    formats = paramFormats,
-    values = values,
-    resultFormats = resultFormats,
-  )
+  val genBind: Gen[Bind] =
+    for {
+      portal <- Arbitrary.arbitrary[Name]
+      statement <- Arbitrary.arbitrary[Name]
+      nbValues <- Gen.chooseNum(0, 32)
+      paramFormats <- Gen.containerOfN[List, Format](nbValues, arbFormat.arbitrary)
+      values <- Gen.containerOfN[List, WireValue](nbValues, arbValue.arbitrary)
+      nbResults <- Gen.chooseNum(0, 32)
+      resultFormats <- Gen.containerOfN[List, Format](nbResults, arbFormat.arbitrary)
+    } yield Bind(
+      portal = portal,
+      statement = statement,
+      formats = paramFormats,
+      values = values,
+      resultFormats = resultFormats,
+    )
   implicit lazy val arbBind: Arbitrary[Bind] = Arbitrary(genBind)
 
-  val genDescribe: Gen[Describe] = for {
-    portal <- Arbitrary.arbitrary[Name]
-    target <- Gen.oneOf(DescriptionTarget.Portal, DescriptionTarget.PreparedStatement)
-  } yield Describe(
-    name = portal,
-    target = target,
-  )
+  val genDescribe: Gen[Describe] =
+    for {
+      portal <- Arbitrary.arbitrary[Name]
+      target <- Gen.oneOf(DescriptionTarget.Portal, DescriptionTarget.PreparedStatement)
+    } yield Describe(
+      name = portal,
+      target = target,
+    )
   implicit lazy val arbDescribe: Arbitrary[Describe] = Arbitrary(genDescribe)
 
-  val genExecute: Gen[Execute] = for {
-    portal <- Arbitrary.arbitrary[Name]
-    maxRows <- Arbitrary.arbitrary[Int]
-  } yield Execute(
-    portal = portal,
-    maxRows = maxRows,
-  )
+  val genExecute: Gen[Execute] =
+    for {
+      portal <- Arbitrary.arbitrary[Name]
+      maxRows <- Arbitrary.arbitrary[Int]
+    } yield Execute(
+      portal = portal,
+      maxRows = maxRows,
+    )
   implicit lazy val arbExecute: Arbitrary[Execute] = Arbitrary(genExecute)
 
-  def encodeFragment[M <: FrontendMessage: Arbitrary](enc: MessageEncoder[M])(toPacket: M => Packet) = {
+  def encodeFragment[M <: FrontendMessage: Arbitrary](enc: MessageEncoder[M])(toPacket: M => Packet) =
     "encode correctly" in prop { msg: M =>
       enc.toPacket(msg) must_== toPacket(msg)
     }
-  }
 
   "MessageEncoder" should {
 
@@ -128,14 +148,14 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
     "PasswordMessage" should encodeFragment(MessageEncoder.passwordEncoder) { msg =>
       Packet(
         cmd = Some('p'),
-        body = mkBuf() { bb => bb.put(cstring(msg.password)) }
+        body = mkBuf()(bb => bb.put(cstring(msg.password)))
       )
     }
 
     "Query" should encodeFragment(MessageEncoder.queryEncoder) { msg =>
       Packet(
         cmd = Some('Q'),
-        body = mkBuf() { bb => bb.put(cstring(msg.value)) }
+        body = mkBuf()(bb => bb.put(cstring(msg.value)))
       )
     }
 
@@ -168,7 +188,7 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
           bb.put(cstring(msg.statement))
           bb.putShort(msg.dataTypes.length.toShort)
           msg.dataTypes.foreach { oid =>
-            bb.putInt((oid.value & 0xFFFFFFFF).toInt)
+            bb.putInt((oid.value & 0xffffffff).toInt)
           }
           bb
         }

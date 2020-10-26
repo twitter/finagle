@@ -28,14 +28,19 @@ case class Row(
     val field = fields(index)
     val value = values(index)
     PgType.byOid(field.dataType) match {
-      case None => throw PgSqlUnsupportedError(s"Unsupported type for column index $index named ${field.name}. Unknown oid: ${field.dataType.value}")
+      case None => throw PgSqlUnsupportedError(
+          s"Unsupported type for column index $index named ${field.name}. Unknown oid: ${field.dataType.value}"
+        )
       case Some(tpe) =>
-        if(!treads.accepts(tpe)) {
-          throw PgSqlUnsupportedError(s"Cannot decode column index $index named ${field.name} with provided ValueReads; it does not support type ${tpe.name} (oid ${tpe.oid.value}).")
+        if (!treads.accepts(tpe)) {
+          throw PgSqlUnsupportedError(
+            s"Cannot decode column index $index named ${field.name} with provided ValueReads; it does not support type ${tpe.name} (oid ${tpe.oid.value})."
+          )
         } else {
           treads.reads(tpe, value, charset) match {
             case Return(v) => v
-            case Throw(t) => throw new PgSqlClientError(s"Error decoding value for column index $index named ${field.name}", Some(t))
+            case Throw(t) =>
+              throw new PgSqlClientError(s"Error decoding value for column index $index named ${field.name}", Some(t))
           }
         }
     }
@@ -43,22 +48,27 @@ case class Row(
 
   def apply[T: ValueReads](column: String): T =
     get(indexOf(column)
-      .getOrElse(throw new PgSqlClientError(s"No such column $column. Expected one of ${fields.map(_.name).mkString(", ")}")))
+      .getOrElse(
+        throw new PgSqlClientError(s"No such column $column. Expected one of ${fields.map(_.name).mkString(", ")}")
+      ))
 }
 
-case class ResultSet(fields: IndexedSeq[FieldDescription], wireRows: Seq[IndexedSeq[WireValue]], parameters: ConnectionParameters) {
+case class ResultSet(
+  fields: IndexedSeq[FieldDescription],
+  wireRows: Seq[IndexedSeq[WireValue]],
+  parameters: ConnectionParameters
+) {
 
   val columnIndex: Map[String, Int] = fields.map(_.name).zipWithIndex.toMap
 
   lazy val rows: Iterable[Row] =
-    wireRows.map { columns => Row(fields, columns, parameters.parsedParameters.serverEncoding, columnIndex) }
+    wireRows.map(columns => Row(fields, columns, parameters.parsedParameters.serverEncoding, columnIndex))
 }
 object ResultSet {
-  def apply(result: Response.ResultSet): Future[ResultSet] = {
+  def apply(result: Response.ResultSet): Future[ResultSet] =
     result
       .toSeq
       .map { rows =>
         ResultSet(result.fields, rows, result.parameters)
       }
-  }
 }

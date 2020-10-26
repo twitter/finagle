@@ -46,23 +46,24 @@ class PrepareMachine(name: Name, statement: String) extends StateMachine[Respons
       )
     )
 
-  override def receive(state: State, msg: BackendMessage): TransitionResult[State, Response.ParseComplete] = (state, msg) match {
-    case (Parsing, BackendMessage.ParseComplete) => Transition(Parsing, NoOp)
-    case (Parsing, d: BackendMessage.ParameterDescription) => Transition(Parsed(d), NoOp)
+  override def receive(state: State, msg: BackendMessage): TransitionResult[State, Response.ParseComplete] =
+    (state, msg) match {
+      case (Parsing, BackendMessage.ParseComplete) => Transition(Parsing, NoOp)
+      case (Parsing, d: BackendMessage.ParameterDescription) => Transition(Parsed(d), NoOp)
 
-    // NOTE: According to the documentation, because Bind hasn't been issued here,
-    //   the format for the returned fields is unknown at this point.
-    //   Because we issue a Describe on the portal in the ExecuteMachine,
-    //   this incomplete information is not useful, so we ignore it.
-    case (p: Parsed, _: BackendMessage.RowDescription) => Transition(p, NoOp)
-    case (p: Parsed, BackendMessage.NoData) => Transition(p, NoOp)
-    case (Parsed(desc), r: ReadyForQuery) =>
-      Complete(r, Some(Return(Response.ParseComplete(Response.Prepared(name, desc.parameters)))))
+      // NOTE: According to the documentation, because Bind hasn't been issued here,
+      //   the format for the returned fields is unknown at this point.
+      //   Because we issue a Describe on the portal in the ExecuteMachine,
+      //   this incomplete information is not useful, so we ignore it.
+      case (p: Parsed, _: BackendMessage.RowDescription) => Transition(p, NoOp)
+      case (p: Parsed, BackendMessage.NoData) => Transition(p, NoOp)
+      case (Parsed(desc), r: ReadyForQuery) =>
+        Complete(r, Some(Return(Response.ParseComplete(Response.Prepared(name, desc.parameters)))))
 
-    case (Syncing, r: ReadyForQuery) => Complete(r, None)
-    case (_, e: ErrorResponse) => Transition(Syncing, Respond(Throw(PgSqlServerError(e))))
+      case (Syncing, r: ReadyForQuery) => Complete(r, None)
+      case (_, e: ErrorResponse) => Transition(Syncing, Respond(Throw(PgSqlServerError(e))))
 
-    case (state, msg) => throw PgSqlNoSuchTransition("PrepareMachine", state, msg)
-  }
+      case (state, msg) => throw PgSqlNoSuchTransition("PrepareMachine", state, msg)
+    }
 
 }
