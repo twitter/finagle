@@ -3,8 +3,7 @@ package com.twitter.finagle.postgresql
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import com.twitter.finagle.postgresql.BackendMessage.DataRow
-import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.BackendMessage.{DataRow, Field, RowDescription}
 import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
@@ -25,8 +24,13 @@ import org.specs2.matcher.describe.Diffable
 
 trait PropertiesSpec extends ScalaCheck {
 
+  case class AsciiString(value: String)
+  lazy val genAsciiChar: Gen[Char] = Gen.choose(32.toChar, 126.toChar)
+  lazy val genAsciiString: Gen[AsciiString] = Gen.listOf(genAsciiChar).map(_.mkString).map(AsciiString)
+  implicit lazy val arbAsciiString: Arbitrary[AsciiString] = Arbitrary(genAsciiString)
+
   // TODO: Once we have actual data types, Gen.oneOf(...)
-  implicit lazy val arbOid = Arbitrary(Gen.chooseNum(0, Int.MaxValue.toLong * 2).map(Oid))
+  implicit lazy val arbOid = Arbitrary(Gen.chooseNum(0, 0xFFFFFFFFL).map(Oid))
 
   val genParameter: Gen[BackendMessage.Parameter] = Gen.oneOf(
     BackendMessage.Parameter.ServerVersion,
@@ -72,11 +76,11 @@ trait PropertiesSpec extends ScalaCheck {
     Gen.nonEmptyListOf(arbFieldDescription.arbitrary).map(l => RowDescription(l.toIndexedSeq))
   }
 
-  implicit lazy val arbBuf: Arbitrary[Buf] =
-    Arbitrary(Arbitrary.arbitrary[Array[Byte]].map { bytes => Buf.ByteArray.Owned(bytes) })
+  lazy val genBuf: Gen[Buf] = Arbitrary.arbitrary[Array[Byte]].map { bytes => Buf.ByteArray.Owned(bytes) }
+  implicit lazy val arbBuf: Arbitrary[Buf] = Arbitrary(genBuf)
 
   // TODO: this will need to be dervied from the dataType when used in a DataRow
-  val genValue = arbBuf.arbitrary.map(b => WireValue.Value(b))
+  lazy val genValue: Gen[WireValue] = arbBuf.arbitrary.map(b => WireValue.Value(b))
 
   implicit lazy val arbValue: Arbitrary[WireValue] = Arbitrary {
     // TODO: more weight on non-null
@@ -84,31 +88,66 @@ trait PropertiesSpec extends ScalaCheck {
   }
 
   // TODO: produce the appropriate bytes based on the field descriptors. Should also include nulls.
-  def arbDataRow(rowDescription: RowDescription): Arbitrary[DataRow] = Arbitrary {
+  def genRowData(rowDescription: RowDescription): Gen[DataRow] = {
     Gen.containerOfN[IndexedSeq, WireValue](rowDescription.rowFields.size, arbValue.arbitrary)
       .map(DataRow)
   }
+
+  lazy val genDataRow: Gen[DataRow] = for {
+    row <- Arbitrary.arbitrary[RowDescription]
+    data <- genRowData(row)
+  } yield data
+
+  implicit lazy val arbDataRow: Arbitrary[DataRow] = Arbitrary(genDataRow)
 
   // A self-contained, valid result set, i.e.: the row field data match the field descriptors
   case class TestResultSet(desc: RowDescription, rows: List[DataRow])
   implicit lazy val arbTestResultSet: Arbitrary[TestResultSet] = Arbitrary {
     for {
       desc <- arbRowDescription.arbitrary
-      rows <- Gen.listOf(arbDataRow(desc).arbitrary)
+      rows <- Gen.listOf(genRowData(desc))
     } yield TestResultSet(desc, rows)
   }
 
-  // TODO
-  implicit lazy val arbErrorResponse: Arbitrary[BackendMessage.ErrorResponse] =
-    Arbitrary(Gen.const(BackendMessage.ErrorResponse(Map.empty)))
 
-  implicit val arbFormat: Arbitrary[Format] =
+  lazy val genField: Gen[Field] = Gen.oneOf(
+    Field.Code,
+    Field.Column,
+    Field.Constraint,
+    Field.DataType,
+    Field.Detail,
+    Field.File,
+    Field.Hint,
+    Field.InternalPosition,
+    Field.InternalQuery,
+    Field.Line,
+    Field.LocalizedSeverity,
+    Field.Message,
+    Field.Position,
+    Field.Routine,
+    Field.Schema,
+    Field.Severity,
+    Field.Table,
+    Field.Where,
+    Field.Unknown('U') // TODO
+  )
+
+  lazy val fieldMap: Gen[Map[Field, String]] = for {
+    nbValues <- Gen.chooseNum(0, 8)
+    keys <- Gen.containerOfN[List, Field](nbValues, genField)
+    values <- Gen.containerOfN[List, String](nbValues, genAsciiString.map(_.value))
+  } yield (keys zip values).toMap
+
+  implicit lazy val arbErrorResponse: Arbitrary[BackendMessage.ErrorResponse] = Arbitrary(fieldMap.map(BackendMessage.ErrorResponse))
+  implicit lazy val arbNoticeResponse: Arbitrary[BackendMessage.NoticeResponse] = Arbitrary(fieldMap.map(BackendMessage.NoticeResponse))
+
+  implicit lazy val arbFormat: Arbitrary[Format] =
     Arbitrary(Gen.oneOf(Format.Text, Format.Binary))
 
   /**
    * Diffable[Buf] so we can `buf must_=== anotherBuf`
    */
-  implicit val bufDiffable: Diffable[Buf] = new Diffable[Buf] {
+  implicit lazy val bufDiffable: Diffable[Buf] = new Diffable[Buf] {
     override def diff(actual: Buf, expected: Buf): ComparisonResult = {
       val acArr = Buf.ByteArray.Shared.extract(actual)
       val exArr = Buf.ByteArray.Shared.extract(expected)
@@ -125,10 +164,10 @@ trait PropertiesSpec extends ScalaCheck {
     }
   }
 
-  val genArrayDim = Gen.chooseNum(1, 100).map { size =>
+  lazy val genArrayDim: Gen[PgArrayDim] = Gen.chooseNum(1, 100).map { size =>
     PgArrayDim(size, 1)
   }
-  val genArray = for {
+  lazy val genArray: Gen[PgArray] = for {
     dimensions <- Gen.chooseNum(1, 4)
     oid <- arbOid.arbitrary
     dims <- Gen.containerOfN[IndexedSeq, PgArrayDim](dimensions, genArrayDim)
@@ -143,25 +182,20 @@ trait PropertiesSpec extends ScalaCheck {
     )
   }
 
-  implicit val arbPgArray: Arbitrary[PgArray] = Arbitrary(genArray)
+  implicit lazy val arbPgArray: Arbitrary[PgArray] = Arbitrary(genArray)
 
-  case class AsciiString(value: String)
-  val genAsciiChar: Gen[Char] = Gen.choose(32.toChar, 126.toChar)
-  val genAsciiString: Gen[AsciiString] = Gen.listOf(genAsciiChar).map(_.mkString).map(AsciiString)
-  implicit val arbAsciiString: Arbitrary[AsciiString] = Arbitrary(genAsciiString)
-
-  val genInstant: Gen[Instant] = for {
+  lazy val genInstant: Gen[Instant] = for {
     secs <- Gen.chooseNum(PgTime.Min.getEpochSecond, PgTime.Max.getEpochSecond)
     nanos <- Gen.chooseNum(PgTime.Min.getNano, PgTime.Max.getNano)
   } yield Instant.ofEpochSecond(secs, nanos).truncatedTo(ChronoUnit.MICROS)
   implicit val arbInstant: Arbitrary[Instant] = Arbitrary(genInstant)
 
-  val genMicros: Gen[Timestamp.Micros] = genInstant.map(i => i.getEpochSecond * 1000000 + i.getNano / 1000).map(Timestamp.Micros)
-  val genTimestamp: Gen[Timestamp] =
+  lazy val genMicros: Gen[Timestamp.Micros] = genInstant.map(i => i.getEpochSecond * 1000000 + i.getNano / 1000).map(Timestamp.Micros)
+  lazy val genTimestamp: Gen[Timestamp] =
     Gen.frequency(99 -> genMicros, 1 -> Gen.oneOf(Timestamp.NegInfinity, Timestamp.Infinity))
   implicit lazy val arbTimestamp = Arbitrary(genTimestamp)
 
-  val genNumeric: Gen[Numeric] = implicitly[Arbitrary[BigDecimal]].arbitrary.map(PgNumeric.bigDecimalToNumeric)
+  lazy val genNumeric: Gen[Numeric] = implicitly[Arbitrary[BigDecimal]].arbitrary.map(PgNumeric.bigDecimalToNumeric)
   implicit lazy val arbNumeric: Arbitrary[Numeric] = Arbitrary(genNumeric)
 
 }

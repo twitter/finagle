@@ -162,7 +162,7 @@ object MessageDecoder {
       case "IntervalStyle" => Parameter.IntervalStyle
       case "TimeZone" => Parameter.TimeZone
       case "integer_datetimes" => Parameter.IntegerDateTimes
-      case "standard_conforming_strings" => Parameter.IntegerDateTimes
+      case "standard_conforming_strings" => Parameter.StandardConformingStrings
       case other => Parameter.Other(other)
     }
     ParameterStatus(parameter, reader.cstring())
@@ -190,7 +190,7 @@ object MessageDecoder {
             case 0 => None
             case attrId => Some(AttributeId(attrId))
           },
-          dataType = Oid(r.int()),
+          dataType = Oid(r.unsignedInt()),
           dataTypeSize = r.short(),
           typeModifier = r.int(),
           format = r.format()
@@ -207,7 +207,7 @@ object MessageDecoder {
 
   implicit lazy val parameterDescriptionDecoder: MessageDecoder[ParameterDescription] = MessageDecoder { reader =>
     ParameterDescription(
-      reader.collect { r => Oid(r.int()) }
+      reader.collect { r => Oid(r.unsignedInt()) }
     )
   }
 }
