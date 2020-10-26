@@ -36,7 +36,7 @@ class PgSqlTransporter(
   private[this] val transporter: Transporter[Buf, Buf, TransportContext] = params[Transport.ClientSsl] match {
     case Transport.ClientSsl(None) =>
       Netty4Transporter.framedBuf(
-        Some(framer _),
+        Some(() => framer),
         remoteAddress,
         params
       )

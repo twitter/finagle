@@ -62,7 +62,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       )
 
     fullSpec("select statements with no arguments", "select 1") {
-      case Response.ResultSet(_, rows, _) => Reader.toAsyncStream(rows).toSeq.map(r => r must haveSize(1))
+      case Response.ResultSet(_, rows, _) => Reader.toAsyncStream(rows).toSeq().map(r => r must haveSize(1))
       case _ => Future(ko)
     }
 

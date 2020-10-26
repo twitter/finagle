@@ -13,7 +13,7 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
           Reader.toAsyncStream(statements)
             .mapF(s => Client.Expect.ResultSet(s))
             .mapF(s => s.toSeq)
-            .toSeq
+            .toSeq()
         }
         .map { rs =>
           rs must haveSize(2)

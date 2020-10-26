@@ -35,7 +35,7 @@ object PgBuf {
       case None => this
     }
 
-    def foreachUnframed[T](xs: TraversableOnce[T])(f: (Writer, T) => Writer): Writer =
+    def foreachUnframed[T](xs: Iterable[T])(f: (Writer, T) => Writer): Writer =
       xs.foldLeft(this)(f)
 
     def foreach[T](xs: Seq[T])(f: (Writer, T) => Writer): Writer = {
@@ -152,11 +152,11 @@ object PgBuf {
       short(n.weight)
       numericSign(n.sign)
       unsignedShort(n.displayScale)
-      foreachUnframed(n.digits)((w,d) => w.unsignedShort(d.toInt))
+      foreachUnframed(n.digits)((w, d) => w.unsignedShort(d.toInt))
     }
 
     def build: Buf =
-      w.owned
+      w.owned()
   }
 
   def writer: Writer = new Writer(BufByteWriter.dynamic())

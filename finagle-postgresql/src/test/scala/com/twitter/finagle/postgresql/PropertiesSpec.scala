@@ -159,7 +159,7 @@ trait PropertiesSpec extends ScalaCheck {
           s"0x$h"
         }
 
-        override def identical: Boolean = acArr.deep == exArr.deep
+        override def identical: Boolean = java.util.Arrays.equals(acArr, exArr)
 
         override def render: String = s"${hex(acArr)} != ${hex(exArr)}"
       }

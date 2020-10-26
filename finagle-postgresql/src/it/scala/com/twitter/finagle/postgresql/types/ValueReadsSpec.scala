@@ -155,7 +155,7 @@ object ValueReadsSpec {
 
   object ToSqlString {
 
-    def escape(value: String) = value.replaceAllLiterally("'", "''")
+    def escape(value: String) = value.replace("'", "''")
 
     implicit def fromToString[T]: ToSqlString[T] = new ToSqlString[T] {
       override def toString(value: T): String = ToSqlString.escape(value.toString)

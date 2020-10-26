@@ -13,7 +13,7 @@ import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
 
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 
 /**
  * Typeclass for decoding wire values to Scala/Java types.
@@ -111,9 +111,9 @@ object ValueReads {
     override def accepts(tpe: PgType): Boolean = treads.accepts(tpe)
   }
 
-  implicit def traversableReads[F[_], T](implicit
+  implicit def traversableReads[F[T], T](implicit
     treads: ValueReads[T],
-    cbf: CanBuildFrom[F[_], T, F[T]]
+    f: Factory[T, F[T]]
   ): ValueReads[F[T]] = new ValueReads[F[T]] {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[F[T]] = {
       val underlying = tpe.kind match {
@@ -127,9 +127,10 @@ object ValueReads {
             s"Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got ${array.dimensions}"
           )
         }
-        val builder = cbf.apply()
+//import scala.collection.compat._
+        val builder = f.newBuilder
         array.data.foreach { value =>
-          builder += treads.reads(underlying, value, charset).get
+          builder += treads.reads(underlying, value, charset).get()
         }
         builder.result()
       }
