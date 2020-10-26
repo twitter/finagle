@@ -11,7 +11,7 @@ object Types {
   }
 
   case class Oid(value: Long)
-  case class AttributeId(value: Int)
+  case class AttributeId(value: Short)
 
   case class FieldDescription(
     name: String,

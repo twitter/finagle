@@ -81,7 +81,7 @@ class PgBufSpec extends Specification with PropertiesSpec {
       n.digits.foreach(d => bb.putShort(d))
       bb
     }
-    fragments[UInt]("unsigned int")((w, uint) => w.unsignedInt(uint.bits))(r => UInt(r.unsignedInt()))((b, uint) =>
+    fragments[UInt]("unsigned int")((w, uint) => w.unsignedInt(uint.bits.toLong))(r => UInt(r.unsignedInt()))((b, uint) =>
       b.putInt(uint.bits)
     )
     // C-style strings only

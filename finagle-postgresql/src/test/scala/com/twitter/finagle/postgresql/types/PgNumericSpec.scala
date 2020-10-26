@@ -11,7 +11,7 @@ class PgNumericSpec extends PgSqlSpec with PropertiesSpec {
   "PgNumeric" should {
 
     def num(w: Short, s: Short, digits: Seq[Short], sign: NumericSign) =
-      Numeric(weight = w, sign = sign, displayScale = s, digits = digits)
+      Numeric(weight = w, sign = sign, displayScale = s.toInt, digits = digits)
 
     "bigDecimalToNumeric" should {
       import PgNumeric.bigDecimalToNumeric

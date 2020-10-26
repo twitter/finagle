@@ -137,7 +137,7 @@ object StateMachine {
     override def start: TransitionResult[State, R] = Transition((), Send(msg))
     override def receive(state: State, msg: BackendMessage): TransitionResult[State, R] = msg match {
       case r: BackendMessage.ReadyForQuery => Complete(r, Some(Return(f(r))))
-      case e: BackendMessage.ErrorResponse => Transition(Unit, Respond(Throw(PgSqlServerError(e))))
+      case e: BackendMessage.ErrorResponse => Transition((), Respond(Throw(PgSqlServerError(e))))
       case msg => throw PgSqlNoSuchTransition(name, (), msg)
     }
   }
