@@ -22,7 +22,7 @@ object PgNumeric {
     if (n.digits.isEmpty) java.math.BigDecimal.ZERO
     else {
       val unscaled = n.digits.foldLeft(java.math.BigDecimal.ZERO) { case (acc, d) =>
-        acc.movePointRight(NumericBase).add(java.math.BigDecimal.valueOf(d))
+        acc.movePointRight(NumericBase).add(java.math.BigDecimal.valueOf(d.toLong))
       }
 
       // https://github.com/postgres/postgres/blob/7538708394e7a70105a4e601e253adf80f47cca8/src/backend/utils/adt/numeric.c#L263-L265
@@ -65,7 +65,7 @@ object PgNumeric {
       var padded =
         if (pad == 0) unscaled.underlying
         else {
-          (unscaled * BigInt(math.pow(10, pad).toInt)).underlying
+          (unscaled * BigInt(math.pow(10, pad.toDouble).toInt)).underlying
         }
 
       var digits = List.empty[Short]

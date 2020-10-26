@@ -188,7 +188,7 @@ trait PropertiesSpec extends ScalaCheck {
   lazy val genInstant: Gen[Instant] = for {
     secs <- Gen.chooseNum(PgTime.Min.getEpochSecond, PgTime.Max.getEpochSecond)
     nanos <- Gen.chooseNum(PgTime.Min.getNano, PgTime.Max.getNano)
-  } yield Instant.ofEpochSecond(secs, nanos).truncatedTo(ChronoUnit.MICROS)
+  } yield Instant.ofEpochSecond(secs, nanos.toLong).truncatedTo(ChronoUnit.MICROS)
   implicit val arbInstant: Arbitrary[Instant] = Arbitrary(genInstant)
 
   lazy val genMicros: Gen[Timestamp.Micros] =

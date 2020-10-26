@@ -44,12 +44,12 @@ object PgBuf {
     }
 
     def byte(v: Byte): Writer = {
-      w.writeByte(v)
+      w.writeByte(v.toInt)
       this
     }
 
     def short(v: Short): Writer = {
-      w.writeShortBE(v)
+      w.writeShortBE(v.toInt)
       this
     }
 
@@ -59,7 +59,7 @@ object PgBuf {
     }
 
     def int(v: Int): Writer = {
-      w.writeIntBE(v)
+      w.writeIntBE(v.toLong)
       this
     }
 
@@ -148,11 +148,11 @@ object PgBuf {
       }
 
     def numeric(n: Numeric): Writer = {
-      unsignedShort(n.digits.length.toShort)
+      unsignedShort(n.digits.length)
       short(n.weight)
       numericSign(n.sign)
       unsignedShort(n.displayScale)
-      foreachUnframed(n.digits)(_.unsignedShort(_))
+      foreachUnframed(n.digits)((w,d) => w.unsignedShort(d.toInt))
     }
 
     def build: Buf =
@@ -191,7 +191,7 @@ object PgBuf {
       case v => sys.error(s"unexpected format value $v")
     }
     def collect[T](f: Reader => T): IndexedSeq[T] = {
-      val size = short()
+      val size = short().toInt
       val builder = IndexedSeq.newBuilder[T]
       builder.sizeHint(size)
       for (_ <- 0 until size) builder += f(this)

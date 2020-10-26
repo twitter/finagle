@@ -1,6 +1,6 @@
 package com.twitter.finagle.postgresql.transport
 
-import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.{BackendMessage, PgSqlClientError}
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationCleartextPassword
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSSContinue
@@ -58,23 +58,27 @@ object MessageDecoder {
 
   def fromPacket(p: Packet): Try[BackendMessage] = {
     lazy val reader = PgBuf.reader(p.body)
-    p.cmd.getOrElse(Throw(new IllegalStateException("invalid backend packet, missing message type."))) match {
-      case '1' => Return(ParseComplete)
-      case '2' => Return(BindComplete)
-      case 'C' => decode[CommandComplete](reader)
-      case 'D' => decode[DataRow](reader)
-      case 'E' => decode[ErrorResponse](reader)
-      case 'I' => Return(EmptyQueryResponse)
-      case 'K' => decode[BackendKeyData](reader)
-      case 'n' => Return(NoData)
-      case 'N' => decode[NoticeResponse](reader)
-      case 'R' => decode[AuthenticationMessage](reader)
-      case 's' => Return(PortalSuspended)
-      case 'S' => decode[ParameterStatus](reader)
-      case 't' => decode[ParameterDescription](reader)
-      case 'T' => decode[RowDescription](reader)
-      case 'Z' => decode[ReadyForQuery](reader)
-      case byte => sys.error(s"unimplemented message $byte")
+    p.cmd match {
+      case None => Throw(new IllegalStateException("invalid backend packet, missing message type."))
+      case Some(cmd) =>
+        cmd match {
+          case '1' => Return(ParseComplete)
+          case '2' => Return(BindComplete)
+          case 'C' => decode[CommandComplete](reader)
+          case 'D' => decode[DataRow](reader)
+          case 'E' => decode[ErrorResponse](reader)
+          case 'I' => Return(EmptyQueryResponse)
+          case 'K' => decode[BackendKeyData](reader)
+          case 'n' => Return(NoData)
+          case 'N' => decode[NoticeResponse](reader)
+          case 'R' => decode[AuthenticationMessage](reader)
+          case 's' => Return(PortalSuspended)
+          case 'S' => decode[ParameterStatus](reader)
+          case 't' => decode[ParameterDescription](reader)
+          case 'T' => decode[RowDescription](reader)
+          case 'Z' => decode[ReadyForQuery](reader)
+          case byte => Throw(new PgSqlClientError(s"unimplemented message $byte"))
+        }
     }
   }
 
