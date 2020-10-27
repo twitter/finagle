@@ -159,6 +159,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     "readsString" should simpleSpec[String](
       ValueReads.readsString,
       PgType.Text,
+      PgType.Json,
       PgType.Varchar,
       PgType.Bpchar,
       PgType.Name,

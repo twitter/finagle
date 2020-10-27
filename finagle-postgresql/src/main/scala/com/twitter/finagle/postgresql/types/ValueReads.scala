@@ -33,6 +33,7 @@ import scala.collection.compat._
  * | CHARACTER(n) | [[String]] |
  * | DOUBLE (float8) | [[Double]] |
  * | INTEGER (int, int4) | [[Int]] |
+ * | JSON | [[String]] |
  * | NUMERIC (decimal) | [[BigDecimal]] |
  * | REAL (float4) | [[Float]] |
  * | SMALLINT (int2) | [[Short]] |
@@ -171,6 +172,7 @@ object ValueReads {
 
     override def accepts(tpe: PgType): Boolean =
       tpe == PgType.Text ||
+        tpe == PgType.Json ||
         tpe == PgType.Varchar ||
         tpe == PgType.Bpchar || // CHAR(n)
         tpe == PgType.Name || // system identifiers

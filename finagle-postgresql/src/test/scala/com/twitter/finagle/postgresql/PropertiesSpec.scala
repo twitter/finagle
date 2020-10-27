@@ -31,6 +31,11 @@ trait PropertiesSpec extends ScalaCheck {
   lazy val genAsciiString: Gen[AsciiString] = Gen.listOf(genAsciiChar).map(_.mkString).map(AsciiString)
   implicit lazy val arbAsciiString: Arbitrary[AsciiString] = Arbitrary(genAsciiString)
 
+  case class JsonString(value: String)
+  // TODO
+  lazy val genJsonString: Gen[JsonString] = Gen.const("""{"valid": true, "b": 1.4, "array": [1,2,3]}""").map(JsonString)
+  implicit lazy val arbJsonString: Arbitrary[JsonString] = Arbitrary(genJsonString)
+
   // TODO: Once we have actual data types, Gen.oneOf(...)
   implicit lazy val arbOid = Arbitrary(Gen.chooseNum(0, 0xffffffffL).map(Oid))
 
