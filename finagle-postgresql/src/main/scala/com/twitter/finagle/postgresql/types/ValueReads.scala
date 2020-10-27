@@ -111,7 +111,7 @@ object ValueReads {
     override def accepts(tpe: PgType): Boolean = treads.accepts(tpe)
   }
 
-  implicit def traversableReads[F[T], T](implicit
+  implicit def traversableReads[F[_], T](implicit
     treads: ValueReads[T],
     f: Factory[T, F[T]]
   ): ValueReads[F[T]] = new ValueReads[F[T]] {
@@ -127,7 +127,6 @@ object ValueReads {
             s"Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got ${array.dimensions}"
           )
         }
-//import scala.collection.compat._
         val builder = f.newBuilder
         array.data.foreach { value =>
           builder += treads.reads(underlying, value, charset).get()
