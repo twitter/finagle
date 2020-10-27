@@ -543,6 +543,10 @@ use.</p><p> Flag          Value     Meaning
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
+                        <a class="object" href="BindingFactory$.html" title=""></a>
+                        <a class="class" href="BindingFactory.html" title="A factory that routes to the local binding of the passed-in Path."></a>
+                        <a href="BindingFactory.html" title="A factory that routes to the local binding of the passed-in Path.">BindingFactory</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="DefaultInterpreter$.html" title="Interpret names against the Dtab, using the default evaluation strategy."></a>
                         <a href="DefaultInterpreter$.html" title="Interpret names against the Dtab, using the default evaluation strategy.">DefaultInterpreter</a>
@@ -1009,7 +1013,39 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.naming.MultipleNameInterpretersException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.naming.BindingFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BindingFactory[Req,Rep]extendsServiceFactory[Req,Rep]"></a><a id="BindingFactory[Req,Rep]:BindingFactory[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/naming/BindingFactory.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A factory that routes to the local binding of the passed-in Path." href="BindingFactory.html"><span class="name">BindingFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.naming.BindingFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.naming.BindingFactory.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A factory that routes to the local binding of the passed-in
+<a href="../Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A factory that routes to the local binding of the passed-in
+<a href="../Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>. It calls <code>newFactory</code> to mint a
+new <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> for novel
+name evaluations.</p><p>A three-level caching scheme is employed for efficiency:</p><p>First, the <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> for a <a href="../Path.html" class="extype" name="com.twitter.finagle.Path">Path</a> is cached by the local
+<a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>. This permits sharing in the
+common case that no local <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> is given. (It also papers over the
+mutability of <a href="../Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">Dtab.base</a>.)</p><p>Second, the <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> for a <a href="../Path.html" class="extype" name="com.twitter.finagle.Path">Path</a> (relative to a
+<a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>) is cached by the <a href="../NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> it is bound to by that <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>. Binding a path results
+in an <a href="https://twitter.github.io/util/docs/com/twitter/util/Activity.html" class="extype" name="com.twitter.util.Activity">Activity</a>, so this cache permits
+sharing when the same tree is returned in different updates of the
+<span class="extype" name="Activity">Activity</span>. (In particular it papers over nuisance updates of the
+<span class="extype" name="Activity">Activity</span> where the value is unchanged.)</p><p>Third, the ServiceFactory for a <a href="../Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Name.Bound</a> appearing in a <a href="../NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> is cached by its
+<a href="../Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Name.Bound</a>. This permits sharing when the same <a href="../Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Name.Bound</a>
+appears in different <a href="../NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>s (or the same <a href="../NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>
+resulting from different bindings of the <a href="../Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>).
+</p></div></div>
+    </li><li name="com.twitter.finagle.naming.MultipleNameInterpretersException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MultipleNameInterpretersExceptionextendsIllegalStateException"></a><a id="MultipleNameInterpretersException:MultipleNameInterpretersException"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/naming/MultipleNameInterpretersException.html" title="Permalink">
@@ -1069,7 +1105,23 @@ generator.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.naming.DefaultInterpreter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+                <li name="com.twitter.finagle.naming.BindingFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BindingFactory"></a><a id="BindingFactory:BindingFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/naming/BindingFactory$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="BindingFactory$.html"><span class="name">BindingFactory</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.naming.DefaultInterpreter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultInterpreter"></a><a id="DefaultInterpreter:DefaultInterpreter"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/naming/DefaultInterpreter$.html" title="Permalink">

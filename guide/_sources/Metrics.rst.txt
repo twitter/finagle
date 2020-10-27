@@ -374,3 +374,10 @@ These stats pertain to the :ref:`ThriftMux <whats_thriftmux>` protocol.
 PerEndpoint StatsFilter
 -----------------------
 .. include:: metrics/PerEndpoint.rst
+
+Partitioning
+------------
+
+See :doc:`here <PartitionAwareClient>` for how to enable ThriftMux Partition Aware Client.
+
+.. include:: metrics/Partitioning.rst

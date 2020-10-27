@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Clients &#8212; Finagle 20.9.0 documentation</title>
+    <title>Clients &#8212; Finagle 20.10.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '20.9.0',
+        VERSION:     '20.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -1254,6 +1254,16 @@ level than the  <a class="reference internal" href="Configuration.html#finagle6a
 <li>Configuration of per-attempt and total timeouts.</li>
 </ul>
 <p><a class="reference internal" href="MethodBuilder.html"><span class="doc">Learn more</span></a> about <code class="docutils literal"><span class="pre">MethodBuilder</span></code>.</p>
+</div>
+<div class="section" id="partition-aware-client">
+<h2>Partition Aware Client<a class="headerlink" href="#partition-aware-client" title="Permalink to this headline">¶</a></h2>
+<p>Partition Aware Client is a client configured with a
+partitioning layer in the client stack that understands the service partitioning strategy.
+It routes requests to the partitioned service shards and supports scatter-gather.
+Finagle Memcached client and Redis PartitionedClient have the consistent hashing partitioning
+strategy configuration by default, ThriftMux client has partitioning support as an opt-in
+configuration by calling <code class="docutils literal"><span class="pre">.withPartitioning</span></code>.</p>
+<p><a class="reference internal" href="PartitionAwareClient.html"><span class="doc">Learn more</span></a> about ThriftMux Partition Aware Client.</p>
 <p class="rubric">Footnotes</p>
 <table class="docutils footnote" frame="void" id="backoff" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
@@ -1401,6 +1411,7 @@ Alvaro Videla’s <a class="reference external" href="https://videlalvaro.github
 </ul>
 </li>
 <li><a class="reference internal" href="#methodbuilder">MethodBuilder</a></li>
+<li><a class="reference internal" href="#partition-aware-client">Partition Aware Client</a></li>
 </ul>
 </li>
 </ul>

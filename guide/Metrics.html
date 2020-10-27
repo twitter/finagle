@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 20.9.0 documentation</title>
+    <title>Metrics &#8212; Finagle 20.10.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '20.9.0',
+        VERSION:     '20.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -1423,6 +1423,45 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 <p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures/&lt;exception_name&gt;+</strong></p>
 <p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures</strong></p>
 </div>
+<div class="section" id="partitioning">
+<h2>Partitioning<a class="headerlink" href="#partitioning" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference internal" href="PartitionAwareClient.html"><span class="doc">here</span></a> for how to enable ThriftMux Partition Aware Client.</p>
+<p>Partitioning metrics are under <strong>clnt/&lt;server_label&gt;/partitioner/</strong> scope given insights
+into how client stack manages partition nodes.</p>
+<div class="section" id="hashingpartitioningstrategy">
+<h3>HashingPartitioningStrategy<a class="headerlink" href="#hashingpartitioningstrategy" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>redistributes</dt>
+<dd>A counter of the times the nodes on the hash ring have been redistributed.</dd>
+<dt>joins</dt>
+<dd>A counter of the times a new node joins the hash ring, indicating a new partition
+joins the cluster.</dd>
+<dt>leaves</dt>
+<dd>A counter of the times a node leaves the hash ring, indicating service discovery
+detects a node leave.</dd>
+<dt>ejections</dt>
+<dd>A counter of the times an unhealthy node marked by ConsistentHashingFailureAccrual
+has been removed from the hash ring. <em>leaves</em> and <em>joins</em> indicate service discovery updates,
+while <em>ejections</em> and <em>revivals</em> indicate the code health status.</dd>
+<dt>revivals</dt>
+<dd>A counter of the times an ejected node has been marked as live on the hash ring. <em>leaves</em>
+and <em>joins</em> indicate service discovery updates, while <em>ejections</em> and <em>revivals</em> indicate
+node health status.</dd>
+<dt>live_nodes</dt>
+<dd>A gauge of the current total number of healthy partitions.</dd>
+<dt>dead_nodes</dt>
+<dd>A gauge of the current total number of unhealthy partitions marked by
+ConsistentHashingFailureAccrual.</dd>
+</dl>
+</div>
+<div class="section" id="custompartitioningstrategy-thriftmux">
+<h3>CustomPartitioningStrategy (ThriftMux)<a class="headerlink" href="#custompartitioningstrategy-thriftmux" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>nodes</dt>
+<dd>A gauge of the current total number of logical partitions.</dd>
+</dl>
+</div>
+</div>
 </div>
 
 
@@ -1543,6 +1582,11 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 <li><a class="reference internal" href="#mysql">Mysql</a></li>
 <li><a class="reference internal" href="#thriftmux">ThriftMux</a></li>
 <li><a class="reference internal" href="#perendpoint-statsfilter">PerEndpoint StatsFilter</a></li>
+<li><a class="reference internal" href="#partitioning">Partitioning</a><ul>
+<li><a class="reference internal" href="#hashingpartitioningstrategy">HashingPartitioningStrategy</a></li>
+<li><a class="reference internal" href="#custompartitioningstrategy-thriftmux">CustomPartitioningStrategy (ThriftMux)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

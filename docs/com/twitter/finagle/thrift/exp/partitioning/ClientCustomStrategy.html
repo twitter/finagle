@@ -287,8 +287,7 @@ generator.
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An API to set a custom partitioning strategy for a Thrift/ThriftMux Client.
 For a Java-friendly way to do the same thing, see <code>ClientCustomStrategy.create</code>
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>When updating the partition topology dynamically, there is a potential one-time
-       mismatch if a Service Discovery update happens after getPartitionIdAndRequest.</p></span></dd></dl><div class="toggleContainer block">
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -507,9 +506,9 @@ For a Java-friendly way to do the same thing, see <code>ClientCustomStrategy.cre
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#getLogicalPartitionId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getLogicalPartitionId:A=&gt;(Int=&gt;Int)"></a><a id="getLogicalPartitionId:(A)⇒(Int)⇒Int"></a>
+      <a id="getLogicalPartitionId:A=&gt;(Int=&gt;Seq[Int])"></a><a id="getLogicalPartitionId:(A)⇒(Int)⇒Seq[Int]"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy.html#getLogicalPartitionId:A=&gt;(Int=&gt;Int)" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy.html#getLogicalPartitionId:A=&gt;(Int=&gt;Seq[Int])" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -518,7 +517,7 @@ For a Java-friendly way to do the same thing, see <code>ClientCustomStrategy.cre
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">getLogicalPartitionId</span><span class="result">: (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.A">A</span>) ⇒ (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span class="name">getLogicalPartitionId</span><span class="result">: (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.A">A</span>) ⇒ (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="../../../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
       </span>
       
       
@@ -643,6 +642,22 @@ For a Java-friendly way to do the same thing, see <code>ClientCustomStrategy.cre
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#observable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="observable:com.twitter.util.Activity[A]"></a><a id="observable:Activity[A]"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy.html#observable:com.twitter.util.Activity[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">observable</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Activity.html#com.twitter.util.Activity" class="extype" name="com.twitter.util.Activity">Activity</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.A">A</span>]</span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy#responseMergerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="responseMergerRegistry:com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMergerRegistry"></a><a id="responseMergerRegistry:ResponseMergerRegistry"></a>
       <span class="permalink">
@@ -662,22 +677,6 @@ For a Java-friendly way to do the same thing, see <code>ClientCustomStrategy.cre
 for message fan-out cases.</p><div class="fullcomment"><div class="comment cmt"><p>A ResponseMergerRegistry implemented by client to supply <span class="extype" name="ResponseMerger">ResponseMerger</span>s
 for message fan-out cases.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="ResponseMerger">ResponseMerger</span></p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#state" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="state:com.twitter.util.Activity[A]"></a><a id="state:Activity[A]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy.html#state:com.twitter.util.Activity[A]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">state</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Activity.html#com.twitter.util.Activity" class="extype" name="com.twitter.util.Activity">Activity</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.A">A</span>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

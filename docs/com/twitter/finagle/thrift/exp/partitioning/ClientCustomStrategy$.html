@@ -450,9 +450,9 @@ generator.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#clusterResharding" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="clusterResharding(getPartitionIdAndRequestFn:Set[com.twitter.finagle.Address]=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:Set[com.twitter.finagle.Address]=&gt;(Int=&gt;Int)):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy"></a><a id="clusterResharding((Set[Address])⇒ToPartitionedMap,(Set[Address])⇒(Int)⇒Int):CustomPartitioningStrategy"></a>
+      <a id="clusterResharding(getPartitionIdAndRequestFn:Set[com.twitter.finagle.Address]=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:Set[com.twitter.finagle.Address]=&gt;(Int=&gt;Seq[Int])):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy"></a><a id="clusterResharding((Set[Address])⇒ToPartitionedMap,(Set[Address])⇒(Int)⇒Seq[Int]):CustomPartitioningStrategy"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy$.html#clusterResharding(getPartitionIdAndRequestFn:Set[com.twitter.finagle.Address]=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:Set[com.twitter.finagle.Address]=&gt;(Int=&gt;Int)):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy$.html#clusterResharding(getPartitionIdAndRequestFn:Set[com.twitter.finagle.Address]=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:Set[com.twitter.finagle.Address]=&gt;(Int=&gt;Seq[Int])):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -461,7 +461,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clusterResharding</span><span class="params">(<span name="getPartitionIdAndRequestFn">getPartitionIdAndRequestFn: (<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]) ⇒ <a href="#ToPartitionedMap=PartialFunction[com.twitter.scrooge.ThriftStructIface,com.twitter.util.Future[Map[Int,com.twitter.scrooge.ThriftStructIface]]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap">ToPartitionedMap</a></span>, <span name="getLogicalPartitionIdFn">getLogicalPartitionIdFn: (<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]) ⇒ (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
+        <span class="name">clusterResharding</span><span class="params">(<span name="getPartitionIdAndRequestFn">getPartitionIdAndRequestFn: (<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]) ⇒ <a href="#ToPartitionedMap=PartialFunction[com.twitter.scrooge.ThriftStructIface,com.twitter.util.Future[Map[Int,com.twitter.scrooge.ThriftStructIface]]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap">ToPartitionedMap</a></span>, <span name="getLogicalPartitionIdFn">getLogicalPartitionIdFn: (<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]) ⇒ (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="../../../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>)</span><span class="result">: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
       </span>
       
       <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the remote cluster state.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the remote cluster state.</p><p>This is appropriate for simple custom strategies where you only need to
@@ -479,13 +479,13 @@ if you want to be able to add or remove capacity safely.</p><p>Java users should
        based on anything other than the state of the remote cluster it is
        provided with, or else it will malfunction.</p></dd><dt class="param">getLogicalPartitionIdFn</dt><dd class="cmt"><p>A function that given the current state of the
        remote cluster, returns a function that gets the logical partition
-       identifier from a host identifier, host identifiers are derived from
-       <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId. Indicates which logical partition a physical
+       identifiers from a host identifier, host identifiers are derived from
+       <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId. Indicates which logical partitions a physical
        host belongs to, multiple hosts can belong to the same partition,
-       for example:</p><pre>{
-  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="num">0</span>
-  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="num">1</span>
-  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="num">2</span>
+       and one host can belong to multiple partitions, for example:</p><pre>{
+  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">0</span>, <span class="num">1</span>)
+  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">1</span>)
+  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">2</span>)
   <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">throw</span> ...
 }</pre><p>       Note that this function must be pure (ie referentially transparent).
        It cannot change based on anything other than the state of the
@@ -512,11 +512,11 @@ if you want to be able to add or remove capacity safely.</p><p>Java users should
        remote cluster, returns a function that gets the logical partition
        identifier from a host identifier, host identifiers are derived from
        <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId. Indicates which logical partition a physical
-       host belongs to, multiple hosts can belong to the same partition,
-       for example:</p><pre>{
-  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="num">0</span>
-  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="num">1</span>
-  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="num">2</span>
+       host belongs to, multiple hosts can belong to the same partition, and one host
+       can belong to multiple partitions, for example:</p><pre>{
+  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">0</span>, <span class="num">1</span>)
+  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">1</span>)
+  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">2</span>)
   <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">throw</span> ...
 }</pre><p>       Note that this function must be pure (ie referentially transparent).
        It cannot change based on anything other than the state of the
@@ -646,9 +646,9 @@ if you want to be able to add or remove capacity safely.</p><p>Java users should
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#noResharding" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="noResharding(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionId:Int=&gt;Int):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy"></a><a id="noResharding(ToPartitionedMap,(Int)⇒Int):CustomPartitioningStrategy"></a>
+      <a id="noResharding(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionId:Int=&gt;Seq[Int]):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy"></a><a id="noResharding(ToPartitionedMap,(Int)⇒Seq[Int]):CustomPartitioningStrategy"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy$.html#noResharding(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionId:Int=&gt;Int):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy$.html#noResharding(getPartitionIdAndRequest:com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionId:Int=&gt;Seq[Int]):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -657,25 +657,24 @@ if you want to be able to add or remove capacity safely.</p><p>Java users should
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">noResharding</span><span class="params">(<span name="getPartitionIdAndRequest">getPartitionIdAndRequest: <a href="#ToPartitionedMap=PartialFunction[com.twitter.scrooge.ThriftStructIface,com.twitter.util.Future[Map[Int,com.twitter.scrooge.ThriftStructIface]]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap">ToPartitionedMap</a></span>, <span name="getLogicalPartitionId">getLogicalPartitionId: (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
+        <span class="name">noResharding</span><span class="params">(<span name="getPartitionIdAndRequest">getPartitionIdAndRequest: <a href="#ToPartitionedMap=PartialFunction[com.twitter.scrooge.ThriftStructIface,com.twitter.util.Future[Map[Int,com.twitter.scrooge.ThriftStructIface]]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap">ToPartitionedMap</a></span>, <span name="getLogicalPartitionId">getLogicalPartitionId: (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="../../../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>)</span><span class="result">: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
       </span>
       
-      <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that does not reshard.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that does not reshard.</p><p>This is appropriate for simple custom strategies where you never need to
-change which shard a given request would go to, and you neither add nor
-remove shards.</p><p>Java users should see <a href="ClientCustomStrategies$.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies">ClientCustomStrategies$</a> for an easier to use API.
+      <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that does not reshard.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that does not reshard.</p><p>This is appropriate for static partitioning backend topologies.</p><p>Java users should see <a href="ClientCustomStrategies$.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies">ClientCustomStrategies$</a> for an easier to use API.
 </p></div><dl class="paramcmts block"><dt class="param">getPartitionIdAndRequest</dt><dd class="cmt"><p>A PartialFunction implemented by client that
        provides the partitioning logic on a request. It takes a Thrift object
        request, and returns Future Map of partition ids to sub-requests. If
        we don't need to fan-out, it should return one element: partition id
        to the original request.  This PartialFunction can take multiple
        Thrift request types of one Thrift service (different method endpoints
-       of one service).</p></dd><dt class="param">getLogicalPartitionId</dt><dd class="cmt"><p>Gets the logical partition identifier from a host
+       of one service).</p></dd><dt class="param">getLogicalPartitionId</dt><dd class="cmt"><p>Gets the logical partition identifiers from a host
        identifier, host identifiers are derived from <span class="extype" name="ZkMetadata">ZkMetadata</span>
-       shardId. Indicates which logical partition a physical host belongs to,
-       multiple hosts can belong to the same partition, for example:</p><pre>{
-  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="num">0</span>
-  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="num">1</span>
-  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="num">2</span>
+       shardId. Indicates which logical partitions a physical host belongs to,
+       multiple hosts can belong to the same partition, and one host can belong
+       to multiple partitions, for example:</p><pre>{
+  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">0</span>, <span class="num">1</span>)
+  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">1</span>)
+  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">2</span>)
   <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">throw</span> ...
 }</pre></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#noResharding" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -693,9 +692,7 @@ remove shards.</p><p>Java users should see <a href="ClientCustomStrategies$.html
         <span class="name">noResharding</span><span class="params">(<span name="getPartitionIdAndRequest">getPartitionIdAndRequest: <a href="#ToPartitionedMap=PartialFunction[com.twitter.scrooge.ThriftStructIface,com.twitter.util.Future[Map[Int,com.twitter.scrooge.ThriftStructIface]]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap">ToPartitionedMap</a></span>)</span><span class="result">: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
       </span>
       
-      <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that does not reshard.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that does not reshard.</p><p>This is appropriate for simple custom strategies where you never need to
-change which shard a given request would go to, and you neither add nor
-remove shards.</p><p>Java users should see <a href="ClientCustomStrategies$.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies">ClientCustomStrategies$</a> for an easier to use API.
+      <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that does not reshard.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that does not reshard.</p><p>This is appropriate for static partitioning backend topologies.</p><p>Java users should see <a href="ClientCustomStrategies$.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies">ClientCustomStrategies$</a> for an easier to use API.
 </p></div><dl class="paramcmts block"><dt class="param">getPartitionIdAndRequest</dt><dd class="cmt"><p>A PartialFunction implemented by client that
        provides the partitioning logic on a request. It takes a Thrift object
        request, and returns Future Map of partition ids to sub-requests. If
@@ -743,9 +740,9 @@ remove shards.</p><p>Java users should see <a href="ClientCustomStrategies$.html
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#resharding" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="resharding[A](getPartitionIdAndRequestFn:A=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:A=&gt;(Int=&gt;Int),observable:com.twitter.util.Activity[A]):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy"></a><a id="resharding[A]((A)⇒ToPartitionedMap,(A)⇒(Int)⇒Int,Activity[A]):CustomPartitioningStrategy"></a>
+      <a id="resharding[A](getPartitionIdAndRequestFn:A=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:A=&gt;(Int=&gt;Seq[Int]),observable:com.twitter.util.Activity[A]):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy"></a><a id="resharding[A]((A)⇒ToPartitionedMap,(A)⇒(Int)⇒Seq[Int],Activity[A]):CustomPartitioningStrategy"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy$.html#resharding[A](getPartitionIdAndRequestFn:A=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:A=&gt;(Int=&gt;Int),observable:com.twitter.util.Activity[A]):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/thrift/exp/partitioning/ClientCustomStrategy$.html#resharding[A](getPartitionIdAndRequestFn:A=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:A=&gt;(Int=&gt;Seq[Int]),observable:com.twitter.util.Activity[A]):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -754,12 +751,15 @@ remove shards.</p><p>Java users should see <a href="ClientCustomStrategies$.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">resharding</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="getPartitionIdAndRequestFn">getPartitionIdAndRequestFn: (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.resharding.A">A</span>) ⇒ <a href="#ToPartitionedMap=PartialFunction[com.twitter.scrooge.ThriftStructIface,com.twitter.util.Future[Map[Int,com.twitter.scrooge.ThriftStructIface]]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap">ToPartitionedMap</a></span>, <span name="getLogicalPartitionIdFn">getLogicalPartitionIdFn: (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.resharding.A">A</span>) ⇒ (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="observable">observable: <a href="https://twitter.github.io/util/docs/com/twitter/util/Activity.html#com.twitter.util.Activity" class="extype" name="com.twitter.util.Activity">Activity</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.resharding.A">A</span>]</span>)</span><span class="result">: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
+        <span class="name">resharding</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="getPartitionIdAndRequestFn">getPartitionIdAndRequestFn: (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.resharding.A">A</span>) ⇒ <a href="#ToPartitionedMap=PartialFunction[com.twitter.scrooge.ThriftStructIface,com.twitter.util.Future[Map[Int,com.twitter.scrooge.ThriftStructIface]]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap">ToPartitionedMap</a></span>, <span name="getLogicalPartitionIdFn">getLogicalPartitionIdFn: (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.resharding.A">A</span>) ⇒ (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>) ⇒ <a href="../../../../../../scala/index.html#Seq[+A]=Seq[A]" class="extmbr" name="scala.Seq">Seq</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>, <span name="observable">observable: <a href="https://twitter.github.io/util/docs/com/twitter/util/Activity.html#com.twitter.util.Activity" class="extype" name="com.twitter.util.Activity">Activity</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.resharding.A">A</span>]</span>)</span><span class="result">: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
       </span>
       
-      <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the remote cluster state.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the remote cluster state.</p><p>This is appropriate for simple custom strategies where you only need to
-know information about the remote cluster in order to reshard. For example,
-if you want to be able to add or remove capacity safely.</p><p>Java users should see <a href="ClientCustomStrategies$.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies">ClientCustomStrategies$</a> for an easier to use API.
+      <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the user provided state.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the user provided state.</p><p>This lets the client be aware of the backend dynamic resharding by providing the
+fully described state of resharding. The partitioning schema needs to be configured
+to react to each state, and it needs to be a pure function (see param below).
+When the state got successfully updated, the partitioning strategy will move
+to the new schema. See <a href="#clusterResharding(getPartitionIdAndRequestFn:Set[com.twitter.finagle.Address]=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:Set[com.twitter.finagle.Address]=&gt;(Int=&gt;Seq[Int])):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#clusterResharding">clusterResharding</a> if only the backend cluster information
+needs to be observed in order to reshard.</p><p>Java users should see <a href="ClientCustomStrategies$.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies">ClientCustomStrategies$</a> for an easier to use API.
 </p></div><dl class="paramcmts block"><dt class="param">getPartitionIdAndRequestFn</dt><dd class="cmt"><p>A function that given the current state of
        <code>observable</code>, returns a PartialFunction implemented by client that
        provides the partitioning logic on a request. It takes a Thrift
@@ -772,13 +772,13 @@ if you want to be able to add or remove capacity safely.</p><p>Java users should
        change based on anything other than the state of <code>observable</code>, or
        else it will malfunction.</p></dd><dt class="param">getLogicalPartitionIdFn</dt><dd class="cmt"><p>A function that given the current state
        <code>observable</code>, returns a function that gets the logical partition
-       identifier from a host identifier, host identifiers are derived from
-       <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId. Indicates which logical partition a physical
+       identifiers from a host identifier, host identifiers are derived from
+       <span class="extype" name="ZkMetadata">ZkMetadata</span> shardId. Indicates which logical partitions a physical
        host belongs to, multiple hosts can belong to the same partition,
-       for example:</p><pre>{
-  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="num">0</span>
-  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="num">1</span>
-  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="num">2</span>
+       and one host can belong to multiple partitions, for example:</p><pre>{
+  <span class="kw">case</span> a <span class="kw">if</span> Range(<span class="num">0</span>, <span class="num">10</span>).contains(a) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">0</span>, <span class="num">1</span>)
+  <span class="kw">case</span> b <span class="kw">if</span> Range(<span class="num">10</span>, <span class="num">20</span>).contains(b) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">1</span>)
+  <span class="kw">case</span> c <span class="kw">if</span> Range(<span class="num">20</span>, <span class="num">30</span>).contains(c) <span class="kw">=&gt;</span> <span class="std">Seq</span>(<span class="num">2</span>)
   <span class="kw">case</span> _ <span class="kw">=&gt;</span> <span class="kw">throw</span> ...
 }</pre><p>       Note that this function must be pure (ie referentially transparent).
        It cannot change based on anything other than the state of
@@ -799,9 +799,12 @@ if you want to be able to add or remove capacity safely.</p><p>Java users should
         <span class="name">resharding</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="getPartitionIdAndRequestFn">getPartitionIdAndRequestFn: (<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.resharding.A">A</span>) ⇒ <a href="#ToPartitionedMap=PartialFunction[com.twitter.scrooge.ThriftStructIface,com.twitter.util.Future[Map[Int,com.twitter.scrooge.ThriftStructIface]]]" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap">ToPartitionedMap</a></span>, <span name="observable">observable: <a href="https://twitter.github.io/util/docs/com/twitter/util/Activity.html#com.twitter.util.Activity" class="extype" name="com.twitter.util.Activity">Activity</a>[<span class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.resharding.A">A</span>]</span>)</span><span class="result">: <a href="CustomPartitioningStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy">CustomPartitioningStrategy</a></span>
       </span>
       
-      <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the remote cluster state.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the remote cluster state.</p><p>This is appropriate for simple custom strategies where you only need to
-know information about the remote cluster in order to reshard. For example,
-if you want to be able to add or remove capacity safely.</p><p>Java users should see <a href="ClientCustomStrategies$.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies">ClientCustomStrategies$</a> for an easier to use API.
+      <p class="shortcomment cmt">Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the user provided state.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <a href="ClientCustomStrategy.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy">ClientCustomStrategy</a> that reshards based on the user provided state.</p><p>This lets the client be aware of the backend dynamic resharding by providing the
+fully described state of resharding. The partitioning schema needs to be configured
+to react to each state, and it needs to be a pure function (see param below).
+When the state got successfully updated, the partitioning strategy will move
+to the new schema. See <a href="#clusterResharding(getPartitionIdAndRequestFn:Set[com.twitter.finagle.Address]=&gt;com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy.ToPartitionedMap,getLogicalPartitionIdFn:Set[com.twitter.finagle.Address]=&gt;(Int=&gt;Seq[Int])):com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy" class="extmbr" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy#clusterResharding">clusterResharding</a> if only the backend cluster information
+needs to be observed in order to reshard.</p><p>Java users should see <a href="ClientCustomStrategies$.html" class="extype" name="com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategies">ClientCustomStrategies$</a> for an easier to use API.
 </p></div><dl class="paramcmts block"><dt class="param">getPartitionIdAndRequestFn</dt><dd class="cmt"><p>A function that given the current state of
        <code>observable</code>, returns a PartialFunction implemented by client that
        provides the partitioning logic on a request. It takes a Thrift
