@@ -46,6 +46,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
   // This maps types to custom names, otherwise, we use the typical naming scheme.
   // NOTE: we can extract the function name from the pg_type.dat file, but let's not add this to PgType if not necessary.
   val customFuncs = Map(
+    PgType.Json -> "json_send",
     PgType.Numeric -> "numeric_send",
     PgType.Timestamptz -> "timestamptz_send",
     PgType.Timestamp -> "timestamp_send",
@@ -143,6 +144,10 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
       // names are limited to ascii, 63 bytes long
       implicit val nameString: Arbitrary[String] = Arbitrary(Gen.listOfN(63, genAsciiChar).map(_.mkString))
       simpleSpec(ValueReads.readsString, PgType.Name)
+    }
+    "readsString" should {
+      implicit val jsonString: Arbitrary[String] = Arbitrary(genJsonString.map(_.value))
+      simpleSpec(ValueReads.readsString, PgType.Json)
     }
     "readsUuid" should simpleSpec(ValueReads.readsUuid, PgType.Uuid)
   }
