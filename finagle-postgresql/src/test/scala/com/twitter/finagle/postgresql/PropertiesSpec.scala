@@ -199,7 +199,7 @@ trait PropertiesSpec extends ScalaCheck {
 
       // Implment a custom equals check that delegates to BigDecimal for comparing numbers.
       // It's slower, but will not cause false negatives for some edge cases.
-      def jsEq(l: JValue, r: JValue): Boolean = {
+      def jsEq(l: JValue, r: JValue): Boolean =
         l match {
           case JNull => r.isNull
           case JTrue | JFalse => l.asBoolean == r.asBoolean
@@ -211,7 +211,6 @@ trait PropertiesSpec extends ScalaCheck {
           case JArray(arr) => arr.zipWithIndex.forall { case (jv, i) => jsEq(jv, r.get(i)) }
           case JObject(obj) => obj.forall { case (key, jv) => jsEq(jv, r.get(key)) }
         }
-      }
 
       new ComparisonResult {
         override def identical: Boolean = jsEq(actualJson, expectedJson)
