@@ -15,6 +15,7 @@ import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.transport.PgBuf
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
+import org.scalacheck.Gen
 import org.specs2.specification.core.Fragment
 import org.specs2.specification.core.Fragments
 
@@ -59,7 +60,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       val arrayType = PgType.arrayOf(accept).getOrElse(sys.error(s"no array type for ${accept.name}"))
       val ret = arrayReads.reads(arrayType, arrayWire, utf8).asScala
       ret must beSuccessfulTry(values)
-    }
+    }.setGen(Gen.listOfN(5, Arbitrary.arbitrary[T])) // limit to 5 elements to speed things up
   }
   def nonNullableFragment(reads: ValueReads[_], accept: PgType): Fragment =
     s"fail to read a null value" in {
