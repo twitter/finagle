@@ -33,7 +33,8 @@ import scala.collection.compat._
  * | CHARACTER(n) | [[String]] |
  * | DOUBLE (float8) | [[Double]] |
  * | INTEGER (int, int4) | [[Int]] |
- * | JSON | [[String]] |
+ * | JSON | [[String]] or [[Json]] |
+ * | JSONB | [[Json]] |
  * | NUMERIC (decimal) | [[BigDecimal]] |
  * | REAL (float4) | [[Float]] |
  * | SMALLINT (int2) | [[Short]] |
@@ -160,6 +161,21 @@ object ValueReads {
       }
     }
   implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
+  implicit lazy val readsJson: ValueReads[Json] = new ValueReads[Json] {
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[Json] =
+      tpe match {
+        case PgType.Json => Return(Json(buf, charset))
+        case PgType.Jsonb =>
+          buf.get(0) match {
+            case 1 => Return(Json(buf.slice(1, buf.length), charset))
+            case _ => Throw(PgSqlUnsupportedError("Only JSONB version 1 is supported"))
+          }
+        case _ => Throw(PgSqlUnsupportedError(s"readsJson does not support type ${tpe.name}"))
+      }
+
+    override def accepts(tpe: PgType): Boolean =
+      tpe == PgType.Jsonb || tpe == PgType.Json
+  }
   implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
   implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())
   implicit lazy val readsString: ValueReads[String] = new ValueReads[String] {

@@ -1,5 +1,6 @@
 package com.twitter.finagle.postgresql
 
+import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -15,6 +16,7 @@ import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.types.Json
 import com.twitter.finagle.postgresql.types.PgNumeric
 import com.twitter.finagle.postgresql.types.PgTime
 import com.twitter.io.Buf
@@ -35,6 +37,8 @@ trait PropertiesSpec extends ScalaCheck {
   // TODO
   lazy val genJsonString: Gen[JsonString] = Gen.const("""{"valid": true, "b": 1.4, "array": [1,2,3]}""").map(JsonString)
   implicit lazy val arbJsonString: Arbitrary[JsonString] = Arbitrary(genJsonString)
+  lazy val genJson: Gen[Json] = genJsonString.map(str => Json(Buf.Utf8(str.value), StandardCharsets.UTF_8))
+  implicit lazy val arbJson: Arbitrary[Json] = Arbitrary(genJson)
 
   // TODO: Once we have actual data types, Gen.oneOf(...)
   implicit lazy val arbOid = Arbitrary(Gen.chooseNum(0, 0xffffffffL).map(Oid))

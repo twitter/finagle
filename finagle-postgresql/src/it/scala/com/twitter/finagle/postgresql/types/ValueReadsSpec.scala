@@ -47,6 +47,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
   // NOTE: we can extract the function name from the pg_type.dat file, but let's not add this to PgType if not necessary.
   val customFuncs = Map(
     PgType.Json -> "json_send",
+    PgType.Jsonb -> "jsonb_send",
     PgType.Numeric -> "numeric_send",
     PgType.Timestamptz -> "timestamptz_send",
     PgType.Timestamp -> "timestamp_send",
@@ -129,6 +130,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
       failFor(ValueReads.readsInstant, "-Infinity", PgType.Timestamptz)
     }
     "readsInt" should simpleSpec(ValueReads.readsInt, PgType.Int4)
+    "readsJson" should simpleSpec(ValueReads.readsJson, PgType.Json/*, PgType.Jsonb TODO: requires parsing json */)
     "readsLong" should simpleSpec(ValueReads.readsLong, PgType.Int8)
     "readsShort" should simpleSpec(ValueReads.readsShort, PgType.Int2)
     "readsString" should {
@@ -194,5 +196,10 @@ object ValueReadsSpec {
         }
       }
     }
+
+    implicit val jsonToSqlString: ToSqlString[Json] = new ToSqlString[Json] {
+      override def toString(value: Json): String = value.jsonString
+    }
+
   }
 }

@@ -146,6 +146,16 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         bb.putInt(int)
       }
     }
+    "readsJson" should simpleSpec[Json](ValueReads.readsJson, PgType.Json) { json =>
+      mkBuf() { bb =>
+        bb.put(json.jsonByteBuffer)
+      }
+    }
+    "readsJson" should simpleSpec[Json](ValueReads.readsJson, PgType.Jsonb) { json =>
+      mkBuf() { bb =>
+        bb.put(1.toByte).put(json.jsonByteBuffer)
+      }
+    }
     "readsLong" should simpleSpec[Long](ValueReads.readsLong, PgType.Int8) { long =>
       mkBuf() { bb =>
         bb.putLong(long)
