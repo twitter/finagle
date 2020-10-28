@@ -29,4 +29,3 @@ case class Json(value: Buf, charset: Charset) {
   lazy val jsonByteArray: Array[Byte] = Buf.ByteArray.Owned.extract(value)
   def jsonByteBuffer: java.nio.ByteBuffer = Buf.ByteBuffer.Owned.extract(value)
 }
-
