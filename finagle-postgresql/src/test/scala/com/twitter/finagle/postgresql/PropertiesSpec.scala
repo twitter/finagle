@@ -25,8 +25,23 @@ import org.scalacheck.Gen
 import org.specs2.ScalaCheck
 import org.specs2.matcher.describe.ComparisonResult
 import org.specs2.matcher.describe.Diffable
+import org.typelevel.jawn.ast.DeferLong
+import org.typelevel.jawn.ast.DeferNum
+import org.typelevel.jawn.ast.DoubleNum
+import org.typelevel.jawn.ast.FastRenderer
+import org.typelevel.jawn.ast.JArray
+import org.typelevel.jawn.ast.JFalse
+import org.typelevel.jawn.ast.JNull
+import org.typelevel.jawn.ast.JObject
+import org.typelevel.jawn.ast.JParser
+import org.typelevel.jawn.ast.JString
+import org.typelevel.jawn.ast.JTrue
+import org.typelevel.jawn.ast.JValue
+import org.typelevel.jawn.ast.LongNum
 
 trait PropertiesSpec extends ScalaCheck {
+
+  import ArbitraryJson._
 
   case class AsciiString(value: String)
   lazy val genAsciiChar: Gen[Char] = Gen.choose(32.toChar, 126.toChar)
@@ -34,8 +49,7 @@ trait PropertiesSpec extends ScalaCheck {
   implicit lazy val arbAsciiString: Arbitrary[AsciiString] = Arbitrary(genAsciiString)
 
   case class JsonString(value: String)
-  // TODO
-  lazy val genJsonString: Gen[JsonString] = Gen.const("""{"valid": true, "b": 1.4, "array": [1,2,3]}""").map(JsonString)
+  lazy val genJsonString: Gen[JsonString] = Arbitrary.arbitrary[JValue].map(jv => JsonString(jv.render(FastRenderer)))
   implicit lazy val arbJsonString: Arbitrary[JsonString] = Arbitrary(genJsonString)
   lazy val genJson: Gen[Json] = genJsonString.map(str => Json(Buf.Utf8(str.value), StandardCharsets.UTF_8))
   implicit lazy val arbJson: Arbitrary[Json] = Arbitrary(genJson)
@@ -171,6 +185,38 @@ trait PropertiesSpec extends ScalaCheck {
         override def identical: Boolean = java.util.Arrays.equals(acArr, exArr)
 
         override def render: String = s"${hex(acArr)} != ${hex(exArr)}"
+      }
+    }
+  }
+
+  /**
+   * Diffable[Json] because json equivalence isn't trivially done by comparing strings
+   */
+  implicit lazy val jsonDiffable: Diffable[Json] = new Diffable[Json] {
+    override def diff(actual: Json, expected: Json): ComparisonResult = {
+      val actualJson = JParser.parseFromString(actual.jsonString).get
+      val expectedJson = JParser.parseFromString(expected.jsonString).get
+
+      // Implment a custom equals check that delegates to BigDecimal for comparing numbers.
+      // It's slower, but will not cause false negatives for some edge cases.
+      def jsEq(l: JValue, r: JValue): Boolean = {
+        l match {
+          case JNull => r.isNull
+          case JTrue | JFalse => l.asBoolean == r.asBoolean
+          case JString(ls) => ls == r.asString
+          case LongNum(ln) => ln == r.asLong
+          case DoubleNum(dn) => BigDecimal(dn) == r.asBigDecimal
+          case DeferLong(dn) => BigDecimal(dn) == r.asBigDecimal
+          case DeferNum(dn) => BigDecimal(dn) == r.asBigDecimal
+          case JArray(arr) => arr.zipWithIndex.forall { case (jv, i) => jsEq(jv, r.get(i)) }
+          case JObject(obj) => obj.forall { case (key, jv) => jsEq(jv, r.get(key)) }
+        }
+      }
+
+      new ComparisonResult {
+        override def identical: Boolean = jsEq(actualJson, expectedJson)
+
+        override def render: String = s"$actualJson != $expectedJson"
       }
     }
   }

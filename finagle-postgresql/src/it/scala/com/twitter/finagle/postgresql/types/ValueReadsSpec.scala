@@ -93,7 +93,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
       val arrayReads = ValueReads.traversableReads[List, T](valueReads, implicitly)
       val read = arrayReads.reads(arrayType, WireValue.Value(bytes), StandardCharsets.UTF_8)
       read.asScala must beSuccessfulTry(be_===(values)) // === delegates to Diffable
-    }
+    }.setGen(Gen.listOfN(5, Arbitrary.arbitrary[T])) // limit to up to 5 values
 
   def simpleSpec[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], pgType: PgType*) = {
     val fs = pgType
@@ -130,7 +130,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
       failFor(ValueReads.readsInstant, "-Infinity", PgType.Timestamptz)
     }
     "readsInt" should simpleSpec(ValueReads.readsInt, PgType.Int4)
-    "readsJson" should simpleSpec(ValueReads.readsJson, PgType.Json/*, PgType.Jsonb TODO: requires parsing json */)
+    "readsJson" should simpleSpec(ValueReads.readsJson, PgType.Json, PgType.Jsonb)
     "readsLong" should simpleSpec(ValueReads.readsLong, PgType.Int8)
     "readsShort" should simpleSpec(ValueReads.readsShort, PgType.Int2)
     "readsString" should {
@@ -198,7 +198,7 @@ object ValueReadsSpec {
     }
 
     implicit val jsonToSqlString: ToSqlString[Json] = new ToSqlString[Json] {
-      override def toString(value: Json): String = value.jsonString
+      override def toString(value: Json): String = escape(value.jsonString)
     }
 
   }
