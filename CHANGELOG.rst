@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-netty4: Add `ExternalClientEngineFactory` to the open source version of Finagle. This
+  `SslClientEngineFactory` acts as a better example of how to build custom client and server engine
+  factories in order to reuse SSL contexts for performance concerns. ``PHAB_ID=D572567``
+
 20.10.0
 -------
 
