@@ -69,4 +69,17 @@ object Types {
     digits: Seq[Short] // NumericDigit
   )
 
+  /**
+   * Postgres Inet type wrapper.
+   *
+   * Postgres Inet type (https://www.postgresql.org/docs/current/datatype-net-types.html#DATATYPE-INET)
+   * is a tuple made of an address and a subnet (or "network mask").
+   *
+   * @param ipAddress the IpAddress part, e.g.: 192.168.0.1
+   * @param netmask the netmask, or number of bits to consider in `ipAddress`.
+   *                This is 0 to 32 for IPv4 and 0 to 128 for IPv6.
+   *                This is an unsigned byte value, so using a `Short`.
+   */
+  case class Inet(ipAddress: java.net.InetAddress, netmask: Short)
+
 }

@@ -9,6 +9,7 @@ import com.twitter.finagle.postgresql.EmbeddedPgSqlSpec
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
+import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.types.ValueReadsSpec.ToSqlString
 import com.twitter.io.Buf
@@ -46,6 +47,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
   // This maps types to custom names, otherwise, we use the typical naming scheme.
   // NOTE: we can extract the function name from the pg_type.dat file, but let's not add this to PgType if not necessary.
   val customFuncs = Map(
+    PgType.Inet -> "inet_send",
     PgType.Json -> "json_send",
     PgType.Jsonb -> "jsonb_send",
     PgType.Numeric -> "numeric_send",
@@ -124,6 +126,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
 //    "readsByte" should simpleSpec(ValueReads.readsByte, PgType.Char)
     "readsDouble" should simpleSpec(ValueReads.readsDouble, PgType.Float8)
     "readsFloat" should simpleSpec(ValueReads.readsFloat, PgType.Float4)
+    "readsInet" should simpleSpec(ValueReads.readsInet, PgType.Inet)
     "readsInstant" should simpleSpec(ValueReads.readsInstant, PgType.Timestamptz, PgType.Timestamp)
     "readsInstant" should {
       failFor(ValueReads.readsInstant, "Infinity", PgType.Timestamptz)
@@ -199,6 +202,11 @@ object ValueReadsSpec {
 
     implicit val jsonToSqlString: ToSqlString[Json] = new ToSqlString[Json] {
       override def toString(value: Json): String = escape(value.jsonString)
+    }
+
+    implicit val inetToSqlString: ToSqlString[Inet] = new ToSqlString[Inet] {
+      override def toString(value: Inet): String =
+        s"${value.ipAddress.getHostAddress}/${value.netmask}"
     }
 
   }
