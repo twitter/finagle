@@ -73,7 +73,7 @@ class PgBufSpec extends Specification with PropertiesSpec {
       bb.put(inet.netmask.toByte)
         .put(0.toByte)
       val addr = inet.ipAddress.getAddress
-        bb.put(addr.length.toByte)
+      bb.put(addr.length.toByte)
       bb.put(addr)
     }
     fragments[Int]("int")(_.int(_))(_.int())(_.putInt(_))

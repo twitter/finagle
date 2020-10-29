@@ -276,18 +276,16 @@ object PgBuf {
       val _ = byte() // is CIDR
       val len = byte()
       (family, len) match {
-        case (2, 4) => { // IPv4
-          if(netmask > 32) throw new PgSqlClientError(s"invalid netmask for IPv4 $netmask")
+        case (2, 4) => // IPv4
+          if (netmask > 32) throw new PgSqlClientError(s"invalid netmask for IPv4 $netmask")
           val bytes = buf(4)
           val addr = java.net.InetAddress.getByAddress(Buf.ByteArray.Owned.extract(bytes))
           Inet(addr, netmask)
-        }
-        case (3, 16) => { // IPv6
-          if(netmask > 128) throw new PgSqlClientError(s"invalid netmask for IPv6 $netmask")
+        case (3, 16) => // IPv6
+          if (netmask > 128) throw new PgSqlClientError(s"invalid netmask for IPv6 $netmask")
           val bytes = buf(16)
           val addr = java.net.InetAddress.getByAddress(Buf.ByteArray.Owned.extract(bytes))
           Inet(addr, netmask)
-        }
         case _ =>
           throw new PgSqlClientError(s"invalid length ($len) for inet family ($family)")
       }
