@@ -5,6 +5,7 @@ import java.nio.ByteOrder
 
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Numeric
 import com.twitter.finagle.postgresql.Types.NumericSign
@@ -64,6 +65,17 @@ class PgBufSpec extends Specification with PropertiesSpec {
     fragments[Byte]("byte")(_.byte(_))(_.byte())(_.put(_))
     fragments[Double]("double")(_.double(_))(_.double())(_.putDouble(_))
     fragments[Float]("float")(_.float(_))(_.float())(_.putFloat(_))
+    fragments[Inet]("inet")(_.inet(_))(_.inet()) { (bb, inet) =>
+      inet.ipAddress match {
+        case _: java.net.Inet4Address => bb.put(2.toByte)
+        case _: java.net.Inet6Address => bb.put(3.toByte)
+      }
+      bb.put(inet.netmask.toByte)
+        .put(0.toByte)
+      val addr = inet.ipAddress.getAddress
+        bb.put(addr.length.toByte)
+      bb.put(addr)
+    }
     fragments[Int]("int")(_.int(_))(_.int())(_.putInt(_))
     fragments[Long]("long")(_.long(_))(_.long())(_.putLong(_))
     fragments[Numeric]("numeric")(_.numeric(_))(_.numeric()) { (bb, n) =>

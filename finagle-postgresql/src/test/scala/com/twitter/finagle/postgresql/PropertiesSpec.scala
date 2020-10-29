@@ -9,6 +9,7 @@ import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Numeric
 import com.twitter.finagle.postgresql.Types.Oid
@@ -253,5 +254,20 @@ trait PropertiesSpec extends ScalaCheck {
 
   lazy val genNumeric: Gen[Numeric] = implicitly[Arbitrary[BigDecimal]].arbitrary.map(PgNumeric.bigDecimalToNumeric)
   implicit lazy val arbNumeric: Arbitrary[Numeric] = Arbitrary(genNumeric)
+
+  lazy val genIp: Gen[java.net.InetAddress] = for {
+    size <- Gen.oneOf(4, 16)
+    addr <- Gen.buildableOfN[Array[Byte], Byte](size, Arbitrary.arbitrary[Byte])
+  } yield java.net.InetAddress.getByAddress(addr)
+  implicit lazy val arbIp: Arbitrary[java.net.InetAddress] = Arbitrary(genIp)
+
+  lazy val genInet: Gen[Inet] = for {
+    ip <- genIp
+    mask <- ip match {
+      case _: java.net.Inet4Address => Gen.choose(0,32)
+      case _: java.net.Inet6Address => Gen.choose(0,128)
+    }
+  } yield Inet(ip, mask.toShort)
+  implicit lazy val arbInet: Arbitrary[Inet] = Arbitrary(genInet)
 
 }

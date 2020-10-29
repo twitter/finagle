@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets
 
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.Types.Format
+import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Numeric
 import com.twitter.finagle.postgresql.Types.NumericSign
@@ -155,6 +156,20 @@ object PgBuf {
       foreachUnframed(n.digits)((w, d) => w.unsignedShort(d.toInt))
     }
 
+    def inet(i: Inet): Writer = {
+      val family = i.ipAddress match {
+        case _: java.net.Inet4Address => 2
+        case _: java.net.Inet6Address => 3
+      }
+      byte(family.toByte)
+      byte(i.netmask.toByte)
+      byte(0) // is CIDR
+
+      val addr = i.ipAddress.getAddress
+      byte(addr.length.toByte)
+      buf(Buf.ByteArray.Owned(addr))
+    }
+
     def build: Buf =
       w.owned()
   }
@@ -165,6 +180,7 @@ object PgBuf {
     private[this] val reader = ByteReader(b)
 
     def byte(): Byte = reader.readByte()
+    def unsignedByte(): Short = reader.readUnsignedByte()
     def short(): Short = reader.readShortBE()
     def unsignedShort(): Int = reader.readUnsignedShortBE()
     def int(): Int = reader.readIntBE()
@@ -252,6 +268,29 @@ object PgBuf {
         displayScale = unsignedShort(),
         digits = Seq.fill(len)(short())
       )
+    }
+
+    def inet(): Inet = {
+      val family = byte()
+      val netmask = unsignedByte()
+      val _ = byte() // is CIDR
+      val len = byte()
+      (family, len) match {
+        case (2, 4) => { // IPv4
+          if(netmask > 32) throw new PgSqlClientError(s"invalid netmask for IPv4 $netmask")
+          val bytes = buf(4)
+          val addr = java.net.InetAddress.getByAddress(Buf.ByteArray.Owned.extract(bytes))
+          Inet(addr, netmask)
+        }
+        case (3, 16) => { // IPv6
+          if(netmask > 128) throw new PgSqlClientError(s"invalid netmask for IPv6 $netmask")
+          val bytes = buf(16)
+          val addr = java.net.InetAddress.getByAddress(Buf.ByteArray.Owned.extract(bytes))
+          Inet(addr, netmask)
+        }
+        case _ =>
+          throw new PgSqlClientError(s"invalid length ($len) for inet family ($family)")
+      }
     }
   }
 

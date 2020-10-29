@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
+import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.NumericSign
 import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
@@ -118,6 +119,19 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     "readsFloat" should simpleSpec[Float](ValueReads.readsFloat, PgType.Float4) { float =>
       mkBuf() { bb =>
         bb.putFloat(float)
+      }
+    }
+    "readsInet" should simpleSpec[Inet](ValueReads.readsInet, PgType.Inet) { inet =>
+      mkBuf() { bb =>
+        inet.ipAddress match {
+          case _: java.net.Inet4Address => bb.put(2.toByte)
+          case _: java.net.Inet6Address => bb.put(3.toByte)
+        }
+        bb.put(inet.netmask.toByte)
+          .put(0.toByte)
+        val addr = inet.ipAddress.getAddress
+        bb.put(addr.length.toByte)
+        bb.put(addr)
       }
     }
     "readsInstant" should simpleSpec[java.time.Instant](ValueReads.readsInstant, PgType.Timestamptz, PgType.Timestamp) {

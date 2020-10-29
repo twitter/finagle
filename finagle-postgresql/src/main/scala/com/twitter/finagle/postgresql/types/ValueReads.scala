@@ -5,6 +5,7 @@ import java.nio.charset.CodingErrorAction
 
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlUnsupportedError
+import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.transport.PgBuf
@@ -32,6 +33,7 @@ import scala.collection.compat._
  * | CHAR | [[Byte]] |
  * | CHARACTER(n) | [[String]] |
  * | DOUBLE (float8) | [[Double]] |
+ * | INET | [[Inet]] ([[java.net.InetAddress]] and a subnet) |
  * | INTEGER (int, int4) | [[Int]] |
  * | JSON | [[String]] or [[Json]] |
  * | JSONB | [[Json]] |
@@ -160,6 +162,7 @@ object ValueReads {
         case Timestamp.Micros(offset) => PgTime.usecOffsetAsInstant(offset)
       }
     }
+  implicit lazy val readsInet: ValueReads[Inet] = simple(PgType.Inet)(_.inet())
   implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
   implicit lazy val readsJson: ValueReads[Json] = new ValueReads[Json] {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[Json] =
