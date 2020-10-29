@@ -264,8 +264,8 @@ trait PropertiesSpec extends ScalaCheck {
   lazy val genInet: Gen[Inet] = for {
     ip <- genIp
     mask <- ip match {
-      case _: java.net.Inet4Address => Gen.choose(0,32)
-      case _: java.net.Inet6Address => Gen.choose(0,128)
+      case _: java.net.Inet4Address => Gen.choose(0, 32)
+      case _: java.net.Inet6Address => Gen.choose(0, 128)
     }
   } yield Inet(ip, mask.toShort)
   implicit lazy val arbInet: Arbitrary[Inet] = Arbitrary(genInet)
