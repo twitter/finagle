@@ -86,7 +86,10 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     s"successfully read value of type ${tpe.name}" in prop { value: T =>
       val bytes = pgBytes(tpe, value)
       val read = valueReads.reads(tpe, WireValue.Value(bytes), StandardCharsets.UTF_8)
-      read.asScala must beSuccessfulTry(be_===(value)) // === delegates to Diffable
+      // beIdentical delegates to Diffable
+      // This is necessary for Json which doesn't implement equals.
+      // Doing so would require a dependency on a json library.
+      read.asScala must beSuccessfulTry(beIdentical(value))
     }
 
   def arrayFragment[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], arrayType: PgType, tpe: PgType) =
@@ -94,7 +97,10 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
       val bytes = pgArrayBytes(tpe, values)
       val arrayReads = ValueReads.traversableReads[List, T](valueReads, implicitly)
       val read = arrayReads.reads(arrayType, WireValue.Value(bytes), StandardCharsets.UTF_8)
-      read.asScala must beSuccessfulTry(be_===(values)) // === delegates to Diffable
+      // beIdentical delegates to Diffable
+      // This is necessary for Json which doesn't implement equals.
+      // Doing so would require a dependency on a json library.
+      read.asScala must beSuccessfulTry(beIdentical(values))
     }.setGen(Gen.listOfN(5, Arbitrary.arbitrary[T])) // limit to up to 5 values
 
   def simpleSpec[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], pgType: PgType*) = {

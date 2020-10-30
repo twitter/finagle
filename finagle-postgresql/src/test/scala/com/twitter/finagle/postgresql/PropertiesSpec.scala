@@ -171,21 +171,19 @@ trait PropertiesSpec extends ScalaCheck {
     Arbitrary(Gen.oneOf(Format.Text, Format.Binary))
 
   /**
-   * Diffable[Buf] so we can `buf must_=== anotherBuf`
+   * Diffable[Buf] to get a the actual Buf's bytes when printing.
    */
   implicit lazy val bufDiffable: Diffable[Buf] = new Diffable[Buf] {
     override def diff(actual: Buf, expected: Buf): ComparisonResult = {
-      val acArr = Buf.ByteArray.Shared.extract(actual)
-      val exArr = Buf.ByteArray.Shared.extract(expected)
       new ComparisonResult {
-        def hex(arr: Array[Byte]): String = {
-          val h = arr.map(s => f"$s%02X").mkString
+        def hex(buf: Buf): String = {
+          val h = Buf.ByteArray.Owned.extract(buf).map(s => f"$s%02X").mkString
           s"0x$h"
         }
 
-        override def identical: Boolean = java.util.Arrays.equals(acArr, exArr)
+        override def identical: Boolean = Buf.equals(actual, expected)
 
-        override def render: String = s"${hex(acArr)} != ${hex(exArr)}"
+        override def render: String = s"${hex(actual)} != ${hex(expected)}"
       }
     }
   }
