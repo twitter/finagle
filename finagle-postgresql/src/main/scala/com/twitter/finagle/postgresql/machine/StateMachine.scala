@@ -141,4 +141,8 @@ object StateMachine {
       case msg => throw PgSqlNoSuchTransition(name, (), msg)
     }
   }
+
+  // Simple machine for the Sync request which immediately responds with a "ReadyForQuery".
+  val syncMachine: StateMachine[Response.Ready.type] =
+    StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(_ => Response.Ready)
 }
