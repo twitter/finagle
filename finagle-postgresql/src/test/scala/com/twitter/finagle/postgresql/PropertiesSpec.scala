@@ -250,7 +250,13 @@ trait PropertiesSpec extends ScalaCheck {
     Gen.frequency(99 -> genMicros, 1 -> Gen.oneOf(Timestamp.NegInfinity, Timestamp.Infinity))
   implicit lazy val arbTimestamp = Arbitrary(genTimestamp)
 
-  lazy val genNumericSign: Gen[NumericSign] = Gen.oneOf(NumericSign.Positive, NumericSign.Negative, NumericSign.NaN, NumericSign.NegInfinity, NumericSign.Infinity)
+  lazy val genNumericSign: Gen[NumericSign] = Gen.oneOf(
+    NumericSign.Positive,
+    NumericSign.Negative,
+    NumericSign.NaN,
+    NumericSign.NegInfinity,
+    NumericSign.Infinity
+  )
   implicit lazy val arbNumericSign: Arbitrary[NumericSign] = Arbitrary(genNumericSign)
   lazy val genNumeric: Gen[Numeric] = implicitly[Arbitrary[BigDecimal]].arbitrary.map(PgNumeric.bigDecimalToNumeric)
   implicit lazy val arbNumeric: Arbitrary[Numeric] = Arbitrary(genNumeric)
