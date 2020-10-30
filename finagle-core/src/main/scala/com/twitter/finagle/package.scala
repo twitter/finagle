@@ -2,6 +2,7 @@ package com.twitter
 
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+import scala.util.control.NoStackTrace
 
 /**
 
@@ -77,9 +78,13 @@ package object finagle {
       Stack.leaf(
         Endpoint,
         new com.twitter.finagle.service.FailingFactory[Req, Rep](
-          new IllegalArgumentException("Unterminated stack")
+          UnterminatedStackException
         )
       )
+
+    private[this] object UnterminatedStackException
+        extends IllegalArgumentException("Unterminated stack")
+        with NoStackTrace
   }
 
   private[this] val LibraryName: String = "com.twitter.finagle.core"
