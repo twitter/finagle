@@ -4,12 +4,13 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
+import com.twitter.finagle.postgresql.machine.Connection
 import com.twitter.finagle.postgresql.machine.ExecuteMachine
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
 import com.twitter.finagle.postgresql.machine.PrepareMachine
+import com.twitter.finagle.postgresql.machine.Runner
 import com.twitter.finagle.postgresql.machine.SimpleQueryMachine
 import com.twitter.finagle.postgresql.machine.StateMachine
 import com.twitter.finagle.postgresql.transport.MessageDecoder
@@ -49,76 +50,25 @@ class ClientDispatcher(
       params[Stats].statsReceiver
     ) {
 
-  /**
-   * Send a single message to the backend.
-   */
-  private[this] def send[M <: FrontendMessage](s: StateMachine.Send[M]): Future[Unit] =
-    transport
-      .write(s.encoder.toPacket(s.msg))
-      .rescue {
-        case exc => wrapWriteException(exc)
-      }
-
-  /**
-   * Read a single message from the backend.
-   */
-  private[this] def receive(): Future[BackendMessage] =
-    transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry // TODO: better error handling
-
-  private[this] def run[R <: Response](machine: StateMachine[R], promise: Promise[R]) = {
-
-    // NOTE: this is initialized to null, but is immediately set to the start state before doing anything else.
-    var state: machine.State = null.asInstanceOf[machine.State]
-
-    def step(transition: StateMachine.TransitionResult[machine.State, R]): Future[ReadyForQuery] = transition match {
-      case StateMachine.Transition(s, action) =>
-        state = s
-        val doAction = action match {
-          case StateMachine.NoOp => Future.Done
-          case s @ StateMachine.Send(_) => send(s)
-          case StateMachine.SendSeveral(msgs) =>
-            Future.traverseSequentially(msgs) {
-              case s @ StateMachine.Send(_) => send(s)
-            }.unit
-          case StateMachine.Respond(r) =>
-            promise.updateIfEmpty(r)
-            Future.Done
+  // implements Connection on Transport
+  private[this] val transportConnection = new Connection {
+    def send[M <: FrontendMessage](s: StateMachine.Send[M]): Future[Unit] =
+      transport
+        .write(s.encoder.toPacket(s.msg))
+        .rescue {
+          case exc => wrapWriteException(exc)
         }
-        doAction before readAndStep
-      case StateMachine.Complete(ready, response) =>
-        response.foreach(promise.updateIfEmpty)
 
-        // Make sure the state machine produced a response for the client.
-        if (!promise.isDefined) {
-          // NOTE: we still use updateIfEmpty since the promise may still be canceled.
-          promise.updateIfEmpty(
-            Throw(PgSqlInvalidMachineStateError(
-              s"State machine ${machine.getClass} was in state $state and completed without producing a response for the client."
-            ))
-          )
-        }
-        Future.value(ready)
-    }
-
-    def readAndStep: Future[ReadyForQuery] =
-      receive().flatMap(msg => step(machine.receive(state, msg)))
-
-    step(machine.start)
+    def receive(): Future[BackendMessage] =
+      transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry
   }
 
-  /**
-   * Runs a state machine to completion and fulfills the client response.
-   */
-  private[this] def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] =
-    run(machine, promise)
+  private[this] val machineRunner: Runner = new Runner(transportConnection)
+  def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] =
+    machineRunner.dispatch(machine, promise)
       .transform {
         case Return(_) => Future.Done
-        case t: Throw[_] =>
-          promise.updateIfEmpty(t.cast)
-          // the state machine failed unexpectedly, which leaves the connection in a bad state
-          //   let's close the transport
-          // TODO: is this the appropriate way to handle "bad connections" in finagle?
-          close()
+        case Throw(_) => close()
       }
 
   /**
@@ -132,14 +82,10 @@ class ClientDispatcher(
   /**
    * Immediately start the handshaking upon connection establishment, before any client requests.
    */
-  private[this] val startup: Future[Unit] = machineDispatch(
+  private[this] val startup: Future[Unit] = machineRunner.dispatch(
     HandshakeMachine(params[Credentials], params[Database]),
     connectionParameters
   )
-
-  // Simple machine for the Sync request which immediately responds with a "ReadyForQuery".
-  val syncMachine: StateMachine[Response.Ready.type] =
-    StateMachine.singleMachine("SyncMachine", FrontendMessage.Sync)(_ => Response.Ready)
 
   override def apply(req: Request): Future[Response] =
     startup before super.apply(req)
@@ -156,7 +102,7 @@ class ClientDispatcher(
           case Request.ConnectionParameters =>
             p.setValue(parameters)
             Future.Done
-          case Request.Sync => machineDispatch(syncMachine, p)
+          case Request.Sync => machineDispatch(StateMachine.syncMachine, p)
           case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
           case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
           case e: Request.Execute => machineDispatch(new ExecuteMachine(e, parameters), p)
