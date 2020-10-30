@@ -69,6 +69,16 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
       )
     }
 
+    "fails when md5 password is required but not provided" in {
+      machineSpec(mkMachine)(
+        checkStartup,
+        receive(BackendMessage.AuthenticationMD5Password(Buf.Empty)),
+        checkFailure("complete with failure") { ex =>
+          ex must beEqualTo(PgSqlPasswordRequired)
+        }
+      )
+    }
+
     def passwordAuthSpec(username: String, password: String)(f: => BackendMessage)(check: String => MatchResult[_]) =
       machineSpec(mkMachine(username, Some(password), "database"))(
         checkStartup,
