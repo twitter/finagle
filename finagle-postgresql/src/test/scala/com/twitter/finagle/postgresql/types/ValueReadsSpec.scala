@@ -85,6 +85,83 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       )
 
   "ValueReads" should {
+    "simple" should {
+      "fail when the value buffer is not consumed entirely" in {
+        val invalid = ValueReads.simple(PgType.Int4) { _.short() }
+        val read = invalid.reads(PgType.Int4, Buf.ByteArray(0,0,0,0), utf8)
+
+        read.get must throwA[PgSqlClientError]("Reading value of type int4 should have consumed the whole value's buffer, but 2 bytes remained.")
+      }
+      "fail when the value is null" in {
+        val valid = ValueReads.simple(PgType.Int4) { _.int() }
+        val read = valid.reads(PgType.Int4, WireValue.Null, utf8)
+        read.get must throwA[IllegalArgumentException]("Type int4 has no reasonable null value. If you intended to make this field nullable, you must read it as an Option\\[T\\].")
+      }
+    }
+
+    "optionReads" should {
+      "delegate reads when non-null" in {
+        val optionalInt = ValueReads.optionReads(ValueReads.readsInt)
+        val read = optionalInt.reads(PgType.Int4, WireValue.Value(Buf.ByteArray(0,0,0,0)), utf8)
+        read.asScala must beSuccessfulTry(beSome(0))
+      }
+      "accept the underlying type" in {
+        val optionalInt = ValueReads.optionReads(ValueReads.readsInt)
+        optionalInt.accepts(PgType.Int4) must beTrue
+        optionalInt.accepts(PgType.Text) must beFalse
+      }
+      "return None when null" in {
+        val optionalInt = ValueReads.optionReads(ValueReads.readsInt)
+        val read = optionalInt.reads(PgType.Int4, WireValue.Null, utf8)
+        read.asScala must beSuccessfulTry(beNone)
+      }
+    }
+
+    "traversableReads" should {
+      "accept the underlying type" in {
+        val readsIntList = ValueReads.traversableReads[List, Int](ValueReads.readsInt, implicitly)
+        readsIntList.accepts(PgType.Int4Array) must beTrue
+        readsIntList.accepts(PgType.Int4) must beFalse
+        readsIntList.accepts(PgType.Int2Array) must beFalse
+      }
+
+      "reject nona=-array types when reading" in {
+        val readsIntList = ValueReads.traversableReads[List, Int](ValueReads.readsInt, implicitly)
+        val read = readsIntList.reads(PgType.Int4, Buf.Empty, utf8)
+        read.get must throwA[PgSqlClientError](s"Type int4 is not an array type and cannot be read as such.")
+      }
+
+      "support empty lists" in {
+        val readsIntList = ValueReads.traversableReads[List, Int](ValueReads.readsInt, implicitly)
+        val pgArray = PgArray(
+          dimensions = 0,
+          dataOffset = 0,
+          elemType = PgType.Int4.oid,
+          arrayDims = IndexedSeq.empty,
+          data = IndexedSeq.empty
+        )
+        val arrayBuf = PgBuf.writer.array(pgArray).build
+        val read = readsIntList.reads(PgType.Int4Array, arrayBuf, utf8)
+        read.asScala must beSuccessfulTry(Nil)
+      }
+
+      "fail for multi-dimensional arrays" in {
+        val readsIntList = ValueReads.traversableReads[List, Int](ValueReads.readsInt, implicitly)
+
+        val pgArray = PgArray(
+          dimensions = 2,
+          dataOffset = 0,
+          elemType = PgType.Int4.oid,
+          arrayDims = IndexedSeq(PgArrayDim(0, 1), PgArrayDim(0, 1)),
+          data = IndexedSeq.empty
+        )
+        val arrayBuf = PgBuf.writer.array(pgArray).build
+        val read = readsIntList.reads(PgType.Int4Array, arrayBuf, utf8)
+
+        read.get must throwA[PgSqlClientError]("Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got 2")
+      }
+    }
+
     "readsBigDecimal" should simpleSpec[BigDecimal](ValueReads.readsBigDecimal, PgType.Numeric) { bd =>
       mkBuf() { bb =>
         // converting to numeric is non-trivial, so we don't re-write it here.
