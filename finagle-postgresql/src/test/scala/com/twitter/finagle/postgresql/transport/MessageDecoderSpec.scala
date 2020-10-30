@@ -34,6 +34,7 @@ import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
@@ -117,6 +118,16 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
     }
 
   "MessageDecoder" should {
+    "fail when packet is not identified" in {
+      val decoded = MessageDecoder.fromPacket(Packet(None, Buf.Empty))
+      decoded.get must throwA[IllegalStateException]("invalid backend packet, missing message type.")
+    }
+
+    "fail when decoder is not implemented" in {
+      val decoded = MessageDecoder.fromPacket(Packet(Some(' '), Buf.Empty))
+      decoded.get must throwA[PgSqlClientError](s"unimplemented message ' '")
+    }
+
     "ErrorResponse" should decodeFragment(MessageDecoder.errorResponseDecoder) { msg =>
       Packet(
         cmd = Some('E'),

@@ -78,7 +78,7 @@ object MessageDecoder {
           case 't' => decode[ParameterDescription](reader)
           case 'T' => decode[RowDescription](reader)
           case 'Z' => decode[ReadyForQuery](reader)
-          case byte => Throw(new PgSqlClientError(s"unimplemented message $byte"))
+          case byte => Throw(new PgSqlClientError(s"unimplemented message '${byte.toChar}'"))
         }
     }
   }
