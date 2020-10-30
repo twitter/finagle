@@ -174,7 +174,7 @@ trait PropertiesSpec extends ScalaCheck {
    * Diffable[Buf] to get a the actual Buf's bytes when printing.
    */
   implicit lazy val bufDiffable: Diffable[Buf] = new Diffable[Buf] {
-    override def diff(actual: Buf, expected: Buf): ComparisonResult = {
+    override def diff(actual: Buf, expected: Buf): ComparisonResult =
       new ComparisonResult {
         def hex(buf: Buf): String = {
           val h = Buf.ByteArray.Owned.extract(buf).map(s => f"$s%02X").mkString
@@ -185,7 +185,6 @@ trait PropertiesSpec extends ScalaCheck {
 
         override def render: String = s"${hex(actual)} != ${hex(expected)}"
       }
-    }
   }
 
   /**
