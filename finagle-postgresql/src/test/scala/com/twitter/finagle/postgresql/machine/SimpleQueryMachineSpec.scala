@@ -4,6 +4,7 @@ import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
@@ -194,6 +195,13 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
         BackendMessage.CommandComplete(secondTag) -> { case Return(value) =>
           value must beEqualTo(Response.Command(secondTag))
         }
+      )
+    }
+
+    "fail when no transition exist" in {
+      val machine = mkMachine("bogus")
+      machine.receive(machine.Sent, BackendMessage.PortalSuspended) must throwA[PgSqlNoSuchTransition](
+        "SimpleQueryMachine"
       )
     }
   }
