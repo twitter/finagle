@@ -12,6 +12,7 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
 import com.twitter.finagle.postgresql.PgSqlInvalidMachineStateError
+import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlPasswordRequired
 import com.twitter.finagle.postgresql.PgSqlUnsupportedAuthenticationMechanism
 import com.twitter.finagle.postgresql.PropertiesSpec
@@ -149,6 +150,13 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
             ex must beAnInstanceOf[PgSqlInvalidMachineStateError]
           }
         ): _*
+      )
+    }
+
+    "fail when no transition exist" in {
+      val machine = mkMachine
+      machine.receive(machine.Authenticating, BackendMessage.PortalSuspended) must throwA[PgSqlNoSuchTransition](
+        "HandshakeMachine"
       )
     }
   }

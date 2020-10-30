@@ -11,6 +11,7 @@ import com.twitter.finagle.postgresql.FrontendMessage.Describe
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.FrontendMessage.Parse
 import com.twitter.finagle.postgresql.FrontendMessage.Sync
+import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Types.Name
@@ -74,6 +75,13 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
 
     "support NoData describe response" in prop { (name: Name, query: String, parametersTypes: IndexedSeq[Oid]) =>
       nominalSpec(name, query, parametersTypes, NoData)
+    }
+
+    "fail when no transition exist" in {
+      val machine = mkMachine(Name.Unnamed, "bogus")
+      machine.receive(machine.Parsing, BackendMessage.PortalSuspended) must throwA[PgSqlNoSuchTransition](
+        "PrepareMachine"
+      )
     }
   }
 }

@@ -14,6 +14,7 @@ import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.FrontendMessage.Execute
 import com.twitter.finagle.postgresql.FrontendMessage.Flush
 import com.twitter.finagle.postgresql.FrontendMessage.Sync
+import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Request
@@ -153,6 +154,13 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
             }
           }
         }
+    }
+
+    "fail when no transition exist" in {
+      val machine = mkMachine(Name.Unnamed, Name.Unnamed, IndexedSeq.empty)
+      machine.receive(machine.Binding, BackendMessage.PortalSuspended) must throwA[PgSqlNoSuchTransition](
+        "ExecuteMachine"
+      )
     }
 
   }
