@@ -78,6 +78,15 @@ class PgBufSpec extends Specification with PropertiesSpec {
     }
     fragments[Int]("int")(_.int(_))(_.int())(_.putInt(_))
     fragments[Long]("long")(_.long(_))(_.long())(_.putLong(_))
+    fragments[NumericSign]("numericSign")(_.numericSign(_))(_.numericSign()) { (bb, n) =>
+      n match {
+        case NumericSign.Positive => bb.putShort(0.toShort)
+        case NumericSign.Negative => bb.putShort(0x4000.toShort)
+        case NumericSign.NaN => bb.putShort(0xc000.toShort)
+        case NumericSign.Infinity => bb.putShort(0xd000.toShort)
+        case NumericSign.NegInfinity => bb.putShort(0xf000.toShort)
+      }
+    }
     fragments[Numeric]("numeric")(_.numeric(_))(_.numeric()) { (bb, n) =>
       bb.putShort(n.digits.length.toShort)
       bb.putShort(n.weight)
@@ -122,6 +131,11 @@ class PgBufSpec extends Specification with PropertiesSpec {
       format match {
         case Format.Text => bb.putShort(0)
         case Format.Binary => bb.putShort(1)
+      }
+    }
+    "format" should {
+      "fail when invalid" in {
+        PgBuf.reader(Buf.ByteArray(0, 3)).format() must throwA[RuntimeException]("unexpected format value 3")
       }
     }
     fragments[List[Int]]("foreach")(_.foreach(_)(_.int(_)))(_.collect(_.int()).toList) { (bb, xs) =>
