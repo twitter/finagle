@@ -1,7 +1,7 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle.filter
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.exp.DarkTrafficFilter.DarkRequestAnnotation
+import com.twitter.finagle.filter.DarkTrafficFilter.DarkRequestAnnotation
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.ForwardAnnotation
 import com.twitter.util.{Future, Promise}

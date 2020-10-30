@@ -14,6 +14,13 @@ New Features
   `SslClientEngineFactory` acts as a better example of how to build custom client and server engine
   factories in order to reuse SSL contexts for performance concerns. ``PHAB_ID=D572567``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Move `DarkTrafficFilter` and `AbstractDarkTrafficFilter` from the experimental
+  finagle-exp to supported finagle-core. The package containing these classes changed from
+  `c.t.finagle.exp` to `c.t.finagle.filter`. ``PHAB_ID=D572384``
+
 20.10.0
 -------
 

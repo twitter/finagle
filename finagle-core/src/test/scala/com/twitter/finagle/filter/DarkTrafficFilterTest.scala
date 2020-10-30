@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle.filter
 
 import com.twitter.conversions.DurationOps.RichDuration
 import com.twitter.finagle.client.utils.StringClient
