@@ -90,14 +90,14 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         val invalid = ValueReads.simple(PgType.Int4)(_.short())
         val read = invalid.reads(PgType.Int4, Buf.ByteArray(0, 0, 0, 0), utf8)
 
-        read.get must throwA[PgSqlClientError](
+        read.get() must throwA[PgSqlClientError](
           "Reading value of type int4 should have consumed the whole value's buffer, but 2 bytes remained."
         )
       }
       "fail when the value is null" in {
         val valid = ValueReads.simple(PgType.Int4)(_.int())
         val read = valid.reads(PgType.Int4, WireValue.Null, utf8)
-        read.get must throwA[IllegalArgumentException](
+        read.get() must throwA[IllegalArgumentException](
           "Type int4 has no reasonable null value. If you intended to make this field nullable, you must read it as an Option\\[T\\]."
         )
       }
@@ -132,7 +132,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       "reject nona=-array types when reading" in {
         val readsIntList = ValueReads.traversableReads[List, Int](ValueReads.readsInt, implicitly)
         val read = readsIntList.reads(PgType.Int4, Buf.Empty, utf8)
-        read.get must throwA[PgSqlClientError](s"Type int4 is not an array type and cannot be read as such.")
+        read.get() must throwA[PgSqlClientError](s"Type int4 is not an array type and cannot be read as such.")
       }
 
       "support empty lists" in {
@@ -146,7 +146,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         )
         val arrayBuf = PgBuf.writer.array(pgArray).build
         val read = readsIntList.reads(PgType.Int4Array, arrayBuf, utf8)
-        read.asScala must beSuccessfulTry(Nil)
+        read.asScala must beSuccessfulTry(be_==(Nil))
       }
 
       "fail for multi-dimensional arrays" in {
@@ -162,7 +162,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         val arrayBuf = PgBuf.writer.array(pgArray).build
         val read = readsIntList.reads(PgType.Int4Array, arrayBuf, utf8)
 
-        read.get must throwA[PgSqlClientError](
+        read.get() must throwA[PgSqlClientError](
           "Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got 2"
         )
       }

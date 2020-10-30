@@ -120,12 +120,12 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
   "MessageDecoder" should {
     "fail when packet is not identified" in {
       val decoded = MessageDecoder.fromPacket(Packet(None, Buf.Empty))
-      decoded.get must throwA[IllegalStateException]("invalid backend packet, missing message type.")
+      decoded.get() must throwA[IllegalStateException]("invalid backend packet, missing message type.")
     }
 
     "fail when decoder is not implemented" in {
       val decoded = MessageDecoder.fromPacket(Packet(Some(' '), Buf.Empty))
-      decoded.get must throwA[PgSqlClientError](s"unimplemented message ' '")
+      decoded.get() must throwA[PgSqlClientError](s"unimplemented message ' '")
     }
 
     "ErrorResponse" should decodeFragment(MessageDecoder.errorResponseDecoder) { msg =>
