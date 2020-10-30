@@ -30,7 +30,6 @@ object Request {
    *   }
    * }}}
    *
-   *
    * @see [[Response.ConnectionParameters]]
    */
   case object ConnectionParameters extends Request
