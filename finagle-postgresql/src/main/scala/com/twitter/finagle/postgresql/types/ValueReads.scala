@@ -119,12 +119,13 @@ object ValueReads {
     treads: ValueReads[T],
     f: Factory[T, F[T]]
   ): ValueReads[F[T]] = new ValueReads[F[T]] {
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[F[T]] = {
-      val underlying = tpe.kind match {
-        case Kind.Array(underlying) => underlying
-        case _ => throw new PgSqlClientError(s"Type ${tpe.name} is not an array type and cannot be read as such.")
-      }
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[F[T]] =
       Try {
+        val underlying = tpe.kind match {
+          case Kind.Array(underlying) => underlying
+          case _ => throw new PgSqlClientError(s"Type ${tpe.name} is not an array type and cannot be read as such.")
+        }
+
         val array = PgBuf.reader(buf).array()
         if (array.dimensions > 1) {
           throw PgSqlUnsupportedError(
@@ -137,7 +138,6 @@ object ValueReads {
         }
         builder.result()
       }
-    }
 
     override def accepts(tpe: PgType): Boolean =
       tpe.kind match {
