@@ -10,6 +10,11 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: Add a new stat (histogram) that reports how long a task has been sitting in the
+  offload queue. This instrumentation is sampled at the given interval (100ms by default) that
+  can be overridden with a global flag `com.twitter.finagle.offload.delaySampleInterval`.
+  ``PHAB_ID=D571980``
+
 * finagle-core: Add a new experimental flag `com.twitter.finagle.offload.queueSize` that allows to
   put bounds on the offload queue. Any excess work that can't be offloaded due to a queue overflow
   is run on IO (Netty) thread instead. Put this way, this flag enables the simplest form of

@@ -76,6 +76,11 @@ These metrics correspond to the state of the offload filter thread pool when con
 **finagle/offload_pool/queue_depth**
   A Gauge of the number of tasks that are waiting to be executed.
 
+**finagle/offload_pool/delay_ms**
+  A histogram reporting offloading delay - how long a task has been sitting in the offload queue
+  before it gets executed. For efficiency reasons, this stat is sampled each
+  `com.twitter.finagle.offload.delaySampleInterval` interval.
+
 Timer
 <<<<<
 

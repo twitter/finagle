@@ -3,12 +3,12 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.filter.OffloadFilter.OffloadThreadPool
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Awaitable, Future, FuturePool, Promise}
+import com.twitter.util.{Await, Awaitable, Future, FuturePool, MockTimer, Promise, Time}
 import com.twitter.finagle.util.DefaultTimer.Implicit
 import java.util.concurrent.{CountDownLatch, Executors}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import scala.collection.mutable.ArrayBuffer
 
 class OffloadFilterTest extends FunSuite with BeforeAndAfterAll {
   private class ExpectedException extends Exception("boom")
@@ -157,9 +157,50 @@ class OffloadFilterTest extends FunSuite with BeforeAndAfterAll {
     assert(await(Contexts.local.let(key, 4) { s() }) == Some(4))
   }
 
+  class MockFuturePool extends FuturePool {
+    private val queue = ArrayBuffer.empty[() => Any]
+    def apply[T](f: => T): Future[T] = {
+      queue += { () => f }
+      Future.never
+    }
+
+    def runAll(): Unit = {
+      queue.foreach(f => f())
+      queue.clear()
+    }
+
+    def isEmpty: Boolean = queue.isEmpty
+  }
+
+  test("sample delay should sample the delay") {
+    val stats = new InMemoryStatsReceiver
+    val pool = new MockFuturePool
+    val timer = new MockTimer
+    val sampleDelay = new OffloadFilter.SampleDelay(pool, stats.stat("delay"), timer)
+    Time.withCurrentTimeFrozen { ctrl =>
+      sampleDelay()
+
+      ctrl.advance(50.milliseconds)
+      pool.runAll()
+      assert(stats.stats(Seq("delay")) == Seq(50))
+      assert(timer.tasks.nonEmpty)
+      assert(pool.isEmpty)
+
+      ctrl.advance(50.milliseconds)
+      timer.tick()
+      assert(timer.tasks.isEmpty)
+      assert(!pool.isEmpty)
+
+      ctrl.advance(200.milliseconds)
+      pool.runAll()
+
+      assert(stats.stats(Seq("delay")) == Seq(50, 200))
+    }
+  }
+
   test("rejection handler does what it's supposed to do") {
     val stats = new InMemoryStatsReceiver
-    val pool = new OffloadThreadPool(1, 1, stats)
+    val pool = new OffloadFilter.OffloadThreadPool(1, 1, stats)
     val blockOnMe = new Promise[Unit] with Runnable {
       def run(): Unit = Await.result(this)
     }

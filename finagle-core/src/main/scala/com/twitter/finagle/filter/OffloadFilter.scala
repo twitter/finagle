@@ -2,16 +2,21 @@ package com.twitter.finagle.filter
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.offload.{queueSize, numWorkers}
-import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, Stat, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.util.{
   ExecutorServiceFuturePool,
   Future,
   FutureNonLocalReturnControl,
   FuturePool,
-  Promise
+  Promise,
+  Stopwatch,
+  Time,
+  Timer
 }
+import scala.com.twitter.finagle.offload.delaySampleInterval
 import java.util.concurrent.{
   ExecutorService,
   LinkedBlockingQueue,
@@ -28,6 +33,30 @@ import scala.runtime.NonLocalReturnControl
  * This filter can be enabled by default through the flag `com.twitter.finagle.offload.numWorkers`.
  */
 object OffloadFilter {
+
+  private[finagle] final class SampleDelay(pool: FuturePool, stat: Stat, timer: Timer)
+      extends (() => Unit) {
+    private class Task extends (() => Unit) {
+      private val submitted = Stopwatch.start()
+
+      def apply(): Unit = {
+        val delay = submitted()
+        stat.add(delay.inMilliseconds)
+
+        val nextAt = Time.now + delaySampleInterval() - delay
+        // NOTE: if the delay happened to be longer than the sampling interval, the nextAt would be
+        // negative. Scheduling a task under a negative time would force the Timer to treat it as
+        // "run now". Thus the offloading delay is sampled at either 'sampleInterval' or 'delay',
+        // whichever is longer.
+        timer.schedule(nextAt)(SampleDelay.this())
+      }
+    }
+
+    def apply(): Unit = {
+      val task = new Task
+      pool(task())
+    }
+  }
 
   /**
    * This handler is run when the submitted work is rejected from the ThreadPool, usually because
@@ -73,14 +102,18 @@ object OffloadFilter {
   private[this] val ClientAnnotationKey = "clnt/finagle.offload_pool_size"
   private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"
 
-  private[this] lazy val defaultPool = {
-    numWorkers.get match {
-      case None => None
-      case Some(threads) =>
-        val stats = FinagleStatsReceiver.scope("offload_pool")
-        val pool = new OffloadFuturePool(new OffloadThreadPool(threads, queueSize(), stats), stats)
+  private[this] lazy val global: Option[FuturePool] = {
+    numWorkers.get.map { threads =>
+      val stats = FinagleStatsReceiver.scope("offload_pool")
+      val pool = new OffloadFuturePool(new OffloadThreadPool(threads, queueSize(), stats), stats)
 
-        Some(pool)
+      // Start sampling the offload delay if the interval isn't Duration.Top.
+      if (delaySampleInterval().isFinite && !delaySampleInterval().isZero) {
+        val sampleDelay = new SampleDelay(pool, stats.stat("delay_ms"), DefaultTimer)
+        sampleDelay()
+      }
+
+      pool
     }
   }
 
@@ -94,7 +127,7 @@ object OffloadFilter {
     final case object Disabled extends Param
 
     implicit val param: Stack.Param[Param] = new Stack.Param[Param] {
-      lazy val default: Param = defaultPool.map(Enabled(_)).getOrElse(Disabled)
+      lazy val default: Param = global.map(Enabled.apply).getOrElse(Disabled)
 
       override def show(p: Param): Seq[(String, () => String)] = {
         val enabledStr = p match {
