@@ -68,6 +68,11 @@ These metrics correspond to the state of the offload filter thread pool when con
 **finagle/offload_pool/completed_tasks**
   A gauge of the number of total tasks that have completed execution.
 
+**finagle/offload_pool/not_offloaded_tasks**
+  A counter of how many tasks weren't offloaded because the queue has grown over a proposed limit
+  (set via a flag `com.twitter.finagle.offload.queueSize`). If a task can't be offloaded it is run
+  the caller thread which is commonly a Netty IO worker.
+
 **finagle/offload_pool/queue_depth**
   A Gauge of the number of tasks that are waiting to be executed.
 

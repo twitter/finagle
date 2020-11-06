@@ -1,8 +1,8 @@
 package com.twitter.finagle.filter
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.offload.numWorkers
-import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.finagle.offload.{queueSize, numWorkers}
+import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.util.{
@@ -12,7 +12,13 @@ import com.twitter.util.{
   FuturePool,
   Promise
 }
-import java.util.concurrent.{ExecutorService, Executors, ThreadPoolExecutor}
+import java.util.concurrent.{
+  ExecutorService,
+  LinkedBlockingQueue,
+  RejectedExecutionHandler,
+  ThreadPoolExecutor,
+  TimeUnit
+}
 import scala.runtime.NonLocalReturnControl
 
 /**
@@ -23,33 +29,58 @@ import scala.runtime.NonLocalReturnControl
  */
 object OffloadFilter {
 
+  /**
+   * This handler is run when the submitted work is rejected from the ThreadPool, usually because
+   * its work queue has reached the proposed limit. When that happens, we simply run the work on
+   * the current thread (a thread that was trying to offload), which is most commonly a Netty IO
+   * worker.
+   */
+  private[finagle] final class RunsOnNettyThread(rejections: Counter)
+      extends RejectedExecutionHandler {
+    def rejectedExecution(r: Runnable, e: ThreadPoolExecutor): Unit = {
+      if (!e.isShutdown) {
+        rejections.incr()
+        r.run()
+      }
+    }
+  }
+
+  private[finagle] final class OffloadThreadPool(
+    poolSize: Int,
+    queueSize: Int,
+    stats: StatsReceiver)
+      extends ThreadPoolExecutor(
+        poolSize /*corePoolSize*/,
+        poolSize /*maximumPoolSize*/,
+        0L /*keepAliveTime*/,
+        TimeUnit.MILLISECONDS,
+        new LinkedBlockingQueue[Runnable](queueSize) /*workQueue*/,
+        new NamedPoolThreadFactory("finagle/offload", makeDaemons = true) /*threadFactory*/,
+        new RunsOnNettyThread(stats.counter("not_offloaded_tasks")))
+
+  private final class OffloadFuturePool(executor: ThreadPoolExecutor, stats: StatsReceiver)
+      extends ExecutorServiceFuturePool(executor) {
+    private val gauges = Seq(
+      stats.addGauge("pool_size") { poolSize },
+      stats.addGauge("active_tasks") { numActiveTasks },
+      stats.addGauge("completed_tasks") { numCompletedTasks },
+      stats.addGauge("queue_depth") { executor.getQueue.size }
+    )
+  }
+
   private[this] val Role = Stack.Role("OffloadWorkFromIO")
   private[this] val Description = "Offloading computations from IO threads"
   private[this] val ClientAnnotationKey = "clnt/finagle.offload_pool_size"
   private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"
 
-  private[this] lazy val (defaultPool, defaultPoolStats) = {
+  private[this] lazy val defaultPool = {
     numWorkers.get match {
-      case None =>
-        (None, Seq.empty)
+      case None => None
       case Some(threads) =>
-        val factory = new NamedPoolThreadFactory("finagle/offload", makeDaemons = true)
-        val threadPool = Executors.newFixedThreadPool(threads, factory)
-        val pool = new ExecutorServiceFuturePool(threadPool)
-
         val stats = FinagleStatsReceiver.scope("offload_pool")
-        val gauges = Seq(
-          stats.addGauge("pool_size") { pool.poolSize },
-          stats.addGauge("active_tasks") { pool.numActiveTasks },
-          stats.addGauge("completed_tasks") { pool.numCompletedTasks },
-          stats.addGauge("queue_depth") {
-            threadPool match {
-              case executor: ThreadPoolExecutor => executor.getQueue.size
-              case _ => -1
-            }
-          }
-        )
-        (Some(pool), gauges)
+        val pool = new OffloadFuturePool(new OffloadThreadPool(threads, queueSize(), stats), stats)
+
+        Some(pool)
     }
   }
 

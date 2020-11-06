@@ -10,6 +10,11 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: Add a new experimental flag `com.twitter.finagle.offload.queueSize` that allows to
+  put bounds on the offload queue. Any excess work that can't be offloaded due to a queue overflow
+  is run on IO (Netty) thread instead. Put this way, this flag enables the simplest form of
+  backpressure on the link between Netty and OffloadFilter. ``PHAB_ID=D573328``
+
 * finagle-netty4: Add `ExternalClientEngineFactory` to the open source version of Finagle. This
   `SslClientEngineFactory` acts as a better example of how to build custom client and server engine
   factories in order to reuse SSL contexts for performance concerns. ``PHAB_ID=D572567``

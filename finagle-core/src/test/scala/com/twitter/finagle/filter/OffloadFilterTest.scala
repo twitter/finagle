@@ -3,6 +3,8 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.filter.OffloadFilter.OffloadThreadPool
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, FuturePool, Promise}
 import com.twitter.finagle.util.DefaultTimer.Implicit
 import java.util.concurrent.{CountDownLatch, Executors}
@@ -153,5 +155,33 @@ class OffloadFilterTest extends FunSuite with BeforeAndAfterAll {
       new OffloadFilter.Server[Unit, Option[Int]](FuturePool.interruptible(executor)).andThen(next)
     assert(await(s()) == None)
     assert(await(Contexts.local.let(key, 4) { s() }) == Some(4))
+  }
+
+  test("rejection handler does what it's supposed to do") {
+    val stats = new InMemoryStatsReceiver
+    val pool = new OffloadThreadPool(1, 1, stats)
+    val blockOnMe = new Promise[Unit] with Runnable {
+      def run(): Unit = Await.result(this)
+    }
+
+    // block the only worker we have
+    pool.submit(blockOnMe)
+
+    // Take up a slot in the queue
+    pool.submit(new Runnable {
+      def run(): Unit = ()
+    })
+    assert(stats.counters(Seq("not_offloaded_tasks")) == 0)
+
+    // Submit a task for rejection
+    var caller: Thread = null
+    pool.submit(new Runnable {
+      def run(): Unit = caller = Thread.currentThread()
+    })
+
+    assert(caller eq Thread.currentThread())
+    assert(stats.counters(Seq("not_offloaded_tasks")) == 1)
+    blockOnMe.setDone()
+    pool.shutdown()
   }
 }
