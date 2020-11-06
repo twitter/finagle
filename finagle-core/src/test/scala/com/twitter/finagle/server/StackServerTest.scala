@@ -5,7 +5,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
-import com.twitter.finagle.filter.{RequestSemaphoreFilter, ServerAdmissionControl}
+import com.twitter.finagle.filter.RequestSemaphoreFilter
 import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
@@ -144,43 +144,6 @@ class StackServerTest extends FunSuite with Eventually {
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), factory)
     Await.result(server.close(), 2.seconds)
     assert(serviceFactoryClosed.isDefined)
-  }
-
-  test("ensure onServerClosed Promise is satisfied upon server close") {
-    val wasPromiseSatisfied = new Promise[Unit]
-
-    class ClosingFilter[Req, Rep](onServerClose: Future[Unit]) extends SimpleFilter[Req, Rep] {
-      def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-        service(req)
-      }
-      onServerClose.onSuccess { _ => wasPromiseSatisfied.setDone() }
-    }
-
-    object ClosingFilter2 {
-      val name = "closing filter"
-
-      val mkFilter = { params: ServerAdmissionControl.ServerParams =>
-        new Filter.TypeAgnostic {
-          def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-            new ClosingFilter[Req, Rep](onServerClose = params.onServerClose)
-        }
-      }
-    }
-    try {
-      ServerAdmissionControl.register(ClosingFilter2.name, ClosingFilter2.mkFilter)
-      val echo = ServiceFactory.const(Service.mk[String, String](s => Future.value(s)))
-      val stack = StackServer.newStack[String, String] ++ Stack.leaf(Endpoint, echo)
-      val factory = ServiceFactory.const(Service.const[String](Future.value("hi")))
-
-      val server = StringServer.server
-        .withStack(stack)
-        .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), factory)
-
-      Await.ready(server.close(), 5.seconds)
-      assert(wasPromiseSatisfied.isDefined)
-    } finally {
-      ServerAdmissionControl.unregister(ClosingFilter2.name)
-    }
   }
 
   test("Rejections from RequestSemaphoreFilter are captured in stats") {
