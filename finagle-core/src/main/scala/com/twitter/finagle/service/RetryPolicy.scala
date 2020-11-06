@@ -21,9 +21,9 @@ import scala.collection.JavaConverters._
  * a [[Duration]] field for how long to wait for the next retry as well
  * as the next `RetryPolicy` to use.
  *
- * Finagle will handle retryable Throws automatically but you will need to
- * supply a custom [[ResponseClassifier]] to inform Finagle which application
- * level exceptions are retryable.
+ * Finagle will automatically handle retryable Throws. Requests that
+ * have not been written to or processed by a remote service are safe to
+ * retry.
  *
  * @see [[SimpleRetryPolicy]] for a Java friendly API.
  */
