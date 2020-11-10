@@ -27,6 +27,10 @@ New Features
 * finagle-core: Provide `com.twitter.finagle.naming.DisplayBoundName` for configuring how to
   display the bound `Name` for a given client in metrics metadata. ``PHAB_ID=D573905``
 
+* finagle-core: Provide `ClientParamsInjector`, a class that will be service-loaded at run-time
+  by Finagle clients, and will allow generic configuration of all sets of parameters.
+  ``PHAB_ID=D574861``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

@@ -109,6 +109,8 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
     params: Stack.Params = this.params
   ): This
 
+  protected def injectors: Seq[ClientParamsInjector] = StackClient.DefaultInjectors.injectors
+
   /**
    * @inheritdoc
    *
@@ -143,10 +145,11 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
       new RelativeNameMarkingStatsReceiver(stats.scope(clientLabel)),
       Client)
 
-    val clientParams = params +
-      Label(clientLabel) +
-      Stats(clientSr) +
-      BindingFactory.Dest(dest)
+    val clientParams = injectors.foldLeft(
+      params +
+        Label(clientLabel) +
+        Stats(clientSr) +
+        BindingFactory.Dest(dest)) { case (prms, injector) => injector(prms) }
 
     clientStack.make(clientParams)
   }

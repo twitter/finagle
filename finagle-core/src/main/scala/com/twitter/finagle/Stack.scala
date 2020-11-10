@@ -478,6 +478,13 @@ object Stack {
     def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]]
   }
 
+  /**
+   * Encodes parameter injection for [[Stack.Params]]
+   */
+  trait ParamsInjector {
+    def apply(params: Stack.Params): Stack.Params
+  }
+
   trait Transformable[+T] {
 
     /**
@@ -676,10 +683,22 @@ object Stack {
  * discouraged. Modifying params via transformers creates subtle dependencies
  * between modules and makes it difficult to reason about the value of
  * params, as it may change depending on the module's placement in the stack.
+ * Whenever possible, [[ClientParamsInjector]] should be used instead.
  */
 abstract class StackTransformer extends Stack.Transformer {
   def name: String
   override def toString: String = s"StackTransformer(name=$name)"
+}
+
+/**
+ * ClientsParamsInjector is the standard mechanism for injecting params into
+ * the client.  It is a ``Stack.ParamsInjector`` with a name.  The injection
+ * will run at materialization time for Finagle clients, so that the parameters
+ * for a Stack will be injected in a consistent way.
+ */
+abstract class ClientParamsInjector extends Stack.ParamsInjector {
+  def name: String
+  override def toString: String = s"ClientParamsInjector(name=$name)"
 }
 
 /**

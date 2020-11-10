@@ -5,6 +5,7 @@ import com.twitter.finagle.exp.FinagleScheduler
 import com.twitter.finagle.loadbalancer.aperture
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
 import com.twitter.finagle.stats.{DefaultStatsReceiver, FinagleStatsReceiver}
+import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.util.{DefaultLogger, LoadService}
 import com.twitter.jvm.JvmStats
@@ -110,6 +111,11 @@ private[twitter] object Init {
     _finagleBuildRevision.set(p.getProperty("build_revision", unknownVersion))
 
     LoadService[StackTransformer]().foreach { nt => StackServer.DefaultTransformer.append(nt) }
+    // we split out params injection from stack transformation because params are typically
+    // injected at the top of the stack, and it can create confusing deps to inject them via
+    // StackTransformers.  at the same time, we occasionally want to inject parameters
+    // before we ever call Stack#make.  this gives us an opportunity to do it.
+    LoadService[ClientParamsInjector]().foreach { nt => StackClient.DefaultInjectors.append(nt) }
 
     log.info(
       "Finagle version %s (rev=%s) built at %s".format(

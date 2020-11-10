@@ -13,6 +13,7 @@ import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{ClientStatsReceiver, LoadedHostStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.util.registry.GlobalRegistry
+import scala.collection.immutable.Queue
 
 object StackClient {
 
@@ -434,6 +435,19 @@ object StackClient {
     Stack.Params.empty +
       Stats(ClientStatsReceiver) +
       LoadBalancerFactory.HostStats(LoadedHostStatsReceiver)
+
+  /**
+   * A set of ClientParamsInjectors for transforming client params.
+   */
+  private[finagle] object DefaultInjectors {
+    @volatile private var underlying = Queue.empty[ClientParamsInjector]
+
+    def append(injector: ClientParamsInjector): Unit =
+      synchronized { underlying = underlying :+ injector }
+
+    def injectors: Seq[ClientParamsInjector] =
+      underlying
+  }
 }
 
 /**

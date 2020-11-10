@@ -16,7 +16,7 @@ import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.finagle.util.StackRegistry
+import com.twitter.finagle.util.{StackRegistry, TestParam}
 import com.twitter.finagle.{Name, param}
 import com.twitter.util._
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
@@ -752,5 +752,38 @@ abstract class AbstractStackClientTest
     }
 
     assert(failure.toString == "Failure(boom!, flags=0x00) with Service -> stringClient")
+  }
+
+  test("Injects the appropriate params") {
+    val listeningServer = StringServer.server
+      .serve(":*", Service.mk[String, String](Future.value))
+    val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
+    val label = "stringClient"
+
+    var testParamValue = 0
+
+    val verifyModule = new Stack.Module1[TestParam, ServiceFactory[String, String]] {
+      val role = Stack.Role("verify")
+      val description = "Verifies the value of the test param"
+
+      def make(testParam: TestParam, next: ServiceFactory[String, String]): ServiceFactory[String, String] = {
+        testParamValue = testParam.p1
+        new SimpleFilter[String, String] {
+          def apply(request: String, service: Service[String, String]): Future[String] = {
+            Future.value("world")
+          }
+        }.andThen(next)
+      }
+    }
+
+    // push the verification module onto the stack.  doesn't really matter where in the stack it
+    // goes
+    val svc = baseClient
+      .withStack(verifyModule +: _)
+      .newService(Name.bound(Address(boundAddress)), label)
+
+    await(svc("hello"))
+
+    assert(testParamValue == 37)
   }
 }
