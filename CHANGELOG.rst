@@ -24,6 +24,9 @@ New Features
   `SslClientEngineFactory` acts as a better example of how to build custom client and server engine
   factories in order to reuse SSL contexts for performance concerns. ``PHAB_ID=D572567``
 
+* finagle-core: Provide `com.twitter.finagle.naming.DisplayBoundName` for configuring how to
+  display the bound `Name` for a given client in metrics metadata. ``PHAB_ID=D573905``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

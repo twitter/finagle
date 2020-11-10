@@ -2,6 +2,7 @@ package com.twitter.finagle.naming
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats._
 import com.twitter.finagle.tracing.{Annotation, NullTracer, Record, Trace, TraceId, Tracer}
@@ -26,6 +27,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   import BindingFactoryTest._
 
   var saveBase: Dtab = Dtab.empty
+
+  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 
   before {
     saveBase = Dtab.base
@@ -87,7 +90,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     def newWith(localDtab: Dtab): Service[Unit, Var[Addr]] = {
       Dtab.unwind {
         Dtab.local = localDtab
-        Await.result(factory())
+        await(factory())
       }
     }
   }
@@ -131,7 +134,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
         }
       tc.advance(5678.microseconds)
       v() = Activity.Ok(NameTree.Leaf(Name.Path(Path.read("/test1010"))))
-      Await.result(Await.result(f).close())
+      await(await(f).close())
 
       val expected = Map(
         Seq("bind_latency_us") -> Seq(5678.0)
@@ -144,7 +147,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   test("Uses Dtab.base")(new Ctx {
     val n1 = Dtab.read("/foo/bar=>/test1010")
     val s1 = newWith(n1)
-    val v1 = Await.result(s1(()))
+    val v1 = await(s1(()))
     assert(v1.sample() == Addr.Bound(Address(1010)))
 
     s1.close()
@@ -155,7 +158,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     Dtab.base ++= Dtab.read("/test1010=>/$/inet/1011")
     val n1 = Dtab.read("/foo/bar=>/test1010")
     val s1 = newWith(n1)
-    val v1 = Await.result(s1(()))
+    val v1 = await(s1(()))
     assert(v1.sample() == Addr.Bound(Address(1011)))
 
     s1.close()
@@ -163,7 +166,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
   test("Includes path in NoBrokersAvailableException")(new Ctx {
     val noBrokers = intercept[NoBrokersAvailableException] {
-      Await.result(factory())
+      await(factory())
     }
 
     assert(noBrokers.name == "/foo/bar")
@@ -200,7 +203,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     val noBrokers = intercept[NoBrokersAvailableException] {
       Dtab.unwind {
         Dtab.local = localDtab
-        Await.result(factory())
+        await(factory())
       }
     }
 
@@ -213,7 +216,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       {
         val n1 = Dtab.read("/foo/bar=>/test1010")
         val s1 = newWith(n1)
-        val v1 = Await.result(s1(()))
+        val v1 = await(s1(()))
         s1.close()
       },
       Seq(
@@ -231,7 +234,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     val n4 = Dtab.read("/foo/bar=>/$/inet/4")
 
     assert(news == 0)
-    Await.result(newWith(n1).close() before newWith(n1).close())
+    await(newWith(n1).close() before newWith(n1).close())
     assert(news == 1)
     assert(closes == 0)
 
@@ -253,7 +256,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     s1.close()
     assert(closes == 2)
 
-    Await.result(newWith(n2).close() before newWith(n3).close())
+    await(newWith(n2).close() before newWith(n3).close())
     assert(news == 4)
     assert(closes == 2)
   })
@@ -265,31 +268,31 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     val n4 = Dtab.read("/foo/bar=>/$/inet/3")
 
     assert(news == 0)
-    Await.result(newWith(n1).close() before newWith(n1).close())
+    await(newWith(n1).close() before newWith(n1).close())
     assert(news == 1)
     assert(closes == 0)
 
-    Await.result(newWith(n2).close())
+    await(newWith(n2).close())
     assert(news == 1)
     assert(closes == 0)
 
-    Await.result(newWith(n3).close())
+    await(newWith(n3).close())
     assert(news == 2)
     assert(closes == 0)
 
-    Await.result(newWith(n4).close())
+    await(newWith(n4).close())
     assert(news == 3)
     assert(closes == 1)
 
-    Await.result(newWith(n3).close())
+    await(newWith(n3).close())
     assert(news == 3)
     assert(closes == 1)
 
-    Await.result(newWith(n1).close())
+    await(newWith(n1).close())
     assert(news == 4)
     assert(closes == 2)
 
-    Await.result(newWith(n2).close())
+    await(newWith(n2).close())
     assert(news == 4)
     assert(closes == 2)
   })
@@ -309,8 +312,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
     val params = Stack.Params.empty + BindingFactory.Dest(name)
     val factory = module.toStack(end).make(params)
-    val service = Await.result(factory())
-    val full = Await.result(service(Path.read("/omega")))
+    val service = await(factory())
+    val full = await(service(Path.read("/omega")))
     assert(full == Path.read("/alpha/omega"))
   }
 
@@ -341,7 +344,87 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       .push(BindingFactory.module[String, String])
       .make(params)
 
-    val service = Await.result(factory())
-    Await.result(service("foo"))
+    val service = await(factory())
+    await(service("foo"))
+  }
+
+  test("BindingFactory.Module: augments metrics metadata with path info") {
+    val unbound = Name.Path(Path.read("/foo"))
+    val baseDtab = () => Dtab.base ++ Dtab.read("/foo => /$/inet/1")
+    val stats = new InMemoryStatsReceiver()
+
+    val verifyModule =
+      new Stack.Module1[Stats, ServiceFactory[String, String]] {
+        val role = Stack.Role("verifyModule")
+        val description = "Verify that the stats were modified properly"
+
+        def make(statsParam: Stats, next: ServiceFactory[String, String]) = {
+          val Stats(stats) = statsParam
+          stats.counter("foo").incr()
+          stats.stat("bar").add(1)
+          stats.addGauge("baz") { 0 }
+          ServiceFactory.const(Service.mk[String, String](Future.value))
+        }
+      }
+
+    val params =
+      Stack.Params.empty + BindingFactory.Dest(unbound) + BindingFactory.BaseDtab(baseDtab) + Stats(stats)
+
+    val factory = new StackBuilder[ServiceFactory[String, String]](nilStack[String, String])
+      .push(verifyModule)
+      .push(BindingFactory.module[String, String])
+      .make(params)
+
+    val service = await(factory())
+    await(service("foo"))
+    assert(stats.schemas(Seq("foo")).metricBuilder.processPath.get == "/$/inet/1")
+    assert(stats.counters(Seq("foo")) == 1)
+    assert(stats.schemas(Seq("bar")).metricBuilder.processPath.get == "/$/inet/1")
+    assert(stats.stats(Seq("bar")) == Seq(1))
+    assert(stats.schemas(Seq("baz")).metricBuilder.processPath.get == "/$/inet/1")
+    assert(stats.gauges(Seq("baz"))() == 0)
+  }
+
+  test("BindingFactory.Module: DisplayNameBound allows configuring how a bound name is shown") {
+    val unbound = Name.Path(Path.read("/foo"))
+    val baseDtab = () => Dtab.base ++ Dtab.read("/foo => /$/inet/1")
+    val stats = new InMemoryStatsReceiver()
+    val displayFn = { bound: Name.Bound =>
+      bound.id match {
+        case path: Path => path.show.reverse
+        case _ => fail
+      }
+    }
+
+    val verifyModule =
+      new Stack.Module1[Stats, ServiceFactory[String, String]] {
+        val role = Stack.Role("verifyModule")
+        val description = "Verify that the stats were modified properly"
+
+        def make(statsParam: Stats, next: ServiceFactory[String, String]) = {
+          val Stats(stats) = statsParam
+          stats.counter("foo").incr()
+          stats.stat("bar").add(1)
+          stats.addGauge("baz") { 0 }
+          ServiceFactory.const(Service.mk[String, String](Future.value))
+        }
+      }
+
+    val params =
+      Stack.Params.empty + BindingFactory.Dest(unbound) + BindingFactory.BaseDtab(baseDtab) + Stats(stats) + DisplayBoundName(displayFn)
+
+    val factory = new StackBuilder[ServiceFactory[String, String]](nilStack[String, String])
+      .push(verifyModule)
+      .push(BindingFactory.module[String, String])
+      .make(params)
+
+    val service = await(factory())
+    await(service("foo"))
+    assert(stats.schemas(Seq("foo")).metricBuilder.processPath.get == "/$/inet/1".reverse)
+    assert(stats.counters(Seq("foo")) == 1)
+    assert(stats.schemas(Seq("bar")).metricBuilder.processPath.get == "/$/inet/1".reverse)
+    assert(stats.stats(Seq("bar")) == Seq(1))
+    assert(stats.schemas(Seq("baz")).metricBuilder.processPath.get == "/$/inet/1".reverse)
+    assert(stats.gauges(Seq("baz"))() == 0)
   }
 }

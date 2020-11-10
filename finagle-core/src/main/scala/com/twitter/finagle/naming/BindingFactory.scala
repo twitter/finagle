@@ -6,7 +6,7 @@ import com.twitter.finagle.factory.ServiceFactoryCache
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.param
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats._
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.{CachedHashCode, Showable}
 import com.twitter.logging.Logger
@@ -236,6 +236,7 @@ object BindingFactory {
       val Dest(dest) = params[Dest]
       val LoadBalancerFactory.Param(balancer) = params[LoadBalancerFactory.Param]
       val eagerConnections = params[EagerConnections].enabled
+      val DisplayBoundName(displayFn) = params[DisplayBoundName]
 
       // we check if the stack has been explicitly configured to detect misconfiguration
       // and make sure that the underlying balancer supports eagerly connecting to endpoints
@@ -253,6 +254,17 @@ object BindingFactory {
         }
 
       def newStack(errorLabel: String, bound: Name.Bound) = {
+        val displayed = displayFn(bound)
+        val statsWithBoundName = new StatsReceiverProxy {
+          protected def self: StatsReceiver = stats
+          override def stat(schema: HistogramSchema): Stat =
+            stats.stat(HistogramSchema(schema.metricBuilder.withIdentifier(Some(displayed))))
+          override def counter(schema: CounterSchema): Counter =
+            stats.counter(CounterSchema(schema.metricBuilder.withIdentifier(Some(displayed))))
+          override def addGauge(schema: GaugeSchema)(f: => Float): Gauge =
+            stats.addGauge(GaugeSchema(schema.metricBuilder.withIdentifier(Some(displayed))))(f)
+        }
+
         val updatedParams =
           params +
             // replace the possibly unbound Dest with the definitely bound
@@ -260,7 +272,8 @@ object BindingFactory {
             // (2) it seems disingenuous not to.
             Dest(bound) +
             LoadBalancerFactory.Dest(bound.addr) +
-            LoadBalancerFactory.ErrorLabel(errorLabel)
+            LoadBalancerFactory.ErrorLabel(errorLabel) +
+            param.Stats(statsWithBoundName)
 
         // Explicitly disable `EagerConnections` if (1) `eagerlyConnect` is false, indicating that
         // the feature was explicitly disabled or the underlying balancer does not support the eager connections
