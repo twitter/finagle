@@ -38,6 +38,12 @@ Breaking API Changes
   finagle-exp to supported finagle-core. The package containing these classes changed from
   `c.t.finagle.exp` to `c.t.finagle.filter`. ``PHAB_ID=D572384``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Use Scala default implementation to calculate Hashcode and equals method for
+  ServiceFactoryProxy. ``PHAB_ID=D569045``
+
 20.10.0
 -------
 

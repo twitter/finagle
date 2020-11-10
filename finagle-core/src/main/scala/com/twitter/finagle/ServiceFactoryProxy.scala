@@ -8,12 +8,11 @@ import com.twitter.util.{Future, Time}
  * an existing `ServiceFactory`.
  */
 abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
-    extends ServiceFactory[Req, Rep]
-    with Proxy {
+    extends ServiceFactory[Req, Rep] {
   def self: ServiceFactory[Req, Rep] = _self
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = self(conn)
   def close(deadline: Time): Future[Unit] = self.close(deadline)
-
+  override def toString: String = s"${getClass.getName}(${self.toString})"
   override def status: Status = self.status
 }
