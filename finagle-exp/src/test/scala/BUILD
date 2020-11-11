@@ -11,7 +11,6 @@ junit_tests(
         "finagle/finagle-core/src/main",
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-exp",
-        "finagle/finagle-thrift/src/main/java",
         "util/util-core:scala",
         "util/util-stats",
     ],

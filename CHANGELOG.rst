@@ -38,6 +38,12 @@ Breaking API Changes
   finagle-exp to supported finagle-core. The package containing these classes changed from
   `c.t.finagle.exp` to `c.t.finagle.filter`. ``PHAB_ID=D572384``
 
+* finagle-core, finagle-thrift: Move `ForwardingWarmUpFilter` and `ThriftForwardingWarmUpFilter`
+  from the experimental finagle-exp to supported finagle-core, and finagle-thrift, respectively.
+  The package containing `ForwardingWarmUpFilter` changed from `c.t.finagle.exp` to
+  `c.t.finagle.filter`, and the package containing `ThriftForwardingWarmUpFilter` changed from
+  `c.t.finagle.exp` to `c.t.finagle.thrift.filter`. ``PHAB_ID=D573545``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

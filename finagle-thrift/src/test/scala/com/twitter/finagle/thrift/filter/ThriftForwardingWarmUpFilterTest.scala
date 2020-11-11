@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle.thrift.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service

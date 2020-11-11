@@ -746,8 +746,7 @@ lazy val finagleExp = Project(
       "com.netflix.concurrency-limits" % "concurrency-limits-core" % "0.3.0"
     )
   ).dependsOn(
-    finagleCore % "compile->compile;test->test",
-    finagleThrift
+    finagleCore % "compile->compile;test->test"
   )
 
 lazy val finagleGrpcContext = Project(

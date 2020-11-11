@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle.filter
 
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver, Stat}
 import com.twitter.finagle.{SimpleFilter, Service}

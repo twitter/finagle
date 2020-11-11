@@ -1,8 +1,9 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle.thrift.filter
 
-import com.twitter.finagle.thrift.{ThriftClientRequest, ClientId}
-import com.twitter.finagle.{Filter, Service}
+import com.twitter.finagle.filter.ForwardingWarmUpFilter
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
+import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
+import com.twitter.finagle.{Filter, Service}
 import com.twitter.util.Duration
 
 object ThriftForwardingWarmUpFilter {
