@@ -39,6 +39,7 @@ val scalaCollectionCompat = "org.scala-lang.modules" %% "scala-collection-compat
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.8.5"
 val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.11"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
+val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % netty4StaticSslVersion
 val netty4Libs = Seq(
   "io.netty" % "netty-handler" % netty4Version,
   "io.netty" % "netty-transport" % netty4Version,
@@ -53,11 +54,11 @@ val netty4LibsTest = Seq(
   "io.netty" % "netty-transport-native-epoll" % netty4Version % "test" classifier "linux-x86_64",
   // this package is a dep of native-epoll above, explicitly add this for coursier plugin
   "io.netty" % "netty-transport-native-unix-common" % netty4Version % "test",
-  "io.netty" % "netty-handler-proxy" % netty4Version % "test"
+  "io.netty" % "netty-handler-proxy" % netty4Version % "test",
+  netty4StaticSsl % "test"
 )
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
-val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % netty4StaticSslVersion
 val opencensusVersion = "0.24.0"
 val jacksonVersion = "2.11.2"
 val jacksonLibs = Seq(
