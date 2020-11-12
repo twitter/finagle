@@ -25,6 +25,9 @@ class ApertureTest extends FunSuite with ApertureSuite {
    * us avoid down nodes with the important caveat that we only select over a subset.
    */
   private class Bal extends TestBal {
+
+    protected def nodeLoad: Double = 0.0
+
     protected def statsReceiver: StatsReceiver = NullStatsReceiver
     protected class Node(val factory: EndpointFactory[Unit, Unit])
         extends ServiceFactoryProxy[Unit, Unit](factory)
@@ -33,7 +36,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       // We don't need a load metric since this test only focuses on
       // the internal behavior of aperture.
       def id: Int = 0
-      def load: Double = 0
+      def load: Double = nodeLoad
       def pending: Int = 0
       override val token: Int = 0
     }
@@ -476,6 +479,27 @@ class ApertureTest extends FunSuite with ApertureSuite {
     bal.update(Vector.tabulate(150)(Factory))
     bal.rebuildx()
     assert(bal.minUnitsx == 150)
+  }
+
+  test("d-aperture with equally loaded nodes doesn't unduly bias due to rounding errors") {
+    val counts = new Counts
+    val bal = new Bal {
+      override val minAperture = 12
+      override protected def nodeLoad: Double = 1.0
+    }
+    ProcessCoordinate.setCoordinate(0, 1)
+    bal.update(counts.range(3))
+    bal.rebuildx()
+    assert(bal.isDeterministicAperture)
+    assert(bal.minUnitsx == 3)
+    bal.applyn(3000)
+
+    ProcessCoordinate.unsetCoordinate()
+
+    val requests = counts.toIterator.map(_._total).toVector
+    val avg = requests.sum.toDouble / requests.size
+    val relativeDiffs = requests.map { i => math.abs(avg - i) / avg }
+    relativeDiffs.foreach { i => assert(i < 0.05) }
   }
 
   test("vectorHash") {

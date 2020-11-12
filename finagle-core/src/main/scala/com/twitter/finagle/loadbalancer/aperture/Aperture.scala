@@ -599,6 +599,12 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       }
     }
 
+    // A quick helper for seeing if a is close to the same value as b.
+    // This allows for avoiding bias due to numerical instability in
+    // floating point values.
+    private[this] def approxEqual(a: Double, b: Double): Boolean =
+      math.abs(a - b) < 0.0001
+
     /**
      * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
      * taking into account their respective weights.
@@ -613,7 +619,17 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         // stability issues.
         val _aw = if (aw == 0) 1.0 else aw
         val _bw = if (bw == 0) 1.0 else bw
-        if (a.load / _aw <= b.load / _bw) a else b
+
+        // We first check if the weights are effectively the same so we can
+        // ignore them if they are. If we just go for it and use them we can
+        // evaluate (1.0 / 1.0 <= 1.0 / 1.0000000001) and we bias toward the
+        // second instance which should have identical weight but it's a hair
+        // off due to floating point precision errors.
+        if (approxEqual(_aw, _bw)) {
+          if (a.load <= b.load) a else b
+        } else {
+          if (a.load / _aw <= b.load / _bw) a else b
+        }
       } else {
         if (Status.best(aStatus, bStatus) == aStatus) a else b
       }
