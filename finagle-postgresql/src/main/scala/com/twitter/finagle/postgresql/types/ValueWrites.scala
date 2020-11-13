@@ -4,6 +4,7 @@ import java.nio.CharBuffer
 import java.nio.charset.Charset
 import java.nio.charset.CodingErrorAction
 
+import com.twitter.finagle.postgresql.PgSqlUnsupportedError
 import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.transport.PgBuf
@@ -94,7 +95,20 @@ object ValueWrites {
     w.long(PgTime.instantAsUsecOffset(instant))
   }
   implicit lazy val writesInt: ValueWrites[Int] = simple(PgType.Int4)(_.int(_))
-  implicit lazy val writesJson: ValueWrites[Json] = unimplemented
+  implicit lazy val writesJson: ValueWrites[Json] = new ValueWrites[Json] {
+    // TODO: Json is really only meant for reading...
+    override def writes(tpe: PgType, json: Json, charset: Charset): WireValue = {
+      val buf = tpe match {
+        case PgType.Json => json.value
+        case PgType.Jsonb => Buf.ByteArray(1).concat(json.value)
+        case _ => throw new PgSqlUnsupportedError(s"readsJson does not support type ${tpe.name}")
+      }
+      WireValue.Value(buf)
+    }
+
+    override def accepts(tpe: PgType): Boolean =
+      tpe == PgType.Json || tpe == PgType.Jsonb
+  }
   implicit lazy val writesLong: ValueWrites[Long] = simple(PgType.Int8)(_.long(_))
   implicit lazy val writesShort: ValueWrites[Short] = simple(PgType.Int2)(_.short(_))
   implicit lazy val writesString: ValueWrites[String] = new ValueWrites[String] {
