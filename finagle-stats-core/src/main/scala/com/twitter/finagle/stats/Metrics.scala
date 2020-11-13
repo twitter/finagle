@@ -40,7 +40,9 @@ object Metrics {
   private[this] def newMetricsMaps: MetricsMaps = MetricsMaps(
     countersMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreCounter](),
     statsMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreStat](),
-    gaugesMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge]()
+    gaugesMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge](),
+    /** Store MetricSchemas for each metric in order to surface metric metadata to users. */
+    metricSchemas = new ConcurrentHashMap[String, MetricSchema]()
   )
 
   private class StoreCounterImpl(override val name: String) extends MetricsStore.StoreCounter {
@@ -79,7 +81,8 @@ object Metrics {
   private case class MetricsMaps(
     countersMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreCounter],
     statsMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreStat],
-    gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge])
+    gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge],
+    metricSchemas: ConcurrentHashMap[String, MetricSchema])
 }
 
 /**
@@ -128,10 +131,7 @@ private[finagle] class Metrics private (
 
   private[this] val gaugesMap = metricsMaps.gaugesMap
 
-  /**
-   * Store MetricSchemas for each metric in order to surface metric metadata to users.
-   */
-  private[this] val metricSchemas = new ConcurrentHashMap[String, MetricSchema]()
+  private[this] val metricSchemas = metricsMaps.metricSchemas
 
   private[this] val verbosityMap =
     new ConcurrentHashMap[String, Verbosity]()

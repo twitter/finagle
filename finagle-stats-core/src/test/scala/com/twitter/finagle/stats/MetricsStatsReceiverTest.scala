@@ -223,6 +223,28 @@ class MetricsStatsReceiverTest extends FunSuite {
       assert(metrics2.histograms.containsKey("baz"))
     }
 
+    test("StatsReceivers share underlying schema maps by default" + suffix) {
+      val metrics1 = new Metrics()
+      val metrics2 = new Metrics()
+
+      val sr1 = new MetricsStatsReceiver(metrics1)
+      val sr2 = new StatsReceiverProxy {
+        protected def self: StatsReceiver = new MetricsStatsReceiver(metrics2)
+      }
+
+      addCounter(sr1, Seq("aaa"))
+      assert(metrics1.schemas.containsKey("aaa"))
+      assert(metrics2.schemas.containsKey("aaa"))
+
+      addGauge(sr1, Seq("bbb"))(1f)
+      assert(metrics1.schemas.containsKey("bbb"))
+      assert(metrics2.schemas.containsKey("bbb"))
+
+      addHisto(sr1, Seq("ccc"))
+      assert(metrics1.schemas.containsKey("ccc"))
+      assert(metrics2.schemas.containsKey("ccc"))
+    }
+
     // scalafix:on StoreGaugesAsMemberVariables
   }
 
