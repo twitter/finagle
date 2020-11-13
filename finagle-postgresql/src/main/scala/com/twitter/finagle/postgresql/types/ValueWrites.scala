@@ -4,8 +4,12 @@ import java.nio.CharBuffer
 import java.nio.charset.Charset
 import java.nio.charset.CodingErrorAction
 
+import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlUnsupportedError
+import com.twitter.finagle.postgresql.Types
 import com.twitter.finagle.postgresql.Types.Inet
+import com.twitter.finagle.postgresql.Types.PgArray
+import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.transport.PgBuf
 import com.twitter.io.Buf
@@ -70,10 +74,40 @@ object ValueWrites {
     override def accepts(tpe: PgType): Boolean = twrites.accepts(tpe)
   }
 
-  implicit def traversableWrites[F[X] <: Iterable[X], T](implicit twrites: ValueWrites[T]): ValueWrites[F[T]] = {
-    val _ = twrites
-    unimplemented
-  }
+  implicit def traversableWrites[F[X] <: Iterable[X], T](implicit twrites: ValueWrites[T]): ValueWrites[F[T]] =
+    new ValueWrites[F[T]] {
+
+      def emptyArray(oid: Types.Oid): PgArray =
+        PgArray(0, 0, oid, IndexedSeq.empty, IndexedSeq.empty)
+      override def writes(tpe: PgType, values: F[T], charset: Charset): WireValue = {
+        val underlying = tpe.kind match {
+          case Kind.Array(underlying) => underlying
+          case _ => throw new PgSqlClientError(
+              s"Type ${tpe.name} is not an array type and cannot be written as such." +
+                s" Note that this may be because you're trying to write a multi-dimensional array which isn't supported."
+            )
+        }
+        val data = values.map(v => twrites.writes(underlying, v, charset)).toIndexedSeq
+        val pgArray =
+          if (data.isEmpty) emptyArray(underlying.oid)
+          else {
+            PgArray(
+              dimensions = 1,
+              dataOffset = 0,
+              elemType = underlying.oid,
+              arrayDims = IndexedSeq(PgArrayDim(data.length, 1)),
+              data = data,
+            )
+          }
+        WireValue.Value(PgBuf.writer.array(pgArray).build)
+      }
+
+      override def accepts(tpe: PgType): Boolean =
+        tpe.kind match {
+          case Kind.Array(underlying) => twrites.accepts(underlying)
+          case _ => false
+        }
+    }
 
   def unimplemented[T] = new ValueWrites[T] {
     override def writes(tpe: PgType, value: T, charset: Charset): WireValue = ???
@@ -90,9 +124,10 @@ object ValueWrites {
   implicit lazy val writesDouble: ValueWrites[Double] = simple(PgType.Float8)(_.double(_))
   implicit lazy val writesFloat: ValueWrites[Float] = simple(PgType.Float4)(_.float(_))
   implicit lazy val writesInet: ValueWrites[Inet] = simple(PgType.Inet)(_.inet(_))
-  implicit lazy val writesInstant: ValueWrites[java.time.Instant] = simple(PgType.Timestamptz, PgType.Timestamp) { (w, instant) =>
-    // NOTE: we skip going through Timestamp.Micros since we never write anything else
-    w.long(PgTime.instantAsUsecOffset(instant))
+  implicit lazy val writesInstant: ValueWrites[java.time.Instant] = simple(PgType.Timestamptz, PgType.Timestamp) {
+    (w, instant) =>
+      // NOTE: we skip going through Timestamp.Micros since we never write anything else
+      w.long(PgTime.instantAsUsecOffset(instant))
   }
   implicit lazy val writesInt: ValueWrites[Int] = simple(PgType.Int4)(_.int(_))
   implicit lazy val writesJson: ValueWrites[Json] = new ValueWrites[Json] {
@@ -128,7 +163,7 @@ object ValueWrites {
         tpe == PgType.Name || // system identifiers
         tpe == PgType.Unknown // probably used as a fallback to text serialization?
   }
-  implicit lazy val writesUuid: ValueWrites[java.util.UUID] = simple(PgType.Uuid) { (w,uuid) =>
+  implicit lazy val writesUuid: ValueWrites[java.util.UUID] = simple(PgType.Uuid) { (w, uuid) =>
     w.long(uuid.getMostSignificantBits).long(uuid.getLeastSignificantBits)
   }
 }
