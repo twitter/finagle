@@ -41,7 +41,7 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
       case Transition(_, SendSeveral(msgs)) =>
         msgs.toList must beLike {
           case a :: b :: c :: d :: Nil =>
-            a must beEqualTo(Send(Bind(portalName, name, Nil, parameters, Format.Binary :: Nil)))
+            a must beEqualTo(Send(Bind(portalName, name, Format.Binary :: Nil, parameters, Format.Binary :: Nil)))
             b must beEqualTo(Send(Describe(portalName, DescriptionTarget.Portal)))
             c must beEqualTo(Send(Execute(portalName, 0)))
             d must beEqualTo(Send(Flush))

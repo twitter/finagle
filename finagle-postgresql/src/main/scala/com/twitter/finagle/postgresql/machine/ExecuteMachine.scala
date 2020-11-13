@@ -73,8 +73,8 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters)
           Bind(
             portal = portalName,
             statement = prepared.name,
-            formats = Nil, // TODO: deal with parameters
-            values = parameters, // TODO: deal with parameters
+            formats = Format.Binary :: Nil, // send all parameters in binary format
+            values = parameters,
             resultFormats = Format.Binary :: Nil // request all results in binary format
           ),
           // TODO: we can avoid sending this one when the Prepare phase already returned NoData.
