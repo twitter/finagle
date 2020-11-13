@@ -46,6 +46,7 @@ import scala.collection.compat._
  * | UUID | [[java.util.UUID]] |
  * | VARCHAR | [[String]] |
  *
+ * @see [[ValueWrites]]
  * @see [[PgType]]
  */
 trait ValueReads[T] {

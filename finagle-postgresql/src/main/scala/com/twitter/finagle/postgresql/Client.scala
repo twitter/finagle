@@ -7,6 +7,7 @@ import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.postgresql.Response.Command
 import com.twitter.finagle.postgresql.Response.QueryResponse
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.types.PgType
 import com.twitter.finagle.postgresql.types.ValueWrites
 import com.twitter.io.Reader
@@ -100,7 +101,7 @@ object Client {
                 val values = (prepared.statement.parameterTypes zip parameters)
                   .map { case (tpe, p) =>
                     // TODO: extract charset from Prepared or connection
-                    p.wireValue(PgType.pgTypeByOid(tpe), StandardCharsets.UTF_8)
+                    p.encode(PgType.pgTypeByOid(tpe), StandardCharsets.UTF_8)
                   }
                 svc(Request.ExecutePortal(prepared.statement, values))
               }
@@ -115,8 +116,14 @@ object Client {
 }
 
 case class Parameter[T](value: T)(implicit val valueWrites: ValueWrites[T]) {
-  def wireValue(tpe: PgType, charset: Charset) =
+  def encode(tpe: PgType, charset: Charset): WireValue = {
+    if(!valueWrites.accepts(tpe)) {
+      throw PgSqlUnsupportedError(
+        s"Cannot encode parameter value with provided ValueWrites instance; it does not support type ${tpe.name} (oid ${tpe.oid.value})."
+      )
+    }
     valueWrites.writes(tpe, value, charset)
+  }
 }
 
 trait PreparedStatement extends QueryClient[Seq[Parameter[_]]]

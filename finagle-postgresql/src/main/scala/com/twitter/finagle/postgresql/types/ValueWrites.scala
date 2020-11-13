@@ -44,19 +44,37 @@ import com.twitter.io.Buf
  * | UUID | [[java.util.UUID]] |
  * | VARCHAR | [[String]] |
  *
+ * @see [[ValueReads]]
  * @see [[PgType]]
  */
 trait ValueWrites[T] {
 
+  /**
+   * Encode a value to Postgres' wire representation for a particular Postgres type.
+   *
+   * @note It is the responsability of the caller to ensure that the Postgres type is accepted by this implementation.
+   *
+   * @param tpe the Postgres type to encode the value into.
+   * @param value the value to encode.
+   * @param charset when applicable, the character set to use when encoding.
+   * @return the encoded value
+   */
   def writes(tpe: PgType, value: T, charset: Charset): WireValue
 
+  /**
+   * Returns true when this implementation is able to encode values of the provided Postgres type.
+   * Returns false otherwise.
+   *
+   * @param tpe the Postgres type to check.
+   * @return true if this implementation can encode values for the type, false otherwise.
+   */
   def accepts(tpe: PgType): Boolean
 
 }
 
 object ValueWrites {
 
-  def simple[T](expect: PgType*)(write: (PgBuf.Writer, T) => PgBuf.Writer) = new ValueWrites[T] {
+  def simple[T](expect: PgType*)(write: (PgBuf.Writer, T) => PgBuf.Writer): ValueWrites[T] = new ValueWrites[T] {
     val accept: Set[PgType] = expect.toSet
 
     override def writes(tpe: PgType, value: T, charset: Charset): WireValue =
@@ -108,12 +126,6 @@ object ValueWrites {
           case _ => false
         }
     }
-
-  def unimplemented[T] = new ValueWrites[T] {
-    override def writes(tpe: PgType, value: T, charset: Charset): WireValue = ???
-
-    override def accepts(tpe: PgType): Boolean = ???
-  }
 
   implicit lazy val writesBigDecimal: ValueWrites[BigDecimal] = simple(PgType.Numeric) { (w, bd) =>
     w.numeric(PgNumeric.bigDecimalToNumeric(bd))
