@@ -89,7 +89,10 @@ object ValueWrites {
   implicit lazy val writesDouble: ValueWrites[Double] = simple(PgType.Float8)(_.double(_))
   implicit lazy val writesFloat: ValueWrites[Float] = simple(PgType.Float4)(_.float(_))
   implicit lazy val writesInet: ValueWrites[Inet] = simple(PgType.Inet)(_.inet(_))
-  implicit lazy val writesInstant: ValueWrites[java.time.Instant] = unimplemented
+  implicit lazy val writesInstant: ValueWrites[java.time.Instant] = simple(PgType.Timestamptz, PgType.Timestamp) { (w, instant) =>
+    // NOTE: we skip going through Timestamp.Micros since we never write anything else
+    w.long(PgTime.instantAsUsecOffset(instant))
+  }
   implicit lazy val writesInt: ValueWrites[Int] = simple(PgType.Int4)(_.int(_))
   implicit lazy val writesJson: ValueWrites[Json] = unimplemented
   implicit lazy val writesLong: ValueWrites[Long] = simple(PgType.Int8)(_.long(_))
