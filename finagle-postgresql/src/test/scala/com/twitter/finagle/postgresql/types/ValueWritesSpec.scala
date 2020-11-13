@@ -62,7 +62,6 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
       val ret = arrayWrites.writes(arrayType, values, utf8)
       ret must_== arrayWire
     }.setGen(Gen.listOfN(5, Arbitrary.arbitrary[T])) // limit to 5 elements to speed things up
-      .pendingUntilFixed
   }
 
   def nullableFragment[T: Arbitrary](writes: ValueWrites[T], accept: PgType): Fragment =
@@ -106,14 +105,14 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
         writesIntList.accepts(PgType.Int4Array) must beTrue
         writesIntList.accepts(PgType.Int4) must beFalse
         writesIntList.accepts(PgType.Int2Array) must beFalse
-      }.pendingUntilFixed
+      }
 
       "reject non-array types when reading" in {
         val writesIntList = ValueWrites.traversableWrites[List, Int](ValueWrites.writesInt)
         writesIntList.writes(PgType.Int4, Nil, utf8) must throwA[PgSqlClientError](
-          s"Type int4 is not an array type and cannot be read as such."
+          s"Type int4 is not an array type and cannot be written as such."
         )
-      }.pendingUntilFixed
+      }
 
       "support empty lists" in {
         val writesIntList = ValueWrites.traversableWrites[List, Int](ValueWrites.writesInt)
@@ -125,16 +124,16 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
           data = IndexedSeq.empty
         )
         val arrayBuf = PgBuf.writer.array(pgArray).build
-        writesIntList.writes(PgType.Int4Array, Nil, utf8) must_== arrayBuf
-      }.pendingUntilFixed
+        writesIntList.writes(PgType.Int4Array, Nil, utf8) must_== WireValue.Value(arrayBuf)
+      }
 
       "fail for multi-dimensional arrays" in {
         val writesIntList = ValueWrites.traversableWrites[List, Int](ValueWrites.writesInt)
         val arrayOfArray = ValueWrites.traversableWrites[List, List[Int]](writesIntList)
         arrayOfArray.writes(PgType.Int4Array, List(List(1)), utf8) must throwA[PgSqlClientError](
-          "Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got 2"
+          "Type int4 is not an array type and cannot be written as such. Note that this may be because you're trying to write a multi-dimensional array which isn't supported."
         )
-      }.pendingUntilFixed
+      }
     }
 
     "writesBigDecimal" should simpleSpec[BigDecimal](ValueWrites.writesBigDecimal, PgType.Numeric) { bd =>
