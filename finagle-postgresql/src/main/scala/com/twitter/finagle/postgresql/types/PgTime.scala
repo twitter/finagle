@@ -41,10 +41,26 @@ object PgTime {
     Duration.of(usecFromEpoch, ChronoUnit.MICROS)
 
   /**
+   * Converts [[java.time.Duration]] to an offset (timestamp) from Postgres' epoch.
+   * Postgres timestamps are stored as microseconds since its epoch.
+   * The value can be negative.
+   */
+  def durationAsUsecOffset(duration: Duration): Long =
+    duration.getSeconds * 1000000 + duration.getNano / 1000
+
+  /**
    * Converts a timestamp value to a [[java.time.Instant]].
    * Postgres timestamps are stored as microseconds since its epoch.
    * The value can be negative.
    */
   def usecOffsetAsInstant(usecFromEpoch: Long): Instant =
     Epoch.plus(usecOffsetAsDuration(usecFromEpoch))
+
+  /**
+   * Converts a [[java.time.Instant]] to a timestamp value.
+   * Postgres timestamps are stored as microseconds since its epoch.
+   * The value can be negative.
+   */
+  def instantAsUsecOffset(instant: java.time.Instant): Long =
+    durationAsUsecOffset(Duration.between(Epoch, instant))
 }
