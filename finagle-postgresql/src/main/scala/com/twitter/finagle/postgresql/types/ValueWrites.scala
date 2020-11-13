@@ -1,6 +1,8 @@
 package com.twitter.finagle.postgresql.types
 
+import java.nio.CharBuffer
 import java.nio.charset.Charset
+import java.nio.charset.CodingErrorAction
 
 import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -78,10 +80,12 @@ object ValueWrites {
     override def accepts(tpe: PgType): Boolean = ???
   }
 
-  implicit lazy val writesBigDecimal: ValueWrites[BigDecimal] = unimplemented
+  implicit lazy val writesBigDecimal: ValueWrites[BigDecimal] = simple(PgType.Numeric) { (w, bd) =>
+    w.numeric(PgNumeric.bigDecimalToNumeric(bd))
+  }
   implicit lazy val writesBoolean: ValueWrites[Boolean] = simple(PgType.Bool)((w, t) => w.byte(if (t) 1 else 0))
   implicit lazy val writesBuf: ValueWrites[Buf] = simple(PgType.Bytea)(_.buf(_))
-  implicit lazy val writesByte: ValueWrites[Byte] = unimplemented
+  implicit lazy val writesByte: ValueWrites[Byte] = simple(PgType.Char)(_.byte(_))
   implicit lazy val writesDouble: ValueWrites[Double] = simple(PgType.Float8)(_.double(_))
   implicit lazy val writesFloat: ValueWrites[Float] = simple(PgType.Float4)(_.float(_))
   implicit lazy val writesInet: ValueWrites[Inet] = simple(PgType.Inet)(_.inet(_))
@@ -90,6 +94,24 @@ object ValueWrites {
   implicit lazy val writesJson: ValueWrites[Json] = unimplemented
   implicit lazy val writesLong: ValueWrites[Long] = simple(PgType.Int8)(_.long(_))
   implicit lazy val writesShort: ValueWrites[Short] = simple(PgType.Int2)(_.short(_))
-  implicit lazy val writesString: ValueWrites[String] = unimplemented
-  implicit lazy val writesUuid: ValueWrites[java.util.UUID] = unimplemented
+  implicit lazy val writesString: ValueWrites[String] = new ValueWrites[String] {
+    def strictEncoder(charset: Charset) =
+      charset.newEncoder()
+        .onMalformedInput(CodingErrorAction.REPORT)
+        .onUnmappableCharacter(CodingErrorAction.REPORT)
+
+    override def writes(tpe: PgType, value: String, charset: Charset): WireValue =
+      WireValue.Value(Buf.ByteBuffer.Owned(strictEncoder(charset).encode(CharBuffer.wrap(value))))
+
+    override def accepts(tpe: PgType): Boolean =
+      tpe == PgType.Text ||
+        tpe == PgType.Json ||
+        tpe == PgType.Varchar ||
+        tpe == PgType.Bpchar || // CHAR(n)
+        tpe == PgType.Name || // system identifiers
+        tpe == PgType.Unknown // probably used as a fallback to text serialization?
+  }
+  implicit lazy val writesUuid: ValueWrites[java.util.UUID] = simple(PgType.Uuid) { (w,uuid) =>
+    w.long(uuid.getMostSignificantBits).long(uuid.getLeastSignificantBits)
+  }
 }

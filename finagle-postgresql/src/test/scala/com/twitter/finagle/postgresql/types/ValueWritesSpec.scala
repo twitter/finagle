@@ -137,7 +137,7 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
       }.pendingUntilFixed
     }
 
-    "readsBigDecimal" should simpleSpec[BigDecimal](ValueWrites.writesBigDecimal, PgType.Numeric) { bd =>
+    "writesBigDecimal" should simpleSpec[BigDecimal](ValueWrites.writesBigDecimal, PgType.Numeric) { bd =>
       mkBuf() { bb =>
         // converting to numeric is non-trivial, so we don't re-write it here.
         val numeric = PgNumeric.bigDecimalToNumeric(bd)
@@ -153,27 +153,27 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
         bb
       }
     }
-    "readsBoolean" should simpleSpec[Boolean](ValueWrites.writesBoolean, PgType.Bool) {
+    "writesBoolean" should simpleSpec[Boolean](ValueWrites.writesBoolean, PgType.Bool) {
       case true => Buf.ByteArray(0x01)
       case false => Buf.ByteArray(0x00)
     }
-    "readsBuf" should simpleSpec[Buf](ValueWrites.writesBuf, PgType.Bytea) { buf =>
+    "writesBuf" should simpleSpec[Buf](ValueWrites.writesBuf, PgType.Bytea) { buf =>
       mkBuf() { bb =>
         bb.put(Buf.ByteArray.Shared.extract(buf))
       }
     }
-    "readsByte" should simpleSpec[Byte](ValueWrites.writesByte, PgType.Char)(byte => Buf.ByteArray(byte))
-    "readsDouble" should simpleSpec[Double](ValueWrites.writesDouble, PgType.Float8) { double =>
+    "writesByte" should simpleSpec[Byte](ValueWrites.writesByte, PgType.Char)(byte => Buf.ByteArray(byte))
+    "writesDouble" should simpleSpec[Double](ValueWrites.writesDouble, PgType.Float8) { double =>
       mkBuf() { bb =>
         bb.putDouble(double)
       }
     }
-    "readsFloat" should simpleSpec[Float](ValueWrites.writesFloat, PgType.Float4) { float =>
+    "writesFloat" should simpleSpec[Float](ValueWrites.writesFloat, PgType.Float4) { float =>
       mkBuf() { bb =>
         bb.putFloat(float)
       }
     }
-    "readsInet" should simpleSpec[Inet](ValueWrites.writesInet, PgType.Inet) { inet =>
+    "writesInet" should simpleSpec[Inet](ValueWrites.writesInet, PgType.Inet) { inet =>
       mkBuf() { bb =>
         inet.ipAddress match {
           case _: java.net.Inet4Address => bb.put(2.toByte)
@@ -186,7 +186,7 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
         bb.put(addr)
       }
     }
-    "readsInstant" should simpleSpec[java.time.Instant](
+    "writesInstant" should simpleSpec[java.time.Instant](
       ValueWrites.writesInstant,
       PgType.Timestamptz,
       PgType.Timestamp
@@ -200,32 +200,32 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
           bb.putLong(micros)
         }
     }
-    "readsInt" should simpleSpec[Int](ValueWrites.writesInt, PgType.Int4) { int =>
+    "writesInt" should simpleSpec[Int](ValueWrites.writesInt, PgType.Int4) { int =>
       mkBuf() { bb =>
         bb.putInt(int)
       }
     }
-    "readsJson" should simpleSpec[Json](ValueWrites.writesJson, PgType.Json) { json =>
+    "writesJson" should simpleSpec[Json](ValueWrites.writesJson, PgType.Json) { json =>
       mkBuf(json.jsonByteArray.length) { bb =>
         bb.put(json.jsonByteBuffer)
       }
     }
-    "readsJson" should simpleSpec[Json](ValueWrites.writesJson, PgType.Jsonb) { json =>
+    "writesJson" should simpleSpec[Json](ValueWrites.writesJson, PgType.Jsonb) { json =>
       mkBuf(json.jsonByteArray.length + 1) { bb =>
         bb.put(1.toByte).put(json.jsonByteBuffer)
       }
     }
-    "readsLong" should simpleSpec[Long](ValueWrites.writesLong, PgType.Int8) { long =>
+    "writesLong" should simpleSpec[Long](ValueWrites.writesLong, PgType.Int8) { long =>
       mkBuf() { bb =>
         bb.putLong(long)
       }
     }
-    "readsShort" should simpleSpec[Short](ValueWrites.writesShort, PgType.Int2) { short =>
+    "writesShort" should simpleSpec[Short](ValueWrites.writesShort, PgType.Int2) { short =>
       mkBuf() { bb =>
         bb.putShort(short)
       }
     }
-    "readsString" should simpleSpec[String](
+    "writesString" should simpleSpec[String](
       ValueWrites.writesString,
       PgType.Text,
       PgType.Json,
@@ -238,7 +238,7 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
         bb.put(string.getBytes(utf8))
       }
     }
-    "readsUuid" should simpleSpec[java.util.UUID](ValueWrites.writesUuid, PgType.Uuid) { uuid =>
+    "writesUuid" should simpleSpec[java.util.UUID](ValueWrites.writesUuid, PgType.Uuid) { uuid =>
       mkBuf() { bb =>
         bb.putLong(uuid.getMostSignificantBits)
         bb.putLong(uuid.getLeastSignificantBits)
