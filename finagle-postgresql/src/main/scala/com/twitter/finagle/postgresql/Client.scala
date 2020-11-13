@@ -1,10 +1,14 @@
 package com.twitter.finagle.postgresql
 
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.postgresql.Response.Command
 import com.twitter.finagle.postgresql.Response.QueryResponse
 import com.twitter.finagle.postgresql.Types.Name
-import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.types.PgType
+import com.twitter.finagle.postgresql.types.ValueWrites
 import com.twitter.io.Reader
 import com.twitter.util.Closable
 import com.twitter.util.Future
@@ -87,13 +91,18 @@ object Client {
       // NOTE: this assumes that caching is done down the stack so that named statements aren't re-prepared on the same connection
       //   The rationale is that it allows releasing the connection earlier at the expense
       //   of re-preparing statements on each connection and potentially more than once (but not every time)
-      override def query(parameters: Seq[Parameter]): Future[QueryResponse] =
+      override def query(parameters: Seq[Parameter[_]]): Future[QueryResponse] =
         factory()
           .flatMap { svc =>
             svc(Request.Prepare(sql, name))
               .flatMap(Expect.ParseComplete)
               .flatMap { prepared =>
-                svc(Request.ExecutePortal(prepared.statement, parameters.map(_.buf)))
+                val values = (prepared.statement.parameterTypes zip parameters)
+                  .map { case (tpe, p) =>
+                    // TODO: extract charset from Prepared or connection
+                    p.wireValue(PgType.pgTypeByOid(tpe), StandardCharsets.UTF_8)
+                  }
+                svc(Request.ExecutePortal(prepared.statement, values))
               }
               .flatMap(Expect.QueryResponse)
           }
@@ -105,12 +114,12 @@ object Client {
   }
 }
 
-// TODO
-trait Parameter {
-  def buf: WireValue
+case class Parameter[T](value: T)(implicit val valueWrites: ValueWrites[T]) {
+  def wireValue(tpe: PgType, charset: Charset) =
+    valueWrites.writes(tpe, value, charset)
 }
 
-trait PreparedStatement extends QueryClient[Seq[Parameter]]
+trait PreparedStatement extends QueryClient[Seq[Parameter[_]]]
 
 // TODO
 trait CursoredStatement

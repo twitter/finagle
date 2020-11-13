@@ -1,5 +1,6 @@
 package com.twitter.finagle.postgresql
 
+import com.twitter.io.Buf
 import com.twitter.io.Reader
 
 class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
@@ -44,6 +45,17 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
         .prepare("create user another;")
         .modify(Nil)
         .map(_ must beEqualTo(Response.Command("CREATE ROLE")))
+    }
+
+    "prepare param" in {
+      newRichClient
+        .prepare("select $1::bool, $2::bytea")
+        .read(Parameter(true) :: Parameter(Buf.ByteArray(0, 1, 2, 3, 4)) :: Nil)
+        .map { rs =>
+          rs.rows must haveSize(1)
+          rs.rows.head.get[Boolean](0) must beTrue
+          rs.rows.head.get[Buf](1) must_== Buf.ByteArray(0, 1, 2, 3, 4)
+        }
     }
   }
 
