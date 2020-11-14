@@ -14,10 +14,13 @@ import org.specs2.matcher.describe.Diffable
  * The strategy used here is to issue a "typed" select statement of the form
  *
  * {{{
- *   SELECT $1::int4
+ *   SELECT $1::"int4"
  * }}}
  *
  * And supply the value as a statement parameter and then read the value back.
+ *
+ * NOTE: the double quotes around the type name is required due to the "char" (OID 18) type which conflicts
+ * with the "bpchar" type alias, i.e.: char(n). https://stackoverflow.com/a/42484838
  *
  * Unfortunately, this relies on a lot of other machinery to work correctly, namely:
  *
@@ -35,7 +38,7 @@ class ValueWritesSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSp
 
   // Issues the "typed" select statement and read the value back.
   def writeAndRead[T: ValueReads](value: T, valueWrites: ValueWrites[T], tpe: PgType) = {
-    val prepared = richClient.prepare(Name.Unnamed, s"SELECT $$1::${tpe.name}")
+    val prepared = richClient.prepare(Name.Unnamed, s"""SELECT $$1::"${tpe.name}"""")
     Await.result(
       prepared.select(Parameter(value)(valueWrites) :: Nil)(_.get[T](0))
         .map(_.head)
@@ -70,7 +73,7 @@ class ValueWritesSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSp
     "writesBigDecimal" should simpleSpec(ValueWrites.writesBigDecimal, PgType.Numeric)
     "writesBool" should simpleSpec(ValueWrites.writesBoolean, PgType.Bool)
     "writesBuf" should simpleSpec(ValueWrites.writesBuf, PgType.Bytea)
-//    "writesByte" should simpleSpec(ValueWrites.writesByte, PgType.Char)
+    "writesByte" should simpleSpec(ValueWrites.writesByte, PgType.Char)
     "writesDouble" should simpleSpec(ValueWrites.writesDouble, PgType.Float8)
     "writesFloat" should simpleSpec(ValueWrites.writesFloat, PgType.Float4)
     "writesInet" should simpleSpec(ValueWrites.writesInet, PgType.Inet)
