@@ -103,5 +103,3 @@ class ValueWritesSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSp
     "writesUuid" should simpleSpec(ValueWrites.writesUuid, PgType.Uuid)
   }
 }
-
-
