@@ -25,7 +25,7 @@ import org.specs2.matcher.describe.Diffable
  * For example, to produce the bytes for the `Int4` type:
  *
  * {{{
- *   postgres=# SELECT int4send('1234'::"int4");
+ *   postgres=# SELECT int4send(1234::"int4");
  *   int4send
  * ------------
  *  \x000004d2
@@ -76,12 +76,12 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     }
 
   def pgBytes[T](pgType: PgType, value: T)(implicit toSqlString: ToSqlString[T]): Buf =
-    // e.g.: `SELECT int4send('1234'::"int4")`
-    pgBytes(s"""SELECT ${sendFunc(pgType)}('${toSqlString.toString(value)}'::"${pgType.name}");""")
+    // e.g.: `SELECT int4send(1234::"int4")`
+    pgBytes(s"""SELECT ${sendFunc(pgType)}(${toSqlString.toString(value)}::"${pgType.name}");""")
 
   def pgArrayBytes[T](pgType: PgType, values: List[T])(implicit toSqlString: ToSqlString[T]): Buf = {
-    // e.g.: `SELECT array_send('{1,2,3,4}'::"int4"[])`
-    val arrStr = values.map(v => toSqlString.toString(v)).map(v => s"""'$v'""").mkString("ARRAY[", ",", "]")
+    // e.g.: `SELECT array_send({1,2,3,4}::"int4"[])`
+    val arrStr = values.map(v => toSqlString.toString(v)).mkString("ARRAY[", ",", "]")
     pgBytes(s"""SELECT array_send($arrStr::"${pgType.name}"[]);""")
   }
 
@@ -131,8 +131,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     "readsBigDecimal" should failFor(ValueReads.readsBigDecimal, "NaN", PgType.Numeric)
     "readsBool" should simpleSpec(ValueReads.readsBoolean, PgType.Bool)
     "readsBuf" should simpleSpec(ValueReads.readsBuf, PgType.Bytea)
-    // TODO: investigate this some more. It seems like char isn't a byte but a "single character".
-//    "readsByte" should simpleSpec(ValueReads.readsByte, PgType.Char)
+    "readsByte" should simpleSpec(ValueReads.readsByte, PgType.Char)
     "readsDouble" should simpleSpec(ValueReads.readsDouble, PgType.Float8)
     "readsFloat" should simpleSpec(ValueReads.readsFloat, PgType.Float4)
     "readsInet" should simpleSpec(ValueReads.readsInet, PgType.Inet)
@@ -175,9 +174,18 @@ object ValueReadsSpec {
   object ToSqlString {
 
     def escape(value: String) = value.replace("'", "''")
+    def quote(value: String) = s"'$value'"
 
     implicit def fromToString[T]: ToSqlString[T] = new ToSqlString[T] {
-      override def toString(value: T): String = ToSqlString.escape(value.toString)
+      override def toString(value: T): String =
+        quote(escape(value.toString))
+    }
+
+    // Overridden to avoid interpreting the byte value as a character.
+    //  We want the SQL to look like "SELECT (-32)::char". Parens are necessary for negative values.
+    // Note that we could do this for other numerical values, but it only matters for the "char" type.
+    implicit val byteToSqlString: ToSqlString[Byte] = new ToSqlString[Byte] {
+      override def toString(value: Byte): String = s"($value)"
     }
 
     implicit val bufToSqlString: ToSqlString[Buf] = new ToSqlString[Buf] {
@@ -186,7 +194,7 @@ object ValueReadsSpec {
         s"\\x$h"
       }
       override def toString(value: Buf): String =
-        hex(Buf.ByteArray.Shared.extract(value))
+        quote(hex(Buf.ByteArray.Shared.extract(value)))
     }
 
     implicit val instantToSqlString: ToSqlString[Instant] = new ToSqlString[Instant] {
@@ -202,20 +210,21 @@ object ValueReadsSpec {
 
       override def toString(value: Instant): String = {
         val str = fmt.format(value)
-        str.charAt(0) match {
+        val sql = str.charAt(0) match {
           case '+' | '-' => str.drop(1).mkString
           case _ => str
         }
+        quote(sql)
       }
     }
 
     implicit val jsonToSqlString: ToSqlString[Json] = new ToSqlString[Json] {
-      override def toString(value: Json): String = escape(value.jsonString)
+      override def toString(value: Json): String = quote(escape(value.jsonString))
     }
 
     implicit val inetToSqlString: ToSqlString[Inet] = new ToSqlString[Inet] {
       override def toString(value: Inet): String =
-        s"${value.ipAddress.getHostAddress}/${value.netmask}"
+        quote(s"${value.ipAddress.getHostAddress}/${value.netmask}")
     }
 
   }
