@@ -17,6 +17,8 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.BackendMessage.BackendKeyData
 import com.twitter.finagle.postgresql.BackendMessage.BindComplete
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
+import com.twitter.finagle.postgresql.BackendMessage.CopyInResponse
+import com.twitter.finagle.postgresql.BackendMessage.CopyOutResponse
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
@@ -35,6 +37,7 @@ import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.Types.AttributeId
 import com.twitter.finagle.postgresql.Types.FieldDescription
+import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.util.Return
 import com.twitter.util.Throw
@@ -68,6 +71,8 @@ object MessageDecoder {
           case 'C' => decode[CommandComplete](reader)
           case 'D' => decode[DataRow](reader)
           case 'E' => decode[ErrorResponse](reader)
+          case 'G' => decode[CopyInResponse](reader)
+          case 'H' => decode[CopyOutResponse](reader)
           case 'I' => Return(EmptyQueryResponse)
           case 'K' => decode[BackendKeyData](reader)
           case 'n' => Return(NoData)
@@ -215,4 +220,25 @@ object MessageDecoder {
       reader.collect(r => Oid(r.unsignedInt()))
     )
   }
+
+  implicit lazy val copyInResponseDecoder: MessageDecoder[CopyInResponse] = MessageDecoder { reader =>
+    CopyInResponse(
+      overallFormat = reader.byte() match {
+        case 0 => Format.Text
+        case 1 => Format.Binary
+      },
+      columnsFormat = reader.collect(_.format()),
+    )
+  }
+
+  implicit lazy val copyOutResponseDecoder: MessageDecoder[CopyOutResponse] = MessageDecoder { reader =>
+    CopyOutResponse(
+      overallFormat = reader.byte() match {
+        case 0 => Format.Text
+        case 1 => Format.Binary
+      },
+      columnsFormat = reader.collect(_.format()),
+    )
+  }
+
 }

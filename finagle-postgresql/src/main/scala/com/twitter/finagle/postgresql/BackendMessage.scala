@@ -1,6 +1,7 @@
 package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.postgresql.Types.FieldDescription
+import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
@@ -89,4 +90,14 @@ object BackendMessage {
   case object NoData extends BackendMessage
   case object PortalSuspended extends BackendMessage
 
+  // COPY
+  case class CopyInResponse(
+    overallFormat: Format,
+    columnsFormat: IndexedSeq[Format]
+  ) extends BackendMessage
+
+  case class CopyOutResponse(
+    overallFormat: Format,
+    columnsFormat: IndexedSeq[Format]
+  ) extends BackendMessage
 }
