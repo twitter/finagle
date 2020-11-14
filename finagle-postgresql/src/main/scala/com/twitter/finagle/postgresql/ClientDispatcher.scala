@@ -1,11 +1,20 @@
 package com.twitter.finagle.postgresql
 
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.RemovalCause
+import com.github.benmanes.caffeine.cache.RemovalListener
+import com.twitter.cache.FutureCache
+import com.twitter.cache.caffeine.CaffeineCache
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceProxy
 import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
+import com.twitter.finagle.postgresql.Params.MaxConcurrentPrepareStatements
+import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine.Connection
 import com.twitter.finagle.postgresql.machine.ExecuteMachine
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
@@ -15,6 +24,7 @@ import com.twitter.finagle.postgresql.machine.SimpleQueryMachine
 import com.twitter.finagle.postgresql.machine.StateMachine
 import com.twitter.finagle.postgresql.transport.MessageDecoder
 import com.twitter.finagle.postgresql.transport.Packet
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 import com.twitter.util.Promise
@@ -107,5 +117,55 @@ class ClientDispatcher(
           case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
           case e: Request.Execute => machineDispatch(new ExecuteMachine(e, parameters), p)
         }
+    }
+}
+
+object ClientDispatcher {
+  def cached(transport: Transport[Packet, Packet], params: Stack.Params): Service[Request, Response] =
+    PrepareCache(
+      new ClientDispatcher(transport, params),
+      params[MaxConcurrentPrepareStatements].num,
+      params[Stats].statsReceiver
+    )
+}
+
+case class PrepareCache(
+  svc: Service[Request, Response],
+  maxSize: Int,
+  statsReceiver: StatsReceiver, // TODO: export same metrics as finagle-mysql
+) extends ServiceProxy[Request, Response](svc) {
+
+  private[this] val listener = new RemovalListener[Name.Named, Future[Response]] {
+    override def onRemoval(key: Name.Named, response: Future[Response], cause: RemovalCause): Unit = {
+      val _ = response.respond {
+        case Return(Response.ParseComplete(_)) =>
+          val _ = svc(Request.Sync).unit // TODO: destroy portal
+        case _ =>
+      }
+    }
+  }
+
+  private[this] val underlying = Caffeine.newBuilder().maximumSize(maxSize.toLong)
+    .removalListener(listener)
+    .build[Name.Named, Future[Response]]()
+
+  // we only cache Named portals, the unnamed portal is destroyed automatically upon reuse.
+  private[this] val extractPortalName: Request.Prepare => Name.Named = {
+    case Request.Prepare(_, n: Name.Named) => n
+    case r =>
+      throw new PgSqlClientError(
+        s"Unexpected request type ${r.getClass.getName}. The cache can only accept Request.Prepared requests with Name.Named portals. Other requests should have been filtered out."
+      )
+  }
+
+  private[this] val fn = FutureCache.default(
+    fn = svc,
+    cache = FutureCache.keyEncoded(extractPortalName, new CaffeineCache(underlying))
+  )
+
+  override def apply(request: Request): Future[Response] =
+    request match {
+      case r @ Request.Prepare(_, Name.Named(_)) => fn(r)
+      case _ => super.apply(request)
     }
 }
