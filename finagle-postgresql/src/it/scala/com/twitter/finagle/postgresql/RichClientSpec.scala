@@ -33,6 +33,18 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
         .map(_ must beEqualTo(Response.Command("CREATE ROLE")))
     }
 
+    "copy from" in withTmpTable { tlbName =>
+      newRichClient
+        .modify(s"COPY $tlbName FROM STDIN;")
+        .map(_ => ok)
+    }.pendingUntilFixed()
+
+    "copy to" in withTmpTable { tlbName =>
+      newRichClient
+        .modify(s"COPY $tlbName TO STDOUT;")
+        .map(_ => ok)
+    }.pendingUntilFixed()
+
     "prepare read" in {
       newRichClient
         .prepare("select 1")
