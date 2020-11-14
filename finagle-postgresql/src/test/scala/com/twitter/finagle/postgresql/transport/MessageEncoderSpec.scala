@@ -20,6 +20,7 @@ import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.FrontendMessage.Close
 import com.twitter.finagle.postgresql.FrontendMessage.CopyDone
 import com.twitter.finagle.postgresql.FrontendMessage.CopyFail
 import com.twitter.finagle.postgresql.PropertiesSpec
@@ -113,6 +114,16 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
       maxRows = maxRows,
     )
   implicit lazy val arbExecute: Arbitrary[Execute] = Arbitrary(genExecute)
+
+  val genClose: Gen[Close] =
+    for {
+      name <- Arbitrary.arbitrary[Name]
+      target <- Arbitrary.arbitrary[DescriptionTarget]
+    } yield Close(
+      name = name,
+      target = target,
+    )
+  implicit lazy val arbClose: Arbitrary[Close] = Arbitrary(genClose)
 
   implicit lazy val arbCopyFail: Arbitrary[CopyFail] = Arbitrary(genAsciiString.map(s => CopyFail(s.value)))
 
@@ -257,6 +268,23 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
             case Name.Unnamed => bb.put(cstring(""))
           }
           bb.putInt(msg.maxRows)
+        }
+      )
+    }
+
+    "Close" should encodeFragment(MessageEncoder.closeEncoder) { msg =>
+      Packet(
+        cmd = Some('C'),
+        body = mkBuf() { bb =>
+          msg.target match {
+            case DescriptionTarget.Portal => bb.put('P'.toByte)
+            case DescriptionTarget.PreparedStatement => bb.put('S'.toByte)
+          }
+          msg.name match {
+            case Name.Named(name) => bb.put(cstring(name))
+            case Name.Unnamed => bb.put(cstring(""))
+          }
+          bb
         }
       )
     }
