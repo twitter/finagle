@@ -34,6 +34,7 @@ import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.BackendMessage.CloseComplete
 import com.twitter.finagle.postgresql.BackendMessage.CopyDone
 import com.twitter.finagle.postgresql.BackendMessage.CopyInResponse
 import com.twitter.finagle.postgresql.BackendMessage.CopyOutResponse
@@ -296,9 +297,10 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
 
     "ParseComplete" should singleton('1', ParseComplete)
     "BindComplete" should singleton('2', BindComplete)
+    "CloseComplete" should singleton('3', CloseComplete)
     "EmptyQueryResponse" should singleton('I', EmptyQueryResponse)
-    "BindComplete" should singleton('n', NoData)
-    "BindComplete" should singleton('s', PortalSuspended)
+    "NoData" should singleton('n', NoData)
+    "PortalSuspended" should singleton('s', PortalSuspended)
 
     def copyInOutBody(overallFormat: Format, columnsFormat: IndexedSeq[Format]) =
       mkBuf() { bb =>
