@@ -40,6 +40,8 @@ trait Client extends QueryClient[String] with Closable {
 
   def prepare(sql: String): PreparedStatement
 
+  def prepare(name: Name, sql: String): PreparedStatement
+
   def cursor(sql: String): CursoredStatement
 
 }
@@ -88,7 +90,7 @@ object Client {
     override def prepare(sql: String): PreparedStatement =
       prepare(Name.Named(MurmurHash3.stringHash(sql).toString), sql)
 
-    def prepare(name: Name, sql: String): PreparedStatement = new PreparedStatement {
+    override def prepare(name: Name, sql: String): PreparedStatement = new PreparedStatement {
       // NOTE: this assumes that caching is done down the stack so that named statements aren't re-prepared on the same connection
       //   The rationale is that it allows releasing the connection earlier at the expense
       //   of re-preparing statements on each connection and potentially more than once (but not every time)
@@ -106,6 +108,10 @@ object Client {
                 svc(Request.ExecutePortal(prepared.statement, values))
               }
               .flatMap(Expect.QueryResponse)
+              .ensure {
+                // TODO: not sure this is correct
+                val _ = svc.close()
+              }
           }
     }
 
