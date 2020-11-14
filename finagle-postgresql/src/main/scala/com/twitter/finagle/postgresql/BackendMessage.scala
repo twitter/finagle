@@ -91,6 +91,9 @@ object BackendMessage {
   case object PortalSuspended extends BackendMessage
 
   // COPY
+  case class CopyData(bytes: Buf) extends BackendMessage
+  case object CopyDone extends BackendMessage
+  case class CopyFail(msg: String) extends BackendMessage
   case class CopyInResponse(
     overallFormat: Format,
     columnsFormat: IndexedSeq[Format]

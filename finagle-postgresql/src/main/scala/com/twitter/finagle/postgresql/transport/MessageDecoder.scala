@@ -17,6 +17,8 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.BackendMessage.BackendKeyData
 import com.twitter.finagle.postgresql.BackendMessage.BindComplete
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
+import com.twitter.finagle.postgresql.BackendMessage.CopyData
+import com.twitter.finagle.postgresql.BackendMessage.CopyDone
 import com.twitter.finagle.postgresql.BackendMessage.CopyInResponse
 import com.twitter.finagle.postgresql.BackendMessage.CopyOutResponse
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
@@ -68,7 +70,9 @@ object MessageDecoder {
         cmd match {
           case '1' => Return(ParseComplete)
           case '2' => Return(BindComplete)
+          case 'c' => Return(CopyDone)
           case 'C' => decode[CommandComplete](reader)
+          case 'd' => decode[CopyData](reader)
           case 'D' => decode[DataRow](reader)
           case 'E' => decode[ErrorResponse](reader)
           case 'G' => decode[CopyInResponse](reader)
@@ -239,6 +243,10 @@ object MessageDecoder {
       },
       columnsFormat = reader.collect(_.format()),
     )
+  }
+
+  implicit lazy val copyDataDecoder: MessageDecoder[CopyData] = MessageDecoder { reader =>
+    CopyData(reader.remainingBuf())
   }
 
 }

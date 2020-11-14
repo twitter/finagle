@@ -276,4 +276,9 @@ trait PropertiesSpec extends ScalaCheck {
   } yield Inet(ip, mask.toShort)
   implicit lazy val arbInet: Arbitrary[Inet] = Arbitrary(genInet)
 
+  implicit lazy val arbBackendCopyData: Arbitrary[BackendMessage.CopyData] =
+    Arbitrary(genBuf.map(BackendMessage.CopyData))
+  implicit lazy val arbFrontendCopyData: Arbitrary[FrontendMessage.CopyData] =
+    Arbitrary(genBuf.map(FrontendMessage.CopyData))
+
 }
