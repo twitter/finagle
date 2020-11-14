@@ -89,6 +89,7 @@ object BackendMessage {
   case class ParameterDescription(parameters: IndexedSeq[Oid]) extends BackendMessage
   case object NoData extends BackendMessage
   case object PortalSuspended extends BackendMessage
+  case object CloseComplete extends BackendMessage
 
   // COPY
   case class CopyData(bytes: Buf) extends BackendMessage

@@ -19,13 +19,34 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
   "Prepared Statement" should {
 
-    def prepareSpec(s: String) =
-      client(Request.Prepare(s))
+    def prepareSpec(name: Name, s: String) =
+      client(Request.Prepare(s, name))
         .map { response =>
           response must beLike {
-            case Response.ParseComplete(_) => ok
+            case Response.ParseComplete(prepared) => prepared.name must_== name
           }
         }
+
+    def closingSpec(name: Name, s: String) =
+      newClient(identity)().flatMap { svc =>
+        svc(Request.Prepare(s, name))
+          .map { response =>
+            response must beLike {
+              case Response.ParseComplete(_) => ok
+            }
+          }
+          .flatMap { _ =>
+            svc(Request.CloseStatement(name))
+              .map { response =>
+                response must beLike {
+                  case Response.Ready => ok
+                }
+              }
+          }
+          .respond { _ =>
+            val _ = svc.close()
+          }
+      }
 
     def executeSpec(
       s: String,
@@ -52,8 +73,17 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
     )(f: Response => Future[MatchResult[_]]) =
       fragments(
         List(
-          s"support preparing $name" in {
-            prepareSpec(query)
+          s"support preparing unnamed prepared $name" in {
+            prepareSpec(Name.Unnamed, query)
+          },
+          s"support preparing named prepared $name" in {
+            prepareSpec(Name.Named(query), query)
+          },
+          s"support closing unnamed prepared $name" in {
+            closingSpec(Name.Unnamed, query)
+          },
+          s"support closing named prepared $name" in {
+            closingSpec(Name.Named(query), query)
           },
           s"support executing $name" in {
             executeSpec(query, parameters) { case (_, response) => f(response) }
@@ -67,7 +97,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
     }
 
     "support preparing select statements with one argument" in {
-      prepareSpec("SELECT 1,$1")
+      prepareSpec(Name.Unnamed, "SELECT 1,$1")
     }
 
     fullSpec("select statements with no arguments", "CREATE TABLE test(col1 bigint)") {
@@ -77,7 +107,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
     "support preparing DML with one argument" in {
       withTmpTable { tableName =>
-        prepareSpec(s"UPDATE $tableName SET int_col = $$1")
+        prepareSpec(Name.Unnamed, s"UPDATE $tableName SET int_col = $$1")
       }
     }
 

@@ -66,6 +66,11 @@ object FrontendMessage {
     maxRows: Int,
   ) extends FrontendMessage
 
+  case class Close(
+    target: DescriptionTarget,
+    name: Name,
+  ) extends FrontendMessage
+
   // COPY
   case class CopyData(bytes: Buf) extends FrontendMessage
   case object CopyDone extends FrontendMessage

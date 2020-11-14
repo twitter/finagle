@@ -16,6 +16,7 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.BackendMessage.BackendKeyData
 import com.twitter.finagle.postgresql.BackendMessage.BindComplete
+import com.twitter.finagle.postgresql.BackendMessage.CloseComplete
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
 import com.twitter.finagle.postgresql.BackendMessage.CopyData
 import com.twitter.finagle.postgresql.BackendMessage.CopyDone
@@ -70,6 +71,7 @@ object MessageDecoder {
         cmd match {
           case '1' => Return(ParseComplete)
           case '2' => Return(BindComplete)
+          case '3' => Return(CloseComplete)
           case 'c' => Return(CopyDone)
           case 'C' => decode[CommandComplete](reader)
           case 'd' => decode[CopyData](reader)

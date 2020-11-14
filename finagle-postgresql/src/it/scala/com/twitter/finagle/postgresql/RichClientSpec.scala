@@ -83,8 +83,8 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
             rs.rows.head.get[Buf](1) must_== param2
           }
 
-      Await.result(read(false, Buf.ByteArray(-1, 0,1,2)))
-      Await.result(read(true, Buf.ByteArray(4,3,2,1)))
+      Await.result(read(false, Buf.ByteArray(-1, 0, 1, 2)))
+      Await.result(read(true, Buf.ByteArray(4, 3, 2, 1)))
     }
   }
 
