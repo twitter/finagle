@@ -11,10 +11,12 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Params.MaxConcurrentPrepareStatements
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.machine.CloseMachine
 import com.twitter.finagle.postgresql.machine.Connection
 import com.twitter.finagle.postgresql.machine.ExecuteMachine
 import com.twitter.finagle.postgresql.machine.HandshakeMachine
@@ -116,6 +118,8 @@ class ClientDispatcher(
           case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
           case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
           case e: Request.Execute => machineDispatch(new ExecuteMachine(e, parameters), p)
+          case Request.CloseStatement(name) =>
+            machineDispatch(new CloseMachine(name, DescriptionTarget.PreparedStatement), p)
         }
     }
 }
@@ -129,6 +133,12 @@ object ClientDispatcher {
     )
 }
 
+/**
+ * Caches statements that have been successfully prepared over the connection
+ * managed by the underlying service (a ClientDispatcher). This decreases
+ * the chances of leaking prepared statements and can simplify the
+ * implementation of prepared statements in the presence of a connection pool.
+ */
 case class PrepareCache(
   svc: Service[Request, Response],
   maxSize: Int,
@@ -139,7 +149,7 @@ case class PrepareCache(
     override def onRemoval(key: Name.Named, response: Future[Response], cause: RemovalCause): Unit = {
       val _ = response.respond {
         case Return(Response.ParseComplete(_)) =>
-          val _ = svc(Request.Sync).unit // TODO: destroy portal
+          val _ = svc(Request.CloseStatement(key)).unit
         case _ =>
       }
     }

@@ -87,6 +87,15 @@ object MessageEncoder {
       .int(msg.maxRows)
   }
 
+  implicit val closeEncoder: MessageEncoder[FrontendMessage.Close] = MessageEncoder('C') { (writer, msg) =>
+    writer
+      .byte(msg.target match {
+        case FrontendMessage.DescriptionTarget.Portal => 'P'
+        case FrontendMessage.DescriptionTarget.PreparedStatement => 'S'
+      })
+      .name(msg.name)
+  }
+
   implicit val copyDataEncoder: MessageEncoder[FrontendMessage.CopyData] = MessageEncoder('d') { (writer, msg) =>
     writer.buf(msg.bytes)
   }
