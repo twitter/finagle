@@ -4,6 +4,7 @@ import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.io.Buf
 
 sealed trait FrontendMessage
 
@@ -65,4 +66,8 @@ object FrontendMessage {
     maxRows: Int,
   ) extends FrontendMessage
 
+  // COPY
+  case class CopyData(bytes: Buf) extends FrontendMessage
+  case object CopyDone extends FrontendMessage
+  case class CopyFail(msg: String) extends FrontendMessage
 }

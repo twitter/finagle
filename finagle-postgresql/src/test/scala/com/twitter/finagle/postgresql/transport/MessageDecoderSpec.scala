@@ -34,10 +34,14 @@ import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.BackendMessage.CopyDone
+import com.twitter.finagle.postgresql.BackendMessage.CopyInResponse
+import com.twitter.finagle.postgresql.BackendMessage.CopyOutResponse
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.specs2.mutable.Specification
 
@@ -102,6 +106,14 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
 
   implicit lazy val arbParameterDescription: Arbitrary[ParameterDescription] =
     Arbitrary(Arbitrary.arbitrary[IndexedSeq[Oid]].map(ParameterDescription))
+
+  val genCopyTuple: Gen[(Format, IndexedSeq[Format])] = for {
+    nbCols <- Gen.chooseNum(1, 256)
+    o <- arbitrary[Format]
+    formats <- Gen.listOfN(nbCols, arbitrary[Format])
+  } yield (o, formats.toIndexedSeq)
+  implicit lazy val arbCopyInResponse: Arbitrary[CopyInResponse] = Arbitrary(genCopyTuple.map(CopyInResponse.tupled))
+  implicit lazy val arbCopyOutResponse: Arbitrary[CopyOutResponse] = Arbitrary(genCopyTuple.map(CopyOutResponse.tupled))
 
   def decodeFragment[M <: BackendMessage: Arbitrary](dec: MessageDecoder[M])(toPacket: M => Packet) = {
     "decode packet body correctly" in prop { msg: M =>
@@ -287,6 +299,44 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
     "EmptyQueryResponse" should singleton('I', EmptyQueryResponse)
     "BindComplete" should singleton('n', NoData)
     "BindComplete" should singleton('s', PortalSuspended)
+
+    def copyInOutBody(overallFormat: Format, columnsFormat: IndexedSeq[Format]) =
+      mkBuf() { bb =>
+        val b = overallFormat match {
+          case Format.Text => 0
+          case Format.Binary => 1
+        }
+        bb.put(b.toByte)
+        bb.putShort(columnsFormat.size.toShort)
+        columnsFormat.foreach {
+          case Format.Text => bb.putShort(0)
+          case Format.Binary => bb.putShort(1)
+        }
+        bb
+      }
+
+    "CopyInResponse" should decodeFragment(MessageDecoder.copyInResponseDecoder) { msg =>
+      Packet(
+        cmd = Some('G'),
+        body = copyInOutBody(msg.overallFormat, msg.columnsFormat)
+      )
+    }
+    "CopyOutResponse" should decodeFragment(MessageDecoder.copyOutResponseDecoder) { msg =>
+      Packet(
+        cmd = Some('H'),
+        body = copyInOutBody(msg.overallFormat, msg.columnsFormat)
+      )
+    }
+    "CopyData" should decodeFragment(MessageDecoder.copyDataDecoder) { msg =>
+      Packet(
+        cmd = Some('d'),
+        body = mkBuf() { bb =>
+          bb.put(Buf.ByteBuffer.Owned.extract(msg.bytes))
+          bb
+        }
+      )
+    }
+    "CopyDone" should singleton('c', CopyDone)
   }
 
 }

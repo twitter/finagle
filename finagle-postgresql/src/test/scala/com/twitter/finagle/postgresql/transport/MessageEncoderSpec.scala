@@ -20,6 +20,8 @@ import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.FrontendMessage.CopyDone
+import com.twitter.finagle.postgresql.FrontendMessage.CopyFail
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
@@ -111,6 +113,8 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
       maxRows = maxRows,
     )
   implicit lazy val arbExecute: Arbitrary[Execute] = Arbitrary(genExecute)
+
+  implicit lazy val arbCopyFail: Arbitrary[CopyFail] = Arbitrary(genAsciiString.map(s => CopyFail(s.value)))
 
   def encodeFragment[M <: FrontendMessage: Arbitrary](enc: MessageEncoder[M])(toPacket: M => Packet) =
     "encode correctly" in prop { msg: M =>
@@ -253,6 +257,35 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
             case Name.Unnamed => bb.put(cstring(""))
           }
           bb.putInt(msg.maxRows)
+        }
+      )
+    }
+
+    "CopyData" should encodeFragment(MessageEncoder.copyDataEncoder) { msg =>
+      Packet(
+        cmd = Some('d'),
+        body = mkBuf() { bb =>
+          bb.put(Buf.ByteBuffer.Owned.extract(msg.bytes))
+          bb
+        }
+      )
+    }
+
+    "CopyDone" should {
+      "encode correctly" in {
+        MessageEncoder.copyDoneEncoder.toPacket(CopyDone) must_== Packet(
+          cmd = Some('c'),
+          body = Buf.Empty
+        )
+      }
+    }
+
+    "CopyFail" should encodeFragment(MessageEncoder.copyFailEncoder) { msg =>
+      Packet(
+        cmd = Some('f'),
+        body = mkBuf() { bb =>
+          bb.put(cstring(msg.msg))
+          bb
         }
       )
     }

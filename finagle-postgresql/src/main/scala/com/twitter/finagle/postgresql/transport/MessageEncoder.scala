@@ -86,4 +86,14 @@ object MessageEncoder {
       .name(msg.portal)
       .int(msg.maxRows)
   }
+
+  implicit val copyDataEncoder: MessageEncoder[FrontendMessage.CopyData] = MessageEncoder('d') { (writer, msg) =>
+    writer.buf(msg.bytes)
+  }
+
+  implicit val copyDoneEncoder: MessageEncoder[FrontendMessage.CopyDone.type] = emptyMessageEncoder('c')
+
+  implicit val copyFailEncoder: MessageEncoder[FrontendMessage.CopyFail] = MessageEncoder('f') { (writer, msg) =>
+    writer.cstring(msg.msg)
+  }
 }
