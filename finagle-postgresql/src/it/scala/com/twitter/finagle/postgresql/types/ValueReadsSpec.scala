@@ -25,7 +25,7 @@ import org.specs2.matcher.describe.Diffable
  * For example, to produce the bytes for the `Int4` type:
  *
  * {{{
- *   postgres=# SELECT int4send('1234'::int4);
+ *   postgres=# SELECT int4send('1234'::"int4");
  *   int4send
  * ------------
  *  \x000004d2
@@ -35,6 +35,9 @@ import org.specs2.matcher.describe.Diffable
  * The resulting value (`\x000004d2`) is a hexadecimal string representation of the bytes that will be present on the wire.
  * We use jdbc to execute the statement, extract the bytes and then we send those bytes into `ValueReads`
  * and confirm that we read back the original value.
+ *
+ * NOTE: the double quotes around the type name is required due to the "char" (OID 18) type which conflicts
+ * with the "bpchar" type alias, i.e.: char(n). https://stackoverflow.com/a/42484838
  *
  * NOTE: because of the type cast from string, there are a few caveats:
  *
@@ -73,13 +76,13 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     }
 
   def pgBytes[T](pgType: PgType, value: T)(implicit toSqlString: ToSqlString[T]): Buf =
-    // e.g.: `SELECT int4send('1234'::int4)`
-    pgBytes(s"SELECT ${sendFunc(pgType)}('${toSqlString.toString(value)}'::${pgType.name});")
+    // e.g.: `SELECT int4send('1234'::"int4")`
+    pgBytes(s"""SELECT ${sendFunc(pgType)}('${toSqlString.toString(value)}'::"${pgType.name}");""")
 
   def pgArrayBytes[T](pgType: PgType, values: List[T])(implicit toSqlString: ToSqlString[T]): Buf = {
-    // e.g.: `SELECT array_send('{1,2,3,4}'::int4[])`
+    // e.g.: `SELECT array_send('{1,2,3,4}'::"int4"[])`
     val arrStr = values.map(v => toSqlString.toString(v)).map(v => s"""'$v'""").mkString("ARRAY[", ",", "]")
-    pgBytes(s"SELECT array_send($arrStr::${pgType.name}[]);")
+    pgBytes(s"""SELECT array_send($arrStr::"${pgType.name}"[]);""")
   }
 
   def readFragment[T: Arbitrary: Diffable: ToSqlString](valueReads: ValueReads[T], tpe: PgType) =
@@ -128,8 +131,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     "readsBigDecimal" should failFor(ValueReads.readsBigDecimal, "NaN", PgType.Numeric)
     "readsBool" should simpleSpec(ValueReads.readsBoolean, PgType.Bool)
     "readsBuf" should simpleSpec(ValueReads.readsBuf, PgType.Bytea)
-    // TODO: figure out why charsend(character) doesn't work
-//    "readsByte" should simpleSpec(ValueReads.readsByte, PgType.Char)
+    "readsByte" should simpleSpec(ValueReads.readsByte, PgType.Char)
     "readsDouble" should simpleSpec(ValueReads.readsDouble, PgType.Float8)
     "readsFloat" should simpleSpec(ValueReads.readsFloat, PgType.Float4)
     "readsInet" should simpleSpec(ValueReads.readsInet, PgType.Inet)
