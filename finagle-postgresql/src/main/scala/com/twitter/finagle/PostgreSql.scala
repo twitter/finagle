@@ -41,7 +41,7 @@ object PostgreSql {
       new postgresql.PgSqlTransporter(addr, params)
 
     override protected def newDispatcher(transport: ClientTransport): Service[Request, Response] =
-      new postgresql.ClientDispatcher(transport, params)
+      postgresql.ClientDispatcher.cached(transport, params)
 
     override protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,

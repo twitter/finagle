@@ -18,4 +18,22 @@ object Params {
   object Database {
     implicit val param: Stack.Param[Database] = Stack.Param(Database(None))
   }
+
+  /**
+   * A class eligible for configuring the maximum number of prepare
+   * statements.  After creating `num` prepare statements, we'll start purging
+   * old ones.
+   */
+  case class MaxConcurrentPrepareStatements(num: Int) {
+    assert(num > 0, s"$num must be positive")
+
+    def mk(): (MaxConcurrentPrepareStatements, Stack.Param[MaxConcurrentPrepareStatements]) =
+      (this, MaxConcurrentPrepareStatements.param)
+  }
+
+  object MaxConcurrentPrepareStatements {
+    implicit val param: Stack.Param[MaxConcurrentPrepareStatements] =
+      Stack.Param(MaxConcurrentPrepareStatements(20))
+  }
+
 }
