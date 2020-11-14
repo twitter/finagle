@@ -1,8 +1,12 @@
 package com.twitter.finagle.postgresql
 
+import java.nio.charset.StandardCharsets
+
 import com.twitter.finagle.Service
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.types.PgType
+import com.twitter.finagle.postgresql.types.ValueWrites
 import com.twitter.io.Reader
 import com.twitter.util.Future
 import org.specs2.matcher.MatchResult
@@ -16,6 +20,9 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
                                  |  SELECT n+2 FROM a
                                  |)
                                  |SELECT * FROM a""".stripMargin
+
+  def write[T](tpe: PgType, value: T)(implicit twrites: ValueWrites[T]): WireValue =
+    twrites.writes(tpe, value, StandardCharsets.UTF_8)
 
   "Prepared Statement" should {
 
@@ -50,7 +57,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
     def executeSpec(
       s: String,
-      parameters: IndexedSeq[WireValue] = IndexedSeq.empty,
+      parameters: Seq[WireValue] = Seq.empty,
       maxResults: Int = 0
     )(f: (Service[Request, Response], Response) => Future[MatchResult[_]]) =
       newClient(identity)()
@@ -68,8 +75,8 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
     def fullSpec(
       name: String,
-      query: String,
-      parameters: IndexedSeq[WireValue] = IndexedSeq.empty
+      query: => String,
+      parameters: Seq[WireValue] = Seq.empty
     )(f: Response => Future[MatchResult[_]]) =
       fragments(
         List(
@@ -96,8 +103,13 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       case _ => Future(ko)
     }
 
-    "support preparing select statements with one argument" in {
-      prepareSpec(Name.Unnamed, "SELECT 1,$1")
+    fullSpec("select statements with one argument", "SELECT 1, $1", write(PgType.Bool, true) :: Nil) {
+      case rs: Response.ResultSet =>
+        rs.toSeq.map { rows =>
+          rows must haveSize(1)
+          rows.head must haveSize(2)
+        }
+      case _ => Future(ko)
     }
 
     fullSpec("select statements with no arguments", "CREATE TABLE test(col1 bigint)") {
@@ -105,10 +117,11 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       case _ => Future(ko)
     }
 
-    "support preparing DML with one argument" in {
-      withTmpTable { tableName =>
-        prepareSpec(Name.Unnamed, s"UPDATE $tableName SET int_col = $$1")
-      }
+    // This is a hack to have a temp table to work with in the following spec.
+    lazy val tableName = withTmpTable(identity)
+    fullSpec("DML with one argument", s"INSERT INTO $tableName(int_col) VALUES($$1)", write(PgType.Int4, 56) :: Nil) {
+      case Response.Command(tag) => Future(tag must beEqualTo("INSERT 0 1"))
+      case _ => Future(ko)
     }
 
     "support portal suspension" in {
