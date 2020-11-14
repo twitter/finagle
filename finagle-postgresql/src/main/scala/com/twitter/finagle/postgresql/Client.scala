@@ -123,7 +123,7 @@ object Client {
 
 case class Parameter[T](value: T)(implicit val valueWrites: ValueWrites[T]) {
   def encode(tpe: PgType, charset: Charset): WireValue = {
-    if(!valueWrites.accepts(tpe)) {
+    if (!valueWrites.accepts(tpe)) {
       throw PgSqlUnsupportedError(
         s"Cannot encode parameter value with provided ValueWrites instance; it does not support type ${tpe.name} (oid ${tpe.oid.value})."
       )
