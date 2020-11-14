@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Inet
@@ -134,6 +135,9 @@ trait PropertiesSpec extends ScalaCheck {
       rows <- Gen.listOf(genRowData(desc))
     } yield TestResultSet(desc, rows)
   }
+
+  implicit lazy val arbTarget: Arbitrary[DescriptionTarget] =
+    Arbitrary(Gen.oneOf(DescriptionTarget.PreparedStatement, DescriptionTarget.Portal))
 
   lazy val genField: Gen[Field] = Gen.oneOf(
     Field.Code,
