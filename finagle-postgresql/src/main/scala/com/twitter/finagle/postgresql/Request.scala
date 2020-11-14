@@ -4,7 +4,7 @@ import com.twitter.finagle.postgresql.Response.Prepared
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.WireValue
 
-trait Request
+sealed trait Request
 object Request {
 
   /**
