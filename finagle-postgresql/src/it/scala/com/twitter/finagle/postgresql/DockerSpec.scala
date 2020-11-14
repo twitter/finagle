@@ -5,8 +5,6 @@ import com.twitter.finagle.PostgreSql
 import com.whisk.docker.testkit.ContainerSpec
 import com.whisk.docker.testkit.DockerReadyChecker
 
-import java.util.concurrent.ForkJoinPool
-
 import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerClient
 import com.whisk.docker.testkit._
@@ -18,7 +16,7 @@ trait DockerTestKitForAll extends BeforeAfterAll {
 
   val dockerClient: DockerClient = DefaultDockerClient.fromEnv().build()
 
-  val dockerExecutionContext: ExecutionContext = ExecutionContext.fromExecutor(new ForkJoinPool())
+  val dockerExecutionContext: ExecutionContext = ExecutionContext.global
 
   val managedContainers: ManagedContainers
 
@@ -41,13 +39,19 @@ trait DockerTestKitForAll extends BeforeAfterAll {
 trait DockerPostgresService extends DockerTestKitForAll {
   import scala.concurrent.duration._
 
-  val postgresAdvertisedPort = 5432
+  val tag = sys.env.get("POSTGRES_VERSION")
+    .map { v =>
+      v.split('.').take(2).mkString(".")
+    }
+    .getOrElse("12.5")
 
-  val PostgresUser = "nph"
-  val PostgresPassword = "suitup"
+  val PostgresAdvertisedPort = 5432
 
-  val postgresContainer = ContainerSpec("postgres:9.6")
-    .withExposedPorts(postgresAdvertisedPort)
+  val PostgresUser = "test-user"
+  val PostgresPassword = "test-password"
+
+  val postgresContainer = ContainerSpec(s"postgres:$tag")
+    .withExposedPorts(PostgresAdvertisedPort)
     .withEnv(s"POSTGRES_USER=$PostgresUser", s"POSTGRES_PASSWORD=$PostgresPassword")
     .withReadyChecker(
       DockerReadyChecker
