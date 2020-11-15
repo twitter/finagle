@@ -4,7 +4,6 @@ import java.nio.file.Files
 import java.nio.file.attribute.PosixFilePermission
 
 import com.twitter.io.StreamIO
-import com.twitter.io.TempFile
 
 import scala.jdk.CollectionConverters._
 
@@ -18,7 +17,10 @@ trait ResourceFileSpec { self: PgSqlSpec =>
    */
   def toTmpFile(name: String): java.io.File =
     using(getClass.getResourceAsStream(name)) { is =>
-      val file = TempFile.fromResourcePath(name)
+      // NOTE: we have to hardcode `/tmp` because Docker cannot read files from the OSX tmp sandbox.
+      // This makes the test suite more platform-specific,
+      //   but it should work on most system without any modifications to the docker daemon
+      val file = java.io.File.createTempFile(name, null, new java.io.File("/tmp"))
       Files.setPosixFilePermissions(
         file.toPath,
         Set(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE).asJava
