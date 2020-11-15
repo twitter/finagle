@@ -59,7 +59,7 @@ trait DockerPostgresService extends DockerTestKitForAll {
   val postgresContainer = configure(
     ContainerSpec(s"postgres:$tag")
       .withExposedPorts(PostgresAdvertisedPort)
-      .withEnv((baseEnv ++ postgresContainerEnv).toList.map{ case(k,v) => s"$k=$v" }: _*)
+      .withEnv((baseEnv ++ postgresContainerEnv).toList.map { case (k, v) => s"$k=$v" }: _*)
       .withReadyChecker(
         DockerReadyChecker
           .Jdbc(

@@ -14,7 +14,12 @@ trait PostgresConnectionSpec {
   def defaultConnectionCfg: ConnectionCfg = ConnectionCfg()
 }
 
-trait PgSqlIntegrationSpec extends PgSqlSpec with PostgresConnectionSpec with DockerPostgresService with ClientEach with Jdbc {
+trait PgSqlIntegrationSpec
+    extends PgSqlSpec
+    with PostgresConnectionSpec
+    with DockerPostgresService
+    with ClientEach
+    with Jdbc {
   override def defaultConnectionCfg = ConnectionCfg(
     username = PostgresUser,
     password = Some(PostgresPassword),

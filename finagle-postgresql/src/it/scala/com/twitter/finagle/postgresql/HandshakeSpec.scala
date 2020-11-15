@@ -5,7 +5,7 @@ import com.whisk.docker.testkit.ContainerSpec
 
 class HandshakeSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
 
-  override def configure(spec: ContainerSpec): ContainerSpec = {
+  override def configure(spec: ContainerSpec): ContainerSpec =
     spec
       .withVolumeBindings(
         HostConfig.Bind.builder()
@@ -14,7 +14,6 @@ class HandshakeSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
           .build()
       )
       .withCommand("-c", "hba_file=/handshake/pg_hba.conf")
-  }
 
   override def beforeAll(): Unit = {
     super.beforeAll()

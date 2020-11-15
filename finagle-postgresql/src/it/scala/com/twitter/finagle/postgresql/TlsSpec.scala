@@ -8,7 +8,7 @@ import com.whisk.docker.testkit.ContainerSpec
 
 class TlsSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
 
-  override def configure(spec: ContainerSpec): ContainerSpec = {
+  override def configure(spec: ContainerSpec): ContainerSpec =
     spec
       .withVolumeBindings(
         HostConfig.Bind.builder()
@@ -23,11 +23,13 @@ class TlsSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
           .build()
       )
       .withCommand(
-        "-c", "ssl=true",
-        "-c", "ssl_cert_file=/certs/server.crt",
-        "-c", "ssl_key_file=/certs/server.key",
+        "-c",
+        "ssl=true",
+        "-c",
+        "ssl_cert_file=/certs/server.crt",
+        "-c",
+        "ssl_key_file=/certs/server.key",
       )
-  }
 
   def withTls(client: PostgreSql.Client): PostgreSql.Client =
     client.withTransport.tls(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))
