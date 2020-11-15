@@ -8,16 +8,17 @@ import com.twitter.util.Future
 import com.twitter.util.Throw
 import org.specs2.matcher.MatchResult
 
-class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
+class SimpleQuerySpec extends PgSqlIntegrationSpec {
 
   "Simple Query" should {
 
-    def one(q: Request.Query)(check: Response.QueryResponse => Future[MatchResult[_]]) =
+    def one(q: Request.Query)(check: Response.QueryResponse => Future[MatchResult[_]]) = withService() { client =>
       client(q)
         .flatMap {
           case r: SimpleQueryResponse => r.next.flatMap(check)
           case r => sys.error(s"unexpected response $r")
         }
+    }
 
     "return an empty result for an empty query" in {
       one(Request.Query("")) {
@@ -26,7 +27,7 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       }
     }
 
-    "return a server error for an invalid query" in {
+    "return a server error for an invalid query" in withService() { client =>
       client(Request.Query("invalid"))
         .liftToTry
         .map { response =>
@@ -56,7 +57,7 @@ class SimpleQuerySpec extends PgSqlSpec with EmbeddedPgSqlSpec {
       }
     }
 
-    "multi-line" in {
+    "multi-line" in withService() { client =>
       client(Request.Query("create user other;\nselect 1 as one;drop user other;"))
         .flatMap { response =>
           response must beAnInstanceOf[SimpleQueryResponse]
