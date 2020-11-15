@@ -4,12 +4,12 @@ import com.twitter.io.Buf
 import com.twitter.io.Reader
 import com.twitter.util.Await
 
-class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
+class RichClientSpec extends PgSqlIntegrationSpec {
 
   "Rich client" should {
 
-    "support multi-line queries" in {
-      newRichClient
+    "support multi-line queries" in withRichClient() { client =>
+      client
         .multiQuery("select 1;select 2;")
         .flatMap { statements =>
           Reader.toAsyncStream(statements)
@@ -22,46 +22,50 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
         }
     }
 
-    "read" in {
-      newRichClient
+    "read" in withRichClient() { client =>
+      client
         .read("select 1;")
         .map(_.rows must haveSize(1))
     }
 
-    "modify" in {
-      newRichClient
+    "modify" in withRichClient() { client =>
+      client
         .modify("create user fake;")
         .map(_ must beEqualTo(Response.Command("CREATE ROLE")))
     }
 
-    "copy from" in withTmpTable { tlbName =>
-      newRichClient
-        .modify(s"COPY $tlbName FROM STDIN;")
-        .map(_ => ok)
+    "copy from" in withRichClient() { client =>
+      withTmpTable() { tlbName =>
+        client
+          .modify(s"COPY $tlbName FROM STDIN;")
+          .map(_ => ok)
+      }
     }.pendingUntilFixed()
 
-    "copy to" in withTmpTable { tlbName =>
-      newRichClient
-        .modify(s"COPY $tlbName TO STDOUT;")
-        .map(_ => ok)
+    "copy to" in withRichClient() { client =>
+      withTmpTable() { tlbName =>
+        client
+          .modify(s"COPY $tlbName TO STDOUT;")
+          .map(_ => ok)
+      }
     }.pendingUntilFixed()
 
-    "prepare read" in {
-      newRichClient
+    "prepare read" in withRichClient() { client =>
+      client
         .prepare("select 1")
         .read(Nil)
         .map(_.rows must haveSize(1))
     }
 
-    "prepare modify" in {
-      newRichClient
+    "prepare modify" in withRichClient() { client =>
+      client
         .prepare("create user another;")
         .modify(Nil)
         .map(_ must beEqualTo(Response.Command("CREATE ROLE")))
     }
 
-    "prepare param" in {
-      newRichClient
+    "prepare param" in withRichClient() { client =>
+      client
         .prepare("select $1::bool, $2::bytea")
         .read(Parameter(true) :: Parameter(Buf.ByteArray(0, 1, 2, 3, 4)) :: Nil)
         .map { rs =>
@@ -71,8 +75,8 @@ class RichClientSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
         }
     }
 
-    "prepare reuse" in {
-      val stmt = newRichClient.prepare("select $1::bool, $2::bytea")
+    "prepare reuse" in withRichClient() { client =>
+      val stmt = client.prepare("select $1::bool, $2::bytea")
 
       def read(param1: Boolean, param2: Buf) =
         stmt

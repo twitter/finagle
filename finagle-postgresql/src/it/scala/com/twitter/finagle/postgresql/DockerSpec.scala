@@ -1,10 +1,7 @@
 package com.twitter.finagle.postgresql
 
-import org.specs2.mutable.Specification
-import com.twitter.finagle.PostgreSql
 import com.whisk.docker.testkit.ContainerSpec
 import com.whisk.docker.testkit.DockerReadyChecker
-
 import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerClient
 import com.whisk.docker.testkit._
@@ -65,23 +62,4 @@ trait DockerPostgresService extends DockerTestKitForAll {
     .toContainer
 
   override val managedContainers: ManagedContainers = postgresContainer.toManagedContainer
-}
-
-class DockerSpec extends Specification with PgSqlSpec with DockerPostgresService {
-
-  "patate" should {
-    "start a docker container" in {
-      val sss = PostgreSql.Client()
-        .withCredentials(PostgresUser, Some(PostgresPassword))
-        .withDatabase("postgres")
-        .newRichClient(s"localhost:${postgresContainer.mappedPort(5432)}")
-
-      sss.select("SELECT 1;")(_.get[Int](0))
-        .map { ints =>
-          ints must haveSize(1)
-          ints.head must_== 1
-        }
-    }
-  }
-
 }
