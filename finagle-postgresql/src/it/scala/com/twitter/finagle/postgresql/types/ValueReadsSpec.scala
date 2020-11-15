@@ -5,9 +5,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-import com.twitter.finagle.postgresql.EmbeddedPgSqlSpec
 import com.twitter.finagle.postgresql.PgSqlClientError
-import com.twitter.finagle.postgresql.PgSqlSpec
+import com.twitter.finagle.postgresql.PgSqlIntegrationSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -44,7 +43,7 @@ import org.specs2.matcher.describe.Diffable
  * - the string representation must escape single quotes, e.g.: "My name's Bob" -> "My name''s Bob"
  * - the `ToSqlString` trait is necessary to handle types that require finer control than `.toString`
  */
-class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpec {
+class ValueReadsSpec extends PgSqlIntegrationSpec with PropertiesSpec {
 
   // The function to convert a type to its wire representation is mostly guessable from its name, but not always.
   // This maps types to custom names, otherwise, we use the typical naming scheme.
@@ -62,7 +61,7 @@ class ValueReadsSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpe
     customFuncs.getOrElse(tpe, s"${tpe.name}send")
 
   def pgBytes(statement: String) =
-    withStatement { stmt =>
+    withStatement() { stmt =>
       using(stmt.executeQuery(statement)) { rs =>
         require(rs.next, "no result in result set")
         val hex = rs.getString(1)
