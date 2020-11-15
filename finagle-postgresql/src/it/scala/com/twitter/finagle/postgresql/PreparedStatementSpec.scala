@@ -11,7 +11,7 @@ import com.twitter.io.Reader
 import com.twitter.util.Future
 import org.specs2.matcher.MatchResult
 
-class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
+class PreparedStatementSpec extends PgSqlIntegrationSpec {
 
   // This query produces an infinite stream which is useful for testing cancellations and portal suspension
   val InfiniteResultSetQuery = """WITH RECURSIVE a(n) AS (
@@ -26,16 +26,17 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
 
   "Prepared Statement" should {
 
-    def prepareSpec(name: Name, s: String) =
+    def prepareSpec(name: Name, s: String) = withService() { client =>
       client(Request.Prepare(s, name))
         .map { response =>
           response must beLike {
             case Response.ParseComplete(prepared) => prepared.name must_== name
           }
         }
+    }
 
-    def closingSpec(name: Name, s: String) =
-      newClient(identity)().flatMap { svc =>
+    def closingSpec(name: Name, s: String) = withClient() { client =>
+      client().flatMap { svc =>
         svc(Request.Prepare(s, name))
           .map { response =>
             response must beLike {
@@ -54,13 +55,14 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
             val _ = svc.close()
           }
       }
+    }
 
     def executeSpec(
       s: String,
       parameters: Seq[WireValue] = Seq.empty,
       maxResults: Int = 0
-    )(f: (Service[Request, Response], Response) => Future[MatchResult[_]]) =
-      newClient(identity)()
+    )(f: (Service[Request, Response], Response) => Future[MatchResult[_]]) = withClient() { client =>
+      client()
         .flatMap { client =>
           client(Request.Prepare(s))
             .flatMap {
@@ -72,6 +74,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
               case _ => Future(ko)
             }
         }
+    }
 
     def fullSpec(
       name: String,
@@ -118,7 +121,7 @@ class PreparedStatementSpec extends PgSqlSpec with EmbeddedPgSqlSpec {
     }
 
     // This is a hack to have a temp table to work with in the following spec.
-    lazy val tableName = withTmpTable(identity)
+    lazy val tableName = withTmpTable()(identity)
     fullSpec("DML with one argument", s"INSERT INTO $tableName(int_col) VALUES($$1)", write(PgType.Int4, 56) :: Nil) {
       case Response.Command(tag) => Future(tag must beEqualTo("INSERT 0 1"))
       case _ => Future(ko)
