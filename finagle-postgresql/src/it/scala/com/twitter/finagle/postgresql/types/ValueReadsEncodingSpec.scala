@@ -2,41 +2,34 @@ package com.twitter.finagle.postgresql.types
 
 import java.nio.charset.StandardCharsets
 
-import com.twitter.finagle.postgresql.Client
-import com.twitter.finagle.postgresql.EmbeddedPgSqlSpec
-import com.twitter.finagle.postgresql.PgSqlSpec
+import com.twitter.finagle.postgresql.PgSqlIntegrationSpec
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
 import com.twitter.util.Await
-import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 
-class ValueReadsEncodingSpec extends PgSqlSpec with EmbeddedPgSqlSpec with PropertiesSpec {
-
-  override def configure(b: EmbeddedPostgres.Builder): EmbeddedPostgres.Builder =
-    b.setLocaleConfig("encoding", "LATIN1")
-      .setLocaleConfig("locale", "C")
+class ValueReadsEncodingSpec extends PgSqlIntegrationSpec with PropertiesSpec {
 
   val DbName = "iso_8859_1"
+  def dbConnectionCfg = defaultConnectionCfg.copy(database = DbName)
 
-  override def prep(e: EmbeddedPostgres): EmbeddedPostgres = {
-    using(e.getPostgresDatabase.getConnection) { conn =>
-      using(conn.createStatement()) { stmt =>
-        stmt.execute(s"CREATE DATABASE $DbName ENCODING 'ISO88591';")
-      }
+  override def postgresContainerEnv = Map(
+    "POSTGRES_INITDB_ARGS" -> "--encoding=LATIN1 --locale=C"
+  )
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    withStatement() { stmt =>
+      val _ = stmt.execute(s"CREATE DATABASE $DbName ENCODING 'ISO88591';")
     }
-    using(e.getDatabase("postgres", DbName).getConnection) { conn =>
-      using(conn.createStatement()) { stmt =>
-        stmt.execute("CREATE TABLE latin_encoded(v TEXT);")
-        stmt.execute("INSERT INTO latin_encoded VALUES('é');")
-      }
+    withStatement(dbConnectionCfg) { stmt =>
+      stmt.execute("CREATE TABLE latin_encoded(v TEXT);")
+      val _ = stmt.execute("INSERT INTO latin_encoded VALUES('é');")
     }
-    e
   }
 
   "ValueReads encoding" should {
-    "detects encoding" in {
-      val service = Await.result(newClient(_.withDatabase(DbName)).apply())
+    "detects encoding" in withService(dbConnectionCfg) { service =>
       service(Request.ConnectionParameters)
         .map {
           case p: Response.ConnectionParameters =>
@@ -46,8 +39,7 @@ class ValueReadsEncodingSpec extends PgSqlSpec with EmbeddedPgSqlSpec with Prope
         }
     }
 
-    "support changing encoding" in {
-      val service = Await.result(newClient(_.withDatabase(DbName)).apply())
+    "support changing encoding" in withService(dbConnectionCfg) { service =>
       Await.result(service(Request.Query("SET client_encoding = 'UTF8';")))
       service(Request.ConnectionParameters)
         .map {
@@ -58,8 +50,7 @@ class ValueReadsEncodingSpec extends PgSqlSpec with EmbeddedPgSqlSpec with Prope
         }
     }.pendingUntilFixed("Receiving ParameterStatus messages mid-connection is not yet supported")
 
-    "use appropriate encoding when reading text" in {
-      val client = Client(newClient(_.withDatabase(DbName)))
+    "use appropriate encoding when reading text" in withRichClient(dbConnectionCfg) { client =>
       client.select("select * from latin_encoded;")(_.get[String](0))
         .map { values =>
           values must_== List("é")
