@@ -47,9 +47,16 @@ trait DockerPostgresService extends DockerTestKitForAll {
   val PostgresUser = "test-user"
   val PostgresPassword = "test-password"
 
+  val baseEnv = Map(
+    "POSTGRES_USER" -> PostgresUser,
+    "POSTGRES_PASSWORD" -> PostgresPassword
+  )
+
+  def postgresContainerEnv: Map[String, String] = Map.empty
+
   val postgresContainer = ContainerSpec(s"postgres:$tag")
     .withExposedPorts(PostgresAdvertisedPort)
-    .withEnv(s"POSTGRES_USER=$PostgresUser", s"POSTGRES_PASSWORD=$PostgresPassword")
+    .withEnv((baseEnv ++ postgresContainerEnv).toList.map{ case(k,v) => s"$k=$v" }: _*)
     .withReadyChecker(
       DockerReadyChecker
         .Jdbc(
