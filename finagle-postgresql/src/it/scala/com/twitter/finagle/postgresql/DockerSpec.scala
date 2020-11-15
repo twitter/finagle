@@ -36,11 +36,7 @@ trait DockerTestKitForAll extends BeforeAfterAll {
 trait DockerPostgresService extends DockerTestKitForAll {
   import scala.concurrent.duration._
 
-  val tag = sys.env.get("POSTGRES_VERSION")
-    .map { v =>
-      v.split('.').take(2).mkString(".")
-    }
-    .getOrElse("12.5")
+  def tag = sys.env.getOrElse("POSTGRES_VERSION", "12")
 
   val PostgresAdvertisedPort = 5432
 
