@@ -3,38 +3,36 @@ package com.twitter.finagle.postgresql
 import com.twitter.finagle.PostgreSql
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceFactory
-import org.specs2.execute.AsResult
-import org.specs2.execute.Result
 
 trait ClientEach { _: PostgresConnectionSpec =>
 
   type ClientCfg = PostgreSql.Client => PostgreSql.Client
 
-  def withClient[R: AsResult](
+  def withClient[R](
     config: ConnectionCfg = defaultConnectionCfg,
     cfg: ClientCfg = identity
-  )(spec: ServiceFactory[Request, Response] => R): Result = {
+  )(spec: ServiceFactory[Request, Response] => R): R = {
     val client = cfg(
       PostgreSql.Client()
         .withCredentials(config.username, config.password)
         .withDatabase(config.database)
     ).newClient(s"${config.host}:${config.port}")
 
-    AsResult(spec(client))
+    spec(client)
   }
 
-  def withRichClient[R: AsResult](
+  def withRichClient[R](
     config: ConnectionCfg = defaultConnectionCfg,
     cfg: ClientCfg = identity
-  )(spec: Client => R): Result =
+  )(spec: Client => R): R =
     withClient(config, cfg) { client =>
       spec(Client(client))
     }
 
-  def withService[R: AsResult](
+  def withService[R](
     config: ConnectionCfg = defaultConnectionCfg,
     cfg: ClientCfg = identity
-  )(spec: Service[Request, Response] => R): Result =
+  )(spec: Service[Request, Response] => R): R =
     withClient(config, cfg) { client =>
       spec(client.toService)
     }
