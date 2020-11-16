@@ -35,7 +35,7 @@ trait QueryClient[Q] {
 
 trait Client extends QueryClient[String] with Closable {
 
-  def multiQuery(sql: String): Future[Reader[QueryResponse]]
+  def multiQuery(sql: String): Reader[QueryResponse]
 
   def prepare(sql: String): PreparedStatement
 
@@ -81,10 +81,13 @@ object Client {
 
     private[this] val service = factory.toService
 
-    override def multiQuery(sql: String): Future[Reader[QueryResponse]] =
-      service(Request.Query(sql))
+    override def multiQuery(sql: String): Reader[QueryResponse] = {
+      val f = service(Request.Query(sql))
         .flatMap(Expect.SimpleQueryResponse)
         .map(_.responses)
+
+      Reader.fromFuture(f).flatten
+    }
 
     override def query(sql: String): Future[QueryResponse] =
       // this uses an unnamed prepared statement to guarantee that the sql string only has one statement
