@@ -91,7 +91,10 @@ class ValueWritesSpec extends PgSqlIntegrationSpec with PropertiesSpec {
         .map(_.mkString)
         .suchThat(str => !str.getBytes("UTF8").contains(0))
       implicit val noZeroByteString: Arbitrary[String] = Arbitrary(genNonZeroByte)
-      simpleSpec(ValueWrites.writesString, PgType.Text, PgType.Varchar, PgType.Bpchar, PgType.Unknown)
+
+      val types = PgType.Text :: PgType.Varchar :: PgType.Bpchar :: Nil
+      val compatTypes = if(tag != "9") PgType.Unknown :: types else types
+      simpleSpec(ValueWrites.writesString, compatTypes: _*)
     }
     "writesString" should {
       // names are limited to ascii, 63 bytes long

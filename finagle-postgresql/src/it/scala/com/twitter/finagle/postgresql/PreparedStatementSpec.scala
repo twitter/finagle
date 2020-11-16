@@ -106,7 +106,7 @@ class PreparedStatementSpec extends PgSqlIntegrationSpec {
       case _ => Future(ko)
     }
 
-    fullSpec("select statements with one argument", "SELECT 1, $1", write(PgType.Bool, true) :: Nil) {
+    fullSpec("select statements with one argument", "SELECT 1, $1::bool", write(PgType.Bool, true) :: Nil) {
       case rs: Response.ResultSet =>
         rs.toSeq.map { rows =>
           rows must haveSize(1)
