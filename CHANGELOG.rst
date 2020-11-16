@@ -109,8 +109,8 @@ New Features
 
 * finagle-netty4: Upgrade to Netty 4.1.51.Final and TcNative 2.0.34.Final. ``PHAB_ID=D536904``
 
-20.8.0
-------
+20.8.0 (DO NOT USE)
+-------------------
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -316,8 +316,8 @@ Breaking API Changes
 * finagle-core: Retried requests due to the `c.t.finagle.service.RetryFilter` will generate their
 own spanId. ``PHAB_ID=`D466083`
 
-20.4.0
-------
+20.4.0 (DO NOT USE)
+-------------------
 
 New Features
 ~~~~~~~~~~~~
