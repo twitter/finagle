@@ -9,14 +9,10 @@ class RichClientSpec extends PgSqlIntegrationSpec {
   "Rich client" should {
 
     "support multi-line queries" in withRichClient() { client =>
-      client
-        .multiQuery("select 1;select 2;")
-        .flatMap { statements =>
-          Reader.toAsyncStream(statements)
-            .mapF(s => Client.Expect.ResultSet(s))
-            .mapF(s => s.toSeq)
-            .toSeq()
-        }
+      Reader.toAsyncStream(client.multiQuery("select 1;select 2;"))
+        .mapF(s => Client.Expect.ResultSet(s))
+        .mapF(s => s.toSeq)
+        .toSeq()
         .map { rs =>
           rs must haveSize(2)
         }
