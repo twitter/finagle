@@ -1,7 +1,6 @@
 package com.twitter.finagle.postgresql
 
 import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.postgresql.Response.Command
@@ -72,6 +71,10 @@ object Client {
       case t: Response.ParseComplete => Future.value(t)
       case r => Future.exception(new IllegalStateException(s"invalid response $r"))
     }
+    def ConnectionParameters(r: Response): Future[Response.ConnectionParameters] = r match {
+      case t: Response.ConnectionParameters => Future.value(t)
+      case r => Future.exception(new IllegalStateException(s"invalid response $r"))
+    }
   }
 
   def apply(factory: ServiceFactory[Request, Response]): Client = new Client {
@@ -97,13 +100,14 @@ object Client {
       override def query(parameters: Seq[Parameter[_]]): Future[QueryResponse] =
         factory()
           .flatMap { svc =>
-            svc(Request.Prepare(sql, name))
-              .flatMap(Expect.ParseComplete)
-              .flatMap { prepared =>
+            val params = svc(Request.ConnectionParameters).flatMap(Expect.ConnectionParameters)
+            val prepare = svc(Request.Prepare(sql, name)).flatMap(Expect.ParseComplete)
+
+            (params join prepare)
+              .flatMap { case(params, prepared) =>
                 val values = (prepared.statement.parameterTypes zip parameters)
                   .map { case (tpe, p) =>
-                    // TODO: extract charset from Prepared or connection
-                    p.encode(PgType.pgTypeByOid(tpe), StandardCharsets.UTF_8)
+                    p.encode(PgType.pgTypeByOid(tpe), params.parsedParameters.clientEncoding)
                   }
                 svc(Request.ExecutePortal(prepared.statement, values))
               }
