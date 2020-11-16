@@ -71,7 +71,7 @@ class TlsSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
 
   override def configure(spec: ContainerSpec): ContainerSpec =
     spec
-      .withOption(runAs) { (s, user) => s.withConfiguration(_.user(user)) }
+      .withOption(runAs)((s, user) => s.withConfiguration(_.user(user)))
       .withVolumeBindings((passwdVolume.toList ++ tlsVolumes): _*)
       .withCommand(
         "-c",

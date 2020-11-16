@@ -93,7 +93,7 @@ class ValueWritesSpec extends PgSqlIntegrationSpec with PropertiesSpec {
       implicit val noZeroByteString: Arbitrary[String] = Arbitrary(genNonZeroByte)
 
       val types = PgType.Text :: PgType.Varchar :: PgType.Bpchar :: Nil
-      val compatTypes = if(tag != "9") PgType.Unknown :: types else types
+      val compatTypes = if (tag != "9") PgType.Unknown :: types else types
       simpleSpec(ValueWrites.writesString, compatTypes: _*)
     }
     "writesString" should {
