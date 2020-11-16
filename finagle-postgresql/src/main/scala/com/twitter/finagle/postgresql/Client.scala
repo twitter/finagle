@@ -107,7 +107,7 @@ object Client {
             val prepare = svc(Request.Prepare(sql, name)).flatMap(Expect.ParseComplete)
 
             (params join prepare)
-              .flatMap { case(params, prepared) =>
+              .flatMap { case (params, prepared) =>
                 val values = (prepared.statement.parameterTypes zip parameters)
                   .map { case (tpe, p) =>
                     p.encode(PgType.pgTypeByOid(tpe), params.parsedParameters.clientEncoding)
