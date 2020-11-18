@@ -22,7 +22,8 @@ object Response {
   )
   case class ConnectionParameters(
     parameters: List[BackendMessage.ParameterStatus],
-    backendData: BackendMessage.BackendKeyData
+    // Not implemented in CRDB: https://github.com/cockroachdb/cockroach/pull/13009
+    backendData: Option[BackendMessage.BackendKeyData],
   ) extends Response {
 
     lazy val parameterMap: Map[BackendMessage.Parameter, String] =
@@ -43,7 +44,7 @@ object Response {
     }
   }
   object ConnectionParameters {
-    val empty: ConnectionParameters = ConnectionParameters(Nil, BackendMessage.BackendKeyData(pid = -1, secret = -1))
+    val empty: ConnectionParameters = ConnectionParameters(Nil, None)
   }
 
   sealed trait QueryResponse extends Response
