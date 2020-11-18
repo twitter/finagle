@@ -190,14 +190,15 @@ class ConsistentHashingFailureAccrualFactoryTest extends FunSuite with MockitoSu
     }
   }
 
-  test("treat successful response and cancelled exceptions as success") {
+  test("treat successful response as success and cancelled exceptions as ignorable") {
     val successes =
       Seq(
         Future.value(123),
         Future.exception(new CancelledRequestException(new Exception)),
         Future.exception(new CancelledConnectionException(new Exception)),
         Future.exception(ChannelWriteException(new CancelledRequestException(new Exception))),
-        Future.exception(ChannelWriteException(new CancelledConnectionException(new Exception)))
+        Future.exception(ChannelWriteException(new CancelledConnectionException(new Exception))),
+        Future.exception(Failure.ignorable("something ignorable"))
       )
 
     successes.foreach { rep =>

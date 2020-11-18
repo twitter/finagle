@@ -4,7 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.{Params, Role}
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.service.{Backoff, ResponseClass, ResponseClassifier, ReqRep}
+import com.twitter.finagle.service.{Backoff, ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -286,7 +286,7 @@ class FailureAccrualFactory[Req, Rep](
   private[this] val probesCounter = statsReceiver.counter("probes")
   private[this] val removedForCounter = statsReceiver.counter("removed_for_ms")
 
-  private[this] def didFail() = self.synchronized {
+  private[this] def didFail(): Unit = self.synchronized {
     state match {
       case Alive | ProbeClosed =>
         policy.markDeadOnFailure() match {
@@ -377,12 +377,8 @@ class FailureAccrualFactory[Req, Rep](
     }
   }
 
-  protected def isSuccess(reqRep: ReqRep): Boolean =
-    responseClassifier.applyOrElse(reqRep, ResponseClassifier.Default) match {
-      case ResponseClass.Successful(_) => true
-      case ResponseClass.Failed(_) => false
-      case ResponseClass.Ignorable => false
-    }
+  protected def classify(reqRep: ReqRep): ResponseClass =
+    responseClassifier.applyOrElse(reqRep, ResponseClassifier.Default)
 
   private[this] def makeService(service: Service[Req, Rep]): Service[Req, Rep] = {
     // N.B. the reason we can't simply filter the service factory is so that
@@ -397,13 +393,17 @@ class FailureAccrualFactory[Req, Rep](
         // (unsuccessful).
         stopProbing()
 
-        service(request).respond {
-          // Don't count `FailureFlags.Ignorable` responses as either successful or failed
-          case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Ignorable) =>
-            didReceiveIgnorable()
-          case rep =>
-            if (isSuccess(ReqRep(request, rep))) didSucceed()
-            else didFail()
+        service(request).respond { rep =>
+          classify(ReqRep(request, rep)) match {
+            case ResponseClass.Successful(_) =>
+              didSucceed()
+
+            case ResponseClass.Failed(_) =>
+              didFail()
+
+            case ResponseClass.Ignorable =>
+              didReceiveIgnorable()
+          }
         }
       }
 

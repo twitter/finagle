@@ -89,16 +89,17 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("uses ResponseClassifier for determining success") {
-    val svcFactory = ServiceFactory.const {
-      Service.mk { i: Int => Future.exception[Int](new IllegalArgumentException(i.toString)) }
-    }
+  test("uses ResponseClassifier for determining success/failure/ignorable") {
+    val svcFactory = ServiceFactory.const(Service.mk[Failure, Unit](Future.exception(_)))
     val classifier: ResponseClassifier = {
-      case ReqRep(in: Int, Throw(_)) if in < 0 => ResponseClass.Success
-      case ReqRep(_, Throw(ex)) if ex.getMessage.toInt == 10 => ResponseClass.Success
+      case ReqRep(t: Failure, Throw(_)) if t.getMessage == "success" => ResponseClass.Success
+      case ReqRep(_, Throw(t)) if t.getMessage == "ignore" => ResponseClass.Ignored
+      case ReqRep(_, Throw(ex)) if ex.getMessage == "also success" => ResponseClass.Success
+      case _ => ResponseClass.NonRetryableFailure
     }
+
     val stats = new InMemoryStatsReceiver()
-    val faf = new FailureAccrualFactory[Int, Int](
+    val faf = new FailureAccrualFactory[Failure, Unit](
       underlying = svcFactory,
       policy = FailureAccrualPolicy.consecutiveFailures(1, Backoff.const(2.seconds)),
       timer = Timer.Nil,
@@ -108,22 +109,26 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val svc = Await.result(faf(), 5.seconds)
 
     // normally these are failures, but these will not trip it...
-    svc(-1)
-    svc(10)
+    svc(Failure("success"))
+    svc(Failure("also success"))
+    assert(stats.counter("removals")() == 0)
+
+    // now some ignorable exceptions
+    svc(Failure("ignore"))
     assert(stats.counter("removals")() == 0)
 
     // trip it.
-    svc(5)
+    svc(Failure("boom"))
     assert(stats.counter("removals")() == 1)
   }
 
   ignorableFailures.foreach { ignorableFailure =>
     test(s"does not count ignorable failure ($ignorableFailure) as failure") {
       val svcFactory = ServiceFactory.const {
-        Service.mk { i: Int => Future.exception[Int](ignorableFailure) }
+        Service.const(Future.exception[Unit](ignorableFailure))
       }
       val stats = new InMemoryStatsReceiver()
-      val faf = new FailureAccrualFactory[Int, Int](
+      val faf = new FailureAccrualFactory[Unit, Unit](
         underlying = svcFactory,
         policy = FailureAccrualPolicy.consecutiveFailures(1, Backoff.const(2.seconds)),
         timer = Timer.Nil,
@@ -132,18 +137,18 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       )
 
       val svc = Await.result(faf(), 5.seconds)
-      svc(-1)
+      svc(())
       assert(stats.counter("removals")() == 0)
       assert(faf.isAvailable)
     }
 
     test(s"does not count ignorable failure ($ignorableFailure) as success") {
-      var ret = Future.exception[Int](new Exception("boom!"))
+      var ret = Future.exception[Unit](new Exception("boom!"))
       val svcFactory = ServiceFactory.const {
-        Service.mk { i: Int => ret }
+        Service.mk { _: Unit => ret }
       }
       val stats = new InMemoryStatsReceiver()
-      val faf = new FailureAccrualFactory[Int, Int](
+      val faf = new FailureAccrualFactory[Unit, Unit](
         underlying = svcFactory,
         policy = FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(2.seconds)),
         timer = new MockTimer,
@@ -152,35 +157,35 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       )
 
       val svc = Await.result(faf(), 5.seconds)
-      svc(-1)
-      svc(-1)
+      svc(())
+      svc(())
 
       assert(stats.counter("removals")() == 0)
       assert(faf.isAvailable)
 
-      ret = Future.exception[Int](ignorableFailure)
+      ret = Future.exception[Unit](ignorableFailure)
 
-      svc(-1) // this should not be counted as a success
+      svc(()) // this should not be counted as a success
       assert(stats.counter("removals")() == 0)
       assert(faf.isAvailable)
 
-      ret = Future.exception[Int](new Exception("boom!"))
+      ret = Future.exception[Unit](new Exception("boom!"))
 
-      svc(-1) // Third "real" exception in a row; should trip FA
+      svc(()) // Third "real" exception in a row; should trip FA
 
       assert(stats.counter("removals")() == 1)
       assert(!faf.isAvailable)
     }
 
     test(s"keeps probe open on ignorable failure ($ignorableFailure)") {
-      var ret = Future.exception[Int](new Exception("boom!"))
+      var ret = Future.exception[Unit](new Exception("boom!"))
       Time.withCurrentTimeFrozen { timeControl =>
         val svcFactory = ServiceFactory.const {
-          Service.mk { i: Int => ret }
+          Service.mk { _: Unit => ret }
         }
         val stats = new InMemoryStatsReceiver()
         val timer = new MockTimer
-        val faf = new FailureAccrualFactory[Int, Int](
+        val faf = new FailureAccrualFactory[Unit, Unit](
           underlying = svcFactory,
           policy = FailureAccrualPolicy.consecutiveFailures(1, Backoff.const(2.seconds)),
           timer = timer,
@@ -189,7 +194,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         )
 
         val svc = Await.result(faf(), 5.seconds)
-        svc(-1)
+        svc(())
 
         // Trip FA
         assert(stats.counter("removals")() == 1)
@@ -200,9 +205,9 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
         assert(faf.isAvailable)
 
-        ret = Future.exception[Int](ignorableFailure)
+        ret = Future.exception[Unit](ignorableFailure)
 
-        svc(-1)
+        svc(())
 
         // ensure that the ignorable not counted as a success, but that we can still send requests
         // (ProbeOpen state)
@@ -760,10 +765,10 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
           timer,
           NullStatsReceiver
         ) {
-      override def isSuccess(reqRep: ReqRep): Boolean = {
+      override def classify(reqRep: ReqRep): ResponseClass = {
         reqRep.response match {
-          case Throw(_) => false
-          case Return(x) => x != 321
+          case Return(x) if x != 321 => ResponseClass.Success
+          case _ => ResponseClass.NonRetryableFailure
         }
       }
     }

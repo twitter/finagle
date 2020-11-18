@@ -3,7 +3,7 @@ package com.twitter.finagle.partitioning
 import com.twitter.concurrent.Broker
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
-import com.twitter.finagle.service.{ReqRep, ResponseClassifier}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{param => finagleParam, _}
 import com.twitter.finagle.partitioning.{param => partitioningParam}
@@ -109,22 +109,28 @@ private[finagle] class ConsistentHashingFailureAccrualFactory[Req, Rep](
       serviceName = label
     })
 
+  override protected def classify(reqRep: ReqRep): ResponseClass = reqRep.response match {
+    case Return(_) => ResponseClass.Success
+    case Throw(t) if shouldIgnore(t) => ResponseClass.Ignored
+    case Throw(_) => ResponseClass.NonRetryableFailure
+  }
+
   // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
-  override def isSuccess(reqRep: ReqRep): Boolean = reqRep.response match {
-    case Return(_) => true
-    case Throw(f: Failure)
-        if f.cause.exists(_.isInstanceOf[CancelledRequestException]) && f
-          .isFlagged(FailureFlags.Interrupted) =>
+  private[this] def shouldIgnore(failure: Throwable): Boolean = failure match {
+    case f: FailureFlags[_] if f.isFlagged(FailureFlags.Ignorable) => true
+    case f: Failure
+        if f.cause.exists(_.isInstanceOf[CancelledRequestException]) &&
+          f.isFlagged(FailureFlags.Interrupted) =>
       true
-    case Throw(f: Failure)
+    case f: Failure
         if f.cause.exists(_.isInstanceOf[CancelledConnectionException]) && f
           .isFlagged(FailureFlags.Interrupted) =>
       true
-    case Throw(WriteException(_: CancelledRequestException)) => true
-    case Throw(_: CancelledRequestException) => true
-    case Throw(WriteException(_: CancelledConnectionException)) => true
-    case Throw(_: CancelledConnectionException) => true
-    case Throw(e) => false
+    case WriteException(_: CancelledRequestException) => true
+    case _: CancelledRequestException => true
+    case WriteException(_: CancelledConnectionException) => true
+    case _: CancelledConnectionException => true
+    case _ => false
   }
 
   override protected def didMarkDead(duration: Duration): Unit = {

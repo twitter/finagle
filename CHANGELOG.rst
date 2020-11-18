@@ -44,6 +44,10 @@ Breaking API Changes
   `c.t.finagle.filter`, and the package containing `ThriftForwardingWarmUpFilter` changed from
   `c.t.finagle.exp` to `c.t.finagle.thrift.filter`. ``PHAB_ID=D573545``
 
+* finagle-core: `FailureAccrualFactory.isSuccess` has been replaced with the method
+  `def classify(ReqRep): ResponseClass` to allow expressing that a failure should be ignored. 
+  ``PHAB_ID=D571093``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
