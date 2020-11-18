@@ -5,7 +5,9 @@ import com.whisk.docker.testkit.ContainerSpec
 
 class HandshakeSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
 
-  override def configure(spec: ContainerSpec): ContainerSpec =
+  specificTo(Postgres)
+
+  override def configure(backend: Backend, spec: ContainerSpec): ContainerSpec =
     spec
       .withVolumeBindings(
         HostConfig.Bind.builder()

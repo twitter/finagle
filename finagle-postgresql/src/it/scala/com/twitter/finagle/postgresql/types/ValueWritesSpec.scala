@@ -3,6 +3,7 @@ package com.twitter.finagle.postgresql.types
 import com.twitter.finagle.postgresql.Client
 import com.twitter.finagle.postgresql.Parameter
 import com.twitter.finagle.postgresql.PgSqlIntegrationSpec
+import com.twitter.finagle.postgresql.Postgres
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.util.Await
@@ -33,6 +34,9 @@ import org.specs2.matcher.describe.Diffable
  * Java types.
  */
 class ValueWritesSpec extends PgSqlIntegrationSpec with PropertiesSpec {
+
+  // TODO: investigate CRDB failures
+  specificTo(Postgres)
 
   // Issues the "typed" select statement and read the value back.
   def writeAndRead[T: ValueReads](client: Client, value: T, valueWrites: ValueWrites[T], tpe: PgType) = {
