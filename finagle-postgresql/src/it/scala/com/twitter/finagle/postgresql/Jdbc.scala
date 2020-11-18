@@ -17,7 +17,7 @@ trait Jdbc { _: PostgresConnectionSpec with PgSqlSpec =>
   def withTmpTable[T](cfg: ConnectionCfg = defaultConnectionCfg)(f: String => T) =
     withStatement(cfg) { stmt =>
       val tableName = randomTableName
-      stmt.execute(s"CREATE TABLE $tableName(int_col int)") // TODO: allow specifying the table spec
+      stmt.execute(s"CREATE TABLE $tableName(int4_col int4)") // TODO: allow specifying the table spec
       f(tableName)
     }
 }
