@@ -11,7 +11,6 @@ import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSCMCredential
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationSSPI
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
-import com.twitter.finagle.postgresql.PgSqlInvalidMachineStateError
 import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlPasswordRequired
 import com.twitter.finagle.postgresql.PgSqlUnsupportedAuthenticationMechanism
@@ -143,7 +142,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
           checkResult("responds success") {
             case Complete(_, Some(Return(result))) =>
               result.parameters must containTheSameElementsAs(parameters)
-              result.backendData must beEqualTo(bkd)
+              result.backendData must beSome(bkd)
           }
         )
 
@@ -152,12 +151,15 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
         )
     }
 
-    "fails if missing BackendKeyData" in {
+    "accepts missing BackendKeyData" in {
+      // NOTE: BackendKeyData is not implemented in CockroachDB
       machineSpec(mkMachine)(
         authSuccess ++ List(
           receive(BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
-          checkFailure("fails") { ex =>
-            ex must beAnInstanceOf[PgSqlInvalidMachineStateError]
+          checkResult("responds success") {
+            case Complete(_, Some(Return(result))) =>
+              result.parameters must beEmpty
+              result.backendData must beNone
           }
         ): _*
       )
