@@ -30,6 +30,8 @@ class RichClientSpec extends PgSqlIntegrationSpec {
         .map(_ must beEqualTo(Response.Command("CREATE ROLE")))
     }
 
+    // TODO: COPY in CRDB cannot be done within a prepared statement
+    // https://github.com/cockroachdb/cockroach/blob/master/pkg/sql/pgwire/conn.go#L848-L855
     "copy from" in withRichClient() { client =>
       withTmpTable() { tlbName =>
         client
@@ -38,6 +40,8 @@ class RichClientSpec extends PgSqlIntegrationSpec {
       }
     }.pendingUntilFixed()
 
+    // TODO: COPY in CRDB cannot be done within a prepared statement
+    // https://github.com/cockroachdb/cockroach/blob/master/pkg/sql/pgwire/conn.go#L848-L855
     "copy to" in withRichClient() { client =>
       withTmpTable() { tlbName =>
         client

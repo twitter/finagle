@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlIntegrationSpec
+import com.twitter.finagle.postgresql.Postgres
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Inet
 import com.twitter.finagle.postgresql.Types.WireValue
@@ -44,6 +45,8 @@ import org.specs2.matcher.describe.Diffable
  * - the `ToSqlString` trait is necessary to handle types that require finer control than `.toString`
  */
 class ValueReadsSpec extends PgSqlIntegrationSpec with PropertiesSpec {
+
+  specificTo(Postgres)
 
   // The function to convert a type to its wire representation is mostly guessable from its name, but not always.
   // This maps types to custom names, otherwise, we use the typical naming scheme.

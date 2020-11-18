@@ -13,6 +13,8 @@ import scala.jdk.CollectionConverters._
 
 class TlsSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
 
+  specificTo(Postgres)
+
   /**
    * Here be dragons.
    *
@@ -52,7 +54,7 @@ class TlsSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
       Set(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE).asJava
     ).toFile
 
-  override def postgresContainerEnv = Map(
+  override def env(backend: Backend) = Map(
     "PGDATA" -> "/var/lib/postgresql/data/pg_data"
   )
 
@@ -69,7 +71,7 @@ class TlsSpec extends PgSqlIntegrationSpec with ResourceFileSpec {
       .build()
   )
 
-  override def configure(spec: ContainerSpec): ContainerSpec =
+  override def configure(backend: Backend, spec: ContainerSpec): ContainerSpec =
     spec
       .withOption(runAs)((s, user) => s.withConfiguration(_.user(user)))
       .withVolumeBindings((passwdVolume.toList ++ tlsVolumes): _*)

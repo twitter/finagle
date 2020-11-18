@@ -2,7 +2,9 @@ package com.twitter.finagle.postgresql.types
 
 import java.nio.charset.StandardCharsets
 
+import com.twitter.finagle.postgresql.Backend
 import com.twitter.finagle.postgresql.PgSqlIntegrationSpec
+import com.twitter.finagle.postgresql.Postgres
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
@@ -10,10 +12,12 @@ import com.twitter.util.Await
 
 class ValueReadsEncodingSpec extends PgSqlIntegrationSpec with PropertiesSpec {
 
+  specificTo(Postgres)
+
   val DbName = "iso_8859_1"
   def dbConnectionCfg = defaultConnectionCfg.copy(database = DbName)
 
-  override def postgresContainerEnv = Map(
+  override def env(backend: Backend) = Map(
     "POSTGRES_INITDB_ARGS" -> "--encoding=LATIN1 --locale=C"
   )
 

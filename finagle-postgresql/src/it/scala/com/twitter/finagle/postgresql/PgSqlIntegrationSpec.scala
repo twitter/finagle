@@ -17,12 +17,13 @@ trait PostgresConnectionSpec {
 trait PgSqlIntegrationSpec
     extends PgSqlSpec
     with PostgresConnectionSpec
-    with DockerPostgresService
+    with PostgresBackendService
     with ClientEach
     with Jdbc {
+
   override def defaultConnectionCfg = ConnectionCfg(
-    username = PostgresUser,
-    password = Some(PostgresPassword),
-    port = postgresContainer.mappedPort(5432)
+    username = testBackend.user,
+    password = testBackend.password,
+    port = container.mappedPort(testBackend.advertisedPort)
   )
 }
