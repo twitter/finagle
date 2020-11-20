@@ -147,7 +147,7 @@ private[service] object BackoffStrategy {
    * exponential backoff value.
    *
    * @param start must be greater than 0 and less than or equal to `maximum`.
-   * @param maximum maximum must be greater than 0 and greater than or equal to
+   * @param maximum must be greater than 0 and greater than or equal to
    *                `start`.
    *
    * @note This is "full jitter" via

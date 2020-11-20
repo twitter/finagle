@@ -94,7 +94,7 @@ class BackoffStrategyTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
           result.append(start)
           start = nextStart(start, maxMs.millis, rng)
         }
-        verifyBackoff(backoff, result, exhausted = false)
+        verifyBackoff(backoff, result.toSeq, exhausted = false)
     }
 
     def nextStart(start: Duration, maximum: Duration, rng: Rng): Duration = {
@@ -124,7 +124,7 @@ class BackoffStrategyTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
           result.append(start)
           start = nextStart(startMs.millis, maxMs.millis, rng, attempt)
         }
-        verifyBackoff(backoff, result, exhausted = false)
+        verifyBackoff(backoff, result.toSeq, exhausted = false)
     }
 
     def nextStart(start: Duration, maximum: Duration, rng: Rng, attempt: Int): Duration = {
@@ -157,7 +157,7 @@ class BackoffStrategyTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
           result.append(start)
           start = nextStart(start, maxMs.millis, rng, attempt)
         }
-        verifyBackoff(backoff, result, exhausted = false)
+        verifyBackoff(backoff, result.toSeq, exhausted = false)
     }
 
     def nextStart(start: Duration, max: Duration, rng: Rng, attempt: Int): Duration = {
