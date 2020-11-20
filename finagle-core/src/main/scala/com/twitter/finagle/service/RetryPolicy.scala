@@ -12,6 +12,7 @@ import com.twitter.util.{Duration, Return, Throw, Try, TimeoutException => UtilT
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
 
 /**
  * A function defining retry behavior for a given value type `A`.
@@ -153,6 +154,21 @@ abstract class SimpleRetryPolicy[A](i: Int)
 }
 
 object RetryPolicy {
+
+  /**
+   * In theory, calling 'toString' on a `Stream` should always be safe.
+   * In practice, we've seen numerous occurrences of
+   * `java.lang.UnsupportedOperationException: tail of empty stream`
+   * when doing so. This method defensively handles `NonFatal` errors
+   * and returns `Stream(?)` as a result.
+   */
+  private def streamToString[T](stream: Stream[T]): String = {
+    try {
+      stream.toString
+    } catch {
+      case NonFatal(_) => "Stream(?)"
+    }
+  }
 
   // We provide a proxy around partial functions so we can give them a better .toString
   private class NamedPf[A, B](name: String, f: PartialFunction[A, B])
@@ -340,7 +356,7 @@ object RetryPolicy {
   )(
     shouldRetry: PartialFunction[A, Boolean]
   ): RetryPolicy[A] = {
-    RetryPolicy.named(s"backoff($backoffs)($shouldRetry)") { e =>
+    RetryPolicy.named(s"backoff(${RetryPolicy.streamToString(backoffs)})($shouldRetry)") { e =>
       if (shouldRetry.applyOrElse(e, AlwaysFalse)) {
         backoffs match {
           case howlong #:: rest =>

@@ -54,6 +54,13 @@ Runtime Behavior Changes
 * finagle-core: Use Scala default implementation to calculate Hashcode and equals method for
   ServiceFactoryProxy. ``PHAB_ID=D569045``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-core: Users should no longer see the problematic
+  `java.lang.UnsupportedOperationException: tail of empty stream` when a `c.t.f.s.RetryPolicy`
+  is converted to a String for showing. ``PHAB_ID=D582199``
+
 20.10.0
 -------
 
