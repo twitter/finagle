@@ -84,7 +84,7 @@ private object ChannelStatsHandler {
  * statistics. The handler is meant to be specific to a single
  * [[io.netty.channel.Channel Channel]] within a Finagle client or
  * server. Aggregate statistics are consolidated in the given
- * [[com.twitter.finagle.netty4.channel.ChannelStatsHandler.SharedChannelStats]] instance.
+ * [[com.twitter.finagle.netty4.channel.SharedChannelStats]] instance.
  */
 private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
     extends ChannelDuplexHandler {
