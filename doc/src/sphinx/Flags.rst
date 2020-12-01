@@ -71,9 +71,10 @@ Common
   is run on IO (Netty) threads instead. Thus, when set, this flag enforces the backpressure on the
   link between "Netty (producer) and your application (consumer).
 
-**com.twitter.finagle.offload.delaySampleInterval** `duration`
-  When offload filter is enabled, sample offloading delay (how long a task has been sitting in the
-  offload queue before it gets executed) at this interval (default: `100.milliseconds`).
+**com.twitter.finagle.offload.statsSampleInterval** `duration`
+  When offload filter is enabled, sample additional offload queue stats (`delays_ms`) at this
+  interval (default: `100.milliseconds`). Only finite and positive values are accepted, everything
+  else disables the stats.
 
 Netty 4
 -------

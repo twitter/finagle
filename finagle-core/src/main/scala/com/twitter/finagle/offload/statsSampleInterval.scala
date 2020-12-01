@@ -3,7 +3,7 @@ package scala.com.twitter.finagle.offload
 import com.twitter.app.GlobalFlag
 import com.twitter.util.Duration
 
-object delaySampleInterval
+object statsSampleInterval
     extends GlobalFlag[Duration](
       Duration.fromMilliseconds(100),
       "Sample offload filter queue at this interval and record task delay (in milliseconds) under " +

@@ -1,12 +1,13 @@
 package com.twitter.finagle.filter
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.offload.{queueSize, numWorkers}
-import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, Stat, StatsReceiver}
+import com.twitter.finagle.offload.{numWorkers, queueSize}
+import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.util.{
+  Duration,
   ExecutorServiceFuturePool,
   Future,
   FutureNonLocalReturnControl,
@@ -16,7 +17,7 @@ import com.twitter.util.{
   Time,
   Timer
 }
-import scala.com.twitter.finagle.offload.delaySampleInterval
+import scala.com.twitter.finagle.offload.statsSampleInterval
 import java.util.concurrent.{
   ExecutorService,
   LinkedBlockingQueue,
@@ -34,26 +35,37 @@ import scala.runtime.NonLocalReturnControl
  */
 object OffloadFilter {
 
-  private[finagle] final class SampleDelay(pool: FuturePool, stat: Stat, timer: Timer)
+  private[finagle] final class SampleQueueStats(
+    pool: FuturePool,
+    stats: StatsReceiver,
+    timer: Timer)
       extends (() => Unit) {
-    private class Task extends (() => Unit) {
-      private val submitted = Stopwatch.start()
 
+    private val delayMs = stats.stat("delay_ms")
+    private val pendingTasks = stats.stat("pending_tasks")
+
+    // No need to volatile or synchronize this to ensure safe publishing as there is a
+    // happens-before relationship between the thread submitting a task into the ExecutorService
+    // (or FuturePool) and the task itself.
+    private var submitted: Stopwatch.Elapsed = null
+
+    private object task extends (() => Unit) {
       def apply(): Unit = {
         val delay = submitted()
-        stat.add(delay.inMilliseconds)
+        delayMs.add(delay.inMilliseconds)
+        pendingTasks.add(pool.numPendingTasks)
 
-        val nextAt = Time.now + delaySampleInterval() - delay
+        val nextAt = Time.now + statsSampleInterval() - delay
         // NOTE: if the delay happened to be longer than the sampling interval, the nextAt would be
         // negative. Scheduling a task under a negative time would force the Timer to treat it as
         // "run now". Thus the offloading delay is sampled at either 'sampleInterval' or 'delay',
         // whichever is longer.
-        timer.schedule(nextAt)(SampleDelay.this())
+        timer.schedule(nextAt)(SampleQueueStats.this())
       }
     }
 
     def apply(): Unit = {
-      val task = new Task
+      submitted = Stopwatch.start()
       pool(task())
     }
   }
@@ -93,7 +105,7 @@ object OffloadFilter {
       stats.addGauge("pool_size") { poolSize },
       stats.addGauge("active_tasks") { numActiveTasks },
       stats.addGauge("completed_tasks") { numCompletedTasks },
-      stats.addGauge("queue_depth") { executor.getQueue.size }
+      stats.addGauge("queue_depth") { numPendingTasks }
     )
   }
 
@@ -108,9 +120,9 @@ object OffloadFilter {
       val pool = new OffloadFuturePool(new OffloadThreadPool(threads, queueSize(), stats), stats)
 
       // Start sampling the offload delay if the interval isn't Duration.Top.
-      if (delaySampleInterval().isFinite && !delaySampleInterval().isZero) {
-        val sampleDelay = new SampleDelay(pool, stats.stat("delay_ms"), DefaultTimer)
-        sampleDelay()
+      if (statsSampleInterval().isFinite && statsSampleInterval() > Duration.Zero) {
+        val sampleStats = new SampleQueueStats(pool, stats, DefaultTimer)
+        sampleStats()
       }
 
       pool

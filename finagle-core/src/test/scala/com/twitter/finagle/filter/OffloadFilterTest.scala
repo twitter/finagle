@@ -165,24 +165,28 @@ class OffloadFilterTest extends FunSuite with BeforeAndAfterAll {
     }
 
     def runAll(): Unit = {
-      queue.foreach(f => f())
-      queue.clear()
+      while (queue.nonEmpty) {
+        queue.remove(0).apply()
+      }
     }
 
     def isEmpty: Boolean = queue.isEmpty
+
+    override def numPendingTasks: Long = queue.size
   }
 
-  test("sample delay should sample the delay") {
+  test("sample delay should sample the stats") {
     val stats = new InMemoryStatsReceiver
     val pool = new MockFuturePool
     val timer = new MockTimer
-    val sampleDelay = new OffloadFilter.SampleDelay(pool, stats.stat("delay"), timer)
+    val sampleDelay = new OffloadFilter.SampleQueueStats(pool, stats, timer)
     Time.withCurrentTimeFrozen { ctrl =>
       sampleDelay()
 
       ctrl.advance(50.milliseconds)
       pool.runAll()
-      assert(stats.stats(Seq("delay")) == Seq(50))
+      assert(stats.stats(Seq("delay_ms")) == Seq(50))
+      assert(stats.stats(Seq("pending_tasks")) == Seq(0))
       assert(timer.tasks.nonEmpty)
       assert(pool.isEmpty)
 
@@ -192,9 +196,11 @@ class OffloadFilterTest extends FunSuite with BeforeAndAfterAll {
       assert(!pool.isEmpty)
 
       ctrl.advance(200.milliseconds)
+      pool(()) // one penidng task
       pool.runAll()
 
-      assert(stats.stats(Seq("delay")) == Seq(50, 200))
+      assert(stats.stats(Seq("delay_ms")) == Seq(50, 200))
+      assert(stats.stats(Seq("pending_tasks")) == Seq(0, 1))
     }
   }
 
