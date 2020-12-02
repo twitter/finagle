@@ -65,6 +65,7 @@ object Fields {
   final val SetCookie = "Set-Cookie"
   final val SetCookie2 = "Set-Cookie2"
   final val Te = "Te"
+  final val TimingAllowOrigin = "Timing-Allow-Origin"
   final val Trailer = "Trailer"
   final val TransferEncoding = "Transfer-Encoding"
   final val Upgrade = "Upgrade"
