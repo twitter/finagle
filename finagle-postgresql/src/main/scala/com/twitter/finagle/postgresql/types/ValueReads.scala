@@ -110,6 +110,15 @@ object ValueReads {
     override def accepts(tpe: PgType): Boolean = accept(tpe)
   }
 
+  /**
+   * Define a `ValueReads[B]` in terms of `ValueReads[A]` and `A => B`.
+   */
+  def by[A, B](f: A => B)(implicit readsA: ValueReads[A]): ValueReads[B] = new ValueReads[B] {
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[B] =
+      readsA.reads(tpe, buf, charset).map(f)
+    override def accepts(tpe: PgType): Boolean = readsA.accepts(tpe)
+  }
+
   implicit def optionReads[T](implicit treads: ValueReads[T]): ValueReads[Option[T]] = new ValueReads[Option[T]] {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[Option[T]] =
       treads.reads(tpe, buf, charset).map(Some(_))

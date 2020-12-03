@@ -104,6 +104,19 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       }
     }
 
+    "by" should {
+      "accept the underlying type" in {
+        val longByInt = ValueReads.by[Int, Long](_.toLong)
+        longByInt.accepts(PgType.Int4) must beTrue
+        longByInt.accepts(PgType.Int8) must beFalse
+      }
+      "reads the underlying value" in prop { value: Int =>
+        val longByInt = ValueReads.by[Int, Long](_.toLong)
+        val read = longByInt.reads(PgType.Int4, Buf.U32BE(value), utf8)
+        read.asScala must beSuccessfulTry(value.toLong)
+      }
+    }
+
     "optionReads" should {
       "delegate reads when non-null" in {
         val optionalInt = ValueReads.optionReads(ValueReads.readsInt)
