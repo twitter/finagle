@@ -140,7 +140,7 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
               ) ++ tail.map(receive(_))
           }
           val postSteps = List(
-            receive(CommandComplete(CommandTag.Select(rs.rows.size)))
+            receive(CommandComplete(CommandTag.AffectedRows(CommandTag.Select, rs.rows.size)))
           )
           baseSpec(name, portalName, parameters, rs.desc)(
             steps ++ postSteps: _*

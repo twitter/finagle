@@ -49,14 +49,14 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
 
     "returns the number of inserted rows" in withTmpTable() { tbl =>
       command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) {
-        case Response.Command(tag) => Future.value(tag must_== CommandTag.Insert(4))
+        case Response.Command(tag) => Future.value(tag must_== CommandTag.AffectedRows(CommandTag.Insert, 4))
       }
     }
 
     "returns the number of updated rows" in withTmpTable() { tbl =>
       command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) { _ =>
         command(Request.Query(s"UPDATE $tbl SET int4_col = -89 WHERE int4_col > 2;")) {
-          case Response.Command(tag) => Future.value(tag must_== CommandTag.Update(2))
+          case Response.Command(tag) => Future.value(tag must_== CommandTag.AffectedRows(CommandTag.Update, 2))
         }
       }
     }
@@ -64,7 +64,7 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
     "returns the number of deleted rows" in withTmpTable() { tbl =>
       command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) { _ =>
         command(Request.Query(s"DELETE FROM $tbl;")) {
-          case Response.Command(tag) => Future.value(tag must_== CommandTag.Delete(4))
+          case Response.Command(tag) => Future.value(tag must_== CommandTag.AffectedRows(CommandTag.Delete, 4))
         }
       }
     }
@@ -74,7 +74,7 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
       withTmpTable() { tbl =>
         command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) { _ =>
           command(Request.Query(s"CREATE TABLE ${tbl}_2 AS SELECT * FROM $tbl;")) {
-            case Response.Command(tag) => Future.value(tag must_== CommandTag.Select(4))
+            case Response.Command(tag) => Future.value(tag must_== CommandTag.AffectedRows(CommandTag.Select, 4))
           }
         }
       }

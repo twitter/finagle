@@ -93,14 +93,17 @@ trait PropertiesSpec extends ScalaCheck {
   val genCommandTag: Gen[CommandTag] =
     for {
       rows <- Gen.chooseNum(0, Int.MaxValue)
+      cmd <- Gen.oneOf(
+        CommandTag.Insert,
+        CommandTag.Update,
+        CommandTag.Delete,
+        CommandTag.Select,
+        CommandTag.Move,
+        CommandTag.Fetch,
+      )
       tag <- Gen.oneOf(
-        CommandTag.Insert(rows),
-        CommandTag.Update(rows),
-        CommandTag.Delete(rows),
-        CommandTag.Select(rows),
-        CommandTag.Move(rows),
-        CommandTag.Fetch(rows),
-        CommandTag.Other("SOME TAG"),
+        CommandTag.AffectedRows(cmd, rows),
+        CommandTag.Other("SOME TAG")
       )
     } yield tag
   implicit lazy val arbCommandTag: Arbitrary[CommandTag] = Arbitrary(genCommandTag)

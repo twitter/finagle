@@ -145,7 +145,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       val sendRows = rows.map(receive(_))
 
       val post = List(
-        receive(BackendMessage.CommandComplete(CommandTag.Select(rows.size))),
+        receive(BackendMessage.CommandComplete(CommandTag.AffectedRows(CommandTag.Select, rows.size))),
         receive(readyForQuery),
         checkCompletes
       )
