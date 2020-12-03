@@ -1,6 +1,7 @@
 package com.twitter.finagle.postgresql.machine
 
 import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.BackendMessage.CommandTag
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.FrontendMessage
@@ -119,7 +120,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       }
     }
 
-    "support commands" in prop { (command: String, commandTag: String) =>
+    "support commands" in prop { (command: String, commandTag: CommandTag) =>
       singleQuerySpec(command, BackendMessage.CommandComplete(commandTag)) {
         case Return(value) => value must beEqualTo(Response.Command(commandTag))
       }
@@ -144,7 +145,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       val sendRows = rows.map(receive(_))
 
       val post = List(
-        receive(BackendMessage.CommandComplete("command tag")),
+        receive(BackendMessage.CommandComplete(CommandTag.Select(rows.size))),
         receive(readyForQuery),
         checkCompletes
       )
@@ -185,7 +186,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       }
     }
 
-    "support multiline queries" in prop { (command: String, firstTag: String, secondTag: String) =>
+    "support multiline queries" in prop { (command: String, firstTag: CommandTag, secondTag: CommandTag) =>
       multiQuerySpec(
         command,
         BackendMessage.CommandComplete(firstTag) -> { case Return(value) =>

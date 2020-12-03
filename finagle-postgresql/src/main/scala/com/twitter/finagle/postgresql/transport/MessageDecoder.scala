@@ -18,6 +18,7 @@ import com.twitter.finagle.postgresql.BackendMessage.BackendKeyData
 import com.twitter.finagle.postgresql.BackendMessage.BindComplete
 import com.twitter.finagle.postgresql.BackendMessage.CloseComplete
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
+import com.twitter.finagle.postgresql.BackendMessage.CommandTag
 import com.twitter.finagle.postgresql.BackendMessage.CopyData
 import com.twitter.finagle.postgresql.BackendMessage.CopyDone
 import com.twitter.finagle.postgresql.BackendMessage.CopyInResponse
@@ -146,8 +147,19 @@ object MessageDecoder {
     BackendKeyData(reader.int(), reader.int())
   }
 
+  def commandTag(value: String): CommandTag =
+    value.split(" ", 3).toList match {
+      case "INSERT" :: _ :: rows :: Nil => CommandTag.Insert(rows.toInt)
+      case "DELETE" :: rows :: Nil => CommandTag.Delete(rows.toInt)
+      case "UPDATE" :: rows :: Nil => CommandTag.Update(rows.toInt)
+      case "SELECT" :: rows :: Nil => CommandTag.Select(rows.toInt)
+      case "MOVE" :: rows :: Nil => CommandTag.Move(rows.toInt)
+      case "FETCH" :: rows :: Nil => CommandTag.Fetch(rows.toInt)
+      case _ => CommandTag.Other(value)
+    }
+
   implicit lazy val commandCompleteDecoder: MessageDecoder[CommandComplete] = MessageDecoder { reader =>
-    CommandComplete(reader.cstring())
+    CommandComplete(commandTag(reader.cstring()))
   }
 
   implicit lazy val authenticationMessageDecoder: MessageDecoder[AuthenticationMessage] = MessageDecoder { reader =>

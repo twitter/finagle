@@ -59,7 +59,7 @@ object Response {
     def empty: ResultSet = ResultSet(IndexedSeq.empty, Reader.empty, ConnectionParameters.empty)
   }
   case object Empty extends QueryResponse
-  case class Command(commandTag: String) extends QueryResponse
+  case class Command(commandTag: BackendMessage.CommandTag) extends QueryResponse
 
   case class SimpleQueryResponse(responses: Reader[QueryResponse]) extends Response {
     def next: Future[QueryResponse] =

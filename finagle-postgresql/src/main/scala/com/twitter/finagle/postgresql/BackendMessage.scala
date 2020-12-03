@@ -9,8 +9,21 @@ import com.twitter.io.Buf
 sealed trait BackendMessage
 object BackendMessage {
 
-  // TODO: command tag parser
-  case class CommandComplete(commandTag: String) extends BackendMessage
+  sealed trait CommandTag {
+    def rows: Int
+  }
+  object CommandTag {
+    case class Insert(rows: Int) extends CommandTag
+    case class Delete(rows: Int) extends CommandTag
+    case class Update(rows: Int) extends CommandTag
+    case class Select(rows: Int) extends CommandTag
+    case class Move(rows: Int) extends CommandTag
+    case class Fetch(rows: Int) extends CommandTag
+    case class Other(value: String) extends CommandTag {
+      def rows: Int = throw PgSqlUnsupportedError(s"Unsupported command tag: $value")
+    }
+  }
+  case class CommandComplete(commandTag: CommandTag) extends BackendMessage
   case object EmptyQueryResponse extends BackendMessage
 
   case class RowDescription(rowFields: IndexedSeq[FieldDescription]) extends BackendMessage
