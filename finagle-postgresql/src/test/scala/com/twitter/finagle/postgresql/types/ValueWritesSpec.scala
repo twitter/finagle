@@ -98,8 +98,8 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
     "optionWrites" should {
       "delegate writes when Some" in {
         val optionalInt = ValueWrites.optionWrites(ValueWrites.writesInt)
-        val read = optionalInt.writes(PgType.Int4, Some(0), utf8)
-        read must_== ValueWrites.writesInt.writes(PgType.Int4, 0, utf8)
+        val wrote = optionalInt.writes(PgType.Int4, Some(0), utf8)
+        wrote must_== ValueWrites.writesInt.writes(PgType.Int4, 0, utf8)
       }
       "accept the underlying type" in {
         val optionalInt = ValueWrites.optionWrites(ValueWrites.writesInt)
@@ -108,8 +108,8 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
       }
       "write Null when None" in {
         val optionalInt = ValueWrites.optionWrites(ValueWrites.writesInt)
-        val read = optionalInt.writes(PgType.Int4, None, utf8)
-        read must_== WireValue.Null
+        val wrote = optionalInt.writes(PgType.Int4, None, utf8)
+        wrote must_== WireValue.Null
       }
     }
 
