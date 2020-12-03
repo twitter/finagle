@@ -124,7 +124,7 @@ class PreparedStatementSpec extends PgSqlIntegrationSpec {
     // This is a hack to have a temp table to work with in the following spec.
     lazy val tableName = withTmpTable()(identity)
     fullSpec("DML with one argument", s"INSERT INTO $tableName(int4_col) VALUES($$1)", write(PgType.Int4, 56) :: Nil) {
-      case Response.Command(tag) => Future(tag must_== CommandTag.Insert(1))
+      case Response.Command(tag) => Future(tag must_== CommandTag.AffectedRows(CommandTag.Insert, 1))
       case _ => Future(ko)
     }
 

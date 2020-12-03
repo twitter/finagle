@@ -149,12 +149,12 @@ object MessageDecoder {
 
   def commandTag(value: String): CommandTag =
     value.split(" ", 3).toList match {
-      case "INSERT" :: _ :: rows :: Nil => CommandTag.Insert(rows.toInt)
-      case "DELETE" :: rows :: Nil => CommandTag.Delete(rows.toInt)
-      case "UPDATE" :: rows :: Nil => CommandTag.Update(rows.toInt)
-      case "SELECT" :: rows :: Nil => CommandTag.Select(rows.toInt)
-      case "MOVE" :: rows :: Nil => CommandTag.Move(rows.toInt)
-      case "FETCH" :: rows :: Nil => CommandTag.Fetch(rows.toInt)
+      case "INSERT" :: _ :: rows :: Nil => CommandTag.AffectedRows(CommandTag.Insert, rows.toInt)
+      case "DELETE" :: rows :: Nil => CommandTag.AffectedRows(CommandTag.Delete, rows.toInt)
+      case "UPDATE" :: rows :: Nil => CommandTag.AffectedRows(CommandTag.Update, rows.toInt)
+      case "SELECT" :: rows :: Nil => CommandTag.AffectedRows(CommandTag.Select, rows.toInt)
+      case "MOVE" :: rows :: Nil => CommandTag.AffectedRows(CommandTag.Move, rows.toInt)
+      case "FETCH" :: rows :: Nil => CommandTag.AffectedRows(CommandTag.Fetch, rows.toInt)
       case _ => CommandTag.Other(value)
     }
 
