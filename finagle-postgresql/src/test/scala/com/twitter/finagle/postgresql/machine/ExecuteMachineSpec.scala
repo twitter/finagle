@@ -3,6 +3,7 @@ package com.twitter.finagle.postgresql.machine
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.BackendMessage.BindComplete
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
+import com.twitter.finagle.postgresql.BackendMessage.CommandTag
 import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
 import com.twitter.finagle.postgresql.BackendMessage.NoData
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
@@ -118,7 +119,7 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
     }
 
     "support commands" in prop {
-      (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], commandTag: String) =>
+      (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], commandTag: CommandTag) =>
         nominalSpec(name, portalName, parameters, NoData, CommandComplete(commandTag), Response.Command(commandTag))
     }
 
@@ -139,7 +140,7 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
               ) ++ tail.map(receive(_))
           }
           val postSteps = List(
-            receive(CommandComplete("TODO"))
+            receive(CommandComplete(CommandTag.Select(rs.rows.size)))
           )
           baseSpec(name, portalName, parameters, rs.desc)(
             steps ++ postSteps: _*

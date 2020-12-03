@@ -5,6 +5,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+import com.twitter.finagle.postgresql.BackendMessage.CommandTag
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
 import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.BackendMessage.RowDescription
@@ -88,6 +89,21 @@ trait PropertiesSpec extends ScalaCheck {
       key <- Arbitrary.arbitrary[Int]
     } yield BackendMessage.BackendKeyData(pid, key)
   }
+
+  val genCommandTag: Gen[CommandTag] =
+    for {
+      rows <- Gen.chooseNum(0, Int.MaxValue)
+      tag <- Gen.oneOf(
+        CommandTag.Insert(rows),
+        CommandTag.Update(rows),
+        CommandTag.Delete(rows),
+        CommandTag.Select(rows),
+        CommandTag.Move(rows),
+        CommandTag.Fetch(rows),
+        CommandTag.Other("SOME TAG"),
+      )
+    } yield tag
+  implicit lazy val arbCommandTag: Arbitrary[CommandTag] = Arbitrary(genCommandTag)
 
   implicit lazy val arbFieldDescription: Arbitrary[FieldDescription] = Arbitrary {
     for {

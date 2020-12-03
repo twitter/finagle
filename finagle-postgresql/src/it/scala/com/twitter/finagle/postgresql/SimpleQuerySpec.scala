@@ -1,5 +1,6 @@
 package com.twitter.finagle.postgresql
 
+import com.twitter.finagle.postgresql.BackendMessage.CommandTag
 import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.Response.SimpleQueryResponse
 import com.twitter.io.Reader
@@ -20,6 +21,12 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
         }
     }
 
+    def command(r: Request.Query)(check: Response.Command => Future[MatchResult[_]]): Future[MatchResult[_]] =
+      one(r) {
+        case c: Response.Command => check(c)
+        case r => sys.error(s"unexpected response $r")
+      }
+
     "return an empty result for an empty query" in {
       one(Request.Query("")) {
         case Response.Empty => Future.value(ok)
@@ -39,12 +46,44 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
           }
         }
     }
+
+    "returns the number of inserted rows" in withTmpTable() { tbl =>
+      command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) {
+        case Response.Command(tag) => Future.value(tag must_== CommandTag.Insert(4))
+      }
+    }
+
+    "returns the number of updated rows" in withTmpTable() { tbl =>
+      command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) { _ =>
+        command(Request.Query(s"UPDATE $tbl SET int4_col = -89 WHERE int4_col > 2;")) {
+          case Response.Command(tag) => Future.value(tag must_== CommandTag.Update(2))
+        }
+      }
+    }
+
+    "returns the number of deleted rows" in withTmpTable() { tbl =>
+      command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) { _ =>
+        command(Request.Query(s"DELETE FROM $tbl;")) {
+          case Response.Command(tag) => Future.value(tag must_== CommandTag.Delete(4))
+        }
+      }
+    }
+
+    "returns the number of selected rows" in withTmpTable() { tbl =>
+      command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) { _ =>
+        command(Request.Query(s"CREATE TABLE ${tbl}_2 AS SELECT * FROM $tbl;")) {
+          case Response.Command(tag) => Future.value(tag must_== CommandTag.Select(4))
+        }
+      }
+    }
+
     "return an CREATE ROLE command tag" in {
       one(Request.Query("CREATE USER fake;")) {
-        case Response.Command(tag) => Future.value(tag must_== "CREATE ROLE")
+        case Response.Command(tag) => Future.value(tag must_== CommandTag.Other("CREATE ROLE"))
         case r => sys.error(s"unexpected response $r")
       }
     }
+
     "return a ResultSet for a SELECT query" in {
       one(Request.Query("SELECT 1 AS one;")) {
         case rs @ Response.ResultSet(desc, _, _) =>
@@ -68,7 +107,7 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
               responses.toList must beLike {
                 case first :: rs :: last :: Nil =>
                   first must beLike {
-                    case Response.Command(tag) => tag must_== "CREATE ROLE"
+                    case Response.Command(tag) => tag must_== CommandTag.Other("CREATE ROLE")
                   }
                   rs must beLike {
                     case rs @ Response.ResultSet(desc, _, _) =>
@@ -79,7 +118,7 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
                       })
                   }
                   last must beLike {
-                    case Response.Command(tag) => tag must_== "DROP ROLE"
+                    case Response.Command(tag) => tag must_== CommandTag.Other("DROP ROLE")
                   }
               }
             }

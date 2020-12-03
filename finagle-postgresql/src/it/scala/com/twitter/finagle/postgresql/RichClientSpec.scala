@@ -1,5 +1,6 @@
 package com.twitter.finagle.postgresql
 
+import com.twitter.finagle.postgresql.BackendMessage.CommandTag
 import com.twitter.io.Buf
 import com.twitter.io.Reader
 import com.twitter.util.Await
@@ -27,7 +28,7 @@ class RichClientSpec extends PgSqlIntegrationSpec {
     "modify" in withRichClient() { client =>
       client
         .modify("create user fake;")
-        .map(_ must beEqualTo(Response.Command("CREATE ROLE")))
+        .map(_ must beEqualTo(Response.Command(CommandTag.Other("CREATE ROLE"))))
     }
 
     // TODO: COPY in CRDB cannot be done within a prepared statement
@@ -61,7 +62,7 @@ class RichClientSpec extends PgSqlIntegrationSpec {
       client
         .prepare("create user another;")
         .modify(Nil)
-        .map(_ must beEqualTo(Response.Command("CREATE ROLE")))
+        .map(_ must beEqualTo(Response.Command(CommandTag.Other("CREATE ROLE"))))
     }
 
     "prepare param" in withRichClient() { client =>

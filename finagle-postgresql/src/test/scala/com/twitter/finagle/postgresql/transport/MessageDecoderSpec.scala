@@ -35,10 +35,12 @@ import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.BackendMessage.CloseComplete
+import com.twitter.finagle.postgresql.BackendMessage.CommandTag
 import com.twitter.finagle.postgresql.BackendMessage.CopyDone
 import com.twitter.finagle.postgresql.BackendMessage.CopyInResponse
 import com.twitter.finagle.postgresql.BackendMessage.CopyOutResponse
 import com.twitter.finagle.postgresql.PgSqlClientError
+import com.twitter.finagle.postgresql.PgSqlUnsupportedError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
@@ -82,7 +84,7 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
     }
 
   implicit lazy val arbCommandComplete: Arbitrary[CommandComplete] =
-    Arbitrary(genAsciiString.map(_.value).map(CommandComplete))
+    Arbitrary(genCommandTag.map(CommandComplete))
 
   lazy val genAuthenticationMessage: Gen[AuthenticationMessage] =
     Gen.oneOf(
@@ -175,11 +177,55 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       )
     }
 
+    "command tag" should {
+      "parse insert" in {
+        MessageDecoder.commandTag("INSERT 0 42") must_== CommandTag.Insert(42)
+        MessageDecoder.commandTag("INSERT 42 0") must_== CommandTag.Insert(0)
+      }
+      "parse delete" in {
+        MessageDecoder.commandTag("DELETE 42") must_== CommandTag.Delete(42)
+        MessageDecoder.commandTag("DELETE 0") must_== CommandTag.Delete(0)
+      }
+      "parse update" in {
+        MessageDecoder.commandTag("UPDATE 42") must_== CommandTag.Update(42)
+        MessageDecoder.commandTag("UPDATE 0") must_== CommandTag.Update(0)
+      }
+      "parse select" in {
+        MessageDecoder.commandTag("SELECT 42") must_== CommandTag.Select(42)
+        MessageDecoder.commandTag("SELECT 0") must_== CommandTag.Select(0)
+      }
+      "parse move" in {
+        MessageDecoder.commandTag("MOVE 42") must_== CommandTag.Move(42)
+        MessageDecoder.commandTag("MOVE 0") must_== CommandTag.Move(0)
+      }
+      "parse fetch" in {
+        MessageDecoder.commandTag("FETCH 42") must_== CommandTag.Fetch(42)
+        MessageDecoder.commandTag("FETCH 0") must_== CommandTag.Fetch(0)
+      }
+      "parse other" in prop { str: String =>
+        MessageDecoder.commandTag(str) must_== CommandTag.Other(str)
+      }
+      "fail to return rows for Other" in {
+        CommandTag.Other("not a tag with rows").rows must throwA[PgSqlUnsupportedError](
+          "Unsupported command tag: not a tag with rows"
+        )
+      }
+    }
+
     "CommandComplete" should decodeFragment(MessageDecoder.commandCompleteDecoder) { msg =>
       Packet(
         cmd = Some('C'),
         body = mkBuf() { bb =>
-          bb.put(cstring(msg.commandTag))
+          val str = msg.commandTag match {
+            case CommandTag.Insert(rows) => s"INSERT 0 $rows"
+            case CommandTag.Delete(rows) => s"DELETE $rows"
+            case CommandTag.Update(rows) => s"UPDATE $rows"
+            case CommandTag.Select(rows) => s"SELECT $rows"
+            case CommandTag.Move(rows) => s"MOVE $rows"
+            case CommandTag.Fetch(rows) => s"FETCH $rows"
+            case CommandTag.Other(value) => value
+          }
+          bb.put(cstring(str))
         }
       )
     }
