@@ -69,9 +69,9 @@ trait PostgresBackendService extends DockerTestKitForAll { _: ArgumentsShortcuts
   def testBackend: Backend = sys.env.get("TEST_BACKEND").map {
     case "postgres" => Postgres
     case "cockroachdb" => CockroachDb
-  }.getOrElse(CockroachDb)
+  }.getOrElse(Postgres)
 
-  def tag = sys.env.getOrElse("TEST_BACKEND_TAG", "v20.2.0")
+  def tag = sys.env.getOrElse("TEST_BACKEND_TAG", "13")
 
   /**
    * Only execute the spec for a specific backend
