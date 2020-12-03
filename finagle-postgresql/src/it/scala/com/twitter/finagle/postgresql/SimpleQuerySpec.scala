@@ -3,6 +3,7 @@ package com.twitter.finagle.postgresql
 import com.twitter.finagle.postgresql.BackendMessage.CommandTag
 import com.twitter.finagle.postgresql.BackendMessage.Field
 import com.twitter.finagle.postgresql.Response.SimpleQueryResponse
+import com.twitter.finagle.postgresql.types.PgType
 import com.twitter.io.Reader
 import com.twitter.util.Await
 import com.twitter.util.Future
@@ -96,6 +97,17 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
             rowSeq must haveSize(1)
           }
         case r => sys.error(s"unexpected response $r")
+      }
+    }
+
+    "support RETURNING clause" in withTmpTable(schema = Schema("id" -> PgType.Text, "num" -> PgType.Int4)) { tbl =>
+      one(Request.Query(s"INSERT INTO $tbl VALUES ('abc', 1),('def', 2) RETURNING id, num")) {
+        case rs @ Response.ResultSet(desc, _, _) =>
+          desc.map(_.name) must_== List("id", "num")
+          rs.toSeq.map { rowSeq =>
+            rowSeq.map(_.size) must_== List(2, 2)
+          }
+        case _ => Future.value(ko)
       }
     }
 
