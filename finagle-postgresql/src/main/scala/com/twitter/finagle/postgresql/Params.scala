@@ -10,7 +10,7 @@ object Params {
         // do not show the password for security reasons
         Seq(("username", () => p.username))
 
-      override def default: Credentials = ???
+      override def default: Credentials = Credentials("postgres", None)
     }
   }
 
