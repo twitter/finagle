@@ -132,7 +132,7 @@ case class Parameter[T](value: T)(implicit val valueWrites: ValueWrites[T]) {
   def encode(tpe: PgType, charset: Charset): WireValue = {
     if (!valueWrites.accepts(tpe)) {
       throw PgSqlUnsupportedError(
-        s"Cannot encode parameter value with provided ValueWrites instance; it does not support type ${tpe.name} (oid ${tpe.oid.value})."
+        s"Cannot encode parameter value of type ${value.getClass.getName} with provided ValueWrites instance; it does not support type ${tpe.name} (oid ${tpe.oid.value})."
       )
     }
     valueWrites.writes(tpe, value, charset)
