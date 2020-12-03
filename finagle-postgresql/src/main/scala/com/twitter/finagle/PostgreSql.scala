@@ -5,6 +5,7 @@ import java.net.SocketAddress
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.StdStackClient
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.param.WithSessionPool
 import com.twitter.finagle.postgresql.Params
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
@@ -20,7 +21,8 @@ object PostgreSql {
   case class Client(
     stack: Stack[ServiceFactory[Request, Response]] = defaultStack,
     params: Stack.Params = defaultParams
-  ) extends StdStackClient[Request, Response, Client] {
+  ) extends StdStackClient[Request, Response, Client]
+      with WithSessionPool[Client] {
 
     override type In = Packet
     override type Out = Packet
