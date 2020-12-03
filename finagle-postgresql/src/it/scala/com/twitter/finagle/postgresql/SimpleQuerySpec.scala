@@ -69,10 +69,13 @@ class SimpleQuerySpec extends PgSqlIntegrationSpec {
       }
     }
 
-    "returns the number of selected rows" in withTmpTable() { tbl =>
-      command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) { _ =>
-        command(Request.Query(s"CREATE TABLE ${tbl}_2 AS SELECT * FROM $tbl;")) {
-          case Response.Command(tag) => Future.value(tag must_== CommandTag.Select(4))
+    // CRDB returns Other("CREATE TABLE AS")
+    "returns the number of selected rows" in backend(Postgres) {
+      withTmpTable() { tbl =>
+        command(Request.Query(s"INSERT INTO $tbl VALUES (1),(2),(3),(4);")) { _ =>
+          command(Request.Query(s"CREATE TABLE ${tbl}_2 AS SELECT * FROM $tbl;")) {
+            case Response.Command(tag) => Future.value(tag must_== CommandTag.Select(4))
+          }
         }
       }
     }
