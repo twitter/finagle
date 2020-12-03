@@ -30,6 +30,7 @@ import com.twitter.io.Buf
  * | BYTEA (byte[]) | [[Buf]] |
  * | CHAR | [[Byte]] |
  * | CHARACTER(n) | [[String]] |
+ * | DATE (date) | [[java.time.LocalDate]] |
  * | DOUBLE (float8) | [[Double]] |
  * | INET | [[Inet]] ([[java.net.InetAddress]] and a subnet) |
  * | INTEGER (int, int4) | [[Int]] |
@@ -157,6 +158,9 @@ object ValueWrites {
       tpe == PgType.Json || tpe == PgType.Jsonb
   }
   implicit lazy val writesLong: ValueWrites[Long] = simple(PgType.Int8)(_.long(_))
+  implicit lazy val writesLocalDate: ValueWrites[java.time.LocalDate] = simple(PgType.Date) { (w, date) =>
+    w.int(PgDate.localDateAsEpochDayOffset(date))
+  }
   implicit lazy val writesShort: ValueWrites[Short] = simple(PgType.Int2)(_.short(_))
   implicit lazy val writesString: ValueWrites[String] = new ValueWrites[String] {
     def strictEncoder(charset: Charset) =

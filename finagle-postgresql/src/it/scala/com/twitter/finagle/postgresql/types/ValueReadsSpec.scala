@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql.types
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -52,6 +53,7 @@ class ValueReadsSpec extends PgSqlIntegrationSpec with PropertiesSpec {
   // This maps types to custom names, otherwise, we use the typical naming scheme.
   // NOTE: we can extract the function name from the pg_type.dat file, but let's not add this to PgType if not necessary.
   val customFuncs = Map(
+    PgType.Date -> "date_send",
     PgType.Inet -> "inet_send",
     PgType.Json -> "json_send",
     PgType.Jsonb -> "jsonb_send",
@@ -144,6 +146,7 @@ class ValueReadsSpec extends PgSqlIntegrationSpec with PropertiesSpec {
     }
     "readsInt" should simpleSpec(ValueReads.readsInt, PgType.Int4)
     "readsJson" should simpleSpec(ValueReads.readsJson, PgType.Json, PgType.Jsonb)
+    "readsLocalDate" should simpleSpec(ValueReads.readsLocalDate, PgType.Date)
     "readsLong" should simpleSpec(ValueReads.readsLong, PgType.Int8)
     "readsShort" should simpleSpec(ValueReads.readsShort, PgType.Int2)
     "readsString" should {
@@ -211,6 +214,27 @@ object ValueReadsSpec {
         .withZone(ZoneId.of("UTC"))
 
       override def toString(value: Instant): String = {
+        val str = fmt.format(value)
+        val sql = str.charAt(0) match {
+          case '+' | '-' => str.drop(1).mkString
+          case _ => str
+        }
+        quote(sql)
+      }
+    }
+
+    implicit val localDateToSqlString: ToSqlString[LocalDate] = new ToSqlString[LocalDate] {
+
+      // Postgres says they allow reading ISO 8601 strings, but it's not quite the case.
+      // ISO 8601 allows prefixing the year with a + or - to disambiguate years before 0000 and after 9999
+      // https://en.wikipedia.org/wiki/ISO_8601#Years
+      // Postgres wants AD/BC instead.
+      // Note that this also means that year "-1" is 2 BC.
+      val fmt = DateTimeFormatter
+        .ofPattern("yyyy-MM-dd GG")
+        .withZone(ZoneId.of("UTC"))
+
+      override def toString(value: LocalDate): String = {
         val str = fmt.format(value)
         val sql = str.charAt(0) match {
           case '+' | '-' => str.drop(1).mkString

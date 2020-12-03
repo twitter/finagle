@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 import com.twitter.finagle.postgresql.BackendMessage.DataRow
@@ -20,6 +21,7 @@ import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.types.Json
+import com.twitter.finagle.postgresql.types.PgDate
 import com.twitter.finagle.postgresql.types.PgNumeric
 import com.twitter.finagle.postgresql.types.PgTime
 import com.twitter.io.Buf
@@ -253,6 +255,11 @@ trait PropertiesSpec extends ScalaCheck {
   lazy val genTimestamp: Gen[Timestamp] =
     Gen.frequency(99 -> genMicros, 1 -> Gen.oneOf(Timestamp.NegInfinity, Timestamp.Infinity))
   implicit lazy val arbTimestamp = Arbitrary(genTimestamp)
+
+  lazy val genLocalDate: Gen[LocalDate] = for {
+    days <- Gen.chooseNum(-2451545, 2145031948)
+  } yield PgDate.Epoch.plusDays(days.toLong)
+  implicit val arbLocalDate: Arbitrary[LocalDate] = Arbitrary(genLocalDate)
 
   lazy val genNumericSign: Gen[NumericSign] = Gen.oneOf(
     NumericSign.Positive,

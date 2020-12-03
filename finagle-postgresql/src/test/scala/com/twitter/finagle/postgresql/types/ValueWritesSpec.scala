@@ -3,6 +3,7 @@ package com.twitter.finagle.postgresql.types
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
+import java.time.temporal.ChronoUnit
 
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlSpec
@@ -212,6 +213,11 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
     "writesJson" should simpleSpec[Json](ValueWrites.writesJson, PgType.Jsonb) { json =>
       mkBuf(json.jsonByteArray.length + 1) { bb =>
         bb.put(1.toByte).put(json.jsonByteBuffer)
+      }
+    }
+    "writesLocalDate" should simpleSpec[java.time.LocalDate](ValueWrites.writesLocalDate, PgType.Date) { date =>
+      mkBuf() { bb =>
+        bb.putInt(ChronoUnit.DAYS.between(PgDate.Epoch, date).toInt)
       }
     }
     "writesLong" should simpleSpec[Long](ValueWrites.writesLong, PgType.Int8) { long =>

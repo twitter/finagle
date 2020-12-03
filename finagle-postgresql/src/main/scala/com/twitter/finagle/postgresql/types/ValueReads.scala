@@ -32,6 +32,7 @@ import scala.collection.compat._
  * | BYTEA (byte[]) | [[Buf]] |
  * | CHAR | [[Byte]] |
  * | CHARACTER(n) | [[String]] |
+ * | DATE (date) | [[java.time.LocalDate]] |
  * | DOUBLE (float8) | [[Double]] |
  * | INET | [[Inet]] ([[java.net.InetAddress]] and a subnet) |
  * | INTEGER (int, int4) | [[Int]] |
@@ -179,6 +180,9 @@ object ValueReads {
 
     override def accepts(tpe: PgType): Boolean =
       tpe == PgType.Jsonb || tpe == PgType.Json
+  }
+  implicit lazy val readsLocalDate: ValueReads[java.time.LocalDate] = simple(PgType.Date) { buf =>
+    PgDate.dayOffsetAsLocalDate(buf.int())
   }
   implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
   implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())

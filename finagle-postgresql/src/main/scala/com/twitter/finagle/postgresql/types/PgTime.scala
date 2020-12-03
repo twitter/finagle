@@ -5,7 +5,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 /**
- * Some utilities to deal with Postgres' internal time representations and boundaries.
+ * Some utilities to deal with Postgres' internal timestamp representations and boundaries.
  */
 object PgTime {
 
