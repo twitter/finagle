@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.MalformedInputException
 import java.nio.charset.StandardCharsets
+import java.time.temporal.ChronoUnit
 
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlSpec
@@ -252,6 +253,11 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     "readsJson" should simpleSpec[Json](ValueReads.readsJson, PgType.Jsonb) { json =>
       mkBuf(json.jsonByteArray.length + 1) { bb =>
         bb.put(1.toByte).put(json.jsonByteBuffer)
+      }
+    }
+    "readsLocalDate" should simpleSpec[java.time.LocalDate](ValueReads.readsLocalDate, PgType.Date) { ld =>
+      mkBuf() { bb =>
+        bb.putInt(ChronoUnit.DAYS.between(PgDate.Epoch, ld).toInt)
       }
     }
     "readsLong" should simpleSpec[Long](ValueReads.readsLong, PgType.Int8) { long =>

@@ -86,6 +86,7 @@ class ValueWritesSpec extends PgSqlIntegrationSpec with PropertiesSpec {
     "writesInstant" should simpleSpec(ValueWrites.writesInstant, PgType.Timestamptz, PgType.Timestamp)
     "writesInt" should simpleSpec(ValueWrites.writesInt, PgType.Int4)
     "writesJson" should simpleSpec(ValueWrites.writesJson, PgType.Json, PgType.Jsonb)
+    "writesLocalDate" should simpleSpec(ValueWrites.writesLocalDate, PgType.Date)
     "writesLong" should simpleSpec(ValueWrites.writesLong, PgType.Int8)
     "writesShort" should simpleSpec(ValueWrites.writesShort, PgType.Int2)
     "writesString" should {
