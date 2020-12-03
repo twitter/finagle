@@ -84,6 +84,16 @@ object ValueWrites {
     override def accepts(tpe: PgType): Boolean = accept(tpe)
   }
 
+  /**
+   * Define a `ValueWrites[B]` in terms of `ValueWrites[A]` and `B => A`.
+   */
+  def by[A, B](f: B => A)(implicit writesA: ValueWrites[A]): ValueWrites[B] = new ValueWrites[B] {
+    override def writes(tpe: PgType, value: B, charset: Charset): WireValue =
+      writesA.writes(tpe, f(value), charset)
+    override def accepts(tpe: PgType): Boolean =
+      writesA.accepts(tpe)
+  }
+
   implicit def optionWrites[T](implicit twrites: ValueWrites[T]): ValueWrites[Option[T]] = new ValueWrites[Option[T]] {
     override def writes(tpe: PgType, value: Option[T], charset: Charset): WireValue =
       value match {

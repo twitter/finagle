@@ -82,6 +82,19 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
 
   "ValueWrites" should {
 
+    "by" should {
+      "accept the underlying type" in {
+        val intByLong = ValueWrites.by[Long, Int](_.toLong)
+        intByLong.accepts(PgType.Int4) must beFalse
+        intByLong.accepts(PgType.Int8) must beTrue
+      }
+      "write the underlying value" in prop { value: Int =>
+        val intByLong = ValueWrites.by[Long, Int](_.toLong)
+        val wrote = intByLong.writes(PgType.Int8, value, utf8)
+        wrote must_== WireValue.Value(Buf.U64BE(value.toLong))
+      }
+    }
+
     "optionWrites" should {
       "delegate writes when Some" in {
         val optionalInt = ValueWrites.optionWrites(ValueWrites.writesInt)
