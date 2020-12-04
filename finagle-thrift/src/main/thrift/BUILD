@@ -29,3 +29,11 @@ java_thrift_library(
     compiler = "scrooge",
     language = "scala",
 )
+
+java_thrift_library(
+    # Renamed longer to assist bazel migration
+    name = "thrift-bazel-workaround-java",
+    sources = ["*.thrift"],
+    compiler = "scrooge",
+    language = "java",
+)
