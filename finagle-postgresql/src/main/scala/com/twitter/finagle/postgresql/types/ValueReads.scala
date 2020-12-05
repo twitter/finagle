@@ -30,7 +30,6 @@ import scala.collection.compat._
  * | BIGINT (int8) | [[Long]] |
  * | BOOL | [[Boolean]] |
  * | BYTEA (byte[]) | [[Buf]] |
- * | CHAR | [[Byte]] |
  * | CHARACTER(n) | [[String]] |
  * | DATE (date) | [[java.time.LocalDate]] |
  * | DOUBLE (float8) | [[Double]] |
@@ -40,7 +39,7 @@ import scala.collection.compat._
  * | JSONB | [[Json]] |
  * | NUMERIC (decimal) | [[BigDecimal]] |
  * | REAL (float4) | [[Float]] |
- * | SMALLINT (int2) | [[Short]] |
+ * | SMALLINT (int2) | [[Short]] and [[Byte]] (since Postgres doesn't have int1) |
  * | TEXT | [[String]] |
  * | TIMESTAMP | [[java.time.Instant]] |
  * | TIMESTAMP WITH TIME ZONE | [[java.time.Instant]] |
@@ -162,7 +161,19 @@ object ValueReads {
   }
   implicit lazy val readsBoolean: ValueReads[Boolean] = simple(PgType.Bool)(_.byte() != 0)
   implicit lazy val readsBuf: ValueReads[Buf] = simple(PgType.Bytea)(_.remainingBuf())
-  implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Char)(_.byte())
+
+  // Postgres does not have a numeric 1-byte data type. So we use 2-byte value and check bounds.
+  // NOTE: Postgres does have a 1-byte data type (i.e.: "char" with quotes),
+  //   but it's very tricky to use to store numbers, so it's unlikely to be useful in practice.
+  // See https://www.postgresql.org/docs/current/datatype-numeric.html
+  // See https://dba.stackexchange.com/questions/159090/how-to-store-one-byte-integer-in-postgresql
+  implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Int2) { reader =>
+    val shortVal = reader.short()
+    if (!shortVal.isValidByte) throw new PgSqlClientError(
+      s"int2 value is out of range for reading as a Byte: $shortVal is not within [${Byte.MinValue},${Byte.MaxValue}]. Consider reading as Short instead."
+    )
+    shortVal.toByte
+  }
   implicit lazy val readsDouble: ValueReads[Double] = simple(PgType.Float8)(_.double())
   implicit lazy val readsFloat: ValueReads[Float] = simple(PgType.Float4)(_.float())
   implicit lazy val readsInstant: ValueReads[java.time.Instant] =

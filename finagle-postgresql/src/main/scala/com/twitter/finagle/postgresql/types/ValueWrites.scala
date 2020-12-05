@@ -28,7 +28,6 @@ import com.twitter.io.Buf
  * | BIGINT (int8) | [[Long]] |
  * | BOOL | [[Boolean]] |
  * | BYTEA (byte[]) | [[Buf]] |
- * | CHAR | [[Byte]] |
  * | CHARACTER(n) | [[String]] |
  * | DATE (date) | [[java.time.LocalDate]] |
  * | DOUBLE (float8) | [[Double]] |
@@ -38,7 +37,7 @@ import com.twitter.io.Buf
  * | JSONB | [[Json]] |
  * | NUMERIC (decimal) | [[BigDecimal]] |
  * | REAL (float4) | [[Float]] |
- * | SMALLINT (int2) | [[Short]] |
+ * | SMALLINT (int2) | [[Short]] and [[Byte]] (since Postgres doesn't have int1) |
  * | TEXT | [[String]] |
  * | TIMESTAMP | [[java.time.Instant]] |
  * | TIMESTAMP WITH TIME ZONE | [[java.time.Instant]] |
@@ -143,7 +142,12 @@ object ValueWrites {
   }
   implicit lazy val writesBoolean: ValueWrites[Boolean] = simple(PgType.Bool)((w, t) => w.byte(if (t) 1 else 0))
   implicit lazy val writesBuf: ValueWrites[Buf] = simple(PgType.Bytea)(_.buf(_))
-  implicit lazy val writesByte: ValueWrites[Byte] = simple(PgType.Char)(_.byte(_))
+  // Postgres does not have a numeric 1-byte data type. So we use 2-byte value and check bounds.
+  // NOTE: Postgres does have a 1-byte data type (i.e.: "char" with quotes),
+  //   but it's very tricky to use to store numbers, so it's unlikely to be useful in practice.
+  // See https://www.postgresql.org/docs/current/datatype-numeric.html
+  // See https://dba.stackexchange.com/questions/159090/how-to-store-one-byte-integer-in-postgresql
+  implicit lazy val writesByte: ValueWrites[Byte] = simple(PgType.Int2)((w, b) => w.short(b.toShort))
   implicit lazy val writesDouble: ValueWrites[Double] = simple(PgType.Float8)(_.double(_))
   implicit lazy val writesFloat: ValueWrites[Float] = simple(PgType.Float4)(_.float(_))
   implicit lazy val writesInet: ValueWrites[Inet] = simple(PgType.Inet)(_.inet(_))

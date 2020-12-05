@@ -207,7 +207,24 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         bb.put(Buf.ByteArray.Shared.extract(buf))
       }
     }
-    "readsByte" should simpleSpec[Byte](ValueReads.readsByte, PgType.Char)(byte => Buf.ByteArray(byte))
+    "readsByte" should simpleSpec[Byte](ValueReads.readsByte, PgType.Int2) { byte =>
+      mkBuf() { bb =>
+        bb.putShort(byte.toShort)
+      }
+    }
+    "readsByte" should {
+      def failFor(value: Short) = {
+        val buf = mkBuf()(bb => bb.putShort(value))
+        val read = ValueReads.readsByte.reads(PgType.Int2, WireValue.Value(buf), utf8)
+        read.get() must throwA[PgSqlClientError](
+          s"int2 value is out of range for reading as a Byte: $value is not within \\[-128,127\\]. Consider reading as Short instead."
+        )
+      }
+      "fail when int2 value is out of range" in {
+        failFor((Byte.MaxValue.toInt + 1).toShort)
+        failFor((Byte.MinValue.toInt - 1).toShort)
+      }
+    }
     "readsDouble" should simpleSpec[Double](ValueReads.readsDouble, PgType.Float8) { double =>
       mkBuf() { bb =>
         bb.putDouble(double)

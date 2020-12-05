@@ -79,7 +79,7 @@ class ValueWritesSpec extends PgSqlIntegrationSpec with PropertiesSpec {
     "writesBigDecimal" should simpleSpec(ValueWrites.writesBigDecimal, PgType.Numeric)
     "writesBool" should simpleSpec(ValueWrites.writesBoolean, PgType.Bool)
     "writesBuf" should simpleSpec(ValueWrites.writesBuf, PgType.Bytea)
-    "writesByte" should simpleSpec(ValueWrites.writesByte, PgType.Char)
+    "writesByte" should simpleSpec(ValueWrites.writesByte, PgType.Int2)
     "writesDouble" should simpleSpec(ValueWrites.writesDouble, PgType.Float8)
     "writesFloat" should simpleSpec(ValueWrites.writesFloat, PgType.Float4)
     "writesInet" should simpleSpec(ValueWrites.writesInet, PgType.Inet)

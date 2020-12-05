@@ -175,7 +175,11 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
         bb.put(Buf.ByteArray.Shared.extract(buf))
       }
     }
-    "writesByte" should simpleSpec[Byte](ValueWrites.writesByte, PgType.Char)(byte => Buf.ByteArray(byte))
+    "writesByte" should simpleSpec[Byte](ValueWrites.writesByte, PgType.Int2) { byte =>
+      mkBuf() { bb =>
+        bb.putShort(byte.toShort)
+      }
+    }
     "writesDouble" should simpleSpec[Double](ValueWrites.writesDouble, PgType.Float8) { double =>
       mkBuf() { bb =>
         bb.putDouble(double)
