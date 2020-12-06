@@ -117,6 +117,45 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       }
     }
 
+    "or" should {
+      "accept both types" in {
+        val first = ValueReads.simple(PgType.Int4)(_ => 4)
+        val second = ValueReads.simple(PgType.Int2)(_ => 2)
+
+        val or = ValueReads.or(first, second)
+        or.accepts(PgType.Int4) must beTrue
+        or.accepts(PgType.Int2) must beTrue
+        or.accepts(PgType.Int8) must beFalse
+
+        val orElse = first orElse second
+        orElse.accepts(PgType.Int4) must beTrue
+        orElse.accepts(PgType.Int2) must beTrue
+        orElse.accepts(PgType.Int8) must beFalse
+      }
+      "reads from both" in {
+        val first = ValueReads.simple(PgType.Int4)(_ => 4)
+        val second = ValueReads.simple(PgType.Int2)(_ => 2)
+
+        val or = ValueReads.or(first, second)
+        or.reads(PgType.Int4, Buf.Empty, utf8).get() must_== 4
+        or.reads(PgType.Int2, Buf.Empty, utf8).get() must_== 2
+
+        val orElse = first orElse second
+        orElse.reads(PgType.Int4, Buf.Empty, utf8).get() must_== 4
+        orElse.reads(PgType.Int2, Buf.Empty, utf8).get() must_== 2
+      }
+      "reads from first in priority" in {
+        val first = ValueReads.simple(PgType.Int4)(_ => 4)
+        val second = ValueReads.simple(PgType.Int4)(_ => 2)
+
+        val or = ValueReads.or(first, second)
+        or.reads(PgType.Int4, Buf.Empty, utf8).get() must_== 4
+
+        val orElse = first orElse second
+        orElse.reads(PgType.Int4, Buf.Empty, utf8).get() must_== 4
+      }
+    }
+
     "optionReads" should {
       "delegate reads when non-null" in {
         val optionalInt = ValueReads.optionReads(ValueReads.readsInt)
