@@ -21,28 +21,31 @@ import com.twitter.io.Buf
  * Furthermore, postgres allows creating custom types (i.e.: commonly enums, but any arbitrary type can effectively
  * be created) which also require their own mapping to scala types.
  *
- * The following built-in types and their corresponding scala / java types are provided:
+ * The following built-in types and their corresponding scala / java types are provided
+ * * (read this table as "Postgres Type X can be written from Scala / Java Type Y"):
  *
  * | Postgres Type | Scala / Java Type |
  * | --- | --- |
- * | BIGINT (int8) | [[Long]] |
+ * | BIGINT (int8) | [[Long]], [[Int]], [[Short]], [[Byte]] |
  * | BOOL | [[Boolean]] |
  * | BYTEA (byte[]) | [[Buf]] |
  * | CHARACTER(n) | [[String]] |
  * | DATE (date) | [[java.time.LocalDate]] |
- * | DOUBLE (float8) | [[Double]] |
+ * | DOUBLE (float8) | [[Double]], [[Float]] |
  * | INET | [[Inet]] ([[java.net.InetAddress]] and a subnet) |
- * | INTEGER (int, int4) | [[Int]] |
+ * | INTEGER (int, int4) | [[Int]], [[Short]], [[Byte]] |
  * | JSON | [[String]] or [[Json]] |
  * | JSONB | [[Json]] |
  * | NUMERIC (decimal) | [[BigDecimal]] |
  * | REAL (float4) | [[Float]] |
- * | SMALLINT (int2) | [[Short]] and [[Byte]] (since Postgres doesn't have int1) |
+ * | SMALLINT (int2) | [[Short]] and [[Byte]] |
  * | TEXT | [[String]] |
  * | TIMESTAMP | [[java.time.Instant]] |
  * | TIMESTAMP WITH TIME ZONE | [[java.time.Instant]] |
  * | UUID | [[java.util.UUID]] |
  * | VARCHAR | [[String]] |
+ *
+ * @note numeric types don't have the same correspondence for reading and writing.
  *
  * @see [[ValueReads]]
  * @see [[PgType]]
@@ -191,7 +194,7 @@ object ValueWrites {
   implicit lazy val writesBuf: ValueWrites[Buf] = simple(PgType.Bytea)(_.buf(_))
 
   /**
-   * Writes [[Byte]] to [[PgType.Int2]].
+   * Writes [[Byte]] as a [[Short]].
    *
    * Postgres does not have a numeric 1-byte data type. So we use 2-byte value and check bounds.
    * NOTE: Postgres does have a 1-byte data type (i.e.: "char" with quotes),
@@ -200,7 +203,8 @@ object ValueWrites {
    * @see https://www.postgresql.org/docs/current/datatype-numeric.html
    * @see https://dba.stackexchange.com/questions/159090/how-to-store-one-byte-integer-in-postgresql
    */
-  implicit lazy val writesByte: ValueWrites[Byte] = simple(PgType.Int2)((w, b) => w.short(b.toShort))
+  implicit lazy val writesByte: ValueWrites[Byte] =
+    by[Short, Byte](_.toShort)(writesShort)
 
   /**
    * Writes [[Double]] to [[PgType.Float8]].
@@ -210,7 +214,13 @@ object ValueWrites {
   /**
    * Writes [[Float]] to [[PgType.Float4]].
    */
-  implicit lazy val writesFloat: ValueWrites[Float] = simple(PgType.Float4)(_.float(_))
+  lazy val writesFloat4: ValueWrites[Float] = simple(PgType.Float4)(_.float(_))
+
+  /**
+   * Writes [[Float]] to [[PgType.Float4]] or [[writesDouble]].
+   */
+  implicit lazy val writesFloat: ValueWrites[Float] =
+    or(writesFloat4, by[Double, Float](_.toDouble)(writesDouble))
 
   /**
    * Writes [[Inet]] to [[PgType.Inet]].
@@ -229,7 +239,13 @@ object ValueWrites {
   /**
    * Writes [[Int]] to [[PgType.Int4]].
    */
-  implicit lazy val writesInt: ValueWrites[Int] = simple(PgType.Int4)(_.int(_))
+  lazy val writesInt4: ValueWrites[Int] = simple(PgType.Int4)(_.int(_))
+
+  /**
+   * Writes [[Int]] to [[PgType.Int4]] or [[writesLong]].
+   */
+  implicit lazy val writesInt: ValueWrites[Int] =
+    or(writesInt4, by[Long, Int](_.toLong)(writesLong))
 
   /**
    * Writes [[Json]] to [[PgType.Json]] or [[PgType.Jsonb]].
@@ -264,7 +280,13 @@ object ValueWrites {
   /**
    * Writes [[Short]] to [[PgType.Int2]].
    */
-  implicit lazy val writesShort: ValueWrites[Short] = simple(PgType.Int2)(_.short(_))
+  lazy val writesInt2: ValueWrites[Short] = simple(PgType.Int2)(_.short(_))
+
+  /**
+   * Writes [[Short]] to [[PgType.Int2]] or [[writesInt]]
+   */
+  implicit lazy val writesShort: ValueWrites[Short] =
+    or(writesInt2, by[Int, Short](_.toInt)(writesInt))
 
   /**
    * Writes [[String]] to any of [[PgType.Text]], [[PgType.Json]],
