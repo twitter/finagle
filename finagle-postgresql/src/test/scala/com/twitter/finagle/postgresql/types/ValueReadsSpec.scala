@@ -42,14 +42,14 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     fragments(typeFragments)
   }
 
-  def readsFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType)(encode: T => Buf): Fragment =
-    s"read non-null value" in prop { value: T =>
+  def readsFragment[A: Arbitrary, T](reads: ValueReads[T], accept: PgType, f: A => T)(encode: A => Buf): Fragment =
+    s"read non-null value" in prop { value: A =>
       val ret = reads.reads(accept, WireValue.Value(encode(value)), utf8).asScala
-      ret must beSuccessfulTry(value)
+      ret must beSuccessfulTry(f(value))
     }
-  def arrayReadsFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType)(encode: T => Buf) = {
+  def arrayReadsFragment[A: Arbitrary, T](reads: ValueReads[T], accept: PgType, f: A => T)(encode: A => Buf) = {
     val arrayReads = ValueReads.traversableReads[List, T](reads, implicitly)
-    s"read one-dimensional array of non-null values" in prop { values: List[T] =>
+    s"read one-dimensional array of non-null values" in prop { values: List[A] =>
       val data = values.map(v => encode(v)).map(WireValue.Value).toIndexedSeq
       val pgArray = PgArray(
         dimensions = 1,
@@ -61,29 +61,36 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       val arrayWire = WireValue.Value(PgBuf.writer.array(pgArray).build)
       val arrayType = PgType.arrayOf(accept).getOrElse(sys.error(s"no array type for ${accept.name}"))
       val ret = arrayReads.reads(arrayType, arrayWire, utf8).asScala
-      ret must beSuccessfulTry(values)
-    }.setGen(Gen.listOfN(5, Arbitrary.arbitrary[T])) // limit to 5 elements to speed things up
+      ret must beSuccessfulTry(values.map(f))
+    }.setGen(Gen.listOfN(5, Arbitrary.arbitrary[A])) // limit to 5 elements to speed things up
   }
   def nonNullableFragment(reads: ValueReads[_], accept: PgType): Fragment =
     s"fail to read a null value" in {
       reads.reads(accept, WireValue.Null, utf8).asScala must beFailedTry
     }
 
-  def nullableFragment[T: Arbitrary](reads: ValueReads[T], accept: PgType): Fragment =
+  def nullableFragment(reads: ValueReads[_], accept: PgType): Fragment =
     "is nullable when wrapped in Option" in {
       ValueReads.optionReads(reads).reads(accept, WireValue.Null, utf8).asScala must beSuccessfulTry(beNone)
     }
 
-  def simpleSpec[T: Arbitrary](reads: ValueReads[T], accept: PgType, accepts: PgType*)(encode: T => Buf): Fragments =
+  def specs[A: Arbitrary, T](
+    reads: ValueReads[T],
+    accept: PgType,
+    accepts: PgType*
+  )(f: A => T)(encode: A => Buf): Fragments =
     acceptFragments(reads, accept, accepts: _*)
       .append(
         Fragments(
-          readsFragment(reads, accept)(encode),
-          arrayReadsFragment(reads, accept)(encode),
+          readsFragment(reads, accept, f)(encode),
+          arrayReadsFragment(reads, accept, f)(encode),
           nonNullableFragment(reads, accept),
           nullableFragment(reads, accept),
         )
       )
+
+  def simpleSpec[T: Arbitrary](reads: ValueReads[T], accept: PgType, accepts: PgType*)(encode: T => Buf): Fragments =
+    specs[T, T](reads, accept, accepts: _*)(identity)(encode)
 
   "ValueReads" should {
     "simple" should {
@@ -179,7 +186,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         val readsIntList = ValueReads.traversableReads[List, Int](ValueReads.readsInt, implicitly)
         readsIntList.accepts(PgType.Int4Array) must beTrue
         readsIntList.accepts(PgType.Int4) must beFalse
-        readsIntList.accepts(PgType.Int2Array) must beFalse
+        readsIntList.accepts(PgType.Int8Array) must beFalse
       }
 
       "reject nona=-array types when reading" in {
@@ -264,15 +271,19 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         failFor((Byte.MinValue.toInt - 1).toShort)
       }
     }
-    "readsDouble" should simpleSpec[Double](ValueReads.readsDouble, PgType.Float8) { double =>
-      mkBuf() { bb =>
-        bb.putDouble(double)
+    "readsDouble" should {
+      "read float4" should specs[Float, Double](ValueReads.readsDouble, PgType.Float4)(_.toDouble) { float =>
+        mkBuf()(_.putFloat(float))
+      }
+      "read float8" should simpleSpec[Double](ValueReads.readsDouble, PgType.Float8) { double =>
+        mkBuf()(_.putDouble(double))
       }
     }
+    "readsFloat8" should simpleSpec[Double](ValueReads.readsFloat8, PgType.Float8) { double =>
+      mkBuf()(_.putDouble(double))
+    }
     "readsFloat" should simpleSpec[Float](ValueReads.readsFloat, PgType.Float4) { float =>
-      mkBuf() { bb =>
-        bb.putFloat(float)
-      }
+      mkBuf()(_.putFloat(float))
     }
     "readsInet" should simpleSpec[Inet](ValueReads.readsInet, PgType.Inet) { inet =>
       mkBuf() { bb =>
@@ -309,9 +320,18 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       failFor("-Infinity", 0x8000000000000000L)
       failFor("Infinity", 0x7fffffffffffffffL)
     }
-    "readsInt" should simpleSpec[Int](ValueReads.readsInt, PgType.Int4) { int =>
-      mkBuf() { bb =>
-        bb.putInt(int)
+    "readsInt4" should simpleSpec[Int](ValueReads.readsInt4, PgType.Int4) { int =>
+      mkBuf()(_.putInt(int))
+    }
+    "readsInt8" should simpleSpec[Long](ValueReads.readsInt8, PgType.Int8) { long =>
+      mkBuf()(_.putLong(long))
+    }
+    "readsInt" should {
+      "read int2" should specs[Short, Int](ValueReads.readsInt, PgType.Int2)(_.toInt) { short =>
+        mkBuf()(_.putShort(short))
+      }
+      "read int4" should simpleSpec[Int](ValueReads.readsInt, PgType.Int4) { int =>
+        mkBuf()(_.putInt(int))
       }
     }
     "readsJson" should simpleSpec[Json](ValueReads.readsJson, PgType.Json) { json =>
@@ -329,9 +349,15 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         bb.putInt(ChronoUnit.DAYS.between(PgDate.Epoch, ld).toInt)
       }
     }
-    "readsLong" should simpleSpec[Long](ValueReads.readsLong, PgType.Int8) { long =>
-      mkBuf() { bb =>
-        bb.putLong(long)
+    "readsLong" should {
+      "read int2" should specs[Short, Long](ValueReads.readsLong, PgType.Int2)(_.toLong) { short =>
+        mkBuf()(_.putShort(short))
+      }
+      "read int4" should specs[Int, Long](ValueReads.readsLong, PgType.Int4)(_.toLong) { int =>
+        mkBuf()(_.putInt(int))
+      }
+      "read int8" should simpleSpec[Long](ValueReads.readsLong, PgType.Int8) { long =>
+        mkBuf()(_.putLong(long))
       }
     }
     "readsShort" should simpleSpec[Short](ValueReads.readsShort, PgType.Int2) { short =>
