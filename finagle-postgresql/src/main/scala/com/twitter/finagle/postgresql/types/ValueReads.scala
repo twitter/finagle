@@ -89,6 +89,18 @@ trait ValueReads[T] {
    */
   def accepts(tpe: PgType): Boolean
 
+  /**
+   * Returns a `ValueReads` instance that will use `this` if it accepts the type, otherwise
+   * will delegate to `that`.
+   *
+   * @param that the instance to delegate to when `this` does not accept the provided type.
+   * @return a `ValueReads` instance that will use `this` if it accepts the type, otherwise
+   *         will delegate to `that`.
+   * @see [[ValueReads.or]]
+   */
+  def orElse(that: ValueReads[T]): ValueReads[T] =
+    ValueReads.or(this, that)
+
 }
 
 object ValueReads {
@@ -116,6 +128,21 @@ object ValueReads {
     override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[B] =
       readsA.reads(tpe, buf, charset).map(f)
     override def accepts(tpe: PgType): Boolean = readsA.accepts(tpe)
+  }
+
+  /**
+   * If it accepts the given [[PgType]], uses `first` to read the value, otherwise, use `second`.
+   *
+   * @return an instance of [[ValueReads[T]] that uses `first` if it accepts the [[PgType]], otherwise uses `second`.
+   */
+  def or[T](first: ValueReads[T], second: ValueReads[T]): ValueReads[T] = new ValueReads[T] {
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T] = {
+      val r = if (first.accepts(tpe)) first else second
+      r.reads(tpe, buf, charset)
+    }
+
+    override def accepts(tpe: PgType): Boolean =
+      first.accepts(tpe) || second.accepts(tpe)
   }
 
   implicit def optionReads[T](implicit treads: ValueReads[T]): ValueReads[Option[T]] = new ValueReads[Option[T]] {
