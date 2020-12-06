@@ -120,6 +120,10 @@ object ValueWrites {
       first.accepts(tpe) || second.accepts(tpe)
   }
 
+  /**
+   * Returns a `ValueWrites[Option[T]]` that writes `NULL` when the value is `None` and delegates to the underlying
+   * instance when the value is `Some`.
+   */
   implicit def optionWrites[T](implicit twrites: ValueWrites[T]): ValueWrites[Option[T]] = new ValueWrites[Option[T]] {
     override def writes(tpe: PgType, value: Option[T], charset: Charset): WireValue =
       value match {
@@ -129,6 +133,11 @@ object ValueWrites {
     override def accepts(tpe: PgType): Boolean = twrites.accepts(tpe)
   }
 
+  /**
+   * Returns a [[ValueWrites]] able to write a collection of [T] to a Postgres array type.
+   *
+   * For example, this can produce [[ValueWrites[List[Int]]] for the [[PgType.Int4Array]] type.
+   */
   implicit def traversableWrites[F[X] <: Iterable[X], T](implicit twrites: ValueWrites[T]): ValueWrites[F[T]] =
     new ValueWrites[F[T]] {
 
@@ -164,26 +173,67 @@ object ValueWrites {
         }
     }
 
+  /**
+   * Writes [[BigDecimal]] to [[PgType.Numeric]].
+   */
   implicit lazy val writesBigDecimal: ValueWrites[BigDecimal] = simple(PgType.Numeric) { (w, bd) =>
     w.numeric(PgNumeric.bigDecimalToNumeric(bd))
   }
+
+  /**
+   * Writes [[Boolean]] to [[PgType.Bool]].
+   */
   implicit lazy val writesBoolean: ValueWrites[Boolean] = simple(PgType.Bool)((w, t) => w.byte(if (t) 1 else 0))
+
+  /**
+   * Writes [[Buf]] to [[PgType.Bytea]].
+   */
   implicit lazy val writesBuf: ValueWrites[Buf] = simple(PgType.Bytea)(_.buf(_))
-  // Postgres does not have a numeric 1-byte data type. So we use 2-byte value and check bounds.
-  // NOTE: Postgres does have a 1-byte data type (i.e.: "char" with quotes),
-  //   but it's very tricky to use to store numbers, so it's unlikely to be useful in practice.
-  // See https://www.postgresql.org/docs/current/datatype-numeric.html
-  // See https://dba.stackexchange.com/questions/159090/how-to-store-one-byte-integer-in-postgresql
+
+  /**
+   * Writes [[Byte]] to [[PgType.Int2]].
+   *
+   * Postgres does not have a numeric 1-byte data type. So we use 2-byte value and check bounds.
+   * NOTE: Postgres does have a 1-byte data type (i.e.: "char" with quotes),
+   * but it's very tricky to use to store numbers, so it's unlikely to be useful in practice.
+   *
+   * @see https://www.postgresql.org/docs/current/datatype-numeric.html
+   * @see https://dba.stackexchange.com/questions/159090/how-to-store-one-byte-integer-in-postgresql
+   */
   implicit lazy val writesByte: ValueWrites[Byte] = simple(PgType.Int2)((w, b) => w.short(b.toShort))
+
+  /**
+   * Writes [[Double]] to [[PgType.Float8]].
+   */
   implicit lazy val writesDouble: ValueWrites[Double] = simple(PgType.Float8)(_.double(_))
+
+  /**
+   * Writes [[Float]] to [[PgType.Float4]].
+   */
   implicit lazy val writesFloat: ValueWrites[Float] = simple(PgType.Float4)(_.float(_))
+
+  /**
+   * Writes [[Inet]] to [[PgType.Inet]].
+   */
   implicit lazy val writesInet: ValueWrites[Inet] = simple(PgType.Inet)(_.inet(_))
+
+  /**
+   * Writes [[java.time.Instant]] to [[PgType.Timestamptz]] or [[PgType.Timestamp]].
+   */
   implicit lazy val writesInstant: ValueWrites[java.time.Instant] = simple(PgType.Timestamptz, PgType.Timestamp) {
     (w, instant) =>
       // NOTE: we skip going through Timestamp.Micros since we never write anything else
       w.long(PgTime.instantAsUsecOffset(instant))
   }
+
+  /**
+   * Writes [[Int]] to [[PgType.Int4]].
+   */
   implicit lazy val writesInt: ValueWrites[Int] = simple(PgType.Int4)(_.int(_))
+
+  /**
+   * Writes [[Json]] to [[PgType.Json]] or [[PgType.Jsonb]].
+   */
   implicit lazy val writesJson: ValueWrites[Json] = new ValueWrites[Json] {
     // TODO: Json is really only meant for reading...
     override def writes(tpe: PgType, json: Json, charset: Charset): WireValue = {
@@ -198,11 +248,28 @@ object ValueWrites {
     override def accepts(tpe: PgType): Boolean =
       tpe == PgType.Json || tpe == PgType.Jsonb
   }
+
+  /**
+   * Writes [[Long]] to [[PgType.Int8]].
+   */
   implicit lazy val writesLong: ValueWrites[Long] = simple(PgType.Int8)(_.long(_))
+
+  /**
+   * Writes [[java.time.LocalDate]] to [[PgType.Date]].
+   */
   implicit lazy val writesLocalDate: ValueWrites[java.time.LocalDate] = simple(PgType.Date) { (w, date) =>
     w.int(PgDate.localDateAsEpochDayOffset(date))
   }
+
+  /**
+   * Writes [[Short]] to [[PgType.Int2]].
+   */
   implicit lazy val writesShort: ValueWrites[Short] = simple(PgType.Int2)(_.short(_))
+
+  /**
+   * Writes [[String]] to any of [[PgType.Text]], [[PgType.Json]],
+   * [[PgType.Varchar]], [[PgType.Bpchar]], [[PgType.Name]], [[PgType.Unknown]].
+   */
   implicit lazy val writesString: ValueWrites[String] = new ValueWrites[String] {
     def strictEncoder(charset: Charset) =
       charset.newEncoder()
@@ -220,6 +287,10 @@ object ValueWrites {
         tpe == PgType.Name || // system identifiers
         tpe == PgType.Unknown // probably used as a fallback to text serialization?
   }
+
+  /**
+   * Writes [[java.util.UUID]] to [[PgType.Uuid]].
+   */
   implicit lazy val writesUuid: ValueWrites[java.util.UUID] = simple(PgType.Uuid) { (w, uuid) =>
     w.long(uuid.getMostSignificantBits).long(uuid.getLeastSignificantBits)
   }
