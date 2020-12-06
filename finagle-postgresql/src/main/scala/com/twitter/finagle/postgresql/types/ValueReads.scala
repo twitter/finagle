@@ -23,7 +23,8 @@ import scala.collection.compat._
  * Furthermore, postgres allows creating custom types (i.e.: commonly enums, but any arbitrary type can effectively
  * be created) which also require their own mapping to scala types.
  *
- * The following built-in types and their corresponding scala / java types are provided:
+ * The following built-in types and their corresponding scala / java types are provided
+ * (read this table as "Postgres Type X can be read into Scala / Java Type Y"):
  *
  * | Postgres Type | Scala / Java Type |
  * | --- | --- |
@@ -34,17 +35,19 @@ import scala.collection.compat._
  * | DATE (date) | [[java.time.LocalDate]] |
  * | DOUBLE (float8) | [[Double]] |
  * | INET | [[Inet]] ([[java.net.InetAddress]] and a subnet) |
- * | INTEGER (int, int4) | [[Int]] |
+ * | INTEGER (int, int4) | [[Int]] and [[Long]] |
  * | JSON | [[String]] or [[Json]] |
  * | JSONB | [[Json]] |
  * | NUMERIC (decimal) | [[BigDecimal]] |
- * | REAL (float4) | [[Float]] |
- * | SMALLINT (int2) | [[Short]] and [[Byte]] (since Postgres doesn't have int1) |
+ * | REAL (float4) | [[Float]] and [[Double]] |
+ * | SMALLINT (int2) | [[Short]], [[Int]] and [[Long]]. As well as [[Byte]] (bounds are checked), since Postgres doesn't have `int1`. |
  * | TEXT | [[String]] |
  * | TIMESTAMP | [[java.time.Instant]] |
  * | TIMESTAMP WITH TIME ZONE | [[java.time.Instant]] |
  * | UUID | [[java.util.UUID]] |
  * | VARCHAR | [[String]] |
+ *
+ * @note numeric types don't have the same correspondence for reading and writing.
  *
  * @see [[ValueWrites]]
  * @see [[PgType]]
@@ -230,7 +233,13 @@ object ValueReads {
   /**
    * Reads [[Double]] from [[PgType.Float8]].
    */
-  implicit lazy val readsDouble: ValueReads[Double] = simple(PgType.Float8)(_.double())
+  lazy val readsFloat8: ValueReads[Double] = simple(PgType.Float8)(_.double())
+
+  /**
+   * Reads [[Double]] from [[PgType.Float8]] or [[PgType.Float4]].
+   */
+  implicit lazy val readsDouble: ValueReads[Double] =
+    readsFloat8.orElse(by[Float, Double](_.toDouble)(readsFloat))
 
   /**
    * Reads [[Float]] from [[PgType.Float4]].
@@ -257,7 +266,12 @@ object ValueReads {
   /**
    * Reads [[Int]] from [[PgType.Int4]].
    */
-  implicit lazy val readsInt: ValueReads[Int] = simple(PgType.Int4)(_.int())
+  lazy val readsInt4: ValueReads[Int] = simple(PgType.Int4)(_.int())
+
+  /**
+   * Reads [[Int]] from [[PgType.Int4]] or [[readsShort]].
+   */
+  implicit lazy val readsInt: ValueReads[Int] = or(readsInt4, by[Short, Int](_.toInt)(readsShort))
 
   /**
    * Reads [[Json]] from [[PgType.Json]] or [[PgType.Jsonb]].
@@ -284,7 +298,12 @@ object ValueReads {
   /**
    * Reads [[Long]] from [[PgType.Int8]].
    */
-  implicit lazy val readsLong: ValueReads[Long] = simple(PgType.Int8)(_.long())
+  lazy val readsInt8: ValueReads[Long] = simple(PgType.Int8)(_.long())
+
+  /**
+   * Reads [[Long]] from [[PgType.Int8]] or [[readsInt]].
+   */
+  implicit lazy val readsLong: ValueReads[Long] = or(readsInt8, by[Int, Long](_.toLong)(readsInt))
 
   /**
    * Reads [[Short]] from [[PgType.Int2]].
