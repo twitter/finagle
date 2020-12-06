@@ -70,6 +70,18 @@ trait ValueWrites[T] {
    */
   def accepts(tpe: PgType): Boolean
 
+  /**
+   * Returns a `ValueWrites` instance that will use `this` if it accepts the type, otherwise
+   * will delegate to `that`.
+   *
+   * @param that the instance to delegate to when `this` does not accept the provided type.
+   * @return a `ValueWrites` instance that will use `this` if it accepts the type, otherwise
+   *         will delegate to `that`.
+   * @see [[ValueWrites.or]]
+   */
+  def orElse(that: ValueWrites[T]): ValueWrites[T] =
+    ValueWrites.or(this, that)
+
 }
 
 object ValueWrites {
@@ -91,6 +103,21 @@ object ValueWrites {
       writesA.writes(tpe, f(value), charset)
     override def accepts(tpe: PgType): Boolean =
       writesA.accepts(tpe)
+  }
+
+  /**
+   * If it accepts the given [[PgType]], uses `first` to read the value, otherwise, use `second`.
+   *
+   * @return an instance of [[ValueWrites[T]] that uses `first` if it accepts the [[PgType]], otherwise uses `second`.
+   */
+  def or[T](first: ValueWrites[T], second: ValueWrites[T]): ValueWrites[T] = new ValueWrites[T] {
+    override def writes(tpe: PgType, value: T, charset: Charset): WireValue = {
+      val w = if (first.accepts(tpe)) first else second
+      w.writes(tpe, value, charset)
+    }
+
+    override def accepts(tpe: PgType): Boolean =
+      first.accepts(tpe) || second.accepts(tpe)
   }
 
   implicit def optionWrites[T](implicit twrites: ValueWrites[T]): ValueWrites[Option[T]] = new ValueWrites[Option[T]] {

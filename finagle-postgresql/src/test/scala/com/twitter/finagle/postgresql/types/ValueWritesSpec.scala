@@ -95,6 +95,43 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
       }
     }
 
+    "or" should {
+      val first = ValueWrites.simple[Int](PgType.Int4) { case(w,_) => w.byte(4) }
+      val second = ValueWrites.simple[Int](PgType.Int2) { case(w,_) => w.byte(2) }
+      val firstValue = WireValue.Value(Buf.ByteArray(4))
+      val secondValue = WireValue.Value(Buf.ByteArray(2))
+
+      "accept both types" in {
+        val or = ValueWrites.or(first, second)
+        or.accepts(PgType.Int4) must beTrue
+        or.accepts(PgType.Int2) must beTrue
+        or.accepts(PgType.Int8) must beFalse
+
+        val orElse = first orElse second
+        orElse.accepts(PgType.Int4) must beTrue
+        orElse.accepts(PgType.Int2) must beTrue
+        orElse.accepts(PgType.Int8) must beFalse
+      }
+      "writes to both" in {
+        val or = ValueWrites.or(first, second)
+        or.writes(PgType.Int4, 4, utf8) must_== firstValue
+        or.writes(PgType.Int2, 4, utf8) must_== secondValue
+
+        val orElse = first orElse second
+        orElse.writes(PgType.Int4, 4, utf8) must_== firstValue
+        orElse.writes(PgType.Int2, 4, utf8) must_== secondValue
+      }
+      "writes to first in priority" in {
+        val second = ValueWrites.simple[Int](PgType.Int4) { case(w,_) => w.byte(2) }
+
+        val or = ValueWrites.or(first, second)
+        or.writes(PgType.Int4, 4, utf8) must_== firstValue
+
+        val orElse = first orElse second
+        orElse.writes(PgType.Int4, 4, utf8) must_== firstValue
+      }
+    }
+
     "optionWrites" should {
       "delegate writes when Some" in {
         val optionalInt = ValueWrites.optionWrites(ValueWrites.writesInt)
