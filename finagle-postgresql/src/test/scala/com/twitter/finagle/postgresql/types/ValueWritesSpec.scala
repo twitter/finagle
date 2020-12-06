@@ -96,8 +96,8 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
     }
 
     "or" should {
-      val first = ValueWrites.simple[Int](PgType.Int4) { case(w,_) => w.byte(4) }
-      val second = ValueWrites.simple[Int](PgType.Int2) { case(w,_) => w.byte(2) }
+      val first = ValueWrites.simple[Int](PgType.Int4) { case (w, _) => w.byte(4) }
+      val second = ValueWrites.simple[Int](PgType.Int2) { case (w, _) => w.byte(2) }
       val firstValue = WireValue.Value(Buf.ByteArray(4))
       val secondValue = WireValue.Value(Buf.ByteArray(2))
 
@@ -122,7 +122,7 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
         orElse.writes(PgType.Int2, 4, utf8) must_== secondValue
       }
       "writes to first in priority" in {
-        val second = ValueWrites.simple[Int](PgType.Int4) { case(w,_) => w.byte(2) }
+        val second = ValueWrites.simple[Int](PgType.Int4) { case (w, _) => w.byte(2) }
 
         val or = ValueWrites.or(first, second)
         or.writes(PgType.Int4, 4, utf8) must_== firstValue
@@ -212,19 +212,26 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
         bb.put(Buf.ByteArray.Shared.extract(buf))
       }
     }
-    "writesByte" should simpleSpec[Byte](ValueWrites.writesByte, PgType.Int2) { byte =>
-      mkBuf() { bb =>
-        bb.putShort(byte.toShort)
+    "writesByte" should {
+      "write int2" should simpleSpec[Byte](ValueWrites.writesByte, PgType.Int2) { byte =>
+        mkBuf()(_.putShort(byte.toShort))
+      }
+      "write int4" should simpleSpec[Byte](ValueWrites.writesByte, PgType.Int4) { byte =>
+        mkBuf()(_.putInt(byte.toInt))
+      }
+      "write int8" should simpleSpec[Byte](ValueWrites.writesByte, PgType.Int8) { byte =>
+        mkBuf()(_.putLong(byte.toLong))
       }
     }
     "writesDouble" should simpleSpec[Double](ValueWrites.writesDouble, PgType.Float8) { double =>
-      mkBuf() { bb =>
-        bb.putDouble(double)
-      }
+      mkBuf()(_.putDouble(double))
     }
-    "writesFloat" should simpleSpec[Float](ValueWrites.writesFloat, PgType.Float4) { float =>
-      mkBuf() { bb =>
-        bb.putFloat(float)
+    "writesFloat" should {
+      "writes float4" should simpleSpec[Float](ValueWrites.writesFloat, PgType.Float4) { float =>
+        mkBuf()(_.putFloat(float))
+      }
+      "writes float8" should simpleSpec[Float](ValueWrites.writesFloat, PgType.Float8) { float =>
+        mkBuf()(_.putDouble(float.toDouble))
       }
     }
     "writesInet" should simpleSpec[Inet](ValueWrites.writesInet, PgType.Inet) { inet =>
@@ -254,9 +261,12 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
           bb.putLong(micros)
         }
     }
-    "writesInt" should simpleSpec[Int](ValueWrites.writesInt, PgType.Int4) { int =>
-      mkBuf() { bb =>
-        bb.putInt(int)
+    "writesInt" should {
+      "write int4" should simpleSpec[Int](ValueWrites.writesInt, PgType.Int4) { int =>
+        mkBuf()(_.putInt(int))
+      }
+      "write int8" should simpleSpec[Int](ValueWrites.writesInt, PgType.Int8) { int =>
+        mkBuf()(_.putLong(int.toLong))
       }
     }
     "writesJson" should simpleSpec[Json](ValueWrites.writesJson, PgType.Json) { json =>
@@ -275,13 +285,17 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
       }
     }
     "writesLong" should simpleSpec[Long](ValueWrites.writesLong, PgType.Int8) { long =>
-      mkBuf() { bb =>
-        bb.putLong(long)
-      }
+      mkBuf()(_.putLong(long))
     }
-    "writesShort" should simpleSpec[Short](ValueWrites.writesShort, PgType.Int2) { short =>
-      mkBuf() { bb =>
-        bb.putShort(short)
+    "writesShort" should {
+      "writes int2" should simpleSpec[Short](ValueWrites.writesShort, PgType.Int2) { short =>
+        mkBuf()(_.putShort(short))
+      }
+      "writes int4" should simpleSpec[Short](ValueWrites.writesShort, PgType.Int4) { short =>
+        mkBuf()(_.putInt(short.toInt))
+      }
+      "writes int8" should simpleSpec[Short](ValueWrites.writesShort, PgType.Int8) { short =>
+        mkBuf()(_.putLong(short.toLong))
       }
     }
     "writesString" should simpleSpec[String](
