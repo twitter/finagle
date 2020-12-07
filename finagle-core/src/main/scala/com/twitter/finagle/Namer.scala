@@ -72,8 +72,8 @@ object Namer {
 
     private[this] object InetPath {
 
-      private[this] def resolve(host: String, port: Int): Var[Addr] =
-        Resolver.eval(s"inet!$host:$port") match {
+      private[this] def resolve(scheme: String, host: String, port: Int): Var[Addr] =
+        Resolver.eval(s"$scheme!$host:$port") match {
           case Name.Bound(va) => va
           case n: Name.Path =>
             Var.value(
@@ -83,10 +83,15 @@ object Namer {
 
       def unapply(path: Path): Option[(Var[Addr], Path)] = path match {
         case Path.Utf8("$", "inet", host, IntegerString(port), residual @ _*) =>
-          Some((resolve(host, port), Path.Utf8(residual: _*)))
+          Some((resolve("inet", host, port), Path.Utf8(residual: _*)))
         case Path.Utf8("$", "inet", IntegerString(port), residual @ _*) =>
           // no host provided means localhost
-          Some((resolve("", port), Path.Utf8(residual: _*)))
+          Some((resolve("inet", "", port), Path.Utf8(residual: _*)))
+        case Path.Utf8("$", "fixedinet", host, IntegerString(port), residual @ _*) =>
+          Some((resolve("fixedinet", host, port), Path.Utf8(residual: _*)))
+        case Path.Utf8("$", "fixedinet", IntegerString(port), residual @ _*) =>
+          // no host provided means localhost
+          Some((resolve("fixedinet", "", port), Path.Utf8(residual: _*)))
         case _ => None
       }
     }
