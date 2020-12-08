@@ -22,18 +22,12 @@ java_thrift_library(
     ),
 )
 
-java_thrift_library(
+create_thrift_libraries(
     # Renamed longer to assist bazel migration
-    name = "thrift-bazel-workaround-scala",
+    base_name = "thrift-bazel-workaround",
     sources = ["*.thrift"],
-    compiler = "scrooge",
-    language = "scala",
-)
-
-java_thrift_library(
-    # Renamed longer to assist bazel migration
-    name = "thrift-bazel-workaround-java",
-    sources = ["*.thrift"],
-    compiler = "scrooge",
-    language = "java",
+    generate_languages = [
+        "java",
+        "scala",
+    ],
 )
