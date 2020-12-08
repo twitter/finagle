@@ -263,7 +263,7 @@ object ThriftMux
      * requests flow through. This is a familiar chaining combinator for filters.
      */
     def filtered(filter: Filter[mux.Request, mux.Response, mux.Request, mux.Response]): Client = {
-      val role = Stack.Role(filter.getClass.getSimpleName)
+      val role = Stack.Role(filter.getClass.getName)
       val stackable = Filter.canStackFromFac.toStackable(role, filter)
       withStack(stackable +: stack)
     }
