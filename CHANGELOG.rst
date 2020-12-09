@@ -54,6 +54,10 @@ Runtime Behavior Changes
 * finagle-core: Use Scala default implementation to calculate Hashcode and equals method for
   ServiceFactoryProxy. ``PHAB_ID=D569045``
 
+* finagle: Update build.sbt to get aarch64 binaries and try the fast path acquire up to 5 times
+  before failing over to the AbstractQueuedSynchronizer slow path in NonReentrantReadWriteLock
+  for Arm64. ``PHAB_ID=D589167``
+
 Bug Fixes
 ~~~~~~~~~
 
