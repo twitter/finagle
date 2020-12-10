@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 20.10.0 documentation</title>
+    <title>Metrics &#8212; Finagle 20.12.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '20.10.0',
+        VERSION:     '20.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -271,8 +271,21 @@ outside of <code class="docutils literal"><span class="pre">com.twitter.util.Awa
 <dd>A gauge of the number of tasks actively executing.</dd>
 <dt><strong>finagle/offload_pool/completed_tasks</strong></dt>
 <dd>A gauge of the number of total tasks that have completed execution.</dd>
+<dt><strong>finagle/offload_pool/not_offloaded_tasks</strong></dt>
+<dd>A counter of how many tasks weren’t offloaded because the queue has grown over a proposed limit
+(set via a flag <cite>com.twitter.finagle.offload.queueSize</cite>). If a task can’t be offloaded it is run
+the caller thread which is commonly a Netty IO worker.</dd>
 <dt><strong>finagle/offload_pool/queue_depth</strong></dt>
 <dd>A Gauge of the number of tasks that are waiting to be executed.</dd>
+<dt><strong>finagle/offload_pool/pending_tasks</strong></dt>
+<dd>A histogram reporting the number of pending tasks in the offload queue. For efficiency reasons,
+this stat is sampled each <cite>com.twitter.finagle.offload.statsSampleInterval</cite> interval. This stat is
+only enabled if <cite>statsSampleInterval</cite> is both positive and finite.</dd>
+<dt><strong>finagle/offload_pool/delay_ms</strong></dt>
+<dd>A histogram reporting offloading delay - how long a task has been sitting in the offload queue
+before it gets executed. For efficiency reasons, this stat is sampled each
+<cite>com.twitter.finagle.offload.statsSampleInterval</cite> interval. This stat is  only enabled if
+<cite>statsSampleInterval</cite> is both positive and finite.</dd>
 </dl>
 </div>
 <div class="section" id="timer">

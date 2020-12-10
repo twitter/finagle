@@ -732,6 +732,10 @@ finagle clients and servers.
                         <a href="Backoff$.html" title="Implements various backoff strategies.">Backoff</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="BackoffStrategy.html" title="A recursive ADT to define various backoff strategies, where duration returns the current backoff, and next returns a new BackoffStrategy."></a>
+                        <a href="BackoffStrategy.html" title="A recursive ADT to define various backoff strategies, where duration returns the current backoff, and next returns a new BackoffStrategy.">BackoffStrategy</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="ConstantService.html" title="A com.twitter.finagle.Service that returns a constant result."></a>
                         <a href="ConstantService.html" title="A com.twitter.finagle.Service that returns a constant result.">ConstantService</a>
                       </li><li class="current-entities indented4">
@@ -1134,7 +1138,56 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.service.ConstantService" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.service.BackoffStrategy" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="BackoffStrategyextendsAnyRef"></a><a id="BackoffStrategy:BackoffStrategy"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/BackoffStrategy.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A recursive ADT to define various backoff strategies, where duration returns the current backoff, and next returns a new BackoffStrategy." href="BackoffStrategy.html"><span class="name">BackoffStrategy</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A recursive ADT to define various backoff strategies, where <code>duration</code>
+returns the current backoff, and <code>next</code> returns a new <a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A recursive ADT to define various backoff strategies, where <code>duration</code>
+returns the current backoff, and <code>next</code> returns a new <a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a>.</p><p>All <a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a>s are infinite unless it <a href="BackoffStrategy.html#isExhausted:Boolean" class="extmbr" name="com.twitter.finagle.service.BackoffStrategy#isExhausted">isExhausted</a> (an empty
+<a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a>), in this case, calling <code>duration</code> will return a
+<span class="extype" name="NoSuchElementException">NoSuchElementException</span>, calling <code>next</code> will return an
+<span class="extype" name="UnsupportedOperationException">UnsupportedOperationException</span>.</p><p>Finagle provides the following backoff strategies:</p><p>1. BackoffFunction           - create backoffs based on a given function,
+                               can be created via <code>BackoffStrategy.apply</code>.
+2. BackoffFromGeneration     - create backoffs based on a generation
+                               function, can be created via
+                               <code>BackoffStrategy.fromFunction</code>.
+3. Const                     - return a constant backoff, can be created via
+                               <code>BackoffStrategy.const</code>.
+4. Exponential               - create backoffs that grow exponentially, can
+                               be created via <code>BackoffStrategy.exponential</code>.
+5. Linear                    - create backoffs that grow linearly, can be
+                               created via <code>BackoffStrategy.linear</code>.
+6. DecorrelatedJittered      - create backoffs that jitter randomly between
+                               a start value and 3 times of that value, can
+                               be created via
+                               <code>BackoffStrategy.decorrelatedJittered</code>.
+7. EqualJittered             - create backoffs that jitter between 0 and
+                               half of the exponential growth. Can be
+                               created via <code>BackoffStrategy.equalJittered</code>.
+8. ExponentialJittered       - create backoffs that jitter randomly between
+                               0 and a value that grows exponentially by 2.
+                               Can be created via
+                               <code>BackoffStrategy.exponentialJittered</code>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>A new <a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a> will be created only when <code>next</code> is called.</p></span>, <span class="cmt"><p>None of the <a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a>s is memoized, for strategies that
+      involve randomness (<code>DecorrelatedJittered</code>, <code>EqualJittered</code> and
+      <code>ExponentialJittered</code>), there is no way to foresee the next backoff
+      value.</p></span>, <span class="cmt"><p>All <a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a>s are infinite unless using <span class="extype" name="take(Int)">take(Int)</span> to
+      create a strategy with limited number of iterations.</p></span>, <span class="cmt"><p>You can combine one or more <a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a>s with <span class="extype" name="take(Int)">take(Int)</span>
+      and <span class="extype" name="concat(BackoffStrategy)">concat(BackoffStrategy)</span>.</p></span>, <span class="cmt"><p>If the backoff returned from any <a href="BackoffStrategy.html" class="extype" name="com.twitter.finagle.service.BackoffStrategy">BackoffStrategy</a>s overflowed, all
+      succeeding backoffs will be <span class="extype" name="Duration.Top">Duration.Top</span>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.ConstantService" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ConstantService[Req,Rep]extendsService[Req,Rep]"></a><a id="ConstantService[Req,Rep]:ConstantService[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/service/ConstantService.html" title="Permalink">
@@ -1539,9 +1592,9 @@ less correlation between retries. For example <span class="extype" name="HighRes
       <p class="shortcomment cmt">A function defining retry behavior for a given value type <code>A</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A function defining retry behavior for a given value type <code>A</code>.</p><p>The <span class="extype" name="Function1">Function1</span> returns <span class="extype" name="None">None</span> if no more retries should be made
 and <span class="extype" name="Some">Some</span> if another retry should happen. The returned <code>Some</code> has
 a <span class="extype" name="Duration">Duration</span> field for how long to wait for the next retry as well
-as the next <code>RetryPolicy</code> to use.</p><p>Finagle will handle retryable Throws automatically but you will need to
-supply a custom <a href="#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> to inform Finagle which application
-level exceptions are retryable.
+as the next <code>RetryPolicy</code> to use.</p><p>Finagle will automatically handle retryable Throws. Requests that
+have not been written to or processed by a remote service are safe to
+retry.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="SimpleRetryPolicy.html" class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy">SimpleRetryPolicy</a> for a Java friendly API.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.SimpleRetryPolicy" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="SimpleRetryPolicy[A]extendsRetryPolicy[A]withA=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]"></a><a id="SimpleRetryPolicy[A]:SimpleRetryPolicy[A]"></a>

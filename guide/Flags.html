@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Flags &#8212; Finagle 20.10.0 documentation</title>
+    <title>Flags &#8212; Finagle 20.12.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '20.10.0',
+        VERSION:     '20.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -116,6 +116,15 @@ to disable tracing in production applications.</dd>
 <dd>Experimental flag. Enables the offload filter using a thread pool with the specified number of threads.
 When this flag is greater than zero, the execution of application code happens in an isolated pool and the netty threads are used only to handle the network channels. This behavior changes the assumptions regarding the scheduling of tasks in finagle applications. Traditionally, the recommendation is to execute CPU-intensive tasks using a <cite>FuturePool</cite> but, when this flag is enabled, CPU-intensive tasks don’t require a <cite>FuturePool</cite>. Important: Blocking tasks should still use a <cite>FuturePool</cite>.
 It’s important to review the allocation of thread pools when this flag is enabled otherwise the application might create too many threads, which leads to more GC pressure and increases the risk of CPU throttling.</dd>
+<dt><strong>com.twitter.finagle.offload.queueSize</strong> <cite>int</cite></dt>
+<dd>Experimental flag. When offload filter is enabled, its queue is bounded by this value (default:
+“unbounded” or <cite>Int.MaxValue</cite>) Any excess work that can’t be offloaded due to the queue overflow
+is run on IO (Netty) threads instead. Thus, when set, this flag enforces the backpressure on the
+link between “Netty (producer) and your application (consumer).</dd>
+<dt><strong>com.twitter.finagle.offload.statsSampleInterval</strong> <cite>duration</cite></dt>
+<dd>When offload filter is enabled, sample additional offload queue stats (<cite>delays_ms</cite>) at this
+interval (default: <cite>100.milliseconds</cite>). Only finite and positive values are accepted, everything
+else disables the stats.</dd>
 </dl>
 </div>
 <div class="section" id="netty-4">

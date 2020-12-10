@@ -1008,6 +1008,10 @@ generator.
                         <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="ClientParamsInjector.html" title="ClientsParamsInjector is the standard mechanism for injecting params into the client."></a>
+                        <a href="ClientParamsInjector.html" title="ClientsParamsInjector is the standard mechanism for injecting params into the client.">ClientParamsInjector</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="ConnectionFailedException.html" title="Indicates that the client failed to establish a connection."></a>
                         <a href="ConnectionFailedException.html" title="Indicates that the client failed to establish a connection.">ConnectionFailedException</a>
                       </li><li class="current-entities indented3">
@@ -1411,6 +1415,7 @@ in a consistent way.</p><p>Warning: While it's possible to modify params with th
 discouraged. Modifying params via transformers creates subtle dependencies
 between modules and makes it difficult to reason about the value of
 params, as it may change depending on the module's placement in the stack.
+Whenever possible, <a href="ClientParamsInjector.html" class="extype" name="com.twitter.finagle.ClientParamsInjector">ClientParamsInjector</a> should be used instead.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes

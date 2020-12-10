@@ -278,22 +278,6 @@ resources for using Finagle.
 stabilized (moved elsewhere) at any time.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
-                        <a class="object" href="AbstractDarkTrafficFilter$.html" title=""></a>
-                        <a class="trait" href="AbstractDarkTrafficFilter.html" title=""></a>
-                        <a href="AbstractDarkTrafficFilter.html" title="">AbstractDarkTrafficFilter</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="DarkTrafficFilter$.html" title=""></a>
-                        <a class="class" href="DarkTrafficFilter.html" title="Forwards dark traffic to the given service when the given function returns true for a request."></a>
-                        <a href="DarkTrafficFilter.html" title="Forwards dark traffic to the given service when the given function returns true for a request.">DarkTrafficFilter</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="ForwardingWarmUpFilter.html" title="A filter that forwards thrift requests to a specified service."></a>
-                        <a href="ForwardingWarmUpFilter.html" title="A filter that forwards thrift requests to a specified service.">ForwardingWarmUpFilter</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="ThriftForwardingWarmUpFilter$.html" title=""></a>
-                        <a class="class" href="ThriftForwardingWarmUpFilter.html" title=""></a>
-                        <a href="ThriftForwardingWarmUpFilter.html" title="">ThriftForwardingWarmUpFilter</a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="scheduler$.html" title=""></a>
                         <a href="scheduler$.html" title="">scheduler</a>
@@ -1022,133 +1006,14 @@ stabilized (moved elsewhere) at any time.
         <div id="allMembers">
         
 
-        <div id="types" class="types members">
-              <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="AbstractDarkTrafficFilterextendsAnyRef"></a><a id="AbstractDarkTrafficFilter:AbstractDarkTrafficFilter"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="AbstractDarkTrafficFilter.html"><span class="name">AbstractDarkTrafficFilter</span></a><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.exp.DarkTrafficFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]withAbstractDarkTrafficFilter"></a><a id="DarkTrafficFilter[Req,Rep]:DarkTrafficFilter[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/DarkTrafficFilter.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Forwards dark traffic to the given service when the given function returns true for a request." href="DarkTrafficFilter.html"><span class="name">DarkTrafficFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>] with <a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Forwards dark traffic to the given service when the given function returns true for a request.</p>
-    </li><li name="com.twitter.finagle.exp.ForwardingWarmUpFilter" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ForwardingWarmUpFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a><a id="ForwardingWarmUpFilter[Req,Rep]:ForwardingWarmUpFilter[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/ForwardingWarmUpFilter.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A filter that forwards thrift requests to a specified service." href="ForwardingWarmUpFilter.html"><span class="name">ForwardingWarmUpFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter.Rep">Rep</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">A filter that forwards thrift requests to a specified service.</p><div class="fullcomment"><div class="comment cmt"><p>A filter that forwards thrift requests to a specified service. It enables a smooth
-start of processing the requests by slowly increasing the percentage of requests
-that are being processed and lowering the amount of requests that are being
-forwarded.
-</p></div></div>
-    </li><li name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftForwardingWarmUpFilterextendsForwardingWarmUpFilter[Array[Byte],Array[Byte]]"></a><a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/ThriftForwardingWarmUpFilter.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ThriftForwardingWarmUpFilter.html"><span class="name">ThriftForwardingWarmUpFilter</span></a><span class="result"> extends <a href="ForwardingWarmUpFilter.html" class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter">ForwardingWarmUpFilter</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="https://www.scala-lang.org/api/2.12.11/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
-      </span>
-      
-      
-    </li></ol>
-            </div>
+        
 
         
 
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="AbstractDarkTrafficFilter"></a><a id="AbstractDarkTrafficFilter:AbstractDarkTrafficFilter"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter$.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="AbstractDarkTrafficFilter$.html"><span class="name">AbstractDarkTrafficFilter</span></a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.exp.DarkTrafficFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DarkTrafficFilter"></a><a id="DarkTrafficFilter:DarkTrafficFilter"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/DarkTrafficFilter$.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="DarkTrafficFilter$.html"><span class="name">DarkTrafficFilter</span></a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftForwardingWarmUpFilter"></a><a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/ThriftForwardingWarmUpFilter$.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ThriftForwardingWarmUpFilter$.html"><span class="name">ThriftForwardingWarmUpFilter</span></a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.exp.scheduler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.exp.scheduler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="scheduler"></a><a id="scheduler:scheduler"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/exp/scheduler$.html" title="Permalink">

@@ -1003,6 +1003,10 @@ generator.
                         <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="ClientParamsInjector.html" title="ClientsParamsInjector is the standard mechanism for injecting params into the client."></a>
+                        <a href="ClientParamsInjector.html" title="ClientsParamsInjector is the standard mechanism for injecting params into the client.">ClientParamsInjector</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="ConnectionFailedException.html" title="Indicates that the client failed to establish a connection."></a>
                         <a href="ConnectionFailedException.html" title="Indicates that the client failed to establish a connection.">ConnectionFailedException</a>
                       </li><li class="current-entities indented3">
@@ -1840,6 +1844,27 @@ connection.</p><div class="fullcomment"><div class="comment cmt"><p>Information 
 connection.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>this is represented by <a href="ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a> on the client
       side when it initiates a new connection.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ClientParamsInjector" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ClientParamsInjectorextendsStack.ParamsInjector"></a><a id="ClientParamsInjector:ClientParamsInjector"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ClientParamsInjector.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="ClientsParamsInjector is the standard mechanism for injecting params into the client." href="ClientParamsInjector.html"><span class="name">ClientParamsInjector</span></a><span class="result"> extends <a href="Stack$$ParamsInjector.html" class="extype" name="com.twitter.finagle.Stack.ParamsInjector">ParamsInjector</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">ClientsParamsInjector is the standard mechanism for injecting params into
+the client.</p><div class="fullcomment"><div class="comment cmt"><p>ClientsParamsInjector is the standard mechanism for injecting params into
+the client.  It is a <code><code>Stack.ParamsInjector</code></code> with a name.  The injection
+will run at materialization time for Finagle clients, so that the parameters
+for a Stack will be injected in a consistent way.
+</p></div></div>
     </li><li name="com.twitter.finagle.ConnectionFailedException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConnectionFailedExceptionextendsChannelException"></a><a id="ConnectionFailedException:ConnectionFailedException"></a>
       <span class="permalink">
@@ -2774,7 +2799,7 @@ that is closed (i.e. the connection is closed).
       
       
     </li><li name="com.twitter.finagle.ServiceFactoryProxy" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ServiceFactoryProxy[-Req,+Rep]extendsServiceFactory[Req,Rep]withProxy"></a><a id="ServiceFactoryProxy[-Req,+Rep]:ServiceFactoryProxy[Req,Rep]"></a>
+      <a id="ServiceFactoryProxy[-Req,+Rep]extendsServiceFactory[Req,Rep]"></a><a id="ServiceFactoryProxy[-Req,+Rep]:ServiceFactoryProxy[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ServiceFactoryProxy.html" title="Permalink">
         <i class="material-icons"></i>
@@ -2785,7 +2810,7 @@ that is closed (i.e. the connection is closed).
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A ServiceFactory that proxies all calls to another ServiceFactory." href="ServiceFactoryProxy.html"><span class="name">ServiceFactoryProxy</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>] with <span class="extype" name="scala.Proxy">Proxy</span></span>
+        <a title="A ServiceFactory that proxies all calls to another ServiceFactory." href="ServiceFactoryProxy.html"><span class="name">ServiceFactoryProxy</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> that proxies all calls to another
@@ -3059,6 +3084,7 @@ in a consistent way.</p><p>Warning: While it's possible to modify params with th
 discouraged. Modifying params via transformers creates subtle dependencies
 between modules and makes it difficult to reason about the value of
 params, as it may change depending on the module's placement in the stack.
+Whenever possible, <a href="ClientParamsInjector.html" class="extype" name="com.twitter.finagle.ClientParamsInjector">ClientParamsInjector</a> should be used instead.
 </p></div></div>
     </li><li name="com.twitter.finagle.Stackable" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Stackable[T]extendsStack.Head"></a><a id="Stackable[T]:Stackable[T]"></a>

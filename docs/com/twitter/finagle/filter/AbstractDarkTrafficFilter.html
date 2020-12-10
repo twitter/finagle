@@ -147,10 +147,10 @@ returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.h
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.exp" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="exp"></a><a id="exp:exp"></a>
+    </li><li name="com.twitter.finagle.filter" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filter"></a><a id="filter:filter"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/index.html" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/index.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -159,12 +159,10 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="Package exp contains experimental code." href="index.html"><span class="name">exp</span></a>
+        <a title="" href="index.html"><span class="name">filter</span></a>
       </span>
       
-      <p class="shortcomment cmt">Package exp contains experimental code.</p><div class="fullcomment"><div class="comment cmt"><p>Package exp contains experimental code. This can be removed or
-stabilized (moved elsewhere) at any time.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <a class="object" href="AbstractDarkTrafficFilter$.html" title=""></a>
                         <a class="trait" href="" title=""></a>
@@ -174,17 +172,61 @@ stabilized (moved elsewhere) at any time.
                         <a class="class" href="DarkTrafficFilter.html" title="Forwards dark traffic to the given service when the given function returns true for a request."></a>
                         <a href="DarkTrafficFilter.html" title="Forwards dark traffic to the given service when the given function returns true for a request.">DarkTrafficFilter</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="DtabStatsFilter$.html" title=""></a>
+                        <a class="class" href="DtabStatsFilter.html" title="Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all requests with a non-empty Dtab."></a>
+                        <a href="DtabStatsFilter.html" title="Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all requests with a non-empty Dtab.">DtabStatsFilter</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ExceptionSourceFilter$.html" title=""></a>
+                        <a class="class" href="ExceptionSourceFilter.html" title="A com.twitter.finagle.Filter that sources exceptions."></a>
+                        <a href="ExceptionSourceFilter.html" title="A com.twitter.finagle.Filter that sources exceptions.">ExceptionSourceFilter</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ForwardingWarmUpFilter.html" title="A filter that forwards thrift requests to a specified service."></a>
                         <a href="ForwardingWarmUpFilter.html" title="A filter that forwards thrift requests to a specified service.">ForwardingWarmUpFilter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="ThriftForwardingWarmUpFilter$.html" title=""></a>
-                        <a class="class" href="ThriftForwardingWarmUpFilter.html" title=""></a>
-                        <a href="ThriftForwardingWarmUpFilter.html" title="">ThriftForwardingWarmUpFilter</a>
+                        <span class="separator"></span>
+                        <a class="trait" href="LogFormatter.html" title=""></a>
+                        <a href="LogFormatter.html" title="">LogFormatter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="scheduler$.html" title=""></a>
-                        <a href="scheduler$.html" title="">scheduler</a>
+                        <a class="trait" href="LoggingFilter.html" title="A com.twitter.finagle.Filter that logs all requests according to formatter."></a>
+                        <a href="LoggingFilter.html" title="A com.twitter.finagle.Filter that logs all requests according to formatter.">LoggingFilter</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="MaskCancelFilter$.html" title=""></a>
+                        <a class="class" href="MaskCancelFilter.html" title="A com.twitter.finagle.Filter that prevents cancellations from propagating to any subsequent Services."></a>
+                        <a href="MaskCancelFilter.html" title="A com.twitter.finagle.Filter that prevents cancellations from propagating to any subsequent Services.">MaskCancelFilter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="MkJvmFilter.html" title="Given a com.twitter.util.Jvm, use apply to create a Filter to trace garbage collection events."></a>
+                        <a href="MkJvmFilter.html" title="Given a com.twitter.util.Jvm, use apply to create a Filter to trace garbage collection events.">MkJvmFilter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="MonitorFilter.html" title="A com.twitter.finagle.Filter that handles exceptions (incl."></a>
+                        <a href="MonitorFilter.html" title="A com.twitter.finagle.Filter that handles exceptions (incl.">MonitorFilter</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="NackAdmissionFilter$.html" title=""></a>
+                        <a class="class" href="NackAdmissionFilter.html" title="This filter probabilistically drops requests if the nack rate exceeds the nackRateThreshold."></a>
+                        <a href="NackAdmissionFilter.html" title="This filter probabilistically drops requests if the nack rate exceeds the nackRateThreshold.">NackAdmissionFilter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="OffloadFilter$.html" title="These modules introduce async-boundary into the future chain, effectively shifting continuations off of IO threads (into a given FuturePool)."></a>
+                        <a href="OffloadFilter$.html" title="These modules introduce async-boundary into the future chain, effectively shifting continuations off of IO threads (into a given FuturePool).">OffloadFilter</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="PayloadSizeFilter$.html" title=""></a>
+                        <a class="class" href="PayloadSizeFilter.html" title="A filter that exports two histograms to a given StatsReceiver."></a>
+                        <a href="PayloadSizeFilter.html" title="A filter that exports two histograms to a given StatsReceiver.">PayloadSizeFilter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="RequestLogger$.html" title=""></a>
+                        <a href="RequestLogger$.html" title="">RequestLogger</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RequestMeterFilter.html" title="A com.twitter.finagle.Filter that rate limits requests to a fixed rate over time by using the com.twitter.concurrent.AsyncMeter implementation."></a>
+                        <a href="RequestMeterFilter.html" title="A com.twitter.finagle.Filter that rate limits requests to a fixed rate over time by using the com.twitter.concurrent.AsyncMeter implementation.">RequestMeterFilter</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="RequestSemaphoreFilter$.html" title=""></a>
+                        <a class="class" href="RequestSemaphoreFilter.html" title="A com.twitter.finagle.Filter that restricts request concurrency according to the given com.twitter.concurrent.AsyncSemaphore."></a>
+                        <a href="RequestSemaphoreFilter.html" title="A com.twitter.finagle.Filter that restricts request concurrency according to the given com.twitter.concurrent.AsyncSemaphore.">RequestSemaphoreFilter</a>
                       </li>
               </ul>
             </div>
@@ -193,9 +235,9 @@ stabilized (moved elsewhere) at any time.
             <body class="trait type">
       <div id="definition">
         <a href="AbstractDarkTrafficFilter$.html" title="See companion object"><div class="big-circle trait-companion-object">t</div></a>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.exp">exp</a></p>
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.filter">filter</a></p>
         <h1><a href="AbstractDarkTrafficFilter$.html" title="See companion object">AbstractDarkTrafficFilter</a><span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -224,7 +266,7 @@ stabilized (moved elsewhere) at any time.
             <span class="toggle">
               Known Subclasses
             </span>
-            <div class="subClasses hiddenContent"><a href="DarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter">DarkTrafficFilter</a></div>
+            <div class="subClasses hiddenContent"><a href="DarkTrafficFilter.html" class="extype" name="com.twitter.finagle.filter.DarkTrafficFilter">DarkTrafficFilter</a></div>
           </div></div>
         
 
@@ -250,7 +292,7 @@ stabilized (moved elsewhere) at any time.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter"><span>AbstractDarkTrafficFilter</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter"><span>AbstractDarkTrafficFilter</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -274,10 +316,10 @@ stabilized (moved elsewhere) at any time.
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter#handleFailedInvocation" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.filter.AbstractDarkTrafficFilter#handleFailedInvocation" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="handleFailedInvocation[Req](request:Req,t:Throwable):Unit"></a><a id="handleFailedInvocation[Req](Req,Throwable):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#handleFailedInvocation[Req](request:Req,t:Throwable):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#handleFailedInvocation[Req](request:Req,t:Throwable):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -286,14 +328,14 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">handleFailedInvocation</span><span class="tparams">[<span name="Req">Req</span>]</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.handleFailedInvocation.Req">Req</span></span>, <span name="t">t: <a href="../../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">handleFailedInvocation</span><span class="tparams">[<span name="Req">Req</span>]</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.handleFailedInvocation.Req">Req</span></span>, <span name="t">t: <a href="../../../../scala/index.html#Throwable=Throwable" class="extmbr" name="scala.Throwable">Throwable</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter#statsReceiver" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.filter.AbstractDarkTrafficFilter#statsReceiver" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="statsReceiver:com.twitter.finagle.stats.StatsReceiver"></a><a id="statsReceiver:StatsReceiver"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#statsReceiver:com.twitter.finagle.stats.StatsReceiver" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#statsReceiver:com.twitter.finagle.stats.StatsReceiver" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -315,7 +357,7 @@ stabilized (moved elsewhere) at any time.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -331,7 +373,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -347,7 +389,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -363,7 +405,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -379,7 +421,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -403,7 +445,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -419,7 +461,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -435,7 +477,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -457,7 +499,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -476,7 +518,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#hashCode():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -495,7 +537,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -511,7 +553,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -527,7 +569,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -546,7 +588,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -562,10 +604,10 @@ stabilized (moved elsewhere) at any time.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter#sendDarkRequest" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.filter.AbstractDarkTrafficFilter#sendDarkRequest" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sendDarkRequest[Req](request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[_]"></a><a id="sendDarkRequest[Req](Req)((Req)⇒Boolean,(Req)⇒Future[_]):Future[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#sendDarkRequest[Req](request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#sendDarkRequest[Req](request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -574,14 +616,14 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sendDarkRequest</span><span class="tparams">[<span name="Req">Req</span>]</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span></span>)</span><span class="params">(<span name="shouldInvoke">shouldInvoke: (<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="invokeDarkService">invokeDarkService: (<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[_]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[_]</span>
+        <span class="name">sendDarkRequest</span><span class="tparams">[<span name="Req">Req</span>]</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span></span>)</span><span class="params">(<span name="shouldInvoke">shouldInvoke: (<span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="invokeDarkService">invokeDarkService: (<span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[_]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[_]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter#serviceConcurrently" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.filter.AbstractDarkTrafficFilter#serviceConcurrently" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serviceConcurrently[Req,Rep](service:com.twitter.finagle.Service[Req,Rep],request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[Rep]"></a><a id="serviceConcurrently[Req,Rep](Service[Req,Rep],Req)((Req)⇒Boolean,(Req)⇒Future[_]):Future[Rep]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#serviceConcurrently[Req,Rep](service:com.twitter.finagle.Service[Req,Rep],request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[Rep]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#serviceConcurrently[Req,Rep](service:com.twitter.finagle.Service[Req,Rep],request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[Rep]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -590,14 +632,14 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serviceConcurrently</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Rep">Rep</span>]</span>, <span name="request">request: <span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span></span>)</span><span class="params">(<span name="shouldInvoke">shouldInvoke: (<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="invokeDarkService">invokeDarkService: (<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[_]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Rep">Rep</span>]</span>
+        <span class="name">serviceConcurrently</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.serviceConcurrently.Rep">Rep</span>]</span>, <span name="request">request: <span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span></span>)</span><span class="params">(<span name="shouldInvoke">shouldInvoke: (<span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="invokeDarkService">invokeDarkService: (<span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[_]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.filter.AbstractDarkTrafficFilter.serviceConcurrently.Rep">Rep</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -613,7 +655,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#toString():String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -629,7 +671,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -651,7 +693,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -673,7 +715,7 @@ stabilized (moved elsewhere) at any time.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/AbstractDarkTrafficFilter.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/filter/AbstractDarkTrafficFilter.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>

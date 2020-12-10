@@ -201,6 +201,10 @@ the netty4 event loop.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty4.ssl">ssl</a></dd></dl></div>
     </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="ExternalClientEngineFactory$.html" title="This engine factory is intended to be used *only* by clients that talk to outside web servers."></a>
+                        <a href="ExternalClientEngineFactory$.html" title="This engine factory is intended to be used *only* by clients that talk to outside web servers.">ExternalClientEngineFactory</a>
+                      </li><li class="current-entities indented6">
                         <a class="object" href="Netty4ClientEngineFactory$.html" title=""></a>
                         <a class="class" href="Netty4ClientEngineFactory.html" title="This engine factory uses Netty 4's SslContextBuilder."></a>
                         <a href="Netty4ClientEngineFactory.html" title="This engine factory uses Netty 4's SslContextBuilder.">Netty4ClientEngineFactory</a>
@@ -313,7 +317,34 @@ recommended path for using native SSL/TLS engines with Finagle.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.netty4.ssl.client.Netty4ClientEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.netty4.ssl.client.ExternalClientEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ExternalClientEngineFactory"></a><a id="ExternalClientEngineFactory:ExternalClientEngineFactory"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/netty4/ssl/client/ExternalClientEngineFactory$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="This engine factory is intended to be used *only* by clients that talk to outside web servers." href="ExternalClientEngineFactory$.html"><span class="name">ExternalClientEngineFactory</span></a><span class="result"> extends <a href="../../../ssl/client/SslClientEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientEngineFactory">SslClientEngineFactory</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This engine factory is intended to be used *only* by clients that talk to
+outside web servers.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is intended to be used *only* by clients that talk to
+outside web servers. It ignores some of the parameters passed in as part
+of the <code>SslClientConfiguration</code>, in order to severely limit the number
+of <code>OpenSslContext</code> objects which get created.</p><p>There are four types of engines which can be created by this engine factory:
+1. http/1.1 with trust credential checking done against system certs
+2. http/1.1 with no trust credential checking done (insecure)
+3. h2 with trust credential checking done against system certs
+4. h2 with no trust credential checking done (insecure)
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p><code>KeyCredentials</code>, <code>CipherSuites</code>, and <code>Protocols</code> values are all
+ignored with this engine factory and are treated as if they were left
+as <code>Unspecified</code>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.netty4.ssl.client.Netty4ClientEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Netty4ClientEngineFactory"></a><a id="Netty4ClientEngineFactory:Netty4ClientEngineFactory"></a>
       <span class="permalink">
       <a href="../../../../../../com/twitter/finagle/netty4/ssl/client/Netty4ClientEngineFactory$.html" title="Permalink">

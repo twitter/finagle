@@ -58,7 +58,7 @@ Available Tracers
 NullTracer
 ~~~~~~~~~~
 
-A tracer that drops all traces on the ground. This is the default behavior if no tracer is confgured.
+A tracer that drops all traces on the ground. This is the default behavior if no tracer is configured.
 
 BroadcastTracer
 ~~~~~~~~~~~~~~~

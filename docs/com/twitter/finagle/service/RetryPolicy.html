@@ -169,6 +169,10 @@ resources for using Finagle.
                         <a href="Backoff$.html" title="Implements various backoff strategies.">Backoff</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="BackoffStrategy.html" title="A recursive ADT to define various backoff strategies, where duration returns the current backoff, and next returns a new BackoffStrategy."></a>
+                        <a href="BackoffStrategy.html" title="A recursive ADT to define various backoff strategies, where duration returns the current backoff, and next returns a new BackoffStrategy.">BackoffStrategy</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="ConstantService.html" title="A com.twitter.finagle.Service that returns a constant result."></a>
                         <a href="ConstantService.html" title="A com.twitter.finagle.Service that returns a constant result.">ConstantService</a>
                       </li><li class="current-entities indented4">
@@ -328,9 +332,9 @@ resources for using Finagle.
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A function defining retry behavior for a given value type <code>A</code>.</p><p>The <span class="extype" name="Function1">Function1</span> returns <span class="extype" name="None">None</span> if no more retries should be made
 and <span class="extype" name="Some">Some</span> if another retry should happen. The returned <code>Some</code> has
 a <span class="extype" name="Duration">Duration</span> field for how long to wait for the next retry as well
-as the next <code>RetryPolicy</code> to use.</p><p>Finagle will handle retryable Throws automatically but you will need to
-supply a custom <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> to inform Finagle which application
-level exceptions are retryable.
+as the next <code>RetryPolicy</code> to use.</p><p>Finagle will automatically handle retryable Throws. Requests that
+have not been written to or processed by a remote service are safe to
+retry.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="SimpleRetryPolicy.html" class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy">SimpleRetryPolicy</a> for a Java friendly API.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
