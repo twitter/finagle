@@ -18,6 +18,7 @@ Bug Fixes
 
 New Features
 ~~~~~~~~~~~~
+* finagle-benchmark: Add a benchmark for LocalContext. ``PHAB_ID=D588632``
 
 * finagle-core: Add a new stat (histogram) that reports how long a task has been sitting in the
   offload queue. This instrumentation is sampled at the given interval (100ms by default) that
