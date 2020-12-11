@@ -712,4 +712,27 @@ class MethodBuilderTest extends FunSuite with Eventually {
     spe2.close()
     server.close()
   }
+
+  test("methodBuilder supports eager loadbalancer connections") {
+    val server = serverImpl.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new TestService.MethodPerEndpoint {
+        def query(x: String): Future[String] = Future.value(x)
+        def question(y: String): Future[String] = Future.value(y)
+        def inquiry(z: String): Future[String] = Future.value(z)
+      }
+    )
+    val sr = new InMemoryStatsReceiver
+    val client = clientImpl
+    // ensure we install an lb which supports eager conns
+      .withLoadBalancer(com.twitter.finagle.loadbalancer.Balancers.aperture())
+      .configured(com.twitter.finagle.loadbalancer.aperture.EagerConnections(true))
+      .withStatsReceiver(sr)
+      .withLabel("eager_clnt")
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    val spe1 = builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
+    assert(sr.gauges(Seq("eager_clnt", "loadbalancer", "eager_connections"))() == 1.0)
+  }
 }

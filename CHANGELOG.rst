@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-thriftmux: Fixed a bug where connections were not established eagerly in ThriftMux
+  MethodBuilder even when eager connections was enabled. ``PHAB_ID=D589592``
+
 20.12.0
 -------
 
@@ -48,7 +54,7 @@ Breaking API Changes
   `c.t.finagle.exp` to `c.t.finagle.thrift.filter`. ``PHAB_ID=D573545``
 
 * finagle-core: `FailureAccrualFactory.isSuccess` has been replaced with the method
-  `def classify(ReqRep): ResponseClass` to allow expressing that a failure should be ignored. 
+  `def classify(ReqRep): ResponseClass` to allow expressing that a failure should be ignored.
   ``PHAB_ID=D571093``
 
 Runtime Behavior Changes
@@ -139,7 +145,7 @@ Runtime Behavior Changes
 * finagle-core: A ServiceFactory created by ServiceFactory.const/constant propagates the wrapped
   service status. ``PHAB_ID=D520598``
 
-* finagle-core: Only deposit into the RetryBudget after a request succeeds. 
+* finagle-core: Only deposit into the RetryBudget after a request succeeds.
   This should help mitigate retry storm behavior. ``PHAB_ID=D528880``
 
 * finagle-http: `c.t.f.http.filter.PayloadSizeFilter` no longer adds an annotation on each

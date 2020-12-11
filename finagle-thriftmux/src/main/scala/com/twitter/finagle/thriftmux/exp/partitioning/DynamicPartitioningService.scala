@@ -93,7 +93,9 @@ private[partitioning] class DynamicPartitioningService(
       }
     }
 
-  private[this] lazy val disabledPartitioningService = next.make(params).toService
+  // Note, we want to initialize the non-partitioned request path eagerly. This allows
+  // features like eager connections to work without priming the client with a request.
+  private[this] val disabledPartitioningService = next.make(params).toService
 
   def apply(request: Request): Future[Response] = {
     val strategy = Contexts.local.getOrElse(strategyKey, () => Disabled)
