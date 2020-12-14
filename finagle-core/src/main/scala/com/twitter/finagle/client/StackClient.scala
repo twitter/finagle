@@ -413,6 +413,9 @@ object StackClient {
      *    such that execution context shifts as client's response leaves
      *    the stack and enters the application code.
      *
+     *  * `ClientExceptionTracingFilter` reports binary annotations for exceptions.
+     *    It has no position constraints within the stack.
+     *
      *  * `TraceInitializerFilter` allocates a new trace span per
      *    request. It must appear above all other modules so the
      *    request span encompasses all tracing in the course of a
@@ -424,6 +427,7 @@ object StackClient {
     stk.push(ForwardAnnotation.module)
     stk.push(OffloadFilter.client)
     stk.push(RegistryEntryLifecycle.module)
+    stk.push(ClientExceptionTracingFilter.module())
     stk.push(TraceInitializerFilter.clientModule)
     stk.result
   }

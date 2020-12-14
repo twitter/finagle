@@ -20,6 +20,11 @@ New Features
 ~~~~~~~~~~~~
 * finagle-benchmark: Add a benchmark for LocalContext. ``PHAB_ID=D588632``
 
+* finagle-core: Add a new filter, `ClientExceptionTracingFilter`, that records error annotations for
+  completed spans. Annotations include `error`, `exception.type`, and `exception.message`. 
+  See https://github.com/open-telemetry/opentelemetry-specification for naming details.
+  ``PHAB_ID=D583001``
+
 * finagle-core: Add a new stat (histogram) that reports how long a task has been sitting in the
   offload queue. This instrumentation is sampled at the given interval (100ms by default) that
   can be overridden with a global flag `com.twitter.finagle.offload.statsSampleInterval`.

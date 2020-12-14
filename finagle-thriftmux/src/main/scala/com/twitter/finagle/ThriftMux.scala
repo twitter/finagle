@@ -8,6 +8,7 @@ import com.twitter.finagle.client.{
 }
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
+import com.twitter.finagle.filter.{ClientExceptionTracingFilter => ExceptionTracingFilter}
 import com.twitter.finagle.mux.transport.{MuxFailure, OpportunisticTls}
 import com.twitter.finagle.mux.{OpportunisticTlsParams, WithCompressionPreferences}
 import com.twitter.finagle.naming.BindingFactory
@@ -140,6 +141,9 @@ object ThriftMux
       .insertAfter(
         TraceInitializerFilter.role,
         thriftmux.service.ClientTraceAnnotationsFilter.module)
+      .replace(
+        ExceptionTracingFilter.role,
+        ExceptionTracingFilter.module(new thriftmux.service.ClientExceptionTracingFilter))
       .insertAfter(BindingFactory.role, ThriftPartitioningService.module(ThriftMuxMarshallable))
   }
 
