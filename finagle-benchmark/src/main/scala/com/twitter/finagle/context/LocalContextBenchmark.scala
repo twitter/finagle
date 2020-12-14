@@ -31,7 +31,7 @@ class LocalContextBenchmark extends StdBenchAnnotations {
   }
 
   @Benchmark
-  def let(): Int = doInContext(doLet())
+  def let(): Int = doInContext(doLet)
 
   private val doLet: () => Int = () => {
     local.let(realKey, 15) {
@@ -40,7 +40,7 @@ class LocalContextBenchmark extends StdBenchAnnotations {
   }
 
   @Benchmark
-  def get(): Boolean = doInContext(doGet())
+  def get(): Boolean = doInContext(doGet)
 
   private val doGet: () => Boolean = () => {
     local.get(unusedKey).isEmpty &&
@@ -48,7 +48,7 @@ class LocalContextBenchmark extends StdBenchAnnotations {
   }
 
   @Benchmark
-  def getOrElse(bh: Blackhole): Int = doInContext(doGetOrElse(bh))
+  def getOrElse(bh: Blackhole): Int = doInContext(doGetOrElse, bh)
 
   private val doGetOrElse: (Blackhole) => Int = (bh: Blackhole) => {
     bh.consume { local.getOrElse(unusedKey, () => None) }
@@ -56,7 +56,7 @@ class LocalContextBenchmark extends StdBenchAnnotations {
   }
 
   @Benchmark
-  def letClear(): Int = doInContext(doLetClear())
+  def letClear(): Int = doInContext(doLetClear)
 
   private val doLetClear: () => Int = () => {
     local.letClear(realKey) {
@@ -64,7 +64,11 @@ class LocalContextBenchmark extends StdBenchAnnotations {
     }
   }
 
-  def doInContext[T](fn: => T): T = {
-    local.letLocal(env)(fn)
+  def doInContext[T](fn: () => T): T = {
+    local.letLocal(env)(fn())
+  }
+
+  def doInContext[T](fn: Blackhole => T, bh: Blackhole): T = {
+    local.letLocal(env)(fn(bh))
   }
 }
