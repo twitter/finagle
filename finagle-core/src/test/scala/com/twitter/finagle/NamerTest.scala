@@ -188,6 +188,39 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
+  test("Namer.global: /$/fixedinet") {
+    Namer.global.lookup(Path.read("/$/fixedinet/1234")).sample() match {
+      case NameTree.Leaf(Name.Bound(addr)) =>
+        assert(addr.sample() == Addr.Bound(Set(Address(1234))))
+      case _ => fail()
+    }
+
+    Await.result(
+      Namer.global.lookup(Path.read("/$/fixedinet/127.0.0.1/1234")).values.toFuture(),
+      1.second
+    )() match {
+      case NameTree.Leaf(Name.Bound(addr)) =>
+        assert(
+          Await.result(addr.changes.filter(_ != Addr.Pending).toFuture(), 1.second)
+            == Addr.Bound(Set(Address("127.0.0.1", 1234)))
+        )
+      case _ => fail()
+    }
+
+    intercept[ClassNotFoundException] {
+      Namer.global.lookup(Path.read("/$/fixedinet")).sample()
+    }
+
+    Namer.global.lookup(Path.read("/$/fixedinet/1234/foobar")).sample() match {
+      case NameTree.Leaf(bound: Name.Bound) =>
+        assert(bound.addr.sample() == Addr.Bound(Address(1234)))
+        assert(bound.id == Path.Utf8("$", "fixedinet", "1234"))
+        assert(bound.path == Path.Utf8("foobar"))
+
+      case _ => fail()
+    }
+  }
+
   test("Namer.global: /$/fail") {
     assert(
       Namer.global.lookup(Path.read("/$/fail")).sample()

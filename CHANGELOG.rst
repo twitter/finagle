@@ -80,6 +80,9 @@ Bug Fixes
   `java.lang.UnsupportedOperationException: tail of empty stream` when a `c.t.f.s.RetryPolicy`
   is converted to a String for showing. ``PHAB_ID=D582199``
 
+* finagle-core: Recognize `fixedinet` name scheme in global `com.twitter.finagle.Namer`.
+  ``PHAB_ID=D589429``
+
 20.10.0
 -------
 
