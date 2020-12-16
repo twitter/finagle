@@ -26,6 +26,12 @@ private[finagle] object MysqlTracingFilter {
       new MysqlTracingFilter(_credentials.username, _database.db).andThen(next)
     }
   }
+
+  // For security purposes we only emit the first token which will always be a SQL
+  // command (like SELECT) or a fragment (DROP [DATABASE|TABLE]). We don't want to
+  // implement the full parser here so we won't deal with the two token commands.
+  private def firstToken(str: String): String =
+    str.substring(0, math.max(0, str.indexOf(' ')))
 }
 
 private class MysqlTracingFilter(username: Option[String], database: Option[String])
@@ -33,7 +39,18 @@ private class MysqlTracingFilter(username: Option[String], database: Option[Stri
   import MysqlTracingFilter._
 
   // we cache based on the class name of the request to avoid string concat
-  val unknownReqAnnoCache = mutable.Map.empty[String, String]
+  private[this] val unknownReqAnnoCache = mutable.Map.empty[String, String]
+
+  private[this] def getClassName(request: Request): String = {
+    val className = request.getClass.getSimpleName
+    // We need to synchronize or else we risk map corruption and that can result
+    // in infinite loops.
+    unknownReqAnnoCache.synchronized {
+      unknownReqAnnoCache.getOrElseUpdate(
+        className,
+        UnknownReqAnnotationPrefix + className.replace("$", ""))
+    }
+  }
 
   def apply(request: Request, service: Service[Request, Result]): Future[Result] = {
     val trace = Trace()
@@ -49,20 +66,13 @@ private class MysqlTracingFilter(username: Option[String], database: Option[Stri
 
       request match {
         case QueryRequest(sqlStatement) =>
-          trace.recordBinary(QueryAnnotationKey, sqlStatement)
+          trace.recordBinary(QueryAnnotationKey, firstToken(sqlStatement))
         case PrepareRequest(sqlStatement) =>
-          trace.recordBinary(PrepareAnnotationKey, sqlStatement)
+          trace.recordBinary(PrepareAnnotationKey, firstToken(sqlStatement))
         case ExecuteRequest(id, _, _, _) =>
           trace.recordBinary(ExecuteAnnotationKey, id)
         case _ =>
-          val className = request.getClass.getSimpleName
-
-          // not thread safe but also not worth the synchronization
-          val anno = unknownReqAnnoCache.getOrElseUpdate(
-            className,
-            UnknownReqAnnotationPrefix + className.replace("$", ""))
-
-          trace.record(anno)
+          trace.record(getClassName(request))
       }
     }
 

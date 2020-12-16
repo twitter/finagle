@@ -13,6 +13,11 @@ Bug Fixes
 * finagle-thriftmux: Fixed a bug where connections were not established eagerly in ThriftMux
   MethodBuilder even when eager connections was enabled. ``PHAB_ID=D589592``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+ * finagle-mysql: Don't use the full query when adding tracing annotations. ``PHAB_ID=D593944``
+
 20.12.0
 -------
 

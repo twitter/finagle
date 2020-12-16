@@ -42,8 +42,8 @@ class MysqlBuilderTest extends FunSuite with IntegrationClient {
       ready(client.ping())
 
       val mysqlTraces = annotations.collect {
-        case Annotation.BinaryAnnotation("clnt/mysql.query", "SELECT 1") => ()
-        case Annotation.BinaryAnnotation("clnt/mysql.prepare", "SELECT ?") => ()
+        case Annotation.BinaryAnnotation("clnt/mysql.query", "SELECT") => ()
+        case Annotation.BinaryAnnotation("clnt/mysql.prepare", "SELECT") => ()
         case Annotation.Message("clnt/mysql.PingRequest") => ()
       }
 
