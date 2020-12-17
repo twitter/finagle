@@ -15,6 +15,9 @@ private[http] sealed abstract class ParameterMap {
   /** Return Some(String) value for a named parameter if it is present, None otherwise. */
   def get(name: String): Option[String]
 
+  /** Return Some(String) value for a named parameter if it is present and a [[StringParam]], None otherwise. */
+  def getString(name: String): Option[String]
+
   /** Return Some(Int) value for a named parameter if it is present and a [[IntParam]], None otherwise. */
   def getInt(name: String): Option[Int]
 
@@ -37,6 +40,7 @@ private[http] object EmptyParameterMap extends ParameterMap {
   private[routing] def getParam(name: String): Option[ParameterValue] = None
   def getParamClass(name: String): Option[Class[_]] = None
   def get(name: String): Option[String] = None
+  def getString(name: String): Option[String] = None
   def getInt(name: String): Option[Int] = None
   def getLong(name: String): Option[Long] = None
   def getBoolean(name: String): Option[Boolean] = None
@@ -45,7 +49,8 @@ private[http] object EmptyParameterMap extends ParameterMap {
 }
 
 /** A [[ParameterMap]] backed by a [[Map]]. */
-private[http] class MapParameterMap private[routing] (underlying: Map[String, ParameterValue])
+private[http] case class MapParameterMap private[routing] (
+  private val underlying: Map[String, ParameterValue])
     extends ParameterMap {
 
   def isDefinedAt(name: String): Boolean = underlying.isDefinedAt(name)
@@ -64,6 +69,11 @@ private[http] class MapParameterMap private[routing] (underlying: Map[String, Pa
 
   def get(name: String): Option[String] = underlying.get(name) match {
     case Some(pv) => Some(pv.value)
+    case _ => None
+  }
+
+  def getString(name: String): Option[String] = underlying.get(name) match {
+    case Some(pv: StringValue) => Some(pv.value)
     case _ => None
   }
 
@@ -91,4 +101,5 @@ private[http] class MapParameterMap private[routing] (underlying: Map[String, Pa
     case Some(d: DoubleValue) => Some(d.doubleValue)
     case _ => None
   }
+
 }
