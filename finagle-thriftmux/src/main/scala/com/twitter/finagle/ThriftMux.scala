@@ -558,7 +558,7 @@ object ThriftMux
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       muxer.stack
 
-    protected val serverParam: RichServerParam = RichServerParam(
+    protected[twitter] val serverParam: RichServerParam = RichServerParam(
       protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
       serviceName = params[Label].label,
       maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
