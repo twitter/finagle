@@ -6,8 +6,8 @@ val releaseVersion = "21.1.0-SNAPSHOT"
 
 val libthriftVersion = "0.10.0"
 
-val defaultNetty4Version = "4.1.51.Final"
-val defaultNetty4StaticSslVersion = "2.0.34.Final"
+val defaultNetty4Version = "4.1.56.Final"
+val defaultNetty4StaticSslVersion = "2.0.35.Final"
 
 val useNettySnapshot: Boolean = sys.env.get("FINAGLE_USE_NETTY_4_SNAPSHOT") match {
   case Some(useSnapshot) => useSnapshot.toBoolean
@@ -44,7 +44,7 @@ val netty4Libs = Seq(
   "io.netty" % "netty-handler" % netty4Version,
   "io.netty" % "netty-transport" % netty4Version,
   "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-x86_64",
-  "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-aarch64",
+  "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-aarch_64",
   // this package is a dep of native-epoll above, explicitly add this for coursier plugin
   "io.netty" % "netty-transport-native-unix-common" % netty4Version,
   "io.netty" % "netty-handler-proxy" % netty4Version
@@ -53,7 +53,7 @@ val netty4LibsTest = Seq(
   "io.netty" % "netty-handler" % netty4Version % "test",
   "io.netty" % "netty-transport" % netty4Version % "test",
   "io.netty" % "netty-transport-native-epoll" % netty4Version % "test" classifier "linux-x86_64",
-  "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-aarch64",
+  "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-aarch_64",
   // this package is a dep of native-epoll above, explicitly add this for coursier plugin
   "io.netty" % "netty-transport-native-unix-common" % netty4Version % "test",
   "io.netty" % "netty-handler-proxy" % netty4Version % "test",
