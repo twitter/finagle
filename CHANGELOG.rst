@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-http: Record http-specific annotations including `http.status_code` and
+  `http.method`. See details at
+  https://github.com/open-telemetry/opentelemetry-specification/tree/master/specification/trace
+  ``PHAB_ID=D580894``
+
 Bug Fixes
 ~~~~~~~~~
 
@@ -23,6 +31,7 @@ Runtime Behavior Changes
 
 New Features
 ~~~~~~~~~~~~
+
 * finagle-benchmark: Add a benchmark for LocalContext. ``PHAB_ID=D588632``
 
 * finagle-core: Add a new filter, `ClientExceptionTracingFilter`, that records error annotations for

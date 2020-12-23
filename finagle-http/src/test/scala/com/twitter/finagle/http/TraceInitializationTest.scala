@@ -34,15 +34,19 @@ class TraceInitializationTest extends FunSuite {
     assertAnnotationsInOrder(
       tracer.toSeq,
       Seq(
-        Annotation.Rpc("GET"),
-        Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
         Annotation.ServiceName("theClient"),
         Annotation.ClientSend,
         Annotation.Rpc("GET"),
+        Annotation.BinaryAnnotation("http.method", "GET"),
         Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
         Annotation.ServiceName("theServer"),
         Annotation.ServerRecv,
+        Annotation.Rpc("GET"),
+        Annotation.BinaryAnnotation("http.method", "GET"),
+        Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
         Annotation.ServerSend,
+        Annotation.BinaryAnnotation("http.status_code", 200),
+        Annotation.BinaryAnnotation("http.status_code", 200),
         Annotation.ClientRecv
       )
     )

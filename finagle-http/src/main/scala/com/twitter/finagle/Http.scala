@@ -152,6 +152,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           TraceInitializerFilter.role,
           PayloadSizeFilter.module(PayloadSizeFilter.clientTraceKeyPrefix)
         )
+        .replace(StackClient.Role.protoTracing, HttpTracingFilter.module)
         // The pooling strategy depends on whether we're using H2, and if so, what variant.
         // We use a custom module to isolate the selection logic.
         .replace(DefaultPool.Role, HttpPool)
@@ -373,6 +374,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           TraceInitializerFilter.role,
           PayloadSizeFilter.module(PayloadSizeFilter.serverTraceKeyPrefix)
         )
+        .replace(StackServer.Role.protoTracing, HttpTracingFilter.module)
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
         .prepend(ServerDtabContextFilter.module)

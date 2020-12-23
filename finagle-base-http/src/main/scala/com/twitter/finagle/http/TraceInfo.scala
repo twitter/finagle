@@ -101,11 +101,9 @@ private object TraceInfo {
     id match {
       case Some(tid) =>
         Trace.letId(tid) {
-          traceRpc(request)
           f
         }
       case None =>
-        traceRpc(request)
         f
     }
   }
@@ -135,15 +133,6 @@ private object TraceInfo {
     }
     if (traceId.flags.toLong != 0L) {
       request.headerMap.addUnsafe(Header.Flags, JLong.toString(traceId.flags.toLong))
-    }
-    traceRpc(request)
-  }
-
-  def traceRpc(request: Request): Unit = {
-    val trace = Trace()
-    if (trace.isActivelyTracing) {
-      trace.recordRpc(request.method.toString)
-      trace.recordBinary("http.uri", stripParameters(request.uri))
     }
   }
 
