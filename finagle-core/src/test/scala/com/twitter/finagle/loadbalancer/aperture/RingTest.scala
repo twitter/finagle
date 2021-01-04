@@ -27,6 +27,12 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     }
   }
 
+  def assertApproxEqual(a: Double, b: Double, epsilon: Double = 1e-4): Unit = {
+    withClue(s"${a} was not approximately equal to ${b}") {
+      assert(Math.abs(a - b) < epsilon)
+    }
+  }
+
   test("Ring.range has a valid size") {
     val numClients = 65
     val localUnitWidth = 1.0 / numClients
@@ -182,6 +188,7 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
       val (a, b) = ring.pick2(3 / 4d, 1 / 2d)
       Seq(a, b)
     }
+
     assert(ring.range(3 / 4d, 1 / 2d) == histo.keys.size)
     assert(histo.keys == Set(7, 8, 9, 0, 1, 2))
     // 7 and 2 get a fraction of the traffic
@@ -195,8 +202,18 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     assert(b / a - 0.5 < 1e-1)
   }
 
-  test("indices") {
+  test("Handles full-width windows when offset + width results in an overlap") {
+    // This bug case was reported externally:
+    // https://nvartolomei.com/weighted-deterministic-aperture/
+    // https://twitter.com/nvartolomei/status/1295010014457987073
+    val ring = new Ring(4, rng)
+    val weight = ring.weight(0, 1 / 8D, 1D)
+    assertApproxEqual(weight, 1.0D)
+  }
+
+  test("weight") {
     val ring = new Ring(10, rng)
+
     assert(ring.range(1 / 4d, 1 / 4d) == 3)
     assert(ring.indices(1 / 4d, 1 / 4d) == Seq(2, 3, 4))
 
@@ -205,19 +222,79 @@ class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     assert(ring.indices(3 / 4d, 1 / 2d) == Seq(7, 8, 9, 0, 1, 2))
 
     // walk the indices
-    for (i <- 0 to 10) {
+    for (i <- 0 to 9) {
       withClue(s"offset=${i / 10d} width=${1 / 10d}") {
         assert(ring.range(i / 10d, 1 / 10d) == 1)
         assert(ring.indices(i / 10d, 1 / 10d) == Seq(i % 10))
       }
     }
+
+    assertApproxEqual(1.0, ring.weight(index = 5, offset = 0.5D, 0.1D))
+    assertApproxEqual(1.0, ring.weight(index = 5, offset = 0.5D, 1.0D))
+
+    // Wrap-around: intersection between [0.0, 0.1) and [0.75, 1.25)
+    assertApproxEqual(1.0, ring.weight(index = 0, offset = 0.75D, 0.5D))
+
+    assertApproxEqual(ring.weight(index = 0, offset = 0, width = 1.0), 1.0)
+
+    // Wrap-around with full width, zero offset, and nonzero index
+    assertApproxEqual(ring.weight(index = 9, offset = 0, width = 1.0), 1.0)
+    // Wrap-around with full width, non-zero offset, and nonzero index
+    assertApproxEqual(ring.weight(index = 9, offset = 0.5D, width = 1.0), 1.0)
+    // Wrap-around with full width, zero offset, and zero index
+    assertApproxEqual(ring.weight(index = 0, offset = 0, width = 1.0), 1.0)
+
+    //Full overlap without offset
+    assertApproxEqual(ring.weight(index = 0, offset = 0, width = 0.1D), 1.0D)
+    // Full overlap with offset
+    assertApproxEqual(ring.weight(index = 1, offset = 0.1D, width = 0.1D), 1.0D)
   }
 
-  test("weight") {
+  test("Weight should be 0 if offset > unitWidth and we don't overlap the ring boundary") {
     val ring = new Ring(10, rng)
-    assert(1.0 - ring.weight(5, 1 / 2d, 1 / 10d) <= 1e-6)
-    assert(1.0 - ring.weight(5, 1 / 2d, 1.0) <= 1e-6)
-    // wrap around: intersection between [0.0, 0.1) and [0.75, 1.25)
-    assert(1.0 - ring.weight(0, 3 / 4d, 1 / 2d) <= 1e-6)
+    val offsetGen: Gen[Double] = Gen.choose[Int](10, 89).map { n => n * 0.01D }
+
+    forAll(offsetGen) { offset =>
+      assertApproxEqual(ring.weight(0, offset, 0.1D), 0D)
+    }
+  }
+
+  test("Partial weights without overlapping the ring boundary") {
+    val ring = new Ring(10, rng)
+    val offsetGen: Gen[Double] = Gen.choose(0, 99).map { n => n * 0.001D }
+
+    forAll(offsetGen) { offset =>
+      val unitWidth = 0.1D
+      assert(offset < unitWidth)
+      val overlapping = (unitWidth - offset) / unitWidth
+      assertApproxEqual(ring.weight(0, offset, width = 0.1D), overlapping)
+    }
+  }
+
+  test("Weight should be 0 if width is 0") {
+    val ring = new Ring(10, rng)
+
+    // With a width of 0, the overlap should be 0 regardless of offset
+    val offsetGen: Gen[Double] = Gen.choose(0, 100).map { n => n * .01D }
+    val indexGen: Gen[Int] = Gen.choose(0, 9)
+
+    forAll(offsetGen, indexGen) { (offset, index) =>
+      assertApproxEqual(ring.weight(index = index, offset = offset, width = 0.0D), 0D)
+    }
+  }
+
+  test("weight throws exceptions when appropriate") {
+    val ring = new Ring(10, rng)
+    assertThrows[IllegalArgumentException] {
+      ring.weight(10, 0D, 0.5D)
+    }
+
+    assertThrows[IllegalArgumentException] {
+      ring.weight(0, 0D, 1.5D)
+    }
+
+    assertThrows[IllegalArgumentException] {
+      ring.weight(0, 0D, -0.5D)
+    }
   }
 }

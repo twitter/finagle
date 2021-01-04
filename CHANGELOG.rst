@@ -18,8 +18,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+* finagle-core: Fix wraparound bug in `Ring.weight`, as reported by @nvartolomei ``PHAB_ID=D575958``
+
 * finagle-thriftmux: Fixed a bug where connections were not established eagerly in ThriftMux
   MethodBuilder even when eager connections was enabled. ``PHAB_ID=D589592``
+
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,8 +97,6 @@ Bug Fixes
   `java.lang.UnsupportedOperationException: tail of empty stream` when a `c.t.f.s.RetryPolicy`
   is converted to a String for showing. ``PHAB_ID=D582199``
 
-* finagle-core: Recognize `fixedinet` name scheme in global `com.twitter.finagle.Namer`.
-  ``PHAB_ID=D589429``
 
 20.10.0
 -------

@@ -49,7 +49,7 @@ private class Ring(size: Int, rng: Rng) {
    * @param offset A value between [0, 1.0).
    */
   def index(offset: Double): Int = {
-    if (offset < 0 && offset >= 1.0)
+    if (offset < 0 || offset >= 1.0)
       throw new IllegalArgumentException(s"offset must be between [0, 1.0): $offset")
 
     math.floor(offset * size).toInt % size
@@ -102,14 +102,24 @@ private class Ring(size: Int, rng: Rng) {
     if (width < 0 || width > 1.0)
       throw new IllegalArgumentException(s"width must be between [0, 1.0]: $width")
 
-    // In cases where `offset + width` wraps around the ring, we need
-    // to scale the range by 1.0 where it overlaps.
-    val ab: Double = {
-      val ab0 = index * unitWidth
-      if (ab0 + 1 < offset + width) ab0 + 1 else ab0
+    val ab = index * unitWidth
+    val ae = ab + unitWidth
+
+    // In cases where [offset, offset + width) wraps around the ring,
+    // it's easier to calculate the size of the inverse range,
+    // and subtract that from the size of the full ring
+    if (offset + width > 1.0) {
+      // We know that the inverse of [offset, offset + width) is a single
+      // contiguous range, which does not overlap the boundary of the ring.
+      val start = (offset + width) % 1
+      val end = offset
+
+      // 1.0 is the size of the full ring, so by subtracting the size of the inverse,
+      // we can determine the size of [offset, offset + width)
+      1D - (intersect(ab, ae, start, end) / unitWidth)
+    } else {
+      intersect(ab, ae, offset, offset + width) / unitWidth
     }
-    val ae: Double = ab + unitWidth
-    intersect(ab, ae, offset, offset + width) / unitWidth
   }
 
   /**
