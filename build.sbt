@@ -53,7 +53,7 @@ val netty4LibsTest = Seq(
   "io.netty" % "netty-handler" % netty4Version % "test",
   "io.netty" % "netty-transport" % netty4Version % "test",
   "io.netty" % "netty-transport-native-epoll" % netty4Version % "test" classifier "linux-x86_64",
-  "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-aarch_64",
+  "io.netty" % "netty-transport-native-epoll" % netty4Version % "test" classifier "linux-aarch_64",
   // this package is a dep of native-epoll above, explicitly add this for coursier plugin
   "io.netty" % "netty-transport-native-unix-common" % netty4Version % "test",
   "io.netty" % "netty-handler-proxy" % netty4Version % "test",
