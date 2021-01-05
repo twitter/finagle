@@ -56,7 +56,7 @@ class PartitionNodeManagerTest extends FunSuite {
 
     val factory: Stackable[ServiceFactory[String, String]] =
       new Stack.Module1[LoadBalancerFactory.Dest, ServiceFactory[String, String]] {
-        val role = Stack.Role("serviceFactory")
+        val role = LoadBalancerFactory.role
         val description: String = "mock the Stack[ServiceFactory[Req, Rep] for node manager"
 
         def make(

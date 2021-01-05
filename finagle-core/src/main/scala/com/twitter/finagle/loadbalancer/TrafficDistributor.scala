@@ -123,7 +123,7 @@ private[finagle] object TrafficDistributor {
    *                    newly transformed partition map from the current Set. This function
    *                    usually handles transactions during creating, updating, and removing.
    */
-  private[finagle] def updatePartitionMap[Key, Partition, U](
+  private[loadbalancer] def updatePartitionMap[Key, Partition, U](
     accumulated: Map[Key, Partition],
     current: Set[U],
     getKeys: U => Seq[Key],
@@ -207,7 +207,10 @@ private[finagle] object TrafficDistributor {
    * A modified version of scala collection's groupBy function. `f` is a multi-mapping function
    * and this achieves many to many mapping.
    */
-  private def groupBy[U, Key](coll: Set[U], f: U => Seq[Key]): immutable.Map[Key, Set[U]] = {
+  private[finagle] def groupBy[U, Key](
+    coll: Set[U],
+    f: U => Seq[Key]
+  ): immutable.Map[Key, Set[U]] = {
     val m = mutable.Map.empty[Key, Builder[U, Set[U]]]
     for (elem <- coll) {
       val keys = f(elem)
@@ -324,7 +327,7 @@ private class TrafficDistributor[Req, Rep](
     extends ServiceFactory[Req, Rep] {
   import TrafficDistributor._
 
-  /*
+  /**
    * Partitions `endpoints` and assigns a `newBalancer` instance to each partition.
    * Because balancer instances are stateful, they need to be cached across updates.
    */

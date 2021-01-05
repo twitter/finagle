@@ -221,6 +221,31 @@ sealed trait Stack[T] {
   def +:(stk: Stackable[T]): Stack[T] =
     stk.toStack(this)
 
+  /**
+   * Drops the leading elements of the stack while the stack matches the
+   * supplied predicate.
+   *
+   * If the entire stack matches the predicate, returns the leaf node.
+   */
+  @tailrec
+  final def dropWhile(pred: Stack[T] => Boolean): Stack[T] =
+    if (!pred(this)) {
+      this
+    } else {
+      this match {
+        case Node(_, _, next) => next.dropWhile(pred)
+        case leaf @ Leaf(_, _) => leaf
+      }
+    }
+
+  /**
+   * Returns the next entry in the Stack, or [[None]] if it's a Leaf.
+   */
+  def tailOption: Option[Stack[T]] = this match {
+    case Node(_, _, next) => Some(next)
+    case Leaf(_, _) => None
+  }
+
   override def toString: String = {
     val elems = tails map {
       case Node(hd, _, _) => s"Node(role = ${hd.role}, description = ${hd.description})"

@@ -14,24 +14,6 @@ import scala.util.control.NonFatal
 private[finagle] object PartitionNodeManager {
 
   /**
-   * A ServiceFactory that hold an updatable collection of address to configure the
-   * its LoadBalancerFactory.
-   */
-  private class CachedServiceFactory[Req, Rep](
-    val endpoints: Var[Addr] with Updatable[Addr] with Extractable[Addr],
-    params: Stack.Params,
-    underlying: Stack[ServiceFactory[Req, Rep]])
-      extends Closable {
-
-    val factory: ServiceFactory[Req, Rep] = {
-      val paramsWithLB = params + LoadBalancerFactory.Dest(endpoints)
-      underlying.make(paramsWithLB)
-    }
-
-    def close(deadline: Time): Future[Unit] = factory.close(deadline)
-  }
-
-  /**
    * The given partition Id cannot be found in the Partition node map.
    */
   final class NoPartitionException(
@@ -160,79 +142,89 @@ private[finagle] class PartitionNodeManager[
   // Keep track of addresses in the current set that already have associate instances
   private[this] val destActivity = varAddrToActivity(params[LoadBalancerFactory.Dest].va, label)
 
-  private[this] val cachedServiceFactoryDiffOps =
-    new DiffOps[Address, CachedServiceFactory[Req, Rep]] {
-      def remove(factory: CachedServiceFactory[Req, Rep]): Unit = factory.close()
+  private[this] val addressedEndpoints = {
+    val newEndpointStk =
+      underlying.dropWhile(_.head.role != LoadBalancerFactory.role).tailOption.get
+    weightEndpoints(
+      destActivity,
+      LoadBalancerFactory.newEndpointFn(params, newEndpointStk),
+      !params[LoadBalancerFactory.EnableProbation].enable
+    )
+  }
 
-      def add(addresses: Set[Address]): CachedServiceFactory[Req, Rep] =
-        new CachedServiceFactory(Var(Addr.Bound(addresses)), params, underlying)
-
-      def update(
-        addresses: Set[Address],
-        factory: CachedServiceFactory[Req, Rep]
-      ): CachedServiceFactory[Req, Rep] = {
-        factory.endpoints.update(Addr.Bound(addresses))
-        factory
-      }
+  private[this] def getShardIdFromFactory(
+    state: A,
+    factory: AddressedFactory[Req, Rep]
+  ): Seq[Try[Int]] = {
+    val metadata = factory.address match {
+      case WeightedAddress(Address.Inet(_, metadata), _) => metadata
+      case Address.ServiceFactory(_, metadata) => metadata
     }
-
-  private[this] val getShardIdFromAddress: A => Address => Seq[Try[Int]] = {
-    state =>
-      { addr =>
-        val metadata = addr match {
-          case WeightedAddress(Address.Inet(_, metadata), _) => metadata
-          case Address.ServiceFactory(_, metadata) => metadata
+    ZkMetadata.fromAddrMetadata(metadata).flatMap(_.shardId) match {
+      case Some(id) =>
+        try {
+          val partitionIds = getLogicalPartitionPerState(state)(id)
+          partitionIds.map(Return(_))
+        } catch {
+          case NonFatal(e) =>
+            logger.log(Level.ERROR, "getLogicalPartition failed with: ", e)
+            Seq(Throw(e))
         }
-        ZkMetadata.fromAddrMetadata(metadata).flatMap(_.shardId) match {
-          case Some(id) =>
-            try {
-              val partitionIds = getLogicalPartitionPerState(state)(id)
-              partitionIds.map(Return(_))
-            } catch {
-              case NonFatal(e) =>
-                logger.log(Level.ERROR, "getLogicalPartition failed with: ", e)
-                Seq(Throw(e))
-            }
-          case None =>
-            val ex = new NoShardIdException(s"cannot get shardId from $metadata")
-            logger.log(Level.ERROR, "getLogicalPartition failed with: ", ex)
-            Seq(Throw(ex))
-        }
-      }
+      case None =>
+        val ex = new NoShardIdException(s"cannot get shardId from $metadata")
+        logger.log(Level.ERROR, "getLogicalPartition failed with: ", ex)
+        Seq(Throw(ex))
+    }
   }
 
   // listen to the WeightedAddress changes, transform the changes to a stream of
-  // partition id (includes errors) to [[CachedServiceFactory]].
+  // partition id (includes errors) to [[ServiceFactory]].
   private[this] val partitionAddressChanges: Activity[
-    (B, Map[Try[Int], CachedServiceFactory[Req, Rep]])
+    (B, Map[Try[Int], ServiceFactory[Req, Rep]])
   ] = {
-    val init: (B, Map[Try[Int], CachedServiceFactory[Req, Rep]]) =
-      (PartialFunction.empty, Map.empty)
-    Activity(safelyScanLeft(init, destActivity.join(observable).run.changes) {
-      case ((_, partitionNodes), (activeSet, state)) =>
-        (
-          getPartitionFunctionPerState(state),
-          updatePartitionMap[Try[Int], CachedServiceFactory[Req, Rep], Address](
-            partitionNodes,
-            activeSet,
-            getShardIdFromAddress(state),
-            cachedServiceFactoryDiffOps
-          ))
-    })
+    // the most complex layer of the stack we build here is the load balancer, which is pretty cheap
+    // we can't just fix up the maps in-place because it leads to race conditions, so we recreate
+    // them from scratch instead.
+    Activity(addressedEndpoints)
+      .join(observable).map {
+        case (factory, state) =>
+          (
+            getPartitionFunctionPerState(state), {
+              // the raw grouping from updatePartitionMap, but without the update-in-place
+              val grouped = groupBy(
+                factory,
+                { factory: AddressedFactory[Req, Rep] => getShardIdFromFactory(state, factory) })
+              grouped.map {
+                case (key, endpoints) =>
+                  val paramsWithLB = params +
+                    LoadBalancerFactory.Endpoints(Var
+                      .value(
+                        Activity.Ok(endpoints.asInstanceOf[Set[AddressedFactory[_, _]]])).changes) +
+                    LoadBalancerFactory.Dest(Var.value(Addr.Bound(endpoints.map(_.address))))
+
+                  key -> underlying.make(paramsWithLB)
+              }
+            }
+          )
+      }.stabilize
   }
 
-  // Transform the stream of [[CachedServiceFactory]] to ServiceFactory and filter out
+  // Transform the stream of [[ServiceFactory]] to ServiceFactory and filter out
   // the failed partition id
   private[this] val partitionNodesChange: Event[SnapPartitioner[Req, Rep, B]] = {
     val init = SnapPartitioner.uninitialized[Req, Rep, B]
     partitionAddressChanges.states
       .foldLeft(init) {
         case (_, Activity.Ok((partitionFn, partitions))) =>
+          // we purposefully don't close the old balancers because that would shut down the
+          // underlying endpoints.  however, that's fine because there's not a resource that we
+          // we need to clean up here.
+
           // this could possibly be an empty update if getLogicalPartition returns all Throws
           SnapPartitioner(
             partitionFn,
             partitions.collect {
-              case (Return(key), sf) => (key -> sf.factory)
+              case (Return(key), sf) => key -> sf
             })
         case (staleState, _) => staleState
       }.filter(_.partitionMapping.nonEmpty)

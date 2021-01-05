@@ -4,16 +4,15 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.partitioning.PartitioningService
 import com.twitter.finagle.partitioning.zk.ZkMetadata
+import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.thrift.ClientDeserializeCtx
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
-import com.twitter.finagle.{Addr, Address, Service, ServiceFactory, Stack}
+import com.twitter.finagle.{Addr, Address, Service, ServiceFactory, Stack, Stackable, StackBuilder}
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
 import com.twitter.test.thriftscala.B
 import com.twitter.util.{Future, Return, Var}
 import org.scalatest.{FunSuite, PrivateMethodTester}
-import org.mockito.Mockito.when
-import org.mockito.Matchers.any
 
 class ThriftCustomPartitioningServiceTest
     extends FunSuite
@@ -43,10 +42,22 @@ class ThriftCustomPartitioningServiceTest
     responseMerger = Some(aResponseMerger)
   )
 
-  val mockStack = mock[Stack[ServiceFactory[ThriftStructIface, Int]]]
-
   val sf = ServiceFactory.const(Service.const(Future.value(0)))
-  when(mockStack.make(any())).thenReturn(sf)
+  val factory: Stackable[ServiceFactory[ThriftStructIface, Int]] =
+    new Stack.Module1[LoadBalancerFactory.Dest, ServiceFactory[ThriftStructIface, Int]] {
+      val role = LoadBalancerFactory.role
+      val description: String = "mock the Stack[ServiceFactory[Req, Rep] for node manager"
+
+      def make(
+        param: LoadBalancerFactory.Dest,
+        next: ServiceFactory[ThriftStructIface, Int]
+      ): ServiceFactory[ThriftStructIface, Int] = sf
+    }
+
+  val stack =
+    new StackBuilder[ServiceFactory[ThriftStructIface, Int]](nilStack[ThriftStructIface, Int])
+      .push(factory)
+      .result
 
   def addresses(num: Int): Var[Addr] = {
     val sfAddresses: Seq[Address] = for {
@@ -57,7 +68,7 @@ class ThriftCustomPartitioningServiceTest
 
   def testService(strategy: CustomPartitioningStrategy) =
     new ThriftCustomPartitioningService[ThriftStructIface, Int](
-      underlying = mockStack,
+      underlying = stack,
       thriftMarshallable = thriftMarshallable,
       params = Stack.Params.empty + LoadBalancerFactory.Dest(addresses(4)),
       strategy
@@ -67,7 +78,7 @@ class ThriftCustomPartitioningServiceTest
   val serviceWithMbStrategy = testService(mbCustomStrategy)
 
   test(
-    "getPartitionIdAndRequestMap uses the provided partitiong function and request to pick an appropriate service") {
+    "getPartitionIdAndRequestMap uses the provided partitioning function and request to pick an appropriate service") {
     val request = B.MergeableAdd.Args(List(1, 2, 3, 4))
     val serdeCtx = new ClientDeserializeCtx[Int](request, _ => Return(Int.MinValue))
     val toPartitionedMap: PartialFunction[
@@ -125,29 +136,11 @@ class ThriftCustomPartitioningServiceTest
   }
 
   test("fan-out request - partitionRequest") {
-    /*
-    val fakeNodeManager =
-      mock[PartitionNodeManager[B.MergeableAdd, Int, Unit, ClientCustomStrategy.ToPartitionedMap]]
-    when(fakeNodeManager.snapshotSharder()).thenReturn {
-      (
-        partitionId =>
-          Future.value {
-            Service.mk { _: B.MergeableAdd => Future.value(partitionId) }
-          }, { case B.MergeableAdd: B.MergeableAdd =>
-
-      }
-      )
-    }
-    new FieldSetter(
-      serviceWithClientStrategy,
-      serviceWithClientStrategy.getClass.getDeclaredField("nodeManager"))
-      .set(fakeNodeManager)
-     */
     val fanoutRequest = B.MergeableAdd.Args(List(1, 2, 3, 4))
     val serdeCtx1 = new ClientDeserializeCtx[Int](fanoutRequest, _ => Return(Int.MinValue))
     Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx1) {
       serdeCtx1.rpcName("mergeable_add")
-      assert((await(serviceWithClientStrategy.partitionRequest(fanoutRequest)).size == 3))
+      assert(await(serviceWithClientStrategy.partitionRequest(fanoutRequest)).size == 3)
     }
   }
 
