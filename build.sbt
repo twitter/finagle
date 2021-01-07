@@ -33,7 +33,7 @@ val netty4StaticSslVersion: String =
 val nettyVersionInfo = settingKey[String]("A setting reference for printing the netty version info")
 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
-val zkVersion = "3.5.0-alpha"
+val zkVersion = "3.5.6"
 
 val scalaCollectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.8.5"
