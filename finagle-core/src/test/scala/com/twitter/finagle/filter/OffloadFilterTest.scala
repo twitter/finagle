@@ -196,7 +196,7 @@ class OffloadFilterTest extends FunSuite with BeforeAndAfterAll {
       assert(!pool.isEmpty)
 
       ctrl.advance(200.milliseconds)
-      pool(()) // one penidng task
+      pool(()) // one pending task
       pool.runAll()
 
       assert(stats.stats(Seq("delay_ms")) == Seq(50, 200))

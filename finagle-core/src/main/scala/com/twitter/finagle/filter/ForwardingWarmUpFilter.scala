@@ -33,9 +33,9 @@ abstract class ForwardingWarmUpFilter[Req, Rep](
   private[this] val forwardLatency = forwardScope.stat("latency_ms")
   private[this] val forwardFailureCounter = forwardScope.counter("failures")
 
-  private[this] val onWarmp: Promise[Unit] = Promise[Unit]()
+  private[this] val onWarmup: Promise[Unit] = Promise[Unit]()
 
-  val onWarm: Future[Unit] = onWarmp
+  val onWarm: Future[Unit] = onWarmup
 
   /**
    * Indicates whether the request may be forwarded (i.e. in the case where
@@ -54,7 +54,7 @@ abstract class ForwardingWarmUpFilter[Req, Rep](
 
       if (percentWarm >= 1) {
         warmupComplete = true
-        onWarmp.setDone()
+        onWarmup.setDone()
         service(request)
       } else {
         val r = rng.nextFloat()
