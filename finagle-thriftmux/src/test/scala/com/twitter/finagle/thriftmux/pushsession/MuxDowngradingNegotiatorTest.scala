@@ -1,5 +1,6 @@
 package com.twitter.finagle.thriftmux.pushsession
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Mux.param.OppTls
 import com.twitter.finagle.pushsession.RefPushSession
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
@@ -118,6 +119,35 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
       refSession.receive(ByteReader(thriftMsg))
 
       assert(handle.closedCalled)
+      assert(statsReceiver.counters(Seq("mux", "tls", "upgrade", "incompatible")) == 1L)
+    }
+  }
+
+  test("no infinite loops if we close before the handshake is complete and fail negotiation") {
+    new Ctx {
+      override lazy val params: Stack.Params =
+        ThriftMux.BaseServerParams + fparam.Stats(statsReceiver) +
+          OppTls(Some(OpportunisticTls.Required))
+
+      val thriftMsg = {
+        val buffer = new TMemoryBuffer(1)
+        val framed = new TFramedTransport(buffer)
+        val proto = new TBinaryProtocol(framed)
+        val arg = TestService.Query.Args("hi")
+        TestService.Query.Args.encode(arg, proto)
+        framed.flush()
+        val bytes = buffer.getArray
+        Buf.ByteArray.Owned(bytes)
+      }
+
+      val closeF = refSession.close(60.seconds)
+      handle.serialExecutor.executeAll()
+      refSession.receive(ByteReader(thriftMsg))
+
+      assert(handle.closedCalled)
+      handle.onClosePromise.setDone()
+      assert(closeF.isDefined)
+      assert(handle.serialExecutor.pendingTasks == 0)
       assert(statsReceiver.counters(Seq("mux", "tls", "upgrade", "incompatible")) == 1L)
     }
   }
