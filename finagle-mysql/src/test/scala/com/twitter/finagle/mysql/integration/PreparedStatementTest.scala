@@ -101,6 +101,13 @@ class PreparedStatementTest extends FunSuite with IntegrationClient with BeforeA
   }
 
   test("insert BigDecimal with too much precision") {
+    // Depending on how the server is configured, this test may fail.
+    // With the following configurations (which happen to be MySQL's defaults) this test will pass:
+    // +-----------------------------------------------------------------------------------------------------------------------+
+    // | @@sql_mode                                                                                                            |
+    // +-----------------------------------------------------------------------------------------------------------------------+
+    // | ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION |
+    // +-----------------------------------------------------------------------------------------------------------------------+
     intercept[ServerError] {
       // this number has more total digits than allowed, 5
       insertBigDecimal(Some(BigDecimal("100000")))

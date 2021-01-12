@@ -29,7 +29,7 @@ class AbortedClientTest extends FunSuite with IntegrationClient {
 
   for (c <- client) {
     test("MySql connections are closed cleanly, so MySql doesn't count them as aborted.") {
-      val abortedClientQuery = "SHOW GLOBAL STATUS LIKE '%Aborted_clients%'"
+      val abortedClientQuery = "SHOW GLOBAL STATUS LIKE 'Aborted_clients'"
       val initialAbortedValue: String =
         await(c.select(abortedClientQuery)(row => row.stringOrNull("Value"))).head
 

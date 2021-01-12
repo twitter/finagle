@@ -20,6 +20,9 @@ Bug Fixes
 
 * finagle-core: Fix wraparound bug in `Ring.weight`, as reported by @nvartolomei ``PHAB_ID=D575958``
 
+* finagle-mysql: Update the UTF8 character set to cover those added in MySQL 8.
+  ``PHAB_ID=D590996``
+
 * finagle-thriftmux: Fixed a bug where connections were not established eagerly in ThriftMux
   MethodBuilder even when eager connections was enabled. ``PHAB_ID=D589592``
 
@@ -96,7 +99,6 @@ Bug Fixes
 * finagle-core: Users should no longer see the problematic
   `java.lang.UnsupportedOperationException: tail of empty stream` when a `c.t.f.s.RetryPolicy`
   is converted to a String for showing. ``PHAB_ID=D582199``
-
 
 20.10.0
 -------

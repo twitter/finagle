@@ -30,10 +30,20 @@ object MysqlCharset {
   private[this] val Latin1Set = Set(5, 8, 15, 31, 47, 48, 49, 94)
 
   /**
+   * With MySQL 5.7:
    * "SELECT id,collation_name FROM information_schema.collations
-   * WHERE collation_name LIKE '%utf8' ORDER BY id"
+   * WHERE collation_name LIKE 'utf8%' ORDER BY id;"
    */
-  private[this] val Utf8Set = Set(192 to 254: _*) + 33 + 45 + 46 + 83
+  private[this] val Utf8MySql57Set = Set(192 to 254: _*) + 33 + 45 + 46 + 83
+
+  /**
+   * With MySQL 8.0:
+   * "SELECT id,collation_name FROM information_schema.collations
+   * WHERE collation_name LIKE 'utf8%' ORDER BY id;"
+   */
+  private[this] val Utf8MySql8OnlySet = Set(255 to 315: _*) + 76
+
+  private[this] val Utf8MySql8Set = Utf8MySql57Set ++ Utf8MySql8OnlySet
 
   /**
    * @see https://dev.mysql.com/doc/refman/5.7/en/charset-unicode-sets.html
@@ -50,9 +60,9 @@ object MysqlCharset {
    */
   val Binary: Short = 63.toShort
 
-  private[this] val CompatibleSet = Latin1Set ++ Utf8Set + Binary
+  private[this] val CompatibleSet = Latin1Set ++ Utf8MySql8Set + Binary
   def isCompatible(code: Short): Boolean = CompatibleSet(code)
-  def isUtf8(code: Short): Boolean = Utf8Set(code)
+  def isUtf8(code: Short): Boolean = Utf8MySql8Set(code)
   def isLatin1(code: Short): Boolean = Latin1Set(code)
   def isBinary(code: Short): Boolean = code == Binary
 }

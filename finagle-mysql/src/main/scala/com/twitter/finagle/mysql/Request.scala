@@ -12,10 +12,11 @@ object Command {
   val COM_INIT_DB: Byte = 0x02.toByte // mysql_select_db
   val COM_QUERY: Byte = 0x03.toByte // mysql_real_query
   val COM_FIELD_LIST: Byte = 0x04.toByte // mysql_list_fields
-  val COM_CREATE_DB: Byte = 0x05.toByte // mysql_create_db (deperacted)
+  val COM_CREATE_DB: Byte = 0x05.toByte // mysql_create_db (deprecated)
   val COM_DROP_DB: Byte = 0x06.toByte // mysql_drop_db (deprecated)
   val COM_REFRESH: Byte = 0x07.toByte // mysql_refresh
-  val COM_SHUTDOWN: Byte = 0x08.toByte // mysql_shutdown
+  val COM_SHUTDOWN: Byte =
+    0x08.toByte // mysql_shutdown (deprecated as of 5.7, removal planned for 8 at some point; use SHUTDOWN in com_query instead).
   val COM_STATISTICS: Byte = 0x09.toByte // mysql_stat
   val COM_PROCESS_INFO: Byte = 0x0a.toByte // mysql_list_processes
   val COM_CONNECT: Byte = 0x0b.toByte // internal thread state
