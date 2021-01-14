@@ -3,6 +3,7 @@ package com.twitter.finagle.filter
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Future, Return, Throw}
 
 object RequestSemaphoreFilter {
@@ -42,6 +43,11 @@ class RequestSemaphoreFilter[Req, Rep](sem: AsyncSemaphore, stats: StatsReceiver
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
     sem.acquire().transform {
       case Return(permit) => service(req).ensure { permit.release() }
-      case Throw(noPermit) => Future.exception(Failure.rejected(noPermit))
+      case Throw(noPermit) => {
+        val tracing = Trace()
+        if (tracing.isActivelyTracing)
+          tracing.recordBinary("clnt/RequestSemaphoreFilter_rejected", noPermit.getMessage)
+        Future.exception(Failure.rejected(noPermit))
+      }
     }
 }

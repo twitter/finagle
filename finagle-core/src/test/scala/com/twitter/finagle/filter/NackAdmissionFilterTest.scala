@@ -3,6 +3,8 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
+import com.twitter.finagle.tracing.{BufferingTracer, Record, Trace}
 import com.twitter.finagle.util.{DefaultLogger, Ema, LossyEma, Rng}
 import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
 import com.twitter.util._
@@ -213,6 +215,31 @@ class NackAdmissionFilterTest extends FunSuite {
     assert(0 < successRate && successRate < 1)
     assert(1 > multiplier * successRate)
     testDropsRequest()
+  }
+
+  testEnabled("annotates dropped requests") { ctl =>
+    val lowRng: CustomRng = new CustomRng(0)
+    val ctx = new Ctx(lowRng)
+    import ctx._
+    val tracer = new BufferingTracer()
+    Trace.letTracer(tracer) {
+
+      while (filter.emaValue > DefaultAcceptRateThreshold) {
+        ctl.advance(10.milliseconds)
+        nackWithoutTest()
+      }
+
+      nackWithoutTest()
+      val expected = Seq(
+        (
+          "clnt/NackAdmissionFilter_rejected",
+          "probabilistically dropped because " +
+            "nackRate 0.5000930677240232 over window 3.seconds exceeds nackRateThreshold 0.5"))
+      val actual = tracer.iterator.toList collect {
+        case Record(_, _, BinaryAnnotation(k, v), _) => k -> v
+      }
+      assert(expected == actual)
+    }
   }
 
   testEnabled("doesn't drop requests after accept rate drops below threshold") { ctl =>

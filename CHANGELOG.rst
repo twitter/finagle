@@ -12,6 +12,9 @@ Unreleased
 
 New Features
 ~~~~~~~~~~~~
+* finagle-core: Add `clnt/<FilterName>_rejected` annotation to filters that may throttle requests, 
+  including `c.t.finagle.filter.NackAdmissionFilter` and `c.t.finagle.filter.RequestSemaphoreFilter`.
+  ``PHAB_ID=D597875``
 
 * finagle-http: Record http-specific annotations including `http.status_code` and
   `http.method`. See details at

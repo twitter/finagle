@@ -4,6 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.client.useNackAdmissionFilter
 import com.twitter.finagle.stats.{Counter, Gauge, StatsReceiver, Verbosity}
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.{LossyEma, Rng}
 import com.twitter.util._
 
@@ -240,6 +241,12 @@ class NackAdmissionFilter[Req, Rep] private[filter] (
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     rpsCounter.incr()
     if (enabled && shouldDropRequest()) {
+      val tracing = Trace()
+      if (tracing.isActivelyTracing)
+        tracing.recordBinary(
+          "clnt/NackAdmissionFilter_rejected",
+          s"probabilistically dropped because nackRate ${1d - emaValue} over window $window exceeds nackRateThreshold $acceptRateThreshold"
+        )
       droppedRequestCounter.incr()
       OverloadFailure
     } else {
