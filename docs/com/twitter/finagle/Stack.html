@@ -1657,6 +1657,28 @@ with <code>right</code>. Note that this replaces the terminating element of
       </span>
       
       <p class="shortcomment cmt">Returns whether the stack contains a given role or not.</p>
+    </li><li name="com.twitter.finagle.Stack#dropWhile" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dropWhile(pred:com.twitter.finagle.Stack[T]=&gt;Boolean):com.twitter.finagle.Stack[T]"></a><a id="dropWhile((Stack[T])⇒Boolean):Stack[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack.html#dropWhile(pred:com.twitter.finagle.Stack[T]=&gt;Boolean):com.twitter.finagle.Stack[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dropWhile</span><span class="params">(<span name="pred">pred: (<a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]) ⇒ <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Drops the leading elements of the stack while the stack matches the
+supplied predicate.</p><div class="fullcomment"><div class="comment cmt"><p>Drops the leading elements of the stack while the stack matches the
+supplied predicate.</p><p>If the entire stack matches the predicate, returns the leaf node.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@tailrec</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -2084,6 +2106,22 @@ unmodified stack is returned.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack#tailOption" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="tailOption:Option[com.twitter.finagle.Stack[T]]"></a><a id="tailOption:Option[Stack[T]]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack.html#tailOption:Option[com.twitter.finagle.Stack[T]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tailOption</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the next entry in the Stack, or <span class="extype" name="None">None</span> if it's a Leaf.</p>
     </li><li name="com.twitter.finagle.Stack#tails" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tails:Iterator[com.twitter.finagle.Stack[T]]"></a><a id="tails:Iterator[Stack[T]]"></a>
       <span class="permalink">
