@@ -4,7 +4,8 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.utils.StringClient
-import com.twitter.finagle.loadbalancer.TrafficDistributor.DiffOps
+import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle.DiffOps
+import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
@@ -12,6 +13,7 @@ import com.twitter.util.{Function => _, _}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicReference
 import org.scalatest.FunSuite
+import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle
 
 private object TrafficDistributorTest {
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
@@ -656,7 +658,7 @@ class TrafficDistributorTest extends FunSuite {
       val init = Map.empty[Int, Partition]
 
       val result =
-        TrafficDistributor.updatePartitionMap(init, current, getPartitionKey, partitionDiffOps)
+        AddrLifecycle.updatePartitionMap(init, current, getPartitionKey, partitionDiffOps)
       assert(result(0).value.sample() == Set(3, 6))
       assert(result(1).value.sample() == Set(1, 4))
       assert(result(2).value.sample() == Set(2, 5))
@@ -673,7 +675,7 @@ class TrafficDistributorTest extends FunSuite {
       // remove a partition
       val current1 = Set(1, 3, 4)
       val result =
-        TrafficDistributor.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
+        AddrLifecycle.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
       assert(result(0).value.sample() == Set(3))
       assert(result(1).value.sample() == Set(1, 4))
       assert(result.get(2) == None)
@@ -692,7 +694,7 @@ class TrafficDistributorTest extends FunSuite {
       val current1 = Set(7, 2, 3, 4, 5, 6)
 
       val result1 =
-        TrafficDistributor.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
+        AddrLifecycle.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
       assert(result1(0).value.sample() == Set(3, 6))
       assert(result1(1).value.sample() == Set(4, 7))
       assert(result1(2).value.sample() == Set(2, 5))
@@ -700,7 +702,7 @@ class TrafficDistributorTest extends FunSuite {
 
       val current2 = Set(7, 8, 3, 4, 11, 6)
       val result2 =
-        TrafficDistributor.updatePartitionMap(result1, current2, getPartitionKey, partitionDiffOps)
+        AddrLifecycle.updatePartitionMap(result1, current2, getPartitionKey, partitionDiffOps)
       assert(result2(0).value.sample() == Set(3, 6))
       assert(result2(1).value.sample() == Set(4, 7))
       assert(result2(2).value.sample() == Set(8, 11))
@@ -716,7 +718,7 @@ class TrafficDistributorTest extends FunSuite {
       val current = Set(1, 2, 3, 4, 5, 6)
 
       val result =
-        TrafficDistributor.updatePartitionMap(init, current, getPartitionKey, partitionDiffOps)
+        AddrLifecycle.updatePartitionMap(init, current, getPartitionKey, partitionDiffOps)
       assert(result(0).value.sample() == Set(3, 6))
       assert(result(1).value.sample() == Set(1, 4))
       assert(result(2).value.sample() == Set(2, 5))
@@ -734,7 +736,7 @@ class TrafficDistributorTest extends FunSuite {
 
       val current1 = Set(1, 2, 4, 7)
       val result1 =
-        TrafficDistributor.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
+        AddrLifecycle.updatePartitionMap(init, current1, getPartitionKey, partitionDiffOps)
       assert(result1.get(0) == None)
       assert(closeIsCalled == 1)
       assert(result1(1).value.sample() == Set(1, 4, 7))
@@ -750,7 +752,7 @@ class TrafficDistributorTest extends FunSuite {
 
       val current2 = Set(2, 5, 9, 12)
       val result2 =
-        TrafficDistributor.updatePartitionMap(result1, current2, getPartitionKey, partitionDiffOps)
+        AddrLifecycle.updatePartitionMap(result1, current2, getPartitionKey, partitionDiffOps)
       assert(result2(0).value.sample() == Set(9, 12))
       assert(result2.get(1) == None)
       assert(result2(2).value.sample() == Set(2, 5))
@@ -769,7 +771,7 @@ class TrafficDistributorTest extends FunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
       val ref =
-        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -792,7 +794,7 @@ class TrafficDistributorTest extends FunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
       val ref =
-        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -826,7 +828,7 @@ class TrafficDistributorTest extends FunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
       val ref =
-        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -838,7 +840,7 @@ class TrafficDistributorTest extends FunSuite {
           // their statuses. weightEndpoints will only close factories that do not have
           // status `Open`, unless you enable eagerEvictions
           await(Future.join(set.map {
-            case TrafficDistributor.AddressedFactory(factory, _) =>
+            case AddressedFactory(factory, _) =>
               factory().flatMap(_.close())
           }.toSeq))
         case _ => fail
@@ -867,7 +869,7 @@ class TrafficDistributorTest extends FunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
       val ref =
-        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -902,7 +904,7 @@ class TrafficDistributorTest extends FunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, true)
       val ref =
-        new AtomicReference[Activity.State[Set[TrafficDistributor.AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {

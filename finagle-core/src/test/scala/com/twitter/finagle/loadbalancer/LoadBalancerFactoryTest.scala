@@ -4,6 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
+import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
@@ -355,7 +356,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
         Activity.value(augmentedAddresses),
         addr => ???,
         false
-      ).asInstanceOf[Event[Activity.State[Set[TrafficDistributor.AddressedFactory[_, _]]]]]
+      ).asInstanceOf[Event[Activity.State[Set[AddressedFactory[_, _]]]]]
 
     stack.make(
       Stack.Params.empty +

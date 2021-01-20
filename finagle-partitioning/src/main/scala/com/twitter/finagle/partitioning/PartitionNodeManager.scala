@@ -2,8 +2,10 @@ package com.twitter.finagle.partitioning
 
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
-import com.twitter.finagle.loadbalancer.TrafficDistributor._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.loadbalancer.TrafficDistributor._
+import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle._
+import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.param.{Label, Logger, Stats}
 import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.logging.{HasLogLevel, Level}

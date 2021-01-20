@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift.exp.partitioning
 
-import com.twitter.finagle.loadbalancer.{LoadBalancerFactory, TrafficDistributor}
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.partitioning.PartitioningService
 import com.twitter.finagle.thrift.ClientDeserializeCtx
@@ -11,6 +11,7 @@ import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.{
 import com.twitter.finagle.{Address, Service, ServiceFactory, Stack}
 import com.twitter.scrooge.ThriftStructIface
 import com.twitter.util.{Future, Time}
+import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle
 import scala.util.control.NonFatal
 
 /**
@@ -31,7 +32,7 @@ private[finagle] class ThriftCustomPartitioningService[Req, Rep](
       new ClientCustomStrategy[Set[Address]](
         strat.getPartitionIdAndRequestFn,
         strat.getLogicalPartitionIdFn,
-        TrafficDistributor
+        AddrLifecycle
           .varAddrToActivity(params[LoadBalancerFactory.Dest].va, params[Label].label))
     case _ => configuredStrategy
   }

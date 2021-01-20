@@ -3,11 +3,13 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.loadbalancer.aperture.EagerConnections
+import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.util.{Activity, Event, Var}
 import java.util.logging.{Level, Logger}
+import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle
 import scala.util.control.NonFatal
 
 /**
@@ -72,11 +74,11 @@ object LoadBalancerFactory {
    * If this is configured, the [[Dest]] param will be ignored.
    */
   private[finagle] case class Endpoints(
-    va: Event[Activity.State[Set[TrafficDistributor.AddressedFactory[_, _]]]])
+    va: Event[Activity.State[Set[AddressedFactory[_, _]]]])
 
   private[finagle] object Endpoints {
-    implicit val param = Stack.Param(
-      Endpoints(Event[Activity.State[Set[TrafficDistributor.AddressedFactory[_, _]]]]()))
+    implicit val param =
+      Stack.Param(Endpoints(Event[Activity.State[Set[AddressedFactory[_, _]]]]()))
   }
 
   /**
@@ -349,10 +351,10 @@ object LoadBalancerFactory {
       // cluster to another, and crucially, to share data between endpoints
       val endpoints = if (params.contains[LoadBalancerFactory.Endpoints]) {
         params[LoadBalancerFactory.Endpoints].va
-          .asInstanceOf[Event[Activity.State[Set[TrafficDistributor.AddressedFactory[Req, Rep]]]]]
+          .asInstanceOf[Event[Activity.State[Set[AddressedFactory[Req, Rep]]]]]
       } else {
         TrafficDistributor.weightEndpoints(
-          TrafficDistributor.varAddrToActivity(dest, label),
+          AddrLifecycle.varAddrToActivity(dest, label),
           newEndpointFn(params, next),
           !probationEnabled
         )
