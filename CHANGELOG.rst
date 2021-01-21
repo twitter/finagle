@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-core: Added variant of `c.t.f.Address.ServiceFactory.apply` that does not require
+  specifying `c.t.f.Addr.Metadata` and defaults to `c.t.f.Addr.Metadata.empty`. ``PHAB_ID=D605438``
+
 21.1.0
 ------
 

@@ -86,6 +86,12 @@ object Address {
     metadata: Addr.Metadata)
       extends Address
 
+  object ServiceFactory {
+    def apply[Req, Rep](
+      factory: com.twitter.finagle.ServiceFactory[Req, Rep]
+    ): ServiceFactory[Req, Rep] = ServiceFactory(factory, Addr.Metadata.empty)
+  }
+
   /** Create a new [[Address]] with given [[java.net.InetSocketAddress]]. */
   def apply(addr: InetSocketAddress): Address =
     Address.Inet(addr, Addr.Metadata.empty)
