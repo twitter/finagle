@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.twitter.util.Future;
+
 public class NameCompilationTest {
 
   @Test
@@ -21,6 +23,11 @@ public class NameCompilationTest {
     Address addr = Addresses.newInetAddress(new InetSocketAddress(0));
     Name.Bound boundOne = Names.bound(addr);
     Name.Bound boundMultiple = Names.bound(addr, addr);
+  }
+
+  @Test
+  public void testBoundService() {
+    Name.Bound bound = Names.bound(Service.constant(Future.value("Hello")));
   }
 
   @Test

@@ -110,6 +110,33 @@ object Name {
     Name.Bound(Var.value(Addr.Bound(addrs: _*)), addrs.toSet)
 
   /**
+   * Create a pre-bound [[Address]] which points directly to the provided [[Service]].
+   *
+   * @note This method can be extremely useful in testing the functionality of a Finagle
+   * client without involving the network.
+   *
+   * {{{
+   *   import com.twitter.conversions.DurationOps._
+   *   import com.twitter.finagle.{Http, Name, Service}
+   *   import com.twitter.finagle.http.{Request, Response, Status}
+   *   import com.twitter.util.{Await, Future}
+   *
+   *   val service: Service[Request, Response] = Service.mk { request =>
+   *     val response = Response()
+   *     response.status = Status.Ok
+   *     response.contentString = "Hello"
+   *     Future.value(response)
+   *   }
+   *   val name = Name.bound(service)
+   *   val client = Http.client.newService(name, "hello-service-example")
+   *   val result = Await.result(client(Request("/")), 1.second)
+   *   result.contentString // "Hello"
+   * }}}
+   */
+  def bound[Req, Rep](service: Service[Req, Rep]): Name.Bound =
+    bound(Address.ServiceFactory[Req, Rep](ServiceFactory.const(service)))
+
+  /**
    * An always-empty name.
    * @see [[Names.empty]] for Java compatibility.
    */
@@ -205,6 +232,10 @@ object Names {
   @varargs
   def bound(addrs: Address*): Name.Bound =
     Name.bound(addrs: _*)
+
+  /** See [[Name.bound]] */
+  def bound[Req, Rep](service: Service[Req, Rep]): Name.Bound =
+    Name.bound(service)
 
   /** See [[Name.empty]] */
   def empty: Name.Bound =

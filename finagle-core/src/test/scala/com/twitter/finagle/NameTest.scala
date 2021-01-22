@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Witness, Var}
+import com.twitter.util.{Future, Var, Witness}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.scalatest.FunSuite
 
@@ -41,5 +41,31 @@ class NameTest extends FunSuite {
 
     assert(Name.all(names) == Name.all(names))
     assert(Name.all(names) != Name.all(names drop 1))
+  }
+
+  test("Name.bound can take a Service for testing purposes") {
+    val service: Service[String, String] = Service.mk(_ => Future.value("Hello"))
+    val name = Name.bound(service)
+
+    // Sample the Var[Addr]
+    val addr = name.addr.sample
+    // It should be an Addr.Bound
+    addr match {
+      case Addr.Bound(addrs, metadata) =>
+        // Metadata should be empty
+        assert(metadata == Addr.Metadata.empty)
+        // Addrs should be a set with a single item being
+        // the ServiceFactory for the provided Service
+        assert(addrs.size == 1)
+        addrs.head match {
+          case Address.ServiceFactory(_, _) =>
+            // This is good enough as we can't test the equality of the contained
+            // 'factory' with only the 'service'.
+            succeed
+          case _ =>
+            fail(s"Expected $addrs to be an Address.ServiceFactory")
+        }
+      case _ => fail(s"Expected $addr to be an Addr.Bound")
+    }
   }
 }

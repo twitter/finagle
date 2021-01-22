@@ -13,6 +13,10 @@ New Features
 * finagle-core: Added variant of `c.t.f.Address.ServiceFactory.apply` that does not require
   specifying `c.t.f.Addr.Metadata` and defaults to `c.t.f.Addr.Metadata.empty`. ``PHAB_ID=D605438``
 
+* finagle-core: Added variant of `c.t.f.Name.bound` which takes a `c.t.f.Service` as a parameter.
+  Tying a `Name` directly to a `Service` can be extremely useful for testing the functionality
+  of a Finagle client. ``PHAB_ID=D605745``
+
 21.1.0
 ------
 
