@@ -4,7 +4,7 @@ target(
     ],
 )
 
-target(
+test_suite(
     name = "tests",
     dependencies = [
         "finagle/finagle-thriftmux/src/test/java",

@@ -1,4 +1,4 @@
-target(
+test_suite(
     dependencies = [
         ":client",
         ":defaultloader",

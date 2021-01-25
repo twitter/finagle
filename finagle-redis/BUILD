@@ -4,14 +4,14 @@ target(
     ],
 )
 
-target(
+test_suite(
     name = "tests",
     dependencies = [
         "finagle/finagle-redis/src/test/scala",
     ],
 )
 
-target(
+test_suite(
     name = "integration-tests",
     dependencies = [
         "finagle/finagle-redis/src/it/scala",
