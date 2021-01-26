@@ -17,6 +17,13 @@ New Features
   Tying a `Name` directly to a `Service` can be extremely useful for testing the functionality
   of a Finagle client. ``PHAB_ID=D605745``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-memcached: The log level of messages pertaining to whether a Memcached client is using the
+  older non-partitioned or the newer partitioned version has been lowered. These messages are no
+  longer written at an 'info' level. ``PHAB_ID=D607487``
+
 21.1.0
 ------
 

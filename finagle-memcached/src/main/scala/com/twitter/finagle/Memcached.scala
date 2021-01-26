@@ -258,7 +258,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       registerClient(label0, hasher.toString)
 
       def partitionAwareFinagleClient() = {
-        logger.info(s"Using the new partitioning finagle client for memcached: $destination")
+        logger.fine(s"Using the new partitioning finagle client for memcached: $destination")
         val rawClient: Service[Command, Response] = {
           val stk = stack.insertAfter(
             BindingFactory.role,
@@ -270,7 +270,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       }
 
       def oldMemcachedClient(va: Var[Addr]) = {
-        logger.info(s"Using the old memcached client: $destination")
+        logger.fine(s"Using the old memcached client: $destination")
 
         val finagle.param.Stats(sr) = params[finagle.param.Stats]
         val NumReps(numReps) = params[NumReps]
