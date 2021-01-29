@@ -55,6 +55,23 @@ object StackServer {
    * @see [[com.twitter.finagle.tracing.WireTracingFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
+    /*
+     * NB on orientation: we here speak of "up" / "down" or "above" /
+     * "below" in terms of a request's traversal of the stack---a
+     * request starts at the top and goes down, a response returns
+     * back up. This is opposite to how modules are written on the
+     * page; a request starts at the bottom of the `newStack` method
+     * and goes up.
+     *
+     * Also note that the term "stack" does not refer to a stack in the
+     * computer science sense but instead in the sense of a chain of objects,
+     * i.e., stack modules. Because modules are composed sequentially, it also
+     * makes sense to speak of modules coming "before" or "after" others.
+     *
+     * Lastly, note that "module A comes before module B" has the same meaning
+     * as "module A is pushed after module B".
+     */
+
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
 
     val shouldOffloadEarly = offloadEarly()
@@ -68,7 +85,7 @@ object StackServer {
 
     stk.push(ServerTracingFilter.module)
 
-    // this goes near the listener so it is close to where the handling happens.
+    // this goes near the bottom of the stack so it is close to where Service.apply happens.
     stk.push(ThreadUsage.module)
 
     // `ExportSslUsage` exports the TLS parameter to the R* Registry
