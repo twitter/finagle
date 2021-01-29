@@ -35,6 +35,8 @@ import scala.runtime.NonLocalReturnControl
  */
 object OffloadFilter {
 
+  val Role = Stack.Role("OffloadWorkFromIO")
+
   private[finagle] final class SampleQueueStats(
     pool: FuturePool,
     stats: StatsReceiver,
@@ -109,7 +111,6 @@ object OffloadFilter {
     )
   }
 
-  private[this] val Role = Stack.Role("OffloadWorkFromIO")
   private[this] val Description = "Offloading computations from IO threads"
   private[this] val ClientAnnotationKey = "clnt/finagle.offload_pool_size"
   private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"

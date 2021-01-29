@@ -12,6 +12,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{ClientStatsReceiver, LoadedHostStatsReceiver}
 import com.twitter.finagle.tracing._
+
 import com.twitter.util.registry.GlobalRegistry
 import scala.collection.immutable.Queue
 
@@ -88,7 +89,14 @@ object StackClient {
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
    * @see [[com.twitter.finagle.client.LatencyCompensation]]
    */
-  def endpointStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
+  def endpointStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] =
+    // temporary standard behaviour for those calling this API from outside
+    // of StackClient.scala
+    endpointStack(false)
+
+  private def endpointStack[Req, Rep](
+    shouldOffloadEarly: Boolean
+  ): Stack[ServiceFactory[Req, Rep]] = {
     // Ensure that we have performed global initialization.
     com.twitter.finagle.Init()
 
@@ -96,6 +104,18 @@ object StackClient {
      * N.B. see the note in `newStack` regarding up / down orientation in the stack.
      */
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](nilStack[Req, Rep])
+
+    if (shouldOffloadEarly) {
+
+      /**
+       * `OffloadFilter` shifts future continuations (callbacks and
+       * transformations) off of IO threads into a configured `FuturePool`.
+       * This module is intentionally placed at the top of the stack
+       * such that execution context shifts as client's response leaves
+       * the stack and enters the application code.
+       */
+      stk.push(OffloadFilter.client)
+    }
 
     /**
      * `prepConn` is the bottom of the stack by definition. This position represents
@@ -261,7 +281,9 @@ object StackClient {
      * as "module A is pushed after module B".
      */
 
-    val stk = new StackBuilder(endpointStack[Req, Rep])
+    val shouldOffloadEarly = offloadEarly()
+
+    val stk = new StackBuilder(endpointStack[Req, Rep](shouldOffloadEarly))
 
     /*
      * These modules balance requests across cluster endpoints and
@@ -425,7 +447,9 @@ object StackClient {
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
     stk.push(ForwardAnnotation.module)
-    stk.push(OffloadFilter.client)
+    if (!shouldOffloadEarly) {
+      stk.push(OffloadFilter.client)
+    }
     stk.push(RegistryEntryLifecycle.module)
     stk.push(ClientExceptionTracingFilter.module())
     stk.push(TraceInitializerFilter.clientModule)
