@@ -243,6 +243,13 @@ finagle.retry (`RetryFilter`)
 `````````````````````````````
 Record when a retry has occurred
 
+Samping
+~~~~~~~
+
+zipkin.sampling_rate (`SamplingTracer`)
+``````````````````````````````````````
+Record the sampling rate at trace roots
+
 Timeout
 ~~~~~~~
 

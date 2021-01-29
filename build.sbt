@@ -474,7 +474,7 @@ lazy val finagleZipkinCore = Project(
       util("codec"),
       util("core"),
       util("stats")) ++ scroogeLibs ++ jacksonLibs
-  ).dependsOn(finagleCore, finagleThrift)
+  ).dependsOn(finagleCore % "compile->compile;test->test", finagleThrift)
 
 lazy val finagleZipkinScribe = Project(
   id = "finagle-zipkin-scribe",
