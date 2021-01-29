@@ -57,10 +57,14 @@ object StackServer {
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
 
-    // This module is placed at the bottom of the stack and shifts Future execution context
-    // from IO threads into a configured FuturePool right before user-defined Service.apply is
-    // being called.
-    stk.push(OffloadFilter.server)
+    val shouldOffloadEarly = offloadEarly()
+
+    if (!shouldOffloadEarly) {
+      // This module is placed at the bottom of the stack and shifts Future execution context
+      // from IO threads into a configured FuturePool right before user-defined Service.apply is
+      // being called.
+      stk.push(OffloadFilter.server)
+    }
 
     stk.push(ServerTracingFilter.module)
 
@@ -106,8 +110,16 @@ object StackServer {
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate
     // span.
+
+    if (shouldOffloadEarly) {
+      // This module is placed at the top of the stack and shifts Future execution context
+      // from IO threads into a configured FuturePool right after Netty.
+      stk.push(OffloadFilter.server)
+    }
+
     stk.push(TraceInitializerFilter.serverModule)
     stk.push(MonitorFilter.serverModule)
+
     stk.result
   }
 
