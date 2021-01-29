@@ -3,7 +3,7 @@ package com.twitter.finagle.exp.routing
 import com.twitter.finagle.service.ReqRepT
 import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.finagle.{Service, Status}
-import com.twitter.util.routing.Router
+import com.twitter.util.routing.{ClosedRouterException, Found, NotFound, Router, RouterClosed}
 import com.twitter.util.{Future, Return, Throw, Time}
 import scala.util.control.NonFatal
 
@@ -71,6 +71,9 @@ private[finagle] class RoutingService[Req, Rep](
   private[this] val handledFailuresCounter = failuresStats.counter(Verbosity.Debug, "handled")
   private[this] val unhandledFailuresCounter = failuresStats.counter(Verbosity.Debug, "unhandled")
 
+  private[this] val closedRouterRep: Future[Rep] =
+    Future.exception(ClosedRouterException(router))
+
   private[this] def handleError(request: Req, error: Throw[Rep]): Future[Rep] = {
     val reqRepT = ReqRepT(request, error)
 
@@ -85,14 +88,23 @@ private[finagle] class RoutingService[Req, Rep](
     }
   }
 
-  override def apply(request: Req): Future[Rep] = try {
-    val rep = router(request) match {
-      case Some(svc) =>
+  def apply(request: Req): Future[Rep] = try {
+    val rep: Future[Rep] = router(request) match {
+      case Found(req, svc: Service[Req, Rep]) =>
         foundCounter.incr()
-        svc(request)
-      case _ =>
+        svc(req.asInstanceOf[Req])
+      case NotFound =>
         notFoundCounter.incr()
         notFoundHandler(request)
+      case RouterClosed =>
+        // we don't increment stats because this will be dealt with via handleError
+        closedRouterRep
+      case Found(_, _) =>
+        // this scenario should never be hit, but we have to account for it
+        // we don't increment stats because this will be dealt with via handleError
+        Future.exception(
+          new IllegalStateException(
+            s"The router '${router.label}' is not behaving correctly for input '$request'"))
     }
 
     rep.transform {
