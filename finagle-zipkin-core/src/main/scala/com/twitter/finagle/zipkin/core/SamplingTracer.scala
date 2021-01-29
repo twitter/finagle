@@ -1,7 +1,8 @@
 package com.twitter.finagle.zipkin.core
 
-import com.twitter.finagle.tracing.{Record, TraceId, Tracer}
+import com.twitter.finagle.tracing.{Annotation => FinagleAnnotation, _}
 import com.twitter.logging.Logger
+import com.twitter.util.Time
 
 /**
  * Tracer that supports sampling. Will pass through a subset of the records.
@@ -17,7 +18,25 @@ class SamplingTracer(underlyingTracer: Tracer, sampler: Sampler) extends Tracer 
 
   private[this] val log = Logger(getClass.getName)
 
-  def sampleTrace(traceId: TraceId): Option[Boolean] = sampler.sampleTrace(traceId)
+  private[this] def samplingRecord(traceId: TraceId): Record = {
+    new Record(
+      traceId,
+      Time.now,
+      FinagleAnnotation.BinaryAnnotation("zipkin.sampling_rate", sampler.sampleRate.toString),
+      None)
+  }
+
+  /**
+   * Makes the sampling decision and records the sampling rate if we're tracing
+   * @note sampleTrace should only be called when the tracing decision has not already been made
+   */
+  def sampleTrace(traceId: TraceId): Option[Boolean] = {
+    val st = sampler.sampleTrace(traceId)
+    if (traceId.sampled != Some(true) && st == Some(true)) {
+      record(samplingRecord(traceId))
+    }
+    st
+  }
 
   def setSampleRate(sampleRate: Float): Unit = {
     sampler.setSampleRate(sampleRate)

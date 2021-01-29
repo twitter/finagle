@@ -10,6 +10,9 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-zipkin-core: Record `zipkin.sampling_rate` annotation to track sampling
+  rate at trace roots. ``PHAB_ID=D601379``
+
 * finagle-core: Added variant of `c.t.f.Address.ServiceFactory.apply` that does not require
   specifying `c.t.f.Addr.Metadata` and defaults to `c.t.f.Addr.Metadata.empty`. ``PHAB_ID=D605438``
 
@@ -29,6 +32,7 @@ Runtime Behavior Changes
 
 New Features
 ~~~~~~~~~~~~
+
 * finagle-core: Add `clnt/<FilterName>_rejected` annotation to filters that may throttle requests, 
   including `c.t.finagle.filter.NackAdmissionFilter` and `c.t.finagle.filter.RequestSemaphoreFilter`.
   ``PHAB_ID=D597875``
