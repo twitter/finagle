@@ -4,7 +4,17 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.routing.{Generator, Router, RouterBuilder, ValidationError, Validator}
+import com.twitter.util.routing.{
+  Found,
+  Generator,
+  NotFound,
+  Result,
+  Router,
+  RouterBuilder,
+  RouterInfo,
+  ValidationError,
+  Validator
+}
 import com.twitter.util.{Await, Awaitable, Future, Throw}
 import org.scalatest.FunSuite
 
@@ -44,20 +54,21 @@ private object MethodRoutingServiceTest {
   type Route =
     com.twitter.finagle.exp.routing.Route[Request, Response, MethodSchema]
 
-  private case class MethodRouter(
+  private class MethodRouter(
     label: String,
     routes: Iterable[Route])
-      extends Router[Request, Route] {
+      extends Router[Request, Route](label, routes) {
     private[this] val routeMap: Map[Method, Route] = routes.map(r => r.schema.method -> r).toMap
 
-    override protected def find(input: Request): Option[Route] =
-      activeMethod.flatMap { method =>
-        routeMap.get(method)
+    protected def find(input: Request): Result =
+      routeMap.get(activeMethod.get) match {
+        case Some(route) => Found(input, route)
+        case _ => NotFound
       }
   }
 
   private[this] val validator: Validator[Route] = new Validator[Route] {
-    override def apply(routes: Iterable[Route]): Iterable[ValidationError] = {
+    def apply(routes: Iterable[Route]): Iterable[ValidationError] = {
       val methods = routes.map(_.schema.method).toSet
 
       val distinctMethods =
@@ -74,10 +85,9 @@ private object MethodRoutingServiceTest {
   }
 
   private[this] val generator = new Generator[Request, Route, MethodRouter] {
-    override def apply(
-      label: String,
-      routes: Iterable[Route]
-    ): MethodRouter = MethodRouter(label, routes)
+    def apply(
+      routeInfo: RouterInfo[Route]
+    ): MethodRouter = new MethodRouter(routeInfo.label, routeInfo.routes)
   }
 
   private val notFoundHandler: Request => Future[Response] = r =>
@@ -141,7 +151,7 @@ class MethodRoutingServiceTest extends FunSuite {
       assert(await(svc(UserRequest("123"))) == UserResponse("123", "Goodbye, 123"))
     }
 
-    intercept[IllegalArgumentException] {
+    intercept[NoSuchElementException] {
       await(svc(UserRequest("123")))
     }
   }

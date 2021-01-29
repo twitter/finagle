@@ -4,7 +4,15 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.service.ReqRepT
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.util.routing.{Generator, Router, RouterBuilder}
+import com.twitter.util.routing.{
+  Found,
+  Generator,
+  NotFound,
+  Result,
+  Router,
+  RouterBuilder,
+  RouterInfo
+}
 import com.twitter.util.{Await, Awaitable, Future, Return, Throw}
 import org.scalatest.FunSuite
 import scala.util.control.NonFatal
@@ -15,22 +23,23 @@ private object RoutingServiceTest {
 
   type Route = com.twitter.finagle.exp.routing.Route[Int, String, SvcSchema]
 
-  case class StringRouter(
+  class StringRouter(
     label: String,
     routes: Iterable[Route])
-      extends Router[Int, Route] {
-    override protected def find(input: Int): Option[Route] =
+      extends Router[Int, Route](label, routes) {
+    protected def find(input: Int): Result =
       if (input < 0) throw new IllegalArgumentException("BANG!")
       else {
-        routes.find(_.schema.fn(input))
+        routes.find(_.schema.fn(input)) match {
+          case Some(route) => Found(input, route)
+          case _ => NotFound
+        }
       }
   }
 
   private[this] val generator = new Generator[Int, Route, StringRouter] {
-    override def apply(
-      label: String,
-      routes: Iterable[Route]
-    ): StringRouter = StringRouter(label, routes)
+    def apply(routerInfo: RouterInfo[Route]): StringRouter =
+      new StringRouter(routerInfo.label, routerInfo.routes)
   }
 
   private val notFoundHandler: Int => Future[String] = _ => Future.const(Return("not found"))
