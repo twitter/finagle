@@ -1,7 +1,7 @@
 package com.twitter.finagle.filter
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.offload.{numWorkers, queueSize}
+import com.twitter.finagle.offload.{numWorkers, queueSize, statsSampleInterval}
 import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
@@ -17,7 +17,6 @@ import com.twitter.util.{
   Time,
   Timer
 }
-import scala.com.twitter.finagle.offload.statsSampleInterval
 import java.util.concurrent.{
   ExecutorService,
   LinkedBlockingQueue,

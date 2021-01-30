@@ -1,4 +1,4 @@
-package scala.com.twitter.finagle.offload
+package com.twitter.finagle.offload
 
 import com.twitter.app.GlobalFlag
 import com.twitter.util.Duration
