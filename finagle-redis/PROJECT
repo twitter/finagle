@@ -7,7 +7,6 @@ owners:
   - jsimms
   - mnakamura
   - roanta
-  - ryano
   - vkostyukov
 watchers:
   - csl-team:ldap
