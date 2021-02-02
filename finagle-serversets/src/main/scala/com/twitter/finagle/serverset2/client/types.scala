@@ -72,6 +72,7 @@ private[serverset2] object OpResult {
 private[serverset2] sealed abstract class SessionState(val name: String)
 
 private[serverset2] object SessionState {
+  object Closed extends SessionState("session_closed")
   object Unknown extends SessionState("session_unknown")
   object AuthFailed extends SessionState("session_auth_failed")
   object Disconnected extends SessionState("session_disconnected")

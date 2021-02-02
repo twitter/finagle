@@ -16,6 +16,15 @@ class ApacheWatcherTest extends FunSuite with OneInstancePerTest {
 
   val path = "/foo"
 
+  // the "Closed" state may not exist for certain versions of ZK Client, so we handle
+  // this special case in order to have compatibility across versions
+  val closedKeeperState =
+    try {
+      Map(KeeperState.valueOf("Closed") -> SessionState.Closed)
+    } catch {
+      case _: IllegalArgumentException => Map.empty
+    }
+
   val sessionEvents = Map(
     (KeeperState.Unknown, SessionState.Unknown),
     (KeeperState.AuthFailed, SessionState.AuthFailed),
@@ -25,7 +34,7 @@ class ApacheWatcherTest extends FunSuite with OneInstancePerTest {
     (KeeperState.SyncConnected, SessionState.SyncConnected),
     (KeeperState.SaslAuthenticated, SessionState.SaslAuthenticated),
     (KeeperState.ConnectedReadOnly, SessionState.ConnectedReadOnly)
-  )
+  ) ++ closedKeeperState
 
   val nodeEvents = Map(
     (EventType.NodeChildrenChanged, NodeEvent.ChildrenChanged),

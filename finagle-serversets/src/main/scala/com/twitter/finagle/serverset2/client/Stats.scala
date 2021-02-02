@@ -149,6 +149,7 @@ object SessionStats {
     timer: Timer
   ): Var[WatchState] = {
     import SessionState._
+    val closedCounter = statsReceiver.counter(Closed.name)
     val unknownCounter = statsReceiver.counter(Unknown.name)
     val authFailedCounter = statsReceiver.counter(AuthFailed.name)
     val disconnectedCounter = statsReceiver.counter(Disconnected.name)
@@ -167,6 +168,7 @@ object SessionStats {
             stateTracker.transition(newState)
 
             newState match {
+              case Closed => closedCounter.incr()
               case Unknown => unknownCounter.incr()
               case AuthFailed => authFailedCounter.incr()
               case Disconnected => disconnectedCounter.incr()

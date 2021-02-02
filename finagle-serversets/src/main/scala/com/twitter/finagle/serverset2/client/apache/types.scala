@@ -29,16 +29,27 @@ private[serverset2] object ApacheNodeEvent {
 }
 
 private[serverset2] object ApacheSessionState {
-  val map = Map(
-    KeeperState.Unknown -> SessionState.Unknown,
-    KeeperState.AuthFailed -> SessionState.AuthFailed,
-    KeeperState.Disconnected -> SessionState.Disconnected,
-    KeeperState.Expired -> SessionState.Expired,
-    KeeperState.NoSyncConnected -> SessionState.NoSyncConnected,
-    KeeperState.SyncConnected -> SessionState.SyncConnected,
-    KeeperState.SaslAuthenticated -> SessionState.SaslAuthenticated,
-    KeeperState.ConnectedReadOnly -> SessionState.ConnectedReadOnly
-  )
+  val map = {
+    // the "Closed" state may not exist for certain versions of ZK Client, so we handle
+    // this special case in order to have compatibility across versions
+    val closedState =
+      try {
+        Map(KeeperState.valueOf("Closed") -> SessionState.Closed)
+      } catch {
+        case _: NullPointerException | _: IllegalArgumentException => Map.empty
+      }
+
+    Map(
+      KeeperState.Unknown -> SessionState.Unknown,
+      KeeperState.AuthFailed -> SessionState.AuthFailed,
+      KeeperState.Disconnected -> SessionState.Disconnected,
+      KeeperState.Expired -> SessionState.Expired,
+      KeeperState.NoSyncConnected -> SessionState.NoSyncConnected,
+      KeeperState.SyncConnected -> SessionState.SyncConnected,
+      KeeperState.SaslAuthenticated -> SessionState.SaslAuthenticated,
+      KeeperState.ConnectedReadOnly -> SessionState.ConnectedReadOnly
+    ) ++ closedState
+  }
 
   def apply(state: KeeperState): SessionState = map(state)
 }
