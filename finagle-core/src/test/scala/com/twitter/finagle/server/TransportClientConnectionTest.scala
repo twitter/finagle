@@ -53,9 +53,9 @@ class TransportClientConnectionTest extends FunSuite with MockitoSugar {
     // asserts are written out this way because using just
     // `isDone` results in the compiler warning mentioned in
     // https://github.com/scalatest/scalatest/issues/961
-    assert(result.isDone == false)
+    assert(result.isDefined == false)
     promise.updateIfEmpty(Return(5))
-    assert(result.isDone == true)
+    assert(result.isDefined == true)
   }
 
   test("close calls the Transport's close method") {
