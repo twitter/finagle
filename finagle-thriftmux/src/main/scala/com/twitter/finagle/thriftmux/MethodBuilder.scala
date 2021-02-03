@@ -458,4 +458,6 @@ class MethodBuilder(
         filter(request, service)
     }
   }
+
+  override def toString: String = mb.toString
 }

@@ -305,5 +305,4 @@ trait BaseMethodBuilder[T] {
    *      for further details.
    */
   def nonIdempotent: T
-
 }

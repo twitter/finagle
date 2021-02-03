@@ -732,7 +732,30 @@ class MethodBuilderTest extends FunSuite with Eventually {
     val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
     val builder: MethodBuilder = client.methodBuilder(name)
 
-    val spe1 = builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
+    builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
     assert(sr.gauges(Seq("eager_clnt", "loadbalancer", "eager_connections"))() == 1.0)
+
+    server.close()
+  }
+
+  test(".toString is helpful") {
+    val service = new TestService.MethodPerEndpoint {
+      def query(x: String): Future[String] = Future.value(x)
+      def question(y: String): Future[String] = Future.value(y)
+      def inquiry(z: String): Future[String] = Future.value(z)
+    }
+    val server =
+      serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+    val client = clientImpl.withLabel("a_label")
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+    val mbToString = builder.toString
+
+    assert(mbToString.startsWith("MethodBuilder("))
+    assert(mbToString.contains("dest=Set(Inet("))
+    assert(mbToString.contains("stack=Node("))
+    assert(mbToString.contains("params=Stack.Params."))
+    assert(mbToString.contains("config=Config("))
+    server.close()
   }
 }

@@ -129,6 +129,9 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   private[client] val config: MethodBuilder.Config) { self =>
   import MethodBuilder._
 
+  override def toString: String =
+    s"MethodBuilder(dest=$dest, stack=$stack, params=$stackParams, config=$config)"
+
   //
   // Configuration
   //

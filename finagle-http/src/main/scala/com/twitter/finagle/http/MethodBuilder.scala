@@ -272,4 +272,5 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
   def newService: Service[Request, Response] =
     mb.newService
 
+  override def toString: String = mb.toString
 }
