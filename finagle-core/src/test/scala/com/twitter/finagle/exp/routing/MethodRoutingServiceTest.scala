@@ -2,7 +2,6 @@ package com.twitter.finagle.exp.routing
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.routing.{
   Found,
@@ -21,21 +20,17 @@ import org.scalatest.FunSuite
 // simulate a Thrift style RoutingService
 private object MethodRoutingServiceTest {
 
-  sealed trait Request
-  sealed trait Response
+  sealed trait Struct
 
-  // simulate Thrift's MethodMetadata
-  val Key = Contexts.local.newKey[Method]
-  def activeMethod: Option[Method] = Contexts.local.get(Key)
+  object MethodField extends Field[Method]
 
   sealed trait Method {
-    type Args <: Request
-    type SuccessType
-    def asCurrent[T](f: => T): T = Contexts.local.let(Key, this)(f)
+    type Args <: Struct
+    type SuccessType <: Struct
   }
 
-  case class UserRequest(id: String) extends Request
-  case class UserResponse(id: String, body: String) extends Response
+  case class UserRequest(id: String) extends Struct
+  case class UserResponse(id: String, body: String) extends Struct
 
   object GetUser extends Method {
     type Args = UserRequest
@@ -47,21 +42,25 @@ private object MethodRoutingServiceTest {
     type SuccessType = UserResponse
   }
 
-  case class MethodRequest[T <: Request](method: Method, request: T)
-
-  case class MethodSchema(method: Method)
+  object UndefinedMethod extends Method {
+    type Args = UserRequest
+    type SuccessType = UserResponse
+  }
 
   type Route =
-    com.twitter.finagle.exp.routing.Route[Request, Response, MethodSchema]
+    com.twitter.finagle.exp.routing.Route[Struct, Struct, Method]
 
   private class MethodRouter(
     label: String,
     routes: Iterable[Route])
-      extends Router[Request, Route](label, routes) {
-    private[this] val routeMap: Map[Method, Route] = routes.map(r => r.schema.method -> r).toMap
+      extends Router[Request[Struct], Route](label, routes) {
+    private[this] val routeMap: Map[Method, Route] = routes.map(r => r.schema -> r).toMap
 
-    protected def find(input: Request): Result =
-      routeMap.get(activeMethod.get) match {
+    protected def find(input: Request[Struct]): Result =
+      routeMap.get(
+        input.getOrElse(
+          MethodField,
+          throw new IllegalArgumentException("No MethodField Defined"))) match {
         case Some(route) => Found(input, route)
         case _ => NotFound
       }
@@ -69,7 +68,7 @@ private object MethodRoutingServiceTest {
 
   private[this] val validator: Validator[Route] = new Validator[Route] {
     def apply(routes: Iterable[Route]): Iterable[ValidationError] = {
-      val methods = routes.map(_.schema.method).toSet
+      val methods = routes.map(_.schema).toSet
 
       val distinctMethods =
         if (methods.size != routes.size) {
@@ -84,19 +83,19 @@ private object MethodRoutingServiceTest {
     }
   }
 
-  private[this] val generator = new Generator[Request, Route, MethodRouter] {
+  private[this] val generator = new Generator[Request[Struct], Route, MethodRouter] {
     def apply(
       routeInfo: RouterInfo[Route]
     ): MethodRouter = new MethodRouter(routeInfo.label, routeInfo.routes)
   }
 
-  private val notFoundHandler: Request => Future[Response] = r =>
+  private val notFoundHandler: Request[Struct] => Future[Response[Struct]] = r =>
     Future.const(
       Throw(
         new IllegalArgumentException(
           s"Method not defined that can handle request $r for this service")))
 
-  private def newBuilder: RouterBuilder[Request, Route, MethodRouter] =
+  private def newBuilder: RouterBuilder[Request[Struct], Route, MethodRouter] =
     RouterBuilder.newBuilder(generator).withValidator(validator)
 
 }
@@ -109,51 +108,50 @@ class MethodRoutingServiceTest extends FunSuite {
   test("routes to destinations") {
     val router = newBuilder
       .withRoute(
-        Route.transformed[Request, Response, MethodSchema, MethodRequest[_]](
-          transformer = new RequestTransformingFilter(req => MethodRequest(GetUser, req)),
-          route = Route(
-            label = "get_user",
-            schema = MethodSchema(GetUser),
-            service = Service.mk { req =>
-              val id = req.request.asInstanceOf[GetUser.Args].id
-              Future.value(UserResponse(id, s"Hello, $id"))
-            }
-          )
-        )
+        Route(
+          label = "get_user",
+          schema = GetUser,
+          service = Service.mk[Request[GetUser.Args], Response[GetUser.SuccessType]] { req =>
+            val id = req.value.id
+            Future.value(Response(UserResponse(id, s"Hello, $id")))
+          }
+        ).asInstanceOf[Route]
       )
       .withRoute(
-        Route.transformed[Request, Response, MethodSchema, MethodRequest[_]](
-          transformer = new RequestTransformingFilter(req => MethodRequest(DeleteUser, req)),
-          route = Route(
-            label = "delete_user",
-            schema = MethodSchema(DeleteUser),
-            service = Service.mk { req =>
-              val id = req.request.asInstanceOf[DeleteUser.Args].id
-              Future.value(UserResponse(id, s"Goodbye, $id"))
-            }
-          )
-        )
+        Route(
+          label = "delete_user",
+          schema = DeleteUser,
+          service = Service.mk[Request[DeleteUser.Args], Response[DeleteUser.SuccessType]] { req =>
+            val id = req.value.id
+            Future.value(Response(UserResponse(id, s"Goodbye, $id")))
+          }
+        ).asInstanceOf[Route]
       )
       .newRouter()
 
-    val svc: Service[Request, Response] = new RoutingService(
+    val svc: Service[Request[Struct], Response[Struct]] = new RoutingService(
       router = router,
       notFoundHandler = notFoundHandler,
       exceptionHandler = PartialFunction.empty,
       statsReceiver = NullStatsReceiver
     )
 
-    GetUser.asCurrent {
-      assert(await(svc(UserRequest("123"))) == UserResponse("123", "Hello, 123"))
+    assert(
+      await(svc(Request(UserRequest("123")).set(MethodField, GetUser))) == Response(
+        UserResponse("123", "Hello, 123")))
+
+    assert(
+      await(svc(Request(UserRequest("123")).set(MethodField, DeleteUser))) == Response(
+        UserResponse("123", "Goodbye, 123")))
+
+    intercept[IllegalArgumentException] {
+      await(svc(Request(UserRequest("123")).set(MethodField, UndefinedMethod)))
     }
 
-    DeleteUser.asCurrent {
-      assert(await(svc(UserRequest("123"))) == UserResponse("123", "Goodbye, 123"))
+    intercept[IllegalArgumentException] {
+      await(svc(Request(UserRequest("123"))))
     }
 
-    intercept[NoSuchElementException] {
-      await(svc(UserRequest("123")))
-    }
   }
 
 }

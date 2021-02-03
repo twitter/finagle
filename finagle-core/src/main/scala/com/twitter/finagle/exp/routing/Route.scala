@@ -2,28 +2,18 @@ package com.twitter.finagle.exp.routing
 
 import com.twitter.finagle.{Service, ServiceProxy}
 
-private[finagle] object Route {
+object Route {
 
   /**
-   * Transform a `Route[UserReq, Rep, Schema]` and its underlying service to a
-   * `Route[Req, Rep, Schema]`.
-   *
-   * @param transformer The function to be used to transform from [[Req request]] to
-   *                    [[UserReq user-facing request]] logic to be used by the [[Route route]]
-   *                    to be built.
-   * @param route The [[Route]] to be transformed.
-   * @tparam Req The underlying [[Service service's]] request type.
-   * @tparam Rep The underlying [[Service service's]] response type.
-   * @tparam Schema The contextual route information type.
-   * @tparam UserReq The user-facing underlying [[Service service's]] request type.
-   *
-   * @return The transformed [[Route]].
+   * A [[Route]] where the underlying logic does not need
+   * access to the Request and Response envelopes.
    */
-  def transformed[Req, Rep, Schema, UserReq](
-    transformer: RequestTransformingFilter[Req, Rep, UserReq],
-    route: Route[UserReq, Rep, Schema]
+  def wrap[Req, Rep, Schema](
+    service: Service[Req, Rep],
+    label: String,
+    schema: Schema
   ): Route[Req, Rep, Schema] =
-    Route(label = route.label, schema = route.schema, service = transformer.andThen(route.service))
+    Route(new RequestResponseToReqRepFilter[Req, Rep].andThen(service), label, schema)
 }
 
 /**
@@ -44,7 +34,7 @@ private[finagle] object Route {
  * @tparam Schema The contextual route information type.
  */
 private[finagle] case class Route[-Req, +Rep, Schema] private[routing] (
-  service: Service[Req, Rep],
+  service: Service[Request[Req], Response[Rep]],
   label: String,
   schema: Schema)
-    extends ServiceProxy[Req, Rep](service)
+    extends ServiceProxy[Request[Req], Response[Rep]](service)

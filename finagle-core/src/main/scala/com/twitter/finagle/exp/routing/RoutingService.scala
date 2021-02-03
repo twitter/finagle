@@ -57,11 +57,11 @@ import scala.util.control.NonFatal
  *
  */
 private[finagle] class RoutingService[Req, Rep](
-  router: Router[Req, Service[Req, Rep]],
-  notFoundHandler: Req => Future[Rep],
-  exceptionHandler: PartialFunction[ReqRepT[Req, Rep], Future[Rep]],
+  router: Router[Request[Req], Route[Req, Rep, _]],
+  notFoundHandler: Request[Req] => Future[Response[Rep]],
+  exceptionHandler: PartialFunction[ReqRepT[Request[Req], Response[Rep]], Future[Response[Rep]]],
   statsReceiver: StatsReceiver)
-    extends Service[Req, Rep] {
+    extends Service[Request[Req], Response[Rep]] {
 
   private[this] val routingStats = statsReceiver.scope("router")
   private[this] val foundCounter = routingStats.counter(Verbosity.Debug, "found")
@@ -71,10 +71,13 @@ private[finagle] class RoutingService[Req, Rep](
   private[this] val handledFailuresCounter = failuresStats.counter(Verbosity.Debug, "handled")
   private[this] val unhandledFailuresCounter = failuresStats.counter(Verbosity.Debug, "unhandled")
 
-  private[this] val closedRouterRep: Future[Rep] =
+  private[this] val closedRouterRep: Future[Response[Rep]] =
     Future.exception(ClosedRouterException(router))
 
-  private[this] def handleError(request: Req, error: Throw[Rep]): Future[Rep] = {
+  private[this] def handleError(
+    request: Request[Req],
+    error: Throw[Response[Rep]]
+  ): Future[Response[Rep]] = {
     val reqRepT = ReqRepT(request, error)
 
     // ensure that we can handle the error and handle it if we can
@@ -88,11 +91,12 @@ private[finagle] class RoutingService[Req, Rep](
     }
   }
 
-  def apply(request: Req): Future[Rep] = try {
-    val rep: Future[Rep] = router(request) match {
-      case Found(req, svc: Service[Req, Rep]) =>
+  def apply(request: Request[Req]): Future[Response[Rep]] = try {
+    val rep: Future[Response[Rep]] = router(request) match {
+      case Found(req: Request[Req], svc: Route[Req, Rep, _]) =>
         foundCounter.incr()
-        svc(req.asInstanceOf[Req])
+        val reqWithInfo = req.set(Fields.RouteInfo, svc)
+        svc(reqWithInfo)
       case NotFound =>
         notFoundCounter.incr()
         notFoundHandler(request)
@@ -125,7 +129,7 @@ private[finagle] class RoutingService[Req, Rep](
     if (router.isClosed) {
       Status.Closed
     } else {
-      Status.worstOf[Service[Req, Rep]](router.routes, _.status)
+      Status.worstOf[Route[Req, Rep, _]](router.routes, _.status)
     }
 
 }
