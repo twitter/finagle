@@ -281,7 +281,7 @@ object StackClient {
      * as "module A is pushed after module B".
      */
 
-    val shouldOffloadEarly = offloadEarly()
+    val shouldOffloadEarly = offloadEarly() || com.twitter.finagle.offload.auto()
 
     val stk = new StackBuilder(endpointStack[Req, Rep](shouldOffloadEarly))
 

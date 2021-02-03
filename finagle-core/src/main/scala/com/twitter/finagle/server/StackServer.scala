@@ -74,7 +74,7 @@ object StackServer {
 
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
 
-    val shouldOffloadEarly = offloadEarly()
+    val shouldOffloadEarly = offloadEarly() || com.twitter.finagle.offload.auto()
 
     if (!shouldOffloadEarly) {
       // This module is placed at the bottom of the stack and shifts Future execution context

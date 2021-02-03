@@ -1,7 +1,7 @@
 package com.twitter.finagle.filter
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.offload.{numWorkers, queueSize, statsSampleInterval}
+import com.twitter.finagle.offload.{auto, numWorkers, queueSize, statsSampleInterval}
 import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
@@ -115,7 +115,10 @@ object OffloadFilter {
   private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"
 
   private[this] lazy val global: Option[FuturePool] = {
-    numWorkers.get.map { threads =>
+    val workers =
+      numWorkers.get.orElse(if (auto()) Some(com.twitter.jvm.numProcs().ceil.toInt) else None)
+
+    workers.map { threads =>
       val stats = FinagleStatsReceiver.scope("offload_pool")
       val pool = new OffloadFuturePool(new OffloadThreadPool(threads, queueSize(), stats), stats)
 
