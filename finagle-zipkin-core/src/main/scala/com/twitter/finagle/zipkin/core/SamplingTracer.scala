@@ -22,7 +22,7 @@ class SamplingTracer(underlyingTracer: Tracer, sampler: Sampler) extends Tracer 
     new Record(
       traceId,
       Time.now,
-      FinagleAnnotation.BinaryAnnotation("zipkin.sampling_rate", sampler.sampleRate.toString),
+      FinagleAnnotation.BinaryAnnotation("zipkin.sampling_rate", sampler.sampleRate.toDouble),
       None)
   }
 

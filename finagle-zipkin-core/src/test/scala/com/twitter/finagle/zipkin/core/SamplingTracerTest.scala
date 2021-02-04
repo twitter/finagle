@@ -60,7 +60,7 @@ class SamplingTracerTest extends FunSuite with MockitoSugar with ScalaCheckDrive
     val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
     assert(tracer.sampleTrace(id) == Some(true))
-    val expected = Seq(("zipkin.sampling_rate", s"$sampleRate"))
+    val expected = Seq(("zipkin.sampling_rate", sampleRate.toDouble))
     val actual = underlying.iterator.toList collect {
       case Record(_, _, com.twitter.finagle.tracing.Annotation.BinaryAnnotation(k, v), _) => k -> v
     }
