@@ -754,7 +754,7 @@ class MethodBuilderTest extends FunSuite with Eventually {
     assert(mbToString.startsWith("MethodBuilder("))
     assert(mbToString.contains("dest=Set(Inet("))
     assert(mbToString.contains("stack=Node("))
-    assert(mbToString.contains("params=Stack.Params."))
+    assert(mbToString.contains("params=Stack.Params.") || mbToString.contains("params=Iterable"))
     assert(mbToString.contains("config=Config("))
     server.close()
   }
