@@ -168,6 +168,8 @@ private[serverset2] class ZkSession(
                 u() = Activity.Failed(new Exception("" + sessionState))
               // Do NOT keep retrying, wait to be reconnected automatically by the underlying session
 
+              case WatchState.SessionState(SessionState.Closed) =>
+
               case WatchState.SessionState(sessionState) =>
                 logger.error(s"Unexpected session state $sessionState. Session: $sessionIdAsHex")
                 u() = Activity.Failed(new Exception("" + sessionState))

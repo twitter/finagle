@@ -171,3 +171,6 @@ Under the \`zkclient\` scope
 
 **session_expired**
   A counter of the number of session expirations.
+
+**session_closed**
+  A counter of the number of closed sessions.
