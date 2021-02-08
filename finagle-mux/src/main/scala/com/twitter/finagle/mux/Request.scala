@@ -24,6 +24,12 @@ object Request {
 
   val empty: Request = Impl(Path.empty, Nil, Buf.Empty)
 
+  /**
+   * Variant to create a [[Request]] which only requires a 'payload' (i.e. [[Request]] 'body'). This
+   * version should likely only be used when testing.
+   */
+  def apply(payload: Buf): Request = apply(Path.empty, Nil, payload)
+
   def apply(dst: Path, payload: Buf): Request = apply(dst, Nil, payload)
 
   def apply(dst: Path, ctxts: Seq[(Buf, Buf)], payload: Buf): Request = Impl(dst, ctxts, payload)
@@ -32,6 +38,12 @@ object Request {
 /** For java compatibility */
 object Requests {
   val empty: Request = Request.empty
+
+  /**
+   * Variant to create a [[Request]] which only requires a 'payload' (i.e. [[Request]] 'body'). This
+   * version should likely only be used when testing.
+   */
+  def make(payload: Buf): Request = make(Path.empty, Nil, payload)
 
   def make(dst: Path, payload: Buf): Request = make(dst, Nil, payload)
 

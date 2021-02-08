@@ -20,6 +20,10 @@ New Features
   Tying a `Name` directly to a `Service` can be extremely useful for testing the functionality
   of a Finagle client. ``PHAB_ID=D605745``
 
+* finagle-mux: Added variant of `c.t.f.mux.Request.apply` and `c.t.f.mux.Requests.make` which takes
+  only the body of the `Request` (in the form of `c.t.io.Buf`) as a parameter. This is useful for
+  when the path value of a `Request` is not used by the server (e.g. testing). ``PHAB_ID=D613686``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
