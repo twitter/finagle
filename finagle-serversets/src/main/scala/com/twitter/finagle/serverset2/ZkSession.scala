@@ -168,6 +168,10 @@ private[serverset2] class ZkSession(
                 u() = Activity.Failed(new Exception("" + sessionState))
               // Do NOT keep retrying, wait to be reconnected automatically by the underlying session
 
+              case WatchState.SessionState(SessionState.Closed) =>
+              // The Closed state is introduced in ZK 3.5.5 but for version compatibility,
+              // we do nothing here, adding this case to not break OSS usages for now. Would
+              // be great to re-evaluate the action once ZK is upgraded to or beyond 3.5.5.
               case WatchState.SessionState(sessionState) =>
                 logger.error(s"Unexpected session state $sessionState. Session: $sessionIdAsHex")
                 u() = Activity.Failed(new Exception("" + sessionState))
