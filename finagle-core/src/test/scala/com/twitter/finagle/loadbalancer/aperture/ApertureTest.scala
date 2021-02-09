@@ -598,7 +598,9 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     assert(hash1 == hash3)
 
-    // Permutations have different hash codes
+    // Permutations have different hash codes. First update
+    // with a different list so the rebuild occurs
+    updateWithIps(Vector("1.1.1.1", "1.1.1.3"))
     updateWithIps(Vector("1.1.1.2", "1.1.1.1"))
     val hash4 = getVectorHash
 

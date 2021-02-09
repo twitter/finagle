@@ -201,6 +201,24 @@ class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropert
     assert(rems() == 1)
   }
 
+  test("prevent rebuilds on updates with no changes") {
+    val bal = new TestBalancer
+    val f1, f2 = newFac()
+
+    bal.update(Vector(f1, f2))
+    assert(bal.stats.counters(Seq("rebuilds")) == 1)
+    assert(bal.stats.counters(Seq("updates")) == 1)
+
+    bal.update(Vector(f2, f1))
+    assert(bal.stats.counters(Seq("rebuilds")) == 1)
+    assert(bal.stats.counters(Seq("updates")) == 2)
+
+    val f3 = newFac()
+    bal.update(Vector(f1, f2, f3))
+    assert(bal.stats.counters(Seq("rebuilds")) == 2)
+    assert(bal.stats.counters(Seq("updates")) == 3)
+  }
+
   test("update order and element caching") {
     val bal = new TestBalancer
     val f1, f2, f3 = newFac()

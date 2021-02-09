@@ -41,7 +41,7 @@ private[finagle] object TrafficDistributor {
     eagerEviction: Boolean
   ): Event[Activity.State[Set[AddressedFactory[Req, Rep]]]] = {
     val init = Map.empty[Address, AddressedFactory[Req, Rep]]
-    safelyScanLeft(init, addrs.run.changes) {
+    safelyScanLeft(init, addrs.run.changes.dedup) {
       case (active, addrs) =>
         // Note, if an update contains multiple `Address` instances that are the same
         // with duplicate `weight` metadata, only one of the instances and its associated

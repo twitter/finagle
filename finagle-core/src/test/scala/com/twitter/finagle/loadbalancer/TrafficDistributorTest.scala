@@ -381,12 +381,14 @@ class TrafficDistributorTest extends FunSuite {
       assert(balancers.head.endpoints.sample() == stale)
     }
 
+    // We add an endpoint as the TrafficDistributor dedups
+    val nextUpdate = update + Address(9)
     resetCounters()
     endpointStatus = Status.Busy
-    dest() = Activity.Ok(update)
-    assert(newEndpointCalls == 0)
+    dest() = Activity.Ok(nextUpdate)
+    assert(newEndpointCalls == 1)
     assert(newBalancerCalls == 0)
-    assert(balancers.head.endpoints.sample() == update.map(AddressFactory))
+    assert(balancers.head.endpoints.sample() == nextUpdate.map(AddressFactory))
   })
 
   test("transitions between activity states")(new Ctx {
@@ -603,22 +605,21 @@ class TrafficDistributorTest extends FunSuite {
     // numWeightClasses is the number of balancers emitted by the partition.
     assert(numWeightClasses(sr) == 1.toFloat)
 
-    // New balancer created for each update with an empty endpoint set. Each
-    // time we create a new balancer, we close the previous balancer. The
-    // assert on closeBalancerCalls would fail if we created the "empty"
-    // balancer outside of the scanLeft.
-    assert(newBalancerCalls == 3)
-    assert(closeBalancerCalls == 2)
+    // The TrafficDistributor ignores the subsequent duplicate updates with
+    // the empty endpoint sets. The same balancer is reused.
+    assert(newBalancerCalls == 1)
+    assert(closeBalancerCalls == 0)
 
-    // Finally, we give the distributor an endpoint.
+    // Finally, we give the distributor an endpoint. The balancer created from
+    // the stream of empty updates is closed.
     dest() = Activity.Ok(weightClass(2.0, 100))
     await(dist())
 
     // Verify that there's still one balancer in the distribution, because we
     // close the "empty" balancer.
     assert(numWeightClasses(sr) == 1.toFloat)
-    assert(newBalancerCalls == 4)
-    assert(closeBalancerCalls == 3)
+    assert(newBalancerCalls == 2)
+    assert(closeBalancerCalls == 1)
   })
 
   trait UpdatePartitionMapCtx {

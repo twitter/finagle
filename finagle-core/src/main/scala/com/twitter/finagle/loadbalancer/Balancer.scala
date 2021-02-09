@@ -167,22 +167,27 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
       mutable.HashMap(dist.vector.map(factoryToNode): _*)
 
     var numAdded: Int = 0
-
     for (factory <- newFactories) {
-      if (oldFactories.contains(factory)) {
-        transferred += oldFactories(factory)
-        oldFactories.remove(factory)
-      } else {
-        transferred += newNode(factory)
-        numAdded += 1
+      oldFactories.remove(factory) match {
+        case Some(f) =>
+          transferred += f
+        case None =>
+          transferred += newNode(factory)
+          numAdded += 1
       }
     }
+    val numRemoved = oldFactories.size
 
-    removes.incr(oldFactories.size)
+    removes.incr(numRemoved)
     adds.incr(numAdded)
 
-    dist = dist.rebuild(transferred.result())
-    rebuilds.incr()
+    // It isn't contractual that `newFactories` must have new or removed endpoints from the
+    // current serverset. Lets guard against unnecessarily rebuilding here if no endpoints
+    // have been added or removed.
+    if (numAdded > 0 || numRemoved > 0) {
+      dist = dist.rebuild(transferred.result())
+      rebuilds.incr()
+    }
   }
 
   /**
