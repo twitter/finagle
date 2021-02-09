@@ -13,7 +13,8 @@ import scala.language.reflectiveCalls
 class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropertyChecks {
 
   private class TestBalancer(
-    protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver)
+    protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver,
+    singletonDistributor: Boolean = false)
       extends Balancer[Unit, Unit] {
 
     def maxEffort: Int = 5
@@ -34,13 +35,14 @@ class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropert
 
     def rebuildDistributor(): Unit = {}
 
-    case class Distributor(vec: Vector[Node], gen: Int = 1) extends DistributorT[Node](vec) {
+    case class Distributor(vec: Vector[Node], singleton: Boolean, gen: Int = 1)
+        extends DistributorT[Node](vec) {
       type This = Distributor
       def pick(): Node = vector.head
-      def rebuild(): This = {
-        rebuildDistributor()
-        copy(gen = gen + 1)
-      }
+      def rebuild(): This =
+        if (singleton) this
+        else rebuild(vec)
+
       def rebuild(vector: Vector[Node]): This = {
         rebuildDistributor()
         copy(vector, gen = gen + 1)
@@ -61,7 +63,7 @@ class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropert
     protected def newNode(factory: EndpointFactory[Unit, Unit]): Node = new Node(factory)
     protected def failingNode(cause: Throwable): Node = ???
 
-    protected def initDistributor(): Distributor = Distributor(Vector.empty)
+    protected def initDistributor(): Distributor = Distributor(Vector.empty, singletonDistributor)
   }
 
   def newFac(_status: Status = Status.Open) = new EndpointFactory[Unit, Unit] {
@@ -133,6 +135,36 @@ class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropert
     assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
   }
 
+  test("max_effort_exhausted: rebuilds increments for a new distributor") {
+    val bal = new TestBalancer()
+    val closed = newFac(Status.Closed)
+    assert(bal._dist().gen == 1)
+
+    bal.update(Vector(closed))
+    assert(bal._dist().gen == 2)
+    assert(1 == bal.stats.counters(Seq("rebuilds")))
+
+    bal(ClientConnection.nil)
+    assert(bal._dist().gen == 3)
+    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
+    assert(2 == bal.stats.counters(Seq("rebuilds")))
+  }
+
+  test("max_effort_exhausted: accounts for no-op rebuild") {
+    val bal = new TestBalancer(singletonDistributor = true)
+    val closed = newFac(Status.Closed)
+    assert(bal._dist().gen == 1)
+
+    bal.update(Vector(closed))
+    assert(bal._dist().gen == 2)
+    assert(1 == bal.stats.counters(Seq("rebuilds")))
+
+    bal(ClientConnection.nil)
+    assert(bal._dist().gen == 2)
+    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("rebuilds")))
+  }
+
   test("updater: keeps nodes up to date") {
     val bal = new TestBalancer
     val f1, f2, f3 = newFac()
@@ -196,5 +228,4 @@ class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropert
     Await.result(bal.close(), 5.seconds)
     assert(!registry.allMetadata.exists(_.label == label))
   }
-
 }

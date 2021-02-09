@@ -325,7 +325,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     final def rebuild(): This = rebuild(vector)
 
-    final def rebuild(vec: Vector[Node]): This = {
+    def rebuild(vec: Vector[Node]): This = {
       rebuilt = true
 
       updateVectorHash(vec)
@@ -659,6 +659,17 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // rebuilds only need to happen when we receive ring updates (from
     // the servers or our coordinate changing).
     def needsRebuild: Boolean = false
+
+    // Although `needsRebuild` is set to false, the Balancer will trigger a rebuild
+    // when it exhausts picking busy nodes. Lets explictly return the same distributor
+    // if the coordinates and server set hasn't changed.
+    override def rebuild(newVector: Vector[Node]): This =
+      ProcessCoordinate() match {
+        case Some(newCoord) =>
+          if (newCoord == coord && newVector == vector) this
+          else super.rebuild(newVector)
+        case None => super.rebuild(newVector)
+      }
 
     def additionalMetadata: Map[String, Any] = Map(
       "ring_unit_width" -> ring.unitWidth,

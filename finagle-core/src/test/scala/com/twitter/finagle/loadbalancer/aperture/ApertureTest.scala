@@ -93,7 +93,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
     ProcessCoordinate.setCoordinate(1, 4)
     val stats = new InMemoryStatsReceiver
     val aperture = new ApertureLeastLoaded[Unit, Unit](
-      endpoints = Activity.pending,
+      // we need to hydrate the endpoints to avoid the `EmptyVector` Distributor.
+      endpoints = Activity.value(IndexedSeq(new Factory(0))),
       smoothWin = Duration.Bottom,
       lowLoad = 0,
       highLoad = 0,
@@ -160,6 +161,68 @@ class ApertureTest extends FunSuite with ApertureSuite {
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
     Await.result(aperture.close(), 10.seconds)
     assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
+  }
+
+  test("daperture does not rebuild on max effort exhausted") {
+    val factory = new Factory(0)
+    ProcessCoordinate.setCoordinate(1, 4)
+    val stats = new InMemoryStatsReceiver
+    val aperture = new ApertureLeastLoaded[Unit, Unit](
+      endpoints = Activity.value(IndexedSeq(factory)),
+      smoothWin = Duration.Bottom,
+      lowLoad = 0,
+      highLoad = 0,
+      minAperture = 10,
+      maxEffort = 0,
+      rng = Rng.threadLocal,
+      statsReceiver = stats,
+      label = "",
+      timer = new NullTimer,
+      emptyException = new NoBrokersAvailableException,
+      useDeterministicOrdering = Some(true),
+      withEagerConnections = () => false
+    )
+    assert(stats.counters(Seq("rebuilds")) == 1)
+
+    factory.status = Status.Busy
+    assert(stats.gauges(Seq("size"))() == 1)
+    assert(stats.gauges(Seq("busy"))() == 1)
+    aperture.apply()
+    assert(stats.counters(Seq("max_effort_exhausted")) == 1)
+    assert(stats.counters(Seq("rebuilds")) == 1)
+
+    ProcessCoordinate.unsetCoordinate()
+  }
+
+  test("daperture only rebuilds on coordinate changes") {
+    val factory = new Factory(0)
+    ProcessCoordinate.setCoordinate(1, 4)
+    val stats = new InMemoryStatsReceiver
+    val aperture = new ApertureLeastLoaded[Unit, Unit](
+      endpoints = Activity.value(IndexedSeq(factory)),
+      smoothWin = Duration.Bottom,
+      lowLoad = 0,
+      highLoad = 0,
+      minAperture = 10,
+      maxEffort = 0,
+      rng = Rng.threadLocal,
+      statsReceiver = stats,
+      label = "",
+      timer = new NullTimer,
+      emptyException = new NoBrokersAvailableException,
+      useDeterministicOrdering = Some(true),
+      withEagerConnections = () => false
+    )
+    assert(stats.counters(Seq("rebuilds")) == 1)
+
+    ProcessCoordinate.setCoordinate(1, 4)
+    assert(stats.counters(Seq("rebuilds")) == 1)
+
+    // rebuild only on new change
+    ProcessCoordinate.setCoordinate(1, 5)
+    assert(stats.counters(Seq("rebuilds")) == 2)
+
+    ProcessCoordinate.unsetCoordinate()
   }
 
   test("minAperture <= vector.size") {

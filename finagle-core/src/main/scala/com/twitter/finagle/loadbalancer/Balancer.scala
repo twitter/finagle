@@ -93,8 +93,13 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     val rebuilt = synchronized {
       if (initial != dist) false // someone else rebuild for us so no need for us to do so
       else {
-        dist = dist.rebuild()
-        true
+        val rebuildAttempt = initial.rebuild()
+        if (rebuildAttempt != initial) {
+          dist = rebuildAttempt
+          true
+        } else {
+          false
+        }
       }
     }
 
