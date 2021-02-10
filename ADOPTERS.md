@@ -73,6 +73,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Teads.tv](https://teads.tv/)
 * [Tendril](https://www.tendrilinc.com/)
 * [Threat Stack](https://www.threatstack.com/)
+* [Tinkoff](https://tinkoff.ru)
 * [Tinder](https://www.tinder.com/)
 * [Tradeshift](https://tradeshift.com/)
 * [Tumblr](https://www.tumblr.com/)
