@@ -321,7 +321,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     /**
      * A flag indicating that this distributor has been discarded due to a rebuild.
      */
-    @volatile private var rebuilt: Boolean = false
+    @volatile private[this] var rebuilt: Boolean = false
 
     final def rebuild(): This = rebuild(vector)
 
@@ -346,27 +346,32 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       }
 
       if (self.eagerConnections) {
-        dist.doEagerlyConnect()
+        val oldNodes = indices.map(vector(_))
+        dist.doEagerlyConnect(oldNodes)
       }
 
       dist
     }
 
     /**
-     * Eagerly connects to the endpoints within the aperture. The connections created are
+     * Eagerly connects to the new endpoints within the aperture. The connections created are
      * out of band without any timeouts. If an in-flight request picks a host that has no
      * established sessions, a request-driven connection will be established.
      */
-    private def doEagerlyConnect(): Unit = {
+    private def doEagerlyConnect(oldNodes: Set[Node]): Unit = {
       val is = indices
       if (rebuildLog.isLoggable(Level.DEBUG)) {
-        rebuildLog.debug(s"establishing ${is.size} eager connections")
+        val newEndpoints = is.count(i => !oldNodes.contains(vector(i)))
+        rebuildLog.debug(s"establishing $newEndpoints eager connections")
       }
 
       is.foreach { i =>
-        ApertureEagerConnections.submit {
-          if (rebuilt) Future.Done
-          else vector(i).apply().flatMap { svc => svc.close() }
+        val node = vector(i)
+        if (!oldNodes.contains(node)) {
+          ApertureEagerConnections.submit {
+            if (rebuilt) Future.Done
+            else node().flatMap(svc => svc.close())
+          }
         }
       }
     }
@@ -540,16 +545,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       ring.range(coord.offset, width)
     }
 
-    def indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
+    override val indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
 
-    private[this] def nodes: Seq[(Int, Double, Address, Status)] = {
-      val offset = coord.offset
-      val width = apertureWidth
-      val indices = ring.indices(offset, width)
+    private[this] def nodes: Set[(Int, Double, Address, Status)] = {
       indices.map { i =>
         val factory = vector(i).factory
         val addr = factory.address
-        val weight = ring.weight(i, offset, width)
+        val weight = ring.weight(i, coord.offset, apertureWidth)
         val status = factory.status
         (i, weight, addr, status)
       }
@@ -580,9 +582,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // host add/removes).
     if (rebuildLog.isLoggable(Level.DEBUG)) {
       val apertureSlice: String = {
-        val offset = coord.offset
-        val width = apertureWidth
-        val indices = ring.indices(offset, width)
         nodes
           .map {
             case (i, weight, addr, status) =>

@@ -6,7 +6,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
-import com.twitter.util.{Activity, Await, Duration, NullTimer}
+import com.twitter.util.{Activity, Await, Duration, NullTimer, Var}
 import java.net.InetSocketAddress
 import org.scalactic.source.Position
 import org.scalatest.{FunSuite, Tag}
@@ -161,6 +161,34 @@ class ApertureTest extends FunSuite with ApertureSuite {
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
     Await.result(aperture.close(), 10.seconds)
     assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
+  }
+
+  test("eagerly connects to only new endpoints in the aperture") {
+    val factories = IndexedSeq(new Factory(0), new Factory(1))
+    val endpoints = Var(Activity.Ok(factories))
+
+    ProcessCoordinate.setCoordinate(instanceId = 0, totalInstances = 1)
+    val aperture = new ApertureLeastLoaded[Unit, Unit](
+      endpoints = Activity(endpoints),
+      smoothWin = Duration.Bottom,
+      lowLoad = 0,
+      highLoad = 0,
+      minAperture = 10,
+      maxEffort = 0,
+      rng = Rng.threadLocal,
+      statsReceiver = NullStatsReceiver,
+      label = "",
+      timer = new NullTimer,
+      emptyException = new NoBrokersAvailableException,
+      useDeterministicOrdering = Some(true),
+      withEagerConnections = () => true
+    )
+    assert(factories.forall(_.total == 1))
+
+    val newEndpoint = new Factory(2)
+    endpoints.update(Activity.Ok(factories :+ newEndpoint))
+    assert(newEndpoint.total == 1)
+    assert(factories.forall(_.total == 1))
   }
 
   test("daperture does not rebuild on max effort exhausted") {
