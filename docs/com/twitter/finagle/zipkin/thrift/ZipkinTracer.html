@@ -668,13 +668,7 @@ If <a href="../../tracing/TraceId.html#sampled:Option[Boolean]" class="extmbr" n
         <span class="name">sampleTrace</span><span class="params">(<span name="traceId">traceId: <a href="../../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Should we sample this trace or not? Could be decided
-that a percentage of all traces will be let through for example.</p><div class="fullcomment"><div class="comment cmt"><p>Should we sample this trace or not? Could be decided
-that a percentage of all traces will be let through for example.
-True: keep it
-False: false throw the data away
-None: i'm going to defer making a decision on this to the child service
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/SamplingTracer.html" class="extype" name="com.twitter.finagle.zipkin.core.SamplingTracer">SamplingTracer</a> → <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Tracer.SomeTrue">Tracer.SomeTrue</span> and <span class="extype" name="Tracer.SomeFalse">Tracer.SomeFalse</span> as constant return values.</p></span></dd></dl></div>
+      <p class="shortcomment cmt">Makes the sampling decision and records the sampling rate if we're tracing</p><div class="fullcomment"><div class="comment cmt"><p>Makes the sampling decision and records the sampling rate if we're tracing</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../core/SamplingTracer.html" class="extype" name="com.twitter.finagle.zipkin.core.SamplingTracer">SamplingTracer</a> → <a href="../../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></dd><dt>Note</dt><dd><span class="cmt"><p>sampleTrace should only be called when the tracing decision has not already been made</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.zipkin.core.SamplingTracer#setSampleRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setSampleRate(sampleRate:Float):Unit"></a><a id="setSampleRate(Float):Unit"></a>
       <span class="permalink">

@@ -1610,6 +1610,38 @@ the current request-local delegation table.</p></div><dl class="attributes block
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Name#bound" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bound[Req,Rep](service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.Name.Bound"></a><a id="bound[Req,Rep](Service[Req,Rep]):Bound"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Name$.html#bound[Req,Rep](service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.Name.Bound" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bound</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Name.bound.Req">Req</span>, <span class="extype" name="com.twitter.finagle.Name.bound.Rep">Rep</span>]</span>)</span><span class="result">: <a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a pre-bound <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> which points directly to the provided <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a pre-bound <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> which points directly to the provided <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This method can be extremely useful in testing the functionality of a Finagle
+client without involving the network.</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
+<span class="kw">import</span> com.twitter.finagle.{Http, Name, Service}
+<span class="kw">import</span> com.twitter.finagle.http.{Request, Response, Status}
+<span class="kw">import</span> com.twitter.util.{Await, Future}
+
+<span class="kw">val</span> service: Service[Request, Response] = Service.mk { request <span class="kw">=&gt;</span>
+  <span class="kw">val</span> response = Response()
+  response.status = Status.Ok
+  response.contentString = <span class="lit">"Hello"</span>
+  Future.value(response)
+}
+<span class="kw">val</span> name = Name.bound(service)
+<span class="kw">val</span> client = Http.client.newService(name, <span class="lit">"hello-service-example"</span>)
+<span class="kw">val</span> result = Await.result(client(Request(<span class="lit">"/"</span>)), <span class="num">1.</span>second)
+result.contentString <span class="cmt">// "Hello"</span></pre></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.Name#bound" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="bound(addrs:com.twitter.finagle.Address*):com.twitter.finagle.Name.Bound"></a><a id="bound(Address*):Bound"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Name$.html#bound(addrs:com.twitter.finagle.Address*):com.twitter.finagle.Name.Bound" title="Permalink">
@@ -1624,7 +1656,7 @@ the current request-local delegation table.</p></div><dl class="attributes block
         <span class="name">bound</span><span class="params">(<span name="addrs">addrs: <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>*</span>)</span><span class="result">: <a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a pre-bound address.</p><div class="fullcomment"><div class="comment cmt"><p>Create a pre-bound address.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Names$.html#bound(addrs:com.twitter.finagle.Address*):com.twitter.finagle.Name.Bound" class="extmbr" name="com.twitter.finagle.Names#bound">Names.bound</a> for Java compatibility.</p></span></dd></dl></div>
+      <p class="shortcomment cmt">Create a pre-bound address.</p><div class="fullcomment"><div class="comment cmt"><p>Create a pre-bound address.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Names$.html#bound[Req,Rep](service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.Name.Bound" class="extmbr" name="com.twitter.finagle.Names#bound">Names.bound</a> for Java compatibility.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">

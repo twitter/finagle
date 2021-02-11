@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Compression &#8212; Finagle 21.1.0 documentation</title>
+    <title>Compression &#8212; Finagle 21.2.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '21.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,8 +33,7 @@
 
   </script>
 
-  </head>
-  <body>
+  </head><body>
   
   
 
@@ -87,7 +79,7 @@ clients will decompress the messages it knows how to decompress automatically.</
 will only compress messages with text-like <a href="#id3"><span class="problematic" id="id4">`</span></a>Content-Type`s.  Although the HTTP
 spec does not officially support server-side decompression, some clients can
 send compressed HTTP requests, so we support that behavior.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 
 <span class="k">def</span> <span class="n">bigPayloadService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
@@ -137,7 +129,7 @@ be) using the specified compression formats.</p>
 <p>The default configured compression format is <cite>Off</cite>, so enabling compression
 means that you need to configure it as <cite>Accepted</cite> or <cite>Desired</cite> as appropriate.
 Here’s what configuring it looks like:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.mux.transport.</span><span class="o">{</span><span class="nc">Compression</span><span class="o">,</span> <span class="nc">CompressionLevel</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">compressor</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="nc">Compression</span><span class="o">.</span><span class="n">lz4Compressor</span><span class="o">(</span><span class="n">highCompression</span> <span class="k">=</span> <span class="kc">false</span><span class="o">))</span>
@@ -178,7 +170,7 @@ would like to use compression, you should add a dependency on the
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Compression</a><ul>
 <li><a class="reference internal" href="#http">HTTP</a></li>

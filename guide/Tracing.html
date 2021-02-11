@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Tracing &#8212; Finagle 21.1.0 documentation</title>
+    <title>Tracing &#8212; Finagle 21.2.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '21.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,8 +33,7 @@
 
   </script>
 
-  </head>
-  <body>
+  </head><body>
   
   
 
@@ -75,7 +67,7 @@
 <p>By default Finagle uses a <cite>DefaultTracer</cite> which will load implementations from included artifacts using the Java <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>. Out of the box, adding the finagle-zipkin-scribe package to your classpath will enable sending tracing spans to zipkin via the <a class="reference external" href="http://go/scribe">scribe</a> protocol.</p>
 <p>You can replicate this functionality and globally install a tracer by including an artifact with a service loaded <cite>Tracer</cite>. Your implementation must implement the <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/tracing/Tracer.scala">Tracer</a> API and follow the requirements necessary to be loaded by the <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html">ServiceLoader</a>.</p>
 <p>Furthermore, tracers can be overridden in code, they may be specified when creating a client or server. In the following example we replace the default tracer with our own <cite>BroadcastTracer</cite> which will send traces both to zipkin, via scribe, as well as to the console:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.</span><span class="o">{</span><span class="nc">BroadcastTracer</span><span class="o">,</span> <span class="nc">Record</span><span class="o">,</span> <span class="nc">TraceId</span><span class="o">,</span> <span class="nc">Tracer</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.zipkin.thrift.ZipkinTracer</span>
 
@@ -93,7 +85,7 @@
 </div>
 <p>We also supply a <cite>NullTracer</cite> which will not write trace messages anywhere.  However, even if <cite>NullTracer</cite> is passed to <cite>withTracer</cite>, Finagle clients will continue to propagate trace information.  This can have the surprising side effect of orphaning traces if the traces are being aggregated in a distributed tracing service like Zipkin, so we generally discourage people from using <cite>NullTracer</cite> in production.</p>
 <p>Information about active traces is located within the Finagle <a class="reference external" href="Context">Context</a>. The Trace API is a convenient way of accessing the currently active traces for a request and provides the ability to manipulate them with operations such as adding custom annotations.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">SimpleFilter</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
@@ -145,7 +137,7 @@
 <h2>Tracing<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>In general you can use any method from the <cite>Trace</cite> API to add annotations to the current tracing context. This allows you to annotate events or information happening at the time a request is being made or processed.</p>
 <p>Each request operates within the scope of a span, which is created when the request is received or an initial request is made. In some cases it may be advantageous to segment parts of processing a request into their own discrete events. You can do this by generating local spans; these spans exist completely within a single process. This is useful when understanding the relationship between local computation and external requests as well as relative timing and duration of these operations to each other. Local spans can be created with the <cite>Trace#traceLocal</cite> methods.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
 
 <span class="k">def</span> <span class="n">chainOfEvents</span><span class="o">()</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="o">???</span>
 
@@ -156,7 +148,7 @@
 </pre></div>
 </div>
 <p>Furthermore, operations can be timed and the result recorded within the trace context:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Trace</span>
 
 <span class="k">def</span> <span class="n">complexComputation</span><span class="o">()</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="o">???</span>
 
@@ -339,6 +331,13 @@
 <p>Record when a retry has occurred</p>
 </div>
 </div>
+<div class="section" id="samping">
+<h3>Samping<a class="headerlink" href="#samping" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="zipkin-sampling-rate-samplingtracer">
+<h4>zipkin.sampling_rate (<cite>SamplingTracer</cite>)<a class="headerlink" href="#zipkin-sampling-rate-samplingtracer" title="Permalink to this headline">¶</a></h4>
+<p>Record the sampling rate at trace roots</p>
+</div>
+</div>
 <div class="section" id="timeout">
 <h3>Timeout<a class="headerlink" href="#timeout" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="finagle-timeout-timeoutfilter">
@@ -388,7 +387,7 @@
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Tracing</a><ul>
 <li><a class="reference internal" href="#configuration">Configuration</a></li>
@@ -437,6 +436,10 @@
 </li>
 <li><a class="reference internal" href="#retry">Retry</a><ul>
 <li><a class="reference internal" href="#finagle-retry-retryfilter">finagle.retry (<cite>RetryFilter</cite>)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#samping">Samping</a><ul>
+<li><a class="reference internal" href="#zipkin-sampling-rate-samplingtracer">zipkin.sampling_rate (<cite>SamplingTracer</cite>)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#timeout">Timeout</a><ul>

@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Threading Model &#8212; Finagle 21.1.0 documentation</title>
+    <title>Threading Model &#8212; Finagle 21.2.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '21.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,8 +33,7 @@
 
   </script>
 
-  </head>
-  <body>
+  </head><body>
   
   
 
@@ -80,7 +72,7 @@ even one of them may affect multiple clients and servers. While it’s recommend
 defaults (numerous experiments showed they are good), it’s possible to override the worker pool size
 with a command line flag.</p>
 <p>The following sets the worker pool size to 24.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">24</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">24</span>
 </pre></div>
 </div>
 <div class="section" id="i-o-thread-affinity">
@@ -116,7 +108,7 @@ complexity. Scala’s <cite>permutations</cite> operation can serve a good examp
 running time. As implemented below, such a server would have a hard time staying responsive as its
 I/O threads would be constantly busy (blocked) calculating permutations as opposed to serving
 networking events.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
@@ -133,7 +125,7 @@ networking events.</p>
 <p>A comparably bad thing can happen to clients too. Running <cite>permutations</cite> as part of any callback
 (<cite>flatMap</cite>, <cite>onSuccess</cite>, <cite>onFailure</cite>, etc)  on a <cite>Future</cite> returned from a client has the exact same
 effect - it saturates an I/O thread.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 
 <span class="k">def</span> <span class="n">process</span><span class="o">(</span><span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
@@ -170,14 +162,14 @@ service given its traffic profile and resource allocation.</p>
 that’s scheduled in the underlying <a class="reference external" href="https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ExecutorService.html">ExecutorService</a>. They come in handy for offloading the I/O
 threads in Finagle while preserving the first-class support to Twitter Futures (interrupts, locals).</p>
 <p>Offloading can be done on per-method (endpoint) basis:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Future</span><span class="o">,</span> <span class="nc">FuturePool</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Future</span><span class="o">,</span> <span class="nc">FuturePool</span><span class="o">}</span>
 
 <span class="k">def</span> <span class="n">offloadedPermutations</span><span class="o">(</span><span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">pool</span><span class="k">:</span> <span class="kt">FuturePool</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
   <span class="n">pool</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="n">permutations</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;\n&quot;</span><span class="o">))</span>
 </pre></div>
 </div>
 <p>As well as per entire client or server:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.FuturePool</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.FuturePool</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">Http.Server</span> <span class="o">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
@@ -188,7 +180,7 @@ threads in Finagle while preserving the first-class support to Twitter Futures (
 </pre></div>
 </div>
 <p>Or per entire application (JVM process), using command-line flags:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">14</span> <span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">10</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">14</span> <span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">10</span>
 </pre></div>
 </div>
 </div>
@@ -211,7 +203,7 @@ threads in Finagle while preserving the first-class support to Twitter Futures (
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Threading Model</a><ul>
 <li><a class="reference internal" href="#i-o-thread-affinity">I/O Thread Affinity</a></li>

@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Twitter Futures &#8212; Finagle 21.1.0 documentation</title>
+    <title>Twitter Futures &#8212; Finagle 21.2.0 documentation</title>
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '21.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -40,8 +33,7 @@
 
   </script>
 
-  </head>
-  <body>
+  </head><body>
   
   
 
@@ -115,12 +107,12 @@ that the stack traces aren’t as useful (in practice we sometimes “run it now
 </dl>
 <p>To illustrate this, imagine that we’re doing three pieces of work, doWorkA, doWorkB, doWorkC.</p>
 <p>We write it as:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>Future.value(doWorkA()).map { a =&gt; doWorkB(a) }.map { b =&gt; doWorkC(b) }
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Future.value(doWorkA()).map { a =&gt; doWorkB(a) }.map { b =&gt; doWorkC(b) }
 </pre></div>
 </div>
 <p>So what does this turn into at run time?  The answer is different depending upon which model we have for Future.</p>
 <p>With Scala, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>val executor = new ForkJoinPool(2 /* parallelism */)
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>val executor = new ForkJoinPool(2 /* parallelism */)
 val a = doWorkA()
 executor.submit(new Runnable() { def run(): Unit = {
   val b = doWorkB(a)
@@ -129,7 +121,7 @@ executor.submit(new Runnable() { def run(): Unit = {
 </pre></div>
 </div>
 <p>With Java, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>def workA(): C = {
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>def workA(): C = {
   val a = doWorkA()
   workB(a)
 }
@@ -144,7 +136,7 @@ workA()
 </pre></div>
 </div>
 <p>With Twitter, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>val a = doWorkA()
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>val a = doWorkA()
 val b = doWorkB(a)
 doWorkC(b)
 </pre></div>
@@ -220,7 +212,7 @@ constructed explicitly by saying <cite>Promise.attached(underlying)</cite> like 
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <h3><a href="../index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Twitter Futures</a><ul>
 <li><a class="reference internal" href="#history">History</a></li>

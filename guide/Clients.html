@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Clients &#8212; Finagle 21.1.0 documentation</title>
+    <title>Clients &#8212; Finagle 21.2.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '21.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,8 +33,7 @@
 
   </script>
 
-  </head>
-  <body>
+  </head><body>
   
   
 
@@ -73,14 +65,14 @@ construction. The following API supports the creation of both stateful and state
 You want a stateful client if you require requests and response sequences over the same connection.
 The following illustrates the difference.</p>
 <p>Constructor for a <strong>stateless</strong> client:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">newService</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">newService</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
 </pre></div>
 </div>
 <p>That is, given a logical destination and an identifier, return a function that produces
 a typed <cite>Service</cite> over which requests can be dispatched. Dispatched requests will be
 load balanced across all of the resolved hosts utilizing Finagle’s configured load balancer.</p>
 <p>An alternative constructor for a <strong>stateful</strong> client producing a typed <cite>ServiceFactory</cite>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">newClient</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">newClient</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
 </pre></div>
 </div>
 <p>Each <cite>Service</cite> acquired from the returned <cite>ServiceFactory</cite> represents a distinct session. Requests
@@ -89,7 +81,7 @@ occurs only per-session, <cite>ServiceFactory.apply</cite>, while per-request on
 the configured <a class="reference internal" href="#pooling">Pooling</a> strategy, <cite>Service.close</cite> typically returns its connection to
 the pool and does not cut the connection. As a result, it is important to close sessions after use
 to avoid resource leaks. For example:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">ServiceFactory</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">ServiceFactory</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
@@ -115,9 +107,9 @@ to avoid resource leaks. For example:</p>
 <h2>Client Protocol Implementation<a class="headerlink" href="#client-protocol-implementation" title="Permalink to this headline">¶</a></h2>
 <p>As of <a class="reference internal" href="changelog.html"><span class="doc">6.x</span></a>, client implementations are encouraged to expose
 this interface on a Scala object named after the protocol implementation. This
-results in a uniform way to construct clients, <code class="docutils literal"><span class="pre">Protocol.newClient(...)</span></code> or
-<code class="docutils literal"><span class="pre">Protocol.newService(...)</span></code>. For example:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
+results in a uniform way to construct clients, <code class="docutils literal notranslate"><span class="pre">Protocol.newClient(...)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">Protocol.newService(...)</span></code>. For example:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 
@@ -125,7 +117,7 @@ results in a uniform way to construct clients, <code class="docutils literal"><s
 </pre></div>
 </div>
 <p>Clients can further furnish the resulting <cite>ServiceFactory</cite> with protocol
-specific API’s. A common pattern is to expose a <code class="docutils literal"><span class="pre">newRichClient</span></code> method that
+specific API’s. A common pattern is to expose a <code class="docutils literal notranslate"><span class="pre">newRichClient</span></code> method that
 does exactly this. For cases like Thrift, where IDLs are part of
 the rich API, a more specialized API is exposed. See the protocols section on
 <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">Thrift</span></a> for more details.</p>
@@ -141,7 +133,7 @@ servers (e.g. HTTP, SOCKS5).</p>
 <p>Finagle has robust support for TLS. The most common options such as server validation are accessible
 directly via the <cite>tls</cite> members of <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/param/ClientTransportParams.scala">ClientTransportParams</a>
 as follows:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">twitter</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -153,7 +145,7 @@ as follows:</p>
 <p>Finagle also supports <a class="reference external" href="https://en.wikipedia.org/wiki/SPNEGO">SPNEGO</a> which is an HTTP specific
 extension for negotiating security schemes. A common use case for SPNEGO is for authentication in <a class="reference external" href="https://en.wikipedia.org/wiki/Kerberos_(protocol)">Kerberos</a>
 secured environments.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.SpnegoAuthenticator.ClientFilter</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.SpnegoAuthenticator.Credentials.</span><span class="o">{</span><span class="nc">ClientSource</span><span class="o">,</span> <span class="nc">JAASClientSource</span><span class="o">}</span>
@@ -174,7 +166,7 @@ through web proxy servers in a default Finagle client that might be used with an
 only HTTP(S). See <a class="reference external" href="https://wiki.squid-cache.org/Features/HTTPS">Squid documentation</a> on this feature.</p>
 <p>The following example enables tunneling HTTP traffic through a web proxy server <cite>my-proxy-server.com</cite>
 to <cite>twitter.com</cite>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.client.Transporter</span>
 <span class="k">import</span> <span class="nn">java.net.SocketAddress</span>
@@ -208,7 +200,7 @@ such as failure detection and load balancing.</p>
 traffic, an HTTP(S) proxy should be used instead.</p>
 <p>Use the following CLI flags to enable SOCKS proxy on every Finagle client on a given JVM instance
 (username and password are optional).</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>-com.twitter.finagle.socks.socksProxyHost<span class="o">=</span>localhost <span class="se">\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>-com.twitter.finagle.socks.socksProxyHost<span class="o">=</span>localhost <span class="se">\</span>
 -com.twitter.finagle.socks.socksProxyPort<span class="o">=</span><span class="m">50001</span> <span class="se">\</span>
 -com.twitter.finagle.socks.socksUsername<span class="o">=</span><span class="nv">$TheUsername</span> <span class="se">\</span>
 -com.twitter.finagle.socks.socksPassword<span class="o">=</span><span class="nv">$ThePassword</span>
@@ -398,9 +390,9 @@ behavior of a Finagle client. Client metrics are exported using a
 (see the <a class="reference internal" href="Metrics.html#public-stats"><span class="std std-ref">metrics</span></a> section for more details about specific metric values).</p>
 <p>Unhandled exceptions can be handled by installing a custom
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">MonitorFilter</a> or overriding the default monitor
-instance. The default setting for <code class="docutils literal"><span class="pre">MonitorFilter</span></code> is to log all the unhandled exception onto standard
+instance. The default setting for <code class="docutils literal notranslate"><span class="pre">MonitorFilter</span></code> is to log all the unhandled exception onto standard
 output. To override this, use the following sample.</p>
-<div class="highlight-scala" id="configuring-monitors"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
+<div class="highlight-scala notranslate" id="configuring-monitors"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Monitor</span>
@@ -431,15 +423,15 @@ Concretely, should a request result in a retryable failure on the first attempt,
 retry, this is considered a single successful logical request. By default, a Finagle client’s
 success rate metrics include the individual attempts and this can cause confusion.
 <a class="reference internal" href="MethodBuilder.html#methodbuilder"><span class="std std-ref">MethodBuilder</span></a> offers logical metrics scoped to “logical” for both
-success rate and latency. The deprecated <code class="docutils literal"><span class="pre">ClientBuilder</span></code> code also offers similar metrics
+success rate and latency. The deprecated <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code> code also offers similar metrics
 scoped to “tries”.</p>
 <p>Failures that are known to be safe to retry (for example, exceptions that occurred before the
 bytes were written to the wire and protocol level NACKs) will be automatically retried by Finagle.
-These retries come out of a <code class="docutils literal"><span class="pre">RetryBudget</span></code> that allows for approximately 20% of the total requests
+These retries come out of a <code class="docutils literal notranslate"><span class="pre">RetryBudget</span></code> that allows for approximately 20% of the total requests
 to be retried on top of 10 retries per second in order to accommodate clients that have just started
 issuing requests or clients that have a low rate of requests per second.</p>
 <p>Some failures may also be known as unsafe to retry. If a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a>
-is flagged <code class="docutils literal"><span class="pre">NonRetryable</span></code>, the <cite>Retries</cite> module will not make any attempts to retry the request and
+is flagged <code class="docutils literal notranslate"><span class="pre">NonRetryable</span></code>, the <cite>Retries</cite> module will not make any attempts to retry the request and
 pass along the failure as is. A <cite>NonRetryable</cite> failure may be used in situations where a client
 determines that a service is unhealthy and wishes to signal that the normal pattern of retries should
 be skipped. Additionally, a service may reject a request that is malformed and thus pointless to retry.
@@ -447,14 +439,14 @@ While Finagle respects the <cite>NonRetryable</cite> flag internally, users shou
 when creating retry filters of their own.</p>
 <p>The <cite>Retries</cite> module is configured with two parameters:</p>
 <ol class="arabic simple">
-<li><code class="docutils literal"><span class="pre">RetryBudget</span></code> - determines whether there is available budget to retry a request</li>
-<li><code class="docutils literal"><span class="pre">Stream[Duration]</span></code> - the backoff <a class="footnote-reference" href="#backoff" id="id2">[1]</a> policy used to requeue the failed request</li>
+<li><code class="docutils literal notranslate"><span class="pre">RetryBudget</span></code> - determines whether there is available budget to retry a request</li>
+<li><code class="docutils literal notranslate"><span class="pre">Stream[Duration]</span></code> - the backoff <a class="footnote-reference" href="#backoff" id="id2">[1]</a> policy used to requeue the failed request</li>
 </ol>
-<p>By default, the <code class="docutils literal"><span class="pre">RetryBudget</span></code> allows for about 20% of the total requests to be immediately (no backoff)
+<p>By default, the <code class="docutils literal notranslate"><span class="pre">RetryBudget</span></code> allows for about 20% of the total requests to be immediately (no backoff)
 retried on top of 10 retries per second in order to accommodate clients that have just started issuing
 requests or clients that have a low rate of requests per second.</p>
 <p>To override this default use the following code snippet.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">Backoff</span><span class="o">,</span> <span class="nc">RetryBudget</span><span class="o">}</span>
 
@@ -466,9 +458,9 @@ requests or clients that have a low rate of requests per second.</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The following example <a class="footnote-reference" href="#example" id="id3">[3]</a> shows how to use a factory method <code class="docutils literal"><span class="pre">RetryBudget.apply</span></code> in order to
-construct a new instance of <code class="docutils literal"><span class="pre">RetryBudget</span></code> backed by <em>leaky token bucket</em>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<p>The following example <a class="footnote-reference" href="#example" id="id3">[3]</a> shows how to use a factory method <code class="docutils literal notranslate"><span class="pre">RetryBudget.apply</span></code> in order to
+construct a new instance of <code class="docutils literal notranslate"><span class="pre">RetryBudget</span></code> backed by <em>leaky token bucket</em>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.RetryBudget</span>
 
 <span class="k">val</span> <span class="n">budget</span><span class="k">:</span> <span class="kt">RetryBudget</span> <span class="o">=</span> <span class="nc">RetryBudget</span><span class="o">(</span>
@@ -478,17 +470,17 @@ construct a new instance of <code class="docutils literal"><span class="pre">Ret
 <span class="o">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">RetryBudget</span></code> factory method takes three arguments:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">RetryBudget</span></code> factory method takes three arguments:</p>
 <ol class="arabic simple">
 <li><cite>ttl</cite> - a time to live for deposited tokens</li>
 <li><cite>minRetriesPerSec</cite> - the minimum rate of retries allowed</li>
 <li><cite>percentCanRetry</cite> - the percentage of requests that might be retried</li>
 </ol>
-<p>While the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a> (configured via <code class="docutils literal"><span class="pre">Retries</span></code>)
+<p>While the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a> (configured via <code class="docutils literal notranslate"><span class="pre">Retries</span></code>)
 is inserted into every client’s stack by default so all the failures from the underlying modules will be
 retried, the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RetryFilter.scala">RetryFilter</a> handling application level
 exceptions from the remote server should be applied explicitly.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.util.DefaultTimer</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">RetryBudget</span><span class="o">,</span> <span class="nc">RetryFilter</span><span class="o">,</span> <span class="nc">RetryPolicy</span><span class="o">}</span>
@@ -509,14 +501,14 @@ exceptions from the remote server should be applied explicitly.</p>
 <span class="k">val</span> <span class="n">retryTwitter</span> <span class="k">=</span> <span class="n">retry</span><span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">twitter</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">RetryPolicy</span></code> instance might be constructed in several ways:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">RetryPolicy</span></code> instance might be constructed in several ways:</p>
 <ol class="arabic simple">
-<li><code class="docutils literal"><span class="pre">RetryPolicy.tries</span></code> - retries using jittered backoff <a class="footnote-reference" href="#backoff" id="id4">[1]</a> between the given number
+<li><code class="docutils literal notranslate"><span class="pre">RetryPolicy.tries</span></code> - retries using jittered backoff <a class="footnote-reference" href="#backoff" id="id4">[1]</a> between the given number
 of maximum attempts</li>
-<li><code class="docutils literal"><span class="pre">RetryPolicy.backoff</span></code> - retries using the given backoff <a class="footnote-reference" href="#backoff" id="id5">[1]</a> policy</li>
+<li><code class="docutils literal notranslate"><span class="pre">RetryPolicy.backoff</span></code> - retries using the given backoff <a class="footnote-reference" href="#backoff" id="id5">[1]</a> policy</li>
 </ol>
-<p>The following example <a class="footnote-reference" href="#example" id="id6">[3]</a> constructs an instance of <code class="docutils literal"><span class="pre">RetryPolicy</span></code> using the given backoff value.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Response</span><span class="o">,</span> <span class="nc">Status</span><span class="o">}</span>
+<p>The following example <a class="footnote-reference" href="#example" id="id6">[3]</a> constructs an instance of <code class="docutils literal notranslate"><span class="pre">RetryPolicy</span></code> using the given backoff value.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Response</span><span class="o">,</span> <span class="nc">Status</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">Backoff</span><span class="o">,</span> <span class="nc">RetryPolicy</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Try</span><span class="o">,</span> <span class="nc">Return</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
@@ -530,8 +522,8 @@ of maximum attempts</li>
 <p>See <a class="reference internal" href="Metrics.html#id3"><span class="std std-ref">Retries metrics</span></a> for more details.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">It’s highly recommended to <cite>share</cite> a single instance of <code class="docutils literal"><span class="pre">RetryBudget</span></code> between both
-<code class="docutils literal"><span class="pre">RetryFilter</span></code> and <code class="docutils literal"><span class="pre">RequeueFilter</span></code> to prevent <cite>retry storms</cite>.</p>
+<p class="last">It’s highly recommended to <cite>share</cite> a single instance of <code class="docutils literal notranslate"><span class="pre">RetryBudget</span></code> between both
+<code class="docutils literal notranslate"><span class="pre">RetryFilter</span></code> and <code class="docutils literal notranslate"><span class="pre">RequeueFilter</span></code> to prevent <cite>retry storms</cite>.</p>
 </div>
 </div>
 <div class="section" id="timeouts-expiration">
@@ -539,12 +531,12 @@ of maximum attempts</li>
 <p>Finagle provides timeout facilities with fine granularity:</p>
 <p>The <cite>Session Timeout</cite> module defines a timeout for session acquisition. That is, it defines
 the maximum time allotted to a request to wait for an available service/session. Requests
-that exceed this timeout are failed with a <code class="docutils literal"><span class="pre">ServiceTimeoutException</span></code>. This module is
+that exceed this timeout are failed with a <code class="docutils literal notranslate"><span class="pre">ServiceTimeoutException</span></code>. This module is
 implemented by the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/factory/TimeoutFactory.scala">TimeoutFactory</a></p>
-<p>The default timeout value for the <cite>Session Timeout</cite> module is unbounded (i.e., <code class="docutils literal"><span class="pre">Duration.Top</span></code>),
+<p>The default timeout value for the <cite>Session Timeout</cite> module is unbounded (i.e., <code class="docutils literal notranslate"><span class="pre">Duration.Top</span></code>),
 which simply means it’s disabled. Although, it’s possible to override the default setting with
 stack params <a class="footnote-reference" href="#example" id="id7">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -560,9 +552,9 @@ to cancel the request when a timeout is triggered. With most protocols, if the r
 already been dispatched, the only way to cancel the request is to terminate the connection.
 Note that HTTP/2 and Mux both have first-class support for request cancellation without
 needing to tear down the connection.</p>
-<p>The default timeout for the <cite>Request Timeout</cite> module is unbounded (i.e., <code class="docutils literal"><span class="pre">Duration.Top</span></code>).
+<p>The default timeout for the <cite>Request Timeout</cite> module is unbounded (i.e., <code class="docutils literal notranslate"><span class="pre">Duration.Top</span></code>).
 Here is an example <a class="footnote-reference" href="#example" id="id8">[3]</a> of how to override that default.</p>
-<div class="highlight-scala" id="configuring-timeouts"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate" id="configuring-timeouts"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -585,7 +577,7 @@ after a certain amount of time. The module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p>The default setting for the <cite>Expiration</cite> module is to never expire a session. Here is how
 it can be configured <a class="footnote-reference" href="#example" id="id9">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -597,8 +589,8 @@ it can be configured <a class="footnote-reference" href="#example" id="id9">[3]<
 which a session is considered alive.</p>
 <p>See <a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><span class="std std-ref">Expiration metrics</span></a> for more details.</p>
 <p>Finally, timeouts can be enforced outside of these modules on a per-request level using
-<code class="docutils literal"><span class="pre">Future#within</span></code> or <code class="docutils literal"><span class="pre">Future#raiseWithin</span></code>.  <a class="footnote-reference" href="#raise" id="id10">[4]</a>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<code class="docutils literal notranslate"><span class="pre">Future#within</span></code> or <code class="docutils literal notranslate"><span class="pre">Future#raiseWithin</span></code>.  <a class="footnote-reference" href="#raise" id="id10">[4]</a>:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
@@ -630,8 +622,8 @@ for more details.</p>
 See <a class="reference internal" href="Metrics.html#loadbalancer-stats"><span class="std std-ref">Load Balancing metrics</span></a> for more details.</p>
 <p>Use the following code snippet to override the default load balancing strategy for a particular Finagle
 client (see <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/Balancers.scala">Balancers</a> on how to construct
-instances of <code class="docutils literal"><span class="pre">LoadBalancerFactory</span></code>).</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+instances of <code class="docutils literal notranslate"><span class="pre">LoadBalancerFactory</span></code>).</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.LoadBalancerFactory</span>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span> <span class="o">???</span>
@@ -640,7 +632,7 @@ instances of <code class="docutils literal"><span class="pre">LoadBalancerFactor
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com:8081,twitter.com:8082&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>In addition to the default configuration (i.e., <code class="docutils literal"><span class="pre">Balancers.p2c</span></code>), the following setups are available.</p>
+<p>In addition to the default configuration (i.e., <code class="docutils literal notranslate"><span class="pre">Balancers.p2c</span></code>), the following setups are available.</p>
 <div class="section" id="heap-least-loaded">
 <h4>Heap + Least Loaded<a class="headerlink" href="#heap-least-loaded" title="Permalink to this headline">¶</a></h4>
 <p>The distributor is a heap which is shared across requests. Each node in the heap maintains a count of
@@ -651,8 +643,8 @@ efficient access to the least loaded. The distributor inherits all the nice prop
 This configuration has some limitations. In particular, it’s difficult to use weighted nodes or
 swap out a load metric without sacrificing the performance of the heap. What’s more, the heap must be
 updated atomically by each request and thus represents a highly contended resource.</p>
-<p>Use <code class="docutils literal"><span class="pre">Balancers.heap</span></code> to construct an instance of <code class="docutils literal"><span class="pre">LoadBalancerFactory</span></code>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
+<p>Use <code class="docutils literal notranslate"><span class="pre">Balancers.heap</span></code> to construct an instance of <code class="docutils literal notranslate"><span class="pre">LoadBalancerFactory</span></code>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span> <span class="nc">Balancers</span><span class="o">.</span><span class="n">heap</span><span class="o">()</span>
 </pre></div>
@@ -675,16 +667,16 @@ the least loaded of the two. By repeatedly using this strategy, we can expect a 
 the maximum load of any server <a class="footnote-reference" href="#p2c-bounds" id="id12">[6]</a>. The default load metric for the P2C balancer is least
 loaded, however, because P2C is fully concurrent <a class="footnote-reference" href="#p2c-jmh" id="id13">[7]</a>, it allows us to efficiently implement
 weighted nodes <a class="footnote-reference" href="#weights-api" id="id14">[8]</a> or different load metrics with minimal per-request costs.</p>
-<p>Use <code class="docutils literal"><span class="pre">Balancers.p2c</span></code> to construct an instance of <code class="docutils literal"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id15">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
+<p>Use <code class="docutils literal notranslate"><span class="pre">Balancers.p2c</span></code> to construct an instance of <code class="docutils literal notranslate"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id15">[3]</a>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span> <span class="nc">Balancers</span><span class="o">.</span><span class="n">p2c</span><span class="o">(</span><span class="n">maxEffort</span> <span class="k">=</span> <span class="mi">100</span><span class="o">)</span>
 </pre></div>
 </div>
-<p id="max-effort">The <code class="docutils literal"><span class="pre">maxEffort</span></code> param (default value is 5) from the example above is the maximum amount of “effort”
+<p id="max-effort">The <code class="docutils literal notranslate"><span class="pre">maxEffort</span></code> param (default value is 5) from the example above is the maximum amount of “effort”
 we’re willing to expend on a load balancing decision without rebuilding its internal state. Simply
 speaking this is the number of times a load balancer is able to retry because the previously picked
-node was <em>marked unavailable</em> (i.e., an underlying circuit breaker is activated). If the <code class="docutils literal"><span class="pre">maxEffort</span></code>
+node was <em>marked unavailable</em> (i.e., an underlying circuit breaker is activated). If the <code class="docutils literal notranslate"><span class="pre">maxEffort</span></code>
 is exhausted and the <em>alive</em> node still hasn’t been found, the load balancer will send a request to
 the last picked one.</p>
 </div>
@@ -697,15 +689,15 @@ effectively increasing our resolution per-request. It is designed to react to sl
 the assumption that a loaded endpoint takes time to recover and so it is generally safe for the
 advertised load to incorporate an endpoint’s history. However, this assumption breaks down in the
 presence of long polling clients.</p>
-<p>Use <code class="docutils literal"><span class="pre">Balancers.p2cPeakEwma</span></code> to construct an instance of <code class="docutils literal"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id17">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<p>Use <code class="docutils literal notranslate"><span class="pre">Balancers.p2cPeakEwma</span></code> to construct an instance of <code class="docutils literal notranslate"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id17">[3]</a>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span>
   <span class="nc">Balancers</span><span class="o">.</span><span class="n">p2cPeakEwma</span><span class="o">(</span><span class="n">maxEffort</span> <span class="k">=</span> <span class="mi">100</span><span class="o">,</span> <span class="n">decayTime</span> <span class="k">=</span> <span class="mf">100.</span><span class="n">seconds</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">p2cPeakEwma</span></code> factory method takes two arguments:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">p2cPeakEwma</span></code> factory method takes two arguments:</p>
 <ol class="arabic simple">
 <li><cite>maxEffort</cite> (default: 5) - see <a class="reference internal" href="#max-effort"><span class="std std-ref">P2C’s max effort</span></a></li>
 <li><cite>decayTime</cite> (default: 10 seconds) - the window of latency observations</li>
@@ -736,8 +728,8 @@ clients pay the penalty of session establishment less frequently.</li>
 <li>It increases the efficacy of least-loaded balancing which, in order to
 work well, requires concurrent load.</li>
 </ol>
-<p>Use <code class="docutils literal"><span class="pre">Balancers.aperture</span></code> to construct an instance of <code class="docutils literal"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id19">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<p>Use <code class="docutils literal notranslate"><span class="pre">Balancers.aperture</span></code> to construct an instance of <code class="docutils literal notranslate"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id19">[3]</a>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span>
@@ -750,7 +742,7 @@ work well, requires concurrent load.</li>
   <span class="o">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">aperture</span></code> factory method takes five arguments:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">aperture</span></code> factory method takes five arguments:</p>
 <ol class="arabic simple">
 <li><cite>maxEffort</cite> (default: 5) - see <a class="reference internal" href="#max-effort"><span class="std std-ref">P2C’s max effort</span></a></li>
 <li><cite>smoothWin</cite> (default: 5 seconds) - the window of concurrent load observation</li>
@@ -785,9 +777,9 @@ behind a client parameter <a class="footnote-reference" href="#probation" id="id
 must make a decision. Finagle’s default behavior makes an optimistic decision
 that its view of the nodes may be out-of-date and picks a node it hopes has become available.
 This can be customized to fail the request immediately through
-<code class="docutils literal"><span class="pre">LoadBalancerFactory.WhenNoNodesOpenParam</span></code> which will cause clients to see
-a non-retryable <code class="docutils literal"><span class="pre">c.t.f.loadbalancer.NoNodesOpenException</span></code>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.LoadBalancerFactory.WhenNoNodesOpenParam</span>
+<code class="docutils literal notranslate"><span class="pre">LoadBalancerFactory.WhenNoNodesOpenParam</span></code> which will cause clients to see
+a non-retryable <code class="docutils literal notranslate"><span class="pre">c.t.f.loadbalancer.NoNodesOpenException</span></code>:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.LoadBalancerFactory.WhenNoNodesOpenParam</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.WhenNoNodesOpen</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
@@ -822,11 +814,11 @@ the load balancer above it will avoid its use). The factory becomes available
 again on success or when the back-off schedule runs out.</p>
 <p>This module fails closed and returns an exception when it detects a failure. See the
 FAQ to <a class="reference internal" href="FAQ.html#faq-failedfastexception"><span class="std std-ref">better understand</span></a> why clients might be
-seeing <code class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></code>’s.</p>
+seeing <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.FailedFastException</span></code>’s.</p>
 <p id="disabling-fail-fast">The <cite>Fail Fast</cite> module is enabled by default for all of the Finagle clients except for
-<code class="docutils literal"><span class="pre">Memcached.client</span></code> one. The following example demonstrates how to explicitly disable it for a
+<code class="docutils literal notranslate"><span class="pre">Memcached.client</span></code> one. The following example demonstrates how to explicitly disable it for a
 particular client.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withSessionQualifier</span><span class="o">.</span><span class="n">noFailFast</span>
@@ -856,14 +848,14 @@ again.</p>
 <li>A policy based on the requests success rate meaning (i.e, an endpoint marked dead if its success rate
 goes below the given threshold).</li>
 <li>A policy based on the number of consecutive failures occurred in the endpoint (i.e., an endpoint marked
-dead if there are at least <code class="docutils literal"><span class="pre">N</span></code> consecutive failures occurred in this endpoint)</li>
+dead if there are at least <code class="docutils literal notranslate"><span class="pre">N</span></code> consecutive failures occurred in this endpoint)</li>
 </ol>
 <p>The default setup for the <cite>Failure Accrual</cite> module is a hybrid policy based on the number of consecutive
 failures (default is 5) and required success rate (default is 80%). The policy is accompanied by an equal
 jittered backoff <a class="footnote-reference" href="#backoff" id="id22">[1]</a> (5 to 300 seconds) producing durations for which an endpoint is marked dead.</p>
-<p>Use <code class="docutils literal"><span class="pre">FailureAccrualFactory.Param</span></code> <a class="footnote-reference" href="#experimental" id="id23">[2]</a> to configure Failure Accrual`. The following snippets
+<p>Use <code class="docutils literal notranslate"><span class="pre">FailureAccrualFactory.Param</span></code> <a class="footnote-reference" href="#experimental" id="id23">[2]</a> to configure Failure Accrual`. The following snippets
 illustrate some examples <a class="footnote-reference" href="#example" id="id24">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.liveness.</span><span class="o">{</span><span class="nc">FailureAccrualFactory</span><span class="o">,</span> <span class="nc">FailureAccrualPolicy</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.Backoff</span>
@@ -877,15 +869,15 @@ illustrate some examples <a class="footnote-reference" href="#example" id="id24"
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">successRate</span></code> factory method takes three arguments:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">successRate</span></code> factory method takes three arguments:</p>
 <ol class="arabic simple">
 <li><cite>requiredSuccessRate</cite> - the minimally required success rate below which an endpoint marked dead</li>
 <li><cite>window</cite> - the window of <em>requests</em> to measure success rate on; measured using an exponentially
 weighted moving average</li>
-<li><cite>markDeadFor</cite> - the backoff policy (an instance of <code class="docutils literal"><span class="pre">Stream[Duration]</span></code>) used to mark an endpoint
+<li><cite>markDeadFor</cite> - the backoff policy (an instance of <code class="docutils literal notranslate"><span class="pre">Stream[Duration]</span></code>) used to mark an endpoint
 dead for</li>
 </ol>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.liveness.</span><span class="o">{</span><span class="nc">FailureAccrualFactory</span><span class="o">,</span> <span class="nc">FailureAccrualPolicy</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.Backoff</span>
@@ -900,18 +892,18 @@ dead for</li>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">successRateWithinDuration</span></code> factory method takes four arguments:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">successRateWithinDuration</span></code> factory method takes four arguments:</p>
 <ol class="arabic simple">
 <li><cite>requiredSuccessRate</cite> - the minimally required success rate below which an endpoint is marked dead</li>
 <li><cite>window</cite> - duration over which the success rate is tracked over.</li>
-<li><cite>markDeadFor</cite> - the backoff policy (an instance of <code class="docutils literal"><span class="pre">Stream[Duration]</span></code>) used to mark an endpoint
+<li><cite>markDeadFor</cite> - the backoff policy (an instance of <code class="docutils literal notranslate"><span class="pre">Stream[Duration]</span></code>) used to mark an endpoint
 dead for</li>
-<li><cite>minRequestThreshold</cite> - the minimum number of requests required within the past <code class="docutils literal"><span class="pre">window</span></code> before considering
+<li><cite>minRequestThreshold</cite> - the minimum number of requests required within the past <code class="docutils literal notranslate"><span class="pre">window</span></code> before considering
 the measured success rate</li>
 </ol>
 <p>To configure <cite>Failure Accrual</cite> based on a number of consecutive failures <a class="footnote-reference" href="#experimental" id="id25">[2]</a>, use the
 following snippet <a class="footnote-reference" href="#example" id="id26">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.liveness.</span><span class="o">{</span><span class="nc">FailureAccrualFactory</span><span class="o">,</span> <span class="nc">FailureAccrualPolicy</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.Backoff</span>
@@ -924,22 +916,22 @@ following snippet <a class="footnote-reference" href="#example" id="id26">[3]</a
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">consecutiveFailures</span></code> factory method takes two arguments:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">consecutiveFailures</span></code> factory method takes two arguments:</p>
 <ol class="arabic simple">
 <li><cite>consecutiveFailures</cite> - the number of failures after which an endpoint is marked dead</li>
-<li><cite>markDeadFor</cite> - the backoff policy (an instance of <code class="docutils literal"><span class="pre">Stream[Duration]</span></code>) used to mark an endpoint
+<li><cite>markDeadFor</cite> - the backoff policy (an instance of <code class="docutils literal notranslate"><span class="pre">Stream[Duration]</span></code>) used to mark an endpoint
 dead for</li>
 </ol>
-<p>FailureAccrualPolicys can also be composed together via the <code class="docutils literal"><span class="pre">orElse</span></code> method. If multiple policies return a duration on <cite>markDeadOnFailure()</cite>,
+<p>FailureAccrualPolicys can also be composed together via the <code class="docutils literal notranslate"><span class="pre">orElse</span></code> method. If multiple policies return a duration on <cite>markDeadOnFailure()</cite>,
 the maximum duration is used.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">It’s highly recommended to use <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/Backoff.scala">Backoff</a>
-API for constructing instances of <code class="docutils literal"><span class="pre">Stream[Duration]</span></code> instead of using the error-prone Stream API directly.</p>
+API for constructing instances of <code class="docutils literal notranslate"><span class="pre">Stream[Duration]</span></code> instead of using the error-prone Stream API directly.</p>
 </div>
 <p>Finally, it’s possible to completely disable the <cite>Failure Accrual</cite> module for a given
 client.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withSessionQualifier</span><span class="o">.</span><span class="n">noFailureAccrual</span>
@@ -948,7 +940,7 @@ client.</p>
 </div>
 <p>The module is implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>.
 See <a class="reference internal" href="Metrics.html#failure-accrual-stats"><span class="std std-ref">Failure Accrual Stats</span></a> for stats exported from the
-<code class="docutils literal"><span class="pre">Failure</span> <span class="pre">Accrual</span></code> module.</p>
+<code class="docutils literal notranslate"><span class="pre">Failure</span> <span class="pre">Accrual</span></code> module.</p>
 </div>
 </div>
 <div class="section" id="pooling">
@@ -968,12 +960,12 @@ and caching pools in front of each remote peer.</p>
 pool caches streams (not connections) multiplexed over a single connection.</p>
 </div>
 <p>The default client stack layers caching and watermark pools which amounts to maintaining the low
-watermark (i.e., <code class="docutils literal"><span class="pre">0</span></code>, as long as request concurrency exists), queuing requests above the unbounded high
-watermark (i.e., <code class="docutils literal"><span class="pre">Int.MaxValue</span></code>), and applying an unbounded TTL (i.e., <code class="docutils literal"><span class="pre">Duration.Top</span></code>) for services
+watermark (i.e., <code class="docutils literal notranslate"><span class="pre">0</span></code>, as long as request concurrency exists), queuing requests above the unbounded high
+watermark (i.e., <code class="docutils literal notranslate"><span class="pre">Int.MaxValue</span></code>), and applying an unbounded TTL (i.e., <code class="docutils literal notranslate"><span class="pre">Duration.Top</span></code>) for services
 that are between [low, high].</p>
 <p>The override the default settings for connection pooling in a Finagle client, use the following
 example <a class="footnote-reference" href="#example" id="id27">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -1002,7 +994,7 @@ connection concurrency exceeds the high watermark</li>
 <h4>Buffering Pool<a class="headerlink" href="#buffering-pool" title="Permalink to this headline">¶</a></h4>
 <p>The simplest connection pool implementation available in Finagle is
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/BufferingPool.scala">BufferingPool</a> that just buffers up to
-<code class="docutils literal"><span class="pre">bufferSize</span></code> connections and produces/closes new ones above it. This pool is disabled by
+<code class="docutils literal notranslate"><span class="pre">bufferSize</span></code> connections and produces/closes new ones above it. This pool is disabled by
 default.</p>
 </div>
 <div class="section" id="watermark-pool">
@@ -1036,7 +1028,7 @@ client’s already unhealthy success rate. The filter works by keeping a moving
 average of the fraction of requests that are <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nacked</span></a>. When
 this fraction hits a given threshold, the filter will probabilistically drop
 requests in proportion to that fraction.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -1048,15 +1040,15 @@ requests in proportion to that fraction.</p>
 </div>
 <p>The filter can be configured with the following parameters:</p>
 <ol class="arabic simple">
-<li><code class="docutils literal"><span class="pre">window</span></code> The duration over which the average is calculated. Default is 2
+<li><code class="docutils literal notranslate"><span class="pre">window</span></code> The duration over which the average is calculated. Default is 2
 minutes.</li>
-<li><code class="docutils literal"><span class="pre">nackRateThreshold</span></code> The rate of rejected requests at which the filter kicks
+<li><code class="docutils literal notranslate"><span class="pre">nackRateThreshold</span></code> The rate of rejected requests at which the filter kicks
 in. Default is 0.5.</li>
 </ol>
 <p><a class="reference internal" href="Metrics.html#admission-control-stats"><span class="std std-ref">Related stats</span></a></p>
 <p>Here is a brief summary of the configurable params.</p>
 <blockquote>
-<div>A configuration with a <code class="docutils literal"><span class="pre">nackRateThreshold</span></code> of N% and a <code class="docutils literal"><span class="pre">window</span></code> of duration
+<div>A configuration with a <code class="docutils literal notranslate"><span class="pre">nackRateThreshold</span></code> of N% and a <code class="docutils literal notranslate"><span class="pre">window</span></code> of duration
 W roughly translates as, “start dropping some requests to the cluster when
 the nack rate averages at least N% over a window of duration W.”</div></blockquote>
 <p>Here are some examples of situations with param values chosen to make the
@@ -1092,13 +1084,13 @@ developers can provide classification of responses on clients and servers by usi
 This gives Finagle the proper domain knowledge and improves the efficacy of
 <a class="reference internal" href="#client-failure-accrual"><span class="std std-ref">failure accrual</span></a> and more accurate
 <a class="reference internal" href="Metrics.html#metrics-stats-filter"><span class="std std-ref">success rate stats</span></a>.</p>
-<p>For HTTP clients and servers, using <code class="docutils literal"><span class="pre">HttpResponseClassifier.ServerErrorsAsFailures</span></code> often works
+<p>For HTTP clients and servers, using <code class="docutils literal notranslate"><span class="pre">HttpResponseClassifier.ServerErrorsAsFailures</span></code> often works
 great as it classifies any HTTP 5xx response code as a failure. For Thrift/ThriftMux
-clients and servers you may want to use <code class="docutils literal"><span class="pre">ThriftResponseClassifier.ThriftExceptionsAsFailures</span></code>
+clients and servers you may want to use <code class="docutils literal notranslate"><span class="pre">ThriftResponseClassifier.ThriftExceptionsAsFailures</span></code>
 which classifies any deserialized Thrift Exception as a failure. For a large set of
 use cases these should suffice. Classifiers get wired up to your client and server in a
 straightforward manner, for example, in a ThriftMux client:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.service.ThriftResponseClassifier</span>
 
 <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
@@ -1107,7 +1099,7 @@ straightforward manner, for example, in a ThriftMux client:</p>
 </pre></div>
 </div>
 <p>In an HTTP server:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.service.HttpResponseClassifier</span>
 
 <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
@@ -1116,47 +1108,47 @@ straightforward manner, for example, in a ThriftMux client:</p>
 </pre></div>
 </div>
 <p>If a classifier is not specified on a client or server or if a user’s classifier isn’t
-defined for a given request/response pair then <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code>
+defined for a given request/response pair then <code class="docutils literal notranslate"><span class="pre">ResponseClassifier.Default</span></code>
 is used. This gives us the simple classification rules of responses that are
-<code class="docutils literal"><span class="pre">Returns</span></code> are successful and <code class="docutils literal"><span class="pre">Throws</span></code> are failures.</p>
+<code class="docutils literal notranslate"><span class="pre">Returns</span></code> are successful and <code class="docutils literal notranslate"><span class="pre">Throws</span></code> are failures.</p>
 <div class="section" id="custom-classifiers">
 <h3>Custom Classifiers<a class="headerlink" href="#custom-classifiers" title="Permalink to this headline">¶</a></h3>
-<p><code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is a <code class="docutils literal"><span class="pre">PartialFunction</span></code> from <code class="docutils literal"><span class="pre">ReqRep</span></code> to
-<code class="docutils literal"><span class="pre">ResponseClass</span></code>. Custom classifiers allow the user to tell Finagle what
+<p><code class="docutils literal notranslate"><span class="pre">ResponseClassifier</span></code> is a <code class="docutils literal notranslate"><span class="pre">PartialFunction</span></code> from <code class="docutils literal notranslate"><span class="pre">ReqRep</span></code> to
+<code class="docutils literal notranslate"><span class="pre">ResponseClass</span></code>. Custom classifiers allow the user to tell Finagle what
 constitutes a failed outcome, and also what to do about it. Users define
-classifiers in terms of <code class="docutils literal"><span class="pre">ReqRep</span></code> and <code class="docutils literal"><span class="pre">Try</span></code>.</p>
-<p><code class="docutils literal"><span class="pre">rc</span></code>, defined below, is a classifier that tells Finagle that <code class="docutils literal"><span class="pre">Throw</span></code> means
-failure, and <code class="docutils literal"><span class="pre">Return</span></code> means success.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">rc</span><span class="k">:</span> <span class="kt">ResponseClassifier</span> <span class="o">=</span> <span class="o">{</span>
+classifiers in terms of <code class="docutils literal notranslate"><span class="pre">ReqRep</span></code> and <code class="docutils literal notranslate"><span class="pre">Try</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">rc</span></code>, defined below, is a classifier that tells Finagle that <code class="docutils literal notranslate"><span class="pre">Throw</span></code> means
+failure, and <code class="docutils literal notranslate"><span class="pre">Return</span></code> means success.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">rc</span><span class="k">:</span> <span class="kt">ResponseClassifier</span> <span class="o">=</span> <span class="o">{</span>
   <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="n">req</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">exc</span><span class="o">))</span> <span class="k">=&gt;</span> <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
   <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="n">req</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">rep</span><span class="o">))</span> <span class="k">=&gt;</span> <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">Success</span>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>A <code class="docutils literal"><span class="pre">ReqRep</span></code> is a request-response pair. This is so that classifiers can make
+<p>A <code class="docutils literal notranslate"><span class="pre">ReqRep</span></code> is a request-response pair. This is so that classifiers can make
 judgements on both a request and response.</p>
-<p>More than just telling Finagle if this <code class="docutils literal"><span class="pre">ReqRep</span></code> is a successful or failed
+<p>More than just telling Finagle if this <code class="docutils literal notranslate"><span class="pre">ReqRep</span></code> is a successful or failed
 outcome, it also gives Finagle a hint about what it should do next. Finagle can
 respond to failed outcomes with some nuance, for example, it may retry the
 operation.</p>
-<p><code class="docutils literal"><span class="pre">ResponseClass</span></code> defines three classes of failure:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ResponseClass</span></code> defines three classes of failure:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">NonRetryableFailure</span></code>: Something went wrong, don’t retry.</li>
-<li><code class="docutils literal"><span class="pre">RetryableFailure</span></code>: Something went wrong, consider retrying the operation.</li>
-<li><code class="docutils literal"><span class="pre">Ignorable</span></code>: Something went wrong, but it can be ignored.</li>
+<li><code class="docutils literal notranslate"><span class="pre">NonRetryableFailure</span></code>: Something went wrong, don’t retry.</li>
+<li><code class="docutils literal notranslate"><span class="pre">RetryableFailure</span></code>: Something went wrong, consider retrying the operation.</li>
+<li><code class="docutils literal notranslate"><span class="pre">Ignorable</span></code>: Something went wrong, but it can be ignored.</li>
 </ul>
-<p>And, of course, <code class="docutils literal"><span class="pre">Success</span></code> means that the operation succeeded.
-<code class="docutils literal"><span class="pre">Ignorable</span></code> does not apply to <code class="docutils literal"><span class="pre">Success</span></code> because it is a mapping from
-<code class="docutils literal"><span class="pre">FailureFlags.Ignorable</span></code> which only applies to <code class="docutils literal"><span class="pre">Failure</span></code> and not any
+<p>And, of course, <code class="docutils literal notranslate"><span class="pre">Success</span></code> means that the operation succeeded.
+<code class="docutils literal notranslate"><span class="pre">Ignorable</span></code> does not apply to <code class="docutils literal notranslate"><span class="pre">Success</span></code> because it is a mapping from
+<code class="docutils literal notranslate"><span class="pre">FailureFlags.Ignorable</span></code> which only applies to <code class="docutils literal notranslate"><span class="pre">Failure</span></code> and not any
 arbitrary response.</p>
 <p>It’s important to note that classifiers are only consulted but not obeyed. For
-example, a classifier may emit <code class="docutils literal"><span class="pre">Ignorable</span></code> for a given <code class="docutils literal"><span class="pre">ReqRep</span></code> but what
-actually happens depends on how the caller chooses to interpret <code class="docutils literal"><span class="pre">Ignorable</span></code>.
-Similarly, just because a classifier emits <code class="docutils literal"><span class="pre">RetryableFailure</span></code> does not mean
+example, a classifier may emit <code class="docutils literal notranslate"><span class="pre">Ignorable</span></code> for a given <code class="docutils literal notranslate"><span class="pre">ReqRep</span></code> but what
+actually happens depends on how the caller chooses to interpret <code class="docutils literal notranslate"><span class="pre">Ignorable</span></code>.
+Similarly, just because a classifier emits <code class="docutils literal notranslate"><span class="pre">RetryableFailure</span></code> does not mean
 the caller will retry the operation.</p>
 <p>Now that we’ve covered the basics, let’s look at an example in HTTP. Here is
 an example that counts HTTP 503s as failures:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
 
@@ -1166,21 +1158,21 @@ an example that counts HTTP 503s as failures:</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Note that this <code class="docutils literal"><span class="pre">PartialFunction</span></code> isn’t total which is ok due to Finagle
+<p>Note that this <code class="docutils literal notranslate"><span class="pre">PartialFunction</span></code> isn’t total which is ok due to Finagle
 always using user defined classifiers in combination with
-<code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code> which will cover all cases.</p>
+<code class="docutils literal notranslate"><span class="pre">ResponseClassifier.Default</span></code> which will cover all cases.</p>
 </div>
 <div class="section" id="thrift-and-thriftmux-classifiers">
 <h3>Thrift and ThriftMux Classifiers<a class="headerlink" href="#thrift-and-thriftmux-classifiers" title="Permalink to this headline">¶</a></h3>
 <p>Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
-<code class="docutils literal"><span class="pre">Service</span></code> from <code class="docutils literal"><span class="pre">Array[Byte]</span></code> to <code class="docutils literal"><span class="pre">Array[Byte]</span></code> for all the methods of an
+<code class="docutils literal notranslate"><span class="pre">Service</span></code> from <code class="docutils literal notranslate"><span class="pre">Array[Byte]</span></code> to <code class="docutils literal notranslate"><span class="pre">Array[Byte]</span></code> for all the methods of an
 IDL’s service. To make this workable, there is support in Scrooge,
-<code class="docutils literal"><span class="pre">Thrift/ThriftMux.newService</span></code>, <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newClient</span></code> and <code class="docutils literal"><span class="pre">Thrift/ThriftMux.serve</span></code>
+<code class="docutils literal notranslate"><span class="pre">Thrift/ThriftMux.newService</span></code>, <code class="docutils literal notranslate"><span class="pre">Thrift/ThriftMux.newClient</span></code> and <code class="docutils literal notranslate"><span class="pre">Thrift/ThriftMux.serve</span></code>
 code to deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
-<code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method’s response type. Given an IDL:</p>
-<div class="highlight-none"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }
+<code class="docutils literal notranslate"><span class="pre">$Service.$Method.Args</span></code>, and the method’s response type. Given an IDL:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }
 exception InvalidQueryException {
   1: i32 errorCode
 }
@@ -1194,7 +1186,7 @@ service SocialGraph {
 </pre></div>
 </div>
 <p>One possible classifier would be:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">classifier</span><span class="k">:</span> <span class="kt">ResponseClassifier</span> <span class="o">=</span> <span class="o">{</span>
   <span class="c1">// #1</span>
@@ -1216,23 +1208,23 @@ service SocialGraph {
 </pre></div>
 </div>
 <p>If you examine that classifier you’ll note a few things. First (#1), the
-deserialized <code class="docutils literal"><span class="pre">NotFoundException</span></code> can be treated as a failure. Second (#2), a
+deserialized <code class="docutils literal notranslate"><span class="pre">NotFoundException</span></code> can be treated as a failure. Second (#2), a
 “successful” response can be examined to enable services using status codes to
 classify errors. Next (#3), the request can be introspected to make the
 decision - <em>HOWEVER</em> - if an exception is thrown at the Mux layer
-(ex: <code class="docutils literal"><span class="pre">c.t.f.mux.ClientDiscardedRequestException</span></code>) there will <strong>NOT</strong>
+(ex: <code class="docutils literal notranslate"><span class="pre">c.t.f.mux.ClientDiscardedRequestException</span></code>) there will <strong>NOT</strong>
 be a match against (#3). This style (#3) should be avoided for Thrift and ThriftMux.
 Instead, prefer to handle request specific details at the application layer, such as creating
 a <a class="reference external" href="ServicesAndFilters.html#filters">Filter</a> to reject the request, and reserve Response
 Classification to deal with wire level response concerns. Lastly (#4), the deserialized
-<code class="docutils literal"><span class="pre">InvalidQueryException</span></code> can be treated as a successful response.</p>
+<code class="docutils literal notranslate"><span class="pre">InvalidQueryException</span></code> can be treated as a successful response.</p>
 </div>
 <div class="section" id="other-details">
 <h3>Other Details<a class="headerlink" href="#other-details" title="Permalink to this headline">¶</a></h3>
 <p>If you have a response classifier that categorizes non-Exceptions as failures, this includes
 Thrift Responses (#2) or embedded Thrift Exceptions (#1), note that they will be counted in
-the <code class="docutils literal"><span class="pre">StatsFilter</span></code> as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code>
-in the <code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
+the <code class="docutils literal notranslate"><span class="pre">StatsFilter</span></code> as a <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code>
+in the <code class="docutils literal notranslate"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
 <a class="reference external" href="https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
 for more details.</p>
 </div>
@@ -1241,19 +1233,19 @@ for more details.</p>
 <h2>MethodBuilder<a class="headerlink" href="#methodbuilder" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Currently there is <code class="docutils literal"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.
+<p class="last">Currently there is <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.
 We are waiting on user interest before expanding to more protocols.</p>
 </div>
-<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> is a collection of APIs for client configuration at a higher
+<p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> is a collection of APIs for client configuration at a higher
 level than the  <a class="reference internal" href="Configuration.html#finagle6apis"><span class="std std-ref">Finagle 6 APIs</span></a> while improving upon the deprecated
-<code class="docutils literal"><span class="pre">ClientBuilder</span></code>. <code class="docutils literal"><span class="pre">MethodBuilder</span></code> provides:</p>
+<code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>. <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> provides:</p>
 <ul class="simple">
 <li><a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">Logical</span></a> success rate metrics.</li>
 <li>Retries based on application-level requests and responses (e.g. an HTTP
 503 response code or a Thrift exception).</li>
 <li>Configuration of per-attempt and total timeouts.</li>
 </ul>
-<p><a class="reference internal" href="MethodBuilder.html"><span class="doc">Learn more</span></a> about <code class="docutils literal"><span class="pre">MethodBuilder</span></code>.</p>
+<p><a class="reference internal" href="MethodBuilder.html"><span class="doc">Learn more</span></a> about <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code>.</p>
 </div>
 <div class="section" id="partition-aware-client">
 <h2>Partition Aware Client<a class="headerlink" href="#partition-aware-client" title="Permalink to this headline">¶</a></h2>
@@ -1262,7 +1254,7 @@ partitioning layer in the client stack that understands the service partitioning
 It routes requests to the partitioned service shards and supports scatter-gather.
 Finagle Memcached client and Redis PartitionedClient have the consistent hashing partitioning
 strategy configuration by default, ThriftMux client has partitioning support as an opt-in
-configuration by calling <code class="docutils literal"><span class="pre">.withPartitioning</span></code>.</p>
+configuration by calling <code class="docutils literal notranslate"><span class="pre">.withPartitioning</span></code>.</p>
 <p><a class="reference internal" href="PartitionAwareClient.html"><span class="doc">Learn more</span></a> about ThriftMux Partition Aware Client.</p>
 <p class="rubric">Footnotes</p>
 <table class="docutils footnote" frame="void" id="backoff" rules="none">
@@ -1318,16 +1310,16 @@ where n is the number of servers in the cluster.</td></tr>
 <tr><td class="label"><a class="fn-backref" href="#id13">[7]</a></td><td>Our micro benchmark exposes the stark differences:</td></tr>
 </tbody>
 </table>
-<div class="highlight-text"><div class="highlight"><pre><span></span>HeapBalancer.getAndPut           1000  avgt  10 8686.479 ± 261.360 ns/op
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>HeapBalancer.getAndPut           1000  avgt  10 8686.479 ± 261.360 ns/op
 P2CBalancer.leastLoadedGetAndPut 1000  avgt  10 1692.388 ± 103.164 ns/op
 </pre></div>
 </div>
 <table class="docutils footnote" frame="void" id="weights-api" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id14">[8]</a></td><td>Weights are built into all the balancers except for the <code class="docutils literal"><span class="pre">HeapBalancer</span></code>.
-The API exposed for this is in <code class="docutils literal"><span class="pre">com.twitter.finagle.WeightedSocketAddress</span></code>. The name
-resolver that translates logical destinations to <code class="docutils literal"><span class="pre">com.twitter.finagle.Addr</span></code> can wrap
+<tr><td class="label"><a class="fn-backref" href="#id14">[8]</a></td><td>Weights are built into all the balancers except for the <code class="docutils literal notranslate"><span class="pre">HeapBalancer</span></code>.
+The API exposed for this is in <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.WeightedSocketAddress</span></code>. The name
+resolver that translates logical destinations to <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.Addr</span></code> can wrap
 concrete address with a <cite>Double</cite> which influences the balancer’s distributor during the
 selection process.</td></tr>
 </tbody>
@@ -1335,7 +1327,7 @@ selection process.</td></tr>
 <table class="docutils footnote" frame="void" id="probation" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id20">[9]</a></td><td>See <code class="docutils literal"><span class="pre">com.twitter.finagle.loadbalancer.LoadBalancerFactory#EnableProbation</span></code>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id20">[9]</a></td><td>See <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.loadbalancer.LoadBalancerFactory#EnableProbation</span></code>.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="failure-detectors" rules="none">
@@ -1365,7 +1357,7 @@ Alvaro Videla’s <a class="reference external" href="https://videlalvaro.github
   <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
   <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Clients</a><ul>
 <li><a class="reference internal" href="#client-protocol-implementation">Client Protocol Implementation</a></li>

@@ -657,8 +657,8 @@ the netty4 event loop.
                         <a href="Netty4Transporter$.html" title="">Netty4Transporter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend"></a>
-                        <a href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend">numWorkers</a>
+                        <a class="object" href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend."></a>
+                        <a href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend.">numWorkers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="referenceLeakLintRule$.html" title=""></a>
@@ -1193,11 +1193,15 @@ via the passed in <a href="../Stack$$Param.html" class="extype" name="com.twitte
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend" href="numWorkers$.html"><span class="name">numWorkers</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
+        <a title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend." href="numWorkers$.html"><span class="name">numWorkers</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Flag for defining the number of worker threads used by the Finagle Netty 4 backend
-</p><div class="fullcomment"><div class="comment cmt"><p>Flag for defining the number of worker threads used by the Finagle Netty 4 backend
+      <p class="shortcomment cmt">Flag for defining the number of worker threads used by the Finagle Netty 4 backend.</p><div class="fullcomment"><div class="comment cmt"><p>Flag for defining the number of worker threads used by the Finagle Netty 4 backend. This defaults
+to 2 x available CPUs but this behavior can be overridden via the auto offloading flag.</p><p>{{
+ -com.twitter.finagle.offload.auto=true
+}}</p><p>When auto offloading is enabled and no explicit c.t.f.netty.numWorkers is provided, the number of
+Netty workers defaults to 1/3 of available CPUs with a floor of 4 (on a host with less than
+12 CPUs, 4 Netty workers would be allocated).
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>For the default value, we set a floor of 8 workers so in the case of constrained
       environments we don't end up with detrimentally small worker pool sizes.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.netty4.referenceLeakLintRule" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">

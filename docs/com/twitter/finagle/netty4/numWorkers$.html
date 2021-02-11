@@ -199,8 +199,8 @@ the netty4 event loop.
                         <a href="Netty4Transporter$.html" title="">Netty4Transporter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend"></a>
-                        <a href="" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend">numWorkers</a>
+                        <a class="object" href="" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend."></a>
+                        <a href="" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend.">numWorkers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="referenceLeakLintRule$.html" title=""></a>
@@ -297,7 +297,12 @@ the netty4 event loop.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Flag for defining the number of worker threads used by the Finagle Netty 4 backend
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Flag for defining the number of worker threads used by the Finagle Netty 4 backend. This defaults
+to 2 x available CPUs but this behavior can be overridden via the auto offloading flag.</p><p>{{
+ -com.twitter.finagle.offload.auto=true
+}}</p><p>When auto offloading is enabled and no explicit c.t.f.netty.numWorkers is provided, the number of
+Netty workers defaults to 1/3 of available CPUs with a floor of 4 (on a host with less than
+12 CPUs, 4 Netty workers would be allocated).
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>For the default value, we set a floor of 8 workers so in the case of constrained
       environments we don't end up with detrimentally small worker pool sizes.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
