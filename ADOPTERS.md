@@ -49,6 +49,7 @@ URLs if possible) and [submit a pull request][1]!
 * [QuizUp](https://www.quizup.com/)
 * [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
+* [RELEX Solutions](https://www.relexsolutions.com/)
 * [Reputation.com](https://www.reputation.com/)
 * [Sabre Labs](https://sabrelabs.com/)
 * [Salesforce](https://www.salesforce.com/)
