@@ -21,6 +21,7 @@ scala_library(
         "util/util-codec",
         "util/util-core",
         "util/util-logging",
+        "util/util-routing/src/main/scala/com/twitter/util/routing",
         "util/util-stats",
     ],
     exports = [

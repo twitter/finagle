@@ -30,6 +30,7 @@ junit_tests(
             scope = "forced",
         ),
         "util/util-logging",
+        "util/util-routing/src/main/scala/com/twitter/util/routing",
         "util/util-stats",
     ],
 )
