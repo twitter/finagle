@@ -36,6 +36,19 @@ object OffloadFilter {
 
   val Role = Stack.Role("OffloadWorkFromIO")
 
+  /**
+   * Offloads the evaluation of the provided by-name parameter using the offload filter
+   * thread pool if the offload filter is enabled. Evaluates using FuturePool.unboundedPool otherwise.
+   * @param f the by-name parameter to be evaluated
+   * @tparam T the return type of the by-name parameter
+   * @return a future to be satisfied with the result once the evaluation is complete
+   */
+  private[twitter] def offload[T](f: => T): Future[T] =
+    global match {
+      case None => FuturePool.unboundedPool(f)
+      case Some(pool) => pool(f)
+    }
+
   private[finagle] final class SampleQueueStats(
     pool: FuturePool,
     stats: StatsReceiver,
