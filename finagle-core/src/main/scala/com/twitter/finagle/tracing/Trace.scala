@@ -243,19 +243,12 @@ object Trace extends Tracing {
    */
   def traceLocal[T](name: String)(f: => T): T = {
     letId(Trace.nextId) {
-      val trace = Trace()
-
-      // these annotations are necessary to get the
-      // zipkin ui to properly display the span.
-      trace.recordRpc(name)
-      trace.recordServiceName(serviceName)
-      trace.recordBinary("lc", name)
-
-      trace.record(LocalBeginAnnotation)
+      val timestamp = Time.nowNanoPrecision
       try {
         f
       } finally {
-        trace.record(LocalEndAnnotation)
+        val duration = Time.nowNanoPrecision - timestamp
+        recordSpan(name, timestamp, duration)
       }
     }
   }
@@ -268,17 +261,44 @@ object Trace extends Tracing {
    */
   def traceLocalFuture[T](name: String)(f: => Future[T]): Future[T] = {
     letId(Trace.nextId) {
-      val trace = Trace()
-
-      // these annotations are necessary to get the
-      // zipkin ui to properly display the span.
-      trace.recordRpc(name)
-      trace.recordServiceName(serviceName)
-      trace.recordBinary("lc", name)
-
-      trace.record(LocalBeginAnnotation)
-      f.ensure(trace.record(LocalEndAnnotation))
+      val timestamp = Time.nowNanoPrecision
+      f.ensure {
+        val duration = Time.nowNanoPrecision - timestamp
+        recordSpan(name, timestamp, duration)
+      }
     }
+  }
+
+  /**
+   * Create a span with the given name and Duration, with the end of the span at `Time.now`.
+   */
+  def traceLocalSpan(name: String, duration: Duration): Unit = {
+    letId(Trace.nextId) {
+      recordSpan(name, Time.nowNanoPrecision - duration, duration)
+    }
+  }
+
+  /**
+   * Create a span with the given name, timestamp and Duration. This is useful for debugging, or
+   * if you do not have complete control over the whole execution, e.g. you can not use
+   * [[traceLocalFuture]].
+   */
+  def traceLocalSpan(name: String, timestamp: Time, duration: Duration): Unit = {
+    letId(Trace.nextId) {
+      recordSpan(name, timestamp, duration)
+    }
+  }
+
+  private[this] def recordSpan(name: String, timestamp: Time, duration: Duration): Unit = {
+    val trace = Trace()
+    // these annotations are necessary to get the
+    // zipkin ui to properly display the span.
+    trace.record(Record(id, timestamp, Annotation.Rpc(name)))
+    trace.record(Record(id, timestamp, Annotation.ServiceName(serviceName)))
+    trace.record(Record(id, timestamp, Annotation.BinaryAnnotation("lc", name)))
+
+    trace.record(Record(id, timestamp, Annotation.Message(LocalBeginAnnotation)))
+    trace.record(Record(id, timestamp + duration, Annotation.Message(LocalEndAnnotation)))
   }
 
   /**

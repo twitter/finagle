@@ -439,12 +439,19 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Time.withTimeAt(startTime) { ctrl =>
       val tracer = new BufferingTracer()
       val parentTraceId = Trace.id
+      val name = "work"
       Trace.letTracerAndId(tracer, parentTraceId) {
-        val childTraceId = Trace.traceLocal("work") {
+        val childTraceId = Trace.traceLocal(name) {
           ctrl.advance(1.second)
           Trace.id
         }
 
+        assert(tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
+        assert(
+          tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(
+          tracer.toSeq.contains(
+            Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
         assert(
           tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
@@ -460,16 +467,24 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Time.withTimeAt(startTime) { ctrl =>
       val tracer = new BufferingTracer()
       val parentTraceId = Trace.id
+      val name = "work"
       Trace.letTracerAndId(tracer, parentTraceId) {
 
         try {
-          Trace.traceLocal("work") {
+          Trace.traceLocal(name) {
             ctrl.advance(1.second)
             throw TraceIdException(Trace.id)
           }
           fail("Expected exception to be thrown")
         } catch {
           case TraceIdException(childTraceId) =>
+            assert(tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
+            assert(
+              tracer.toSeq.contains(
+                Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+            assert(
+              tracer.toSeq.contains(
+                Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
             assert(
               tracer.toSeq.contains(
                 Record(childTraceId, startTime, Annotation.Message("local/begin"))))
@@ -488,8 +503,9 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Time.withTimeAt(startTime) { ctrl =>
       val tracer = new BufferingTracer()
       val parentTraceId = Trace.nextId
+      val name = "work"
       Trace.letTracerAndId(tracer, parentTraceId) {
-        val childTraceIdFuture = Trace.traceLocalFuture("work") {
+        val childTraceIdFuture = Trace.traceLocalFuture(name) {
           Future.Done.delayed(1.second)(mockTimer).map(_ => Trace.id)
         }
 
@@ -498,6 +514,12 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
 
         val childTraceId = Await.result(childTraceIdFuture)
 
+        assert(tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
+        assert(
+          tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(
+          tracer.toSeq.contains(
+            Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
         assert(
           tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
@@ -511,11 +533,12 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
   test("trace async local exceptional span") {
     val mockTimer = new MockTimer()
     val startTime = Time.now
+    val name = "work"
     Time.withTimeAt(startTime) { ctrl =>
       val tracer = new BufferingTracer()
       val parentTraceId = Trace.nextId
       Trace.letTracerAndId(tracer, parentTraceId) {
-        val childTraceIdFuture = Trace.traceLocalFuture("work") {
+        val childTraceIdFuture = Trace.traceLocalFuture(name) {
           Future.Done
             .delayed(1.second)(mockTimer).flatMap(_ => Future.exception(TraceIdException(Trace.id)))
         }
@@ -528,6 +551,13 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
           fail("Expected exception to be thrown")
         } catch {
           case TraceIdException(childTraceId) =>
+            assert(tracer.toSeq.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
+            assert(
+              tracer.toSeq.contains(
+                Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+            assert(
+              tracer.toSeq.contains(
+                Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
             assert(
               tracer.toSeq.contains(
                 Record(childTraceId, startTime, Annotation.Message("local/begin"))))
