@@ -19,7 +19,7 @@ import com.twitter.util.routing.{
 }
 import java.lang.IllegalStateException
 
-private[routing] object HttpRouter {
+private[http] object HttpRouter {
 
   /**
    * Represents the [[Route routes]] and their [[com.twitter.finagle.http.Method methods]]
@@ -181,7 +181,7 @@ private[routing] final class LinearPathRouter(
 
 }
 
-private[routing] object LinearPathRouter {
+private[http] object LinearPathRouter {
 
   /** A [[PathRouterGenerator]] for the [[LinearPathRouter]] */
   object Generator extends PathRouterGenerator {

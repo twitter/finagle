@@ -3,7 +3,7 @@ package com.twitter.finagle.http.exp.routing
 import com.twitter.finagle.http.exp.routing.Path.{isParameterFn, parameterNameFn}
 import com.twitter.finagle.http.exp.routing.Segment.Parameterized
 
-private object Path {
+object Path {
   // perf optimization to val up our functions
   private val isParameterFn: Segment => Boolean = _.isInstanceOf[Parameterized]
   private val parameterNameFn: PartialFunction[Segment, String] = {
@@ -16,7 +16,7 @@ private object Path {
  *
  * @param segments The [[Segment segments]] that define this [[Path path]].
  */
-private[http] final case class Path private[routing] (
+private[http] final case class Path(
   segments: Iterable[Segment]) {
   override def toString: String = segments.mkString
 
