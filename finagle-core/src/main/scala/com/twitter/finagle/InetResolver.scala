@@ -191,7 +191,7 @@ object FixedInetResolver {
     apply(unscopedStatsReceiver, 16000)
 
   def apply(unscopedStatsReceiver: StatsReceiver, maxCacheSize: Long): InetResolver =
-    apply(unscopedStatsReceiver, maxCacheSize, Stream.empty, DefaultTimer)
+    apply(unscopedStatsReceiver, maxCacheSize, Backoff.empty, DefaultTimer)
 
   /**
    * Uses a [[com.twitter.util.Future]] cache to memoize lookups.
@@ -199,12 +199,12 @@ object FixedInetResolver {
    * @param maxCacheSize Specifies the maximum number of `Futures` that can be cached.
    *                     No maximum size limit if Long.MaxValue.
    * @param backoffs Optionally retry DNS resolution failures using this sequence of
-   *                 durations for backoff. Stream.empty means don't retry.
+   *                 durations for backoff. [[Backoff.empty]] means don't retry.
    */
   def apply(
     unscopedStatsReceiver: StatsReceiver,
     maxCacheSize: Long,
-    backoffs: Stream[Duration],
+    backoffs: Backoff,
     timer: Timer
   ): InetResolver = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
@@ -223,24 +223,23 @@ object FixedInetResolver {
   private[finagle] def cache(
     resolveHost: String => Future[Seq[InetAddress]],
     maxCacheSize: Long,
-    backoffs: Stream[Duration] = Stream.empty,
+    backoffs: Backoff = Backoff.empty,
     timer: Timer = DefaultTimer
   ): LoadingCache[String, Future[Seq[InetAddress]]] = {
 
     val cacheLoader = new CacheLoader[String, Future[Seq[InetAddress]]]() {
       def load(host: String): Future[Seq[InetAddress]] = {
         // Optionally retry failed DNS resolutions with specified backoff.
-        def retryingLoad(nextBackoffs: Stream[Duration]): Future[Seq[InetAddress]] = {
+        def retryingLoad(nextBackoffs: Backoff): Future[Seq[InetAddress]] = {
           resolveHost(host).rescue {
             case exc: UnknownHostException =>
-              nextBackoffs match {
-                case nextBackoff #:: restBackoffs =>
-                  log.debug(
-                    s"Caught UnknownHostException resolving host '$host'. Retrying in $nextBackoff..."
-                  )
-                  Future.sleep(nextBackoff)(timer).before(retryingLoad(restBackoffs))
-                case Stream.Empty =>
-                  Future.exception(exc)
+              if (nextBackoffs.isExhausted) {
+                Future.exception(exc)
+              } else {
+                log.debug(
+                  s"Caught UnknownHostException resolving host '$host'. Retrying in ${nextBackoffs.duration}..."
+                )
+                Future.sleep(nextBackoffs.duration)(timer).before(retryingLoad(nextBackoffs.next))
               }
           }
         }

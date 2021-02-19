@@ -2,6 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{
+  Backoff,
   ChannelClosedException,
   Failure,
   FailureFlags,
@@ -9,9 +10,6 @@ import com.twitter.finagle.{
   WriteException
 }
 import com.twitter.util.{Duration, Return, Throw, Try, TimeoutException => UtilTimeoutException}
-import java.util.{concurrent => juc}
-import java.{util => ju}
-import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
 /**
@@ -352,18 +350,13 @@ object RetryPolicy {
    * @see [[backoffJava]] for a Java friendly API.
    */
   def backoff[A](
-    backoffs: Stream[Duration]
+    backoffs: Backoff
   )(
     shouldRetry: PartialFunction[A, Boolean]
   ): RetryPolicy[A] = {
-    RetryPolicy.named(s"backoff(${RetryPolicy.streamToString(backoffs)})($shouldRetry)") { e =>
-      if (shouldRetry.applyOrElse(e, AlwaysFalse)) {
-        backoffs match {
-          case howlong #:: rest =>
-            Some((howlong, backoff(rest)(shouldRetry)))
-          case _ =>
-            None
-        }
+    RetryPolicy.named(s"backoff($backoffs($shouldRetry)") { e =>
+      if (shouldRetry.applyOrElse(e, AlwaysFalse) && !backoffs.isExhausted) {
+        Some((backoffs.duration, backoff(backoffs.next)(shouldRetry)))
       } else {
         None
       }
@@ -371,15 +364,17 @@ object RetryPolicy {
   }
 
   /**
+   * @deprecated Please use the [[backoff]] api which is already Java friendly.
+   *
    * A version of [[backoff]] usable from Java.
    *
    * @param backoffs can be created via [[Backoff.toJava]].
    */
   def backoffJava[A](
-    backoffs: juc.Callable[ju.Iterator[Duration]],
+    backoffs: Backoff,
     shouldRetry: PartialFunction[A, Boolean]
   ): RetryPolicy[A] = {
-    backoff[A](backoffs.call().asScala.toStream)(shouldRetry)
+    backoff[A](backoffs)(shouldRetry)
   }
 
   /**

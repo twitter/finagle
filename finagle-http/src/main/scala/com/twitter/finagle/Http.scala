@@ -312,7 +312,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     ): Client =
       super.withResponseClassifier(responseClassifier)
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
-    override def withRetryBackoff(backoff: Stream[Duration]): Client =
+    override def withRetryBackoff(backoff: Backoff): Client =
       super.withRetryBackoff(backoff)
     override def withLabel(label: String): Client = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Client =

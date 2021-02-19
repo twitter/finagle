@@ -3,16 +3,16 @@ package com.twitter.finagle.memcached
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.common.zookeeper.ZooKeeperClient
-import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Duration, FuturePool, JavaTimer, Return, Throw}
+import com.twitter.finagle.Backoff
+import com.twitter.util.{FuturePool, JavaTimer, Return, Throw}
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{WatchedEvent, Watcher}
 import scala.collection.JavaConverters._
 
 object ZookeeperStateMonitor {
   val DefaultZkConnectionRetryBackoff =
-    (Backoff.exponential(1.second, 2) take 6) ++ Backoff.const(60.seconds)
+    (Backoff.exponential(1.second, 2).take(6)).concat(Backoff.const(60.seconds))
   val DefaultFuturePool = FuturePool.unboundedPool
   val DefaultTimer = new JavaTimer(isDaemon = true)
   val DefaultZKWaitTimeout = 10.seconds
@@ -89,7 +89,7 @@ trait ZookeeperStateMonitor {
   private[this] def loopZookeeperWork(): Unit = {
     def scheduleReadCachePoolConfig(
       op: () => Unit,
-      backoff: Stream[Duration] = DefaultZkConnectionRetryBackoff
+      backoff: Backoff = DefaultZkConnectionRetryBackoff
     ): Unit = {
       DefaultFuturePool {
         op()
@@ -99,11 +99,10 @@ trait ZookeeperStateMonitor {
           loopZookeeperWork()
         case Throw(ex) =>
           zkWorkFailedCounter.incr()
-          backoff match {
-            case wait #:: rest =>
-              DefaultTimer.doLater(wait) {
-                scheduleReadCachePoolConfig(op, rest)
-              }
+          if (!backoff.isExhausted) {
+            DefaultTimer.doLater(backoff.duration) {
+              scheduleReadCachePoolConfig(op, backoff.next)
+            }
           }
       }
     }

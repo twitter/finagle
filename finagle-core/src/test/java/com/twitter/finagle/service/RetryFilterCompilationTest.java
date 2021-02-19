@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import com.twitter.finagle.Backoff;
 import com.twitter.util.Duration;
 import com.twitter.util.Try;
 

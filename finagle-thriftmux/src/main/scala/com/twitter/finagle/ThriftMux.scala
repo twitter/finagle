@@ -421,7 +421,7 @@ object ThriftMux
     override def withResponseClassifier(responseClassifier: ResponseClassifier): Client =
       super.withResponseClassifier(responseClassifier)
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
-    override def withRetryBackoff(backoff: Stream[Duration]): Client =
+    override def withRetryBackoff(backoff: Backoff): Client =
       super.withRetryBackoff(backoff)
     override def withExecutionOffloaded(executor: ExecutorService): Client =
       super.withExecutionOffloaded(executor)

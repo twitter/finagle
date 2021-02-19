@@ -12,7 +12,7 @@ import com.twitter.finagle.partitioning.{
   NodeMarkedDead,
   NodeRevived
 }
-import com.twitter.finagle.service.{Backoff, ResponseClassifier}
+import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, MockTimer, Time}
 import org.mockito.Mockito.{times, verify, when}

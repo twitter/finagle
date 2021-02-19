@@ -1,11 +1,11 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{FailureFlags, Filter, Service}
 import com.twitter.finagle.Filter.TypeAgnostic
+import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Annotation, Trace, TraceId}
-import com.twitter.finagle.param.HighResTimer
+import com.twitter.finagle.{Backoff, FailureFlags, Filter, Service}
 import com.twitter.util._
 
 object RetryingService {
@@ -166,7 +166,7 @@ object RetryFilter {
    * less correlation between retries. For example [[HighResTimer.Default]].
    */
   def apply[Req, Rep](
-    backoffs: Stream[Duration],
+    backoffs: Backoff,
     statsReceiver: StatsReceiver = NullStatsReceiver
   )(
     shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean]
@@ -237,7 +237,7 @@ object RetryExceptionsFilter {
    * less correlation between retries. For example [[HighResTimer.Default]].
    */
   def apply[Req, Rep](
-    backoffs: Stream[Duration],
+    backoffs: Backoff,
     statsReceiver: StatsReceiver = NullStatsReceiver
   )(
     shouldRetry: PartialFunction[Try[Nothing], Boolean]

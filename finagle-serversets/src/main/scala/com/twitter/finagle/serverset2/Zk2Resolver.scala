@@ -5,8 +5,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
-import com.twitter.finagle.{Addr, FixedInetResolver, InetResolver, Resolver}
-import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.{Addr, Backoff, FixedInetResolver, InetResolver, Resolver}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.Logger

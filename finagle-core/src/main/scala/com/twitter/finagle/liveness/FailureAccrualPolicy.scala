@@ -1,7 +1,7 @@
 package com.twitter.finagle.liveness
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.Backoff
 import com.twitter.finagle.util.{Ema, Showable}
 import com.twitter.util.{Duration, Stopwatch, WindowedAdder}
 
@@ -103,7 +103,7 @@ object FailureAccrualPolicy {
   private[this] val Success = 1
   private[this] val Failure = 0
 
-  protected[this] val constantBackoff: Stream[Duration] = Backoff.const(300.seconds)
+  protected[this] val constantBackoff: Backoff = Backoff.const(300.seconds)
 
   /**
    * A policy based on an exponentially-weighted moving average success rate
@@ -123,13 +123,13 @@ object FailureAccrualPolicy {
    * `markDeadOnFailure()` will return None, until at least `window` data points
    * are provided.
    *
-   * @param markDeadFor stream of durations to use for the next duration
+   * @param markDeadFor a policy encoded [[Backoff]] to calculate the next duration
    * returned from `markDeadOnFailure()`
    */
   private[this] abstract class SuccessRateFailureAccrualPolicy(
     requiredSuccessRate: Double,
     window: Long,
-    markDeadFor: Stream[Duration])
+    markDeadFor: Backoff)
       extends FailureAccrualPolicy {
     assert(
       requiredSuccessRate >= 0.0 && requiredSuccessRate <= 1.0,
@@ -139,9 +139,8 @@ object FailureAccrualPolicy {
 
     val name = "SuccessRateFailureAccrualPolicy"
 
-    // Pad the back of the stream to mark dead for a constant amount (300 seconds)
-    // when the stream runs out.
-    private[this] val freshMarkDeadFor = markDeadFor ++ constantBackoff
+    // Mark dead for a constant amount (300 seconds) when the `markDeadFor` runs out.
+    private[this] val freshMarkDeadFor = markDeadFor.concat(constantBackoff)
 
     // The head of `nextMarkDeadFor` is the next duration that will be returned
     // from `markDeadOnFailure()` if the required success rate is not met.
@@ -158,8 +157,8 @@ object FailureAccrualPolicy {
       val emaStampForRequest = emaStamp
       val sr = successRate.update(emaStampForRequest, Failure)
       if (canRemove(emaStampForRequest, sr)) {
-        val duration = nextMarkDeadFor.head
-        nextMarkDeadFor = nextMarkDeadFor.tail
+        val duration = nextMarkDeadFor.duration
+        nextMarkDeadFor = nextMarkDeadFor.next
         Some(duration)
       } else {
         None
@@ -219,13 +218,13 @@ object FailureAccrualPolicy {
    * @param window window over which the success rate is tracked. `window` requests
    * must occur for `markDeadOnFailure()` to ever return Some(Duration)
    *
-   * @param markDeadFor stream of durations to use for the next duration
+   * @param markDeadFor a policy encoded [[Backoff]] to calculate the next duration
    * returned from `markDeadOnFailure()`
    */
   def successRate(
     requiredSuccessRate: Double,
     window: Int,
-    markDeadFor: Stream[Duration]
+    markDeadFor: Backoff
   ): FailureAccrualPolicy = {
     new SuccessRateFailureAccrualPolicy(requiredSuccessRate, window, markDeadFor) {
       private[this] var totalRequests = 0L
@@ -262,7 +261,7 @@ object FailureAccrualPolicy {
    * `markDeadOnFailure()` will return None, until we get at least `minRequestThreshold`
    *  requests within a `window` duration.
    *
-   * @param markDeadFor stream of durations to use for the next duration
+   * @param markDeadFor a policy encoded [[Backoff]] to calculate the next duration
    * returned from `markDeadOnFailure()`
    *
    * @param minRequestThreshold minimum number of requests in the past `window`
@@ -271,7 +270,7 @@ object FailureAccrualPolicy {
   def successRateWithinDuration(
     requiredSuccessRate: Double,
     window: Duration,
-    markDeadFor: Stream[Duration],
+    markDeadFor: Backoff,
     minRequestThreshold: Int
   ): FailureAccrualPolicy =
     successRateWithinDuration(
@@ -287,7 +286,7 @@ object FailureAccrualPolicy {
   private[liveness] def successRateWithinDuration(
     requiredSuccessRate: Double,
     window: Duration,
-    markDeadFor: Stream[Duration],
+    markDeadFor: Backoff,
     minRequestThreshold: Int,
     nowMillis: () => Long
   ): FailureAccrualPolicy = {
@@ -344,13 +343,13 @@ object FailureAccrualPolicy {
    * `markDeadOnFailure()` will return None, until we get requests for a duration
    * of at least `window`.
    *
-   * @param markDeadFor stream of durations to use for the next duration
+   * @param markDeadFor a policy encoded [[Backoff]] to calculate the next duration
    * returned from `markDeadOnFailure()`
    */
   def successRateWithinDuration(
     requiredSuccessRate: Double,
     window: Duration,
-    markDeadFor: Stream[Duration]
+    markDeadFor: Backoff
   ): FailureAccrualPolicy =
     successRateWithinDuration(
       requiredSuccessRate,
@@ -366,16 +365,16 @@ object FailureAccrualPolicy {
    *
    * @param numFailures number of consecutive failures
    *
-   * @param markDeadFor stream of durations to use for the next duration
+   * @param markDeadFor a policy encoded [[Backoff]] to calculate the next duration
    * returned from `markDeadOnFailure()`
    */
-  def consecutiveFailures(numFailures: Int, markDeadFor: Stream[Duration]): FailureAccrualPolicy =
+  def consecutiveFailures(numFailures: Int, markDeadFor: Backoff): FailureAccrualPolicy =
     new FailureAccrualPolicy {
       val name = "ConsecutiveFailureAccrualPolicy"
 
       // Pad the back of the stream to mark dead for a constant amount (300 seconds)
-      // when the stream runs out.
-      private[this] val freshMarkDeadFor = markDeadFor ++ constantBackoff
+      // when the Backoff runs out.
+      private[this] val freshMarkDeadFor = markDeadFor.concat(constantBackoff)
 
       // The head of `nextMarkDeadFor` is the next duration that will be returned
       // from `markDeadOnFailure()` if the required success rate is not met.
@@ -391,8 +390,8 @@ object FailureAccrualPolicy {
       def markDeadOnFailure(): Option[Duration] = synchronized {
         consecutiveFailures += 1
         if (consecutiveFailures >= numFailures) {
-          val duration = nextMarkDeadFor.head
-          nextMarkDeadFor = nextMarkDeadFor.tail
+          val duration = nextMarkDeadFor.duration
+          nextMarkDeadFor = nextMarkDeadFor.next
           Some(duration)
         } else {
           None

@@ -6,7 +6,7 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{DefaultLogger, Updater}
 import com.twitter.logging.Level
-import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask}
+import com.twitter.util._
 import java.util.logging.Logger
 
 object FailFastFactory {
@@ -17,7 +17,7 @@ object FailFastFactory {
     since: Time,
     task: TimerTask,
     ntries: Int,
-    backoffs: Stream[Duration])
+    backoffs: Backoff)
       extends State
 
   private val url =
@@ -36,8 +36,8 @@ object FailFastFactory {
   // "permanently" dead host doesn't create a space leak. since each new backoff
   // that is taken will be held onto by this global Stream (having the trailing
   // `constant` avoids this issue).
-  private val defaultBackoffs: Stream[Duration] =
-    Backoff.exponentialJittered(1.second, 32.seconds).take(16) ++ Backoff.constant(32.seconds)
+  private val defaultBackoffs: Backoff =
+    Backoff.exponentialJittered(1.second, 32.seconds).take(16).concat(Backoff.constant(32.seconds))
 
   val role = Stack.Role("FailFast")
 
@@ -69,7 +69,7 @@ object FailFastFactory {
       Transporter.EndpointAddr,
       ServiceFactory[Req, Rep]
     ] {
-      val role = FailFastFactory.role
+      val role: Stack.Role = FailFastFactory.role
       val description = "Backoff exponentially from hosts to which we cannot establish a connection"
       def make(
         failFast: FailFast,
@@ -79,7 +79,7 @@ object FailFastFactory {
         _logger: param.Logger,
         _endpoint: Transporter.EndpointAddr,
         next: ServiceFactory[Req, Rep]
-      ) = {
+      ): ServiceFactory[Req, Rep] = {
         failFast match {
           case FailFast(false) =>
             next
@@ -126,7 +126,7 @@ private[finagle] class FailFastFactory[Req, Rep](
   label: String,
   logger: Logger = DefaultLogger,
   endpoint: Address = Address.failing,
-  backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs)
+  backoffs: Backoff = FailFastFactory.defaultBackoffs)
     extends ServiceFactoryProxy(underlying) {
   import FailFastFactory._
 
@@ -171,10 +171,10 @@ private[finagle] class FailFastFactory[Req, Rep](
         state = Ok
 
       case Observation.Fail(failure) if state == Ok =>
-        val (wait, rest) = backoffs match {
-          case Stream.Empty => (Duration.Zero, Stream.empty[Duration])
-          case w #:: r => (w, r)
-        }
+        val (wait, rest) =
+          if (backoffs.isExhausted) (Duration.Zero, Backoff.empty)
+          else (backoffs.duration, backoffs.next)
+
         val now = Time.now
         val task = timer.schedule(now + wait) { this.apply(Observation.Timeout) }
         markedDeadCounter.incr()
@@ -197,16 +197,18 @@ private[finagle] class FailFastFactory[Req, Rep](
 
       case Observation.TimeoutFail(failure) if state != Ok =>
         state match {
-          case Retrying(_, _, task, _, Stream.Empty) =>
+          case Retrying(_, _, task, _, backoffs) if backoffs.isExhausted =>
             task.cancel()
             // Backoff schedule exhausted. Optimistically become available in
             // order to continue trying.
             state = Ok
 
-          case Retrying(_, since, task, ntries, wait #:: rest) =>
+          case Retrying(_, since, task, ntries, backoffs) =>
             task.cancel()
-            val newTask = timer.schedule(Time.now + wait) { this.apply(Observation.Timeout) }
-            state = Retrying(failWith(failure), since, newTask, ntries + 1, rest)
+            val newTask = timer.schedule(Time.now + backoffs.duration) {
+              this.apply(Observation.Timeout)
+            }
+            state = Retrying(failWith(failure), since, newTask, ntries + 1, backoffs.next)
 
           case Ok => assert(false)
         }

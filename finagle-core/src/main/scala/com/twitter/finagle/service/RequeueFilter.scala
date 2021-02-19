@@ -1,10 +1,9 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle._
-import com.twitter.finagle.context
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Annotation, Trace, TraceId}
+import com.twitter.finagle.{context, _}
 import com.twitter.util._
 
 /**
@@ -15,7 +14,7 @@ import com.twitter.util._
  *
  * @param retryBudget Maintains our requeue budget.
  *
- * @param retryBackoffs Stream of backoffs to use before each retry. (e.g. the
+ * @param retryBackoffs a policy encoded [[Backoff]] to use before each retry. (e.g. the
  *                      first element is used to delay the first retry, 2nd for
  *                      the second retry and so on)
  *
@@ -39,7 +38,7 @@ import com.twitter.util._
  */
 private[finagle] class RequeueFilter[Req, Rep](
   retryBudget: RetryBudget,
-  retryBackoffs: Stream[Duration],
+  retryBackoffs: Backoff,
   maxRetriesPerReq: Double,
   responseClassifier: ResponseClassifier,
   statsReceiver: StatsReceiver,
@@ -65,7 +64,7 @@ private[finagle] class RequeueFilter[Req, Rep](
     service: Service[Req, Rep],
     attempt: Int,
     retriesRemaining: Int,
-    backoffs: Stream[Duration]
+    backoffs: Backoff
   ): Future[Rep] = {
     Contexts.broadcast.let(context.Retries, context.Retries(attempt)) {
       val trace = Trace()
@@ -100,23 +99,22 @@ private[finagle] class RequeueFilter[Req, Rep](
             canNotRetryCounter.incr()
             responseFuture(attempt, t)
           } else if (retriesRemaining > 0 && retryBudget.tryWithdraw()) {
-            backoffs match {
-              case Duration.Zero #:: rest =>
-                // no delay between retries. Retry immediately.
-                requeueCounter.incr()
-                applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
-              case delay #:: rest =>
-                // Delay and then retry.
-                timer
-                  .doLater(delay) {
-                    requeueCounter.incr()
-                    applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
-                  }
-                  .flatten
-              case _ =>
-                // Schedule has run out of entries. Budget is empty.
-                budgetExhaustCounter.incr()
-                responseFuture(attempt, t).transform(FailureFlags.asNonRetryable)
+            if (backoffs.isExhausted) {
+              // Schedule has run out of entries. Budget is empty.
+              budgetExhaustCounter.incr()
+              responseFuture(attempt, t).transform(FailureFlags.asNonRetryable)
+            } else if (backoffs.duration == Duration.Zero) {
+              // no delay between retries. Retry immediately.
+              requeueCounter.incr()
+              applyService(req, service, attempt + 1, retriesRemaining - 1, backoffs.next)
+            } else {
+              // Delay and then retry.
+              timer
+                .doLater(backoffs.duration) {
+                  requeueCounter.incr()
+                  applyService(req, service, attempt + 1, retriesRemaining - 1, backoffs.next)
+                }
+                .flatten
             }
           } else {
             if (retriesRemaining > 0)
@@ -136,7 +134,7 @@ private[finagle] class RequeueFilter[Req, Rep](
     service: Service[Req, Rep],
     attempt: Int,
     retriesRemaining: Int,
-    backoffs: Stream[Duration]
+    backoffs: Backoff
   ): Future[Rep] = {
     // If we've requeued a request, `attempt > 0`, we want the child request to subsequently
     // generate a new spanId for this request. The original request, `attempt == 0` should

@@ -1,8 +1,8 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.Backoff
 import com.twitter.finagle.serverset2.client._
-import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.io.Buf

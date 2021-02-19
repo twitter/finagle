@@ -1,16 +1,21 @@
 package com.twitter.finagle.liveness
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.Backoff
+import com.twitter.finagle.Backoff.EqualJittered
+import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import com.twitter.finagle.service._
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
 class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
 
   private[this] val constantBackoff = Backoff.const(5.seconds)
-  private[this] val expBackoff = Backoff.equalJittered(5.seconds, 60.seconds)
-  private[this] val expBackoffList = expBackoff take 6
+  // since `EqualJittered` generates values randomly, we pass the seed
+  // here in order to validate the values returned in the tests.
+  private[this] def expBackoff(seed: Long) =
+    new EqualJittered(5.seconds, 5.seconds, 60.seconds, 1, Rng(seed))
+  private[this] def expBackoffList(seed: Long) = expBackoff(seed).take(6)
 
   test("Consecutive failures policy: fail on nth attempt") {
     val policy = FailureAccrualPolicy.consecutiveFailures(3, constantBackoff)
@@ -46,33 +51,27 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   }
 
   test("Consecutive failures policy: markDeadOnFailure() iterates over markDeadFor") {
-    val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoff)
-
-    for (i <- 0 until expBackoffList.length)
-      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoffList(7777))
+    verifyPolicyBackoff(expBackoffList(7777), policy)
   }
 
   test(
     "Consecutive failures policy: markDeadOnFailure() returns Some(300.seconds) when stream runs out"
   ) {
-    val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoffList)
-
-    for (i <- 0 until expBackoffList.length)
-      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoffList(9999))
+    verifyPolicyBackoff(expBackoffList(9999), policy)
 
     for (i <- 0 until 5) assert(policy.markDeadOnFailure() == Some(300.seconds))
   }
 
   test("Consecutive failures policy: markDeadFor resets on revived()") {
-    val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoff)
-
-    for (i <- 0 until expBackoffList.length)
-      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoff(666))
+    val backoffs = expBackoffList(666)
+    verifyPolicyBackoff(backoffs, policy)
 
     policy.revived()
 
-    for (i <- 0 until expBackoffList.length)
-      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    verifyPolicyBackoff(backoffs, policy)
   }
 
   test("Success rate policy markDeadOnFailure() doesn't return Some(Duration) until min requests") {
@@ -100,36 +99,32 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   }
 
   test("Success rate policy: markDeadOnFailure() iterates over markDeadFor") {
-    val policy = FailureAccrualPolicy.successRate(1, 1, expBackoff)
+    val policy = FailureAccrualPolicy.successRate(1, 1, expBackoff(333))
 
-    for (i <- 0 until expBackoffList.length)
-      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    verifyPolicyBackoff(expBackoffList(333), policy)
   }
 
   test("Success rate policy: markDeadOnFailure() returns 300 when stream runs out") {
-    val policy = FailureAccrualPolicy.successRate(1, 1, expBackoffList)
+    val policy = FailureAccrualPolicy.successRate(1, 1, expBackoffList(333))
 
-    for (i <- 0 until expBackoffList.length)
-      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    verifyPolicyBackoff(expBackoffList(333), policy)
 
     for (i <- 0 until 5) assert(policy.markDeadOnFailure() == Some(300.seconds))
   }
 
   test("Success rate policy: markDeadFor resets on revived()") {
-    val policy = FailureAccrualPolicy.successRate(1, 2, expBackoff)
-
+    val policy = FailureAccrualPolicy.successRate(1, 2, expBackoff(333))
+    val backoffs = expBackoffList(333)
     // At least 2 requests need to fail before markDeadOnFailure() returns Some(_)
     assert(policy.markDeadOnFailure() == None)
-    for (i <- 0 until expBackoffList.length)
-      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    verifyPolicyBackoff(backoffs, policy)
 
     policy.revived()
 
     // The failures should've been reset. markDeadOnFailure() should return None
     // on the first failed request.
     assert(policy.markDeadOnFailure() == None)
-    for (i <- 0 until expBackoffList.length)
-      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    verifyPolicyBackoff(backoffs, policy)
   }
 
   test(
@@ -141,7 +136,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
         FailureAccrualPolicy.successRateWithinDuration(
           1,
           successRateDuration,
-          expBackoffList,
+          expBackoffList(333),
           0,
           Stopwatch.timeMillis)
 
@@ -151,8 +146,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
       // All markDeadOnFailure() calls should now return Some(Duration),
       // and should iterate over expBackoffList.
       timeControl.advance(successRateDuration)
-      for (i <- 0 until expBackoffList.length)
-        assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+      verifyPolicyBackoff(expBackoffList(333), policy)
 
       // Stream 'expBackoffList' ran out of values.
       // All markDeadOnFailure() calls should return Some(300.seconds).
@@ -167,13 +161,12 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
         FailureAccrualPolicy.successRateWithinDuration(
           1,
           successRateDuration,
-          expBackoffList,
+          expBackoffList(333),
           0,
           Stopwatch.timeMillis)
 
       timeControl.advance(successRateDuration)
-      for (i <- 0 until expBackoffList.length)
-        assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+      verifyPolicyBackoff(expBackoffList(333), policy)
 
       policy.revived()
 
@@ -223,7 +216,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
         FailureAccrualPolicy.successRateWithinDuration(
           1,
           successRateDuration,
-          expBackoffList,
+          expBackoffList(333),
           5,
           Stopwatch.timeMillis)
 
@@ -239,12 +232,12 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
 
   def hybridPolicy =
     FailureAccrualPolicy
-      .consecutiveFailures(3, expBackoff)
+      .consecutiveFailures(3, expBackoff(333))
       .orElse(
         FailureAccrualPolicy.successRateWithinDuration(
           requiredSuccessRate = 0.8,
           window = 30.seconds,
-          markDeadFor = expBackoff,
+          markDeadFor = expBackoff(333),
           minRequestThreshold = 0,
           Stopwatch.timeMillis
         )
@@ -321,5 +314,14 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     assert(policy2.markDeadOnFailure() == None)
     assert(policy2.markDeadOnFailure() == None)
     assert(policy2.markDeadOnFailure() == Some(10.seconds))
+  }
+
+  // helper method to verify the backoff returned from `policy`
+  // is the same as the backoff returned from `backoffs`
+  private def verifyPolicyBackoff(backoffs: Backoff, policy: FailureAccrualPolicy): Unit = {
+    if (!backoffs.isExhausted) {
+      assert(policy.markDeadOnFailure() == Some(backoffs.duration))
+      verifyPolicyBackoff(backoffs.next, policy)
+    }
   }
 }

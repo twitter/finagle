@@ -7,6 +7,32 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-core: Introduce a new `Backoff` to create backoffs based on varies strategies, where
+  backoffs are calculated on the fly, instead of being created once and memoized in a `Stream`.
+  Also introduced `Backoff.fromStream(Stream)` and `Backoff.toStream` to help with migration to
+  the new API. ``PHAB_ID=D592562``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: `c.t.finagle.InetResolver`, `c.t.finagle.builder.ClientBuilder`,
+  `c.t.finagle.liveness.FailureAccrualFactory`, `c.t.finagle.liveness.FailureAccrualPolicy`,
+  `c.t.finagle.param.ClientParams`, `c.t.finagle.param.SessionQualificationParams`,
+  `c.t.finagle.service.FailFastFactory`, `c.t.finagle.service.RequeueFilter`,
+  `c.t.finagle.service.Retries`, `c.t.finagle.service.RetryFilter`, and
+  `c.t.finagle.service.RetryPolicy` will accept the new `c.t.finagle.service.Backoff` to create
+  backoffs. Services can convert a `Stream` to/from a `Backoff` with `Backoff.fromStream(Stream)`
+  and `Backoff.toStream`. ``PHAB_ID=D592562``
+
+Deprecations
+~~~~~~~~~~~~
+* finagle-core: `Backoff.fromJava` is marked as deprecated, since the new `Backoff` is java-friendly.
+  For services using `Stream.iterator` on the old `Backoff`, please use the new API
+  `Backoff.toJavaIterator` to acquire a java-friendly iterator. ``PHAB_ID=D592562``
+
 21.2.0
 ------
 

@@ -245,7 +245,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     override def withResponseClassifier(responseClassifier: ResponseClassifier): Client =
       super.withResponseClassifier(responseClassifier)
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
-    override def withRetryBackoff(backoff: Stream[Duration]): Client =
+    override def withRetryBackoff(backoff: Backoff): Client =
       super.withRetryBackoff(backoff)
 
     override def withStack(stack: Stack[ServiceFactory[Request, Result]]): Client =

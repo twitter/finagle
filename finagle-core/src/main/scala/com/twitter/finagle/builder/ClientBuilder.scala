@@ -1,24 +1,23 @@
 package com.twitter.finagle.builder
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle._
+import com.twitter.finagle.{Backoff, _}
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.client.{DefaultPool, StackClient}
-import com.twitter.finagle.client.{StackBasedClient, Transporter}
+import com.twitter.finagle.client.{DefaultPool, StackBasedClient, StackClient, Transporter}
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.service._
 import com.twitter.finagle.service.FailFastFactory.FailFast
+import com.twitter.finagle.service._
+import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.ssl.client.{
   SslClientConfiguration,
   SslClientEngineFactory,
   SslClientSessionVerifier,
   SslContextClientEngineFactory
 }
-import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.stats.{
   NullStatsReceiver,
   RelativeNameMarkingStatsReceiver,
@@ -830,7 +829,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * @see [[retryPolicy]] for per-request rules on which failures are
    * eligible for retries.
    */
-  def retryBudget(budget: RetryBudget, backoffSchedule: Stream[Duration]): This =
+  def retryBudget(budget: RetryBudget, backoffSchedule: Backoff): This =
     configured(Retries.Budget(budget, backoffSchedule))
 
   /**

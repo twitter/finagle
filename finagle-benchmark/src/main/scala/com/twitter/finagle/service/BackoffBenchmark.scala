@@ -3,6 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.Duration
 import com.twitter.finagle.benchmark.StdBenchAnnotations
+import com.twitter.finagle.Backoff
 import org.openjdk.jmh.annotations.{Scope, State, Benchmark}
 
 // ./sbt 'project finagle-benchmark' 'jmh:run BackoffBenchmark'
@@ -27,10 +28,10 @@ class BackoffBenchmark extends StdBenchAnnotations {
 
 object BackoffBenchmark {
 
-  abstract class BackoffState(var backoff: Stream[Duration]) {
+  abstract class BackoffState(var backoff: Backoff) {
     def next(): Duration = {
-      val head = backoff.head
-      backoff = backoff.tail
+      val head = backoff.duration
+      backoff = backoff.next
       head
     }
   }
@@ -38,30 +39,30 @@ object BackoffBenchmark {
   @State(Scope.Thread)
   class FromFunction
       extends BackoffState(
-        Backoff.fromFunction(() => 10.seconds) ++ Backoff.const(300.seconds)
+        Backoff.fromFunction(() => 10.seconds).concat(Backoff.const(300.seconds))
       )
 
   @State(Scope.Thread)
   class Constant
       extends BackoffState(
-        Backoff.const(10.seconds) ++ Backoff.const(300.seconds)
+        Backoff.const(10.seconds).concat(Backoff.const(300.seconds))
       )
 
   @State(Scope.Thread)
   class EqualJittered
       extends BackoffState(
-        Backoff.equalJittered(5.seconds, 300.seconds) ++ Backoff.const(300.seconds)
+        Backoff.equalJittered(5.seconds, 300.seconds).concat(Backoff.const(300.seconds))
       )
 
   @State(Scope.Thread)
   class ExponentialJittered
       extends BackoffState(
-        Backoff.exponentialJittered(5.second, 300.seconds) ++ Backoff.const(300.seconds)
+        Backoff.exponentialJittered(5.second, 300.seconds).concat(Backoff.const(300.seconds))
       )
 
   @State(Scope.Thread)
   class DecorrelatedJittered
       extends BackoffState(
-        Backoff.decorrelatedJittered(5.second, 300.seconds) ++ Backoff.const(300.seconds)
+        Backoff.decorrelatedJittered(5.second, 300.seconds).concat(Backoff.const(300.seconds))
       )
 }

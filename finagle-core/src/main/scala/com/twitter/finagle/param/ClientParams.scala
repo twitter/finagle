@@ -1,8 +1,7 @@
 package com.twitter.finagle.param
 
+import com.twitter.finagle.{Backoff, Stack}
 import com.twitter.finagle.service.{Retries, RetryBudget}
-import com.twitter.finagle.Stack
-import com.twitter.util.Duration
 
 /**
  * A collection of methods for basic configuration of Finagle clients.
@@ -32,11 +31,11 @@ trait ClientParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
   /**
    * Configures the requeue backoff policy of this client (default: no delay).
    *
-   * The `backoff` policy is represented by a stream of delays (i.e.,
-   * `Stream[Duration]`) used to delay each retry.
+   * The policy encoded [[Backoff]] is used to calculate the next duration to
+   * delay each retry.
    *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#retries]]
    */
-  def withRetryBackoff(backoff: Stream[Duration]): A =
+  def withRetryBackoff(backoff: Backoff): A =
     self.configured(self.params[Retries.Budget].copy(requeueBackoffs = backoff))
 }

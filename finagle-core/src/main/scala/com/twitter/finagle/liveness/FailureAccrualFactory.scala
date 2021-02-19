@@ -4,7 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.{Params, Role}
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.service.{Backoff, ReqRep, ResponseClass, ResponseClassifier}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -25,8 +25,7 @@ object FailureAccrualFactory {
   // previous requests, it is likely to do so again. The recent
   // "failure history" should influence how long to mark the endpoint
   // dead for.
-  private[finagle] val jitteredBackoff: Stream[Duration] =
-    Backoff.equalJittered(5.seconds, 300.seconds)
+  private[finagle] val jitteredBackoff: Backoff = Backoff.equalJittered(5.seconds, 300.seconds)
 
   private[finagle] def defaultPolicy: Function0[FailureAccrualPolicy] =
     new Function0[FailureAccrualPolicy] {

@@ -24,7 +24,7 @@ class MemcachedTest extends FunSuite with MockitoSugar with Eventually with Inte
   protected def baseClient: Memcached.Client = Memcached.client
 
   test("Memcached.Client has expected stack and params") {
-    val markDeadFor = Backoff.const(1.second)
+    var markDeadFor = Backoff.const(1.second)
     val failureAccrualPolicy = FailureAccrualPolicy.consecutiveFailures(20, markDeadFor)
     val client = baseClient
       .configured(FailureAccrualFactory.Param(() => failureAccrualPolicy))
@@ -42,7 +42,10 @@ class MemcachedTest extends FunSuite with MockitoSugar with Eventually with Inte
 
     val FailureAccrualFactory.Param.Configured(policy) = params[FailureAccrualFactory.Param]
     assert(policy() == failureAccrualPolicy)
-    assert(markDeadFor.take(10).force === (0 until 10 map { _ => 1.second }))
+    for (_ <- 0 until 10) {
+      assert(markDeadFor.duration == 1.second)
+      markDeadFor = markDeadFor.next
+    }
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))
     assert(params[pparam.EjectFailedHost] == pparam.EjectFailedHost(false))
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))

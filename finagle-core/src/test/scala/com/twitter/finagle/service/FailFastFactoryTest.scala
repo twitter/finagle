@@ -2,7 +2,14 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{FailedFastException, Service, ServiceFactory, SourcedException, Status}
+import com.twitter.finagle.{
+  Backoff,
+  FailedFastException,
+  Service,
+  ServiceFactory,
+  SourcedException,
+  Status
+}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import org.mockito.Matchers.any
@@ -20,7 +27,7 @@ class FailFastFactoryTest
 
   def newCtx() = new {
     val timer = new MockTimer
-    val backoffs = 1.second #:: 2.seconds #:: Stream.empty[Duration]
+    val backoffs = Backoff.linear(1.second, 1.second).take(2)
     val service = mock[Service[Int, Int]]
     when(service.close(any[Time])).thenReturn(Future.Done)
     val underlying = mock[ServiceFactory[Int, Int]]
@@ -243,7 +250,7 @@ class FailFastFactoryTest
       val ctx = newCtx()
       import ctx._
 
-      val failfast = new FailFastFactory(underlying, stats, timer, label, backoffs = Stream.empty)
+      val failfast = new FailFastFactory(underlying, stats, timer, label, backoffs = Backoff.empty)
       failfast()
     }
   }

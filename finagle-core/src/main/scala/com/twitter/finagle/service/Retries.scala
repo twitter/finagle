@@ -57,7 +57,7 @@ object Retries {
    */
   case class Budget(
     retryBudget: RetryBudget,
-    requeueBackoffs: Stream[Duration] = Budget.emptyBackoffSchedule) {
+    requeueBackoffs: Backoff = Budget.emptyBackoffSchedule) {
     def this(retryBudget: RetryBudget) =
       this(retryBudget, Budget.emptyBackoffSchedule)
 
@@ -92,7 +92,7 @@ object Retries {
      * Default backoff stream to use for automatic retries.
      * All Zeros.
      */
-    val emptyBackoffSchedule = Backoff.constant(Duration.Zero)
+    val emptyBackoffSchedule = Backoff.const(Duration.Zero)
 
     def default: Budget = Budget(RetryBudget(), emptyBackoffSchedule)
 
@@ -239,7 +239,7 @@ object Retries {
 
   private[this] def newRequeueFilter[Req, Rep](
     retryBudget: RetryBudget,
-    retrySchedule: Stream[Duration],
+    retrySchedule: Backoff,
     withdrawsOnly: Boolean,
     statsReceiver: StatsReceiver,
     timer: Timer,
