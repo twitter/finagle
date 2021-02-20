@@ -99,13 +99,13 @@ jobs:
         uses: actions/cache@v2
         env:
           cache-name: cache-build-deps
-          with:
-            path: |
-              ~/.dodo
-              ~/.ivy2/cache
-              ~/.ivy2/local/com.twitter
-              ~/.sbt
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.scala }}-${{ matrix.java }}
+        with:
+          path: |
+            ~/.dodo
+            ~/.ivy2/cache
+            ~/.ivy2/local/com.twitter
+            ~/.sbt
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.scala }}-${{ matrix.java }}
       - name: update cache
         run: |
           if [ -f ~/.ivy2/cache ]; then
