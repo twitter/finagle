@@ -99,30 +99,30 @@ jobs:
         uses: actions/cache@v2
         env:
           cache-name: cache-build-deps
-            with:
-              path: |
-                ~/.dodo
-                ~/.ivy2/cache
-                ~/.ivy2/local/com.twitter
-                ~/.sbt
-              key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.scala }}-${{ matrix.java }}
-          - name: update cache
-            run: |
-              if [ -f ~/.ivy2/cache ]; then
-                find ~/.ivy2/cache  -name "ivydata-*.properties" -delete
-              fi
-              if [ -f ~/.sbt ]; then
-                find ~/.sbt         -name "*.lock"               -delete
-              fi
-          - name: build dependencies
-            uses: twitter/dodo-build@v3
-            with:
-              branch: develop
-              project: finagle
-              no-test: true
-              publish-m2: true
-              verbose: true
-          - name: set up netty snapshot
-            run: source ./netty-snapshot-env.sh
-          - name: test
-            run: ${{ format('./sbt ++{0} clean "{1}/test"', matrix.scala, matrix.project) }}
+          with:
+            path: |
+              ~/.dodo
+              ~/.ivy2/cache
+              ~/.ivy2/local/com.twitter
+              ~/.sbt
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.scala }}-${{ matrix.java }}
+      - name: update cache
+        run: |
+          if [ -f ~/.ivy2/cache ]; then
+            find ~/.ivy2/cache  -name "ivydata-*.properties" -delete
+          fi
+          if [ -f ~/.sbt ]; then
+            find ~/.sbt         -name "*.lock"               -delete
+          fi
+      - name: build dependencies
+        uses: twitter/dodo-build@v3
+        with:
+          branch: develop
+          project: finagle
+          no-test: true
+          publish-m2: true
+          verbose: true
+      - name: set up netty snapshot
+        run: source ./netty-snapshot-env.sh
+      - name: test
+        run: ${{ format('./sbt ++{0} clean "{1}/test"', matrix.scala, matrix.project) }}
