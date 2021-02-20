@@ -19,10 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # We don't run the 2.11.x series with finagle because the build matrix becomes
-        # too large. GitHub limits the build matrix to 256.
-        # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix
-        scala: [2.12.8, 2.13.1]
+        scala: [2.11.12, 2.12.8, 2.13.1]
         java: ['1.8', '1.11']
         project: ['finagle-base-http', 'finagle-benchmark', 'finagle-benchmark-thrift', 'finagle-core', 'finagle-example', 'finagle-exception', 'finagle-exp', 'finagle-grpc-context', 'finagle-http', 'finagle-http2','finagle-init','finagle-integration','finagle-memcached','finagle-mux','finagle-mysql','finagle-netty4','finagle-netty4-http','finagle-opencensus-tracing','finagle-partitioning','finagle-redis','finagle-scribe','finagle-serversets','finagle-stats','finagle-stats-core','finagle-thrift','finagle-thriftmux','finagle-toggle','finagle-tunable','finagle-zipkin-core','finagle-zipkin-scribe']
     runs-on: ubuntu-latest
@@ -78,12 +75,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # We don't run the 2.11.x series with finagle because the build matrix becomes
-        # too large. GitHub limits the build matrix to 256.
-        # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix
-        scala: [ 2.12.8, 2.13.1 ]
-        java: [ '1.8', '1.11' ]
-        project: [ 'finagle-base-http','finagle-core','finagle-http','finagle-http2','finagle-integration','finagle-mux','finagle-mysql','finagle-netty4','finagle-netty4-http','finagle-thriftmux' ]
+        scala: [2.11.12, 2.12.8, 2.13.1]
+        java: ['1.8', '1.11']
+        project: ['finagle-base-http','finagle-core','finagle-http','finagle-http2','finagle-integration','finagle-mux','finagle-mysql','finagle-netty4','finagle-netty4-http','finagle-thriftmux']
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
