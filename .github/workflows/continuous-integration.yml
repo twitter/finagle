@@ -19,16 +19,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # We don't run the 2.11.x series with finagle because the build matrix becomes
+        # too large. GitHub limits the build matrix to 256.
+        # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix
         scala: [2.12.8, 2.13.1]
         java: ['1.8', '1.11']
         project: ['finagle-base-http', 'finagle-benchmark', 'finagle-benchmark-thrift', 'finagle-core', 'finagle-example', 'finagle-exception', 'finagle-exp', 'finagle-grpc-context', 'finagle-http', 'finagle-http2','finagle-init','finagle-integration','finagle-memcached','finagle-mux','finagle-mysql','finagle-netty4','finagle-netty4-http','finagle-opencensus-tracing','finagle-partitioning','finagle-redis','finagle-scribe','finagle-serversets','finagle-stats','finagle-stats-core','finagle-thrift','finagle-thriftmux','finagle-toggle','finagle-tunable','finagle-zipkin-core','finagle-zipkin-scribe']
-        use_netty: [false]
-        experimental: [false]
-        include:
-          - project: ['finagle-base-http','finagle-core','finagle-http','finagle-http2','finagle-integration','finagle-mux','finagle-mysql','finagle-netty4','finagle-netty4-http','finagle-thriftmux']
-            use_netty: true
-            experimental: true
-    continue-on-error: ${{ matrix.experimental }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
@@ -78,3 +74,55 @@ jobs:
       - name: upload coverage
         if: ${{ success() }}
         run: bash <(curl -s https://codecov.io/bash)
+  build-with-netty-snapshot:
+    strategy:
+      fail-fast: false
+      matrix:
+        # We don't run the 2.11.x series with finagle because the build matrix becomes
+        # too large. GitHub limits the build matrix to 256.
+        # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix
+        scala: [ 2.12.8, 2.13.1 ]
+        java: [ '1.8', '1.11' ]
+        project: [ 'finagle-base-http','finagle-core','finagle-http','finagle-http2','finagle-integration','finagle-mux','finagle-mysql','finagle-netty4','finagle-netty4-http','finagle-thriftmux' ]
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: echo java version
+        run: java -Xmx32m -version
+      - name: echo javac version
+        run: javac -J-Xmx32m -version
+      - name: cache build dependencies
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-build-deps
+            with:
+              path: |
+                ~/.dodo
+                ~/.ivy2/cache
+                ~/.ivy2/local/com.twitter
+                ~/.sbt
+              key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.scala }}-${{ matrix.java }}
+          - name: update cache
+            run: |
+              if [ -f ~/.ivy2/cache ]; then
+                find ~/.ivy2/cache  -name "ivydata-*.properties" -delete
+              fi
+              if [ -f ~/.sbt ]; then
+                find ~/.sbt         -name "*.lock"               -delete
+              fi
+          - name: build dependencies
+            uses: twitter/dodo-build@v3
+            with:
+              branch: develop
+              project: finagle
+              no-test: true
+              publish-m2: true
+              verbose: true
+          - name: set up netty snapshot
+            run: source ./netty-snapshot-env.sh
+          - name: test
+            run: ${{ format('./sbt ++{0} clean "{1}/test"', matrix.scala, matrix.project) }}
