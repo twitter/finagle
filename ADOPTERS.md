@@ -75,6 +75,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Tendril](https://www.tendrilinc.com/)
 * [Threat Stack](https://www.threatstack.com/)
 * [Tinder](https://www.tinder.com/)
+* [Tinkoff](https://tinkoff.ru)
 * [Tradeshift](https://tradeshift.com/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
