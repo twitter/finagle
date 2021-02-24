@@ -179,7 +179,8 @@ private[finagle] class Metrics private (
 
     if (schema.metricBuilder.percentiles.isEmpty) {
       createStat(
-        HistogramSchema(schema.metricBuilder.withPercentiles(BucketedHistogram.DefaultQuantiles)))
+        HistogramSchema(
+          schema.metricBuilder.withPercentiles(BucketedHistogram.DefaultQuantiles: _*)))
     } else {
       createStat(schema)
     }

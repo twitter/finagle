@@ -64,7 +64,7 @@ object MetricsStatsReceiverTest {
       verbosity: Verbosity = Verbosity.Default
     ) =
       statsReceiver.counter(
-        CounterSchema(statsReceiver.metricBuilder().withName(name).withVerbosity(verbosity)))
+        CounterSchema(statsReceiver.metricBuilder().withName(name: _*).withVerbosity(verbosity)))
     def addGauge(
       statsReceiver: StatsReceiver,
       name: Seq[String],
@@ -73,14 +73,14 @@ object MetricsStatsReceiverTest {
       f: => Float
     ) =
       statsReceiver.addGauge(
-        GaugeSchema(statsReceiver.metricBuilder().withName(name).withVerbosity(verbosity)))(f)
+        GaugeSchema(statsReceiver.metricBuilder().withName(name: _*).withVerbosity(verbosity)))(f)
     def addHisto(
       statsReceiver: StatsReceiver,
       name: Seq[String],
       verbosity: Verbosity = Verbosity.Default
     ) =
       statsReceiver.stat(
-        HistogramSchema(statsReceiver.metricBuilder().withName(name).withVerbosity(verbosity)))
+        HistogramSchema(statsReceiver.metricBuilder().withName(name: _*).withVerbosity(verbosity)))
   }
 }
 
