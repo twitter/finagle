@@ -15,6 +15,13 @@ New Features
   Also introduced `Backoff.fromStream(Stream)` and `Backoff.toStream` to help with migration to
   the new API. ``PHAB_ID=D592562``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-mysql: The constructor of `c.t.f.mysql.transport.MysqlBufReader` now takes an underlying
+  `c.t.io.ByteReader`. Prior uses of the constructor, which took a `c.t.io.Buf`, should migrate to
+  using `c.t.f.mysql.transport.MysqlBufReader.apply` instead. ``PHAB_ID=D622705``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

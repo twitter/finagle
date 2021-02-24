@@ -218,7 +218,7 @@ private[finagle] final class ClientDispatcher(
       case Some(byte) =>
         val isBinaryEncoded = cmd != Command.COM_QUERY
         val numCols = Try {
-          val br = new MysqlBufReader(packet.body)
+          val br = MysqlBufReader(packet.body)
           br.readVariableLong().toInt
         }
 
