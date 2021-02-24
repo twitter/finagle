@@ -1,0 +1,54 @@
+package com.twitter.finagle.mysql.unit.harness
+
+import com.twitter.finagle.mysql.harness.config.{MySqlInstanceConfig, MySqlVersion}
+import java.nio.file.{Path, Paths}
+import org.scalatest.funsuite.AnyFunSuite
+
+class MySqlInstanceConfigTest extends AnyFunSuite {
+  val tempDir: Path = Paths.get(System.getProperty("java.io.tmpdir"))
+  val testVersion: MySqlVersion = new MySqlVersion(
+    1,
+    2,
+    3,
+    Map()
+  ) {}
+  test("create a config with defaults values") {
+    val config = MySqlInstanceConfig(
+      testVersion
+    )
+
+    val expectedParameters = config.mySqlVersion.serverStartParameters.map {
+      case (key, value) => s"$key=$value"
+    }.toSeq
+
+    config.startServerParameters.foreach { param =>
+      assert(expectedParameters.contains(param))
+    }
+
+    assert(expectedParameters.size == config.startServerParameters.size)
+    assert(config.mySqlVersion == testVersion)
+    assert(
+      config.extractedMySqlPath.toString.equals(s"${tempDir.resolve(".embedded_mysql/1.2.3")}"))
+  }
+
+  Seq(
+    "--port",
+    "--datadir",
+    "--socket"
+  ).foreach { forbiddenParam =>
+    test(s"should throw if $forbiddenParam is in start parameters") {
+      val testVersion: MySqlVersion = new MySqlVersion(
+        1,
+        2,
+        3,
+        Map(forbiddenParam -> "aValue")
+      ) {}
+
+      val errorMessage = intercept[RuntimeException] {
+        MySqlInstanceConfig(testVersion)
+      }.getMessage
+      assert(errorMessage.equals(s"$forbiddenParam is not allowed in startServerParameters"))
+    }
+  }
+
+}

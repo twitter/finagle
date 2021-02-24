@@ -1,18 +1,7 @@
-scala_library(
-    name = "integration-client",
-    sources = [
-        "com/twitter/finagle/mysql/integration/IntegrationClient.scala",
-    ],
-    compiler_option_sets = ["fatal_warnings"],
-    dependencies = [
-        "3rdparty/jvm/org/scalatest",
-        "finagle/finagle-core/src/main",
-        "finagle/finagle-mysql/src/main/scala",
-    ],
-)
-
 junit_tests(
-    sources = ["**/*.scala"],
+    sources = [
+        "**/*.scala",
+    ],
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
         "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",
@@ -30,6 +19,7 @@ junit_tests(
         "finagle/finagle-core/src/main",
         "finagle/finagle-mysql",
         "finagle/finagle-mysql/src/test/resources",
+        "finagle/finagle-mysql/src/test/scala/com/twitter/finagle/mysql/harness",
         "util/util-core:scala",
     ],
 )
