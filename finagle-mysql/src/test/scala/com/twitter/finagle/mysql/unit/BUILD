@@ -20,6 +20,7 @@ junit_tests(
         "finagle/finagle-mysql",
         "finagle/finagle-mysql/src/test/resources",
         "finagle/finagle-mysql/src/test/scala/com/twitter/finagle/mysql/harness",
+        "finagle/finagle-mysql/src/test/scala/com/twitter/finagle/mysql/harness/config",
         "util/util-core:scala",
     ],
 )
