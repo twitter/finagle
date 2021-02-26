@@ -92,6 +92,36 @@ class HttpRouterTest extends FunSuite {
     assert(router(Req(Request("/users/forty"))) == NotFound) // 'forty' doesn't match our IntParam
   }
 
+  test("LinearHttpRouter#Query Params aren't taken into consideration when routing") {
+    val constantResult = router(Req(Request("/users?param1=value1&param2=value2")))
+    constantResult match {
+      case Found(input: Req[_], route) =>
+        assert(route == getUsersRoute)
+        val request = input.asInstanceOf[Req[Request]].value
+        assert(request.method == Method.Get)
+        assert(request.uri == "/users?param1=value1&param2=value2")
+        assert(input.get(Fields.ParameterMapField) == None)
+        assert(input.get(Fields.PathField) == Some("/users"))
+      case result =>
+        fail(s"Unexpected Routing Result: $result")
+    }
+
+    val getResult = router(Req(Request("/users/123?param1=value1&param2=value2")))
+    getResult match {
+      case Found(input: Req[_], route) =>
+        assert(route == getUserByIdRoute)
+        val request: Request = input.asInstanceOf[Req[Request]].value
+        assert(request.method == Method.Get)
+        assert(request.uri == "/users/123?param1=value1&param2=value2")
+        assert(
+          input.get(Fields.ParameterMapField) == Some(
+            MapParameterMap(Map("id" -> IntValue("123", 123)))))
+        assert(input.get(Fields.PathField) == Some("/users/123"))
+      case result =>
+        fail(s"Unexpected Routing Result: $result")
+    }
+  }
+
   test(
     "LinearHttpRouter#finds correct Route when multiple Routes exist for same Path with different Method") {
     val getResult = router(Req(Request("/users/123")))

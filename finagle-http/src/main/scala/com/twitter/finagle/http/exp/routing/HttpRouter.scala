@@ -1,6 +1,7 @@
 package com.twitter.finagle.http.exp.routing
 
 import com.twitter.finagle.exp.routing.{Request => Req}
+import com.twitter.finagle.http.exp.routing.Fields.PathField
 import com.twitter.finagle.http.{Method, Request}
 import com.twitter.finagle.http.exp.routing.HttpRouter.{
   PathRouter,
@@ -41,7 +42,15 @@ private[http] object HttpRouter {
    * @see [[https://swagger.io/specification/#paths-object OpenAPI Path matching behavior]]
    */
   sealed abstract class PathRouter(label: String, routes: Iterable[RoutesForPath])
-      extends Router[Req[Request], RoutesForPath](label, routes)
+      extends Router[Req[Request], RoutesForPath](label, routes) {
+
+    /** Extract the memoized path String from the input request */
+    protected final def getPath(req: Req[Request]): String = req.get(PathField) match {
+      case Some(path) => path
+      case _ => throw new IllegalStateException("no path on request")
+    }
+
+  }
 
   /** Contract for a [[Generator]] that will produce a new [[PathRouter]] */
   sealed abstract class PathRouterGenerator
@@ -99,7 +108,8 @@ private[routing] final class HttpRouter(
     RouterInfo(label, groupRoutesByPath()))
 
   protected def find(input: Req[Request]): RouteResult = {
-    pathRouter(input) match {
+    val populatedReq = input.set(PathField, input.value.path)
+    pathRouter(populatedReq) match {
       case Found(req: Req[_], rfp: RoutesForPath) =>
         // if we have found RoutesForPath that match our request, we need to ensure
         // that the request's Method is defined in the RoutesForPath in order to
@@ -205,7 +215,7 @@ private[http] object LinearPathRouter {
   private final class ConstantRouter(label: String, routes: Iterable[RoutesForPath])
       extends PathRouter(label + "-constant", routes) {
     protected def find(input: Req[Request]): RouteResult = {
-      val path = input.value.uri
+      val path: String = getPath(input)
       val iter = routes.iterator
       var result: RouteResult = NotFound
       while (result == NotFound && iter.hasNext) {
@@ -237,7 +247,7 @@ private[http] object LinearPathRouter {
   private final class ParameterizedRouter(label: String, routes: Iterable[RoutesForPath])
       extends PathRouter(label + "-parameterized", routes) {
     protected def find(input: Req[Request]): RouteResult = {
-      val path = input.value.uri
+      val path: String = getPath(input)
       val iter = routes.iterator
       var result: RouteResult = NotFound
       while (result == NotFound && iter.hasNext) {
