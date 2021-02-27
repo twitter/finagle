@@ -9,25 +9,17 @@ class ParamsTest extends FunSuite {
   test("EagerConnections takes on the default flag value unless set") {
     // ensure that there's a default value
     assert(apertureEagerConnections.getWithDefault.isDefined)
-    val default = apertureEagerConnections.getWithDefault.get
+    val default: EagerConnectionsType.Value = apertureEagerConnections.getWithDefault.get
+    val defaultBool = if (default == EagerConnectionsType.Disable) false else true
 
     val params: Stack.Params = Stack.Params.empty
-    assert(params[EagerConnections].enabled == default)
+    assert(params[EagerConnections].enabled == defaultBool)
 
     // purposefully make it the opposite
-    val setParams = params + EagerConnections(!default)
-    assert(setParams[EagerConnections].enabled == !default)
+    val setParams = params + EagerConnections(!defaultBool)
+    assert(setParams[EagerConnections].enabled == !defaultBool)
 
     apertureEagerConnections.reset()
   }
 
-  test("EagerConnections can change its value") {
-    var enabled = false
-
-    val eagerConnections = EagerConnections(() => enabled)
-    assert(eagerConnections.enabled == false)
-
-    enabled = true
-    assert(eagerConnections.enabled == true)
-  }
 }

@@ -42,6 +42,9 @@ object perHostStats
     )
 
 package exp {
+
+  import com.twitter.finagle.loadbalancer.aperture.EagerConnectionsType
+
   object loadMetric
       extends GlobalFlag(
         "leastReq",
@@ -49,11 +52,13 @@ package exp {
       )
 
   object apertureEagerConnections
-      extends GlobalFlag[Boolean](
-        false,
+      extends GlobalFlag[EagerConnectionsType.Value](
+        EagerConnectionsType.Disable,
         "enable aperture eager connections\n" +
+          "\tAccepts one of 3 values of EagerConnectionType: Enable, Disable, and ForceWithDtab.\n" +
           "\tWhen enabled, the aperture load balancer will eagerly establish connections with\n" +
-          "\tall endpoints in the aperture. This does not apply for hosts resolved in result of request-level\n" +
-          "\tdtab overrides."
+          "\tall endpoints in the aperture. This does not typically apply for hosts resolved in\n" +
+          "\tresult of request-leve dtab overrides unless set to ForceWithDtab."
       )
+
 }

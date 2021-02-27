@@ -9,6 +9,10 @@ Unreleased
 
 New Features
 ~~~~~~~~~~~~
+* finagle-core: Added value `ForceWithDtab` to flag
+  `-com.twitter.finagle.loadbalancer.exp.apertureEagerConnections` that forces the
+  aperture load balancer to eagerly connect, even in staging environments where
+  Dtab locals are set. ``PHAB_ID=D613989``
 
 * finagle-core: Introduce a new `Backoff` to create backoffs based on varies strategies, where
   backoffs are calculated on the fly, instead of being created once and memoized in a `Stream`.
@@ -39,6 +43,12 @@ Deprecations
 * finagle-core: `Backoff.fromJava` is marked as deprecated, since the new `Backoff` is java-friendly.
   For services using `Stream.iterator` on the old `Backoff`, please use the new API
   `Backoff.toJavaIterator` to acquire a java-friendly iterator. ``PHAB_ID=D592562``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+* finagle-core: Changed flag `-com.twitter.finagle.loadbalancer.exp.apertureEagerConnections"
+  from having Boolean values true or false to `EagerConnectionsType` values `Enable`,
+  `Disable`, and `ForceWithDtab`. ``PHAB_ID=D613989``
 
 21.2.0
 ------

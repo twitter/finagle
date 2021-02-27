@@ -275,12 +275,16 @@ object BindingFactory {
             LoadBalancerFactory.ErrorLabel(errorLabel) +
             param.Stats(statsWithBoundName)
 
+        val forceWithDtab: Boolean = params[EagerConnections].withForceDtab
+
         // Explicitly disable `EagerConnections` if (1) `eagerlyConnect` is false, indicating that
         // the feature was explicitly disabled or the underlying balancer does not support the eager connections
-        // feature or (2) If request-level dtab overrides are present due to their unpredictable nature,
-        // resulting in wasteful connections.
+        // feature or (2) If request-level dtab overrides are due to their unpredictable nature,
+        // resulting in wasteful connections. The second condition applies only if
+        // EagerConnectionsType.ForceWithDtab is false.
         val finalParams =
-          if (!eagerlyConnect || !Dtab.local.isEmpty) updatedParams + EagerConnections(false)
+          if (!eagerlyConnect || (!forceWithDtab && !Dtab.local.isEmpty))
+            updatedParams + EagerConnections(false)
           else updatedParams
 
         val client = next.make(finalParams)
