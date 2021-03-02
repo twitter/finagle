@@ -1,17 +1,15 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.finagle.mysql.harness.EmbeddedMySqlSuite
-import com.twitter.finagle.mysql.harness.config._
-import com.twitter.util.{Await, Duration}
+import com.twitter.finagle.mysql.harness.EmbeddedSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 
-class PingTest extends EmbeddedMySqlSuite {
+class PingTest extends EmbeddedSuite {
+  override val instanceConfig: InstanceConfig = defaultInstanceConfig
+  override val databaseConfig: DatabaseConfig = defaultDatabaseConfig
+
   test("ping default") { fixture =>
-    val roClient = fixture.mySqlDatabase
-      .createROClient().newRichClient(fixture.mySqlInstance.dest)
-    Await.result(roClient.ping(), Duration.fromSeconds(1))
+    val clnt = fixture.newRichClient()
+    await(clnt.ping())
+    await(clnt.close())
   }
-
-  val mySqlInstanceConfig: MySqlInstanceConfig = defaultInstanceConfig
-
-  val mySqlDatabaseConfig: MySqlDatabaseConfig = defaultDatabaseConfig
 }

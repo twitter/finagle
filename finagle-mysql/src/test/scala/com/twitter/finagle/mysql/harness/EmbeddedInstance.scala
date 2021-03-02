@@ -3,8 +3,7 @@ package com.twitter.finagle.mysql.harness
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql.Client
-import com.twitter.finagle.mysql.harness.EmbeddedMySqlInstance.{RootUser, SetupTeardownTimeout}
-import com.twitter.finagle.mysql.harness.config.{MySqlInstanceConfig, MySqlUser, MySqlUserType}
+import com.twitter.finagle.mysql.harness.config.{InstanceConfig, User}
 import com.twitter.logging.Logger
 import com.twitter.util.{Await, Duration, Future, Return, Throw, Try}
 import java.io.IOException
@@ -17,54 +16,21 @@ import java.util.function.Function
 import scala.reflect.io.Directory
 
 /**
- * Ensures only one embedded mysql instance is created for any database across all tests run.
+ * Manages lifecycle of the embedded mysql instance.
  */
-object EmbeddedMySqlInstance {
+object EmbeddedInstance {
   val SetupTeardownTimeout: Duration = 5.seconds
-  val RootUser: MySqlUser = new MySqlUser {
-    override val name: String = "root"
-    override val password: Option[String] = None
-    override val userType: MySqlUserType = MySqlUserType.RW
-  }
 
   val log: Logger = Logger.get()
 
-  // EmbeddedMySqlInstance is cached by MySqlInstanceConfig in order to ensure 1 instance for all
+  // EmbeddedInstance is cached by InstanceConfig in order to ensure 1 instance for all
   // tests. This will prevent multiple instances of the same mysql version to be spawned affecting
   // performance and memory.
-  private val instanceCache: ConcurrentHashMap[MySqlInstanceConfig, EmbeddedMySqlInstance] =
-    new ConcurrentHashMap[MySqlInstanceConfig, EmbeddedMySqlInstance]()
-
-  private def configToInstance(
-    config: MySqlInstanceConfig
-  ): Function[MySqlInstanceConfig, EmbeddedMySqlInstance] =
-    new Function[MySqlInstanceConfig, EmbeddedMySqlInstance] {
-      override def apply(v1: MySqlInstanceConfig): EmbeddedMySqlInstance = {
-        MySqlExecutables
-          .fromPath(config.extractedMySqlPath)
-          .map { executables =>
-            log.debug("New instance is being set up")
-            val dataDirectory: Path = createDataDirectory(config)
-            val port = openPort()
-            val dest = s"${InetAddress.getLoopbackAddress.getHostAddress}:$port"
-            val serverParameters: Seq[String] = getServerParameters(config, dataDirectory, port)
-
-            initializeDb(dataDirectory, executables)
-
-            val instance = new EmbeddedMySqlInstance(executables, serverParameters, port, dest)
-            instance.startInstance()
-
-            sys addShutdownHook {
-              instance.stopInstance()
-              new Directory(dataDirectory.toFile).deleteRecursively()
-            }
-            instance
-          }.orNull
-      }
-    }
+  private val instanceCache: ConcurrentHashMap[InstanceConfig, EmbeddedInstance] =
+    new ConcurrentHashMap[InstanceConfig, EmbeddedInstance]()
 
   private def getServerParameters(
-    config: MySqlInstanceConfig,
+    config: InstanceConfig,
     dataDirectory: Path,
     port: Int
   ): Seq[String] = {
@@ -76,6 +42,34 @@ object EmbeddedMySqlInstance {
     config.startServerParameters ++ derivedServerParameters
   }
 
+  private def configToInstance(
+    config: InstanceConfig
+  ): Function[InstanceConfig, EmbeddedInstance] =
+    new Function[InstanceConfig, EmbeddedInstance] {
+      override def apply(v1: InstanceConfig): EmbeddedInstance = {
+        MySqlExecutables
+          .fromPath(config.extractedMySqlPath)
+          .map { executables =>
+            log.debug("New instance is being set up")
+            val dataDirectory: Path = createDataDirectory(config)
+            val port = openPort()
+            val dest = s"${InetAddress.getLoopbackAddress.getHostAddress}:$port"
+            val serverParameters: Seq[String] = getServerParameters(config, dataDirectory, port)
+
+            initializeDataDir(dataDirectory, executables)
+
+            val instance = new EmbeddedInstance(executables, serverParameters, port, dest)
+            instance.startInstance()
+
+            sys.addShutdownHook {
+              instance.stopInstance()
+              new Directory(dataDirectory.toFile).deleteRecursively()
+            }
+            instance
+          }.orNull
+      }
+    }
+
   /**
    * Get or create a new MySqlInstance for the given config. This instance has a port, server
    * parameters, and paths to mysqld and mysqladmin.
@@ -84,10 +78,9 @@ object EmbeddedMySqlInstance {
    * @return The option will be empty if the executables are not found in the extraction directory
    */
   def getInstance(
-    config: MySqlInstanceConfig
-  ): Option[EmbeddedMySqlInstance] = {
+    config: InstanceConfig
+  ): Option[EmbeddedInstance] =
     Option(instanceCache.computeIfAbsent(config, configToInstance(config)))
-  }
 
   private def openPort(): Int = {
     val socket: ServerSocket = new ServerSocket(0)
@@ -105,7 +98,7 @@ object EmbeddedMySqlInstance {
     }).getOrElse(throw new RuntimeException("Failed to get ephemeral port for embedded mysql"))
   }
 
-  private def createDataDirectory(config: MySqlInstanceConfig): Path = {
+  private def createDataDirectory(config: InstanceConfig): Path = {
     val dataDirectory: Path =
       config.extractedMySqlPath.resolve(s"data/${UUID.randomUUID()}")
     new Directory(dataDirectory.toFile).deleteRecursively()
@@ -114,11 +107,12 @@ object EmbeddedMySqlInstance {
   }
 
   /**
-   * Initialize the MySql --datadir
+   * Initialize the MySql --datadir.
+   *
    * @param dataDirectory The location of --datadir
    * @param executables The location of the MySql executables
    */
-  private def initializeDb(dataDirectory: Path, executables: MySqlExecutables): Unit = {
+  private def initializeDataDir(dataDirectory: Path, executables: MySqlExecutables): Unit = {
     log.info(s"Initializing $dataDirectory")
     executables.initDatabase(
       Seq(
@@ -133,18 +127,29 @@ object EmbeddedMySqlInstance {
 }
 
 /**
- * A MySql instance
+ * A MySql instance.
+ *
  * @param mySqlExecutables locations of mysqld and mysqladmin
  * @param serverParameters the server parameters to start this instance with
  * @param port the port for start this instance on
  */
-final class EmbeddedMySqlInstance(
+final class EmbeddedInstance(
   mySqlExecutables: MySqlExecutables,
   serverParameters: Seq[String],
   val port: Int,
   val dest: String) {
+  import EmbeddedInstance.SetupTeardownTimeout
+
   private val running = new AtomicBoolean(false)
   private val log: Logger = Logger.get()
+
+  /**
+   * Creates a new mysql.Client connected to the instance via the root account.
+   */
+  def newRootUserClient(baseClient: Mysql.Client = Mysql.client): Client =
+    baseClient
+      .withCredentials(User.Root.name, User.Root.password.orNull)
+      .newRichClient(dest)
 
   /**
    * Start the MySql instance using the [[serverParameters]] on the specified [[port]]
@@ -172,7 +177,7 @@ final class EmbeddedMySqlInstance(
    * Ping the database until it is up
    */
   private def waitForDatabase(): Unit = {
-    val rootClient = createRootUserClient().newRichClient(dest)
+    val rootClient = newRootUserClient()
     val wait = waitForPing(rootClient)
       .before(rootClient.close(SetupTeardownTimeout))
     Await.result(wait, SetupTeardownTimeout)
@@ -186,15 +191,5 @@ final class EmbeddedMySqlInstance(
         log.info(s"mysql instance on port $port is available")
         Future.Done
     }
-  }
-
-  /**
-   * Create a client for the root user
-   * @param baseClient Base configured client
-   * @return A client configured for the root user
-   */
-  def createRootUserClient(baseClient: Mysql.Client = Mysql.client): Mysql.Client = {
-    baseClient
-      .withCredentials(RootUser.name, RootUser.password.orNull)
   }
 }

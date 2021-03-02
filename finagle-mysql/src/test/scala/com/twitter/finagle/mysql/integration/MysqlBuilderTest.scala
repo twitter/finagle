@@ -1,40 +1,35 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql.QueryRequest
-import com.twitter.finagle.mysql.harness.EmbeddedMySqlSuite
-import com.twitter.finagle.mysql.harness.config.{MySqlDatabaseConfig, MySqlInstanceConfig}
+import com.twitter.finagle.mysql.harness.EmbeddedSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.{Mysql, param}
-import com.twitter.util.{Await, Awaitable}
+import com.twitter.finagle.param
 
-class MysqlBuilderTest extends EmbeddedMySqlSuite {
-  val mySqlInstanceConfig: MySqlInstanceConfig = defaultInstanceConfig
-
-  val mySqlDatabaseConfig: MySqlDatabaseConfig = defaultDatabaseConfig
-
-  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
+class MysqlBuilderTest extends EmbeddedSuite {
+  override val instanceConfig: InstanceConfig = defaultInstanceConfig
+  override val databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
   test("clients have granular tracing") { fixture =>
     Trace.enable()
     var annotations: List[Annotation] = Nil
-
-    // if we have a local instance of mysql running.
-    val username = mySqlDatabaseConfig.users.rwUser.name
-    val password = mySqlDatabaseConfig.users.rwUser.password.get
-    val db = mySqlDatabaseConfig.databaseName
-    val client = Mysql.client
+    val mockTracer = new Tracer {
+      def record(record: Record): Unit = {
+        annotations ::= record.annotation
+      }
+      def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)
+    }
+    val client = fixture
+      .newClient()
       .configured(param.Label("myclient"))
-      .withDatabase("test")
-      .withCredentials(username, password)
-      .withDatabase(db)
+      .configured(param.Tracer(mockTracer))
       .withConnectionInitRequest(
         QueryRequest("SET SESSION sql_mode='TRADITIONAL,NO_AUTO_VALUE_ON_ZERO,ONLY_FULL_GROUP_BY'"))
-      .newRichClient(fixture.mySqlInstance.dest)
+      .newRichClient(fixture.instance.dest)
 
-    ready(client.query("SELECT 1"))
-    ready(client.prepare("SELECT ?")(1))
-    ready(client.ping())
+    await(client.query("SELECT 1"))
+    await(client.prepare("SELECT ?")(1))
+    await(client.ping())
 
     val mysqlTraces = annotations.collect {
       case Annotation.BinaryAnnotation("clnt/mysql.query", "SELECT") => ()
@@ -43,5 +38,6 @@ class MysqlBuilderTest extends EmbeddedMySqlSuite {
     }
 
     assert(mysqlTraces.nonEmpty, "missing traces")
+    await(client.close())
   }
 }

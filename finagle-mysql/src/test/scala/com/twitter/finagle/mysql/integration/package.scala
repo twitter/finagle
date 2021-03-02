@@ -1,17 +1,10 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.mysql.harness.config.{
-  MySqlDBUsers,
-  MySqlDatabaseConfig,
-  MySqlInstanceConfig,
-  MySqlVersion,
-  ROUser,
-  RWUser
-}
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig, MySqlVersion}
 
 package object integration {
 
-  val v5_7_28 = new MySqlVersion(
+  val v5_7_28 = MySqlVersion(
     5,
     7,
     28,
@@ -27,14 +20,14 @@ package object integration {
       "--enforce_gtid_consistency" -> "ON",
       "--log-bin" -> "binfile",
       "--server-id" -> "1"
-    ))
+    )
+  )
 
   /**
-   * This is the default MySqlInstanceConfig. This will look for mysql binaries in java.io.tmpdir
-   * by default. Add a known extraction path here to run.
+   * This is the default InstanceConfig used by the integration package.
+   * This will look for mysql binaries in java.io.tmpdir.
    */
-  val defaultInstanceConfig: MySqlInstanceConfig = MySqlInstanceConfig(v5_7_28)
-  val defaultDatabaseConfig: MySqlDatabaseConfig = MySqlDatabaseConfig(
-    "a_database",
-    MySqlDBUsers(RWUser("rw", Some("rwpass")), ROUser("ro", Some("ropass"))))
+  val defaultInstanceConfig: InstanceConfig = InstanceConfig(v5_7_28)
+  val defaultDatabaseConfig: DatabaseConfig =
+    DatabaseConfig(databaseName = "a_database", users = Seq.empty, setupQueries = Seq.empty)
 }
