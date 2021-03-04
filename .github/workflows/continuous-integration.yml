@@ -62,10 +62,6 @@ jobs:
           no-test: true
           publish-m2: true
           verbose: true
-      - name: finagle-memcached/update
-        run: ${{ format('./sbt --error ++{0} ci:update finagle-memcached/update', matrix.scala) }}
-      - name: finagle-memcached/test:compile
-        run: ${{ format('./sbt ++{0} finagle-memcached/test:compile', matrix.scala) }}
       - name: test
         run: ${{ format('./sbt ++{0} clean coverage "{1}/test" coverageReport', matrix.scala, matrix.project) }}
       - name: coverage
