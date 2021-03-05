@@ -21,5 +21,6 @@ scala_library(
     ],
     exports = [
         "3rdparty/jvm/io/netty:netty4",
+        "finagle/finagle-core",
     ],
 )
