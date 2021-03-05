@@ -106,3 +106,36 @@ object CompressionLevel {
   implicit val compressionLevelParam: Stack.Param[CompressionLevel] =
     Stack.Param(CompressionLevel(-1))
 }
+
+/**
+ * Case class to configure jaas params
+ *
+ * @param principal The name of the principal that should be used
+ * @param keyTab Set this to the file name of the keytab to get principal's secret key
+ * @param useKeyTab Set this to true if you want the module to get the principal's key from the the keytab
+ * @param storeKey Set this to true to if you want the keytab or the principal's key to be stored in
+ *                 the Subject's private credentials
+ * @param refreshKrb5Config Set this to true, if you want the configuration to be refreshed before
+ *                          the login method is called
+ * @param debug Output debug messages
+ * @param doNotPrompt Set this to true if you do not want to be prompted for the password if
+ *                    credentials can not be obtained from the cache, the keytab, or through shared state
+ * @see [[https://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html]]
+ */
+case class KerberosConfiguration(
+  principal: Option[String] = None,
+  keyTab: Option[String] = None,
+  useKeyTab: Boolean = true,
+  storeKey: Boolean = true,
+  refreshKrb5Config: Boolean = true,
+  debug: Boolean = false,
+  doNotPrompt: Boolean = true,
+  authEnabled: Boolean = true)
+case class Kerberos(kerberosConfiguration: KerberosConfiguration) {
+  def mk(): (Kerberos, Stack.Param[Kerberos]) =
+    (this, Kerberos.kerberosParam)
+}
+object Kerberos {
+  implicit val kerberosParam: Stack.Param[Kerberos] =
+    Stack.Param(Kerberos(KerberosConfiguration()))
+}
