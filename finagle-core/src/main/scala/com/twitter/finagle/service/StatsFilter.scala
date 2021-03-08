@@ -2,14 +2,11 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{
-  ExceptionStatsHandler,
-  MultiCategorizingExceptionStatsHandler,
-  StatsReceiver
-}
+import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, GreaterThan, MonotoneThreshold}
+import com.twitter.finagle.stats._
 import com.twitter.util._
-import java.util.concurrent.atomic.LongAdder
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.LongAdder
 import scala.util.control.NonFatal
 
 object StatsFilter {
@@ -234,12 +231,34 @@ class StatsFilter[Req, Rep] private[service] (
     }
   }
 
+  private[this] val successSchema =
+    CounterSchema(new MetricBuilder(name = Seq("success"), statsReceiver = statsReceiver))
+  private[this] val failureSchema =
+    CounterSchema(
+      new MetricBuilder(name = Seq(ExceptionStatsHandler.Failures), statsReceiver = statsReceiver))
+  private[this] val requestSchema =
+    CounterSchema(new MetricBuilder(name = Seq("requests"), statsReceiver = statsReceiver))
+
   private[this] val outstandingRequestCount = new LongAdder()
-  private[this] val dispatchCount = statsReceiver.counter("requests")
-  private[this] val successCount = statsReceiver.counter("success")
+  private[this] val dispatchCount = statsReceiver.counter(requestSchema)
+  private[this] val successCount = statsReceiver.counter(successSchema)
   private[this] val latencyStat = statsReceiver.stat(s"request_latency_$latencyStatSuffix")
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
+
+  private[this] val successRate =
+    ExpressionSchema(
+      "success_rate",
+      Expression(successSchema).divide(Expression(successSchema).plus(Expression(failureSchema))))
+      .withBounds(MonotoneThreshold(GreaterThan, 99.5, 99.75))
+      .withUnit(Percentage)
+      .withDescription("The Success Rate")
+      .register()
+
+  private[this] val throughput = ExpressionSchema("throughput", Expression(requestSchema))
+    .withUnit(Requests)
+    .withDescription("The total requests")
+    .register()
 
   private[this] def isIgnorableResponse(rep: Try[Rep]): Boolean = rep match {
     case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Ignorable) =>

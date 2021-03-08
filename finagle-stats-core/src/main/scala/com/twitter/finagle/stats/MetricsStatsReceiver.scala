@@ -2,6 +2,7 @@ package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle.http.{HttpMuxHandler, Route, RouteIndex}
+import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, FuturePool, Time}
@@ -150,6 +151,9 @@ class MetricsStatsReceiver(val registry: Metrics)
   }
 
   override def metricsCollisionsLinterRule: Rule = registry.metricsCollisionsLinterRule
+
+  override protected[finagle] def registerExpression(expressionSchema: ExpressionSchema): Unit =
+    registry.registerExpression(expressionSchema)
 }
 
 private object MetricsExporter {
@@ -178,6 +182,12 @@ class MetricsExporter(val registry: Metrics, val logger: Logger)
    * @return a map of metric names to their full MetricSchemas.
    */
   override def schemas(): Map[String, MetricSchema] = registry.schemas.asScala.toMap
+
+  /**
+   * Exposes Metric Expressions for ExpressionRegistry.
+   * @return a map of expression names to their full ExpressionSchema.
+   */
+  def expressions(): Map[String, ExpressionSchema] = registry.expressions.asScala.toMap
 
   val pattern = "/admin/metrics.json"
 

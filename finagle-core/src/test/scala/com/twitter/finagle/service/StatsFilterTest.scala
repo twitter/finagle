@@ -7,6 +7,7 @@ import com.twitter.finagle.stats.{
   InMemoryStatsReceiver
 }
 import com.twitter.finagle._
+import com.twitter.finagle.stats.exp.{FunctionExpression, MetricExpression}
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
 import org.scalatest.FunSuite
@@ -310,5 +311,12 @@ class StatsFilterTest extends FunSuite {
     assert(3 == sr.counter("requests")())
     assert(2 == sr.counter("success")())
     assert(1 == sr.counter("failures")())
+  }
+
+  test("success rate and throughput expressions are instrumented") {
+    val (_, receiver, _) = getService()
+
+    assert(receiver.expressions("success_rate").expr.isInstanceOf[FunctionExpression])
+    assert(receiver.expressions("throughput").expr.isInstanceOf[MetricExpression])
   }
 }

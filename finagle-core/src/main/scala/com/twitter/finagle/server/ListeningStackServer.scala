@@ -60,7 +60,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       private[this] val statsReceiver =
         if (serverLabel.isEmpty) new RoleConfiguredStatsReceiver(stats, Server)
         else
-          new RoleConfiguredStatsReceiver(
+          RoleConfiguredStatsReceiver(
             new RelativeNameMarkingStatsReceiver(stats.scope(serverLabel)),
             Server)
 

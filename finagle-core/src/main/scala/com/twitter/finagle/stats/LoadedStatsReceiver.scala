@@ -70,10 +70,10 @@ object ClientStatsReceiver extends StatsReceiverProxy {
  */
 object ServerStatsReceiver extends StatsReceiverProxy {
   @volatile protected var self: StatsReceiver =
-    new RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope("srv"), Server)
+    RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope("srv"), Server)
 
   def setRootScope(rootScope: String): Unit = {
-    self = new RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope(rootScope), Server)
+    self = RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope(rootScope), Server)
   }
 
   override def repr: ServerStatsReceiver.type = this

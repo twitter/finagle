@@ -1,5 +1,6 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.logging.Logger
 import com.twitter.util.lint.{Category, Issue, Rule}
 import java.util
@@ -42,7 +43,8 @@ object Metrics {
     statsMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreStat](),
     gaugesMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge](),
     /** Store MetricSchemas for each metric in order to surface metric metadata to users. */
-    metricSchemas = new ConcurrentHashMap[String, MetricSchema]()
+    metricSchemas = new ConcurrentHashMap[String, MetricSchema](),
+    expressionSchemas = new ConcurrentHashMap[String, ExpressionSchema]()
   )
 
   private class StoreCounterImpl(override val name: String) extends MetricsStore.StoreCounter {
@@ -82,7 +84,8 @@ object Metrics {
     countersMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreCounter],
     statsMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreStat],
     gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge],
-    metricSchemas: ConcurrentHashMap[String, MetricSchema])
+    metricSchemas: ConcurrentHashMap[String, MetricSchema],
+    expressionSchemas: ConcurrentHashMap[String, ExpressionSchema])
 }
 
 /**
@@ -132,6 +135,8 @@ private[finagle] class Metrics private (
   private[this] val gaugesMap = metricsMaps.gaugesMap
 
   private[this] val metricSchemas = metricsMaps.metricSchemas
+
+  private[this] val expressionSchemas = metricsMaps.expressionSchemas
 
   private[this] val verbosityMap =
     new ConcurrentHashMap[String, Verbosity]()
@@ -213,6 +218,14 @@ private[finagle] class Metrics private (
     }
   }
 
+  private[stats] def registerExpression(exprSchema: ExpressionSchema): Unit = {
+    val expressionId = exprSchema.labels.serviceName match {
+      case Some(serviceName) => exprSchema.name + "_" + serviceName
+      case None => exprSchema.name
+    }
+    expressionSchemas.putIfAbsent(expressionId, exprSchema)
+  }
+
   def registerGauge(schema: GaugeSchema, f: => Float): Unit =
     registerNumberGauge(schema, f)
 
@@ -289,6 +302,9 @@ private[finagle] class Metrics private (
 
   def schemas: util.Map[String, MetricSchema] =
     util.Collections.unmodifiableMap(metricSchemas)
+
+  def expressions: util.Map[String, ExpressionSchema] =
+    util.Collections.unmodifiableMap(expressionSchemas)
 
   def metricsCollisionsLinterRule: Rule =
     Rule(
