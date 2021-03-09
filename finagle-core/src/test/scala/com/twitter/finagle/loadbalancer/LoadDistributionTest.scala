@@ -86,7 +86,10 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
     clients.foreach(sendAndWait(150))
 
     // Optimal load is 750 / 10 = 75.
-    assert(servers.forall(s => s.load <= 150))
+    // With eager connections enabled, we expect 1 more request per client.
+    // With eager connections disabled, we expect <= 150, with it enabled we expect <= 155
+    // (as we have 5 clients)
+    assert(servers.forall(s => s.load <= 155))
   }
 
   test("servers deploy") {

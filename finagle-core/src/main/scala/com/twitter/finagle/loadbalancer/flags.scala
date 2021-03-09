@@ -53,7 +53,7 @@ package exp {
 
   object apertureEagerConnections
       extends GlobalFlag[EagerConnectionsType.Value](
-        EagerConnectionsType.Disable,
+        EagerConnectionsType.Enable,
         "enable aperture eager connections\n" +
           "\tAccepts one of 3 values of EagerConnectionType: Enable, Disable, and ForceWithDtab.\n" +
           "\tWhen enabled, the aperture load balancer will eagerly establish connections with\n" +

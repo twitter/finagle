@@ -84,7 +84,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
         timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
         useDeterministicOrdering = None,
-        withEagerConnections = () => false
+        eagerConnections = false
       )
     }
   }
@@ -106,7 +106,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      withEagerConnections = () => false
+      eagerConnections = false
     )
 
     assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -130,7 +130,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(false),
-      withEagerConnections = () => false
+      eagerConnections = false
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -155,7 +155,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(false),
-      withEagerConnections = () => false
+      eagerConnections = false
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -181,7 +181,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      withEagerConnections = () => true
+      eagerConnections = true
     )
     assert(factories.forall(_.total == 1))
 
@@ -208,7 +208,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      withEagerConnections = () => false
+      eagerConnections = false
     )
     assert(stats.counters(Seq("rebuilds")) == 1)
 
@@ -239,7 +239,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      withEagerConnections = () => false
+      eagerConnections = false
     )
     assert(stats.counters(Seq("rebuilds")) == 1)
 

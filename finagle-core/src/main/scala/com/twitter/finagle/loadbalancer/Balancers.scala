@@ -259,7 +259,7 @@ object Balancers {
       val sr = params[param.Stats].statsReceiver
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
-      val eagerConnections = params[EagerConnections].isEnabled
+      val eagerConnections = params[EagerConnections].enabled
 
       val balancer = new ApertureLeastLoaded(
         endpoints,
@@ -355,7 +355,7 @@ object Balancers {
       val sr = params[param.Stats].statsReceiver
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
-      val eagerConnections = params[EagerConnections].isEnabled
+      val eagerConnections = params[EagerConnections].enabled
 
       val balancer = new AperturePeakEwma(
         endpoints,

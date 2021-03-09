@@ -22,6 +22,10 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: Changed flag `-com.twitter.finagle.loadbalancer.exp.apertureEagerConnections"
+  from having Boolean values true or false to `EagerConnectionsType` values `Enable`,
+  `Disable`, and `ForceWithDtab`. ``PHAB_ID=D613989``
+
 * finagle-mysql: The constructor of `c.t.f.mysql.transport.MysqlBufReader` now takes an underlying
   `c.t.io.ByteReader`. Prior uses of the constructor, which took a `c.t.io.Buf`, should migrate to
   using `c.t.f.mysql.transport.MysqlBufReader.apply` instead. ``PHAB_ID=D622705``
@@ -38,17 +42,21 @@ Runtime Behavior Changes
   backoffs. Services can convert a `Stream` to/from a `Backoff` with `Backoff.fromStream(Stream)`
   and `Backoff.toStream`. ``PHAB_ID=D592562``
 
+* finagle-core: remove the `com.twitter.finagle.loadbalancer.apertureEagerConnections` Toggle and
+  change the default behavior to enable eager connections for `c.t.f.loadbalancer.ApertureLeastLoaded`
+  and `c.t.f.loadbalancer.AperturePeakEwma` load balancers. The state of the
+  `com.twitter.finagle.loadbalancer.apertureEagerConnections` GlobalFlag now also defaults to enable
+  this feature (`Enable`. You can disable this feature for all clients via setting the
+  `com.twitter.finagle.loadbalancer.apertureEagerConnections` GlobalFlag to `Disable` for your process.
+  (i.e. `-com.twitter.finagle.loadbalancer.apertureEagerConnections=Disable`).
+  ``PHAB_ID=D625618``
+
 Deprecations
 ~~~~~~~~~~~~
 * finagle-core: `Backoff.fromJava` is marked as deprecated, since the new `Backoff` is java-friendly.
   For services using `Stream.iterator` on the old `Backoff`, please use the new API
   `Backoff.toJavaIterator` to acquire a java-friendly iterator. ``PHAB_ID=D592562``
 
-Breaking API Changes
-~~~~~~~~~~~~~~~~~~~~
-* finagle-core: Changed flag `-com.twitter.finagle.loadbalancer.exp.apertureEagerConnections"
-  from having Boolean values true or false to `EagerConnectionsType` values `Enable`,
-  `Disable`, and `ForceWithDtab`. ``PHAB_ID=D613989``
 
 21.2.0
 ------

@@ -2,8 +2,7 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.app.Flaggable
 import com.twitter.finagle.loadbalancer.aperture.EagerConnectionsType.{EagerConnectionsType}
-import com.twitter.finagle.{CoreToggles, Stack}
-import com.twitter.finagle.server.ServerInfo
+import com.twitter.finagle.Stack
 import com.twitter.finagle.loadbalancer.exp.apertureEagerConnections
 
 /**
@@ -15,8 +14,7 @@ import com.twitter.finagle.loadbalancer.exp.apertureEagerConnections
  */
 private[twitter] case class EagerConnections private (
   mode: EagerConnectionsType) {
-  val isEnabled: () => Boolean = () => mode != EagerConnectionsType.Disable
-  def enabled: Boolean = isEnabled()
+  def enabled: Boolean = mode != EagerConnectionsType.Disable
   def withForceDtab: Boolean = mode == EagerConnectionsType.ForceWithDtab
 }
 
@@ -38,31 +36,17 @@ private[twitter] object EagerConnectionsType extends Enumeration {
 }
 
 private[twitter] object EagerConnections {
-  private val toggle = CoreToggles(apertureEagerConnections.name)
 
-  // The flag value takes precedence over the toggle
-  private val default: EagerConnections = {
-    val flagVal = apertureEagerConnections.get
-    flagVal match {
-      case Some(x: EagerConnectionsType) => EagerConnections(x)
-      case _ =>
-        // we lazily grab the server id until the toggle is evaluated to ensure
-        // server initialization has completed.
-        val serverHashCode = ServerInfo().id.hashCode
-        // protect against the toggle not being present
-        if (toggle.isDefined && toggle(serverHashCode)) EagerConnections(enabled = true)
-        else EagerConnections(enabled = false)
-    }
-  }
+  // the default Stack.Param value takes into account the flag value
+  private[this] val default: EagerConnections = EagerConnections(apertureEagerConnections())
 
-  implicit val param: Stack.Param[EagerConnections] = {
+  implicit val param: Stack.Param[EagerConnections] =
     Stack.Param(default)
-  }
 
   /**
    * Creates this param enabling eager connections
    */
-  def apply(): EagerConnections = this(true)
+  def apply(): EagerConnections = apply(true)
 
   /**
    * Explicitly configure EagerConnections

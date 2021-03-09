@@ -31,7 +31,7 @@ private[loadbalancer] final class AperturePeakEwma[Req, Rep](
   protected val timer: Timer,
   protected val emptyException: NoBrokersAvailableException,
   protected val useDeterministicOrdering: Option[Boolean],
-  withEagerConnections: () => Boolean)
+  protected val eagerConnections: Boolean)
     extends Aperture[Req, Rep]
     with PeakEwma[Req, Rep]
     with LoadBand[Req, Rep]
@@ -39,7 +39,6 @@ private[loadbalancer] final class AperturePeakEwma[Req, Rep](
     with Updating[Req, Rep] {
   require(minAperture > 0, s"minAperture must be > 0, but was $minAperture")
   protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
-  protected def eagerConnections = withEagerConnections()
 
   // We set the idle time as a function of the aperture's smooth window.
   // The aperture growth is dampened by this window so after X windows
