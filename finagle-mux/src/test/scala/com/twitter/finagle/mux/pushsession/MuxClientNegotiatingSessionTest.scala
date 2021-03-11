@@ -310,6 +310,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     handle.serialExecutor.executeAll()
     await(sessionF)
     assert(!stats.gauges.contains(Seq("negotiating")))
+    assert(!stats.gauges.contains(Seq("negotiating_queue_size")))
 
     assert(handle.currentSession.isInstanceOf[MuxClientSession])
   }

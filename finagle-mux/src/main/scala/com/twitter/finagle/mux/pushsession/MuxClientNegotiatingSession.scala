@@ -228,6 +228,13 @@ private[finagle] object MuxClientNegotiatingSession {
       qsize
     }
 
+    // update the state of our variables after 'q' has been drained
+    private[this] def markAsDrained(): Unit = {
+      qsize = 0
+      drained = true
+      qsizeGauge.remove() // remove the gauge after we have drained
+    }
+
     /**
      * Drains queued messages into `session` and registers `session`
      * with the handle. Note, this MUST be called from within the `serialExecutor`
@@ -240,8 +247,7 @@ private[finagle] object MuxClientNegotiatingSession {
         iter.remove()
       }
       handle.registerSession(session)
-      qsize = 0
-      drained = true
+      markAsDrained()
     }
 
     /**
@@ -254,8 +260,7 @@ private[finagle] object MuxClientNegotiatingSession {
         iter.next().close()
         iter.remove()
       }
-      qsize = 0
-      drained = true
+      markAsDrained()
     }
 
     def receive(m: ByteReader): Unit = {
