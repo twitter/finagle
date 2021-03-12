@@ -21,6 +21,7 @@ New Features
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+* finagle: Builds are now only supported for Scala 2.12+ ``PHAB_ID=D631091``
 
 * finagle-core: Changed flag `-com.twitter.finagle.loadbalancer.exp.apertureEagerConnections"
   from having Boolean values true or false to `EagerConnectionsType` values `Enable`,
