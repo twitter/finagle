@@ -4,7 +4,8 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Address
 import com.twitter.finagle.loadbalancer.{EndpointFactory, LazyEndpointFactory}
 import com.twitter.finagle.ServiceFactoryProxy
-import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.util.Rng
 import com.twitter.util._
 import org.scalatest.fixture.FunSuite
 
@@ -33,7 +34,8 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     case class Node(factory: EndpointFactory[Unit, Unit])
         extends ServiceFactoryProxy[Unit, Unit](factory)
         with ExpiringNode
-        with ApertureNode {
+        with ApertureNode[Unit, Unit] {
+      override def tokenRng: Rng = rng
       def load: Double = 0
       def pending: Int = 0
       override val token: Int = 0

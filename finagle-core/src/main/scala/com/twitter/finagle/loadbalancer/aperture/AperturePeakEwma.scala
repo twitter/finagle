@@ -55,7 +55,9 @@ private[loadbalancer] final class AperturePeakEwma[Req, Rep](
       with PeakEwmaNode
       with LoadBandNode
       with ExpiringNode
-      with ApertureNode
+      with ApertureNode[Req, Rep] {
+    override def tokenRng: Rng = rng
+  }
 
   protected def newNode(factory: EndpointFactory[Req, Rep]): Node = Node(factory)
   protected def failingNode(cause: Throwable): Node = Node(new FailingEndpointFactory(cause))

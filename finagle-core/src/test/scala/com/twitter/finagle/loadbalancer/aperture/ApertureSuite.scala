@@ -15,7 +15,7 @@ private[loadbalancer] trait ApertureSuite {
    */
   trait TestBal extends Aperture[Unit, Unit] {
     protected val rng = Rng(12345L)
-    protected val emptyException = new Empty
+    protected def emptyException = new Empty
     protected def eagerConnections = false
     protected def maxEffort = 5
     protected def minAperture = 1
@@ -36,8 +36,9 @@ private[loadbalancer] trait ApertureSuite {
     def maxUnitsx: Int = maxUnits
     def distx: Distributor = dist
     def rebuildx(): Unit = rebuild()
-    def isDeterministicAperture: Boolean = dist.isInstanceOf[DeterministicAperture]
-    def isRandomAperture: Boolean = dist.isInstanceOf[RandomAperture]
+    def isDeterministicAperture: Boolean =
+      dist.isInstanceOf[DeterministicAperture[Unit, Unit, Node]]
+    def isRandomAperture: Boolean = dist.isInstanceOf[RandomAperture[Unit, Unit, Node]]
   }
 
   case class Factory(i: Int) extends EndpointFactory[Unit, Unit] {

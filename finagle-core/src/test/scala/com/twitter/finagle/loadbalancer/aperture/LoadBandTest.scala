@@ -25,7 +25,9 @@ class LoadBandTest extends FunSuite with ApertureSuite {
         extends ServiceFactoryProxy[Unit, Unit](factory)
         with LeastLoadedNode
         with LoadBandNode
-        with ApertureNode
+        with ApertureNode[Unit, Unit] {
+      override def tokenRng: Rng = rng
+    }
 
     protected def newNode(factory: EndpointFactory[Unit, Unit]) = Node(factory)
     protected def failingNode(cause: Throwable) = ???

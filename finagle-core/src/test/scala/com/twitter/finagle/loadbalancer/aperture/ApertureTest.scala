@@ -29,10 +29,13 @@ class ApertureTest extends FunSuite with ApertureSuite {
     protected def nodeLoad: Double = 0.0
 
     protected def statsReceiver: StatsReceiver = NullStatsReceiver
-    protected class Node(val factory: EndpointFactory[Unit, Unit])
+    class Node(val factory: EndpointFactory[Unit, Unit])
         extends ServiceFactoryProxy[Unit, Unit](factory)
         with NodeT[Unit, Unit]
-        with ApertureNode {
+        with ApertureNode[Unit, Unit] {
+
+      override def tokenRng: Rng = rng
+
       // We don't need a load metric since this test only focuses on
       // the internal behavior of aperture.
       def id: Int = 0
