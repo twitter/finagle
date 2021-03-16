@@ -34,6 +34,8 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Bump scala version to 2.12.13 ``PHAB_ID=D632567``
+
 * finagle-core: Move helper tracing methods like `traceLocal` in `Trace` into the `Tracing` class. This
   allows cheaper use of these APIs by first capturing a Trace via `Trace#apply`, avoiding the extra lookups
   that will add overhead on the request path. ``PHAB_ID=D633318``.

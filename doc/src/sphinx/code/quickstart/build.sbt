@@ -2,7 +2,7 @@ lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "com.twitter",
-      scalaVersion := "2.12.11",
+      scalaVersion := "2.12.13",
       version      := "1.0"
     )),
     name := "quickstart",
