@@ -1,6 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
+import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicReference
@@ -18,6 +19,8 @@ trait EndpointFactory[Req, Rep] extends ServiceFactory[Req, Rep] {
    * Returns the address which this endpoint connects to.
    */
   def address: Address
+
+  private[loadbalancer] lazy val weight: Double = WeightedAddress.extract(address)._2
 
   /**
    * Signals to the endpoint that it should close and rebuild

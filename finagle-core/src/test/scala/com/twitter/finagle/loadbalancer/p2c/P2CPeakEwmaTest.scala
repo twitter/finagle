@@ -48,7 +48,6 @@ class P2CPeakEwmaTest extends FunSuite with P2CSuite {
   }
 
   case class LatentFactory(which: Int, latency: Any => Int) extends P2CServiceFactory {
-    val weight = 1d
     var load = 0
     var sum = 0
     def meanLoad: Double = if (load == 0) 0.0 else sum.toDouble / load.toDouble
