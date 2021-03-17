@@ -138,8 +138,8 @@ def jdk11GcJavaOptions: Seq[String] = {
 val sharedSettings = Seq(
   version := releaseVersion,
   organization := "com.twitter",
-  scalaVersion := "2.12.13",
-  crossScalaVersions := Seq("2.12.13", "2.13.1"),
+  scalaVersion := "2.12.12",
+  crossScalaVersions := Seq("2.12.12", "2.13.1"),
   fork in Test := true, // We have to fork to get the JavaOptions
   libraryDependencies ++= Seq(
     // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit

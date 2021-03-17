@@ -34,6 +34,9 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Revert to scala version 2.12.12 due to https://github.com/scoverage/sbt-scoverage/issues/319
+  ``PHAB_ID=D635917``
+
 * finagle: Bump scala version to 2.12.13 ``PHAB_ID=D632567``
 
 * finagle-core: Move helper tracing methods like `traceLocal` in `Trace` into the `Tracing` class. This
