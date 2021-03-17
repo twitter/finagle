@@ -19,6 +19,8 @@ New Features
   Also introduced `Backoff.fromStream(Stream)` and `Backoff.toStream` to help with migration to
   the new API. ``PHAB_ID=D592562``
 
+* finagle-netty4: Upgrade to Netty 4.1.59.Final and TcNative 2.0.35.Final. ``PHAB_ID=D629268``  
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 * finagle: Builds are now only supported for Scala 2.12+ ``PHAB_ID=D631091``
