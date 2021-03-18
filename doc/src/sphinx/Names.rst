@@ -353,7 +353,7 @@ computation); ``Addrs`` are in one of 3 states:
 We now see that a ``Var[Addr]`` is capable of representing a moving target,
 for example a dynamic serverset_.
 
-.. _serverset: https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html
+.. _serverset: https://github.com/twitter-archive/commons/blob/master/src/java/com/twitter/common/zookeeper/ServerSet.java
 
 .. rubric:: Footnotes
 .. [#names] A `name` identities *what* you want; an
