@@ -667,7 +667,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     val MonitorFactory(newMonitor) = params[MonitorFactory]
     val statsReceiver = new RoleConfiguredStatsReceiver(
       new RelativeNameMarkingStatsReceiver(params[Stats].statsReceiver),
-      Server)
+      Server,
+      Some(label))
 
     val monitor = newMonitor(lbl, InetSocketAddressUtil.toPublic(addr)) andThen
       new SourceTrackingMonitor(logger, label)

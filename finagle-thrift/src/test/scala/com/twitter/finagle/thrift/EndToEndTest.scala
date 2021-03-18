@@ -12,6 +12,7 @@ import com.twitter.finagle.stats.{
   InMemoryStatsReceiver,
   LoadedStatsReceiver,
   NullStatsReceiver,
+  Server,
   StatsReceiver
 }
 import com.twitter.finagle.thrift.{ClientId => FinagleClientId}
@@ -189,6 +190,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters(Seq("requests")) == 1)
     assert(sr.counters(Seq("success")) == 0)
     assert(sr.counters(Seq("failures")) == 1)
+
+    assert(sr.expressions("success_rate").labels.role == Server)
+
     server.close()
   }
 

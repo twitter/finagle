@@ -152,8 +152,9 @@ class MetricsStatsReceiver(val registry: Metrics)
 
   override def metricsCollisionsLinterRule: Rule = registry.metricsCollisionsLinterRule
 
-  override protected[finagle] def registerExpression(expressionSchema: ExpressionSchema): Unit =
+  override protected[finagle] def registerExpression(expressionSchema: ExpressionSchema): Unit = {
     registry.registerExpression(expressionSchema)
+  }
 }
 
 private object MetricsExporter {

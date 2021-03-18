@@ -1128,7 +1128,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val Label(label) = params[Label]
     new RoleConfiguredStatsReceiver(
       new RelativeNameMarkingStatsReceiver(sr.scope(label)),
-      ClientRole)
+      ClientRole,
+      Some(label))
   }
 
   /**

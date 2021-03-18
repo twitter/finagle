@@ -143,7 +143,8 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
 
     val clientSr = new RoleConfiguredStatsReceiver(
       new RelativeNameMarkingStatsReceiver(stats.scope(clientLabel)),
-      Client)
+      Client,
+      Some(clientLabel))
 
     val clientParams = injectors.foldLeft(
       params +

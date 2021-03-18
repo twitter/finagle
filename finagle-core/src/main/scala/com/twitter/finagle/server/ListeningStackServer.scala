@@ -62,7 +62,8 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
         else
           RoleConfiguredStatsReceiver(
             new RelativeNameMarkingStatsReceiver(stats.scope(serverLabel)),
-            Server)
+            Server,
+            Some(serverLabel))
 
       private[this] val serverParams = params +
         Label(serverLabel) +
