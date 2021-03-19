@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, GreaterThan, MonotoneThreshold}
+import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, GreaterThan, MonotoneThresholds}
 import com.twitter.finagle.stats._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
@@ -250,7 +250,7 @@ class StatsFilter[Req, Rep] private[service] (
     ExpressionSchema(
       "success_rate",
       Expression(successSchema).divide(Expression(successSchema).plus(Expression(failureSchema))))
-      .withBounds(MonotoneThreshold(GreaterThan, 99.5, 99.75))
+      .withBounds(MonotoneThresholds(GreaterThan, 99.5, 99.97))
       .withUnit(Percentage)
       .withDescription("The Success Rate")
       .register()
