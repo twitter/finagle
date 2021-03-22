@@ -135,7 +135,7 @@ in doubt, look around the codebase and see how it's done elsewhere.
 
 ## Issues
 
-When creating an issue please try to ahere to the following format:
+When creating an issue please try to adhere to the following format:
 
     module-name: One line summary of the issue (less than 72 characters)
 
