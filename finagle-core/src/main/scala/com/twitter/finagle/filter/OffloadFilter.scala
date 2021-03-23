@@ -1,22 +1,18 @@
 package com.twitter.finagle.filter
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.offload.{auto, numWorkers, queueSize, statsSampleInterval}
+import com.twitter.finagle.offload.{
+  OffloadFilterAdmissionControl,
+  auto,
+  numWorkers,
+  queueSize,
+  statsSampleInterval
+}
 import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
-import com.twitter.util.{
-  Duration,
-  ExecutorServiceFuturePool,
-  Future,
-  FutureNonLocalReturnControl,
-  FuturePool,
-  Promise,
-  Stopwatch,
-  Time,
-  Timer
-}
+import com.twitter.finagle._
+import com.twitter.util._
 import java.util.concurrent.{
   ExecutorService,
   LinkedBlockingQueue,
@@ -121,13 +117,16 @@ object OffloadFilter {
       stats.addGauge("completed_tasks") { numCompletedTasks },
       stats.addGauge("queue_depth") { numPendingTasks }
     )
+
+    val admissionControl: Option[OffloadFilterAdmissionControl] =
+      OffloadFilterAdmissionControl(this, stats.scope("admission_control"))
   }
 
   private[this] val Description = "Offloading computations from IO threads"
   private[this] val ClientAnnotationKey = "clnt/finagle.offload_pool_size"
   private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"
 
-  private[this] lazy val global: Option[FuturePool] = {
+  private[this] lazy val global: Option[OffloadFuturePool] = {
     val workers =
       numWorkers.get.orElse(if (auto()) Some(com.twitter.jvm.numProcs().ceil.toInt) else None)
 
@@ -168,10 +167,10 @@ object OffloadFilter {
   }
 
   private[finagle] def client[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Module[Req, Rep](new Client(_))
+    new ClientModule[Req, Rep]
 
   private[finagle] def server[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Module[Req, Rep](new Server(_))
+    new ServerModule[Req, Rep]
 
   final class Client[Req, Rep](pool: FuturePool) extends SimpleFilter[Req, Rep] {
 
@@ -212,7 +211,6 @@ object OffloadFilter {
   final class Server[Req, Rep](pool: FuturePool) extends SimpleFilter[Req, Rep] {
 
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-
       // Offloading on the server-side is fairly straightforward: it comes down to running
       // service.apply (users' work) outside of the IO thread.
       //
@@ -259,12 +257,76 @@ object OffloadFilter {
     }
   }
 
-  private final class Module[Req, Rep](makeFilter: FuturePool => SimpleFilter[Req, Rep])
+  private[this] final class AcFilter(ac: OffloadFilterAdmissionControl)
+      extends Filter.TypeAgnostic {
+
+    def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
+      // Save a local reference so we don't need to pointer chase as much.
+      private val ac = AcFilter.this.ac
+      def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+        if (!ac.shouldReject) service(request)
+        else Failure.FutureRetryableNackFailure
+      }
+    }
+  }
+
+  private final class ServerModule[Req, Rep] extends Stack.Module[ServiceFactory[Req, Rep]] {
+
+    def role: Stack.Role = Role
+    def description: String = Description
+    val parameters: Seq[Stack.Param[_]] = Seq(
+      Param.param,
+      ServerAdmissionControl.Param.param
+    )
+
+    def make(
+      params: Stack.Params,
+      next: Stack[ServiceFactory[Req, Rep]]
+    ): Stack[ServiceFactory[Req, Rep]] =
+      Stack.node(this, filtered(_, _), next)
+
+    private[this] def filtered(
+      params: Stack.Params,
+      next: Stack[ServiceFactory[Req, Rep]]
+    ): Stack[ServiceFactory[Req, Rep]] = {
+      val p = params[Param]
+      p match {
+        case Param.Disabled => next
+        case Param.Enabled(pool) =>
+          Stack.leaf(
+            role,
+            new Server(pool).andThen(next.make(maybeInjectAC(pool, params)))
+          )
+      }
+    }
+
+    // This is where we inject admission control, if necessary. We only
+    // inject admission control if it is generally enabled and we have
+    // the global `FuturePool` with the admission controller available.
+    private[this] def maybeInjectAC(pool: FuturePool, params: Stack.Params): Stack.Params = {
+      val acEnabled = params[ServerAdmissionControl.Param].serverAdmissionControlEnabled
+      pool match {
+        case p: OffloadFuturePool if acEnabled && p.admissionControl.isDefined =>
+          params + ServerAdmissionControl.Filters(
+            Some(Seq(_ => new AcFilter(p.admissionControl.get))))
+
+        case _ => params
+      }
+    }
+  }
+
+  private final class ClientModule[Req, Rep]
       extends Stack.Module1[Param, ServiceFactory[Req, Rep]] {
 
-    def make(p: Param, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = p match {
-      case Param.Enabled(pool) => makeFilter(pool).andThen(next)
-      case Param.Disabled => next
+    def make(
+      p: Param,
+      next: ServiceFactory[Req, Rep]
+    ): ServiceFactory[Req, Rep] = {
+      p match {
+        case Param.Enabled(pool) =>
+          new Client(pool).andThen(next)
+        case Param.Disabled => next
+      }
     }
 
     def role: Stack.Role = Role
