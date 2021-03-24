@@ -53,14 +53,14 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * The random number generator used to pick two nodes for
    * comparison – since aperture uses p2c for selection.
    */
-  protected def rng: Rng
+  private[aperture] def rng: Rng
 
   /**
    * The minimum aperture as specified by the user config. Note this value is advisory
    * and the distributor may actually derive a new min based on this.  See `minUnits`
    * for more details.
    */
-  protected def minAperture: Int
+  private[aperture] def minAperture: Int
 
   /**
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
@@ -72,7 +72,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * Indicator if the endpoints within the aperture should be connected to eagerly. This is a Function0
    * to allow the capability to switch off the feature without having to reconstruct the client stack.
    */
-  protected def eagerConnections: Boolean
+  private[aperture] def eagerConnections: Boolean
 
   /**
    * Adjust the aperture by `n` serving units.
@@ -114,7 +114,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    */
   protected def label: String
 
-  protected def dapertureActive: Boolean = {
+  private[aperture] def dapertureActive: Boolean = {
     if (ProcessCoordinate().isEmpty) {
       false
     } else {
@@ -158,12 +158,12 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     self.rebuild()
   }
 
-  private[this] def lbl = if (label.isEmpty) "<unlabelled>" else label
+  private[aperture] def lbl = if (label.isEmpty) "<unlabelled>" else label
   // `pickLog` will log on the hot path so should be enabled judiciously.
-  private val pickLog =
+  private[aperture] val pickLog =
     Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.pick-log.$lbl")
   // `rebuildLog` is used for rebuild level events which happen at a relatively low frequency.
-  private val rebuildLog =
+  private[aperture] val rebuildLog =
     Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.rebuild-log.$lbl")
   protected type Distributor = BaseDist[Req, Rep, Node]
 
@@ -178,77 +178,42 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     ) ++ dist.additionalMetadata
   }
 
-  private def mkDeterministicAperture(
+  private[aperture] def mkDeterministicAperture(
     vector: Vector[Node],
     initAperture: Int,
     coord: Coord
   ): BaseDist[Req, Rep, Node] = {
     new DeterministicAperture[Req, Rep, Node](
+      this,
       vector,
       initAperture,
-      coord,
-      minAperture,
-      updateVectorHash,
-      mkEmptyVector,
-      dapertureActive,
-      eagerConnections,
-      mkDeterministicAperture,
-      mkRandomAperture,
-      rebuildLog,
-      pickLog,
-      lbl,
-      rng
+      coord
     )
   }
 
-  private def mkRandomAperture(
+  private[aperture] def mkRandomAperture(
     vector: Vector[Node],
     initAperture: Int
   ): BaseDist[Req, Rep, Node] = {
     new RandomAperture[Req, Rep, Node](
+      this,
       vector = vector,
-      initAperture = initAperture,
-      minAperture,
-      updateVectorHash,
-      mkEmptyVector,
-      dapertureActive,
-      eagerConnections,
-      mkDeterministicAperture,
-      mkRandomAperture,
-      rebuildLog,
-      lbl,
-      failingNode,
-      emptyException,
-      rng
+      initAperture = initAperture
     )
   }
 
-  private def mkEmptyVector(size: Int) = {
+  private[aperture] def newFailingNode: Node = failingNode(emptyException)
+
+  private[aperture] def mkEmptyVector(size: Int) = {
     new EmptyVector[Req, Rep, Node](
-      emptyException,
-      failingNode,
-      size,
-      minAperture,
-      updateVectorHash,
-      dapertureActive,
-      eagerConnections,
-      mkDeterministicAperture,
-      mkRandomAperture,
-      rebuildLog
+      this,
+      size
     )
   }
 
   protected def initDistributor(): Distributor = new EmptyVector[Req, Rep, Node](
-    emptyException,
-    failingNode,
-    initAperture = 1,
-    minAperture,
-    updateVectorHash,
-    dapertureActive,
-    eagerConnections,
-    mkDeterministicAperture,
-    mkRandomAperture,
-    rebuildLog
+    this,
+    initAperture = 1
   )
 
   override def close(deadline: Time): Future[Unit] = {

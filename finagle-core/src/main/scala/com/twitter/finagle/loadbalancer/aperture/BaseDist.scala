@@ -2,37 +2,19 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.DistributorT
-import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
-import com.twitter.logging.{Level, Logger}
+import com.twitter.logging.Level
 import com.twitter.util.Future
 
 /**
  * A distributor which implements the logic for controlling the size of an aperture
  * but defers the implementation of pick to concrete implementations.
  */
-private[aperture] abstract class BaseDist[Req, Rep, Node <: ApertureNode[Req, Rep]](
-  vector: Vector[Node])
-    extends DistributorT[Node](vector) {
-
-  val initAperture: Int
-
-  def minAperture: Int
-
-  val updateVectorHash: (Vector[Node]) => Unit
-
-  val mkEmptyVector: (Int) => BaseDist[Req, Rep, Node]
-
-  def dapertureActive: Boolean
-
-  def eagerConnections: Boolean
-
-  val mkDeterministicAperture: (Vector[Node], Int, Coord) => BaseDist[Req, Rep, Node]
-
-  val mkRandomAperture: (Vector[Node], Int) => BaseDist[Req, Rep, Node]
-
-  val rebuildLog: Logger
-
-  type This = BaseDist[Req, Rep, Node]
+private[aperture] abstract class BaseDist[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
+  aperture: Aperture[Req, Rep] { type Node = NodeT },
+  vector: Vector[NodeT],
+  initAperture: Int)
+    extends DistributorT[NodeT](vector) {
+  type This = BaseDist[Req, Rep, NodeT]
 
   /**
    * Returns the maximum size of the aperture window.
@@ -42,7 +24,7 @@ private[aperture] abstract class BaseDist[Req, Rep, Node <: ApertureNode[Req, Re
   /**
    * Returns the minimum size of the aperture window.
    */
-  def min: Int = math.min(minAperture, vector.size)
+  def min: Int = math.min(aperture.minAperture, vector.size)
 
   // We are guaranteed that writes to aperture are serialized since
   // we only expose them via the `narrow`, `widen`, etc. methods above. Those
@@ -79,27 +61,27 @@ private[aperture] abstract class BaseDist[Req, Rep, Node <: ApertureNode[Req, Re
 
   final def rebuild(): This = rebuild(vector)
 
-  def rebuild(vec: Vector[Node]): This = {
+  def rebuild(vec: Vector[NodeT]): This = {
     rebuilt = true
 
-    updateVectorHash(vec)
+    aperture.updateVectorHash(vec)
     val dist = if (vec.isEmpty) {
-      mkEmptyVector(initAperture)
-    } else if (dapertureActive) {
+      aperture.mkEmptyVector(initAperture)
+    } else if (aperture.dapertureActive) {
       ProcessCoordinate() match {
         case Some(coord) =>
-          mkDeterministicAperture(vec, initAperture, coord)
+          aperture.mkDeterministicAperture(vec, initAperture, coord)
         case None =>
           // this should not happen as `dapertureActive` should prevent this case
           // but hypothetically, the coordinate could get unset between calls
           // to `dapertureActive` and `ProcessCoordinate()`
-          mkRandomAperture(vec, initAperture)
+          aperture.mkRandomAperture(vec, initAperture)
       }
     } else {
-      mkRandomAperture(vec, initAperture)
+      aperture.mkRandomAperture(vec, initAperture)
     }
 
-    if (eagerConnections) {
+    if (aperture.eagerConnections) {
       val oldNodes = indices.map(vector(_))
       dist.doEagerlyConnect(oldNodes)
     }
@@ -112,11 +94,11 @@ private[aperture] abstract class BaseDist[Req, Rep, Node <: ApertureNode[Req, Re
    * out of band without any timeouts. If an in-flight request picks a host that has no
    * established sessions, a request-driven connection will be established.
    */
-  private def doEagerlyConnect(oldNodes: Set[Node]): Unit = {
+  private def doEagerlyConnect(oldNodes: Set[NodeT]): Unit = {
     val is = indices
-    if (rebuildLog.isLoggable(Level.DEBUG)) {
+    if (aperture.rebuildLog.isLoggable(Level.DEBUG)) {
       val newEndpoints = is.count(i => !oldNodes.contains(vector(i)))
-      rebuildLog.debug(s"establishing ${newEndpoints} eager connections")
+      aperture.rebuildLog.debug(s"establishing ${newEndpoints} eager connections")
     }
 
     is.foreach { i =>

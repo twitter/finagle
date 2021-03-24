@@ -259,7 +259,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
   test("minAperture <= vector.size") {
     val min = 100
     val bal = new Bal {
-      override protected val minAperture = min
+      override private[aperture] val minAperture = min
     }
 
     val counts = new Counts
@@ -275,7 +275,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
   test("aperture <= vector.size") {
     val min = 100
     val bal = new Bal {
-      override protected val minAperture = min
+      override private[aperture] val minAperture = min
     }
 
     val counts = new Counts
@@ -324,7 +324,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
   test("min aperture size is not > the number of active nodes") {
     val counts = new Counts
     val bal = new Bal {
-      override protected val minAperture = 4
+      override private[aperture] val minAperture = 4
     }
 
     bal.update(counts.range(10))

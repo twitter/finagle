@@ -1,7 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
-import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{Address, Status}
 import com.twitter.logging.{Level, Logger}
 
@@ -12,7 +11,7 @@ object DeterministicAperture {
    * Compute the width of the aperture slice using the logical aperture size and the local
    * and remote ring unit widths.
    */
-  def dApertureWidth(
+  private[loadbalancer] def dApertureWidth(
     localUnitWidth: Double,
     remoteUnitWidth: Double,
     logicalAperture: Int
@@ -68,7 +67,7 @@ object DeterministicAperture {
   // Therefore, we've assigned the min to 12 to further decrease the probability of having a
   // aperture without any healthy nodes.
   // Note: the flag will be removed and replaced with a constant after tuning.
-  private[aperture] val MinDeterministicAperture: Int = {
+  private[loadbalancer] val MinDeterministicAperture: Int = {
     val min = minDeterminsticAperture()
     if (1 < min) min
     else {
@@ -92,28 +91,27 @@ object DeterministicAperture {
  * @param coord The [[ProcessCoordinate]] for this process which is used to narrow
  * the range of `pick2`.
  */
-private[aperture] final class DeterministicAperture[Req, Rep, Node <: ApertureNode[Req, Rep]](
-  vector: Vector[Node],
-  override val initAperture: Int,
-  coord: Coord,
-  _minAperture: => Int,
-  override val updateVectorHash: (Vector[Node]) => Unit,
-  override val mkEmptyVector: (Int) => BaseDist[Req, Rep, Node],
-  override val dapertureActive: Boolean,
-  override val eagerConnections: Boolean,
-  override val mkDeterministicAperture: (Vector[Node], Int, Coord) => BaseDist[Req, Rep, Node],
-  override val mkRandomAperture: (Vector[Node], Int) => BaseDist[Req, Rep, Node],
-  override val rebuildLog: Logger,
-  pickLog: Logger,
-  labelForLogging: => String,
-  rng: Rng)
-    extends BaseDist[Req, Rep, Node](
-      vector
+private final class DeterministicAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
+  aperture: Aperture[Req, Rep] { type Node = NodeT },
+  vector: Vector[NodeT],
+  initAperture: Int,
+  coord: Coord)
+    extends BaseDist[Req, Rep, NodeT](
+      aperture,
+      vector,
+      initAperture
     ) {
   import DeterministicAperture._
   require(vector.nonEmpty, "vector must be non empty")
 
-  override def minAperture: Int = _minAperture
+  private[this] val labelForLogging = aperture.lbl
+  private[this] val rng = aperture.rng
+
+  def eagerConnections = aperture.eagerConnections
+
+  def dapertureActive: Boolean = aperture.dapertureActive
+
+  def minAperture: Int = aperture.minAperture
 
   private[this] val ring = new Ring(vector.size, rng)
 
@@ -136,8 +134,8 @@ private[aperture] final class DeterministicAperture[Req, Rep, Node <: ApertureNo
 
   override def physicalAperture: Int = {
     val width = apertureWidth
-    if (rebuildLog.isLoggable(Level.DEBUG)) {
-      rebuildLog.debug(
+    if (aperture.rebuildLog.isLoggable(Level.DEBUG)) {
+      aperture.rebuildLog.debug(
         f"[DeterministicAperture.physicalAperture $labelForLogging] ringUnit=${ring.unitWidth}%1.6f coordUnit=${coord.unitWidth}%1.6f coordOffset=${coord.offset}%1.6f apertureWidth=$width%1.6f"
       )
     }
@@ -179,7 +177,7 @@ private[aperture] final class DeterministicAperture[Req, Rep, Node <: ApertureNo
   // deterministic aperture. Rebuilds are not frequent and concentrated around
   // events where this information would be valuable (i.e. coordinate changes or
   // host add/removes).
-  if (rebuildLog.isLoggable(Level.DEBUG)) {
+  if (aperture.rebuildLog.isLoggable(Level.DEBUG)) {
     val apertureSlice: String = {
       nodes
         .map {
@@ -187,13 +185,15 @@ private[aperture] final class DeterministicAperture[Req, Rep, Node <: ApertureNo
             f"(index=$i, weight=$weight%1.6f, addr=$addr, status=$status)"
         }.mkString("[", ", ", "]")
     }
-    rebuildLog.debug(s"[DeterministicAperture.rebuild $labelForLogging] nodes=$apertureSlice")
+    aperture.rebuildLog.debug(
+      s"[DeterministicAperture.rebuild $labelForLogging] nodes=$apertureSlice")
 
     // It may be useful see the raw server vector for d-aperture since we expect
     // uniformity across processes.
-    if (rebuildLog.isLoggable(Level.TRACE)) {
+    if (aperture.rebuildLog.isLoggable(Level.TRACE)) {
       val vectorString = vector.map(_.factory.address).mkString("[", ", ", "]")
-      rebuildLog.trace(s"[DeterministicAperture.rebuild $labelForLogging] nodes=$vectorString")
+      aperture.rebuildLog.trace(
+        s"[DeterministicAperture.rebuild $labelForLogging] nodes=$vectorString")
     }
   }
 
@@ -207,7 +207,7 @@ private[aperture] final class DeterministicAperture[Req, Rep, Node <: ApertureNo
    * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
    * taking into account their respective weights.
    */
-  private[this] def pick(a: Node, aw: Double, b: Node, bw: Double): Node = {
+  private[this] def pick(a: NodeT, aw: Double, b: NodeT, bw: Double): NodeT = {
     val aStatus = a.status
     val bStatus = b.status
     if (aStatus == bStatus) {
@@ -233,7 +233,7 @@ private[aperture] final class DeterministicAperture[Req, Rep, Node <: ApertureNo
     }
   }
 
-  def pick(): Node = {
+  def pick(): NodeT = {
     val offset = coord.offset
     val width = apertureWidth
     val a = ring.pick(offset, width)
@@ -245,8 +245,8 @@ private[aperture] final class DeterministicAperture[Req, Rep, Node <: ApertureNo
     val nodeB = vector(b)
     val picked = pick(nodeA, aw, nodeB, bw)
 
-    if (pickLog.isLoggable(Level.TRACE)) {
-      pickLog.trace(
+    if (aperture.pickLog.isLoggable(Level.TRACE)) {
+      aperture.pickLog.trace(
         f"[DeterministicAperture.pick] a=(index=$a, weight=$aw%1.6f, node=$nodeA) b=(index=$b, weight=$bw%1.6f, node=$nodeB) picked=$picked"
       )
     }
@@ -261,7 +261,7 @@ private[aperture] final class DeterministicAperture[Req, Rep, Node <: ApertureNo
   // Although `needsRebuild` is set to false, the Balancer will trigger a rebuild
   // when it exhausts picking busy nodes. Let's explicitly return the same distributor
   // if the coordinates and serverset have not changed.
-  override def rebuild(newVector: Vector[Node]): This =
+  override def rebuild(newVector: Vector[NodeT]): This =
     ProcessCoordinate() match {
       case Some(newCoord) =>
         if (newCoord == coord && newVector == vector) this

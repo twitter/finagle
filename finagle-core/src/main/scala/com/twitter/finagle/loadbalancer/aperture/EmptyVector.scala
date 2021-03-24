@@ -1,52 +1,27 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.Status
-import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
-import com.twitter.logging.Logger
 
 /**
  * A distributor which has an aperture size but an empty vector to select
  * from, so it always returns the `failingNode`.
  */
-private[aperture] class EmptyVector[Req, Rep, Node <: ApertureNode[Req, Rep]](
-  emptyException: Throwable,
-  failingNode: (Throwable) => Node,
-  override val initAperture: Int,
-  _minAperture: => Int,
-  override val updateVectorHash: (Vector[Node]) => Unit,
-  _dapertureActive: => Boolean,
-  _eagerConnections: => Boolean,
-  override val mkDeterministicAperture: (Vector[Node], Int, Coord) => BaseDist[Req, Rep, Node],
-  override val mkRandomAperture: (Vector[Node], Int) => BaseDist[Req, Rep, Node],
-  override val rebuildLog: Logger)
-    extends BaseDist[Req, Rep, Node](Vector.empty) {
+private class EmptyVector[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
+  aperture: Aperture[Req, Rep] { type Node = NodeT },
+  initAperture: Int)
+    extends BaseDist[Req, Rep, NodeT](aperture, Vector.empty, initAperture) {
 
   require(vector.isEmpty, s"vector must be empty: $vector")
 
-  override def minAperture: Int = _minAperture
+  def minAperture: Int = aperture.minAperture
 
-  override def dapertureActive: Boolean = _dapertureActive
+  def dapertureActive: Boolean = aperture.dapertureActive
 
-  override def eagerConnections: Boolean = _eagerConnections
-
-  override val mkEmptyVector: Int => BaseDist[Req, Rep, Node] = (size: Int) => {
-    new EmptyVector(
-      emptyException,
-      failingNode,
-      size,
-      _minAperture,
-      updateVectorHash,
-      _dapertureActive,
-      _eagerConnections,
-      mkDeterministicAperture,
-      mkRandomAperture,
-      rebuildLog
-    )
-  }
+  def eagerConnections: Boolean = aperture.eagerConnections
 
   def indices: Set[Int] = Set.empty
   def status: Status = Status.Closed
-  def pick(): Node = failingNode(emptyException)
+  def pick(): NodeT = aperture.newFailingNode
   def needsRebuild: Boolean = false
   def additionalMetadata: Map[String, Any] = Map.empty
 }

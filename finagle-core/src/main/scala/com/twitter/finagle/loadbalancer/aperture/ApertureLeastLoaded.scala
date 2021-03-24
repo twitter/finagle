@@ -20,15 +20,15 @@ private[loadbalancer] final class ApertureLeastLoaded[Req, Rep](
   protected val smoothWin: Duration,
   protected val lowLoad: Double,
   protected val highLoad: Double,
-  protected val minAperture: Int,
+  private[aperture] val minAperture: Int,
   protected val maxEffort: Int,
-  protected val rng: Rng,
+  private[aperture] val rng: Rng,
   protected val statsReceiver: StatsReceiver,
   protected val label: String,
   protected val timer: Timer,
   protected val emptyException: NoBrokersAvailableException,
   protected val useDeterministicOrdering: Option[Boolean],
-  protected val eagerConnections: Boolean)
+  private[aperture] val eagerConnections: Boolean)
     extends Aperture[Req, Rep]
     with LeastLoaded[Req, Rep]
     with LoadBand[Req, Rep]

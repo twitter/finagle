@@ -1,18 +1,16 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.Status
-import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
 import com.twitter.finagle.loadbalancer.p2c.P2CPick
-import com.twitter.finagle.util.Rng
-import com.twitter.logging.{Level, Logger}
+import com.twitter.logging.Level
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
 
-object RandomAperture {
-  private[aperture] def nodeToken[Req, Rep](node: ApertureNode[Req, Rep]): Int = node.token
-  private[aperture] def nodeOpen[Req, Rep](node: ApertureNode[Req, Rep]): Boolean =
+private object RandomAperture {
+  private def nodeToken[Req, Rep](node: ApertureNode[Req, Rep]): Int = node.token
+  private def nodeOpen[Req, Rep](node: ApertureNode[Req, Rep]): Boolean =
     node.status == Status.Open
-  private[aperture] def nodeBusy[Req, Rep](node: ApertureNode[Req, Rep]): Boolean =
+  private def nodeBusy[Req, Rep](node: ApertureNode[Req, Rep]): Boolean =
     node.status == Status.Busy
 
   /**
@@ -20,7 +18,7 @@ object RandomAperture {
    * important that this is a stable sort since we care about the source order
    * of `vec` to eliminate any unnecessary resource churn.
    */
-  private[aperture] def statusOrder[Req, Rep, Node <: ApertureNode[Req, Rep]](
+  private def statusOrder[Req, Rep, Node <: ApertureNode[Req, Rep]](
     vec: Vector[Node]
   ): Vector[Node] = {
     val resultNodes = new VectorBuilder[Node]
@@ -53,39 +51,31 @@ object RandomAperture {
  * @param vector The source vector received from a call to `rebuild`.
  * @param initAperture The initial aperture to use.
  */
-private[aperture] final class RandomAperture[Req, Rep, Node <: ApertureNode[Req, Rep]](
-  vector: Vector[Node],
-  override val initAperture: Int,
-  _minAperture: => Int,
-  override val updateVectorHash: (Vector[Node]) => Unit,
-  override val mkEmptyVector: (Int) => BaseDist[Req, Rep, Node],
-  _dapertureActive: => Boolean,
-  _eagerConnections: => Boolean,
-  override val mkDeterministicAperture: (Vector[Node], Int, Coord) => BaseDist[Req, Rep, Node],
-  override val mkRandomAperture: (Vector[Node], Int) => BaseDist[Req, Rep, Node],
-  override val rebuildLog: Logger,
-  labelForLogging: => String,
-  failingNode: Throwable => Node,
-  emptyException: => Throwable,
-  override val rng: Rng)
-    extends BaseDist[Req, Rep, Node](vector)
-    with P2CPick[Node] {
+private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
+  aperture: Aperture[Req, Rep] { type Node = NodeT },
+  vector: Vector[NodeT],
+  initAperture: Int)
+    extends BaseDist[Req, Rep, NodeT](aperture, vector, initAperture)
+    with P2CPick[NodeT] {
   require(vector.nonEmpty, "vector must be non empty")
   import RandomAperture._
 
-  override def dapertureActive: Boolean = _dapertureActive
+  def dapertureActive: Boolean = aperture.dapertureActive
 
-  override def eagerConnections: Boolean = _eagerConnections
+  def eagerConnections: Boolean = aperture.eagerConnections
 
-  override def minAperture: Int = _minAperture
+  def minAperture: Int = aperture.minAperture
+
+  override val rng = aperture.rng
+  private[this] val labelForLogging = aperture.lbl
 
   // Since we don't have any process coordinate, we sort the node
   // by `token` which is deterministic across rebuilds but random
   // globally, since `token` is assigned randomly per process
   // when the node is created.
-  protected val vec: Vector[Node] = statusOrder[Req, Rep, Node](vector.sortBy(nodeToken))
+  protected val vec: Vector[NodeT] = statusOrder[Req, Rep, NodeT](vector.sortBy(nodeToken))
   protected def bound: Int = logicalAperture
-  protected def emptyNode: Node = failingNode(emptyException)
+  protected def emptyNode: NodeT = aperture.newFailingNode
 
   private[this] def vecAsString: String =
     vec
@@ -93,8 +83,8 @@ private[aperture] final class RandomAperture[Req, Rep, Node <: ApertureNode[Req,
       .map(_.factory.address)
       .mkString("[", ", ", "]")
 
-  if (rebuildLog.isLoggable(Level.DEBUG)) {
-    rebuildLog.debug(s"[RandomAperture.rebuild $labelForLogging] nodes=$vecAsString")
+  if (aperture.rebuildLog.isLoggable(Level.DEBUG)) {
+    aperture.rebuildLog.debug(s"[RandomAperture.rebuild $labelForLogging] nodes=$vecAsString")
   }
 
   def indices: Set[Int] = (0 until logicalAperture).toSet

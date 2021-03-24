@@ -23,15 +23,15 @@ private[loadbalancer] final class AperturePeakEwma[Req, Rep](
   protected val nanoTime: () => Long,
   protected val lowLoad: Double,
   protected val highLoad: Double,
-  protected val minAperture: Int,
+  private[aperture] val minAperture: Int,
   protected val maxEffort: Int,
-  protected val rng: Rng,
+  private[aperture] val rng: Rng,
   protected val statsReceiver: StatsReceiver,
   protected val label: String,
   protected val timer: Timer,
   protected val emptyException: NoBrokersAvailableException,
   protected val useDeterministicOrdering: Option[Boolean],
-  protected val eagerConnections: Boolean)
+  private[aperture] val eagerConnections: Boolean)
     extends Aperture[Req, Rep]
     with PeakEwma[Req, Rep]
     with LoadBand[Req, Rep]

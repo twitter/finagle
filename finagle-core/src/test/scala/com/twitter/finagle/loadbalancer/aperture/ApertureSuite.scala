@@ -14,11 +14,11 @@ private[loadbalancer] trait ApertureSuite {
    * via proxy methods.
    */
   trait TestBal extends Aperture[Unit, Unit] {
-    protected val rng = Rng(12345L)
+    private[aperture] val rng = Rng(12345L)
     protected def emptyException = new Empty
-    protected def eagerConnections = false
+    private[aperture] def eagerConnections = false
     protected def maxEffort = 5
-    protected def minAperture = 1
+    private[aperture] def minAperture = 1
     protected def useDeterministicOrdering: Option[Boolean] = None
     protected def label = ""
 
