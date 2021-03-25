@@ -7,7 +7,6 @@ import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Pipe, Reader, ReaderDiscardedException, StreamTermination}
 import com.twitter.util._
-import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
 import java.net.InetSocketAddress
 
@@ -128,14 +127,7 @@ private[http] object Netty4StreamTransport {
           trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
 
         case Some(chunk) if chunk.isLast =>
-          // Chunk.trailers produces an empty last content so we check against it here
-          // and potentially short-circuit to termination.
-          if (chunk.content.isEmpty) terminate(chunk.trailers)
-          else
-            trans
-              .write(
-                new DefaultHttpContent(ByteBufConversion.bufAsByteBuf(chunk.content))
-              ).before(terminate(chunk.trailers))
+          terminate(chunk)
 
         case Some(chunk) =>
           trans
@@ -145,22 +137,27 @@ private[http] object Netty4StreamTransport {
       }
     }
 
-    // We need to read one more time before writing trailers to ensure HTTP stream isn't malformed.
-    def terminate(trailers: HeaderMap): Future[Unit] = r.read().flatMap {
+    // We need to read one more time before writing last chunk to ensure the stream isn't malformed.
+    def terminate(last: Chunk): Future[Unit] = r.read().flatMap {
       case None =>
         // TODO (vk): PR against Netty; we need to construct out of given Headers so we avoid
         // copying afterwards.
-        val last =
-          if (trailers.isEmpty) LastHttpContent.EMPTY_LAST_CONTENT
-          else {
-            val content =
-              new DefaultLastHttpContent(Unpooled.EMPTY_BUFFER, false /*validateHeaders*/ )
 
-            Bijections.finagle.writeFinagleHeadersToNetty(trailers, content.trailingHeaders())
-            content
+        if (last.content.isEmpty && last.trailers.isEmpty) {
+          trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
+        } else {
+          val contentAndTrailers = new DefaultLastHttpContent(
+            ByteBufConversion.bufAsByteBuf(last.content),
+            false /*validateHeaders*/
+          )
+
+          if (!last.trailers.isEmpty) {
+            Bijections.finagle
+              .writeFinagleHeadersToNetty(last.trailers, contentAndTrailers.trailingHeaders())
           }
 
-        trans.write(last)
+          trans.write(contentAndTrailers)
+        }
 
       case _ =>
         Future.exception(

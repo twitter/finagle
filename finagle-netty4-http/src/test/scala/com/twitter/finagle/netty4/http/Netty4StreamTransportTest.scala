@@ -68,16 +68,12 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "foo")
 
     rw.write(Chunk.last(Buf.Utf8("bar"), HeaderMap("foo" -> "bar")))
-    assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "bar")
-
-    val trailers = write.poll()
-    assert(!trailers.isDefined)
-
     await(rw.close())
 
-    val lastChunk = await(trailers).asInstanceOf[LastHttpContent]
+    val lastChunk = await(write.poll()).asInstanceOf[LastHttpContent]
+
     assert(lastChunk.trailingHeaders().get("foo") == "bar")
-    assert(lastChunk.content == Unpooled.EMPTY_BUFFER)
+    assert(lastChunk.content.toString(UTF_8) == "bar")
     assert(out.isDefined)
   }
 
