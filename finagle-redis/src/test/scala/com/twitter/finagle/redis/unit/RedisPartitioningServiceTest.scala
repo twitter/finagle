@@ -14,8 +14,6 @@ import com.twitter.util.{Await, Duration, Future}
 import java.net.{InetAddress, InetSocketAddress}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.{Set => SSet}
@@ -37,14 +35,6 @@ class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with Befor
       override def toString: String = s"Address($port)-($shardId)"
     }
     WeightedAddress(addr, weight)
-  }
-
-  // NOTE: this is necessary for 2.11 compatibility, 2.12 can infer the types without it
-  private[this] def answer(res: Command => Future[Reply]) = new Answer[Future[Reply]] {
-    def answer(invocation: InvocationOnMock): Future[Reply] = {
-      val v = invocation.getArguments()(0).asInstanceOf[Command]
-      res(v)
-    }
   }
 
   private[this] def createClient(dest: Name, sr: InMemoryStatsReceiver) = {
@@ -118,8 +108,8 @@ class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with Befor
       Buf.Utf8("c") -> Buf.Utf8("c")
     )
 
-    when(mockService.apply(any[MGet])).thenAnswer(
-      answer {
+    when(mockService.apply(any[MGet])).thenAnswer(i =>
+      i.getArguments()(0).asInstanceOf[Command] match {
         case MGet(keys) =>
           Future.value(
             MBulkReply(
@@ -133,8 +123,7 @@ class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with Befor
           )
 
         case x => fail(s"unexpected command: $x")
-      }
-    )
+      })
 
     val results = await(client.mGet(utf8bufs("a", "b", "q")))
 
@@ -175,8 +164,8 @@ class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with Befor
       b -> b
     }.toMap
 
-    when(mockService.apply(any[Command])).thenAnswer(
-      answer {
+    when(mockService.apply(any[Command])).thenAnswer(i =>
+      i.getArguments()(0).asInstanceOf[Command] match {
         case MGet(ks) =>
           Future.value(
             MBulkReply(
@@ -192,8 +181,7 @@ class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with Befor
         case MSet(_) => Future.value(StatusReply("OK"))
 
         case x => fail(s"unexpected command: $x")
-      }
-    )
+      })
 
     await(client.mSet(data))
 
@@ -213,12 +201,11 @@ class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with Befor
   test("test multi-partition Del command") {
     assertPartitionerStats()
 
-    when(mockService.apply(any[Del])).thenAnswer(
-      answer {
+    when(mockService.apply(any[Del])).thenAnswer(i =>
+      i.getArguments()(0).asInstanceOf[Command] match {
         case del: Del => Future.value(IntegerReply(del.keys.length))
         case x => fail(s"expected Del argument, got $x")
-      }
-    )
+      })
 
     val res = await(client.dels(utf8bufs("a", "b", "c")))
     assert(res == 3)
@@ -227,12 +214,11 @@ class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with Befor
   test("test multi-partition pfCount command") {
     assertPartitionerStats()
 
-    when(mockService.apply(any[PFCount])).thenAnswer(
-      answer {
+    when(mockService.apply(any[PFCount])).thenAnswer(i =>
+      i.getArguments()(0).asInstanceOf[Command] match {
         case pfc: PFCount => Future.value(IntegerReply(pfc.keys.length))
         case x => fail(s"expected PFCount argument, got $x")
-      }
-    )
+      })
 
     val res = await(client.pfCount(utf8bufs("a", "b", "c")))
     assert(res == 3)
@@ -247,8 +233,8 @@ class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with Befor
       Buf.Utf8("c") -> utf8bufs("c", "d", "e")
     )
 
-    when(mockService.apply(any[SInter])).thenAnswer {
-      answer {
+    when(mockService.apply(any[SInter])).thenAnswer { i =>
+      i.getArguments()(0).asInstanceOf[Command] match {
         case sinter: SInter =>
           val sets = sinter.keys.map { k =>
             data.get(k) match {

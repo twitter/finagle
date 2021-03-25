@@ -94,7 +94,6 @@ object PartitioningStrategy {
      */
     def addRequestMerger[Req <: ThriftStructIface](
       method: ThriftMethodIface,
-      // Needed for 2.11 compat. can be a scala fn A => B once we drop support
       merger: JFunction[JList[Req], Req]
     ): RequestMergerRegistry = add(method, { seq: Seq[Req] => seq.asJava }.andThen(merger.apply _))
 

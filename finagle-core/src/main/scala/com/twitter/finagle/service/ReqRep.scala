@@ -34,8 +34,7 @@ case class ReqRepT[Req, Rep](request: Req, response: Try[Rep]) extends ReqRep {
 // keeps backward compatibility behavior for when ReqRep was a case class,
 // we can't leak generics here without risking major breaking changes.
 // this can go away when we move everything to ReqRepT version.
-// we use `sealed abstract class` for better Scala 2.11 compatibility.
-sealed abstract class ReqRep {
+sealed trait ReqRep {
   type Request
   type Response
   def request: Request

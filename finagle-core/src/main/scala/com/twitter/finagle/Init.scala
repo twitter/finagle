@@ -86,7 +86,6 @@ private[twitter] object Init {
   private[finagle] def loadBuildProperties: Option[Properties] = {
     val candidates = Seq(
       "finagle-core",
-      "finagle-core_2.11",
       "finagle-core_2.12",
       "finagle-core_2.13"
     )

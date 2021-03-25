@@ -209,8 +209,7 @@ object RichClientParam {
 /**
  * Thrift-specific parameters for configuring clients.
  */
-// TODO: We should make this a case class again once we drop support for 2.11
-class RichClientParam private (
+case class RichClientParam private (
   val protocolFactory: TProtocolFactory,
   val serviceName: String,
   @deprecated("Use thriftReusableBufferFactory instead", "2019-10-03") val maxThriftBufferSize: Int,
