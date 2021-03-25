@@ -19,7 +19,10 @@ New Features
   Also introduced `Backoff.fromStream(Stream)` and `Backoff.toStream` to help with migration to
   the new API. ``PHAB_ID=D592562``
 
-* finagle-netty4: Upgrade to Netty 4.1.59.Final and TcNative 2.0.35.Final. ``PHAB_ID=D629268``  
+* finagle-netty4: Upgrade to Netty 4.1.59.Final and TcNative 2.0.35.Final. ``PHAB_ID=D629268``
+
+* finagle-http: Integrate Kerberos authentication filter to finagle http client and server.
+  ``PHAB_ID=D634270`` ``PHAB_ID=D621714``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -32,6 +35,9 @@ Breaking API Changes
 * finagle-mysql: The constructor of `c.t.f.mysql.transport.MysqlBufReader` now takes an underlying
   `c.t.io.ByteReader`. Prior uses of the constructor, which took a `c.t.io.Buf`, should migrate to
   using `c.t.f.mysql.transport.MysqlBufReader.apply` instead. ``PHAB_ID=D622705``
+
+* finagle-base-http: Kerberos jaas config `KerberosConfiguration` is replaced with ServerKerberosConfiguration
+  and ClientKerberosConfiguration concrete classes.
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

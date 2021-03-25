@@ -1,11 +1,18 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.SpnegoAuthenticator.{Credentials, ServerFilter}
-import com.twitter.finagle.http.param.{Kerberos, KerberosConfiguration}
-import com.twitter.finagle.{Filter, Service, ServiceFactory, SimpleFilter, Stack, Stackable}
+import com.twitter.finagle.http.SpnegoAuthenticator.{ClientFilter, Credentials, ServerFilter}
+import com.twitter.finagle.http.param.{
+  ClientKerberos,
+  ClientKerberosConfiguration,
+  KerberosConfiguration,
+  ServerKerberos,
+  ServerKerberosConfiguration
+}
+import com.twitter.finagle.{Filter, Service, ServiceFactory, Stack, Stackable}
 import com.twitter.util.{Future, FuturePool}
-import java.io.PrintWriter
-import java.nio.file.FileSystems
+import java.io.{File, FileOutputStream, PrintWriter}
+import java.nio.file.{FileSystems, Files, Path}
+import javax.security.auth.login.Configuration
 
 object AuthenticatedIdentityContext {
   private val AuthenticatedIdentityNotSet = "AUTH_USER_NOT_SET"
@@ -18,100 +25,162 @@ object AuthenticatedIdentityContext {
     def authenticatedIdentity: String = request.ctx(AuthenticatedIdentity).takeWhile(_ != '@')
   }
 
-  private[twitter] def setUser(request: Request, username: String): Unit = {
+  private[http] def setUser(request: Request, username: String): Unit = {
     request.ctx.updateAndLock(AuthenticatedIdentity, username)
   }
 }
 
-object ExtractAuthAndCatchUnauthorized
-    extends Filter[SpnegoAuthenticator.Authenticated[Request], Response, Request, Response] {
-  def apply(
-    req: SpnegoAuthenticator.Authenticated[Request],
-    svc: Service[Request, Response]
-  ): Future[Response] = {
-    val httpRequest = req.request
-    AuthenticatedIdentityContext.setUser(httpRequest, req.context.getSrcName.toString)
-    svc(httpRequest).map { resp =>
-      if (resp.status == Status.Unauthorized) {
-        resp.contentType = "application/json; charset=utf-8"
-        resp.setContentString("""
-            {
-              "error": "You are not authenticated."
-            }
-            """)
-      }
-      resp
-    }
-  }
-}
-
 /**
- * A finagle authentication filter.
- * This calls an underlying finagle filter (SpnegoAuthenticator) and then applies a second "conversion"
- * filter to convert the request to a request object that is compatible with finagle.
- * @see JaasConfiguration [[https://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html]]
+ * Apply filter asynchronously
  */
-object Spnego {
-  private def pool: FuturePool = FuturePool.unboundedPool
-  def apply(kerberosConfiguration: KerberosConfiguration): Future[ServerFilter] = pool {
-    val jaas = "jaas.conf"
-    val jaasConfiguration =
-      s"""kerberos-http { 
-         |com.sun.security.auth.module.Krb5LoginModule required
-         | keyTab="${kerberosConfiguration.keyTab.get}"
-         | principal="${kerberosConfiguration.principal.get}"
-         | useKeyTab=${kerberosConfiguration.useKeyTab}
-         | storeKey=${kerberosConfiguration.storeKey}                   
-         | refreshKrb5Config=${kerberosConfiguration.refreshKrb5Config}      
-         | debug=${kerberosConfiguration.debug}
-         | doNotPrompt=${kerberosConfiguration.doNotPrompt}
-         | authEnabled=${kerberosConfiguration.authEnabled}; 
-         | };""".stripMargin
-    new PrintWriter(jaas) {
-      write(jaasConfiguration)
-      close()
-    }
-    val jaasFilePath = FileSystems.getDefault.getPath(jaas).toAbsolutePath.toString
-    System.setProperty("java.security.auth.login.config", jaasFilePath)
-    ServerFilter(new Credentials.JAASServerSource("kerberos-http"))
+private[finagle] class AsyncFilter[Req, IntermediateReq, Rep](
+  async: Future[Filter[Req, Rep, IntermediateReq, Rep]])
+    extends Filter[Req, Rep, IntermediateReq, Rep] {
+  def apply(req: Req, svc: Service[IntermediateReq, Rep]): Future[Rep] = {
+    async.flatMap(_.apply(req, svc))
   }
 }
 
 /**
- * Chain Spnego async filter with extractAuthAndCatchUnauthorized filter
- */
-private[finagle] class AndThenAsync[Req, IntermediateReq, Rep](
-  async: Future[Filter[Req, Rep, IntermediateReq, Rep]],
-  other: Filter[IntermediateReq, Rep, Req, Rep])
-    extends SimpleFilter[Req, Rep] {
-  private val composedFilters: Future[Filter[Req, Rep, Req, Rep]] =
-    async.map(_.andThen(other))
-  def apply(req: Req, svc: Service[Req, Rep]): Future[Rep] = {
-    composedFilters.flatMap(_.apply(req, svc))
-  }
-}
-
-/**
- * Adds kerberos authentication to http requests.
+ * Apply kerberos authentication to http requests.
  */
 object KerberosAuthenticationFilter {
   val role: Stack.Role = Stack.Role("KerberosAuthentication")
-  def module: Stackable[ServiceFactory[Request, Response]] = {
-    new Stack.Module1[Kerberos, ServiceFactory[
+
+  /**
+   * Kerberos server module to apply Spnego server filter
+   */
+  def serverModule: Stackable[ServiceFactory[Request, Response]] = {
+    new Stack.Module1[ServerKerberos, ServiceFactory[
       Request,
       Response
     ]] {
       val role: Stack.Role = KerberosAuthenticationFilter.role
-      val description = "Add kerberos authentication to requests"
+      val description = "Add kerberos server authentication to requests"
       def make(
-        krb: Kerberos,
+        serverKerberos: ServerKerberos,
         next: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] = {
-        if (krb.kerberosConfiguration.principal.nonEmpty && krb.kerberosConfiguration.keyTab.nonEmpty && krb.kerberosConfiguration.authEnabled) {
-          new AndThenAsync[Request, SpnegoAuthenticator.Authenticated[Request], Response](
-            Spnego(krb.kerberosConfiguration),
-            ExtractAuthAndCatchUnauthorized).andThen(next)
+        if (serverKerberos.serverKerberosConfiguration.authEnabled) {
+          new AsyncFilter[Request, SpnegoAuthenticator.Authenticated[Request], Response](
+            SpnegoServerFilter(serverKerberos.serverKerberosConfiguration))
+            .andThen(ExtractAuthAndCatchUnauthorized).andThen(next)
         } else next
+      }
+    }
+  }
+
+  /**
+   * Kerberos client module to apply Spnego client filter
+   */
+  def clientModule: Stackable[ServiceFactory[Request, Response]] = {
+    new Stack.Module1[ClientKerberos, ServiceFactory[
+      Request,
+      Response
+    ]] {
+      val role: Stack.Role = KerberosAuthenticationFilter.role
+      val description = "Add kerberos client authentication to requests"
+      def make(
+        clientKerberos: ClientKerberos,
+        next: ServiceFactory[Request, Response]
+      ): ServiceFactory[Request, Response] = {
+        if (clientKerberos.clientKerberosConfiguration.authEnabled) {
+          new AsyncFilter[Request, Request, Response](
+            SpnegoClientFilter(clientKerberos.clientKerberosConfiguration))
+            .andThen(next)
+        } else next
+      }
+    }
+  }
+
+  /**
+   * Create/append a jaas config and set it to the system property
+   * @param kerberosConfiguration Kerberos jaas configuration
+   * @param loginContext Kerberos Login context
+   * @see JaasConfiguration [[https://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html]]
+   */
+  private[this] def jaas(
+    kerberosConfiguration: KerberosConfiguration,
+    loginContext: String
+  ): Unit = {
+    val jaas = "jaas-internal.conf"
+    val jaasConfiguration =
+      s"""$loginContext {
+         |  com.sun.security.auth.module.Krb5LoginModule required
+         |  keyTab="${kerberosConfiguration.keyTab.get}"
+         |  principal="${kerberosConfiguration.principal.get}"
+         |  useKeyTab=${kerberosConfiguration.useKeyTab}
+         |  storeKey=${kerberosConfiguration.storeKey}
+         |  refreshKrb5Config=${kerberosConfiguration.refreshKrb5Config}
+         |  debug=${kerberosConfiguration.debug}
+         |  doNotPrompt=${kerberosConfiguration.doNotPrompt}
+         |  authEnabled=${kerberosConfiguration.authEnabled}; 
+         |};""".stripMargin
+    val jaasFilePath = FileSystems.getDefault.getPath(jaas).toAbsolutePath
+    if (Files.exists(jaasFilePath)) {
+      if (!Files.lines(jaasFilePath).anyMatch(line => line.equals(s"$loginContext {"))) {
+        writeFile(jaasFilePath, s"\n\n$jaasConfiguration", true)
+        Configuration.getConfiguration.refresh()
+      }
+    } else writeFile(jaasFilePath, jaasConfiguration)
+    System.setProperty("java.security.auth.login.config", jaasFilePath.toString)
+  }
+
+  private[this] def writeFile(path: Path, content: String, append: Boolean = false) =
+    new PrintWriter(new FileOutputStream(new File(path.toUri), append)) {
+      write(content)
+      close()
+    }
+
+  /**
+   * A finagle kerberos authentication filter.
+   * This calls an underlying finagle filter (SpnegoAuthenticator) and then applies a second "conversion"
+   * filter to convert the request to a request object that is compatible with finagle.
+   * Applies server kerberos filter to wrap the spnego server filter with default standard jaas config
+   */
+  private[finagle] object SpnegoServerFilter {
+    def apply(
+      serverKerberosConfiguration: ServerKerberosConfiguration
+    ): Future[Filter[Request, Response, SpnegoAuthenticator.Authenticated[Request], Response]] =
+      FuturePool.unboundedPool {
+        jaas(serverKerberosConfiguration, "kerberos-http-server")
+        ServerFilter(new Credentials.JAASServerSource("kerberos-http-server"))
+      }
+  }
+
+  /**
+   * Applies client kerberos filter to wrap the spnego client filter with default standard jaas config
+   */
+  private[finagle] object SpnegoClientFilter {
+    def apply(
+      clientKerberosConfiguration: ClientKerberosConfiguration
+    ): Future[Filter[Request, Response, Request, Response]] = FuturePool.unboundedPool {
+      jaas(clientKerberosConfiguration, "kerberos-http-client")
+      ClientFilter(
+        new Credentials.JAASClientSource(
+          "kerberos-http-client",
+          clientKerberosConfiguration.serverPrincipal.get))
+    }
+  }
+
+  private[finagle] object ExtractAuthAndCatchUnauthorized
+      extends Filter[SpnegoAuthenticator.Authenticated[Request], Response, Request, Response] {
+    def apply(
+      req: SpnegoAuthenticator.Authenticated[Request],
+      svc: Service[Request, Response]
+    ): Future[Response] = {
+      val httpRequest = req.request
+      AuthenticatedIdentityContext.setUser(httpRequest, req.context.getSrcName.toString)
+      svc(httpRequest).map { resp =>
+        if (resp.status == Status.Unauthorized) {
+          resp.contentType = "application/json; charset=utf-8"
+          resp.setContentString("""
+            {
+              "error": "You are not authenticated."
+            }
+            """)
+        }
+        resp
       }
     }
   }

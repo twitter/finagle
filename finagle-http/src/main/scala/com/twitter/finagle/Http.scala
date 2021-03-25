@@ -7,7 +7,7 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.HttpServerDispatcher
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter._
-import com.twitter.finagle.http.param.KerberosConfiguration
+import com.twitter.finagle.http.param.{ClientKerberosConfiguration, ServerKerberosConfiguration}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.Http2Listener
 import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4ServerStreamTransport}
@@ -161,6 +161,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
         .insertAfter(http.filter.StatsFilter.role, StreamingStatsFilter.module)
+        .prepend(KerberosAuthenticationFilter.clientModule)
 
     private def params: Stack.Params =
       StackClient.defaultParams +
@@ -278,6 +279,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       configured(HttpImpl.Netty4Impl)
 
     /**
+     * Enable kerberos client authentication for http requests
+     */
+    def withKerberos(clientKerberosConfiguration: ClientKerberosConfiguration): Client = configured(
+      http.param.ClientKerberos(clientKerberosConfiguration))
+
+    /**
      * Create a [[http.MethodBuilder]] for a given destination.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
@@ -382,7 +389,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         .prepend(
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
-        .prepend(KerberosAuthenticationFilter.module)
+        .prepend(KerberosAuthenticationFilter.serverModule)
         .insertAfter(http.filter.StatsFilter.role, StreamingStatsFilter.module)
         // the backup request module adds tracing annotations and as such must come
         // after trace initialization and deserialization of contexts.
@@ -527,15 +534,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     /**
      * Enable kerberos server authentication for http requests
      */
-    def withKerberos(kerberosConfiguration: KerberosConfiguration): Server = {
-      require(
-        kerberosConfiguration.principal.exists(_.trim.nonEmpty),
-        "Valid Kerberos principal must be specified")
-      require(
-        kerberosConfiguration.keyTab.exists(_.trim.nonEmpty),
-        "Valid Kerberos keytab path must be specified")
-      configured(http.param.Kerberos(kerberosConfiguration))
-    }
+    def withKerberos(serverKerberosConfiguration: ServerKerberosConfiguration): Server = configured(
+      http.param.ServerKerberos(serverKerberosConfiguration))
 
     /**
      * By default finagle-http automatically sends 100-CONTINUE responses to inbound

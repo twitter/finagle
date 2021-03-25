@@ -108,21 +108,30 @@ object CompressionLevel {
 }
 
 /**
- * Case class to configure jaas params
- *
- * @param principal The name of the principal that should be used
- * @param keyTab Set this to the file name of the keytab to get principal's secret key
- * @param useKeyTab Set this to true if you want the module to get the principal's key from the the keytab
- * @param storeKey Set this to true to if you want the keytab or the principal's key to be stored in
- *                 the Subject's private credentials
- * @param refreshKrb5Config Set this to true, if you want the configuration to be refreshed before
- *                          the login method is called
- * @param debug Output debug messages
- * @param doNotPrompt Set this to true if you do not want to be prompted for the password if
- *                    credentials can not be obtained from the cache, the keytab, or through shared state
+ * Used to configure jaas default params
  * @see [[https://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html]]
  */
-case class KerberosConfiguration(
+sealed trait KerberosConfiguration {
+  def principal: Option[String]
+  def keyTab: Option[String]
+  def useKeyTab: Boolean
+  def storeKey: Boolean
+  def refreshKrb5Config: Boolean
+  def debug: Boolean
+  def doNotPrompt: Boolean
+  def authEnabled: Boolean
+  def validate(): Unit = {
+    if (authEnabled) {
+      require(principal.exists(_.trim.nonEmpty), "Valid Kerberos principal must be specified")
+      require(keyTab.exists(_.trim.nonEmpty), "Valid Kerberos keytab path must be specified")
+    }
+  }
+}
+
+/**
+ * Jaas configuration for kerberos server
+ */
+case class ServerKerberosConfiguration(
   principal: Option[String] = None,
   keyTab: Option[String] = None,
   useKeyTab: Boolean = true,
@@ -131,11 +140,45 @@ case class KerberosConfiguration(
   debug: Boolean = false,
   doNotPrompt: Boolean = true,
   authEnabled: Boolean = true)
-case class Kerberos(kerberosConfiguration: KerberosConfiguration) {
-  def mk(): (Kerberos, Stack.Param[Kerberos]) =
-    (this, Kerberos.kerberosParam)
+    extends KerberosConfiguration {
+  validate()
 }
-object Kerberos {
-  implicit val kerberosParam: Stack.Param[Kerberos] =
-    Stack.Param(Kerberos(KerberosConfiguration()))
+case class ServerKerberos(serverKerberosConfiguration: ServerKerberosConfiguration) {
+  def mk(): (ServerKerberos, Stack.Param[ServerKerberos]) =
+    (this, ServerKerberos.serverKerberosParam)
+}
+object ServerKerberos {
+  implicit val serverKerberosParam: Stack.Param[ServerKerberos] =
+    Stack.Param(ServerKerberos(ServerKerberosConfiguration(authEnabled = false)))
+}
+
+/**
+ * Jaas configuration for kerberos client with serverPrincipal
+ * ServerPrincipal is basically the name of the target peer
+ */
+case class ClientKerberosConfiguration(
+  principal: Option[String] = None,
+  keyTab: Option[String] = None,
+  serverPrincipal: Option[String] = None,
+  useKeyTab: Boolean = true,
+  storeKey: Boolean = true,
+  refreshKrb5Config: Boolean = true,
+  debug: Boolean = false,
+  doNotPrompt: Boolean = true,
+  authEnabled: Boolean = true)
+    extends KerberosConfiguration {
+  validate()
+  if (authEnabled) {
+    require(
+      serverPrincipal.exists(_.trim.nonEmpty),
+      "Valid Kerberos server principal must be specified")
+  }
+}
+case class ClientKerberos(clientKerberosConfiguration: ClientKerberosConfiguration) {
+  def mk(): (ClientKerberos, Stack.Param[ClientKerberos]) =
+    (this, ClientKerberos.clientKerberosParam)
+}
+object ClientKerberos {
+  implicit val clientKerberosParam: Stack.Param[ClientKerberos] =
+    Stack.Param(ClientKerberos(ClientKerberosConfiguration(authEnabled = false)))
 }
