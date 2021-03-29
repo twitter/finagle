@@ -7,6 +7,6 @@ lazy val root = (project in file(".")).
     )),
     name := "quickstart",
     libraryDependencies ++= Seq(
-      "com.twitter" %% "finagle-http" % "21.2.0"
+      "com.twitter" %% "finagle-http" % "21.3.0"
     )
   )
