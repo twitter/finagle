@@ -35,6 +35,8 @@ private[finagle] object Netty4SslConfigurations {
         builder.trustManager(InsecureTrustManagerFactory.INSTANCE)
       case TrustCredentials.CertCollection(file) =>
         builder.trustManager(file)
+      case TrustCredentials.X509Certificates(x509Certs) =>
+        builder.trustManager(x509Certs: _*)
       case TrustCredentials.TrustManagerFactory(trustManagerFactory) =>
         builder.trustManager(trustManagerFactory)
     }

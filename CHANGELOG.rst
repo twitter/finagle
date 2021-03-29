@@ -24,6 +24,9 @@ New Features
 * finagle-http: Integrate Kerberos authentication filter to finagle http client and server.
   ``PHAB_ID=D634270`` ``PHAB_ID=D621714``
 
+* finagle-core: Provided `c.t.f.ssl.TrustCredentials.X509Certificates` to enable directly
+  passing `X509Certificate` instead of passing a `File`. ``PHAB_ID=D641088``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 * finagle: Builds are now only supported for Scala 2.12+ ``PHAB_ID=D631091``

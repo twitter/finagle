@@ -67,6 +67,12 @@ private[ssl] object SslConfigurations {
           case Return(tms) => Some(tms)
           case Throw(ex) => throw SslConfigurationException(ex)
         }
+      case TrustCredentials.X509Certificates(x509Certs) =>
+        val tryTms = X509TrustManagerFactory.buildTrustManager(x509Certs)
+        tryTms match {
+          case Return(tms) => Some(tms)
+          case Throw(ex) => throw SslConfigurationException(ex)
+        }
       case TrustCredentials.TrustManagerFactory(trustManagerFactory) =>
         Some(trustManagerFactory.getTrustManagers)
     }
@@ -181,6 +187,11 @@ private[ssl] object SslConfigurations {
       case TrustCredentials.CertCollection(_) =>
         throw SslConfigurationException.notSupported(
           "TrustCredentials.CertCollection",
+          engineFactoryName
+        )
+      case TrustCredentials.X509Certificates(_) =>
+        throw SslConfigurationException.notSupported(
+          "TrustCredentials.X509Certificates",
           engineFactoryName
         )
       case TrustCredentials.TrustManagerFactory(_) =>

@@ -1,6 +1,7 @@
 package com.twitter.finagle.ssl
 
 import java.io.File
+import java.security.cert.X509Certificate
 import javax.net.ssl
 
 /**
@@ -28,13 +29,22 @@ object TrustCredentials {
   case object Insecure extends TrustCredentials
 
   /**
-   * The collection of certificates which should be used in
-   * verifying a remote peer's credentials.
+   * Indicates the collection of certificates which should be used in
+   * verifying a remote peer's credentials can be read from the given
+   * file.
    *
    * @param file A file containing a collection of X.509 certificates
    *             in PEM format.
    */
   case class CertCollection(file: File) extends TrustCredentials
+
+  /**
+   * The collection of certificates which should be used in
+   * verifying a remote peer's credentials.
+   *
+   * @param x509Certs A collection of X.509 certificates
+   */
+  case class X509Certificates(x509Certs: Seq[X509Certificate]) extends TrustCredentials
 
   /**
    * Indicates that the trust credentials from the [[ssl.TrustManagerFactory]]
