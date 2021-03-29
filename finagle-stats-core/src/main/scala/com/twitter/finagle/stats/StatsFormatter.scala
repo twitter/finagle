@@ -43,9 +43,9 @@ private[twitter] sealed trait StatsFormatter {
     values.histograms.foreach {
       case (name, snapshot) =>
         val count = snapshot.count
-        results += histoName(name, "count") -> count
+        results += histoName(name, labelCount) -> count
         if (count > 0 || includeEmpty) {
-          results += histoName(name, "sum") -> snapshot.sum
+          results += histoName(name, labelSum) -> snapshot.sum
           results += histoName(name, labelAverage) -> snapshot.average
           results += histoName(name, labelMin) -> snapshot.min
           results += histoName(name, labelMax) -> snapshot.max
@@ -66,8 +66,14 @@ private[twitter] sealed trait StatsFormatter {
    * @param component a single part of this histogram, for example the average,
    *                  count, or a percentile.
    */
-  final protected def histoName(name: String, component: String): String =
+  private[twitter] final def histoName(name: String, component: String): String =
     s"${name}$separator$component"
+
+  /** Label applied for the number of times a histogram was reported */
+  private[twitter] final val labelCount: String = "count"
+
+  /** Label applied for sum of the reported values */
+  private[twitter] final val labelSum: String = "sum"
 
   /** Label applied for a given percentile, `p`, of a histogram */
   private[twitter] def labelPercentile(p: Double): String
