@@ -1074,7 +1074,7 @@ generator.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1206,7 +1206,7 @@ implementation can be any StatsReceiver. The type is used as a marker.
       <p class="shortcomment cmt">A Finagle HTTP service that exports <span class="extype" name="Metrics">Metrics</span> (available via <span class="extype" name="MetricsView">MetricsView</span>)
 in a JSON format.</p><div class="fullcomment"><div class="comment cmt"><p>A Finagle HTTP service that exports <span class="extype" name="Metrics">Metrics</span> (available via <span class="extype" name="MetricsView">MetricsView</span>)
 in a JSON format.</p><p>This service respects metrics <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Verbosity.html" class="extype" name="com.twitter.finagle.stats.Verbosity">verbosity levels</a>: it doesn't export &quot;debug&quot;
-(i.e., <span class="extype" name="Verbosity.Debug">Verbosity.Debug</span>) metrics unless they are allowlisted via the comma-separated
+(i.e., <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Verbosity$.html#Debug:com.twitter.finagle.stats.Verbosity" class="extype" name="com.twitter.finagle.stats.Verbosity">Verbosity.Debug</a>) metrics unless they are allowlisted via the comma-separated
 <code>verbose</code>.
 </p></div></div>
     </li><li name="com.twitter.finagle.stats.MetricsBucketedHistogram" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1586,7 +1586,7 @@ are prefixed with the string &quot;srv&quot; by default.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="If a histogram has no data collected (its count is 0), it can be beneficial to not export all the histogram details as there will be no interesting data there." href="includeEmptyHistograms$.html"><span class="name">includeEmptyHistograms</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="If a histogram has no data collected (its count is 0), it can be beneficial to not export all the histogram details as there will be no interesting data there." href="includeEmptyHistograms$.html"><span class="name">includeEmptyHistograms</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <p class="shortcomment cmt">If a histogram has no data collected (its count is 0), it can be
@@ -1609,7 +1609,7 @@ will be exported.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="logOnShutdown$.html"><span class="name">logOnShutdown</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="" href="logOnShutdown$.html"><span class="name">logOnShutdown</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       
@@ -1625,7 +1625,7 @@ will be exported.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="rwLockSpinWait$.html"><span class="name">rwLockSpinWait</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
+        <a title="" href="rwLockSpinWait$.html"><span class="name">rwLockSpinWait</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
       </span>
       
       
@@ -1693,7 +1693,7 @@ separated by new lines. Used with regexes from statsFilter.</p><p>See https://ww
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="useCounterDeltas$.html"><span class="name">useCounterDeltas</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="" href="useCounterDeltas$.html"><span class="name">useCounterDeltas</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       
@@ -1729,7 +1729,7 @@ metrics. The tunable, <span class="extype" name="Verbose">Verbose</span>, has a 
         <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+              <h3>Inherited from <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
         
         </div>

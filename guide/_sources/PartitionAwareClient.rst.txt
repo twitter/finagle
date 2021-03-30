@@ -28,7 +28,7 @@ Thrift/ThriftMux Client
 <<<<<<<<<<<<<<<<<<<<<<<
 
 The set of APIs to configure a client with partitioning is at :finagle-thrift-src:`PartitioningParams
-<com/twitter/finagle/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningParams.scala>`.
+<com/twitter/finagle/thrift/exp/partitioning/PartitioningParams.scala>`.
 
 - `.strategy(partitioningStrategy: PartitioningStrategy)` configures the client with a
   PartitioningStrategy; it could be either a CustomPartitioningStrategy or a HashingPartitioningStrategy.

@@ -200,13 +200,13 @@ resources for using Finagle.
                         <a class="object" href="MysqlBuf$.html" title="MysqlBuf provides convenience methods for reading/writing a logical packet exchanged between a mysql client and server."></a>
                         <a href="MysqlBuf$.html" title="MysqlBuf provides convenience methods for reading/writing a logical packet exchanged between a mysql client and server.">MysqlBuf</a>
                       </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="MysqlBufReader.html" title=""></a>
-                        <a href="MysqlBufReader.html" title="">MysqlBufReader</a>
+                        <a class="object" href="MysqlBufReader$.html" title=""></a>
+                        <a class="class" href="MysqlBufReader.html" title="A ByteReader specialized for dealing with MySQL protocol messages."></a>
+                        <a href="MysqlBufReader.html" title="A ByteReader specialized for dealing with MySQL protocol messages.">MysqlBufReader</a>
                       </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="MysqlBufWriter.html" title=""></a>
-                        <a href="MysqlBufWriter.html" title="">MysqlBufWriter</a>
+                        <a class="object" href="MysqlBufWriter$.html" title=""></a>
+                        <a class="class" href="MysqlBufWriter.html" title="A ByteWriter specialized for dealing with MySQL protocol messages."></a>
+                        <a href="MysqlBufWriter.html" title="A ByteWriter specialized for dealing with MySQL protocol messages.">MysqlBufWriter</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Packet$.html" title=""></a>
                         <a class="class" href="Packet.html" title="A logical packet exchanged between the mysql server and client."></a>
@@ -286,10 +286,10 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="MysqlBufReader.html"><span class="name">MysqlBufReader</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/io/ProxyByteReader.html#com.twitter.io.ProxyByteReader" class="extype" name="com.twitter.io.ProxyByteReader">ProxyByteReader</a></span>
+        <a title="A ByteReader specialized for dealing with MySQL protocol messages." href="MysqlBufReader.html"><span class="name">MysqlBufReader</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/io/ProxyByteReader.html#com.twitter.io.ProxyByteReader" class="extype" name="com.twitter.io.ProxyByteReader">ProxyByteReader</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A <code>ByteReader</code> specialized for dealing with MySQL protocol messages.</p>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufWriter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MysqlBufWriterextendsProxyByteWriterwithBufByteWriter"></a><a id="MysqlBufWriter:MysqlBufWriter"></a>
       <span class="permalink">
@@ -302,10 +302,10 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="MysqlBufWriter.html"><span class="name">MysqlBufWriter</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/io/ProxyByteWriter.html#com.twitter.io.ProxyByteWriter" class="extype" name="com.twitter.io.ProxyByteWriter">ProxyByteWriter</a> with <span class="extype" name="com.twitter.io.BufByteWriter">BufByteWriter</span></span>
+        <a title="A ByteWriter specialized for dealing with MySQL protocol messages." href="MysqlBufWriter.html"><span class="name">MysqlBufWriter</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/io/ProxyByteWriter.html#com.twitter.io.ProxyByteWriter" class="extype" name="com.twitter.io.ProxyByteWriter">ProxyByteWriter</a> with <a href="https://twitter.github.io/util/docs/com/twitter/io/BufByteWriter.html#com.twitter.io.BufByteWriter" class="extype" name="com.twitter.io.BufByteWriter">BufByteWriter</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A <code>ByteWriter</code> specialized for dealing with MySQL protocol messages.</p>
     </li><li name="com.twitter.finagle.mysql.transport.Packet" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PacketextendsProductwithSerializable"></a><a id="Packet:Packet"></a>
       <span class="permalink">
@@ -318,7 +318,7 @@ resources for using Finagle.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A logical packet exchanged between the mysql server and client." href="Packet.html"><span class="name">Packet</span></a><span class="params">(<span name="seq">seq: <a href="https://www.scala-lang.org/api/2.12.11/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>, <span name="body">body: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A logical packet exchanged between the mysql server and client." href="Packet.html"><span class="name">Packet</span></a><span class="params">(<span name="seq">seq: <a href="https://www.scala-lang.org/api/2.12.12/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>, <span name="body">body: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A logical packet exchanged between the mysql
@@ -353,6 +353,38 @@ server and client. A packet consists of a header
 exchanged between a mysql client and server.</p><div class="fullcomment"><div class="comment cmt"><p>MysqlBuf provides convenience methods for reading/writing a logical packet
 exchanged between a mysql client and server. All data is little endian ordered.
 </p></div></div>
+    </li><li name="com.twitter.finagle.mysql.transport.MysqlBufReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MysqlBufReader"></a><a id="MysqlBufReader:MysqlBufReader"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MysqlBufReader$.html"><span class="name">MysqlBufReader</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.mysql.transport.MysqlBufWriter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MysqlBufWriter"></a><a id="MysqlBufWriter:MysqlBufWriter"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MysqlBufWriter$.html"><span class="name">MysqlBufWriter</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.mysql.transport.Packet" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Packet"></a><a id="Packet:Packet"></a>
       <span class="permalink">
@@ -365,7 +397,7 @@ exchanged between a mysql client and server. All data is little endian ordered.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Packet$.html"><span class="name">Packet</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Packet$.html"><span class="name">Packet</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

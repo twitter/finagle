@@ -1088,7 +1088,7 @@ finagle clients and servers.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1257,7 +1257,7 @@ of Finagle clients.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.finagle.stats.ExceptionStatsHandler throughout finagle servers and clients." href="ExceptionStatsHandler.html"><span class="name">ExceptionStatsHandler</span></a><span class="params">(<span name="categorizer">categorizer: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">stats.ExceptionStatsHandler</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.stats.ExceptionStatsHandler throughout finagle servers and clients." href="ExceptionStatsHandler.html"><span class="name">ExceptionStatsHandler</span></a><span class="params">(<span name="categorizer">categorizer: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">stats.ExceptionStatsHandler</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a
@@ -1280,13 +1280,13 @@ unfamiliar with your stats to understand your service's key metrics.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a high resolution com.twitter.util.Timer such that tasks are run tighter to their schedule." href="HighResTimer.html"><span class="name">HighResTimer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">util.Timer</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a high resolution com.twitter.util.Timer such that tasks are run tighter to their schedule." href="HighResTimer.html"><span class="name">HighResTimer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">util.Timer</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html" class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</a>
 such that tasks are run tighter to their schedule.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html" class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</a>
 such that tasks are run tighter to their schedule.
-</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <span class="extype" name="com.twitter.util.Local">Locals</span>
+</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/com/twitter/util/Local.html" class="extype" name="com.twitter.util.Local">Locals</a>
  from scheduling time to execution time.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>it is expected that the resolution should be sub-10 milliseconds.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Timer.html" class="extype" name="com.twitter.finagle.param.Timer">Timer</a> for a configuration that is appropriate for
   tasks that do not need fine-grained scheduling.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.Label" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
@@ -1301,7 +1301,7 @@ such that tasks are run tighter to their schedule.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a label used to identify finagle clients and servers." href="Label.html"><span class="name">Label</span></a><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a label used to identify finagle clients and servers." href="Label.html"><span class="name">Label</span></a><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a label used to identify finagle
@@ -1318,7 +1318,7 @@ clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a java.util.logging.Logger used throughout finagle clients and servers." href="Logger.html"><span class="name">Logger</span></a><span class="params">(<span name="log">log: <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a java.util.logging.Logger used throughout finagle clients and servers." href="Logger.html"><span class="name">Logger</span></a><span class="params">(<span name="log">log: <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span>
@@ -1335,7 +1335,7 @@ used throughout finagle clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.util.Monitor throughout finagle servers and clients." href="Monitor.html"><span class="name">Monitor</span></a><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">util.Monitor</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.util.Monitor throughout finagle servers and clients." href="Monitor.html"><span class="name">Monitor</span></a><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html#com.twitter.util.Monitor" class="extype" name="com.twitter.util.Monitor">util.Monitor</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">com.twitter.util.Monitor</a>
@@ -1352,7 +1352,7 @@ throughout finagle servers and clients.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a client library name used to identify which client library a client is using." href="ProtocolLibrary.html"><span class="name">ProtocolLibrary</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a client library name used to identify which client library a client is using." href="ProtocolLibrary.html"><span class="name">ProtocolLibrary</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a client library name used to identify
@@ -1369,7 +1369,7 @@ which client library a client is using.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.finagle.util.ReporterFactory throughout finagle servers and clients." href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.util.ReporterFactory throughout finagle servers and clients." href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a
@@ -1387,7 +1387,7 @@ clients.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.finagle.service.ResponseClassifier which is used to determine the result of a request/response." href="ResponseClassifier.html"><span class="name">ResponseClassifier</span></a><span class="params">(<span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">service.ResponseClassifier</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.service.ResponseClassifier which is used to determine the result of a request/response." href="ResponseClassifier.html"><span class="name">ResponseClassifier</span></a><span class="params">(<span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">service.ResponseClassifier</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>
@@ -1531,7 +1531,7 @@ client to maintain higher success rates.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.finagle.stats.StatsReceiver throughout finagle clients and servers." href="Stats.html"><span class="name">Stats</span></a><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.stats.StatsReceiver throughout finagle clients and servers." href="Stats.html"><span class="name">Stats</span></a><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a
@@ -1549,13 +1549,13 @@ clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.util.Timer used throughout finagle clients and servers." href="Timer.html"><span class="name">Timer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">util.Timer</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.util.Timer used throughout finagle clients and servers." href="Timer.html"><span class="name">Timer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">util.Timer</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html" class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</a> used
 throughout finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html" class="extype" name="com.twitter.util.Timer">com.twitter.util.Timer</a> used
 throughout finagle clients and servers.
-</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <span class="extype" name="com.twitter.util.Local">Locals</span>
+</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/com/twitter/util/Local.html" class="extype" name="com.twitter.util.Local">Locals</a>
  from scheduling time to execution time.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="HighResTimer.html" class="extype" name="com.twitter.finagle.param.HighResTimer">HighResTimer</a> for a configuration that needs a more
   fine-grained timer as this is typically implemented via a
   &quot;hashed wheel timer&quot; which is optimized for approximated
@@ -1572,7 +1572,7 @@ throughout finagle clients and servers.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.finagle.tracing.Tracer throughout finagle servers and clients." href="Tracer.html"><span class="name">Tracer</span></a><span class="params">(<span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.tracing.Tracer throughout finagle servers and clients." href="Tracer.html"><span class="name">Tracer</span></a><span class="params">(<span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a
@@ -1772,7 +1772,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="ExceptionStatsHandler$.html"><span class="name">ExceptionStatsHandler</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="ExceptionStatsHandler$.html"><span class="name">ExceptionStatsHandler</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1788,7 +1788,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="HighResTimer$.html"><span class="name">HighResTimer</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="HighResTimer$.html"><span class="name">HighResTimer</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1804,7 +1804,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Label$.html"><span class="name">Label</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Label$.html"><span class="name">Label</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1820,7 +1820,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Logger$.html"><span class="name">Logger</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Logger$.html"><span class="name">Logger</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1836,7 +1836,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Monitor$.html"><span class="name">Monitor</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Monitor$.html"><span class="name">Monitor</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1852,7 +1852,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="ProtocolLibrary$.html"><span class="name">ProtocolLibrary</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="ProtocolLibrary$.html"><span class="name">ProtocolLibrary</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1868,7 +1868,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Reporter$.html"><span class="name">Reporter</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Reporter$.html"><span class="name">Reporter</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1884,7 +1884,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="ResponseClassifier$.html"><span class="name">ResponseClassifier</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="ResponseClassifier$.html"><span class="name">ResponseClassifier</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1900,7 +1900,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Stats$.html"><span class="name">Stats</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Stats$.html"><span class="name">Stats</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1916,7 +1916,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Timer$.html"><span class="name">Timer</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Timer$.html"><span class="name">Timer</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1932,7 +1932,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Tracer$.html"><span class="name">Tracer</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Tracer$.html"><span class="name">Tracer</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1949,7 +1949,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+              <h3>Inherited from <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
         
         </div>

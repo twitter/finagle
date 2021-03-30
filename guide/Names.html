@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Names and Naming in Finagle &#8212; Finagle 21.2.0 documentation</title>
+    <title>Names and Naming in Finagle &#8212; Finagle 21.3.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -90,7 +90,7 @@ predictably, uses DNS for this job.</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>zk!myzkhost.mycompany.com:2181!/my/zk/path
 </pre></div>
 </div>
-<p>reads a <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> at the path <code class="docutils literal notranslate"><span class="pre">/my/zk/path</span></code> on the ZooKeeper ensemble
+<p>reads a <a class="reference external" href="https://github.com/twitter-archive/commons/blob/master/src/java/com/twitter/common/zookeeper/ServerSet.java">serverset</a> at the path <code class="docutils literal notranslate"><span class="pre">/my/zk/path</span></code> on the ZooKeeper ensemble
 named by <code class="docutils literal notranslate"><span class="pre">myzkhost.mycompany.com:2181</span></code>.</p>
 <p>When a scheme is absent, <cite>inet</cite> is used; thus</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>twitter.com:8080
@@ -169,7 +169,7 @@ example</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/$/com.twitter.serverset/zk.local.twitter.com:2181/foo/bar
 </pre></div>
 </div>
-<p>is the path describing the <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <code class="docutils literal notranslate"><span class="pre">/foo/bar</span></code> on the ZooKeeper
+<p>is the path describing the <a class="reference external" href="https://github.com/twitter-archive/commons/blob/master/src/java/com/twitter/common/zookeeper/ServerSet.java">serverset</a> <code class="docutils literal notranslate"><span class="pre">/foo/bar</span></code> on the ZooKeeper
 ensemble <code class="docutils literal notranslate"><span class="pre">zk.local.twitter.com:2181</span></code>.</p>
 <p>Dtabs may contain line-oriented comments beginning with <code class="docutils literal notranslate"><span class="pre">#</span></code>. <code class="docutils literal notranslate"><span class="pre">#</span></code>
 must be preceded by a whitespace character or delimiter such as <code class="docutils literal notranslate"><span class="pre">;</span></code>,
@@ -213,7 +213,7 @@ example follows.</p>
 6.      /$/com.twitter.serverset/zk.local.twitter.com:2181/prod/crawler
 </pre></div>
 </div>
-<p>We’ve turned the path /s/crawler into the <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <code class="docutils literal notranslate"><span class="pre">/prod/crawler</span></code>
+<p>We’ve turned the path /s/crawler into the <a class="reference external" href="https://github.com/twitter-archive/commons/blob/master/src/java/com/twitter/common/zookeeper/ServerSet.java">serverset</a> <code class="docutils literal notranslate"><span class="pre">/prod/crawler</span></code>
 on <cite>zk.local.twitter.com:2181</cite>. We use the <code class="docutils literal notranslate"><span class="pre">#</span></code> character to denote
 handlers — the path <code class="docutils literal notranslate"><span class="pre">/s#</span></code> “handles” <code class="docutils literal notranslate"><span class="pre">/s</span></code> and so on. To
 see why this indirection is necessary, consider redefining <code class="docutils literal notranslate"><span class="pre">/s</span></code> by
@@ -319,7 +319,7 @@ or Zookeeper operation completion.</dd>
 concrete endpoints.</dd>
 </dl>
 <p>We now see that a <code class="docutils literal notranslate"><span class="pre">Var[Addr]</span></code> is capable of representing a moving target,
-for example a dynamic <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a>.</p>
+for example a dynamic <a class="reference external" href="https://github.com/twitter-archive/commons/blob/master/src/java/com/twitter/common/zookeeper/ServerSet.java">serverset</a>.</p>
 <p class="rubric">Footnotes</p>
 <table class="docutils footnote" frame="void" id="names" rules="none">
 <colgroup><col class="label" /><col /></colgroup>

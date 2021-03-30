@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ThriftMux Partition Aware Client &#8212; Finagle 21.2.0 documentation</title>
+    <title>ThriftMux Partition Aware Client &#8212; Finagle 21.3.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -75,7 +75,7 @@ for. Partitions can overlap, instances can belong to different partitions.</dd>
 <h2>Enable Partition Awareness<a class="headerlink" href="#enable-partition-awareness" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="thrift-thriftmux-client">
 <h3>Thrift/ThriftMux Client<a class="headerlink" href="#thrift-thriftmux-client" title="Permalink to this headline">¶</a></h3>
-<p>The set of APIs to configure a client with partitioning is at <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/scala/com/twitter/finagle/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningParams.scala">PartitioningParams</a>.</p>
+<p>The set of APIs to configure a client with partitioning is at <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningParams.scala">PartitioningParams</a>.</p>
 <ul class="simple">
 <li><cite>.strategy(partitioningStrategy: PartitioningStrategy)</cite> configures the client with a
 PartitioningStrategy; it could be either a CustomPartitioningStrategy or a HashingPartitioningStrategy.</li>

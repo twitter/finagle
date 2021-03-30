@@ -280,6 +280,14 @@ resources for using Finagle.
                         <a class="class" href="AutomaticContinue.html" title="automatically send 100-CONTINUE responses to requests which set the 'Expect: 100-Continue' header."></a>
                         <a href="AutomaticContinue.html" title="automatically send 100-CONTINUE responses to requests which set the 'Expect: 100-Continue' header.">AutomaticContinue</a>
                       </li><li class="current-entities indented5">
+                        <a class="object" href="ClientKerberos$.html" title=""></a>
+                        <a class="class" href="ClientKerberos.html" title=""></a>
+                        <a href="ClientKerberos.html" title="">ClientKerberos</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="ClientKerberosConfiguration.html" title="Jaas configuration for kerberos client with serverPrincipal ServerPrincipal is basically the name of the target peer"></a>
+                        <a href="ClientKerberosConfiguration.html" title="Jaas configuration for kerberos client with serverPrincipal ServerPrincipal is basically the name of the target peer">ClientKerberosConfiguration</a>
+                      </li><li class="current-entities indented5">
                         <a class="object" href="CompressionLevel$.html" title=""></a>
                         <a class="class" href="CompressionLevel.html" title=""></a>
                         <a href="CompressionLevel.html" title="">CompressionLevel</a>
@@ -291,6 +299,10 @@ resources for using Finagle.
                         <a class="object" href="FixedLengthStreamedAfter$.html" title=""></a>
                         <a class="class" href="FixedLengthStreamedAfter.html" title=""></a>
                         <a href="FixedLengthStreamedAfter.html" title="">FixedLengthStreamedAfter</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="trait" href="KerberosConfiguration.html" title="Used to configure jaas default params"></a>
+                        <a href="KerberosConfiguration.html" title="Used to configure jaas default params">KerberosConfiguration</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="MaxHeaderSize$.html" title=""></a>
                         <a class="class" href="MaxHeaderSize.html" title="the maximum size of all headers."></a>
@@ -307,6 +319,14 @@ resources for using Finagle.
                         <a class="object" href="MaxResponseSize$.html" title=""></a>
                         <a class="class" href="MaxResponseSize.html" title="The maximum size of an inbound HTTP response that this Finagle client can receive from a server."></a>
                         <a href="MaxResponseSize.html" title="The maximum size of an inbound HTTP response that this Finagle client can receive from a server.">MaxResponseSize</a>
+                      </li><li class="current-entities indented5">
+                        <a class="object" href="ServerKerberos$.html" title=""></a>
+                        <a class="class" href="ServerKerberos.html" title=""></a>
+                        <a href="ServerKerberos.html" title="">ServerKerberos</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="ServerKerberosConfiguration.html" title="Jaas configuration for kerberos server"></a>
+                        <a href="ServerKerberosConfiguration.html" title="Jaas configuration for kerberos server">ServerKerberosConfiguration</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Streaming$.html" title=""></a>
                         <a class="class" href="Streaming.html" title=""></a>
@@ -434,7 +454,7 @@ resources for using Finagle.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="automatically send 100-CONTINUE responses to requests which set the 'Expect: 100-Continue' header." href="AutomaticContinue.html"><span class="name">AutomaticContinue</span></a><span class="params">(<span name="enabled">enabled: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="automatically send 100-CONTINUE responses to requests which set the 'Expect: 100-Continue' header." href="AutomaticContinue.html"><span class="name">AutomaticContinue</span></a><span class="params">(<span name="enabled">enabled: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">automatically send 100-CONTINUE responses to requests which set
@@ -442,6 +462,40 @@ the 'Expect: 100-Continue' header.</p><div class="fullcomment"><div class="comme
 the 'Expect: 100-Continue' header. See longer note on
 <code>com.twitter.finagle.Http.Server#withNoAutomaticContinue</code>
 </p></div></div>
+    </li><li name="com.twitter.finagle.http.param.ClientKerberos" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientKerberosextendsProductwithSerializable"></a><a id="ClientKerberos:ClientKerberos"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/ClientKerberos.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ClientKerberos.html"><span class="name">ClientKerberos</span></a><span class="params">(<span name="clientKerberosConfiguration">clientKerberosConfiguration: <a href="ClientKerberosConfiguration.html" class="extype" name="com.twitter.finagle.http.param.ClientKerberosConfiguration">ClientKerberosConfiguration</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.param.ClientKerberosConfiguration" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientKerberosConfigurationextendsKerberosConfigurationwithProductwithSerializable"></a><a id="ClientKerberosConfiguration:ClientKerberosConfiguration"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/ClientKerberosConfiguration.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Jaas configuration for kerberos client with serverPrincipal ServerPrincipal is basically the name of the target peer" href="ClientKerberosConfiguration.html"><span class="name">ClientKerberosConfiguration</span></a><span class="params">(<span name="principal">principal: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../../scala/index.html">None</a></span></span></span>, <span name="keyTab">keyTab: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../../scala/index.html">None</a></span></span></span>, <span name="serverPrincipal">serverPrincipal: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../../scala/index.html">None</a></span></span></span>, <span name="useKeyTab">useKeyTab: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="storeKey">storeKey: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="refreshKrb5Config">refreshKrb5Config: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="debug">debug: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>, <span name="doNotPrompt">doNotPrompt: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="authEnabled">authEnabled: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>)</span><span class="result"> extends <a href="KerberosConfiguration.html" class="extype" name="com.twitter.finagle.http.param.KerberosConfiguration">KerberosConfiguration</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Jaas configuration for kerberos client with serverPrincipal
+ServerPrincipal is basically the name of the target peer
+</p>
     </li><li name="com.twitter.finagle.http.param.CompressionLevel" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CompressionLevelextendsProductwithSerializable"></a><a id="CompressionLevel:CompressionLevel"></a>
       <span class="permalink">
@@ -454,7 +508,7 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="CompressionLevel.html"><span class="name">CompressionLevel</span></a><span class="params">(<span name="level">level: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="CompressionLevel.html"><span class="name">CompressionLevel</span></a><span class="params">(<span name="level">level: <a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -470,7 +524,7 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="Decompression.html"><span class="name">Decompression</span></a><span class="params">(<span name="enabled">enabled: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Decompression.html"><span class="name">Decompression</span></a><span class="params">(<span name="enabled">enabled: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -486,10 +540,26 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="FixedLengthStreamedAfter.html"><span class="name">FixedLengthStreamedAfter</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="FixedLengthStreamedAfter.html"><span class="name">FixedLengthStreamedAfter</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
+    </li><li name="com.twitter.finagle.http.param.KerberosConfiguration" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="KerberosConfigurationextendsAnyRef"></a><a id="KerberosConfiguration:KerberosConfiguration"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/KerberosConfiguration.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Used to configure jaas default params" href="KerberosConfiguration.html"><span class="name">KerberosConfiguration</span></a><span class="result"> extends <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Used to configure jaas default params</p><div class="fullcomment"><div class="comment cmt"><p>Used to configure jaas default params</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html" target="_blank">https://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.param.MaxHeaderSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MaxHeaderSizeextendsProductwithSerializable"></a><a id="MaxHeaderSize:MaxHeaderSize"></a>
       <span class="permalink">
@@ -502,7 +572,7 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="the maximum size of all headers." href="MaxHeaderSize.html"><span class="name">MaxHeaderSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="the maximum size of all headers." href="MaxHeaderSize.html"><span class="name">MaxHeaderSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">the maximum size of all headers.</p>
@@ -518,7 +588,7 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="the maximum size of the initial line." href="MaxInitialLineSize.html"><span class="name">MaxInitialLineSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="the maximum size of the initial line." href="MaxInitialLineSize.html"><span class="name">MaxInitialLineSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">the maximum size of the initial line.</p>
@@ -534,7 +604,7 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="The maximum size of an inbound HTTP request that this Finagle server can receive from a client." href="MaxRequestSize.html"><span class="name">MaxRequestSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="The maximum size of an inbound HTTP request that this Finagle server can receive from a client." href="MaxRequestSize.html"><span class="name">MaxRequestSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">The maximum size of an inbound HTTP request that this
@@ -554,7 +624,7 @@ and not to Finagle HTTP clients.</p></span></dd></dl></div>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="The maximum size of an inbound HTTP response that this Finagle client can receive from a server." href="MaxResponseSize.html"><span class="name">MaxResponseSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="The maximum size of an inbound HTTP response that this Finagle client can receive from a server." href="MaxResponseSize.html"><span class="name">MaxResponseSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">The maximum size of an inbound HTTP response that this
@@ -562,6 +632,39 @@ Finagle client can receive from a server.</p><div class="fullcomment"><div class
 Finagle client can receive from a server.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This param only applies to Finagle HTTP clients,
 and not to Finagle HTTP servers.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.param.ServerKerberos" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerKerberosextendsProductwithSerializable"></a><a id="ServerKerberos:ServerKerberos"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/ServerKerberos.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ServerKerberos.html"><span class="name">ServerKerberos</span></a><span class="params">(<span name="serverKerberosConfiguration">serverKerberosConfiguration: <a href="ServerKerberosConfiguration.html" class="extype" name="com.twitter.finagle.http.param.ServerKerberosConfiguration">ServerKerberosConfiguration</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.param.ServerKerberosConfiguration" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerKerberosConfigurationextendsKerberosConfigurationwithProductwithSerializable"></a><a id="ServerKerberosConfiguration:ServerKerberosConfiguration"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/ServerKerberosConfiguration.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Jaas configuration for kerberos server" href="ServerKerberosConfiguration.html"><span class="name">ServerKerberosConfiguration</span></a><span class="params">(<span name="principal">principal: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../../scala/index.html">None</a></span></span></span>, <span name="keyTab">keyTab: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../../../scala/index.html">None</a></span></span></span>, <span name="useKeyTab">useKeyTab: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="storeKey">storeKey: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="refreshKrb5Config">refreshKrb5Config: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="debug">debug: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>, <span name="doNotPrompt">doNotPrompt: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="authEnabled">authEnabled: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>)</span><span class="result"> extends <a href="KerberosConfiguration.html" class="extype" name="com.twitter.finagle.http.param.KerberosConfiguration">KerberosConfiguration</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Jaas configuration for kerberos server
+</p>
     </li><li name="com.twitter.finagle.http.param.Streaming" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StreamingextendsAnyRef"></a><a id="Streaming:Streaming"></a>
       <span class="permalink">
@@ -598,7 +701,23 @@ and not to Finagle HTTP servers.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="AutomaticContinue$.html"><span class="name">AutomaticContinue</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="AutomaticContinue$.html"><span class="name">AutomaticContinue</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.param.ClientKerberos" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientKerberos"></a><a id="ClientKerberos:ClientKerberos"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/ClientKerberos$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ClientKerberos$.html"><span class="name">ClientKerberos</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -614,7 +733,7 @@ and not to Finagle HTTP servers.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="CompressionLevel$.html"><span class="name">CompressionLevel</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="CompressionLevel$.html"><span class="name">CompressionLevel</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -630,7 +749,7 @@ and not to Finagle HTTP servers.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Decompression$.html"><span class="name">Decompression</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Decompression$.html"><span class="name">Decompression</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -646,7 +765,7 @@ and not to Finagle HTTP servers.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="FixedLengthStreamedAfter$.html"><span class="name">FixedLengthStreamedAfter</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="FixedLengthStreamedAfter$.html"><span class="name">FixedLengthStreamedAfter</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -662,7 +781,7 @@ and not to Finagle HTTP servers.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="MaxHeaderSize$.html"><span class="name">MaxHeaderSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="MaxHeaderSize$.html"><span class="name">MaxHeaderSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -678,7 +797,7 @@ and not to Finagle HTTP servers.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="MaxInitialLineSize$.html"><span class="name">MaxInitialLineSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="MaxInitialLineSize$.html"><span class="name">MaxInitialLineSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -694,7 +813,7 @@ and not to Finagle HTTP servers.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="MaxRequestSize$.html"><span class="name">MaxRequestSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="MaxRequestSize$.html"><span class="name">MaxRequestSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -710,7 +829,23 @@ and not to Finagle HTTP servers.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="MaxResponseSize$.html"><span class="name">MaxResponseSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.11/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="MaxResponseSize$.html"><span class="name">MaxResponseSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.param.ServerKerberos" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerKerberos"></a><a id="ServerKerberos:ServerKerberos"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/ServerKerberos$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ServerKerberos$.html"><span class="name">ServerKerberos</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

@@ -254,12 +254,12 @@ above is</p><pre>Service&lt;HttpRequest, HttpResponse&gt; service =
 verifies the builder dynamically, resulting in a runtime error
 instead of a compiler error.</p><h3>Defaults</h3><p>The following defaults are applied to clients constructed via ClientBuilder,
 unless overridden with the corresponding method. These defaults were chosen
-carefully so as to work well for most use cases.</p><p>Commonly-configured options:</p><ul><li><code>connectTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>tcpConnectTimeout</code>: 1 second</li><li><code>requestTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>timeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionLimit</code>: <code>Int.MaxValue</code></li><li><code>hostConnectionCoresize</code>: 0</li><li><code>hostConnectionIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxWaiters</code>: <code>Int.MaxValue</code></li><li><code>failFast</code>: true</li><li><code>failureAccrualParams</code>, <code>failureAccrualFactory</code>:
+carefully so as to work well for most use cases.</p><p>Commonly-configured options:</p><ul><li><code>connectTimeout</code>: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration$.html#Top:com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration.Top</a></li><li><code>tcpConnectTimeout</code>: 1 second</li><li><code>requestTimeout</code>: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration$.html#Top:com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration.Top</a></li><li><code>timeout</code>: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration$.html#Top:com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration.Top</a></li><li><code>hostConnectionLimit</code>: <code>Int.MaxValue</code></li><li><code>hostConnectionCoresize</code>: 0</li><li><code>hostConnectionIdleTime</code>: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration$.html#Top:com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration.Top</a></li><li><code>hostConnectionMaxWaiters</code>: <code>Int.MaxValue</code></li><li><code>failFast</code>: true</li><li><code>failureAccrualParams</code>, <code>failureAccrualFactory</code>:
    <code>numFailures</code> = 5, <code>markDeadFor</code> = 5 seconds</li></ul><p>Advanced options:</p><p><i>Before changing any of these, make sure that you know exactly how they will
 affect your application -- these options are typically only changed by expert
 users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
    <a href="https://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE" target="_blank">Java default</a>
-   of <code>false</code> is used</li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span>
+   of <code>false</code> is used</li><li><code>hostConnectionMaxIdleTime</code>: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration$.html#Top:com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration.Top</a></li><li><code>hostConnectionMaxLifeTime</code>: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration$.html#Top:com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration.Top</a>
 </li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The user guide for information on the preferred
 <a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank"><code>with</code>-style</a> and
 <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">MethodBuilder</a>
@@ -267,7 +267,7 @@ client-construction APIs.</p></span></dd></dl><div class="toggleContainer block"
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -383,7 +383,7 @@ client-construction APIs.</p></span></dd></dl><div class="toggleContainer block"
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -399,7 +399,7 @@ client-construction APIs.</p></span></dd></dl><div class="toggleContainer block"
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -415,7 +415,7 @@ client-construction APIs.</p></span></dd></dl><div class="toggleContainer block"
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -625,7 +625,7 @@ Http.client.withSession.acquisitionTimeout(duration)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">daemon</span><span class="params">(<span name="daemonize">daemonize: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">daemon</span><span class="params">(<span name="daemonize">daemonize: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">When true, the client is daemonized.</p><div class="fullcomment"><div class="comment cmt"><p>When true, the client is daemonized. As with java threads, a
@@ -691,7 +691,7 @@ Http.client
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -707,7 +707,7 @@ Http.client
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -746,7 +746,7 @@ Http.client.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl clas
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">failFast</span><span class="params">(<span name="enabled">enabled: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">failFast</span><span class="params">(<span name="enabled">enabled: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Marks a host dead on connection failure.</p><div class="fullcomment"><div class="comment cmt"><p>Marks a host dead on connection failure. The host remains dead
@@ -787,7 +787,7 @@ with the <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitte
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">failureAccrualParams</span><span class="params">(<span name="pair">pair: (<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>)</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">failureAccrualParams</span><span class="params">(<span name="pair">pair: (<a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>)</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Use the given parameters for failure accrual.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given parameters for failure accrual.  The first parameter
@@ -807,7 +807,7 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -848,7 +848,7 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
@@ -867,7 +867,7 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionCoresize</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">hostConnectionCoresize</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">The core size of the connection pool: the pool is not shrinked below this limit.</p><div class="fullcomment"><div class="comment cmt"><p>The core size of the connection pool: the pool is not shrinked below this limit.</p><p>To migrate to the Stack-based APIs, use <code>SessionPoolingParams.minSize</code>.
@@ -888,7 +888,7 @@ Http.client.withSessionPool.minSize(value)</pre></div><dl class="attributes bloc
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionLimit</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
+        <span class="name">hostConnectionLimit</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
       </span>
       
       <p class="shortcomment cmt">The maximum number of connections that are allowed per host.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum number of connections that are allowed per host.
@@ -1017,7 +1017,7 @@ If this is defined concurrently with socksProxy, the order in which they are app
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -1033,7 +1033,7 @@ If this is defined concurrently with socksProxy, the order in which they are app
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">keepAlive</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">keepAlive</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Apply TCP keepAlive (<code>SO_KEEPALIVE</code> socket option).</p><div class="fullcomment"><div class="comment cmt"><p>Apply TCP keepAlive (<code>SO_KEEPALIVE</code> socket option).</p><p>To migrate to the Stack-based APIs, use <code>configured</code>.
@@ -1134,7 +1134,7 @@ Http.client.withLabel(<span class="lit">"my_cool_client"</span>)</pre></div></di
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -1169,7 +1169,7 @@ Http.client.withSessionQualifier.noFailureAccrual</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1188,7 +1188,7 @@ Http.client.withSessionQualifier.noFailureAccrual</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1344,7 +1344,7 @@ HTTP classification tools.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">retries</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">retries</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Retry (some) failed requests up to <code>value - 1</code> times.</p><div class="fullcomment"><div class="comment cmt"><p>Retry (some) failed requests up to <code>value - 1</code> times.</p><p>Retries are only done if the request failed with something
@@ -1366,12 +1366,12 @@ Http.client
              single retry if the failure is known to be safe to retry.</li></ul></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
       application level failures. This is particularly important for
       codecs that include exceptions, such as <code>Thrift</code>.
-      This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="../service/RetryPolicy$.html#tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#tries">com.twitter.finagle.service.RetryPolicy.tries</a></p></span><span class="cmt"><p><a href="#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryBudget">retryBudget</a> for governing how many failed requests are
+      This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="../service/RetryPolicy$.html#tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#tries">com.twitter.finagle.service.RetryPolicy.tries</a></p></span><span class="cmt"><p><a href="#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:com.twitter.finagle.Backoff):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryBudget">retryBudget</a> for governing how many failed requests are
 eligible for retries.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#retryBudget" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This"></a><a id="retryBudget(RetryBudget,Stream[Duration]):This"></a>
+      <a id="retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:com.twitter.finagle.Backoff):ClientBuilder.this.This"></a><a id="retryBudget(RetryBudget,Backoff):This"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ClientBuilder.html#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This" title="Permalink">
+      <a href="../../../../com/twitter/finagle/builder/ClientBuilder.html#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:com.twitter.finagle.Backoff):ClientBuilder.this.This" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1380,7 +1380,7 @@ eligible for retries.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">retryBudget</span><span class="params">(<span name="budget">budget: <a href="../service/RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>, <span name="backoffSchedule">backoffSchedule: <a href="../../../../scala/index.html#Stream[+A]=scala.collection.immutable.Stream[A]" class="extmbr" name="scala.Stream">Stream</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">retryBudget</span><span class="params">(<span name="budget">budget: <a href="../service/RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>, <span name="backoffSchedule">backoffSchedule: <a href="../Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
@@ -1428,7 +1428,7 @@ eligible for retries.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">retryPolicy</span><span class="params">(<span name="value">value: <a href="../service/RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Nothing.html#scala.Nothing" class="extype" name="scala.Nothing">Nothing</a>]]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">retryPolicy</span><span class="params">(<span name="value">value: <a href="../service/RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<a href="https://www.scala-lang.org/api/2.12.12/scala/Nothing.html#scala.Nothing" class="extype" name="scala.Nothing">Nothing</a>]]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Retry failed requests according to the given <span class="extype" name="RetryPolicy">RetryPolicy</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Retry failed requests according to the given <span class="extype" name="RetryPolicy">RetryPolicy</span>.</p><p>To migrate to the Stack-based APIs, use <code>MethodBuilder</code>.
@@ -1445,7 +1445,7 @@ Http.client
   }</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
       application level failures. This is particularly important for
       codecs that include exceptions, such as <code>Thrift</code>.
-      This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryBudget">retryBudget</a> for governing how many failed requests are
+      This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:com.twitter.finagle.Backoff):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryBudget">retryBudget</a> for governing how many failed requests are
 eligible for retries.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#socksProxy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="socksProxy(socksProxy:Option[java.net.SocketAddress]):ClientBuilder.this.This"></a><a id="socksProxy(Option[SocketAddress]):This"></a>
@@ -1459,7 +1459,7 @@ eligible for retries.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <a href="https://www.scala-lang.org/api/2.12.11/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Make connections via the given SOCKS proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given SOCKS proxy.
@@ -1584,7 +1584,7 @@ Http.client
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tls</span><span class="params">(<span name="sslContext">sslContext: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>, <span name="hostname">hostname: <a href="https://www.scala-lang.org/api/2.12.11/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">tls</span><span class="params">(<span name="sslContext">sslContext: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>, <span name="hostname">hostname: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Encrypt the connection with SSL/TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL/TLS.  The Engine to use can be passed into the client.
@@ -1773,7 +1773,7 @@ Http.client.withTracer(t)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">trafficClass</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.11/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">trafficClass</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures the traffic class.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the traffic class.
@@ -1824,7 +1824,7 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1846,7 +1846,7 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.11/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="https://www.scala-lang.org/api/2.12.11/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.12/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="https://www.scala-lang.org/api/2.12.12/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1868,7 +1868,7 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.11/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.11/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="https://www.scala-lang.org/api/2.12.12/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1893,7 +1893,7 @@ completeness.</p>
         <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="https://www.scala-lang.org/api/2.12.11/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+              <h3>Inherited from <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
         
         </div>
