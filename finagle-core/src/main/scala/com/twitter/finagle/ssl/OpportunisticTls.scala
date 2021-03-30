@@ -42,4 +42,7 @@ object OpportunisticTls {
    * Compatible with "desired", or "required".
    */
   case object Required extends Level("required")
+
+  /** The sequence of [[Level]]s from least to most secure */
+  final val Values: Seq[Level] = Seq(Off, Desired, Required)
 }

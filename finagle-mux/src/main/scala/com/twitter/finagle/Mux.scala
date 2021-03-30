@@ -78,29 +78,16 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * @note opportunistic TLS is not mutually intelligible with simple mux
      *       over TLS
      */
-    case class OppTls(level: Option[OpportunisticTls.Level]) {
-      def mk(): (OppTls, Stack.Param[OppTls]) =
-        (this, OppTls.param)
-    }
-    object OppTls {
-      implicit val param = new Stack.Param[OppTls] {
-        val default: OppTls = OppTls(None)
+    @deprecated("Please use com.twitter.finagle.param.OppTls directly", "2021-03-11")
+    type OppTls = com.twitter.finagle.param.OppTls
 
-        // override this to have a "cleaner" output in the registry
-        override def show(value: OppTls): Seq[(String, () => String)] = {
-          val levelStr = value match {
-            case OppTls(Some(oppTls)) => oppTls.value.toString
-            case OppTls(None) => "none"
-          }
-          Seq(("opportunisticTlsLevel", () => levelStr))
-        }
-      }
+    @deprecated("Please use com.twitter.finagle.param.OppTls directly", "2021-03-11")
+    object OppTls {
+      def apply(level: Option[OpportunisticTls.Level]): OppTls =
+        com.twitter.finagle.param.OppTls(level)
 
       /** Determine whether opportunistic TLS is configured to `Desired` or `Required`. */
-      def enabled(params: Stack.Params): Boolean = params[OppTls].level match {
-        case Some(OpportunisticTls.Desired | OpportunisticTls.Required) => true
-        case _ => false
-      }
+      def enabled(params: Stack.Params): Boolean = com.twitter.finagle.param.OppTls.enabled(params)
     }
 
     /**

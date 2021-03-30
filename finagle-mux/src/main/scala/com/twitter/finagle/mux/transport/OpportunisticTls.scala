@@ -32,7 +32,8 @@ private[twitter] object OpportunisticTls {
   val Desired: Desired = SslOptTls.Desired
 
   /** The sequence of [[SslOptTls.Level]]s from least to most secure */
-  final val Values: Seq[SslOptTls.Level] = Seq(SslOptTls.Off, SslOptTls.Desired, SslOptTls.Required)
+  @deprecated("Please use SslOptTls.Values directly", "2021-03-11")
+  final def Values: Seq[SslOptTls.Level] = SslOptTls.Values
 
   /**
    * Defines encrypter keys and values exchanged as part of a
