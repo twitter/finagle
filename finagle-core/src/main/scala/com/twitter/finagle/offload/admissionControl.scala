@@ -20,5 +20,5 @@ object admissionControl
     |'none': Offload based admission control is disabled.
     |'default': The default configuration which may change. Currently the same as 'none'.
     |'enabled': Offload based admission control is enabled with common parameters.
-    |'failurePercentile:rejectionIncrement:queueWaterMark:windowSize': set the tuning parameters to custom values""".stripMargin
+    |'windowSize': the window over which to monitor queue health in terms of a duration. Example: 500.milliseconds""".stripMargin
     )

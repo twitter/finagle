@@ -1,5 +1,6 @@
 package com.twitter.finagle.offload
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.FuturePool
@@ -18,8 +19,8 @@ class OffloadFilterAdmissionControlTest extends FunSuite with OneInstancePerTest
   private val strictParams = OffloadFilterAdmissionControl.Enabled(
     failurePercentile = 0.0001,
     rejectionIncrement = 1.0,
-    queueWaterMark = 1l,
-    windowSize = 1
+    queueFullWaterMark = 1l,
+    windowSize = 1.second
   )
 
   private var randomValue: Double = 1.0
@@ -58,7 +59,7 @@ class OffloadFilterAdmissionControlTest extends FunSuite with OneInstancePerTest
   }
 
   test("doesnt reject if we exceed the threshold but haven't overflowed the window") {
-    val ac = newAc(strictParams.copy(windowSize = 2, failurePercentile = 0.51))
+    val ac = newAc(strictParams.copy(windowSize = 2.milliseconds, failurePercentile = 0.51))
     when(mockFuturePool.numPendingTasks).thenReturn(1l)
     assert(ac.sample() == FastSample)
     assert(!ac.shouldReject)
@@ -68,7 +69,7 @@ class OffloadFilterAdmissionControlTest extends FunSuite with OneInstancePerTest
   }
 
   test("recovery phase") {
-    val ac = newAc(strictParams.copy(windowSize = 2, failurePercentile = 0.51))
+    val ac = newAc(strictParams.copy(windowSize = 2.milliseconds, failurePercentile = 0.51))
     when(mockFuturePool.numPendingTasks).thenReturn(1l)
     assert(ac.sample() == FastSample)
     assert(!ac.shouldReject)
@@ -85,7 +86,7 @@ class OffloadFilterAdmissionControlTest extends FunSuite with OneInstancePerTest
   }
 
   test("can recover from an overflow window") {
-    val ac = newAc(strictParams.copy(windowSize = 3, failurePercentile = 0.51))
+    val ac = newAc(strictParams.copy(windowSize = 3.milliseconds, failurePercentile = 0.51))
     when(mockFuturePool.numPendingTasks).thenReturn(1l)
 
     // fill up our window with failure

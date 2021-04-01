@@ -12,6 +12,7 @@ import com.twitter.finagle.stats.{Counter, FinagleStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle._
+import com.twitter.finagle.param.Stats
 import com.twitter.util._
 import java.util.concurrent.{
   ExecutorService,
@@ -111,6 +112,7 @@ object OffloadFilter {
 
   private final class OffloadFuturePool(executor: ThreadPoolExecutor, stats: StatsReceiver)
       extends ExecutorServiceFuturePool(executor) {
+    // Reference held so GC doesn't clean these up automatically.
     private val gauges = Seq(
       stats.addGauge("pool_size") { poolSize },
       stats.addGauge("active_tasks") { numActiveTasks },
@@ -257,15 +259,20 @@ object OffloadFilter {
     }
   }
 
-  private[this] final class AcFilter(ac: OffloadFilterAdmissionControl)
+  private[this] final class AcFilter(ac: OffloadFilterAdmissionControl, stats: StatsReceiver)
       extends Filter.TypeAgnostic {
+
+    private val rejections = stats.counter("rejections")
 
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
       // Save a local reference so we don't need to pointer chase as much.
       private val ac = AcFilter.this.ac
       def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
         if (!ac.shouldReject) service(request)
-        else Failure.FutureRetryableNackFailure
+        else {
+          rejections.incr()
+          Failure.FutureRetryableNackFailure
+        }
       }
     }
   }
@@ -307,8 +314,9 @@ object OffloadFilter {
       val acEnabled = params[ServerAdmissionControl.Param].serverAdmissionControlEnabled
       pool match {
         case p: OffloadFuturePool if acEnabled && p.admissionControl.isDefined =>
+          val stats = params[Stats].statsReceiver.scope("admission_control", "offload_based")
           params + ServerAdmissionControl.Filters(
-            Some(Seq(_ => new AcFilter(p.admissionControl.get))))
+            Some(Seq(_ => new AcFilter(p.admissionControl.get, stats))))
 
         case _ => params
       }

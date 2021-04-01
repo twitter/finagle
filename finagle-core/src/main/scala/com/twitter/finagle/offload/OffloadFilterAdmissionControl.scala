@@ -1,10 +1,11 @@
 package com.twitter.finagle.offload
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.app.Flaggable
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.Logger
-import com.twitter.util.FuturePool
+import com.twitter.util.{Duration, FuturePool}
 import java.util.Locale
 
 // An admission control mechanism that is uses the OffloadFilters work queue
@@ -25,20 +26,12 @@ private[finagle] object OffloadFilterAdmissionControl {
       }
 
       // Expected format:
-      // 'failurePercentile:rejectionIncrement:queueWaterMark:windowSize'
+      // 'failurePercentile:windowSize'
       private[this] def parseParams(lowercaseFlag: String): Params = {
         import com.twitter.finagle.util.parsers._
         lowercaseFlag match {
-          case list(
-                double(failurePercentile),
-                double(rejectionIncrement),
-                long(queueWaterMark),
-                int(windowSize)) =>
-            Enabled(
-              failurePercentile.toDouble,
-              rejectionIncrement.toDouble,
-              queueWaterMark.toLong,
-              windowSize.toInt)
+          case list(duration(windowSize)) =>
+            DefaultEnabledParams.copy(windowSize = windowSize)
           case unknown =>
             log.error(s"Unparsable OffloadFilterAdmissionControl value: $unknown")
             Disabled
@@ -48,28 +41,27 @@ private[finagle] object OffloadFilterAdmissionControl {
   }
 
   case class Enabled(
-    failurePercentile: Double,
+    windowSize: Duration,
     rejectionIncrement: Double,
-    queueWaterMark: Long,
-    windowSize: Int)
+    queueFullWaterMark: Long,
+    failurePercentile: Double)
       extends Params
-
   case object Disabled extends Params
 
   // These parameters have been derived empirically with a little bit of intuition for garnish.
   //
-  // - failurePercentile: derived empirically
+  // - windowSize: The time width to monitor for compliance. A window of 500 to 1000 milliseconds
+  //               seems to perform well a typical service.
   // - rejectionIncrement: derived empirically
-  // - queueWaterMark: derived from the hypothesis that if there is persistently work in the queue
-  //                   we're backed up. Verified empirically.
-  // - windowSize: with a window size of 2000 at the fast sample rate of 1 ms we expect to be able
-  //               to respond to traffic on the order of 2 seconds timescale which has empirically
-  //               been stable but responsive.
+  // - failurePercentile: derived theoretically and verified empirically. If we've been busy for
+  //                      the whole window we consider ourselves backed up.
+  // - queueFullWaterMark: derived from the hypothesis that if there is persistently work in the
+  //                       queue we're backed up. Verified empirically.
   val DefaultEnabledParams: Enabled = Enabled(
-    failurePercentile = 0.99,
+    windowSize = 1000.millis,
     rejectionIncrement = 0.001,
-    queueWaterMark = 1l,
-    windowSize = 2000
+    queueFullWaterMark = 1l,
+    failurePercentile = 1.0,
   )
 
   def apply(futurePool: FuturePool, stats: StatsReceiver): Option[OffloadFilterAdmissionControl] = {
@@ -97,7 +89,7 @@ private[finagle] object OffloadFilterAdmissionControl {
     private[this] var idx: Int = 0
     private[this] val history: Array[Int] = new Array[Int](window)
 
-    def offer(value: Int): Float = {
+    def offer(value: Int): Double = {
       sum -= history(idx)
       sum += value
       history(idx) = value
@@ -105,7 +97,7 @@ private[finagle] object OffloadFilterAdmissionControl {
       average
     }
 
-    def average: Float = { sum.toFloat / window }
+    def average: Double = { sum.toDouble / window }
 
     override def toString: String = {
       val histStr = history.sum
@@ -122,9 +114,8 @@ private[finagle] final class OffloadFilterAdmissionControl(
     extends Thread("offload-ac-thread") {
   import OffloadFilterAdmissionControl._
 
-  private val movingAvg = stats.addGauge("moving_average") { movingAverage.average }
+  private val movingAvg = stats.addGauge("moving_average") { movingAverage.average.toFloat }
   private val rejectProb = stats.addGauge("rejection_probability") { rejectProbability.toFloat }
-  private val nacks = stats.counter("rejections")
 
   // Some constants that were derived empirically
   private[this] final val ShortSleepTimeMs: Int = 1
@@ -132,12 +123,14 @@ private[finagle] final class OffloadFilterAdmissionControl(
   private[this] final val MaxRejectionFraction: Double = 1.0
   private[this] final val RecoveringScaleFactor: Double = 0.9
 
+  // Note that these three are on notice: there is a good chance
+  // that they don't need to be tuned.
   private[this] val failurePercentile = params.failurePercentile
-
   private[this] val rejectionIncrement = params.rejectionIncrement
-  private[this] val queueFullWaterMark = params.queueWaterMark
+  private[this] val queueFullWaterMark = params.queueFullWaterMark
 
-  private[this] val movingAverage = new MovingAverage(params.windowSize)
+  private[this] val movingAverage = new MovingAverage(
+    params.windowSize.inMillis.toInt / ShortSleepTimeMs)
 
   // Since we're modifying this value from a single thread we don't need to
   // worry about synchronizing when accessing it.
@@ -196,7 +189,7 @@ private[finagle] final class OffloadFilterAdmissionControl(
     val avg = movingAverage.offer(if (queueOverflow) 1 else 0)
 
     val oldProbability = rejectProbability
-    if (avg <= failurePercentile) {
+    if (avg < failurePercentile) {
       // This means over our window of time we don't consider ourselves backed up.
       // If we've gotten here we unconditionally consider the queue healthy and we
       // currently have capacity to process requests.
@@ -216,16 +209,13 @@ private[finagle] final class OffloadFilterAdmissionControl(
     // * We were rejecting the cycle before this
     // * We consider our current queue size overloaded
     // * We have a history of being overloaded
-    if (queueOverflow || oldProbability > 0.0 || avg > failurePercentile) ShortSleepTimeMs
+    if (queueOverflow || oldProbability > 0.0 || avg >= failurePercentile) ShortSleepTimeMs
     else LongSleepTimeMs
   }
 
   def shouldReject: Boolean = {
     // Only read the volatile once
     val prob = rejectProbability
-    val reject = 0.0 < prob && random.nextDouble() <= prob
-
-    if (reject) nacks.incr()
-    reject
+    0.0 < prob && random.nextDouble() <= prob
   }
 }
