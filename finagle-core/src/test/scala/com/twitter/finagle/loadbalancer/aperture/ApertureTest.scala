@@ -522,9 +522,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
   }
 
   test("order maintained when status flaps") {
-    val bal = new Bal {
-      override protected val useDeterministicOrdering = Some(true)
-    }
+    val bal = new Bal
 
     ProcessCoordinate.unsetCoordinate()
 
@@ -589,6 +587,29 @@ class ApertureTest extends FunSuite with ApertureSuite {
     bal.applyn(3000)
 
     ProcessCoordinate.unsetCoordinate()
+
+    val requests = counts.toIterator.map(_._total).toVector
+    val avg = requests.sum.toDouble / requests.size
+    val relativeDiffs = requests.map { i => math.abs(avg - i) / avg }
+    relativeDiffs.foreach { i => assert(i < 0.05) }
+  }
+
+  test("'p2c' d-aperture doesn't unduly bias") {
+    val counts = new Counts
+    val bal = new Bal {
+      override val minAperture = 1
+      override protected def nodeLoad: Double = 1.0
+      override val useDeterministicOrdering: Option[Boolean] = Some(true)
+    }
+
+    // If no ProcessCoordinate is set but useDeterministicOrdering is true, we should fall back
+    // to the p2c-style deterministic aperture (one instance, no peers)
+    ProcessCoordinate.unsetCoordinate()
+    bal.update(counts.range(3))
+    bal.rebuildx()
+    assert(bal.isDeterministicAperture)
+    assert(bal.minUnitsx == 3)
+    bal.applyn(3000)
 
     val requests = counts.toIterator.map(_._total).toVector
     val avg = requests.sum.toDouble / requests.size

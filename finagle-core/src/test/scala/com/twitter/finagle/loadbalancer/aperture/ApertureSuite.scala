@@ -19,7 +19,7 @@ private[loadbalancer] trait ApertureSuite {
     private[aperture] def eagerConnections = false
     protected def maxEffort = 5
     private[aperture] def minAperture = 1
-    protected def useDeterministicOrdering: Option[Boolean] = None
+    protected val useDeterministicOrdering: Option[Boolean] = None
     protected def label = ""
 
     protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")

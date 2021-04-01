@@ -66,7 +66,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
    * to derive an ordering for the endpoints used by this [[Balancer]] instance.
    */
-  protected def useDeterministicOrdering: Option[Boolean]
+  protected val useDeterministicOrdering: Option[Boolean]
 
   /**
    * Indicator if the endpoints within the aperture should be connected to eagerly. This is a Function0
@@ -115,13 +115,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected def label: String
 
   private[aperture] def dapertureActive: Boolean = {
-    if (ProcessCoordinate().isEmpty) {
-      false
-    } else {
-      useDeterministicOrdering match {
-        case Some(bool) => bool
-        case None => true
-      }
+    useDeterministicOrdering match {
+      case Some(bool) => bool
+      case None => ProcessCoordinate().isDefined
     }
   }
 

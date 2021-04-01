@@ -2,6 +2,7 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.DistributorT
+import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.{Coord, FromInstanceId}
 import com.twitter.logging.Level
 import com.twitter.util.Future
 
@@ -65,27 +66,43 @@ private[aperture] abstract class BaseDist[Req, Rep, NodeT <: ApertureNode[Req, R
     rebuilt = true
 
     aperture.updateVectorHash(vec)
-    val dist = if (vec.isEmpty) {
+    mkDist(vec, initAperture)
+
+  }
+
+  def mkDist(vec: Vector[NodeT], initAperture: Int): This = {
+    if (vec.isEmpty) {
       aperture.mkEmptyVector(initAperture)
     } else if (aperture.dapertureActive) {
       ProcessCoordinate() match {
         case Some(coord) =>
-          aperture.mkDeterministicAperture(vec, initAperture, coord)
+          val dist = aperture.mkDeterministicAperture(vec, initAperture, coord)
+          checkShouldEagerlyConnect(dist)
         case None =>
           // this should not happen as `dapertureActive` should prevent this case
           // but hypothetically, the coordinate could get unset between calls
           // to `dapertureActive` and `ProcessCoordinate()`
-          aperture.mkRandomAperture(vec, initAperture)
+
+          // If there is no process coordinate, create "P2C" load balancer
+          mkP2C(vec, initAperture)
       }
     } else {
-      aperture.mkRandomAperture(vec, initAperture)
+      val dist = aperture.mkRandomAperture(vec, initAperture)
+      checkShouldEagerlyConnect(dist)
     }
+  }
 
+  private def mkP2C(vec: Vector[NodeT], initAperture: Int) = {
+    // By creating deterministic aperture with a single instance and no peers, we simulate creating
+    // a P2C load balancer
+    aperture.mkDeterministicAperture(vec, initAperture, noPeerCoordinate)
+  }
+
+  private def checkShouldEagerlyConnect(dist: This): This = {
     if (aperture.eagerConnections) {
       val oldNodes = indices.map(vector(_))
       dist.doEagerlyConnect(oldNodes)
     }
-
     dist
   }
 
@@ -124,4 +141,6 @@ private[aperture] abstract class BaseDist[Req, Rep, NodeT <: ApertureNode[Req, R
   def status: Status
 
   def additionalMetadata: Map[String, Any]
+
+  val noPeerCoordinate: Coord = FromInstanceId(0, 1)
 }
