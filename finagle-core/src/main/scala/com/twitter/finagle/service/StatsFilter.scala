@@ -249,7 +249,7 @@ class StatsFilter[Req, Rep] private[service] (
   private[this] val successRate =
     ExpressionSchema(
       "success_rate",
-      Expression(100, statsReceiver).multiply(Expression(successSchema).divide(
+      Expression(100).multiply(Expression(successSchema).divide(
         Expression(successSchema).plus(Expression(failureSchema)))))
       .withBounds(MonotoneThresholds(GreaterThan, 99.5, 99.97))
       .withUnit(Percentage)
