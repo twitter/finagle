@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-core: Introduce a new `ResponseClassifier` ('IgnoreIRTEs') that treats
+  `com.twitter.finagle.IndividualRequestTimeoutException`s as `ResponseClass.Ignored`.
+  This response classifier is useful when a client has set a super low `RequestTimeout` and
+  receiving a response is seen as 'best-effort'. ``PHAB_ID=D645818``
+
 21.3.0
 ------
 

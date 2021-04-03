@@ -1,6 +1,12 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, TimeoutException}
+import com.twitter.finagle.{
+  ChannelClosedException,
+  Failure,
+  FailureFlags,
+  IndividualRequestTimeoutException,
+  TimeoutException
+}
 import com.twitter.finagle.service.ResponseClass._
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Return, Throw}
@@ -50,6 +56,45 @@ class ResponseClassifierTest extends FunSuite {
     assert(
       Ignorable ==
         ResponseClassifier.Default(ReqRep(null, Throw(Failure.ignorable("ignore"))))
+    )
+
+    assert(
+      NonRetryableFailure ==
+        ResponseClassifier.Default(
+          ReqRep(null, Throw(new IndividualRequestTimeoutException(1.second)))
+        )
+    )
+  }
+
+  // This is a copy of 'Default classification' with a slight modification for the
+  // change in behavior towards IndividualRequestTimeoutExceptions for `IgnoreIRTEs`.
+  test("IgnoreIRTEs classification") {
+    assert("IgnoreIRTEsResponseClassifier" == ResponseClassifier.IgnoreIRTEs.toString)
+    assert(
+      Success ==
+        ResponseClassifier.IgnoreIRTEs(ReqRep(null, Return("hi")))
+    )
+
+    assert(
+      RetryableFailure ==
+        ResponseClassifier.IgnoreIRTEs(ReqRep(null, Throw(Failure.rejected)))
+    )
+
+    assert(
+      NonRetryableFailure ==
+        ResponseClassifier.IgnoreIRTEs(ReqRep(null, Throw(Failure("nope"))))
+    )
+
+    assert(
+      Ignorable ==
+        ResponseClassifier.IgnoreIRTEs(ReqRep(null, Throw(Failure.ignorable("ignore"))))
+    )
+
+    assert(
+      Ignorable ==
+        ResponseClassifier.IgnoreIRTEs(
+          ReqRep(null, Throw(new IndividualRequestTimeoutException(1.second)))
+        )
     )
   }
 

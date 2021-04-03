@@ -1,7 +1,13 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.service.RetryPolicy.RetryableWriteException
-import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, TimeoutException}
+import com.twitter.finagle.{
+  ChannelClosedException,
+  Failure,
+  FailureFlags,
+  IndividualRequestTimeoutException,
+  TimeoutException
+}
 import com.twitter.util.{Throw, TimeoutException => UtilTimeoutException, Return}
 
 object ResponseClassifier {
@@ -47,6 +53,21 @@ object ResponseClassifier {
       ResponseClass.Ignored
     case ReqRep(_, Throw(RetryableWriteException(_))) => ResponseClass.RetryableFailure
     case ReqRep(_, Throw(_)) => ResponseClass.NonRetryableFailure
+  }
+
+  /**
+   * The `IgnoreIRTEs` [[ResponseClassifier]] matches `Default` in all aspects except for
+   * how it handles [[IndividualRequestTimeoutException]]s specifically. For `IRTEs`, this
+   * [[ResponseClassifier]] considers them to be [[ResponseClass.Ignored]].
+   *
+   * This [[ResponseClassifier]] is useful for when a particular Finagle client has a very low
+   * `RequestTimeout` set, such that receiving a response within that window is seen as fortuitous,
+   * and that not receiving a response within that window is not seen as problematic. In this case,
+   * the timed out request is treated as ignorable, and should not be seen as or counted as a failure.
+   */
+  val IgnoreIRTEs: ResponseClassifier = named("IgnoreIRTEsResponseClassifier") {
+    case ReqRep(_, Throw(_: IndividualRequestTimeoutException)) => ResponseClass.Ignored
+    case reqRep if Default.isDefinedAt(reqRep) => Default(reqRep)
   }
 
   /**
