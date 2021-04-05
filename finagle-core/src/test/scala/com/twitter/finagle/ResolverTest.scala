@@ -23,6 +23,14 @@ class TestResolver extends Resolver {
   }
 }
 
+class TestInetResolver extends Resolver {
+  val scheme = "inet"
+  def bind(arg: String) = {
+    val addr = Addr.Bound(TestAddr(arg))
+    Var.value(addr)
+  }
+}
+
 case class ConstResolver(a: Addr) extends Resolver {
   val scheme = "const"
   def bind(arg: String) = Var(a)
@@ -78,5 +86,10 @@ class ResolverTest extends FunSuite {
     intercept[MultipleResolversPerSchemeException] {
       TestResolver.get(classOf[TestResolver])
     }
+  }
+
+  test("supports a service loaded inet resolver") {
+    val resolver = new BaseResolver(() => Seq(new TestInetResolver)) {}
+    assert(resolver.eval("inet!xyz") == Resolver.eval("inet!xyz"))
   }
 }
