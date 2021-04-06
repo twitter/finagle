@@ -430,7 +430,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       case label => label
     }
 
-  private[this] def statsReceiver(methodName: Option[String]): StatsReceiver = {
+  private[finagle] def statsReceiver(methodName: Option[String]): StatsReceiver = {
     val clientScoped = stackParams[param.Stats].statsReceiver.scope(clientName)
     methodName match {
       case Some(name) => new LazyStatsReceiver(clientScoped.scope(name))
