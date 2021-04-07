@@ -1,5 +1,6 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema}
 import org.scalatest.FunSuite
 
 object MetricsStatsReceiverTest {
@@ -250,4 +251,38 @@ class MetricsStatsReceiverTest extends FunSuite {
 
   testMetricsStatsReceiver(new PreSchemaCtx())
   testMetricsStatsReceiver(new SchemaCtx())
+
+  test("expressions are reloaded with fully scoped names") {
+    val metrics = Metrics.createDetached()
+    val sr = new MetricsStatsReceiver(metrics)
+
+    val aSchema = CounterSchema(MetricBuilder(name = Seq("a"), statsReceiver = sr).withKernel)
+    val bSchema = HistogramSchema(MetricBuilder(name = Seq("b"), statsReceiver = sr).withKernel)
+    val cSchema = GaugeSchema(MetricBuilder(name = Seq("c"), statsReceiver = sr).withKernel)
+
+    val expression = ExpressionSchema(
+      "test_expression",
+      Expression(aSchema).plus(Expression(bSchema, Left(Expression.Min)).plus(Expression(cSchema))))
+      .register()
+
+    val aCounter = sr.scope("test").counter(aSchema)
+    val bHisto = sr.scope("test").stat(bSchema)
+    val cGauge = sr.scope(("test")).addGauge(cSchema) { 1 }
+
+    // what we expected as hydrated metric builders
+    val aaSchema = CounterSchema(MetricBuilder(name = Seq("test", "a"), statsReceiver = sr))
+    val bbSchema = HistogramSchema(
+      MetricBuilder(
+        name = Seq("test", "b"),
+        percentiles = BucketedHistogram.DefaultQuantiles,
+        statsReceiver = sr))
+    val ccSchema = GaugeSchema(MetricBuilder(name = Seq("test", "c"), statsReceiver = sr))
+
+    val expected_expression = ExpressionSchema(
+      "test_expression",
+      Expression(aaSchema).plus(
+        Expression(bbSchema, Left(Expression.Min)).plus(Expression(ccSchema))))
+
+    assert(metrics.expressions.get("test_expression").expr == expected_expression.expr)
+  }
 }

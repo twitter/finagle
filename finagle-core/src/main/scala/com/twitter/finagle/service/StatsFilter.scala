@@ -232,16 +232,21 @@ class StatsFilter[Req, Rep] private[service] (
   }
 
   private[this] val successSchema =
-    CounterSchema(new MetricBuilder(name = Seq("success"), statsReceiver = statsReceiver))
+    CounterSchema(MetricBuilder(name = Seq("success"), statsReceiver = statsReceiver).withKernel)
   private[this] val failureSchema =
     CounterSchema(
-      new MetricBuilder(name = Seq(ExceptionStatsHandler.Failures), statsReceiver = statsReceiver))
+      MetricBuilder(
+        name = Seq(ExceptionStatsHandler.Failures),
+        statsReceiver = statsReceiver).withKernel)
   private[this] val requestSchema =
-    CounterSchema(new MetricBuilder(name = Seq("requests"), statsReceiver = statsReceiver))
+    CounterSchema(MetricBuilder(name = Seq("requests"), statsReceiver = statsReceiver).withKernel)
 
   private[this] val outstandingRequestCount = new LongAdder()
   private[this] val dispatchCount = statsReceiver.counter(requestSchema)
   private[this] val successCount = statsReceiver.counter(successSchema)
+  // ExceptionStatsHandler creates the failure counter lazily.
+  // We need to eagerly register this counter in metrics for success rate expression.
+  private[this] val failureCount = statsReceiver.counter(failureSchema)
   private[this] val latencyStat = statsReceiver.stat(s"request_latency_$latencyStatSuffix")
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }

@@ -15,11 +15,18 @@ New Features
   This response classifier is useful when a client has set a super low `RequestTimeout` and
   receiving a response is seen as 'best-effort'. ``PHAB_ID=D645818``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: The "failures" counter is changed to be created eagerly, when no failure
+  happens, the counter value is 0. ``PHAB_ID=D645590``
+
 21.3.0
 ------
 
 New Features
 ~~~~~~~~~~~~
+
 * finagle-core: Added value `ForceWithDtab` to flag
   `-com.twitter.finagle.loadbalancer.exp.apertureEagerConnections` that forces the
   aperture load balancer to eagerly connect, even in staging environments where
@@ -40,6 +47,7 @@ New Features
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+
 * finagle: Builds are now only supported for Scala 2.12+ ``PHAB_ID=D631091``
 
 * finagle-core: Changed flag `-com.twitter.finagle.loadbalancer.exp.apertureEagerConnections"

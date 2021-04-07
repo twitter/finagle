@@ -48,12 +48,12 @@ class StatsFilterTest extends FunSuite {
 
     // Verify that the counters and stats were only created once
     verify(receiver).counter(
-      CounterSchema(new MetricBuilder(name = Seq("status", "404"), statsReceiver = receiver)))
+      CounterSchema(MetricBuilder(name = Seq("status", "404"), statsReceiver = receiver)))
     verify(receiver).counter(
-      CounterSchema(new MetricBuilder(name = Seq("status", "4XX"), statsReceiver = receiver)))
+      CounterSchema(MetricBuilder(name = Seq("status", "4XX"), statsReceiver = receiver)))
     verify(receiver).stat(
-      HistogramSchema(new MetricBuilder(name = Seq("time", "404"), statsReceiver = receiver)))
+      HistogramSchema(MetricBuilder(name = Seq("time", "404"), statsReceiver = receiver)))
     verify(receiver).stat(
-      HistogramSchema(new MetricBuilder(name = Seq("time", "4XX"), statsReceiver = receiver)))
+      HistogramSchema(MetricBuilder(name = Seq("time", "4XX"), statsReceiver = receiver)))
   }
 }

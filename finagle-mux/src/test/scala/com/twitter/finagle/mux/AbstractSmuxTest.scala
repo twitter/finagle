@@ -167,7 +167,7 @@ abstract class AbstractSmuxTest extends FunSuite {
           }
           assert(string.isEmpty)
 
-          assert(stats.counters.get(Seq("client", "failures")) == None)
+          assert(stats.counters.get(Seq("client", "failures")) == Some(0))
           assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
           assert(
             stats.counters.get(

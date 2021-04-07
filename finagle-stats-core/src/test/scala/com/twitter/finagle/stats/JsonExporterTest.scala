@@ -140,14 +140,14 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val viewsCounter = registry
       .getOrCreateCounter(
         CounterSchema(
-          new MetricBuilder(
+          MetricBuilder(
             verbosity = Verbosity.Default,
             name = Seq("views"),
             statsReceiver = null))).counter
     val gcCounter = registry
       .getOrCreateCounter(
         CounterSchema(
-          new MetricBuilder(
+          MetricBuilder(
             verbosity = Verbosity.Default,
             name = Seq("jvm_gcs"),
             statsReceiver = null))).counter
@@ -204,7 +204,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
       registry
         .getOrCreateCounter(
           CounterSchema(
-            new MetricBuilder(
+            MetricBuilder(
               verbosity = Verbosity.Default,
               name = Seq(name),
               statsReceiver = null))).counter
@@ -265,7 +265,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val counter = registry
       .getOrCreateCounter(
         CounterSchema(
-          new MetricBuilder(
+          MetricBuilder(
             verbosity = Verbosity.Default,
             name = Seq("anCounter"),
             statsReceiver = null))).counter
@@ -321,10 +321,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val sr =
       registry.registerGauge(
         GaugeSchema(
-          new MetricBuilder(
-            verbosity = Verbosity.Default,
-            name = Seq("boom"),
-            statsReceiver = null)),
+          MetricBuilder(verbosity = Verbosity.Default, name = Seq("boom"), statsReceiver = null)),
         throw new RuntimeException("loolool"))
 
     val exporter = new JsonExporter(registry)

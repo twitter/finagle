@@ -15,21 +15,21 @@ private[stats] class MetricsViaDeprecatedInterface(metrics: Metrics) {
 
   def getOrCreateCounter(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreCounter =
     underlying.getOrCreateCounter(
-      CounterSchema(new MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)))
+      CounterSchema(MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)))
 
   def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit =
     underlying.registerGauge(
-      GaugeSchema(new MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)),
+      GaugeSchema(MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)),
       f)
 
   def registerLongGauge(verbosity: Verbosity, names: Seq[String], f: => Long): Unit =
     underlying.registerLongGauge(
-      GaugeSchema(new MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)),
+      GaugeSchema(MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)),
       f)
 
   def getOrCreateStat(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreStat =
     underlying.getOrCreateStat(
-      HistogramSchema(new MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)))
+      HistogramSchema(MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)))
 
   def getOrCreateStat(
     verbosity: Verbosity,
@@ -38,7 +38,7 @@ private[stats] class MetricsViaDeprecatedInterface(metrics: Metrics) {
   ): MetricsStore.StoreStat =
     underlying.getOrCreateStat(
       HistogramSchema(
-        new MetricBuilder(
+        MetricBuilder(
           name = names,
           verbosity = verbosity,
           percentiles = percentiles,

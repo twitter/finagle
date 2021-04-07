@@ -220,12 +220,12 @@ class StatsFilterTest extends FunSuite {
     val (promise, receiver, statsService) = getService()
 
     assert(receiver.counters(Seq("requests")) == 0)
-    assert(!receiver.counters.contains(Seq("failures")))
+    assert(receiver.counters(Seq("failures")) == 0)
 
     val f = statsService("foo")
 
     assert(receiver.counters(Seq("requests")) == 0)
-    assert(!receiver.counters.contains(Seq("failures")))
+    assert(receiver.counters(Seq("failures")) == 0)
 
     promise.setException(new Exception)
 
@@ -237,12 +237,12 @@ class StatsFilterTest extends FunSuite {
     val (promise, receiver, statsService) = getService()
 
     assert(receiver.counters(Seq("requests")) == 0)
-    assert(!receiver.counters.contains(Seq("failures")))
+    assert(receiver.counters(Seq("failures")) == 0)
 
     val f = statsService("foo")
 
     assert(receiver.counters(Seq("requests")) == 0)
-    assert(!receiver.counters.contains(Seq("failures")))
+    assert(receiver.counters(Seq("failures")) == 0)
 
     promise.setValue("whatever")
 

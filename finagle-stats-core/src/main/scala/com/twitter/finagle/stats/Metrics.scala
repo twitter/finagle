@@ -1,6 +1,7 @@
 package com.twitter.finagle.stats
 
-import com.twitter.finagle.stats.exp.ExpressionSchema
+import com.twitter.finagle.stats.exp.Expression.replaceExpression
+import com.twitter.finagle.stats.exp._
 import com.twitter.logging.Logger
 import com.twitter.util.lint.{Category, Issue, Rule}
 import java.util
@@ -44,7 +45,13 @@ object Metrics {
     gaugesMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge](),
     /** Store MetricSchemas for each metric in order to surface metric metadata to users. */
     metricSchemas = new ConcurrentHashMap[String, MetricSchema](),
-    expressionSchemas = new ConcurrentHashMap[String, ExpressionSchema]()
+    expressionSchemas = new ConcurrentHashMap[String, ExpressionSchema](),
+    // Memoizing metrics used for building expressions.
+    // the key is the object reference hashcode shared between Expression and StatsReceiver,
+    // and the value is the fully hydrated metric builder in StatsReceiver.
+    // Use the value to replace metric builders carried in Expression which do not have full
+    // information.
+    metricBuilders = new ConcurrentHashMap[Int, MetricBuilder]()
   )
 
   private class StoreCounterImpl(override val name: String) extends MetricsStore.StoreCounter {
@@ -85,7 +92,8 @@ object Metrics {
     statsMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreStat],
     gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge],
     metricSchemas: ConcurrentHashMap[String, MetricSchema],
-    expressionSchemas: ConcurrentHashMap[String, ExpressionSchema])
+    expressionSchemas: ConcurrentHashMap[String, ExpressionSchema],
+    metricBuilders: ConcurrentHashMap[Int, MetricBuilder])
 }
 
 /**
@@ -138,6 +146,8 @@ private[finagle] class Metrics private (
 
   private[this] val expressionSchemas = metricsMaps.expressionSchemas
 
+  private[this] val metricBuilders = metricsMaps.metricBuilders
+
   private[this] val verbosityMap =
     new ConcurrentHashMap[String, Verbosity]()
 
@@ -167,6 +177,7 @@ private[finagle] class Metrics private (
         prev
       } else {
         metricSchemas.put(formatted, schema)
+        storeMetricBuilder(schema)
         next
       }
     } else {
@@ -214,7 +225,25 @@ private[finagle] class Metrics private (
       prev
     } else {
       metricSchemas.put(formatted, schema)
+      storeMetricBuilder(schema)
       next
+    }
+  }
+
+  private[this] def storeMetricBuilder(schema: MetricSchema): Unit = {
+    schema.metricBuilder.kernel match {
+      case Some(kernel) => metricBuilders.put(kernel, schema.metricBuilder)
+      case None =>
+    }
+  }
+
+  private[this] def removeMetricBuilder(formattedName: String): Unit = {
+    val metricSchema = metricSchemas.get(formattedName)
+    if (metricSchema != null) {
+      metricSchema.metricBuilder.kernel match {
+        case Some(kernel) => metricBuilders.remove(kernel)
+        case None =>
+      }
     }
   }
 
@@ -240,6 +269,7 @@ private[finagle] class Metrics private (
       val next = new Metrics.StoreGaugeImpl(formatted, f)
       gaugesMap.putIfAbsent(schema.metricBuilder.name, next)
       metricSchemas.putIfAbsent(formatted, schema)
+      storeMetricBuilder(schema)
 
       if (schema.metricBuilder.verbosity != Verbosity.Default) {
         verbosityMap.put(formatted, schema.metricBuilder.verbosity)
@@ -251,6 +281,7 @@ private[finagle] class Metrics private (
       val next = new Metrics.StoreGaugeImpl(formatted, f)
       gaugesMap.put(schema.metricBuilder.name, next)
       metricSchemas.put(formatted, schema)
+      storeMetricBuilder(schema)
     } else {
       throw new MetricCollisionException(
         s"A Counter with the name $formatted had already" +
@@ -262,6 +293,8 @@ private[finagle] class Metrics private (
   def unregisterGauge(names: Seq[String]): Unit = {
     gaugesMap.remove(names)
     val formatted = format(names)
+    // remove from metricBuilders must prior to remove from metricSchemas
+    removeMetricBuilder(formatted)
     metricSchemas.remove(formatted)
     reservedNames.remove(formatted)
     verbosityMap.remove(formatted)
@@ -303,8 +336,20 @@ private[finagle] class Metrics private (
   def schemas: util.Map[String, MetricSchema] =
     util.Collections.unmodifiableMap(metricSchemas)
 
-  def expressions: util.Map[String, ExpressionSchema] =
-    util.Collections.unmodifiableMap(expressionSchemas)
+  private[this] val filledExpression: ConcurrentHashMap[String, ExpressionSchema] =
+    new ConcurrentHashMap[String, ExpressionSchema]()
+
+  def expressions: util.Map[String, ExpressionSchema] = {
+    val added = expressionSchemas.keySet().asScala &~ filledExpression.keySet().asScala
+
+    added.foreach { name =>
+      val exprSchema = expressionSchemas.get(name)
+      val newExpression = exprSchema.copy(expr = replaceExpression(exprSchema.expr, metricBuilders))
+      filledExpression.putIfAbsent(name, newExpression)
+    }
+
+    util.Collections.unmodifiableMap(filledExpression)
+  }
 
   def metricsCollisionsLinterRule: Rule =
     Rule(
