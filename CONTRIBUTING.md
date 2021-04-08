@@ -249,7 +249,7 @@ requests that improve the existing Scaladocs!
 [6]: https://www.sphinx-doc.org/en/master/usage/installation.html
 [7]: http://docutils.sourceforge.net/rst.html
 [8]: https://docs.scala-lang.org/style/scaladoc.html
-[9]: https://github.com/twitter/finagle/blob/master/finagle-core/src/test/java/com/twitter/finagle/AddrCompilationTest.java
+[9]: https://github.com/twitter/finagle/blob/release/finagle-core/src/test/java/com/twitter/finagle/AddrCompilationTest.java
 [es]: https://twitter.github.io/effectivescala/
 [funsuite]: https://www.scalatest.org/getting_started_with_fun_suite
 [sbt]: https://www.scala-sbt.org/

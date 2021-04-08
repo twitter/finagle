@@ -14,5 +14,5 @@ To publish a new version of the user guide to GitHub Pages:
        Finagle (and not the SNAPSHOT version) by running from the master branch.
     2. Execute the script `finagle/pushsite.bash`.
 
-[0]: https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md#building-dependencies
+[0]: https://github.com/twitter/finagle/blob/release/CONTRIBUTING.md#building-dependencies
 [1]: https://www.sphinx-doc.org/en/master/usage/installation.html

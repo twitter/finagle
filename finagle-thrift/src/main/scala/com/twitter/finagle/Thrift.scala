@@ -58,7 +58,7 @@ import org.apache.thrift.protocol.TProtocolFactory
  * to the request, and every subsequent request is dispatched with an
  * envelope carrying trace metadata. The envelope itself is also a
  * Thrift struct described
- * [[https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift
+ * [[https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/thrift/tracing.thrift
  * here]].
  *
  * == Clients ==
@@ -112,7 +112,7 @@ import org.apache.thrift.protocol.TProtocolFactory
  * finagle server (or any other supporting this extension), we reply
  * to the request, and every subsequent request is dispatched with an
  * envelope carrying trace metadata. The envelope itself is also a
- * Thrift struct described [[https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift here]].
+ * Thrift struct described [[https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/thrift/tracing.thrift here]].
  *
  * == Servers ==
  *

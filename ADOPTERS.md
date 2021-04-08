@@ -87,7 +87,7 @@ URLs if possible) and [submit a pull request][1]!
     Lucene"][13]
 
 [0]: https://twitter.com/finagle
-[1]: https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md
+[1]: https://github.com/twitter/finagle/blob/release/CONTRIBUTING.md
 [2]: https://engineering.gutefrage.net/post/47693566182/introducing-gutefrage-net-s-service-oriented
 [3]: https://engineering.pinterest.com/post/59132790640/how-we-make-pins-more-useful
 [4]: https://github.com/rdio/thor

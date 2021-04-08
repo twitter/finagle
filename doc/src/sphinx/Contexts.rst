@@ -116,6 +116,6 @@ will be sent across the entire downstream request graph. Considerations
 should include serialization/deserialization costs, serialized size, and
 schema evolution.
 
-.. _Contexts: https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/context/Contexts.scala
+.. _Contexts: https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/context/Contexts.scala
 
 .. _ThreadLocals: https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html
