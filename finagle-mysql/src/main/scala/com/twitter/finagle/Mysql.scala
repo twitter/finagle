@@ -12,6 +12,7 @@ import com.twitter.finagle.param.{
   _
 }
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
+import com.twitter.finagle.ssl.OpportunisticTls
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
@@ -151,6 +152,30 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
      */
     def withCredentials(u: String, p: String): Client =
       configured(Credentials(Option(u), Option(p)))
+
+    /**
+     * Configures the client whether to speak TLS or not.
+     *
+     * By default, don't use opportunistic TLS, and instead always speak TLS
+     * if TLS has been configured.
+     *
+     * The valid levels are Off, which indicates this will never speak TLS,
+     * Desired, which indicates it may speak TLS, but may also not speak TLS,
+     * and Required, which indicates it must speak TLS.
+     *
+     * Clients configured with level `Required` cannot speak to MySQL servers where
+     * TLS is switched off.
+     */
+    def withOpportunisticTls(level: OpportunisticTls.Level): Client =
+      configured(OppTls(Some(level)))
+
+    /**
+     * Disables opportunistic TLS.
+     *
+     * If the client is still TLS configured, it will speak with the server over TLS. To instead
+     * configure this to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
+     */
+    def withNoOpportunisticTls: Client = configured(OppTls(None))
 
     /**
      * Database to use when this client establishes a new session.

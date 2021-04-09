@@ -15,6 +15,11 @@ New Features
   This response classifier is useful when a client has set a super low `RequestTimeout` and
   receiving a response is seen as 'best-effort'. ``PHAB_ID=D645818``
 
+* finagle-mysql: Introduce support of opportunistic TLS to allow mysql clients
+  with enabled TLS to speak over encrypted connections with MySQL servers where
+  TLS is on, and fallback to plaintext connections if TLS is switched off on
+  the server side. ``PHAB_ID=D644982``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

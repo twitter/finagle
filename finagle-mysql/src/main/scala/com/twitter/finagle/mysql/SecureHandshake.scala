@@ -6,6 +6,8 @@ import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer.O
 import com.twitter.finagle.netty4.transport.ChannelTransportContext
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.Stack
+import com.twitter.finagle.param.OppTls
+import com.twitter.finagle.ssl.OpportunisticTls
 import com.twitter.util.{Future, Promise, Try}
 import io.netty.channel.Channel
 
@@ -13,6 +15,8 @@ private[mysql] final class SecureHandshake(
   params: Stack.Params,
   transport: Transport[Packet, Packet])
     extends Handshake(params, transport) {
+
+  private[this] val tlsLevel = params[OppTls].level.getOrElse(OpportunisticTls.Required)
 
   private[this] def onHandshakeComplete(p: Promise[Unit])(result: Try[Unit]): Unit =
     p.updateIfEmpty(result)
@@ -76,19 +80,47 @@ private[mysql] final class SecureHandshake(
       settings.maxPacketSize.inBytes.toInt
     )
 
+  private[this] def makePlainHandshakeResponse(handshakeInit: HandshakeInit): HandshakeResponse = {
+    PlainHandshakeResponse(
+      settings.username,
+      settings.password,
+      settings.database,
+      settings.calculatedClientCapabilities,
+      handshakeInit.salt,
+      handshakeInit.serverCapabilities,
+      settings.charset,
+      settings.maxPacketSize.inBytes.toInt
+    )
+  }
+
   // For the `SecureHandshake`, after the init,
   // we return an `SslConnectionRequest`,
   // neogtiate SSL/TLS, and then return a handshake response.
   def connectionPhase(): Future[Result] = {
     readHandshakeInit()
       .flatMap { handshakeInit =>
-        writeSslConnectionRequest(handshakeInit)
-          .flatMap(_ => negotiateTls(handshakeInit))
-          .map(_ => handshakeInit)
+        if (tlsLevel == OpportunisticTls.Off) {
+          Future.value(makePlainHandshakeResponse(handshakeInit))
+        } else {
+          val serverTlsEnabled = handshakeInit.serverCapabilities.has(Capability.SSL)
+          if (serverTlsEnabled) {
+            writeSslConnectionRequest(handshakeInit)
+              .flatMap(_ => negotiateTls(handshakeInit))
+              .map(_ => handshakeInit)
+              .map(makeSecureHandshakeResponse)
+          } else if (tlsLevel == OpportunisticTls.Desired) {
+            Future.value(makePlainHandshakeResponse(handshakeInit))
+          } else {
+            Future.exception(
+              new InsufficientServerCapabilitiesException(
+                required = Capability(Capability.SSL),
+                available = handshakeInit.serverCapabilities
+              )
+            )
+          }
+        }
       }
-      .map(makeSecureHandshakeResponse)
       .flatMap(messageDispatch)
       .onFailure(_ => transport.close())
   }
-
 }

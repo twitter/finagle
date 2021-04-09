@@ -95,11 +95,13 @@ private[mysql] object Handshake {
   /**
    * Creates a `Handshake` based on the specific `Stack` params and `Transport` passed in.
    * If the `Transport.ClientSsl` param is set, then a `SecureHandshake` will be returned.
-   * Otherwise a `PlainHandshake is returned.
+   * Otherwise a `PlainHandshake` is returned.
    */
   def apply(params: Stack.Params, transport: Transport[Packet, Packet]): Handshake =
-    if (params[Transport.ClientSsl].sslClientConfiguration.isDefined)
+    if (params[Transport.ClientSsl].sslClientConfiguration.isDefined) {
       new SecureHandshake(params, transport)
-    else new PlainHandshake(params, transport)
+    } else {
+      new PlainHandshake(params, transport)
+    }
 
 }
