@@ -2,7 +2,6 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufWriter, Packet}
 import com.twitter.io.Buf
-import java.security.MessageDigest
 import java.util.logging.Logger
 
 object Command {
@@ -180,7 +179,7 @@ private[mysql] sealed abstract class HandshakeResponse(
     extends ProtocolMessage {
 
   lazy val hashPassword: Array[Byte] = password match {
-    case Some(p) => encryptPassword(p, salt)
+    case Some(pword) => PasswordUtils.encryptPasswordWithSha1(pword, salt, charset)
     case None => Array.emptyByteArray
   }
 
@@ -201,20 +200,6 @@ private[mysql] sealed abstract class HandshakeResponse(
       bw.writeNullTerminatedString(database.get)
 
     Packet(seq, bw.owned())
-  }
-
-  private[this] def encryptPassword(password: String, salt: Array[Byte]) = {
-    val md = MessageDigest.getInstance("SHA-1")
-    val hash1 = md.digest(password.getBytes(MysqlCharset(charset).displayName))
-    md.reset()
-    val hash2 = md.digest(hash1)
-    md.reset()
-    md.update(salt)
-    md.update(hash2)
-
-    val digest = md.digest()
-    (0 until digest.length) foreach { i => digest(i) = (digest(i) ^ hash1(i)).toByte }
-    digest
   }
 }
 
