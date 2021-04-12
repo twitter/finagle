@@ -36,7 +36,7 @@ abstract class AbstractEndToEndTest
   def skipWholeTest: Boolean = false
   def clientImpl(): ClientT
   def serverImpl(): ServerT
-  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
+  def await[A](f: Awaitable[A], timeout: Duration = 5.seconds): A = Await.result(f, timeout)
 
   var saveBase: Dtab = Dtab.empty
 
@@ -78,7 +78,7 @@ abstract class AbstractEndToEndTest
     Dtab.unwind {
       Dtab.local ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
       for (n <- 0 until 2) {
-        val rsp = Await.result(client(Request(Path.empty, Nil, Buf.Empty)), 30.seconds)
+        val rsp = await(client(Request(Path.empty, Nil, Buf.Empty)), 30.seconds)
         val Buf.Utf8(str) = rsp.body
         assert(
           str.replace("\r", "") == "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
@@ -99,7 +99,7 @@ abstract class AbstractEndToEndTest
 
     val client = clientImpl.newService(getName(server), "client")
 
-    val payload = Await.result(client(Request.empty), 30.seconds).body
+    val payload = await(client(Request.empty), 30.seconds).body
     val br = ByteReader(payload)
 
     assert(br.remaining == 4)
@@ -135,7 +135,7 @@ abstract class AbstractEndToEndTest
       .configured(param.Tracer(tracer))
       .newService(getName(server), "theClient")
 
-    Await.result(client(Request.empty), 30.seconds)
+    await(client(Request.empty), 30.seconds)
 
     eventually {
       assertAnnotationsInOrder(
@@ -151,8 +151,8 @@ abstract class AbstractEndToEndTest
       )
     }
 
-    Await.result(server.close(), 30.seconds)
-    Await.result(client.close(), 30.seconds)
+    await(server.close(), 30.seconds)
+    await(client.close(), 30.seconds)
   }
 
   test(s"$implName: requeue nacks") {
@@ -177,12 +177,12 @@ abstract class AbstractEndToEndTest
     val client = clientImpl.newService(name, "client")
 
     assert(n.get == 0)
-    assert(Await.result(client(Request.empty), 30.seconds).body.isEmpty)
+    assert(await(client(Request.empty), 30.seconds).body.isEmpty)
     assert(n.get == 2)
 
-    Await.result(a.close(), 30.seconds)
-    Await.result(b.close(), 30.seconds)
-    Await.result(client.close(), 30.seconds)
+    await(a.close(), 30.seconds)
+    await(b.close(), 30.seconds)
+    await(client.close(), 30.seconds)
   }
 
   test(s"$implName: propagate c.t.f.Failures") {
@@ -216,8 +216,8 @@ abstract class AbstractEndToEndTest
     check(Failure("Nope", FailureFlags.NonRetryable))
     check(Failure("", FailureFlags.Retryable))
 
-    Await.result(server.close(), 30.seconds)
-    Await.result(client.close(), 30.seconds)
+    await(server.close(), 30.seconds)
+    await(client.close(), 30.seconds)
   }
 
   test(s"$implName: gracefully reject sessions") {
@@ -232,13 +232,13 @@ abstract class AbstractEndToEndTest
     val client = clientImpl.newService(getName(server), "client")
 
     // This will try until it exhausts its budget. That's o.k.
-    val failure = intercept[Failure] { Await.result(client(Request.empty), 30.seconds) }
+    val failure = intercept[Failure] { await(client(Request.empty), 30.seconds) }
 
     // FailureFlags.Retryable is stripped.
     assert(!failure.isFlagged(FailureFlags.Retryable))
 
-    Await.result(server.close(), 30.seconds)
-    Await.result(client.close(), 30.seconds)
+    await(server.close(), 30.seconds)
+    await(client.close(), 30.seconds)
   }
 
   private[this] def nextPort(): Int = {
@@ -270,7 +270,7 @@ abstract class AbstractEndToEndTest
       await(client(req))
 
       // This will stop listening, drain, and then close the session.
-      Await.result(server.close(), 30.seconds)
+      await(server.close(), 30.seconds)
 
       // Thus the next request should fail at session establishment.
       intercept[Throwable] { await(client(req)) }
@@ -279,7 +279,7 @@ abstract class AbstractEndToEndTest
       server = serverImpl.serve(s"localhost:$port", echo)
       eventually { await(client(req)) }
 
-      Await.result(server.close(), 30.seconds)
+      await(server.close(), 30.seconds)
     }
 
   test(s"$implName: responds to lease") {
@@ -468,7 +468,7 @@ abstract class AbstractEndToEndTest
         .withMonitor(monitor)
         .newService(s"${InetAddress.getLoopbackAddress.getHostAddress}:${server.port}")
 
-      val result = await(client(Request.empty).liftToTry)
+      val result = await(client(Request.empty).liftToTry, 30.seconds)
       server.close()
 
       // The Monitor should have intercepted the Failure
@@ -506,14 +506,14 @@ abstract class AbstractEndToEndTest
     Time.withCurrentTimeFrozen(BackupRequests.mkRequestWithBackup(client))
 
     val e = intercept[ClientDiscardedRequestException] {
-      Await.result(slow, 5.seconds)
+      await(slow, 5.seconds)
     }
 
     assert(e.getMessage == BackupRequestFilter.SupersededRequestFailureToString)
     assert(e.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
 
-    Await.result(client.close(), 5.seconds)
-    Await.result(server.close(), 5.seconds)
+    await(client.close(), 5.seconds)
+    await(server.close(), 5.seconds)
   }
 
   test("BackupRequestFilter's interrupts are propagated multiple levels as ignorable") {
@@ -539,12 +539,12 @@ abstract class AbstractEndToEndTest
     assert(e.getMessage == BackupRequestFilter.SupersededRequestFailureToString)
     assert(e.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
 
-    Await.result(client.close(), 5.seconds)
-    Await.result(proxy2Server.close(), 5.seconds)
-    Await.result(proxy2Client.close(), 5.seconds)
-    Await.result(proxy1Server.close(), 5.seconds)
-    Await.result(proxy1Client.close(), 5.seconds)
-    Await.result(server.close(), 5.seconds)
+    await(client.close(), 5.seconds)
+    await(proxy2Server.close(), 5.seconds)
+    await(proxy2Client.close(), 5.seconds)
+    await(proxy1Server.close(), 5.seconds)
+    await(proxy1Client.close(), 5.seconds)
+    await(server.close(), 5.seconds)
   }
 
 }
