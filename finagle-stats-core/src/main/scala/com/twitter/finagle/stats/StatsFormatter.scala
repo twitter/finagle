@@ -32,7 +32,7 @@ object includeEmptyHistograms
  */
 private[twitter] sealed trait StatsFormatter {
 
-  val separator = "."
+  val histogramSeparator = "."
 
   def apply(values: SampledValues): Map[String, Number] = {
     val results = new mutable.HashMap[String, Number]()
@@ -67,7 +67,7 @@ private[twitter] sealed trait StatsFormatter {
    *                  count, or a percentile.
    */
   private[twitter] final def histoName(name: String, component: String): String =
-    s"${name}$separator$component"
+    s"${name}$histogramSeparator$component"
 
   /** Label applied for the number of times a histogram was reported */
   private[twitter] final val labelCount: String = "count"
@@ -190,7 +190,7 @@ private[twitter] object StatsFormatter {
       }
     }
 
-    override val separator: String = "_"
+    override val histogramSeparator: String = "_"
 
     def labelPercentile(p: Double): String =
       s"${p * 100}_percentile".replace(".", "_")
