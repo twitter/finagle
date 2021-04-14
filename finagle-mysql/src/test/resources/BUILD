@@ -1,3 +1,6 @@
 resources(
-    sources = ["*.sql"],
+    sources = [
+        "*.sql",
+        "auth/keys/*.pem",
+    ],
 )
