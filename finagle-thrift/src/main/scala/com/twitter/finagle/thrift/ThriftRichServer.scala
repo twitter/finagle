@@ -1,8 +1,9 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.server.StackBasedServer
 import com.twitter.finagle.stats._
-import com.twitter.finagle.{ListeningServer, Server, Stack, Thrift}
+import com.twitter.finagle.{ListeningServer, Stack, Thrift}
 import java.net.SocketAddress
 
 /**
@@ -65,7 +66,7 @@ import java.net.SocketAddress
  *   address, serviceMap, defaultService = Some("extendedEcho"))
  * }}}
  */
-trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
+trait ThriftRichServer { self: StackBasedServer[Array[Byte], Array[Byte]] =>
   import ThriftUtil._
 
   protected def serverParam: RichServerParam
@@ -81,14 +82,20 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
   /**
    * $serveIface
    */
-  def serveIface(addr: String, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, serverParam))
+  def serveIface(addr: String, iface: AnyRef): ListeningServer = {
+    self
+      .configured(Thrift.param.ServiceClass(Some(iface.getClass)))
+      .serve(addr, serverFromIface(iface, serverParam))
+  }
 
   /**
    * $serveIface
    */
-  def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, serverParam))
+  def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer = {
+    self
+      .configured(Thrift.param.ServiceClass(Some(iface.getClass)))
+      .serve(addr, serverFromIface(iface, serverParam))
+  }
 
   /**
    * $serveIfaces

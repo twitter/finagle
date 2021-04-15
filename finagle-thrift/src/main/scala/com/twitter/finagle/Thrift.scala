@@ -211,6 +211,11 @@ object Thrift
     implicit object PerEndpointStats extends Stack.Param[PerEndpointStats] {
       val default = PerEndpointStats(false)
     }
+
+    private[finagle] final case class ServiceClass(clazz: Option[Class[_ <: AnyRef]])
+    private[finagle] implicit object ServiceName extends Stack.Param[ServiceClass] {
+      val default = ServiceClass(None)
+    }
   }
 
   object Client extends ThriftClient {
