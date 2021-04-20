@@ -2,41 +2,56 @@ package com.twitter.finagle.offload
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.Rng
-import com.twitter.util.FuturePool
-import org.mockito.Mockito.when
+import com.twitter.util.{Future, FuturePool, Promise, Try}
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatestplus.mockito.MockitoSugar.mock
 
 class OffloadFilterAdmissionControlTest extends FunSuite with OneInstancePerTest {
 
   private val FastSample: Long = 1l
   private val SlowSample: Long = 5l
 
-  private val mockFuturePool: FuturePool = mock[FuturePool]
+  private class MockFuturePool extends FuturePool {
+
+    private case class Task[T](f: () => T, p: Promise[T]) {
+      def run(): Unit = p.updateIfEmpty(Try(f()))
+    }
+
+    private var thunks: Vector[Task[_]] = Vector.empty
+    def apply[T](f: => T): Future[T] = {
+      val p = Promise[T]()
+      thunks :+= Task(() => f, p)
+      p
+    }
+
+    override def numPendingTasks: Long = thunks.size
+
+    def runOne(): Unit = {
+      if (thunks.isEmpty) {
+        throw new NoSuchElementException()
+      }
+      val head = thunks.head
+      thunks = thunks.tail
+      head.run()
+    }
+
+    def runAll(): Unit = {
+      while (thunks.nonEmpty) {
+        runOne()
+      }
+    }
+  }
+
+  private val mockFuturePool: MockFuturePool = new MockFuturePool
   private val stats = new InMemoryStatsReceiver
 
-  private val strictParams = OffloadFilterAdmissionControl.Enabled(
-    failurePercentile = 0.0001,
-    rejectionIncrement = 1.0,
-    queueFullWaterMark = 1l,
-    windowSize = 1.second
-  )
-
-  private var randomValue: Double = 1.0
+  // Admission control will kick in once the pending decrements grows past 1 task.
+  private val strictParams =
+    OffloadFilterAdmissionControl.Enabled(maxQueueDelay = 1.milliseconds)
 
   private def newAc(
     params: OffloadFilterAdmissionControl.Enabled
   ): OffloadFilterAdmissionControl = {
-    // technically we should return a number in the range [0, 1.0)
-    // but this should be fine.
-    val random = new Rng {
-      def nextDouble(): Double = randomValue
-      def nextInt(n: Int): Int = ???
-      def nextInt(): Int = ???
-      def nextLong(n: Long): Long = ???
-    }
-    new OffloadFilterAdmissionControl(params, mockFuturePool, stats, random)
+    new OffloadFilterAdmissionControl(params, mockFuturePool, stats)
   }
 
   test("doesn't reject initially") {
@@ -46,72 +61,52 @@ class OffloadFilterAdmissionControlTest extends FunSuite with OneInstancePerTest
 
   test("doesn't reject if the queue depth is always 0") {
     val ac = newAc(strictParams)
-    when(mockFuturePool.numPendingTasks).thenReturn(0l)
-    assert(ac.sample() == SlowSample)
-    assert(!ac.shouldReject)
+    (0 until 10).foreach { _ =>
+      assert(ac.sample() == SlowSample)
+      assert(mockFuturePool.numPendingTasks == 0l)
+      assert(!ac.shouldReject)
+    }
   }
 
-  test("rejects if we exceed the threshold") {
+  test("going into and out of rejection mode") {
     val ac = newAc(strictParams)
-    when(mockFuturePool.numPendingTasks).thenReturn(1l)
-    assert(ac.sample() == FastSample)
-    assert(ac.shouldReject)
-  }
 
-  test("doesnt reject if we exceed the threshold but haven't overflowed the window") {
-    val ac = newAc(strictParams.copy(windowSize = 2.milliseconds, failurePercentile = 0.51))
-    when(mockFuturePool.numPendingTasks).thenReturn(1l)
+    // Off some work to the queue to start things off.
+    val p = mockFuturePool { true }
+    assert(!ac.shouldReject)
+    assert(mockFuturePool.numPendingTasks == 1l)
+
+    // A single probe isn't enough to reject
     assert(ac.sample() == FastSample)
     assert(!ac.shouldReject)
+    assert(mockFuturePool.numPendingTasks == 2l)
 
+    // Now we're over the watermark
     assert(ac.sample() == FastSample)
     assert(ac.shouldReject)
-  }
+    assert(mockFuturePool.numPendingTasks == 3l)
 
-  test("recovery phase") {
-    val ac = newAc(strictParams.copy(windowSize = 2.milliseconds, failurePercentile = 0.51))
-    when(mockFuturePool.numPendingTasks).thenReturn(1l)
-    assert(ac.sample() == FastSample)
+    // Clear the simple task at the time but that doesn't stop the AC since we still have probes
+    assert(!p.isDefined)
+    mockFuturePool.runOne()
+    assert(p.isDefined)
+    assert(ac.shouldReject)
+    assert(mockFuturePool.numPendingTasks == 2l)
+
+    // Run one and then there is only one probe outstanding and thus no rejection
+    mockFuturePool.runOne()
     assert(!ac.shouldReject)
+    assert(mockFuturePool.numPendingTasks == 1l)
+
+    // back over the watermark with two probes
     assert(ac.sample() == FastSample)
     assert(ac.shouldReject)
+    assert(mockFuturePool.numPendingTasks == 2l)
 
-    when(mockFuturePool.numPendingTasks).thenReturn(0l)
-    assert(ac.sample() == FastSample)
-    assert(!ac.shouldReject)
-
-    // Back to healthy sample interval
+    // Clear the queue
+    mockFuturePool.runAll()
     assert(ac.sample() == SlowSample)
     assert(!ac.shouldReject)
-  }
-
-  test("can recover from an overflow window") {
-    val ac = newAc(strictParams.copy(windowSize = 3.milliseconds, failurePercentile = 0.51))
-    when(mockFuturePool.numPendingTasks).thenReturn(1l)
-
-    // fill up our window with failure
-    assert(ac.sample() == FastSample)
-    assert(ac.sample() == FastSample)
-    assert(ac.sample() == FastSample)
-
-    assert(ac.shouldReject)
-
-    // Enter recovery phase
-    when(mockFuturePool.numPendingTasks).thenReturn(0l)
-    assert(ac.sample() == FastSample)
-
-    // probability 1.0
-    assert(!ac.shouldReject)
-    // We should still not reject because our window says healthy
-    randomValue = 0.9
-    assert(ac.shouldReject)
-
-    // We should go back to a recovery sample rate and have a zero reject probability
-    assert(ac.sample() == FastSample)
-    randomValue = 0.0
-    assert(!ac.shouldReject)
-
-    // Should be fully in the clear
-    assert(ac.sample() == SlowSample)
+    assert(mockFuturePool.numPendingTasks == 0l)
   }
 }
