@@ -55,6 +55,9 @@ Breaking API Changes
 
 * finagle: Builds are now only supported for Scala 2.12+ ``PHAB_ID=D631091``
 
+* finagle-base-http: Kerberos jaas config `KerberosConfiguration` is replaced with ServerKerberosConfiguration
+  and ClientKerberosConfiguration concrete classes. ``PHAB_ID=D634270``
+
 * finagle-core: Changed flag `-com.twitter.finagle.loadbalancer.exp.apertureEagerConnections"
   from having Boolean values true or false to `EagerConnectionsType` values `Enable`,
   `Disable`, and `ForceWithDtab`. ``PHAB_ID=D613989``
@@ -62,9 +65,6 @@ Breaking API Changes
 * finagle-mysql: The constructor of `c.t.f.mysql.transport.MysqlBufReader` now takes an underlying
   `c.t.io.ByteReader`. Prior uses of the constructor, which took a `c.t.io.Buf`, should migrate to
   using `c.t.f.mysql.transport.MysqlBufReader.apply` instead. ``PHAB_ID=D622705``
-
-* finagle-base-http: Kerberos jaas config `KerberosConfiguration` is replaced with ServerKerberosConfiguration
-  and ClientKerberosConfiguration concrete classes.
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,6 +95,10 @@ Runtime Behavior Changes
   `com.twitter.finagle.loadbalancer.apertureEagerConnections` GlobalFlag to `Disable` for your process.
   (i.e. `-com.twitter.finagle.loadbalancer.apertureEagerConnections=Disable`).
   ``PHAB_ID=D625618``
+
+* finagle-partitioning: Add EndpointMarkedDeadException. Before this change, the exception being
+  thrown appeared as an anonymous class and it made deciphering it difficult when it came up in
+  stats. Create a concrete class and throw that. ``PHAB_ID=D640835``
 
 Deprecations
 ~~~~~~~~~~~~
