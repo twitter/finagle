@@ -22,6 +22,7 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
       val formattedName = formatName(schema.metricBuilder.name)
       logger.log(level, s"$formattedName add $value")
     }
+    def metadata: Metadata = schema.metricBuilder
   }
 
   def counter(schema: CounterSchema): Counter = new Counter {
@@ -31,13 +32,17 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
       val formattedName = formatName(schema.metricBuilder.name)
       logger.log(level, s"$formattedName incr $delta")
     }
+    def metadata: Metadata = schema.metricBuilder
   }
 
   override def addGauge(schema: GaugeSchema)(f: => Float): Gauge = {
     registerGauge(schema, f)
 
-    // dummy gauge to make type signature happy.
-    new Gauge { def remove(): Unit = () }
+    // placeholder gauge that just supplies metadata
+    new Gauge {
+      def remove(): Unit = ()
+      def metadata: Metadata = schema.metricBuilder
+    }
   }
 
   protected[this] def registerGauge(schema: GaugeSchema, f: => Float): Unit =

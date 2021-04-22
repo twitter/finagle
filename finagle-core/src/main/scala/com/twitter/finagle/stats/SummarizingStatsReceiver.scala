@@ -30,18 +30,23 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   def counter(schema: CounterSchema): Counter = new Counter {
     counters.putIfAbsent(schema.metricBuilder.name, new AtomicLong(0))
     def incr(delta: Long): Unit = counters.get(schema.metricBuilder.name).getAndAdd(delta)
+    def metadata: Metadata = schema.metricBuilder
   }
 
   def stat(schema: HistogramSchema): Stat = new Stat {
     def add(value: Float): Unit = SummarizingStatsReceiver.this.synchronized {
       stats.get(schema.metricBuilder.name) += value
     }
+    def metadata: Metadata = schema.metricBuilder
   }
 
   override def addGauge(schema: GaugeSchema)(f: => Float): Gauge =
     synchronized {
       _gauges += (schema.metricBuilder.name -> (() => f))
-      new Gauge { def remove(): Unit = () }
+      new Gauge {
+        def remove(): Unit = ()
+        def metadata: Metadata = schema.metricBuilder
+      }
     }
 
   protected[this] def registerGauge(schema: GaugeSchema, f: => Float): Unit =

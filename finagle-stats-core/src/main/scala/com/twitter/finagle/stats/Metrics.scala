@@ -54,13 +54,16 @@ object Metrics {
     metricBuilders = new ConcurrentHashMap[Int, MetricBuilder]()
   )
 
-  private class StoreCounterImpl(override val name: String) extends MetricsStore.StoreCounter {
+  private class StoreCounterImpl(override val name: String, _metadata: Metadata)
+      extends MetricsStore.StoreCounter {
     private[this] val adder = new LongAdder()
 
     val counter: Counter = new Counter {
       def incr(delta: Long): Unit = {
         adder.add(delta)
       }
+
+      def metadata: Metadata = _metadata
     }
 
     def count: Long = adder.sum()
@@ -71,7 +74,11 @@ object Metrics {
     override def read: Number = f
   }
 
-  private class StoreStatImpl(histo: MetricsHistogram, override val name: String, doLog: Boolean)
+  private class StoreStatImpl(
+    histo: MetricsHistogram,
+    override val name: String,
+    doLog: Boolean,
+    _metadata: Metadata)
       extends MetricsStore.StoreStat {
     def snapshot: Snapshot = histo.snapshot
 
@@ -82,6 +89,8 @@ object Metrics {
         val asLong = value.toLong
         histo.add(asLong)
       }
+
+      def metadata: Metadata = _metadata
     }
 
     def clear(): Unit = histo.clear()
@@ -167,7 +176,7 @@ private[finagle] class Metrics private (
     val curNameUsage = reservedNames.putIfAbsent(formatted, CounterRepr)
 
     if (curNameUsage == null || curNameUsage == CounterRepr) {
-      val next = new Metrics.StoreCounterImpl(formatted)
+      val next = new Metrics.StoreCounterImpl(formatted, schema.metricBuilder)
       val prev = countersMap.putIfAbsent(schema.metricBuilder.name, next)
 
       if (schema.metricBuilder.verbosity != Verbosity.Default)
@@ -214,7 +223,7 @@ private[finagle] class Metrics private (
         log.debug(s"$formatted's histogram implementation doesn't support details")
     }
 
-    val next = new Metrics.StoreStatImpl(histogram, formatted, doLog)
+    val next = new Metrics.StoreStatImpl(histogram, formatted, doLog, schema.metricBuilder)
     val prev = statsMap.putIfAbsent(schema.metricBuilder.name, next)
 
     if (schema.metricBuilder.verbosity != Verbosity.Default) {

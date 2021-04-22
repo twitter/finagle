@@ -246,6 +246,20 @@ class MetricsStatsReceiverTest extends FunSuite {
       assert(metrics2.schemas.containsKey("ccc"))
     }
 
+    test("StatsReceiver metrics expose the underlying schema" + suffix) {
+      val metrics = new Metrics()
+
+      val sr = new MetricsStatsReceiver(metrics)
+      val counter = addCounter(sr, Seq("aaa"))
+      assert(metrics.schemas.get("aaa").metricBuilder == counter.metadata)
+
+      val gauge = addGauge(sr, Seq("bbb"))(1f)
+      assert(metrics.schemas.get("bbb").metricBuilder == gauge.metadata)
+
+      val histo = addHisto(sr, Seq("ccc"))
+      assert(metrics.schemas.get("ccc").metricBuilder == histo.metadata)
+    }
+
     // scalafix:on StoreGaugesAsMemberVariables
   }
 
