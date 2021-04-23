@@ -28,11 +28,11 @@ trait StateMachine[E, R, S] {
 
   @volatile private[this] var currentState: S = _
 
-  def startState(s : S) {
+  def startState(s : S): Unit = {
     currentState = s
   }
 
-  def transition(t: SimpleTransition) {
+  def transition(t: SimpleTransition): Unit = {
     fullTransition(
       t.andThen {
         case (r, s) => (r.map(Response(_)), s)
@@ -40,7 +40,7 @@ trait StateMachine[E, R, S] {
     )
   }
 
-  def fullTransition(t: Transition) {
+  def fullTransition(t: Transition): Unit = {
     transitionFunction = transitionFunction orElse t
   }
 

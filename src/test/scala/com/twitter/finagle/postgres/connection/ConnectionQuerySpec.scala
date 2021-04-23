@@ -1,7 +1,7 @@
 package com.twitter.finagle.postgres.connection
 
 import com.twitter.concurrent.AsyncStream
-import com.twitter.finagle.postgres.{Row, Spec}
+import com.twitter.finagle.postgres.Spec
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Charsets
 import com.twitter.util.Await
@@ -18,7 +18,7 @@ class ConnectionQuerySpec extends Spec {
       val r@SelectResult(fields, rows) = connection.receive(ReadyForQuery('I')).get
 
       fields.length mustEqual 0
-      r.complete.isDone mustBe true
+      r.complete.isDefined mustBe true
       toList(rows) mustEqual List()
     }
 
@@ -73,7 +73,7 @@ class ConnectionQuerySpec extends Spec {
       connection.receive(ReadyForQuery('I'))
 
       assert(fields sameElements Array(Field("email", 0, 1043)))
-      r.complete.isDone mustBe true
+      r.complete.isDefined mustBe true
       toList(rows) must equal (List())
     }
 
@@ -92,7 +92,7 @@ class ConnectionQuerySpec extends Spec {
       connection.receive(ReadyForQuery('I'))
 
       fields must contain theSameElementsAs Array(Field("email", 0, 1043))
-      r.complete.isDone mustBe true
+      r.complete.isDefined mustBe true
       toList(rows) must equal (List(row1, row2))
     }
   }

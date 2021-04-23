@@ -88,7 +88,7 @@ class PostgresClientImpl(
     typeMap().map {
       tm =>
         tm.toIndexedSeq.map {
-          case (oid, PostgresClient.TypeSpecifier(receiveFn, typeName, elemOid)) => typeName -> oid
+          case (oid, PostgresClient.TypeSpecifier(_, typeName, _)) => typeName -> oid
         }.groupBy(_._1).mapValues(_.map(_._2).min)
     }
 

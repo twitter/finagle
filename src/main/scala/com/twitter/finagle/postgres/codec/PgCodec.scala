@@ -1,27 +1,19 @@
 package com.twitter.finagle.postgres.codec
 
-import java.net.{InetSocketAddress, SocketAddress}
-import java.nio.channels.ClosedChannelException
-
 import com.twitter.finagle._
-import com.twitter.finagle.postgres.ResultSet
 import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl, WrongStateForEvent}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
-import com.twitter.finagle.ssl.client.{ SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier }
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
 import com.twitter.logging.Logger
-import com.twitter.util.{ Future, Try }
-import javax.net.ssl.{SSLContext, SSLEngine, SSLSession, TrustManagerFactory}
-
+import com.twitter.util.{Future, Try}
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
 import io.netty.handler.codec.ByteToMessageDecoder
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory
-import io.netty.handler.ssl.{SslContext, SslHandler}
+import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent._
-import scala.collection.mutable
-
-import com.twitter.finagle.transport.Transport
+import java.net.InetSocketAddress
+import javax.net.ssl.SSLSession
 
 /*
  * Filter that converts exceptions into ServerErrors.
@@ -122,7 +114,7 @@ class AuthenticationProxy(
 class BackendMessageDecoder(val parser: BackendMessageParser) extends ChannelInboundHandlerAdapter {
   private val logger = Logger(getClass.getName)
 
-  override def channelRead(ctx: ChannelHandlerContext, message: AnyRef) {
+  override def channelRead(ctx: ChannelHandlerContext, message: AnyRef): Unit = {
     message match {
       case packet: Packet =>
         parser.parse(packet) match {
@@ -192,12 +184,12 @@ class PgClientChannelHandler(
     }
   }
 
-  override def channelInactive(ctx: ChannelHandlerContext) {
+  override def channelInactive(ctx: ChannelHandlerContext): Unit = {
     logger.ifDebug("Detected channel disconnected!")
     super.channelInactive(ctx)
   }
 
-  override def channelRead(ctx: ChannelHandlerContext, message: AnyRef) {
+  override def channelRead(ctx: ChannelHandlerContext, message: AnyRef): Unit = {
     message match {
       case SwitchToSsl =>
         logger.ifDebug("Got switchToSSL message; adding ssl handler into pipeline")
