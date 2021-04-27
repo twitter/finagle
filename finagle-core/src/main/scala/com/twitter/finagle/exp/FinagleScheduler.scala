@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp
 
-import com.twitter.app.GlobalFlag
+import com.twitter.app.{GlobalFlag, LoadService}
 import com.twitter.concurrent.{BridgedThreadPoolScheduler, LocalScheduler, Scheduler}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, Gauge, StatsReceiver}
 import com.twitter.finagle.util.DefaultLogger
@@ -12,10 +12,22 @@ object scheduler
     extends GlobalFlag[String](
       "local",
       "Which scheduler to use for futures " +
-        "<local> | <lifo> | <bridged>[:<num workers>] | <forkjoin>[:<num workers>]"
+        "<local> | <lifo> | <bridged>[:<num workers>] | <forkjoin>[:<num workers>] | " +
+        FinagleSchedulerService.all.map(_.paramsFormat).mkString(" | ")
     )
 
-private[finagle] object FinagleScheduler {
+trait FinagleSchedulerService {
+  def paramsFormat: String
+  def create(params: List[String]): Option[Scheduler]
+}
+
+object FinagleSchedulerService {
+  private[exp] lazy val all = LoadService[FinagleSchedulerService]
+}
+
+private[finagle] class BaseFinagleScheduler(
+  config: String,
+  loadServices: () => Seq[FinagleSchedulerService]) {
   private val log = DefaultLogger
 
   private[this] val gauges: mutable.Buffer[Gauge] = mutable.ArrayBuffer[Gauge]()
@@ -73,7 +85,7 @@ private[finagle] object FinagleScheduler {
   }
 
   def init(): Unit = {
-    scheduler().split(":").toList match {
+    config.split(":").toList match {
       case "bridged" :: Integer(numWorkers) :: Nil => switchToBridged(numWorkers)
       case "bridged" :: Nil => switchToBridged(numProcs().ceil.toInt)
 
@@ -85,10 +97,23 @@ private[finagle] object FinagleScheduler {
         Scheduler.setUnsafe(new LocalScheduler(true))
 
       case "local" :: Nil => // do nothing
-      case _ =>
-        throw new IllegalArgumentException("Wrong scheduler config: %s".format(scheduler()))
+
+      case params =>
+        loadServices().flatMap(_.create(params)) match {
+          case Seq() =>
+            throw new IllegalArgumentException("Wrong scheduler config: %s".format(scheduler()))
+          case Seq(scheduler) =>
+            log.info(s"Using service loaded scheduler $scheduler")
+            Scheduler.setUnsafe(scheduler)
+          case multiple =>
+            throw new IllegalArgumentException(
+              s"Multiple service loaded schedulers found: ${multiple.mkString(", ")}")
+        }
     }
 
     addGauges(Scheduler, DefaultStatsReceiver.scope("scheduler"), gauges)
   }
 }
+
+private[finagle] object FinagleScheduler
+    extends BaseFinagleScheduler(scheduler(), () => FinagleSchedulerService.all)

@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp
 
-import com.twitter.concurrent.LocalScheduler
+import com.twitter.concurrent.{LocalScheduler, Scheduler}
 import com.twitter.finagle.stats.{Gauge, InMemoryStatsReceiver}
 import org.scalatest.FunSuite
 import scala.collection.mutable
@@ -15,6 +15,35 @@ class FinagleSchedulerTest extends FunSuite {
     FinagleScheduler.addGauges(scheduler, stats, gauges)
     assert(2 == gauges.size)
     assert(2 == stats.gauges.size)
+  }
+
+  test("supports a service loaded scheduler") {
+    val scheduler = new LocalScheduler()
+    var params = List("a", "b")
+    val service = new FinagleSchedulerService {
+      def paramsFormat = ""
+      def create(p: List[String]) = {
+        assert(params == p)
+        Some(scheduler)
+      }
+    }
+    val prevScheduler = Scheduler()
+    try {
+      new BaseFinagleScheduler(params.mkString(":"), () => List(service)).init()
+      assert(Scheduler() == scheduler)
+    } finally {
+      Scheduler.setUnsafe(prevScheduler)
+    }
+  }
+
+  test("fails if there are multiple service loaded schedulers") {
+    def service = new FinagleSchedulerService {
+      def paramsFormat = ""
+      def create(p: List[String]) = Some(new LocalScheduler())
+    }
+    intercept[IllegalArgumentException] {
+      new BaseFinagleScheduler("", () => List(service, service)).init()
+    }
   }
 
 }
