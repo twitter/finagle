@@ -257,10 +257,10 @@ private[finagle] class Metrics private (
   }
 
   private[stats] def registerExpression(exprSchema: ExpressionSchema): Unit = {
-    val expressionId = exprSchema.labels.serviceName match {
+    val expressionId = (exprSchema.labels.serviceName match {
       case Some(serviceName) => exprSchema.name + "_" + serviceName
       case None => exprSchema.name
-    }
+    }) + exprSchema.namespaces.mkString("_")
     expressionSchemas.putIfAbsent(expressionId, exprSchema)
   }
 
