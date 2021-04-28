@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Contexts &#8212; Finagle 21.3.0 documentation</title>
+    <title>Contexts &#8212; Finagle 21.4.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -60,7 +60,7 @@
             
   <div class="section" id="contexts">
 <h1>Contexts<a class="headerlink" href="#contexts" title="Permalink to this headline">¶</a></h1>
-<p>Finagle uses <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/context/Contexts.scala">Contexts</a>, which give you something akin to Java’s <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html">ThreadLocals</a>
+<p>Finagle uses <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/context/Contexts.scala">Contexts</a>, which give you something akin to Java’s <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html">ThreadLocals</a>
 across <a class="reference internal" href="Futures.html"><span class="doc">asynchronous</span></a> code.
 They give you access to request-scoped state, such as a request’s deadline,
 throughout the logical life of a request without requiring them to be explicitly passed.

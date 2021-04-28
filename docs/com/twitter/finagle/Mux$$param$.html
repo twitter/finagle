@@ -296,25 +296,28 @@ on the size of messages they are willing to receive. The value is exchanged
 and applied during the mux handshake.
 </p></div></div>
     </li><li name="com.twitter.finagle.Mux.param.OppTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="OppTlsextendsProductwithSerializable"></a><a id="OppTls:OppTls"></a>
+      <a id="OppTls=com.twitter.finagle.param.OppTls"></a><a id="OppTls:OppTls"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$$param$$OppTls.html" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mux$$param$.html#OppTls=com.twitter.finagle.param.OppTls" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring if a client's TLS mode is opportunistic." href="Mux$$param$$OppTls.html"><span class="name">OppTls</span></a><span class="params">(<span name="level">level: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.mux.transport.OpportunisticTls.Level">Level</span>]</span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2021-03-11) Please use com.twitter.finagle.param.OppTls directly">OppTls</span><span class="result alias"> = <a href="param/OppTls.html" class="extype" name="com.twitter.finagle.param.OppTls">param.OppTls</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring if a client's TLS mode is opportunistic.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring if a client's TLS mode is opportunistic.
 If it's not None, then mux will negotiate with the supplied level whether
 to use TLS or not before setting up TLS.</p><p>If it's None, it will not attempt to negotiate whether to use TLS or not
 with the remote peer, and if TLS is configured, it will use mux over TLS.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>opportunistic TLS is not mutually intelligible with simple mux
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2021-03-11)</i> Please use com.twitter.finagle.param.OppTls directly</p></dd><dt>Note</dt><dd><span class="cmt"><p>opportunistic TLS is not mutually intelligible with simple mux
       over TLS</p></span></dd></dl></div>
     </li></ol>
             </div>
@@ -706,7 +709,15 @@ with the remote peer, and if TLS is configured, it will use mux over TLS.
       </span>
       
       
-    </li><li name="com.twitter.finagle.Mux.param.OppTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li>
+              </ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.Mux.param.OppTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="OppTls"></a><a id="OppTls:OppTls"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Mux$$param$$OppTls$.html" title="Permalink">
@@ -718,17 +729,15 @@ with the remote peer, and if TLS is configured, it will use mux over TLS.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Mux$$param$$OppTls$.html"><span class="name">OppTls</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Mux$$param$$OppTls$.html"><span class="name deprecated" title="Deprecated: (Since version 2021-03-11) Please use com.twitter.finagle.param.OppTls directly">OppTls</span></a>
       </span>
       
-      
-    </li>
-              </ol>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2021-03-11)</i> Please use com.twitter.finagle.param.OppTls directly</p></dd></dl></div>
+    </li></ol>
             </div>
-
-        
-
-        
         </div>
 
         <div id="inheritedMembers">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Configuration &#8212; Finagle 21.3.0 documentation</title>
+    <title>Configuration &#8212; Finagle 21.4.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -147,10 +147,10 @@ library and service owners which enables library owners to rollout functionality
 measured and controlled manner.</p>
 <div class="section" id="concepts">
 <h3>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h3>
-<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/Toggle.scala">Toggle</a> is a total
+<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/Toggle.scala">Toggle</a> is a total
 function from a type-<cite>Int</cite> to <cite>Boolean</cite>. These are used to decide whether a feature is
 enabled or not for a given request or service configuration.</p>
-<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ToggleMap.scala">ToggleMap</a> is
+<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ToggleMap.scala">ToggleMap</a> is
 a collection of <cite>Int</cite>-typed <cite>Toggles</cite>. It provides a means of getting a <cite>Toggle</cite>
 for a given an identifier as well as an <cite>Iterator</cite> over the metadata for its <cite>Toggles</cite>.
 Various basic implementations exist on the <cite>ToggleMap</cite> companion object.</p>
@@ -198,13 +198,13 @@ achieved by passing the <cite>Toggle</cite> into the constructor and then using 
 <h4>Library Owners<a class="headerlink" href="#library-owners" title="Permalink to this headline">¶</a></h4>
 <p>The base configuration for <cite>StandardToggles</cite> should be defined in a JSON
 configuration file at <cite>resources/com/twitter/toggles/configs/$libraryName.json</cite>.
-The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/JsonToggleMap.scala">JSON schema</a>
+The <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/JsonToggleMap.scala">JSON schema</a>
 allows for descriptions and comments.</p>
 <p>Dynamically changing the values across a cluster is specific to a particular deployment
 and can be wired in via a
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ServiceLoadedToggleMap.scala">service-loaded ToggleMap</a>.</p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ServiceLoadedToggleMap.scala">service-loaded ToggleMap</a>.</p>
 <p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>’s settings via
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/flag/overrides.scala">flag overrides</a>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/flag/overrides.scala">flag overrides</a>
 using:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.flag</span>
 
@@ -222,14 +222,14 @@ using:</p>
 This provides a quick way to try out a change in a limited fashion.</p>
 <p>For setting more permanent <cite>Toggle</cite> values, include a JSON configuration file at
 <cite>resources/com/twitter/toggles/configs/$libraryName-service.json</cite>.
-The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/JsonToggleMap.scala">JSON schema</a>
+The <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/JsonToggleMap.scala">JSON schema</a>
 allows for descriptions and comments.</p>
 <p>The JSON configuration also supports optional environment-specific overrides via
 files that are examined before the non-environment-specific configs.
 These environment-specific configs must be placed at
 <cite>resources/com/twitter/toggles/configs/$libraryName-service-$environment.json</cite>
 where the <cite>environment</cite> from
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>
 is used to determine which one to load.</p>
 </div>
 </div>
@@ -240,21 +240,21 @@ is used to determine which one to load.</p>
 parameters of clients and servers at runtime.</p>
 <div class="section" id="id2">
 <h3>Concepts<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>A <a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/Tunable.scala">Tunable</a> is like a <cite>Function0</cite>;
+<p>A <a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/Tunable.scala">Tunable</a> is like a <cite>Function0</cite>;
 it produces a value when applied. Dynamic configuration facilitates this value changing
 across invocations at runtime.</p>
 <p><cite>Tunables</cite> are accessed by means of a
-<a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>, which contains all the
+<a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>, which contains all the
 <cite>Tunables</cite> for a given id (ids are keys for distinguishing <cite>TunableMaps</cite>; each client might
 have a separate <cite>TunableMap</cite> that is used for configuration, and the id might be the client label).</p>
 </div>
 <div class="section" id="id3">
 <h3>Usage<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>Accessing the <cite>TunableMap</cite> for a given id is done via
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-tunable/src/main/scala/com/twitter/finagle/tunable/StandardTunableMap.scala">StandardTunableMap</a>,
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-tunable/src/main/scala/com/twitter/finagle/tunable/StandardTunableMap.scala">StandardTunableMap</a>,
 using <cite>StandardTunableMap.apply(“myId”)</cite>.
 The returned map composes in-memory, service-loaded configurations and local files.</p>
-<p>Here is an example of configuring the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a>
+<p>Here is an example of configuring the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a>
 on an HTTP client with a <cite>Tunable</cite>:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
 
@@ -287,7 +287,7 @@ be used. If the in-memory configuration is then set, those new values will be us
 <div class="section" id="in-memory">
 <h4>In-Memory<a class="headerlink" href="#in-memory" title="Permalink to this headline">¶</a></h4>
 <p>In-memory configuration is provided through a
-<a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>. The Tunable values used
+<a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>. The Tunable values used
 by a given instance can be modified using TwitterServer’s <cite>/admin/tunables</cite>
 <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-tunables">API endpoint</a>.</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">map</span> <span class="k">=</span> <span class="nc">TunableMap</span><span class="o">.</span><span class="n">newMutable</span><span class="o">(</span><span class="n">source</span><span class="o">)</span>
@@ -297,7 +297,7 @@ by a given instance can be modified using TwitterServer’s <cite>/admin/tunable
 <div class="section" id="file-based">
 <h4>File-Based<a class="headerlink" href="#file-based" title="Permalink to this headline">¶</a></h4>
 <p>File-based configurations are defined in JSON files with the format specified in
-<a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/JsonTunableMapper.scala">JsonTunableMapper</a>.</p>
+<a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/JsonTunableMapper.scala">JsonTunableMapper</a>.</p>
 <p>Per-environment and per-instance configurations are supported. Configurations for a given id are
 composed from files located at <cite>resources/com/twitter/tunables/</cite>
 (ensure that the <cite>resources</cite> directory is properly packaged with your application) in the following
@@ -309,14 +309,14 @@ order:</p>
 <li>$id/instances.json</li>
 </ol>
 <p>Where $env and $instance are the environment and instance id given by
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>.</p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>.</p>
 </div>
 <div class="section" id="service-loaded">
 <h4>Service-Loaded<a class="headerlink" href="#service-loaded" title="Permalink to this headline">¶</a></h4>
 <p>A service-loaded <cite>TunableMap</cite> is loaded through
-<a class="reference external" href="https://github.com/twitter/util/blob/master/util-app/src/main/scala/com/twitter/app/LoadService.scala">LoadService</a>. For a given id,
+<a class="reference external" href="https://github.com/twitter/util/blob/release/util-app/src/main/scala/com/twitter/app/LoadService.scala">LoadService</a>. For a given id,
 <cite>StandardTunableMap</cite> uses <cite>LoadService</cite> to get a
-<a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/ServiceLoadedTunableMap.scala">ServiceLoadedTunableMap</a>
+<a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/ServiceLoadedTunableMap.scala">ServiceLoadedTunableMap</a>
 with a matching id.</p>
 </div>
 </div>

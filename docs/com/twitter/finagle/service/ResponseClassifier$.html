@@ -444,6 +444,29 @@ as such this treats all <code>Return</code> responses as <a href="ResponseClass$
 all retryable <code>Throws</code> as <a href="ResponseClass$.html#RetryableFailure:com.twitter.finagle.service.ResponseClass.Failed" class="extmbr" name="com.twitter.finagle.service.ResponseClass#RetryableFailure">ResponseClass.RetryableFailure</a>
 and all <code>Throws</code> as <a href="ResponseClass$.html#NonRetryableFailure:com.twitter.finagle.service.ResponseClass.Failed" class="extmbr" name="com.twitter.finagle.service.ResponseClass#NonRetryableFailure">ResponseClass.NonRetryableFailure</a>.</p><p>It is a total function covering the entire input domain and as
 such it is recommended that it is used with user's classifiers:</p><pre>theirClassifier.applyOrElse(theirReqRep, ResponseClassifier.Default)</pre></div></div>
+    </li><li name="com.twitter.finagle.service.ResponseClassifier#IgnoreIRTEs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IgnoreIRTEs:com.twitter.finagle.service.ResponseClassifier"></a><a id="IgnoreIRTEs:ResponseClassifier"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/ResponseClassifier$.html#IgnoreIRTEs:com.twitter.finagle.service.ResponseClassifier" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">IgnoreIRTEs</span><span class="result">: <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The <code>IgnoreIRTEs</code> <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> matches <code>Default</code> in all aspects except for
+how it handles <a href="../IndividualRequestTimeoutException.html" class="extype" name="com.twitter.finagle.IndividualRequestTimeoutException">IndividualRequestTimeoutException</a>s specifically.</p><div class="fullcomment"><div class="comment cmt"><p>The <code>IgnoreIRTEs</code> <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> matches <code>Default</code> in all aspects except for
+how it handles <a href="../IndividualRequestTimeoutException.html" class="extype" name="com.twitter.finagle.IndividualRequestTimeoutException">IndividualRequestTimeoutException</a>s specifically. For <code>IRTEs</code>, this
+<a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> considers them to be <a href="ResponseClass$.html#Ignored:com.twitter.finagle.service.ResponseClass" class="extmbr" name="com.twitter.finagle.service.ResponseClass#Ignored">ResponseClass.Ignored</a>.</p><p>This <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> is useful for when a particular Finagle client has a very low
+<code>RequestTimeout</code> set, such that receiving a response within that window is seen as fortuitous,
+and that not receiving a response within that window is not seen as problematic. In this case,
+the timed out request is treated as ignorable, and should not be seen as or counted as a failure.
+</p></div></div>
     </li><li name="com.twitter.finagle.service.ResponseClassifier#RetryOnChannelClosed" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RetryOnChannelClosed:com.twitter.finagle.service.ResponseClassifier"></a><a id="RetryOnChannelClosed:ResponseClassifier"></a>
       <span class="permalink">

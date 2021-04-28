@@ -632,6 +632,10 @@ use.</p><p> Flag          Value     Meaning
                         <a href="ExecuteRequest.html" title="Uses the binary protocol to build an execute request for a prepared statement.">ExecuteRequest</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="FailedToEncryptPasswordException.html" title="The exception that is thrown if something goes awry during the encryption process."></a>
+                        <a href="FailedToEncryptPasswordException.html" title="The exception that is thrown if something goes awry during the encryption process.">FailedToEncryptPasswordException</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="FetchRequest.html" title=""></a>
                         <a href="FetchRequest.html" title="">FetchRequest</a>
                       </li><li class="current-entities indented4">
@@ -666,6 +670,10 @@ use.</p><p> Flag          Value     Meaning
                         <span class="separator"></span>
                         <a class="object" href="IncompatibleVersion$.html" title="Indicates that the server to which the client is connected is running a version of MySQL that the client is incompatible with."></a>
                         <a href="IncompatibleVersion$.html" title="Indicates that the server to which the client is connected is running a version of MySQL that the client is incompatible with.">IncompatibleVersion</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="InsufficientServerCapabilitiesException.html" title="Indicates that the server lacks required capabilities"></a>
+                        <a href="InsufficientServerCapabilitiesException.html" title="Indicates that the server lacks required capabilities">InsufficientServerCapabilitiesException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="IntValue.html" title=""></a>
@@ -1583,6 +1591,25 @@ a prepared statement.</p><div class="fullcomment"><div class="comment cmt"><p>Us
 a prepared statement.
 <a href="https://dev.mysql.com/doc/internals/en/com-stmt-execute.html" target="_blank">https://dev.mysql.com/doc/internals/en/com-stmt-execute.html</a>
 </p></div></div>
+    </li><li name="com.twitter.finagle.mysql.FailedToEncryptPasswordException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FailedToEncryptPasswordExceptionextendsExceptionwithFailureFlags[com.twitter.finagle.mysql.FailedToEncryptPasswordException]"></a><a id="FailedToEncryptPasswordException:FailedToEncryptPasswordException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/FailedToEncryptPasswordException.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The exception that is thrown if something goes awry during the encryption process." href="FailedToEncryptPasswordException.html"><span class="name">FailedToEncryptPasswordException</span></a><span class="result"> extends <a href="../../../../scala/index.html#Exception=Exception" class="extmbr" name="scala.Exception">Exception</a> with <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="FailedToEncryptPasswordException.html" class="extype" name="com.twitter.finagle.mysql.FailedToEncryptPasswordException">FailedToEncryptPasswordException</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The exception that is thrown if something goes awry during the encryption process.</p><div class="fullcomment"><div class="comment cmt"><p>The exception that is thrown if something goes awry during the encryption process.
+This exception has the <a href="../FailureFlags$.html#NonRetryable:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#NonRetryable">FailureFlags.NonRetryable</a> flag because this error is
+thrown only in cases when the client is incorrectly configured.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.FetchRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FetchRequestextendsCommandRequest"></a><a id="FetchRequest:FetchRequest"></a>
       <span class="permalink">
@@ -1680,6 +1707,23 @@ a prepared statement.
       
       <p class="shortcomment cmt">A base class for exceptions related to client incompatibility with an
 upstream MySQL server.</p>
+    </li><li name="com.twitter.finagle.mysql.InsufficientServerCapabilitiesException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InsufficientServerCapabilitiesExceptionextendsSQLNonTransientExceptionwithFailureFlags[com.twitter.finagle.mysql.InsufficientServerCapabilitiesException]"></a><a id="InsufficientServerCapabilitiesException:InsufficientServerCapabilitiesException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/InsufficientServerCapabilitiesException.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Indicates that the server lacks required capabilities" href="InsufficientServerCapabilitiesException.html"><span class="name">InsufficientServerCapabilitiesException</span></a><span class="result"> extends <span class="extype" name="java.sql.SQLNonTransientException">SQLNonTransientException</span> with <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="InsufficientServerCapabilitiesException.html" class="extype" name="com.twitter.finagle.mysql.InsufficientServerCapabilitiesException">InsufficientServerCapabilitiesException</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Indicates that the server lacks required capabilities
+</p>
     </li><li name="com.twitter.finagle.mysql.IntValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IntValueextendsValuewithProductwithSerializable"></a><a id="IntValue:IntValue"></a>
       <span class="permalink">

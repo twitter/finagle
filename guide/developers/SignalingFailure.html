@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Signaling Failure within Finagle &#8212; Finagle 21.3.0 documentation</title>
+    <title>Signaling Failure within Finagle &#8212; Finagle 21.4.0 documentation</title>
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -68,7 +68,7 @@ the <a class="reference internal" href="../UnsuccessfulResponses.html"><span cla
 <div class="section" id="history">
 <h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
 <p>Historically, Finagle relied exclusively on a hierarchy of classes of exceptions
-defined in <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">Exceptions.scala</a>, with
+defined in <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">Exceptions.scala</a>, with
 each exception corresponding to a specific problem. Pattern matching on
 the exception type was used to classify the exceptions and make decisions about
 how to handle them. As the number of exceptions grew, pattern matching became
@@ -79,7 +79,7 @@ process boundaries.</p>
 <p>However, when fleshing out Finagle’s back pressure strategy, it became useful
 for exceptions other than just <cite>Failure</cite> to also be able to be flagged with
 various attributes that propagate across service boundaries. In order to
-accomplish this, the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/FailureFlags.scala">FailureFlags</a>
+accomplish this, the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/FailureFlags.scala">FailureFlags</a>
 trait was introduced. <cite>FailureFlags</cite> can be applied to any <cite>Throwable</cite>, which
 simplifies the migration strategy as the type of <cite>Throwable</cite> no longer has to
 change.</p>
@@ -92,7 +92,7 @@ building <cite>FailureFlag</cite>-style exceptions, but should not be used for i
 <p>Any new module should ensure that the exceptions it creates have <cite>FailureFlags</cite>.
 This can be done by creating a new class that extends <cite>FailureFlags</cite> or by using
 convenience methods in
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure.scala</a>.</p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure.scala</a>.</p>
 <p><strong>If the class name of the exception is helpful to users</strong> use a custom
 exception class that extends <cite>FailureFlags</cite>. The class name will show up in logs
 and stats. This is preferred.</p>
@@ -129,7 +129,7 @@ flagging and unflagging make copies. Use these methods to modify flags.</p>
 </div>
 <div class="section" id="failureflags-and-failures-outside-of-finagle">
 <h2>FailureFlags and Failures outside of Finagle<a class="headerlink" href="#failureflags-and-failures-outside-of-finagle" title="Permalink to this headline">¶</a></h2>
-<p>In a typically-configured client, the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">ProcessFailures</a> filter will unwrap (See <cite>Failure#unwrap</cite>)
+<p>In a typically-configured client, the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">ProcessFailures</a> filter will unwrap (See <cite>Failure#unwrap</cite>)
 Failures and mask out <cite>FailureFlags</cite> that are unsafe to pass along to users.</p>
 <p>Unwrapping a <cite>Failure</cite> will transform the <cite>Failure</cite> into whatever Throwable it
 had wrapped, discarding any additional information carried by the <cite>Failure</cite>. The
@@ -149,7 +149,7 @@ transformed along the way.</p>
 <div class="section" id="thriftmux">
 <h3>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h3>
 <p>ThriftMux will currently pass the following <cite>FailureFlags</cite>: <cite>Rejected</cite>,
-<cite>Retryable</cite>, <cite>NonRetryable</cite>. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/com/twitter/finagle/mux/transport/MuxFailure.scala">MuxFailure.scala</a>.</p>
+<cite>Retryable</cite>, <cite>NonRetryable</cite>. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-mux/src/main/scala/com/twitter/finagle/mux/transport/MuxFailure.scala">MuxFailure.scala</a>.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="20%" />
@@ -203,7 +203,7 @@ the future.</p>
 <p>Http will pass the flag <cite>Rejected</cite> (a retryable nack) or a combination of <cite>Rejected</cite>
 and <cite>NonRetryable</cite> (a nonretryable nack) via headers. HTTP will completely discard
 any information (stack trace, message, etc) except for the flags. See
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="25%" />

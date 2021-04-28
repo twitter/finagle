@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Protocols &#8212; Finagle 21.3.0 documentation</title>
+    <title>Protocols &#8212; Finagle 21.4.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -213,7 +213,7 @@ Finagle currently has an implementation of the Thrift protocol on top of Mux,
 available in the <cite>finagle-thriftmux</cite> package.</p>
 <p>Much of the future work on Finagle will involve improvements to Mux and feature
 development targeting services that support it. The wire format and semantics of
-the Mux protocol are documented in <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/com/twitter/finagle/mux/package.scala">its source
+the Mux protocol are documented in <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-mux/src/main/scala/com/twitter/finagle/mux/package.scala">its source
 code</a>.</p>
 <p><strong>Why is RPC multiplexing important?</strong></p>
 <p>Some important consequences of multiplexing at the RPC level:</p>
@@ -303,7 +303,7 @@ implement the above <cite>processRow</cite> as a pattern match on expected value
 <p>Note that <cite>select</cite> takes care of checking out the service and returning it to the pool. <cite>select</cite> and
 other useful methods are available on <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Client">mysql.Client</a> which is returned
 from the call to <cite>newRichClient</cite>.</p>
-<p>For a more involved example see the Finagle <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala">example project</a>.</p>
+<p>For a more involved example see the Finagle <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala">example project</a>.</p>
 </div>
 <div class="section" id="http">
 <h2>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
@@ -312,19 +312,19 @@ from the call to <cite>newRichClient</cite>.</p>
 <p>Finagle sets certain request/response headers to transmit additional metadata.</p>
 <dl class="docutils">
 <dt><cite>Finagle-Ctx-com.twitter.finagle.Retries</cite></dt>
-<dd>The number of times this request has been retried. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></dd>
+<dd>The number of times this request has been retried. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></dd>
 <dt><cite>Finagle-Ctx-com.twitter.finagle.Deadline</cite></dt>
-<dd>The time by which this request must be satisfied. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></dd>
+<dd>The time by which this request must be satisfied. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></dd>
 <dt><cite>dtab-local</cite></dt>
 <dd><p class="first">A list of dtab overrides for this request. Note: if your server accepts requests from untrusted clients, you may want to restrict this header to
 only trusted clients. This would prevent bad actors from redirecting requests to possibly unsafe locations. You can disable this behavior by
 removing the ServerDtabContextFilter from the server stack, or by adding your own module which removes these headers from untrusted requests.</p>
-<p class="last">See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpDtab.scala">HttpDtab.scala</a> and <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a>.</p>
+<p class="last">See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpDtab.scala">HttpDtab.scala</a> and <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a>.</p>
 </dd>
 <dt><cite>finagle-http-nack</cite></dt>
-<dd>Makes finagle treat this reply as a retryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
+<dd>Makes finagle treat this reply as a retryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
 <dt><cite>finagle-http-nonretryable-nack</cite></dt>
-<dd>Makes finagle treat this reply as a nonretryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
+<dd>Makes finagle treat this reply as a nonretryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
 </dl>
 </div>
 </div>

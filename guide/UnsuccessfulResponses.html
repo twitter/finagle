@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Unsuccessful Responses &#8212; Finagle 21.3.0 documentation</title>
+    <title>Unsuccessful Responses &#8212; Finagle 21.4.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -68,7 +68,7 @@ Finagle aims to help services gracefully degrade whenever possible.</p>
 <p>It is important to understand that there are many ways a service can respond to
 a request unsuccessfully. Some, but not all of those responses may be due to
 exceptional cases. In Finagle, each response is represented as a
-<a class="reference external" href="https://github.com/twitter/util/blob/master/util-core/src/main/scala/com/twitter/util/Future.scala">Future</a> which may be satisfied
+<a class="reference external" href="https://github.com/twitter/util/blob/release/util-core/src/main/scala/com/twitter/util/Future.scala">Future</a> which may be satisfied
 with either a <cite>Return</cite> or <cite>Throw</cite>. From a user’s point of view, either case could be
 considered successful or not, even though considering a <cite>Throw</cite> result as a
 successful response is an anti-pattern.</p>
@@ -86,14 +86,14 @@ responses and how Finagle deals with them.</p>
 They fall into the following categories.</p>
 <dl class="docutils">
 <dt><strong>Throwables with FailureFlags</strong></dt>
-<dd><a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/FailureFlags.scala">FailureFlags</a> allow for
+<dd><a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/FailureFlags.scala">FailureFlags</a> allow for
 signaling about how to handle the response. Some <cite>FailureFlags</cite> are propagated
 across service boundaries over ThriftMux and Http. See <a class="reference internal" href="#failure-flags">Failure Flags</a> below.</dd>
 <dt><strong>Throwables with Sources</strong></dt>
 <dd><p class="first">Sources contain additional information about what was happening when the
 exception was encountered. A throwable may have both Sources and FailureFlags.</p>
 <ul class="last simple">
-<li>Note: <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">com.twitter.finagle.Failures</a>,
+<li>Note: <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">com.twitter.finagle.Failures</a>,
 which can sometimes be seen in logs, are un-named exceptions which can contain
 both sources and FailureFlags. Failures lack specificity of named exceptions.</li>
 </ul>
@@ -101,7 +101,7 @@ both sources and FailureFlags. Failures lack specificity of named exceptions.</l
 <dt><strong>Finagle Exceptions</strong></dt>
 <dd>Internally, Finagle has exceptions for many different
 occasions. Many of these can be found in
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">Exceptions.scala</a>. Occasionally,
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">Exceptions.scala</a>. Occasionally,
 these will be defined elsewhere, such as in a relevant module. These exceptions
 cover common cases that Finagle may encounter when servicing a request, such as
 <cite>ConnectionRefusedException</cite> when a connection to a given address is refused,
@@ -167,7 +167,7 @@ allowing for additional composition.</p>
 <p>A service that wishes to tap into Finagle’s client-side exception handling
 mechanisms should respond with a <cite>Throwable</cite> that extends <cite>FailureFlags</cite> with
 flags set appropriately. An easy way to create a generic unnamed response like
-this is by using the convenience methods in <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure.scala</a></p>
+this is by using the convenience methods in <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure.scala</a></p>
 <p>In a situation where a service would normally be able to process a request but
 is temporarily overloaded, a <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nack</span></a> response is appropriate.
 The client receiving this will automatically retry the request via the <cite>Retries</cite>

@@ -643,6 +643,10 @@ finagle clients and servers.
                         <a class="class" href="Monitor.html" title="A class eligible for configuring a com.twitter.util.Monitor throughout finagle servers and clients."></a>
                         <a href="Monitor.html" title="A class eligible for configuring a com.twitter.util.Monitor throughout finagle servers and clients.">Monitor</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="OppTls$.html" title=""></a>
+                        <a class="class" href="OppTls.html" title="A class eligible for configuring if a client's TLS mode is opportunistic."></a>
+                        <a href="OppTls.html" title="A class eligible for configuring if a client's TLS mode is opportunistic.">OppTls</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="ProtocolLibrary$.html" title=""></a>
                         <a class="class" href="ProtocolLibrary.html" title="A class eligible for configuring a client library name used to identify which client library a client is using."></a>
                         <a href="ProtocolLibrary.html" title="A class eligible for configuring a client library name used to identify which client library a client is using.">ProtocolLibrary</a>
@@ -1340,6 +1344,27 @@ used throughout finagle clients and servers.</p>
       
       <p class="shortcomment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">com.twitter.util.Monitor</a>
 throughout finagle servers and clients.</p>
+    </li><li name="com.twitter.finagle.param.OppTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="OppTlsextendsProductwithSerializable"></a><a id="OppTls:OppTls"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/OppTls.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A class eligible for configuring if a client's TLS mode is opportunistic." href="OppTls.html"><span class="name">OppTls</span></a><span class="params">(<span name="level">level: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="../ssl/OpportunisticTls$$Level.html" class="extype" name="com.twitter.finagle.ssl.OpportunisticTls.Level">Level</a>]</span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A class eligible for configuring if a client's TLS mode is opportunistic.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring if a client's TLS mode is opportunistic.
+If it's not None, then the client will negotiate with the supplied level whether
+to use TLS or not before setting up TLS.</p><p>If it's None, it will not attempt to negotiate whether to use TLS or not
+with the remote peer, and if TLS is configured, the client will communicate over TLS.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This param will have no effect if the client's protocol does not support
+      <span class="extype" name="OpportunisticTls">OpportunisticTls</span>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.ProtocolLibrary" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ProtocolLibraryextendsProductwithSerializable"></a><a id="ProtocolLibrary:ProtocolLibrary"></a>
       <span class="permalink">
@@ -1837,6 +1862,22 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
       </span>
       <span class="symbol">
         <a title="" href="Monitor$.html"><span class="name">Monitor</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.param.OppTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OppTls"></a><a id="OppTls:OppTls"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/OppTls$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="OppTls$.html"><span class="name">OppTls</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

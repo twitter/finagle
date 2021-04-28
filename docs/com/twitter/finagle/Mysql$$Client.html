@@ -1352,6 +1352,24 @@ defined in <code>DefaultMonitor</code>.</p><pre><span class="kw">import</span> c
 $.withMonitor(consoleMonitor)</pre><p>Returning <code>true</code> form within a monitor effectively terminates the monitor chain so no
 exceptions are propagated down to the next monitor.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Mysql.Client#withNoOpportunisticTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withNoOpportunisticTls:com.twitter.finagle.Mysql.Client"></a><a id="withNoOpportunisticTls:Client"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#withNoOpportunisticTls:com.twitter.finagle.Mysql.Client" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withNoOpportunisticTls</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Disables opportunistic TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Disables opportunistic TLS.</p><p>If the client is still TLS configured, it will speak with the server over TLS. To instead
+configure this to be <code>Off</code>, use <code>withOpportunisticTls(OpportunisticTls.Off)</code>.
+</p></div></div>
     </li><li name="com.twitter.finagle.Mysql.Client#withNoRollback" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withNoRollback:com.twitter.finagle.Mysql.Client"></a><a id="withNoRollback:Client"></a>
       <span class="permalink">
@@ -1373,6 +1391,27 @@ service is put back into the pool. This <i>may</i> result in better performance
 at the risk of receiving a connection from the pool with uncommitted state.</p><p>Instead of disabling this feature, consider configuring the connection pool
 for the client (via <code>withSessionPool</code>) to offer more available connections.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>the rollback module is installed by default.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="mysql/RollbackFactory.html" class="extype" name="com.twitter.finagle.mysql.RollbackFactory">com.twitter.finagle.mysql.RollbackFactory</a></p></span><span class="cmt"><p>https://dev.mysql.com/doc/en/implicit-commit.html</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.Mysql.Client#withOpportunisticTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withOpportunisticTls(level:com.twitter.finagle.ssl.OpportunisticTls.Level):com.twitter.finagle.Mysql.Client"></a><a id="withOpportunisticTls(Level):Client"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#withOpportunisticTls(level:com.twitter.finagle.ssl.OpportunisticTls.Level):com.twitter.finagle.Mysql.Client" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withOpportunisticTls</span><span class="params">(<span name="level">level: <a href="ssl/OpportunisticTls$$Level.html" class="extype" name="com.twitter.finagle.ssl.OpportunisticTls.Level">Level</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the client whether to speak TLS or not.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the client whether to speak TLS or not.</p><p>By default, don't use opportunistic TLS, and instead always speak TLS
+if TLS has been configured.</p><p>The valid levels are Off, which indicates this will never speak TLS,
+Desired, which indicates it may speak TLS, but may also not speak TLS,
+and Required, which indicates it must speak TLS.</p><p>Clients configured with level <code>Required</code> cannot speak to MySQL servers where
+TLS is switched off.
+</p></div></div>
     </li><li name="com.twitter.finagle.client.EndpointerStackClient#withParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withParams(params:com.twitter.finagle.Stack.Params):This"></a><a id="withParams(Params):Client"></a>
       <span class="permalink">

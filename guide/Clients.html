@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Clients &#8212; Finagle 21.3.0 documentation</title>
+    <title>Clients &#8212; Finagle 21.4.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -60,7 +60,7 @@
             
   <div class="section" id="clients">
 <span id="finagle-clients"></span><h1>Clients<a class="headerlink" href="#clients" title="Permalink to this headline">¶</a></h1>
-<p>Finagle clients adheres to a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Client.scala">interface</a> for
+<p>Finagle clients adheres to a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Client.scala">interface</a> for
 construction. The following API supports the creation of both stateful and stateless clients.
 You want a stateful client if you require requests and response sequences over the same connection.
 The following illustrates the difference.</p>
@@ -131,7 +131,7 @@ servers (e.g. HTTP, SOCKS5).</p>
 <div class="section" id="transport-security">
 <h2>Transport Security<a class="headerlink" href="#transport-security" title="Permalink to this headline">¶</a></h2>
 <p>Finagle has robust support for TLS. The most common options such as server validation are accessible
-directly via the <cite>tls</cite> members of <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/param/ClientTransportParams.scala">ClientTransportParams</a>
+directly via the <cite>tls</cite> members of <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/param/ClientTransportParams.scala">ClientTransportParams</a>
 as follows:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
@@ -141,7 +141,7 @@ as follows:</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com:443&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>There are further configuration options including client authentication accessible via <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/param/ClientTransportParams.scala">ClientTransportParams</a>.</p>
+<p>There are further configuration options including client authentication accessible via <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/param/ClientTransportParams.scala">ClientTransportParams</a>.</p>
 <p>Finagle also supports <a class="reference external" href="https://en.wikipedia.org/wiki/SPNEGO">SPNEGO</a> which is an HTTP specific
 extension for negotiating security schemes. A common use case for SPNEGO is for authentication in <a class="reference external" href="https://en.wikipedia.org/wiki/Kerberos_(protocol)">Kerberos</a>
 secured environments.</p>
@@ -386,10 +386,10 @@ this is how failure management modules mark entire endpoints as unavailable.</p>
 <h3>Observability<a class="headerlink" href="#observability" title="Permalink to this headline">¶</a></h3>
 <p>The <cite>Observe</cite>, <cite>Monitor</cite>, and <cite>Trace</cite> modules export useful information about the internals and
 behavior of a Finagle client. Client metrics are exported using a
-<a class="reference external" href="https://github.com/twitter/util/blob/master/util-stats/src/main/scala/com/twitter/finagle/stats/StatsReceiver.scala">StatsReceiver</a>
+<a class="reference external" href="https://github.com/twitter/util/blob/release/util-stats/src/main/scala/com/twitter/finagle/stats/StatsReceiver.scala">StatsReceiver</a>
 (see the <a class="reference internal" href="Metrics.html#public-stats"><span class="std std-ref">metrics</span></a> section for more details about specific metric values).</p>
 <p>Unhandled exceptions can be handled by installing a custom
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">MonitorFilter</a> or overriding the default monitor
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">MonitorFilter</a> or overriding the default monitor
 instance. The default setting for <code class="docutils literal notranslate"><span class="pre">MonitorFilter</span></code> is to log all the unhandled exception onto standard
 output. To override this, use the following sample.</p>
 <div class="highlight-scala notranslate" id="configuring-monitors"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
@@ -430,7 +430,7 @@ bytes were written to the wire and protocol level NACKs) will be automatically r
 These retries come out of a <code class="docutils literal notranslate"><span class="pre">RetryBudget</span></code> that allows for approximately 20% of the total requests
 to be retried on top of 10 retries per second in order to accommodate clients that have just started
 issuing requests or clients that have a low rate of requests per second.</p>
-<p>Some failures may also be known as unsafe to retry. If a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a>
+<p>Some failures may also be known as unsafe to retry. If a <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a>
 is flagged <code class="docutils literal notranslate"><span class="pre">NonRetryable</span></code>, the <cite>Retries</cite> module will not make any attempts to retry the request and
 pass along the failure as is. A <cite>NonRetryable</cite> failure may be used in situations where a client
 determines that a service is unhealthy and wishes to signal that the normal pattern of retries should
@@ -476,9 +476,9 @@ construct a new instance of <code class="docutils literal notranslate"><span cla
 <li><cite>minRetriesPerSec</cite> - the minimum rate of retries allowed</li>
 <li><cite>percentCanRetry</cite> - the percentage of requests that might be retried</li>
 </ol>
-<p>While the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a> (configured via <code class="docutils literal notranslate"><span class="pre">Retries</span></code>)
+<p>While the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a> (configured via <code class="docutils literal notranslate"><span class="pre">Retries</span></code>)
 is inserted into every client’s stack by default so all the failures from the underlying modules will be
-retried, the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RetryFilter.scala">RetryFilter</a> handling application level
+retried, the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/RetryFilter.scala">RetryFilter</a> handling application level
 exceptions from the remote server should be applied explicitly.</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
@@ -532,7 +532,7 @@ of maximum attempts</li>
 <p>The <cite>Session Timeout</cite> module defines a timeout for session acquisition. That is, it defines
 the maximum time allotted to a request to wait for an available service/session. Requests
 that exceed this timeout are failed with a <code class="docutils literal notranslate"><span class="pre">ServiceTimeoutException</span></code>. This module is
-implemented by the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/factory/TimeoutFactory.scala">TimeoutFactory</a></p>
+implemented by the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/factory/TimeoutFactory.scala">TimeoutFactory</a></p>
 <p>The default timeout value for the <cite>Session Timeout</cite> module is unbounded (i.e., <code class="docutils literal notranslate"><span class="pre">Duration.Top</span></code>),
 which simply means it’s disabled. Although, it’s possible to override the default setting with
 stack params <a class="footnote-reference" href="#example" id="id7">[3]</a>.</p>
@@ -547,7 +547,7 @@ stack params <a class="footnote-reference" href="#example" id="id7">[3]</a>.</p>
 <p>See <a class="reference internal" href="Metrics.html#service-factory-failures"><span class="std std-ref">Service Latency metrics</span></a> for more details.</p>
 <p>The <cite>Request Timeout</cite> module is a filter and thus gives an upper bound on the amount of
 time allowed for a request to be outstanding. An important implementation detail of the
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a> is that it attempts
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a> is that it attempts
 to cancel the request when a timeout is triggered. With most protocols, if the request has
 already been dispatched, the only way to cancel the request is to terminate the connection.
 Note that HTTP/2 and Mux both have first-class support for request cancellation without
@@ -574,7 +574,7 @@ support streaming (such as with HTTP).</p>
 </div>
 <p>The <cite>Expiration</cite> module is attached at the connection level and expires a service/session
 after a certain amount of time. The module is implemented by
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p>The default setting for the <cite>Expiration</cite> module is to never expire a session. Here is how
 it can be configured <a class="footnote-reference" href="#example" id="id9">[3]</a>.</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
@@ -602,7 +602,7 @@ which a session is considered alive.</p>
 <h3>Request Draining<a class="headerlink" href="#request-draining" title="Permalink to this headline">¶</a></h3>
 <p>The <cite>RequestDraining</cite> module guarantees that the client delays closure until all
 outstanding requests have been completed. It wraps each produced <cite>Service</cite> with
-a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RefcountedService.scala">RefCountedService</a>.</p>
+a <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/RefcountedService.scala">RefCountedService</a>.</p>
 </div>
 <div class="section" id="load-balancing">
 <h3>Load Balancing<a class="headerlink" href="#load-balancing" title="Permalink to this headline">¶</a></h3>
@@ -621,7 +621,7 @@ for more details.</p>
 <p>There are plenty of useful stats exported from the <cite>Load Balancing</cite> module.
 See <a class="reference internal" href="Metrics.html#loadbalancer-stats"><span class="std std-ref">Load Balancing metrics</span></a> for more details.</p>
 <p>Use the following code snippet to override the default load balancing strategy for a particular Finagle
-client (see <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/Balancers.scala">Balancers</a> on how to construct
+client (see <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/Balancers.scala">Balancers</a> on how to construct
 instances of <code class="docutils literal notranslate"><span class="pre">LoadBalancerFactory</span></code>).</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.LoadBalancerFactory</span>
@@ -802,10 +802,10 @@ triggered, temporarily suspend the use of a particular endpoint.</p>
 </ol>
 <p>In addition to <cite>Fail Fast</cite> and <cite>Failure Accrual</cite>, some of the protocols (i.e., <cite>Mux</cite>, <cite>HTTP/2</cite>) in
 Finagle support <cite>Ping-based Failure Detectors</cite> <a class="footnote-reference" href="#failure-detectors" id="id21">[10]</a>
-(i.e., <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/ThresholdFailureDetector.scala">ThresholdFailureDetector</a>).</p>
+(i.e., <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/liveness/ThresholdFailureDetector.scala">ThresholdFailureDetector</a>).</p>
 <div class="section" id="fail-fast">
 <span id="client-fail-fast"></span><h4>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h4>
-<p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> module
+<p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> module
 attempts to reduce the number of requests dispatched to endpoints that are likely
 to fail. It works by marking downed hosts when a connection fails, and launching a
 background process that repeatedly attempts to reconnect with a given backoff schedule.
@@ -835,7 +835,7 @@ not meaningfully handle the failure when breaking the circuit.</p>
 </div>
 <div class="section" id="failure-accrual">
 <span id="client-failure-accrual"></span><h4>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h4>
-<p>The <cite>Failure Accrual</cite> module marks itself as unavailable per-endpoint based on a configurable <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualPolicy.scala">policy</a>.
+<p>The <cite>Failure Accrual</cite> module marks itself as unavailable per-endpoint based on a configurable <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualPolicy.scala">policy</a>.
 Unlike <cite>Fail Fast</cite>, this module fails open. That is, even if it transitions into an unavailable state, requests
 will still be allowed to flow through it. However, recall that the availability is propagated through the stack,
 so the load balancer will avoid using an endpoint where the failure accrual module is unavailable.</p>
@@ -926,7 +926,7 @@ dead for</li>
 the maximum duration is used.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">It’s highly recommended to use <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/Backoff.scala">Backoff</a>
+<p class="last">It’s highly recommended to use <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/Backoff.scala">Backoff</a>
 API for constructing instances of <code class="docutils literal notranslate"><span class="pre">Stream[Duration]</span></code> instead of using the error-prone Stream API directly.</p>
 </div>
 <p>Finally, it’s possible to completely disable the <cite>Failure Accrual</cite> module for a given
@@ -938,7 +938,7 @@ client.</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The module is implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>.
+<p>The module is implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>.
 See <a class="reference internal" href="Metrics.html#failure-accrual-stats"><span class="std std-ref">Failure Accrual Stats</span></a> for stats exported from the
 <code class="docutils literal notranslate"><span class="pre">Failure</span> <span class="pre">Accrual</span></code> module.</p>
 </div>
@@ -993,7 +993,7 @@ connection concurrency exceeds the high watermark</li>
 <div class="section" id="buffering-pool">
 <h4>Buffering Pool<a class="headerlink" href="#buffering-pool" title="Permalink to this headline">¶</a></h4>
 <p>The simplest connection pool implementation available in Finagle is
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/BufferingPool.scala">BufferingPool</a> that just buffers up to
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/pool/BufferingPool.scala">BufferingPool</a> that just buffers up to
 <code class="docutils literal notranslate"><span class="pre">bufferSize</span></code> connections and produces/closes new ones above it. This pool is disabled by
 default.</p>
 </div>
@@ -1001,7 +1001,7 @@ default.</p>
 <span id="id28"></span><h4>Watermark Pool<a class="headerlink" href="#watermark-pool" title="Permalink to this headline">¶</a></h4>
 <p>Finagle provides a generic pool that maintains a collection of service instances. Each endpoint
 the client connects to has an independent pool with high and low watermarks.
-The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/WatermarkPool.scala">WatermarkPool</a> keeps persistent services
+The <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/pool/WatermarkPool.scala">WatermarkPool</a> keeps persistent services
 up to the lower bound. It will keep making new services up to upper bound if you checkout more
 than lower bound services, but when you release those services above the lower bound, it
 immediately tries to close them. This, however, creates a lot of connection churn if your
@@ -1010,7 +1010,7 @@ application consistently requires more than lower bound connections.</p>
 <div class="section" id="caching-pool">
 <h4>Caching Pool<a class="headerlink" href="#caching-pool" title="Permalink to this headline">¶</a></h4>
 <p id="id29">To reduce connection churn, there is a separate facility for caching, with some TTL,
-services above the lower bound. The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/CachingPool.scala">CachingPool</a>
+services above the lower bound. The <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/pool/CachingPool.scala">CachingPool</a>
 caches <em>regardless</em> of whether there are more than lower-bound open services;
 it’s always caching up to (upper-bound - lower-bound) services. The cache reaches
 its peak value when you reach your peak concurrency (i.e. “load”),
@@ -1021,7 +1021,7 @@ and then slowly decays, based on the TTL.</p>
 </div>
 <div class="section" id="admission-control">
 <h2>Admission Control<a class="headerlink" href="#admission-control" title="Permalink to this headline">¶</a></h2>
-<p>Clients are configured with the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>
+<p>Clients are configured with the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>
 which will probabilistically drop some requests to unhealthy clusters. This aims
 to decrease the request volume to those clusters with little to no effect on a
 client’s already unhealthy success rate. The filter works by keeping a moving
@@ -1080,7 +1080,7 @@ clients experiencing bursty and very low volume (i.e., single digit RPS) traffic
 <span id="id30"></span><h2>Response Classification<a class="headerlink" href="#response-classification" title="Permalink to this headline">¶</a></h2>
 <p>To give Finagle visibility into application level success and failure
 developers can provide classification of responses on clients and servers by using
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/package.scala">response classifiers</a>.
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/package.scala">response classifiers</a>.
 This gives Finagle the proper domain knowledge and improves the efficacy of
 <a class="reference internal" href="#client-failure-accrual"><span class="std std-ref">failure accrual</span></a> and more accurate
 <a class="reference internal" href="Metrics.html#metrics-stats-filter"><span class="std std-ref">success rate stats</span></a>.</p>

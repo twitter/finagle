@@ -116,7 +116,7 @@ available in the `finagle-thriftmux` package.
 Much of the future work on Finagle will involve improvements to Mux and feature
 development targeting services that support it. The wire format and semantics of
 the Mux protocol are documented in `its source
-code <https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/com/twitter/finagle/mux/package.scala>`_.
+code <https://github.com/twitter/finagle/blob/release/finagle-mux/src/main/scala/com/twitter/finagle/mux/package.scala>`_.
 
 **Why is RPC multiplexing important?**
 
@@ -200,7 +200,7 @@ Note that `select` takes care of checking out the service and returning it to th
 other useful methods are available on :api:`mysql.Client <com/twitter/finagle/mysql/Client>` which is returned
 from the call to `newRichClient`.
 
-For a more involved example see the Finagle `example project <https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala>`_.
+For a more involved example see the Finagle `example project <https://github.com/twitter/finagle/blob/release/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala>`_.
 
 HTTP
 ----
@@ -224,7 +224,7 @@ Finagle sets certain request/response headers to transmit additional metadata.
   See :finagle-http-src:`HttpDtab.scala <com/twitter/finagle/http/codec/HttpDtab.scala>` and :ref:`dtabs <dtabs>`.
 
 `finagle-http-nack`
-  Makes finagle treat this reply as a retryable nack. See `HttpNackFilter.scala <https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala>`_
+  Makes finagle treat this reply as a retryable nack. See `HttpNackFilter.scala <https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala>`_
 
 `finagle-http-nonretryable-nack`
-  Makes finagle treat this reply as a nonretryable nack. See `HttpNackFilter.scala <https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala>`_
+  Makes finagle treat this reply as a nonretryable nack. See `HttpNackFilter.scala <https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala>`_

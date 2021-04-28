@@ -4150,7 +4150,7 @@ finagle server (or any other supporting this extension), we reply
 to the request, and every subsequent request is dispatched with an
 envelope carrying trace metadata. The envelope itself is also a
 Thrift struct described
-<a href="https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift" target="_blank">here</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
+<a href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/thrift/tracing.thrift" target="_blank">here</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
 a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
 }</pre><p>compiled with Scrooge, generates the interface
@@ -4171,7 +4171,7 @@ and the standard protocol is used. If the remote server is also a
 finagle server (or any other supporting this extension), we reply
 to the request, and every subsequent request is dispatched with an
 envelope carrying trace metadata. The envelope itself is also a
-Thrift struct described <a href="https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift" target="_blank">here</a>.</p><h4> Servers </h4><p><code>TestService.FutureIface</code> must be implemented and passed
+Thrift struct described <a href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/thrift/tracing.thrift" target="_blank">here</a>.</p><h4> Servers </h4><p><code>TestService.FutureIface</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre><span class="cmt">// An echo service</span>
 ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
   <span class="kw">def</span> query(x: <span class="std">String</span>): Future[<span class="std">String</span>] = Future.value(x)

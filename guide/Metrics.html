@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 21.3.0 documentation</title>
+    <title>Metrics &#8212; Finagle 21.4.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -103,19 +103,19 @@ for more details.</dd>
 <dd>A counter of the number of times any failure has been observed.</dd>
 <dt><strong>sourcedfailures/&lt;source_service_name&gt;{/&lt;exception_name&gt;}+</strong></dt>
 <dd>A counter of the number of times a specific
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown. Sourced
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown. Sourced
 failures include additional information on what service caused the failure.</dd>
 <dt><strong>sourcedfailures/&lt;source_service_name&gt;</strong></dt>
 <dd>A counter of the number of times any
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown from this
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown from this
 service. Sourced failures include additional information on what service
 caused the failure.</dd>
 <dt><strong>sourcedfailures</strong></dt>
 <dd>A counter of the number of times any
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown. Sourced
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown. Sourced
 failures include additional information on what service caused the failure.</dd>
 </dl>
 </div>
@@ -285,10 +285,10 @@ before it gets executed. For efficiency reasons, this stat is sampled each
 <dl class="docutils">
 <dt><strong>finagle/timer/pending_tasks</strong> <cite>verbosity:debug</cite></dt>
 <dd>A stat of the number of pending tasks to run for
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/util/HashedWheelTimer.scala">HashedWheelTimer.Default</a>.</dd>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/HashedWheelTimer.scala">HashedWheelTimer.Default</a>.</dd>
 <dt><strong>finagle/timer/deviation_ms</strong> <cite>verbosity:debug</cite></dt>
 <dd>A stat of the deviation in milliseconds of tasks scheduled on
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/util/HashedWheelTimer.scala">HashedWheelTimer.Default</a>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/HashedWheelTimer.scala">HashedWheelTimer.Default</a>
 from their expected time.</dd>
 <dt><strong>finagle/timer/slow</strong></dt>
 <dd>A counter of the number of tasks found to be executing for longer
@@ -300,7 +300,7 @@ than 2 seconds.</dd>
 <dl class="docutils">
 <dt><strong>finagle/clientregistry/size</strong></dt>
 <dd>A gauge of the current number of clients registered in the
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">ClientRegistry</a>.</dd>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">ClientRegistry</a>.</dd>
 </dl>
 </div>
 <div class="section" id="name-resolution">
@@ -308,11 +308,11 @@ than 2 seconds.</dd>
 <dl class="docutils">
 <dt><strong>inet/dns/queue_size</strong></dt>
 <dd>A gauge of the current number of DNS resolutions waiting for
-lookup in <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</dd>
+lookup in <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</dd>
 <dt><strong>inet/dns/dns_lookups</strong></dt>
-<dd>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</dd>
+<dd>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</dd>
 <dt><strong>inet/dns/dns_lookup_failures</strong></dt>
-<dd>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a> and failed.</dd>
+<dd>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a> and failed.</dd>
 <dt><strong>inet/dns/lookup_ms</strong></dt>
 <dd>A histogram of the latency, in milliseconds, of the time to lookup
 every host (successfully or not) in a <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.Addr</span></code>.</dd>
@@ -324,13 +324,13 @@ at least one resolved host.</dd>
 no resolved hosts.</dd>
 <dt><strong>inet/dns/cache/size</strong></dt>
 <dd>A gauge of the approximate number of cached DNS resolutions in
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a>.</dd>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a>.</dd>
 <dt><strong>inet/dns/cache/evicts</strong></dt>
 <dd>A gauge of the number of times a cached DNS resolution has been
-evicted from <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a>.</dd>
+evicted from <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a>.</dd>
 <dt><strong>inet/dns/cache/hit_rate</strong></dt>
 <dd>A gauge of the ratio of DNS lookups which were already cached by
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a></dd>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a></dd>
 </dl>
 </div>
 <div class="section" id="netty-4">
@@ -488,7 +488,7 @@ connection.</dd>
 <div class="section" id="failure-accrual">
 <h2>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h2>
 <p id="failure-accrual-stats">The client stats under the <cite>failure_accrual</cite> scope track how
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>
 manages failures.</p>
 <div class="section" id="failureaccrualfactory">
 <h3>FailureAccrualFactory<a class="headerlink" href="#failureaccrualfactory" title="Permalink to this headline">¶</a></h3>
@@ -587,16 +587,16 @@ died and must be retried.</dd>
 <h2>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h2>
 <p id="id3">These metrics track the retries of failed requests
 via the
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/Retries.scala">Retries module</a>.</p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/Retries.scala">Retries module</a>.</p>
 <p>Requeues represent requests that were automatically retried by Finagle.
 Only failures which are known to be safe are eligible to be requeued.
 The number of retries allowed are controlled by a dynamic budget,
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RetryBudget.scala">RetryBudget</a>.</p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/RetryBudget.scala">RetryBudget</a>.</p>
 <p>For clients built using
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/builder/ClientBuilder.scala">ClientBuilder</a>,
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/builder/ClientBuilder.scala">ClientBuilder</a>,
 the <cite>retries</cite> stat represents retries
 handled by the configured
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RetryPolicy.scala">RetryPolicy</a>.
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/RetryPolicy.scala">RetryPolicy</a>.
 Note that application level failures
 <strong>are not</strong> included, which is particularly important for protocols that include
 exceptions, such as Thrift. The number of retries allowed is controlled by the
@@ -716,7 +716,7 @@ milliseconds.</dd>
 <div class="section" id="nack-admission-control">
 <h3>Nack Admission Control<a class="headerlink" href="#nack-admission-control" title="Permalink to this headline">¶</a></h3>
 <p id="id6">These metrics reflect the behavior of the
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>.</p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>.</p>
 <dl class="docutils">
 <dt><strong>dropped_requests</strong></dt>
 <dd>A counter of the number of requests probabilistically dropped.</dd>
@@ -910,9 +910,9 @@ given idle state.</dd>
 <p>Finagle clients resolve <a class="reference internal" href="Names.html"><span class="doc">names</span></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e.
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Dtab.scala">Dtabs</a>,
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Name.scala">Names</a>, and
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/NameTree.scala">NameTrees</a>).
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Dtab.scala">Dtabs</a>,
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Name.scala">Names</a>, and
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/NameTree.scala">NameTrees</a>).
 The following stats are recorded under the
 <cite>namer/{dtabcache,namecache,nametreecache}</cite> scopes to provide
 visibility into this caching.</p>
@@ -938,12 +938,12 @@ created in the event that no idle <code class="docutils literal notranslate"><sp
 <p><strong>finagle/clientregistry/initialresolution_ms</strong></p>
 <blockquote>
 <div>A counter of the time spent waiting for client resolution via
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">ClientRegistry.expAllRegisteredClientsResolved</a>.</div></blockquote>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">ClientRegistry.expAllRegisteredClientsResolved</a>.</div></blockquote>
 </div>
 <div class="section" id="address-stabilization">
 <h3>Address Stabilization<a class="headerlink" href="#address-stabilization" title="Permalink to this headline">¶</a></h3>
 <p>Resolved addresses (represented as an instance of
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Addr.scala">Addr</a>) are stabilized in two ways:</p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Addr.scala">Addr</a>) are stabilized in two ways:</p>
 <ol class="arabic simple">
 <li>ZooKeeper failures will not cause a previously bound address to fail.</li>
 <li>When a member leaves a cluster, its removal is delayed.</li>
@@ -1170,7 +1170,7 @@ for comparing state across a cluster or over time.</dd>
 request or response. All metrics are traced using the binary annotations with a <cite>clnt/&lt;clnt_name&gt;/</cite>
 prefix on the client side, and <cite>srv/</cite> prefix on the server side.</p>
 <p>The following metrics are added by
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StreamingStatsFilter.scala">StreamingStatsFilter</a></p>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StreamingStatsFilter.scala">StreamingStatsFilter</a></p>
 <dl class="docutils">
 <dt><strong>http/stream/request/closed</strong></dt>
 <dd>A counter of the number of closed request streams.</dd>
@@ -1202,10 +1202,10 @@ stream.</dd>
 <dd>A gauge of the number of pending response streams.</dd>
 <dt><strong>stream/request/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
 <dd>A histogram of the number of bytes per chunk’s payload of request streams. This is measured in
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></dd>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></dd>
 <dt><strong>stream/response/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
 <dd>A histogram of the number of bytes per chunk’s payload of response streams. This is measured in
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></dd>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></dd>
 <dt>You could derive the streaming success rate of:</dt>
 <dd><ul class="first last simple">
 <li>the total number of streams
@@ -1254,7 +1254,7 @@ header name.</dd>
 header value.</dd>
 </dl>
 <p>These metrics are added by
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StatsFilter.scala">StatsFilter</a> and can be enabled by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StatsFilter.scala">StatsFilter</a> and can be enabled by
 using <cite>.withHttpStats</cite> on <cite>Http.Client</cite> and <cite>Http.Server</cite>.</p>
 <dl class="docutils">
 <dt><strong>status/&lt;statusCode&gt;</strong></dt>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>FAQ &#8212; Finagle 21.3.0 documentation</title>
+    <title>FAQ &#8212; Finagle 21.4.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -214,9 +214,9 @@ synchronization mechanisms.</td></tr>
 </div>
 <div class="section" id="why-do-clients-see-com-twitter-finagle-failedfastexception-s">
 <span id="faq-failedfastexception"></span><h3>Why do clients see com.twitter.finagle.FailedFastException’s?<a class="headerlink" href="#why-do-clients-see-com-twitter-finagle-failedfastexception-s" title="Permalink to this headline">¶</a></h3>
-<p>While the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> service
+<p>While the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> service
 factory generally shields clients from downed hosts, sometimes clients will see
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">FailedFastExceptions</a>.
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">FailedFastExceptions</a>.
 A common cause is when all endpoints in the load balancer’s pool are
 marked down as fail fast, then the load balancer will pass requests through, resulting in a
 <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.FailedFastException</span></code>.</p>
@@ -225,7 +225,7 @@ marked down as fail fast, then the load balancer will pass requests through, res
 </div>
 <div class="section" id="what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">
 <h3>What is a com.twitter.finagle.service.ResponseClassificationSyntheticException?<a class="headerlink" href="#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception" title="Permalink to this headline">¶</a></h3>
-<p>While typically, a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">StatsFilter</a> counts
+<p>While typically, a <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">StatsFilter</a> counts
 <cite>Exceptions</cite> as failures, a user may supply a
 <a class="reference external" href="https://twitter.github.io/finagle/guide/Clients.html#response-classification">ResponseClassifier</a>
 that treats non-Exceptions as failures. In that case, while no exceptions have occurred, a
