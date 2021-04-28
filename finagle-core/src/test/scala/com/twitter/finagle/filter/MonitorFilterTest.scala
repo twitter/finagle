@@ -7,10 +7,9 @@ import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import java.util.logging.{Level, Logger, StreamHandler}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
-import org.mockito.{Matchers, Mockito}
+import org.mockito.Mockito
 import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -88,11 +87,6 @@ class MonitorFilterTest extends FunSuite with MockitoSugar {
     val monitor = Mockito.spy(new MockMonitor)
     val inner = new MockSourcedException("FakeService1")
     val outer = new MockSourcedException(inner, SourcedException.UnspecifiedServiceName)
-
-    val mockLogger = Mockito.spy(Logger.getLogger("MockServer"))
-    // add handler to redirect and mute output, so that it doesn't show up in the console during a test run.
-    mockLogger.setUseParentHandlers(false)
-    mockLogger.addHandler(new StreamHandler())
   }
 
   test("MonitorFilter should when attached to a server, report source for sourced exceptions") {
@@ -107,7 +101,6 @@ class MonitorFilterTest extends FunSuite with MockitoSugar {
       .name("FakeService2")
       .bindTo(address)
       .monitor((_, _) => monitor)
-      .logger(mockLogger)
       .build(service)
 
     // We cannot mock "service" directly, because we are testing an internal filter defined in the ServerBuilder
@@ -128,13 +121,6 @@ class MonitorFilterTest extends FunSuite with MockitoSugar {
 
     verify(monitor, times(0)).handle(inner)
     verify(monitor).handle(outer)
-    verify(mockLogger).log(
-      Matchers.eq(Level.SEVERE),
-      Matchers.eq(
-        "The 'FakeService2' service FakeService2 on behalf of FakeService1 threw an exception"
-      ),
-      Matchers.eq(outer)
-    )
 
     // need to properly close the client and the server, otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
     Await.ready(client.close(), 1.second)
@@ -152,7 +138,6 @@ class MonitorFilterTest extends FunSuite with MockitoSugar {
     val client = ClientBuilder()
       .stack(StringClient.client.withEndpoint(mockService))
       .monitor(_ => monitor)
-      .logger(mockLogger)
       .hosts(Seq(new InetSocketAddress(0)))
       .build()
 

@@ -311,19 +311,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     _configured(BindTo(address))
 
   /**
-   * To migrate to the Stack-based APIs, use `configured`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   * import com.twitter.finagle.param
-   *
-   * Http.server.configured(param.Logger(logger))
-   * }}}
-   */
-  def logger(logger: java.util.logging.Logger): This =
-    _configured(Logger(logger))
-
-  /**
    * To migrate to the Stack-based APIs, use `ServerTransportParams.verbose`.
    * For example:
    * {{{
@@ -662,7 +649,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     val label = if (lbl == "") "server" else lbl
 
     val BindTo(addr) = params[BindTo]
-    val Logger(logger) = params[Logger]
+    val logger = DefaultLogger
     val Daemonize(daemon) = params[Daemonize]
     val MonitorFactory(newMonitor) = params[MonitorFactory]
     val statsReceiver = new RoleConfiguredStatsReceiver(

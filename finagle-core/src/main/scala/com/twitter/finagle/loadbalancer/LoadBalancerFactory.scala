@@ -6,7 +6,7 @@ import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.stats._
-import com.twitter.finagle.util.DefaultMonitor
+import com.twitter.finagle.util.{DefaultMonitor, DefaultLogger}
 import com.twitter.util.{Activity, Event, Var}
 import java.util.logging.{Level, Logger}
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle
@@ -283,7 +283,6 @@ object LoadBalancerFactory {
       implicitly[Stack.Param[HostStats]],
       implicitly[Stack.Param[AddressOrdering]],
       implicitly[Stack.Param[param.Stats]],
-      implicitly[Stack.Param[param.Logger]],
       implicitly[Stack.Param[param.Monitor]],
       implicitly[Stack.Param[param.Reporter]]
     )
@@ -299,9 +298,7 @@ object LoadBalancerFactory {
       val EnableProbation(probationEnabled) = params[EnableProbation]
 
       val param.Stats(statsReceiver) = params[param.Stats]
-      val param.Logger(log) = params[param.Logger]
       val param.Label(label) = params[param.Label]
-      val param.Monitor(monitor) = params[param.Monitor]
 
       val rawStatsReceiver = statsReceiver match {
         case sr: RollupStatsReceiver => sr.underlying.head
@@ -321,7 +318,7 @@ object LoadBalancerFactory {
           catch {
             case NonFatal(exc) =>
               val res = set.toVector
-              log.log(
+              DefaultLogger.log(
                 Level.WARNING,
                 s"Unable to order endpoints via ($ordering): \n${res.mkString("\n")}",
                 exc

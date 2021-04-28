@@ -155,18 +155,6 @@ object HighResTimer {
 }
 
 /**
- * A class eligible for configuring a [[java.util.logging.Logger]]
- * used throughout finagle clients and servers.
- */
-case class Logger(log: java.util.logging.Logger) {
-  def mk(): (Logger, Stack.Param[Logger]) =
-    (this, Logger.param)
-}
-object Logger {
-  implicit val param: Stack.Param[Logger] = Stack.Param(Logger(util.DefaultLogger))
-}
-
-/**
  * A class eligible for configuring a
  * [[com.twitter.finagle.stats.StatsReceiver]] throughout finagle
  * clients and servers.

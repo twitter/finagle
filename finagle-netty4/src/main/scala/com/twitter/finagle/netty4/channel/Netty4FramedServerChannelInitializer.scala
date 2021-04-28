@@ -3,6 +3,7 @@ package com.twitter.finagle.netty4.channel
 import com.twitter.finagle.param._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Stack
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.Duration
 import io.netty.channel._
 import io.netty.handler.timeout._
@@ -23,13 +24,12 @@ private[netty4] class Netty4FramedServerChannelInitializer(params: Stack.Params)
 
   import Netty4FramedServerChannelInitializer._
 
-  private[this] val Logger(logger) = params[Logger]
   private[this] val Stats(stats) = params[Stats]
   private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
   private[this] val sharedChannelRequestStats =
     if (!stats.isNull) Some(new ChannelRequestStatsHandler.SharedChannelRequestStats(stats))
     else None
-  private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
+  private[this] val exceptionHandler = new ChannelExceptionHandler(stats, DefaultLogger)
 
   override def initChannel(ch: Channel): Unit = {
     val pipeline = ch.pipeline

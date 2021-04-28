@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: `c.t.f.param.Logger` has been removed. Use external configuration supported by
+  your logging backend to alter settings of `com.twitter.finagle` logger.  ``PHAB_ID=D618667``
+
 21.4.0
 ------
 

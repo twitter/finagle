@@ -4,8 +4,9 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.proxy.{HttpProxyConnectHandler, Netty4ProxyConnectHandler}
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
-import com.twitter.finagle.param.{Label, Logger, Stats}
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.Duration
 import io.netty.channel.{Channel, ChannelInitializer}
 import io.netty.handler.proxy.{HttpProxyHandler, Socks5ProxyHandler}
@@ -21,7 +22,6 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
   import Netty4ClientChannelInitializer._
 
   private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
-  private[this] val Logger(logger) = params[Logger]
   private[this] val Label(label) = params[Label]
   private[this] val Stats(stats) = params[Stats]
   private[this] val Transporter.HttpProxyTo(httpHostAndCredentials) =
@@ -33,7 +33,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
 
   private[this] val channelSnooper =
     if (params[Transport.Verbose].enabled)
-      Some(ChannelSnooper.byteSnooper(label)(logger.log(Level.INFO, _, _)))
+      Some(ChannelSnooper.byteSnooper(label)(DefaultLogger.log(Level.INFO, _, _)))
     else
       None
 
@@ -47,7 +47,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
       Some(sharedChannelStatsFn(params))
     } else None
 
-  private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
+  private[this] val exceptionHandler = new ChannelExceptionHandler(stats, DefaultLogger)
 
   def initChannel(ch: Channel): Unit = {
 

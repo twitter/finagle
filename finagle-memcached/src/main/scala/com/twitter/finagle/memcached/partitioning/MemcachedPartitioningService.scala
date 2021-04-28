@@ -2,11 +2,11 @@ package com.twitter.finagle.memcached.partitioning
 
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.param.Logger
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
 import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, param}
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
@@ -59,7 +59,7 @@ private[finagle] class MemcachedPartitioningService(
     ) {
   import MemcachedPartitioningService._
 
-  private[this] val logger = params[Logger].log
+  private[this] val logger = DefaultLogger
 
   final override protected def getKeyBytes(key: Buf): Array[Byte] = {
     Buf.ByteArray.Owned.extract(key)

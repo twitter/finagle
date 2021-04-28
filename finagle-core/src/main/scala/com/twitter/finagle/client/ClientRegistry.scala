@@ -6,7 +6,7 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.util.StackRegistry.Entry
-import com.twitter.finagle.util.{Showable, StackRegistry}
+import com.twitter.finagle.util.{DefaultLogger, Showable, StackRegistry}
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.Level
@@ -33,7 +33,7 @@ private[twitter] object ClientRegistry extends StackRegistry {
       case StackRegistry.Entry(_, _, params) =>
         val param.Label(name) = params[param.Label]
         val LoadBalancerFactory.Dest(va) = params[LoadBalancerFactory.Dest]
-        val param.Logger(log) = params[param.Logger]
+        val log = DefaultLogger
 
         val resolved = va.changes.filter(_ != Addr.Pending).toFuture()
         resolved.map { resolution =>

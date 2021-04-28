@@ -1012,21 +1012,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(MonitorFactory(mFactory))
 
   /**
-   * Log very detailed debug information to the given logger.
-   *
-   * To migrate to the Stack-based APIs, use `configured`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   * import com.twitter.finagle.param.Logger
-   *
-   * Http.client.configured(Logger(logger))
-   * }}}
-   */
-  def logger(logger: java.util.logging.Logger): This =
-    configured(Logger(logger))
-
-  /**
    * Use the given parameters for failure accrual.  The first parameter
    * is the number of *successive* failures that are required to mark
    * a host failed.  The second parameter specifies how long the host
@@ -1290,7 +1275,7 @@ private[finagle] object ClientBuilderClient {
   ): ServiceFactory[Req, Rep] = {
     val params = client.params
     val Daemonize(daemon) = params[Daemonize]
-    val Logger(logger) = params[Logger]
+    val logger = DefaultLogger
     val MonitorFactory(mFactory) = params[MonitorFactory]
 
     val clientParams = params + Monitor(mFactory(label))
@@ -1341,7 +1326,7 @@ private[finagle] object ClientBuilderClient {
       private[this] val released = new AtomicBoolean(false)
       override def close(deadline: Time): Future[Unit] = {
         if (!released.compareAndSet(false, true)) {
-          val Logger(logger) = client.params[Logger]
+          val logger = DefaultLogger
           logger.log(
             java.util.logging.Level.WARNING,
             "Release on Service called multiple times!",

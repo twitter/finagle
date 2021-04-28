@@ -1,6 +1,5 @@
 package com.twitter.finagle.redis
 
-import com.twitter.finagle.param.Logger
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
@@ -8,6 +7,7 @@ import com.twitter.finagle.partitioning.param.NumReps
 import com.twitter.finagle.redis.param.RedisKeyHasher
 import com.twitter.finagle.redis.protocol.{Command, Reply, StatusReply}
 import com.twitter.finagle.redis.util.{BufToString, ReplyFormat}
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.finagle.{ServiceFactory, Stack, Stackable}
 import com.twitter.hashing
 import com.twitter.io.Buf
@@ -65,7 +65,7 @@ private[finagle] class RedisPartitioningService(
   import RedisPartitioningService._
   import com.twitter.finagle.redis.protocol._
 
-  private[this] val logger = params[Logger].log
+  private[this] val logger = DefaultLogger
 
   final override protected def getKeyBytes(key: Buf): Array[Byte] =
     Buf.ByteArray.Owned.extract(key)

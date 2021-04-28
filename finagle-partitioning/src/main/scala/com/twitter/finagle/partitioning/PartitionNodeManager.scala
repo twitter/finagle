@@ -6,8 +6,9 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.loadbalancer.TrafficDistributor._
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle._
 import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
-import com.twitter.finagle.param.{Label, Logger, Stats}
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.partitioning.zk.ZkMetadata
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
@@ -121,7 +122,7 @@ private[finagle] class PartitionNodeManager[
 
   import PartitionNodeManager._
 
-  private[this] val logger = params[Logger].log
+  private[this] val logger = DefaultLogger
   private[this] val label = params[Label].label
   private[this] val statsReceiver = {
     val stats = params[Stats].statsReceiver

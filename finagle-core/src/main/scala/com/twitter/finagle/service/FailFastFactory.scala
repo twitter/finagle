@@ -60,12 +60,11 @@ object FailFastFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[FailFastFactory]] when enabled.
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module6[
+    new Stack.Module5[
       FailFast,
       param.Stats,
       param.Timer,
       param.Label,
-      param.Logger,
       Transporter.EndpointAddr,
       ServiceFactory[Req, Rep]
     ] {
@@ -76,7 +75,6 @@ object FailFastFactory {
         _stats: param.Stats,
         _timer: param.Timer,
         _label: param.Label,
-        _logger: param.Logger,
         _endpoint: Transporter.EndpointAddr,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
@@ -87,7 +85,6 @@ object FailFastFactory {
             val param.Stats(statsReceiver) = _stats
             val param.Timer(timer) = _timer
             val param.Label(label) = _label
-            val param.Logger(logger) = _logger
             val Transporter.EndpointAddr(endpoint) = _endpoint
 
             new FailFastFactory(
@@ -95,7 +92,7 @@ object FailFastFactory {
               statsReceiver.scope("failfast"),
               timer,
               label,
-              logger,
+              DefaultLogger,
               endpoint
             )
         }

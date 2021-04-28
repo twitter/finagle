@@ -8,6 +8,7 @@ import com.twitter.finagle.param._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.SnoopingLevelInterpreter
+import com.twitter.finagle.util.DefaultLogger
 import io.netty.channel._
 import java.util.logging.Level
 
@@ -27,7 +28,6 @@ private[netty4] class Netty4RawServerChannelInitializer(params: Stack.Params)
 
   import Netty4RawServerChannelInitializer._
 
-  private[this] val Logger(logger) = params[Logger]
   private[this] val Label(label) = params[Label]
   private[this] val Stats(stats) = params[Stats]
 
@@ -39,7 +39,7 @@ private[netty4] class Netty4RawServerChannelInitializer(params: Stack.Params)
 
   private[this] val channelSnooper =
     if (params[Transport.Verbose].enabled)
-      Some(ChannelSnooper.byteSnooper(label)(logger.log(Level.INFO, _, _)))
+      Some(ChannelSnooper.byteSnooper(label)(DefaultLogger.log(Level.INFO, _, _)))
     else
       None
 

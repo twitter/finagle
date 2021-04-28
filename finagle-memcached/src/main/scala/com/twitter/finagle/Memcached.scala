@@ -49,6 +49,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing.{ClientDestTracingFilter, Tracer}
 import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.util.DefaultLogger
 import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
@@ -251,14 +252,13 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
         Resolver.eval(Client.mkDestination("localhost", LocalMemcached.port))
       } else dest
 
-      val Logger(logger) = params[Logger]
       val label0 = if (label == "") params[Label].label else label
 
       val KeyHasher(hasher) = params[KeyHasher]
       registerClient(label0, hasher.toString)
 
       def partitionAwareFinagleClient() = {
-        logger.fine(s"Using the new partitioning finagle client for memcached: $destination")
+        DefaultLogger.fine(s"Using the new partitioning finagle client for memcached: $destination")
         val rawClient: Service[Command, Response] = {
           val stk = stack.insertAfter(
             BindingFactory.role,
@@ -270,7 +270,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       }
 
       def oldMemcachedClient(va: Var[Addr]) = {
-        logger.fine(s"Using the old memcached client: $destination")
+        DefaultLogger.fine(s"Using the old memcached client: $destination")
 
         val finagle.param.Stats(sr) = params[finagle.param.Stats]
         val NumReps(numReps) = params[NumReps]
