@@ -59,8 +59,6 @@ object BalancerBench {
     protected def newNode(factory: EndpointFactory[Unit, Unit]): Node =
       NullNode(factory)
 
-    protected def failingNode(cause: Throwable): Node = ???
-
     protected def initDistributor(): Distributor =
       NullDistributor(Vector.empty)
 

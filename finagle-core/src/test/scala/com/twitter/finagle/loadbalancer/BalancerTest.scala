@@ -50,18 +50,19 @@ class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropert
       def needsRebuild: Boolean = false
     }
 
-    class Node(val factory: EndpointFactory[Unit, Unit]) extends NodeT[Unit, Unit] {
+    class Node(val factory: EndpointFactory[Unit, Unit])
+        extends ServiceFactoryProxy(factory)
+        with NodeT[Unit, Unit] {
       def load: Double = ???
       def pending: Int = ???
-      def close(deadline: Time): Future[Unit] = TestBalancer.this.synchronized {
+      override def close(deadline: Time): Future[Unit] = TestBalancer.this.synchronized {
         factory.close()
         Future.Done
       }
-      def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
+      override def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
     }
 
     protected def newNode(factory: EndpointFactory[Unit, Unit]): Node = new Node(factory)
-    protected def failingNode(cause: Throwable): Node = ???
 
     protected def initDistributor(): Distributor = Distributor(Vector.empty, singletonDistributor)
   }

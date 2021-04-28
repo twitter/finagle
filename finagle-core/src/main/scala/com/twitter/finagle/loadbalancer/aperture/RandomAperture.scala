@@ -55,8 +55,7 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
   aperture: Aperture[Req, Rep] { type Node = NodeT },
   vector: Vector[NodeT],
   initAperture: Int)
-    extends BaseDist[Req, Rep, NodeT](aperture, vector, initAperture)
-    with P2CPick[NodeT] {
+    extends BaseDist[Req, Rep, NodeT](aperture, vector, initAperture) {
   require(vector.nonEmpty, "vector must be non empty")
   import RandomAperture._
 
@@ -66,7 +65,6 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
 
   def minAperture: Int = aperture.minAperture
 
-  override val rng = aperture.rng
   private[this] val labelForLogging = aperture.lbl
 
   // Since we don't have any process coordinate, we sort the node
@@ -74,8 +72,11 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
   // globally, since `token` is assigned randomly per process
   // when the node is created.
   protected val vec: Vector[NodeT] = statusOrder[Req, Rep, NodeT](vector.sortBy(nodeToken))
-  protected def bound: Int = logicalAperture
-  protected def emptyNode: NodeT = aperture.newFailingNode
+
+  def pick(): NodeT = {
+    if (vec.isEmpty) aperture.failingNode
+    else P2CPick.pick(vec, logicalAperture, aperture.rng)
+  }
 
   private[this] def vecAsString: String =
     vec

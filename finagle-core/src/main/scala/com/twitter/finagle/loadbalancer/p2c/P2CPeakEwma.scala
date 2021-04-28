@@ -1,12 +1,6 @@
 package com.twitter.finagle.loadbalancer.p2c
 
-import com.twitter.finagle.loadbalancer.{
-  Balancer,
-  EndpointFactory,
-  FailingEndpointFactory,
-  PeakEwma,
-  Updating
-}
+import com.twitter.finagle.loadbalancer.{Balancer, EndpointFactory, PeakEwma, Updating}
 import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactoryProxy}
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.Rng
@@ -58,5 +52,4 @@ private[loadbalancer] final class P2CPeakEwma[Req, Rep](
       with PeakEwmaNode
 
   protected def newNode(factory: EndpointFactory[Req, Rep]): Node = Node(factory)
-  protected def failingNode(cause: Throwable): Node = Node(new FailingEndpointFactory(cause))
 }

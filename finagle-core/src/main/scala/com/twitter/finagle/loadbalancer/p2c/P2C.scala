@@ -15,15 +15,8 @@ private[loadbalancer] trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
 
   def additionalMetadata: Map[String, Any] = Map.empty
 
-  protected class Distributor(vector: Vector[Node])
-      extends DistributorT[Node](vector)
-      with P2CPick[Node] {
+  protected class Distributor(vector: Vector[Node]) extends DistributorT[Node](vector) {
     type This = Distributor
-
-    protected def bound: Int = vector.size
-    protected def emptyNode: Node = failingNode(emptyException)
-    protected def rng: Rng = self.rng
-    protected val vec: Vector[Node] = vector
 
     // There is nothing to rebuild (we don't partition in P2C) so we just return
     // `this` instance.
@@ -36,6 +29,11 @@ private[loadbalancer] trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     // above us). However, namers can still force rebuilds when the underlying
     // set of nodes changes (eg: some of the nodes were unannounced and restarted).
     def needsRebuild: Boolean = false
+
+    def pick(): Node = {
+      if (vector.isEmpty) failingNode
+      else P2CPick.pick(vector, vector.size, self.rng)
+    }
   }
 
   protected def initDistributor(): Distributor = new Distributor(Vector.empty)

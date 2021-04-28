@@ -61,7 +61,14 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
    * Create a node whose sole purpose it is to endlessly fail
    * with the given cause.
    */
-  protected def failingNode(cause: Throwable): Node
+  final protected def failingNode(cause: Throwable): Node =
+    newNode(new FailingEndpointFactory(cause))
+
+  /**
+   * A failing factory that always fails using the value of `emptyException`
+   */
+  private[loadbalancer] lazy val failingNode: Node =
+    failingNode(emptyException)
 
   /**
    * The type of Distributor. Mixed in.
@@ -197,13 +204,13 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
    * with a `Status.Open`.
    */
   @tailrec
-  private[this] def pick(count: Int): Node = {
-    if (count == 0)
-      return null.asInstanceOf[Node]
-
-    val n = dist.pick()
-    if (n.factory.status == Status.Open) n
-    else pick(count - 1)
+  private[this] def pick(count: Int): ServiceFactory[Req, Rep] = {
+    if (count == 0) null
+    else {
+      val n = dist.pick()
+      if (n.status == Status.Open) n
+      else pick(count - 1)
+    }
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {

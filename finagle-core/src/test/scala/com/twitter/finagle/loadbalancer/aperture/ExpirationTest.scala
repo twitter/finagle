@@ -42,7 +42,6 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     }
 
     protected def newNode(factory: EndpointFactory[Unit, Unit]): Node = Node(factory)
-    protected def failingNode(cause: Throwable): Node = ???
 
     override def close(when: Time) = {
       expiryTask.cancel()

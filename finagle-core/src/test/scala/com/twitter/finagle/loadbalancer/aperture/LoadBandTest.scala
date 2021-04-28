@@ -30,7 +30,6 @@ class LoadBandTest extends FunSuite with ApertureSuite {
     }
 
     protected def newNode(factory: EndpointFactory[Unit, Unit]) = Node(factory)
-    protected def failingNode(cause: Throwable) = ???
   }
 
   private class Avg {

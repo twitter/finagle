@@ -1,11 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.{
-  EndpointFactory,
-  FailingEndpointFactory,
-  LeastLoaded,
-  Updating
-}
+import com.twitter.finagle.loadbalancer.{EndpointFactory, LeastLoaded, Updating}
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactoryProxy}
@@ -57,7 +52,6 @@ private[loadbalancer] final class ApertureLeastLoaded[Req, Rep](
   }
 
   protected def newNode(factory: EndpointFactory[Req, Rep]): Node = Node(factory)
-  protected def failingNode(cause: Throwable): Node = Node(new FailingEndpointFactory(cause))
 
   override def close(deadline: Time): Future[Unit] = {
     expiryTask.cancel()

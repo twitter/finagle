@@ -161,6 +161,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   // `rebuildLog` is used for rebuild level events which happen at a relatively low frequency.
   private[aperture] val rebuildLog =
     Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.rebuild-log.$lbl")
+
   protected type Distributor = BaseDist[Req, Rep, Node]
 
   def additionalMetadata: Map[String, Any] = {
@@ -198,14 +199,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     )
   }
 
-  private[aperture] def newFailingNode: Node = failingNode(emptyException)
-
-  private[aperture] def mkEmptyVector(size: Int) = {
-    new EmptyVector[Req, Rep, Node](
-      this,
-      size
-    )
-  }
+  private[aperture] def mkEmptyVector(size: Int) =
+    new EmptyVector[Req, Rep, Node](this, size)
 
   protected def initDistributor(): Distributor = new EmptyVector[Req, Rep, Node](
     this,

@@ -21,7 +21,7 @@ private class EmptyVector[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
 
   def indices: Set[Int] = Set.empty
   def status: Status = Status.Closed
-  def pick(): NodeT = aperture.newFailingNode
+  def pick(): NodeT = aperture.failingNode
   def needsRebuild: Boolean = false
   def additionalMetadata: Map[String, Any] = Map.empty
 }

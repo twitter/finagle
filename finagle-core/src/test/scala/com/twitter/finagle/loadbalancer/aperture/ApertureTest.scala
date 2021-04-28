@@ -3,7 +3,7 @@ package com.twitter.finagle.loadbalancer.aperture
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
+import com.twitter.finagle.loadbalancer.{EndpointFactory, NodeT}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Duration, NullTimer, Var}
@@ -46,9 +46,6 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     protected def newNode(factory: EndpointFactory[Unit, Unit]): Node =
       new Node(factory)
-
-    protected def failingNode(cause: Throwable): Node =
-      new Node(new FailingEndpointFactory[Unit, Unit](cause))
 
     var rebuilds: Int = 0
     override def rebuild(): Unit = {
