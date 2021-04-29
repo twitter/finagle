@@ -22,7 +22,7 @@ private object MethodRoutingServiceTest {
 
   sealed trait Struct
 
-  object MethodField extends Field[Method]
+  object MethodField extends MessageField[Method]
 
   sealed trait Method {
     type Args <: Struct

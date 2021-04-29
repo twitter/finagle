@@ -29,6 +29,11 @@ object Route {
  *               This data is meant to be leveraged by a [[com.twitter.util.routing.Router]],
  *               so that it can determine its ability to send a [[Req request]] to
  *               the underlying [[Service service]].
+ * @param fields Extra custom [[RouteField metadata]] information associated with this [[Route route]]
+ *               that external to the [[Schema schema]] information required for a
+ *               base protocol's routing logic. An example use would be to define a [[RouteField]]
+ *               for a longer, human-readable description of this [[Route route's]] logic to put
+ *               in the [[com.twitter.util.registry.Registry]].
  * @tparam Req The underlying [[Service service's]] request type.
  * @tparam Rep The underlying [[Service service's]] response type.
  * @tparam Schema The contextual route information type.
@@ -36,5 +41,27 @@ object Route {
 private[finagle] case class Route[-Req, +Rep, Schema] private[routing] (
   service: Service[Request[Req], Response[Rep]],
   label: String,
-  schema: Schema)
-    extends ServiceProxy[Request[Req], Response[Rep]](service)
+  schema: Schema,
+  private val fields: FieldMap = FieldMap.empty)
+    extends ServiceProxy[Request[Req], Response[Rep]](service) {
+
+  /**
+   * Return `Some(value: FieldType)` for the specified [[RouteField field]]
+   * if it is present in this [[Route route's]] [[FieldMap fields]], otherwise `None`.
+   */
+  def get[FieldType](field: RouteField[FieldType]): Option[FieldType] = fields.get(field)
+
+  /**
+   * Return the [[FieldType value]] for the specified [[RouteField field]]
+   * if it is present in this [[Route route's]] [[FieldMap fields]], otherwise return the
+   * user supplied [[FieldType]].
+   */
+  def getOrElse[FieldType](field: RouteField[FieldType], orElse: => FieldType): FieldType =
+    fields.getOrElse(field, orElse)
+
+  /** Set the value for a [[FieldType field]] in this [[Route route's]] [[FieldMap fields]] */
+  def set[FieldType](
+    field: RouteField[FieldType],
+    value: FieldType
+  ): Route[Req, Rep, Schema] = copy(service, label, schema, fields.set(field, value))
+}

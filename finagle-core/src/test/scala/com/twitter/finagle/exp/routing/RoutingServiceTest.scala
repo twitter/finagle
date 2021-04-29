@@ -23,6 +23,8 @@ private object RoutingServiceTest {
 
   type Route = com.twitter.finagle.exp.routing.Route[Int, String, SvcSchema]
 
+  object CustomField extends RouteField[String]
+
   class StringRouter(
     label: String,
     routes: Iterable[Route])
@@ -246,6 +248,29 @@ class RoutingServiceTest extends FunSuite {
     assert(found() == 3)
     assert(handledFailures() == 1)
     assert(unhandledFailures() == 1)
+  }
+
+  test("routes can define and access custom fields") {
+    val evenRouter = newBuilder
+      .withRoute(
+        Route
+          .wrap(
+            label = "evens",
+            schema = SvcSchema(_ % 2 == 0),
+            service = Service.mk[Int, String](i => Future.value(i.toString))
+          ).set(CustomField, "evens, not odds")
+      )
+      .newRouter()
+
+    evenRouter(Request(4)) match {
+      case Found(_, route) =>
+        val field = route
+          .asInstanceOf[Route].getOrElse(
+            CustomField,
+            throw new IllegalStateException("No CustomField present on route!"))
+        assert(field == "evens, not odds")
+      case error => fail(s"received unexpected result: $error")
+    }
   }
 
 }
