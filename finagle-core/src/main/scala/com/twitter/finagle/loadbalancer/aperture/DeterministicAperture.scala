@@ -115,6 +115,15 @@ private final class DeterministicAperture[Req, Rep, NodeT <: ApertureNode[Req, R
 
   private[this] val ring = new Ring(vector.size, rng)
 
+  private[this] val pdist = new ProbabilityDistribution[NodeT] {
+    def pickOne(): Int = ring.pick(coord.offset, apertureWidth)
+    def tryPickSecond(a: Int): Int = ring.tryPickSecond(a, coord.offset, apertureWidth)
+    def weight(a: Int): Double = ring.weight(a, coord.offset, apertureWidth)
+    def get(i: Int): NodeT = vector(i)
+  }
+
+  def pick(): NodeT = WeightedP2CPick.pick(pdist, aperture.pickLog)
+
   // Note that this definition ignores the user defined `minAperture`,
   // but that isn't likely to hold much value given our definition of `min`
   // and how we calculate the `apertureWidth`.
@@ -195,63 +204,6 @@ private final class DeterministicAperture[Req, Rep, NodeT <: ApertureNode[Req, R
       aperture.rebuildLog.trace(
         s"[DeterministicAperture.rebuild $labelForLogging] nodes=$vectorString")
     }
-  }
-
-  // A quick helper for seeing if a is close to the same value as b.
-  // This allows for avoiding bias due to numerical instability in
-  // floating point values.
-  private[this] def approxEqual(a: Double, b: Double): Boolean =
-    math.abs(a - b) < 0.0001
-
-  /**
-   * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
-   * taking into account their respective weights.
-   */
-  private[this] def pick(a: NodeT, aw: Double, b: NodeT, bw: Double): NodeT = {
-    val aStatus = a.status
-    val bStatus = b.status
-    if (aStatus == bStatus) {
-      // Note, `aw` or `bw` can't be zero since `pick2` would not
-      // have returned the indices in the first place. However,
-      // we check anyways to safeguard against any numerical
-      // stability issues.
-      val _aw = if (aw == 0) 1.0 else aw
-      val _bw = if (bw == 0) 1.0 else bw
-
-      // We first check if the weights are effectively the same so we can
-      // ignore them if they are. If we just go for it and use them we can
-      // evaluate (1.0 / 1.0 <= 1.0 / 1.0000000001) and we bias toward the
-      // second instance which should have identical weight but it's a hair
-      // off due to floating point precision errors.
-      if (approxEqual(_aw, _bw)) {
-        if (a.load <= b.load) a else b
-      } else {
-        if (a.load / _aw <= b.load / _bw) a else b
-      }
-    } else {
-      if (Status.best(aStatus, bStatus) == aStatus) a else b
-    }
-  }
-
-  def pick(): NodeT = {
-    val offset = coord.offset
-    val width = apertureWidth
-    val a = ring.pick(offset, width)
-    val b = ring.tryPickSecond(a, offset, width)
-    val aw = ring.weight(a, offset, width)
-    val bw = ring.weight(b, offset, width)
-
-    val nodeA = vector(a)
-    val nodeB = vector(b)
-    val picked = pick(nodeA, aw, nodeB, bw)
-
-    if (aperture.pickLog.isLoggable(Level.TRACE)) {
-      aperture.pickLog.trace(
-        f"[DeterministicAperture.pick] a=(index=$a, weight=$aw%1.6f, node=$nodeA) b=(index=$b, weight=$bw%1.6f, node=$nodeB) picked=$picked"
-      )
-    }
-
-    picked
   }
 
   // rebuilds only need to happen when we receive ring updates (from
