@@ -13,6 +13,13 @@ Breaking API Changes
 * finagle-core: `c.t.f.param.Logger` has been removed. Use external configuration supported by
   your logging backend to alter settings of `com.twitter.finagle` logger.  ``PHAB_ID=D618667``
 
+Bug Fixes
+~~~~~~~~~~
+
+* finagle-core: Failed writes on Linux due to a remote peer disconnecting should now
+  be properly seen as a `c.t.f.ChannelClosedException` instead of a
+  `c.t.f.UnknownChannelException`. ``PHAB_ID=D661550``
+
 21.4.0
 ------
 
