@@ -285,7 +285,6 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleServersets,
   finaglePartitioning,
   finagleTunable,
-  finagleException,
   finagleIntegration,
   finagleExp,
   finagleGrpcContext,
@@ -485,19 +484,6 @@ lazy val finagleZipkinScribe = Project(
     name := "finagle-zipkin-scribe",
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleScribe, finagleThrift, finagleZipkinCore)
-
-lazy val finagleException = Project(
-  id = "finagle-exception",
-  base = file("finagle-exception")
-).settings(
-    sharedSettings
-  ).settings(
-    name := "finagle-exception",
-    libraryDependencies ++= Seq(
-      util("codec")
-    ) ++ scroogeLibs,
-    libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCore, finagleThrift)
 
 lazy val finagleServersets = Project(
   id = "finagle-serversets",

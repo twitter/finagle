@@ -35,6 +35,12 @@ Runtime Behavior Changes
 * finagle-core: The "failures" counter is changed to be created eagerly, when no failure
   happens, the counter value is 0. ``PHAB_ID=D645590``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-exception: This package was no longer used and therefore has been removed. No
+  replacement is planned. ``PHAB_ID=D656591``
+
 21.3.0
 ------
 
