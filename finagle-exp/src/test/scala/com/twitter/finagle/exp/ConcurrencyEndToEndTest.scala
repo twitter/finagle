@@ -7,28 +7,28 @@ import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.exp.ConcurrencyLimitFilter.ConcurrencyOverload
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Duration, Future}
+import com.twitter.util.{Await, Duration, Future, Promise, Throw}
 import java.net.{InetAddress, InetSocketAddress}
+import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
-private object ConcurrencyEndToEndTest {
-  val initialConcurrentReqLimit = 10
-  val maxConcurrentReqLimit = 1000
-  val excessRps = 5
-  // Timeout needs to be around 1.second so CI tests do not fail
-  val timeout = 1.second
+class ConcurrencyEndToEndTest extends FunSuite with Eventually with IntegrationPatience {
+  private[this] val initialConcurrentReqLimit = 10
+  private[this] val maxConcurrentReqLimit = 1000
+  private[this] val excessRps = 5
 
-  val always: Service[String, String] = Service.const(Future.value("pong"))
-  val failingSvc: Service[String, String] =
+  // Timeout needs to be generous so CI doesn't fail
+  private[this] val timeout = 10.seconds
+
+  private[this] val always: Service[String, String] = Service.const(Future.value("pong"))
+  private[this] val failingSvc: Service[String, String] =
     Service.const(Future.exception(new ChannelClosedException))
-}
 
-class ConcurrencyEndToEndTest extends FunSuite {
-  import ConcurrencyEndToEndTest._
+  private[this] def await[A](f: Future[A], timeout: Duration = timeout): A =
+    Await.result(f, timeout)
 
-  def await[A](f: Future[A], timeout: Duration = 5.second): A = Await.result(f, timeout)
-
-  class Ctx() {
+  private[this] class Ctx() {
 
     private[this] val sr = new InMemoryStatsReceiver
 
@@ -59,7 +59,7 @@ class ConcurrencyEndToEndTest extends FunSuite {
       try {
         fn(client)
       } finally {
-        await(Future.join(server.close(), client.close()), 10.seconds)
+        await(Future.join(server.close(), client.close()))
       }
     }
 
@@ -74,22 +74,53 @@ class ConcurrencyEndToEndTest extends FunSuite {
     val ctx = new Ctx
     import ctx._
 
-    testWithServerAndClient(always) { client =>
-      val result =
-        Future.collectToTry(Seq.fill(initialConcurrentReqLimit + excessRps)(client("ping")))
+    val latch = Promise[String]()
+    val counter = new AtomicInteger()
+    val svc = Service.mk { _: String =>
+      counter.incrementAndGet()
+      latch
+    }
 
-      try {
-        await(result, 10.seconds)
-      } catch {
-        case _: ConcurrencyOverload =>
-        case t: Throwable =>
-          fail(s"expected ConcurrencyOverload, saw $t")
+    testWithServerAndClient(svc) { client =>
+      val successes = Future.collect(Seq.fill(initialConcurrentReqLimit)(client("ping")))
+      eventually {
+        // note that we can't check the requestsCounter because it's not incremented until
+        // the response is returned to the client. Same for the `overloads` check as well.
+        assert(counter.get == initialConcurrentReqLimit)
+        assert(droppedRequestsCounter == 0)
       }
+
+      val overloads = Future.collectToTry(Seq.fill(excessRps)(client("ping")))
+      eventually {
+        assert(counter.get == initialConcurrentReqLimit)
+        assert(droppedRequestsCounter == excessRps)
+      }
+
+      // These should already be available.
+      await(overloads).foreach {
+        case Throw(_: ConcurrencyOverload) => // ok
+        case other => fail(s"Unexpected result: $other")
+      }
+
+      // Now let our initial requests complete
+      latch.setValue("pong")
+      assert(await(successes) == Seq.fill(initialConcurrentReqLimit)("pong"))
 
       // the excessRps is not counted by request counter
       // because the filter is inserted before stats filter
-      assert(requestsCounter == initialConcurrentReqLimit)
-      assert(droppedRequestsCounter == excessRps)
+      eventually {
+        assert(counter.get == initialConcurrentReqLimit)
+        assert(requestsCounter == initialConcurrentReqLimit)
+        assert(droppedRequestsCounter == excessRps)
+      }
+
+      // one more request to make sure we're unblocked now
+      assert(await(client("ping")) == "pong")
+      eventually {
+        assert(counter.get == initialConcurrentReqLimit + 1)
+        assert(requestsCounter == initialConcurrentReqLimit + 1)
+        assert(droppedRequestsCounter == excessRps)
+      }
     }
   }
 
@@ -99,8 +130,11 @@ class ConcurrencyEndToEndTest extends FunSuite {
     testWithServerAndClient(always) { client =>
       val result = Future.collectToTry(Seq.fill(initialConcurrentReqLimit)(client("ping")))
       await(result)
-      assert(successCounter == initialConcurrentReqLimit)
-      assert(droppedRequestsCounter == 0)
+
+      eventually {
+        assert(successCounter == initialConcurrentReqLimit)
+        assert(droppedRequestsCounter == 0)
+      }
     }
   }
 
@@ -114,8 +148,11 @@ class ConcurrencyEndToEndTest extends FunSuite {
           await(client("ping"))
         }
       }
-      assert(failuresCounter == initialConcurrentReqLimit)
-      assert(droppedRequestsCounter == 0)
+
+      eventually {
+        assert(failuresCounter == initialConcurrentReqLimit)
+        assert(droppedRequestsCounter == 0)
+      }
     }
   }
 }
