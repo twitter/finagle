@@ -2,19 +2,20 @@ package com.twitter.finagle.mux
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.client.{EndpointerStackClient, BackupRequestFilter}
+import com.twitter.finagle.client.{BackupRequestFilter, EndpointerStackClient}
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.server.ListeningStackServer
 import com.twitter.finagle.service.Retries
+import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
-import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
-import java.nio.ByteBuffer
+import java.net.{InetSocketAddress, Socket}
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -393,64 +394,7 @@ abstract class AbstractEndToEndTest
 
   test(s"$implName: Default client stack will add RemoteInfo on BadMessageException") {
 
-    class Server {
-      private lazy val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-      private lazy val server = new ServerSocket()
-      @volatile private var client: Socket = _
-
-      private[this] def swallowMessage(): Unit = {
-        val is = client.getInputStream
-        val sizeField = (3 to 0 by -1).foldLeft(0) { (acc: Int, i: Int) =>
-          acc | (is.read().toByte << i)
-        }
-        // swallow sizeField bytes
-        (0 until sizeField).foreach(_ => is.read())
-      }
-
-      private[this] def swallowAndWrite(data: Array[Byte]): Unit = {
-        swallowMessage()
-        val os = client.getOutputStream
-        data.foreach(os.write(_))
-        os.flush()
-      }
-
-      private val serverThread = new Thread(new Runnable {
-        override def run(): Unit = {
-          client = server.accept()
-          // Length of 4 bytes, header of 0x00 00 00 04 (illegal: message type 0x00)
-          val rerr = Message.encode(Message.Rerr(1, "didn't work!"))
-          val badMessage = Array[Byte](0, 0, 0, 4, 0, 0, 0, 4)
-
-          val lengthField = {
-            val len = new Array[Byte](4)
-            val bb = ByteBuffer.wrap(len)
-            bb.putInt(rerr.length)
-            len
-          }
-
-          // write the message twice: once for handshaking and once for the failure
-          swallowAndWrite(lengthField ++ Buf.ByteArray.Shared.extract(rerr))
-          swallowAndWrite(badMessage)
-        }
-      })
-
-      def port = server.getLocalPort
-
-      def start(): Unit = {
-        server.bind(address)
-        serverThread.start()
-      }
-
-      def close(): Unit = {
-        serverThread.join(30.seconds.inMillis)
-        Option(client).foreach(_.close())
-        server.close()
-      }
-    }
-
-    val server = new Server
     val serviceName = "mux-client"
-
     val monitor = new Monitor {
       @volatile var exc: Throwable = _
       override def handle(exc: Throwable): Boolean = {
@@ -459,40 +403,54 @@ abstract class AbstractEndToEndTest
       }
     }
 
-    try {
-      server.start()
-      val sr = new InMemoryStatsReceiver
-      val client = clientImpl
-        .withLabel(serviceName)
-        .withStatsReceiver(sr)
-        .withMonitor(monitor)
-        .newService(s"${InetAddress.getLoopbackAddress.getHostAddress}:${server.port}")
+    val sr = new InMemoryStatsReceiver
+    val configuredClient = clientImpl
+      .withLabel(serviceName)
+      .withStatsReceiver(sr)
+      .withMonitor(monitor)
 
-      val result = await(client(Request.empty).liftToTry, 30.seconds)
-      server.close()
+    val client = {
+      val factory =
+        ServiceFactory.const(Service.mk[Request, Response] { _ =>
+          Future.exception(Failure.wrap(BadMessageException("so sad")))
+        })
 
-      // The Monitor should have intercepted the Failure
-      assert(monitor.exc.isInstanceOf[Failure])
-      val failure = monitor.exc.asInstanceOf[Failure]
-
-      // The client should have yielded a BadMessageException
-      // because the Failure.module should have stripped the Failure
-      assert(result.isThrow)
-      assert(result.throwable.isInstanceOf[BadMessageException])
-      val exc = result.throwable.asInstanceOf[BadMessageException]
-
-      assert(failure.cause == Some(exc))
-
-      // RemoteInfo should have been added by the client stack
-      failure.getSource(Failure.Source.RemoteInfo) match {
-        case Some(a: RemoteInfo.Available) =>
-          assert(a.downstreamLabel == Some(serviceName))
-          assert(a.downstreamAddr.isDefined)
-
-        case other => fail(s"Unexpected remote info: $other")
+      val module = new Stack.Module[ServiceFactory[Request, Response]] {
+        def role: Stack.Role = Stack.Role("sadface")
+        def description: String = "sadface"
+        def parameters: Seq[Stack.Param[_]] = Nil
+        def make(
+          params: Stack.Params,
+          next: Stack[ServiceFactory[Request, Response]]
+        ): Stack[ServiceFactory[Request, Response]] = Stack.leaf(this, factory)
       }
-    } finally {
-      server.close()
+
+      val stack = configuredClient.stack ++ (module +: nilStack)
+      stack
+        .make(configuredClient.params + BindingFactory.Dest(Resolver.eval(s":*"))).toService
+    }
+
+    val result = await(client(Request.empty).liftToTry, 30.seconds)
+
+    // The Monitor should have intercepted the Failure
+    assert(monitor.exc.isInstanceOf[Failure])
+    val failure = monitor.exc.asInstanceOf[Failure]
+
+    // The client should have yielded a BadMessageException
+    // because the Failure.module should have stripped the Failure
+    assert(result.isThrow)
+    assert(result.throwable.isInstanceOf[BadMessageException])
+    val exc = result.throwable.asInstanceOf[BadMessageException]
+
+    assert(failure.cause == Some(exc))
+
+    // RemoteInfo should have been added by the client stack
+    failure.getSource(Failure.Source.RemoteInfo) match {
+      case Some(a: RemoteInfo.Available) =>
+        assert(a.downstreamLabel == Some(serviceName))
+        assert(a.downstreamAddr.isDefined)
+
+      case other => fail(s"Unexpected remote info: $other")
     }
   }
 
