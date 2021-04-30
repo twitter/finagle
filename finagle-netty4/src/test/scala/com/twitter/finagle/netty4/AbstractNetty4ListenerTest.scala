@@ -98,15 +98,12 @@ abstract class AbstractNetty4ListenerTest
     val p = Params.empty + Label("test") + Stats(sr) + MaxConnections(1)
     val server = serveService(_ => (), p, noopService)
 
+    // Establish a connection and wait until the server sees it before we
+    // start the second connection since through connection establishment
+    // they could race with one another to be 'first'.
     val client1 = new Socket()
     client1.connect(server.boundAddress)
-
-    // The first client should be able to write. Note that we do this before
-    // checking the second connection so as to enforce some ordering: otherwise
-    // from the server perspective these connections might get established in a
-    // different order.
-    client1.getOutputStream.write(1)
-    client1.getOutputStream.flush()
+    eventually { assert(sr.gauges(Seq("connections"))() == 1.0f) }
 
     val client2 = new Socket()
     client2.connect(server.boundAddress)
@@ -117,6 +114,10 @@ abstract class AbstractNetty4ListenerTest
         client2.getOutputStream.flush()
       }
     }
+
+    // Make sure that client1 is still able to write some stuff.
+    client1.getOutputStream.write(1)
+    client1.getOutputStream.flush()
 
     client1.close()
     client2.close()
