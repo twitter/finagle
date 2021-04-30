@@ -2,7 +2,8 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.Parameter.NullParameter
 import com.twitter.finagle.mysql.transport.MysqlBuf
-import java.sql.{Date => SQLDate, Timestamp}
+import com.twitter.io.Buf
+import java.sql.{Timestamp, Date => SQLDate}
 import java.util.{Calendar, Date}
 import org.scalatest.FunSuite
 
@@ -163,6 +164,51 @@ class SecureHandshakeResponseTest extends HandshakeResponseTest {
         maxPacketSize
       )
     }
+  }
+}
+
+class AuthSwitchResponseTest extends FunSuite {
+  val password = Some("password")
+  val salt =
+    Array[Byte](70, 38, 43, 66, 74, 48, 79, 126, 76, 66, 70, 118, 67, 40, 63, 68, 120, 80, 103, 54)
+  val charset = 255.toShort
+
+  val req = AuthSwitchResponse(seqNum = 1.toShort, password, salt, charset, withSha256 = false)
+  val br = MysqlBuf.reader(req.toPacket.body)
+
+  test("encode password") {
+    assert(br.readNullTerminatedBytes() === req.hashPassword)
+  }
+}
+
+class AuthMoreDataToServerTest extends FunSuite {
+  test("AuthMoreData request public key") {
+    val req = PlainAuthMoreDataToServer(seqNum = 1.toShort, NeedPublicKey)
+    val br = MysqlBuf.reader(req.toPacket.body)
+
+    assert(br.readByte() == NeedPublicKey.moreDataByte)
+  }
+
+  test("AuthMoreData fast auth success") {
+    val req = PlainAuthMoreDataToServer(seqNum = 1.toShort, FastAuthSuccess)
+    val br = MysqlBuf.reader(req.toPacket.body)
+
+    assert(br.readByte() == FastAuthSuccess.moreDataByte)
+  }
+
+  test("AuthMoreData perform full auth") {
+    val req = PlainAuthMoreDataToServer(seqNum = 1.toShort, PerformFullAuth)
+    val br = MysqlBuf.reader(req.toPacket.body)
+
+    assert(br.readByte == PerformFullAuth.moreDataByte)
+  }
+
+  test("AuthMoreData with password auth data") {
+    val authData = Array[Byte](70, 38, 43, 66, 74, 48, 79, 126, 76, 66)
+    val req = PasswordAuthMoreDataToServer(seqNum = 1.toShort, PerformFullAuth, authData)
+    val br = MysqlBuf.reader(req.toPacket.body)
+
+    assert(Buf.ByteArray.Owned.extract(br.readBytes(10)).sameElements(authData))
   }
 }
 

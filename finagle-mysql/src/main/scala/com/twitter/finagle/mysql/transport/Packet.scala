@@ -7,6 +7,7 @@ object Packet {
   val OkByte = 0x00.toByte
   val ErrorByte = 0xff.toByte
   val EofByte = 0xfe.toByte
+  val AuthMoreDataByte = 0x01.toByte
 
   val MaxBodySize = 0xffffff
 

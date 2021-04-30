@@ -62,6 +62,74 @@ class HandshakeInitTest extends FunSuite {
   })
 }
 
+class AuthSwitchRequestTest extends FunSuite with HexDump {
+  val hex =
+    """2C 00 00 02 FE 63 61 63    68 69 6E 67 5F 73 68 61
+      |32 5F 70 61 73 73 77 6F    72 64 00 0F 71 2E 02 5B
+      |17 57 63 6B 19 4E 47 6A    0E 5B 01 40 72 26 41 00""".stripMargin
+  val pluginData =
+    Array(15, 113, 46, 2, 91, 23, 87, 99, 107, 25, 78, 71, 106, 14, 91, 1, 64, 114, 38, 65)
+
+  test("decode") {
+    assert(packets.size > 0)
+    val authSwitchRequest = AuthSwitchRequest.decode(packets.head)
+    assert(authSwitchRequest.seqNum == 2)
+    assert(authSwitchRequest.pluginName == "caching_sha2_password")
+    assert(authSwitchRequest.pluginData.sameElements(pluginData))
+  }
+}
+
+class AuthMoreDataFromServerTest extends FunSuite {
+
+  test("fast auth success packet")(new HexDump {
+    val hex = """02 00 00 04 01 03"""
+
+    assert(packets.size > 0)
+    val authMoreData = AuthMoreDataFromServer.decode(packets.head)
+    assert(authMoreData.seqNum == 4)
+    assert(authMoreData.moreDataType == FastAuthSuccess)
+    assert(authMoreData.authData.isEmpty)
+  })
+
+  test("perform full auth packet")(new HexDump {
+    val hex = """02 00 00 04 01 04"""
+
+    assert(packets.size > 0)
+    val authMoreData = AuthMoreDataFromServer.decode(packets.head)
+    assert(authMoreData.seqNum == 4)
+    assert(authMoreData.moreDataType == PerformFullAuth)
+    assert(authMoreData.authData.isEmpty)
+  })
+
+  test("auth more data with RSA public key")(new HexDump {
+    val hex =
+      """11 01 00 06 01 2D 2D 2D    2D 2D 42 45 47 49 4E 20
+        |50 55 42 4C 49 43 20 4B    45 59 2D 2D 2D 2D 2D 0A
+        |4D 49 47 66 4D 41 30 47    43 53 71 47 53 49 62 33
+        |44 51 45 42 41 51 55 41    41 34 47 4E 41 44 43 42
+        |69 51 4B 42 67 51 44 42    7A 6F 71 51 75 77 5A 39
+        |2F 65 4B 4D 4F 55 30 4F    58 57 4A 34 49 53 6A 2B
+        |0A 32 59 45 6B 38 6C 34    4F 6D 42 6F 43 39 59 32
+        |77 4E 45 65 34 50 63 6A    7A 6D 43 46 2F 66 39 61
+        |5A 44 79 48 36 7A 6E 68    30 47 36 67 6D 62 2F 79
+        |72 54 76 75 4E 4C 59 6B    54 55 67 69 46 4E 6D 30
+        |79 0A 4A 32 72 53 7A 6C    67 6D 4A 5A 48 6B 57 79
+        |6B 52 6B 6A 4B 72 34 56    30 34 69 41 61 48 64 55
+        |34 4F 52 72 65 37 4D 73    39 65 6C 6E 37 6B 38 43
+        |65 56 51 46 70 43 6A 4D    35 31 48 4F 4C 6B 70 38
+        |49 68 0A 6E 41 56 72 6B    4F 68 53 62 48 49 34 76
+        |78 70 72 62 51 49 44 41    51 41 42 0A 2D 2D 2D 2D
+        |2D 45 4E 44 20 50 55 42    4C 49 43 20 4B 45 59 2D
+        |2D 2D 2D 2D 0A""".stripMargin
+
+    assert(packets.size > 0)
+    val authMoreData = AuthMoreDataFromServer.decode(packets.head)
+    assert(authMoreData.seqNum == 6)
+    assert(authMoreData.moreDataType == NeedPublicKey)
+    assert(authMoreData.authData.isDefined)
+  })
+}
+
 class OKTest extends FunSuite with HexDump {
   val hex = """07 00 00 02 00 00 00 02    00 00 00"""
   test("decode") {

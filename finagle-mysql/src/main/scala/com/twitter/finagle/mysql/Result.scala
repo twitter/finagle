@@ -49,17 +49,21 @@ object HandshakeInit extends Decoder[HandshakeInit] {
           val status = br.readShortLE()
           val capHigh = br.readUnsignedShortLE() << 16
           val serverCap = Capability(capHigh, capLow)
+          val hasPluginAuthCap = serverCap.has(Capability.PluginAuth)
 
-          // auth plugin data. Currently unused but we could verify
-          // that our secure connections respect the expected size.
-          br.skip(1)
+          val authPluginDataLen = br.readUnsignedByte() // sometimes 0
 
           // next 10 bytes are all reserved
           br.readBytes(10)
 
           val salt2 =
-            if (!serverCap.has(Capability.SecureConnection)) Array.empty[Byte]
-            else br.readNullTerminatedBytes()
+            if (hasPluginAuthCap && authPluginDataLen != 0) {
+              // Documentation says 13 or authPluginDataLen - 8
+              br.readNullTerminatedBytes()
+            } else {
+              if (!serverCap.has(Capability.SecureConnection)) Array.empty[Byte]
+              else br.readNullTerminatedBytes()
+            }
 
           HandshakeInit(
             protocol,
@@ -83,6 +87,75 @@ case class HandshakeInit(
   serverCapabilities: Capability,
   charset: Short,
   status: Short)
+    extends Result
+
+/**
+ * Sent during the connection phase if the client and server both support pluggable
+ * authentication, that is, they both have [[Capability.PluginAuth]]. Sent to switch
+ * the authentication method.
+ *
+ * @see [[https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_auth_switch_request.html]]
+ */
+private[mysql] object AuthSwitchRequest extends Decoder[AuthSwitchRequest] {
+  def decode(packet: Packet): AuthSwitchRequest = {
+    val br = MysqlBuf.reader(packet.body)
+    try {
+      // 0xfe status byte doubles as the
+      // AuthSwitchRequest packet identifier
+      br.readByte()
+
+      val pluginName = br.readNullTerminatedString()
+      val pluginData = br.readNullTerminatedBytes()
+      AuthSwitchRequest(
+        seqNum = packet.seq,
+        pluginName = pluginName,
+        pluginData = pluginData
+      )
+    } finally br.close()
+  }
+}
+
+private[mysql] case class AuthSwitchRequest(
+  seqNum: Short,
+  pluginName: String,
+  pluginData: Array[Byte])
+    extends Result
+
+/**
+ * Sent between the client and the server during the connection phase in order
+ * to pass information required for authentication.
+ *
+ * @see [[https://dev.mysql.com/doc/dev/mysql-server/8.0.22/page_protocol_connection_phase_packets_protocol_auth_more_data.html]]
+ */
+private[mysql] object AuthMoreDataFromServer extends Decoder[AuthMoreDataFromServer] {
+  def decode(packet: Packet): AuthMoreDataFromServer = {
+    val br = MysqlBuf.reader(packet.body)
+    try {
+      // 0x01 status byte to identify the AuthMoreData packet
+      br.readByte()
+
+      val firstByteBuf = br.readBytes(1)
+      val firstByte = firstByteBuf.get(0)
+      // either one byte or the server's public key
+      firstByte match {
+        case FastAuthSuccess.moreDataByte =>
+          AuthMoreDataFromServer(packet.seq, FastAuthSuccess, None)
+        case PerformFullAuth.moreDataByte =>
+          AuthMoreDataFromServer(packet.seq, PerformFullAuth, None)
+        case _ => // server sent public key as contents of packet
+          val bufToConvertToString = firstByteBuf.concat(br.readAll())
+          val bytesToConvertToString = new Array[Byte](packet.size)
+          bufToConvertToString.write(bytesToConvertToString, 0)
+          AuthMoreDataFromServer(packet.seq, NeedPublicKey, Some(bytesToConvertToString))
+      }
+    } finally br.close()
+  }
+}
+
+private[mysql] case class AuthMoreDataFromServer(
+  seqNum: Short,
+  moreDataType: AuthMoreDataType,
+  authData: Option[Array[Byte]])
     extends Result
 
 object OK extends Decoder[OK] {
