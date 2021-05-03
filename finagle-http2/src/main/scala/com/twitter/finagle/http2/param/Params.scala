@@ -72,6 +72,20 @@ object InitialWindowSize {
 }
 
 /**
+ * A class for configuring overrides to the default `encoderEnforceMaxConcurrentStreams` setting. If
+ * enabled the encoder will queue frames if the maximum number of concurrent streams would otherwise
+ * be exceeded.
+ */
+final case class EnforceMaxConcurrentStreams(enabled: Boolean) {
+  def mk(): (EnforceMaxConcurrentStreams, Stack.Param[EnforceMaxConcurrentStreams]) =
+    (this, EnforceMaxConcurrentStreams.param)
+}
+
+object EnforceMaxConcurrentStreams {
+  implicit val param = Stack.Param(EnforceMaxConcurrentStreams(enabled = false))
+}
+
+/**
  * A class for configuring overrides to the default maxFrameSize setting.
  */
 case class MaxFrameSize(maxFrameSize: Option[StorageUnit]) {

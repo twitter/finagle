@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-http2: Added `c.t.f.http2.param.EnforceMaxConcurrentStreams` which allows users to
+  configure http2 clients to buffer streams once a connection has hit the max concurrent stream
+  limit rather than rejecting them.  A `buffered_streams` gauge has been added to track the 
+  current number of buffered streams.  ``PHAB_ID=D643138``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -19,6 +27,9 @@ Bug Fixes
 * finagle-core: Failed writes on Linux due to a remote peer disconnecting should now
   be properly seen as a `c.t.f.ChannelClosedException` instead of a
   `c.t.f.UnknownChannelException`. ``PHAB_ID=D661550``
+
+* finagle-http2: The `streams` gauge is now correctly added for http2 connections over TLS.
+  ``PHAB_ID=D643138``
 
 21.4.0
 ------

@@ -19,6 +19,9 @@
 **<client_label>/streams**
   A gauge exposing the number of opened streams on the client.
 
+**<client_label>/buffered_streams**
+  A gauge exposing the number of buffered streams on the client.
+
 **<client_label>/dead_session**
   A counter of the number of closed sessions evicted.
 

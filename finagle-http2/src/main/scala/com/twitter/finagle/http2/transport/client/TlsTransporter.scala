@@ -120,6 +120,7 @@ object TlsTransporter {
     val (codec, handler) = MultiplexHandlerBuilder.clientFrameCodec(params, None)
     val streamChannelInit = H2StreamChannelInit.initClient(params)
     val pingDetectionHandler = new H2ClientFilter(params)
+    MultiplexHandlerBuilder.addStreamsGauge(params[Stats].statsReceiver, codec, channel)
 
     channel.pipeline
       .addLast(Http2CodecName, codec)

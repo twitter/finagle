@@ -1,27 +1,17 @@
 package com.twitter.finagle.http2
 
+import com.twitter.finagle.http2.param._
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.param.{
-  EncoderIgnoreMaxHeaderListSize,
-  FrameLoggerNamePrefix,
-  FrameLogging,
-  HeaderSensitivity
-}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.StatsReceiver
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.{
-  Channel,
-  ChannelFuture,
-  ChannelFutureListener,
-  ChannelHandler,
-  ChannelInitializer
-}
+import io.netty.channel._
 import io.netty.handler.codec.http2.{
   Http2FrameCodec,
   Http2FrameCodecBuilder,
   Http2HeadersEncoder,
-  Http2MultiplexHandler
+  Http2MultiplexHandler,
+  StreamBufferingEncoder
 }
 
 /**
@@ -57,6 +47,29 @@ private object MultiplexHandlerBuilder {
     channel.closeFuture.addListener(new ChannelFutureListener {
       def operationComplete(f: ChannelFuture): Unit = streams.remove()
     })
+
+    addBufferedStreamsGaugeIfNeeded(statsReceiver, frameCodec, channel)
+  }
+
+  private def addBufferedStreamsGaugeIfNeeded(
+    statsReceiver: StatsReceiver,
+    frameCodec: Http2FrameCodec,
+    channel: Channel
+  ): Unit = {
+    frameCodec.encoder() match {
+      case sb: StreamBufferingEncoder =>
+        // scalafix:off StoreGaugesAsMemberVariables
+        val bufferedStreams = statsReceiver.addGauge("buffered_streams") {
+          sb.numBufferedStreams()
+        }
+        // scalafix:on StoreGaugesAsMemberVariables
+
+        channel
+          .closeFuture().addListener(new ChannelFutureListener {
+            override def operationComplete(future: ChannelFuture): Unit = bufferedStreams.remove()
+          })
+      case _ => // noop
+    }
   }
 
   /** Construct a `Http2MultiplexHandler` for server pipelines */
@@ -102,6 +115,10 @@ private object MultiplexHandlerBuilder {
         params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize
       )
       .headerSensitivityDetector(detector(params))
+
+    if (params[EnforceMaxConcurrentStreams].enabled) {
+      builder.encoderEnforceMaxConcurrentStreams(true)
+    }
 
     if (params[FrameLogging].enabled) {
       builder.frameLogger(
