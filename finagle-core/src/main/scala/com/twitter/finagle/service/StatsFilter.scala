@@ -1,5 +1,6 @@
 package com.twitter.finagle.service
 
+import com.twitter.conversions.PercentOps._
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, GreaterThan, MonotoneThresholds}
@@ -240,6 +241,11 @@ class StatsFilter[Req, Rep] private[service] (
         statsReceiver = statsReceiver).withKernel)
   private[this] val requestSchema =
     CounterSchema(MetricBuilder(name = Seq("requests"), statsReceiver = statsReceiver).withKernel)
+  private[this] val latencySchema =
+    HistogramSchema(
+      MetricBuilder(
+        name = Seq(s"request_latency_$latencyStatSuffix"),
+        statsReceiver = statsReceiver).withKernel)
 
   private[this] val outstandingRequestCount = new LongAdder()
   private[this] val dispatchCount = statsReceiver.counter(requestSchema)
@@ -247,7 +253,7 @@ class StatsFilter[Req, Rep] private[service] (
   // ExceptionStatsHandler creates the failure counter lazily.
   // We need to eagerly register this counter in metrics for success rate expression.
   private[this] val failureCount = statsReceiver.counter(failureSchema)
-  private[this] val latencyStat = statsReceiver.stat(s"request_latency_$latencyStatSuffix")
+  private[this] val latencyStat = statsReceiver.stat(latencySchema)
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
 
@@ -265,6 +271,12 @@ class StatsFilter[Req, Rep] private[service] (
     .withUnit(Requests)
     .withDescription("The total requests")
     .register()
+
+  private[this] val latency =
+    ExpressionSchema("latency", Expression(latencySchema, Right(99.percent)))
+      .withUnit(Milliseconds)
+      .withDescription("The p99 latency of a request.")
+      .register()
 
   private[this] def isIgnorableResponse(rep: Try[Rep]): Boolean = rep match {
     case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Ignorable) =>
