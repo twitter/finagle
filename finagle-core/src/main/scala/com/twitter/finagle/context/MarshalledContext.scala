@@ -3,6 +3,7 @@ package com.twitter.finagle.context
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Local, Return, Throw, Try}
+import java.security.{MessageDigest, NoSuchAlgorithmException}
 
 /**
  * A marshalled context contains bindings that may be
@@ -37,12 +38,9 @@ final class MarshalledContext private[context] extends Context {
               cachedEnv = Some(value)
               cachedEnv
             case Throw(e) =>
-              val bytesToDisplay = value.slice(0, 10)
-              val bytesString = Buf.slowHexString(bytesToDisplay)
               val message =
                 s"Failed to deserialize marshalled context entry for key ${key.id}. " +
-                  s"Value has length ${value.length}. First ${bytesToDisplay.length} bytes " +
-                  s"of the value: 0x$bytesString"
+                  s"Value has length ${value.length}. Values hash: 0x${hashValue(value)}"
               log.warning(e, message)
               None
           }
@@ -150,6 +148,26 @@ final class MarshalledContext private[context] extends Context {
     contexts.foldLeft(env) {
       case (env, (k, v)) =>
         env.updated(k, Translucent(k, v))
+    }
+  }
+
+  // Exposed for testing
+  private[context] def hashValue(value: Buf): String = {
+    // SHA-256 is considered a cryptographically secure hash function as of 2021.
+    val algorithm = "SHA-256"
+    try {
+      val digest = MessageDigest.getInstance(algorithm)
+      value match {
+        case Buf.ByteArray.Owned(data, start, end) =>
+          digest.update(data, start, end - start)
+        case other =>
+          val data = Buf.ByteArray.Owned.extract(other)
+          digest.update(data)
+      }
+
+      Buf.slowHexString(Buf.ByteArray.Owned(digest.digest()))
+    } catch {
+      case _: NoSuchAlgorithmException => s"<hash algorithm $algorithm unavailable>"
     }
   }
 

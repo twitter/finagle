@@ -103,4 +103,12 @@ class MarshalledContextTest extends AbstractContextTest {
       assert(marshallRoundtrip.iterator.sameElements(marshallDirect.iterator))
     }
   }
+
+  test("Hashing failed extractions") {
+    val bytes = Buf.ByteArray(0x01.toByte, 0x02.toByte, 0x03.toByte)
+    // This is the result of hashing the above with SHA-256. If the algorithm changes
+    // so too will the hash produced.
+    assert(
+      ctx.hashValue(bytes) == "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81")
+  }
 }
