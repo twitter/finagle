@@ -243,6 +243,19 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     def withConnectionInitRequest(request: Request): Client =
       configured(ConnectionInitRequest(Some(request)))
 
+    /**
+     * To enable the client to use the `caching_sha2_password` authentication method.
+     */
+    def withCachingSha2Password: Client =
+      configured(CachingSha2PasswordAuth(true))
+
+    /**
+     * To configure the local path to the server's RSA public key for encryption
+     * during `caching_sha2_password` authentication.
+     */
+    def withServerRsaPublicKey(path: String): Client =
+      configured(PathToServerRsaPublicKey(path))
+
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withSessionPool: SessionPoolingParams[Client] =

@@ -90,3 +90,33 @@ case class ConnectionInitRequest(request: Option[Request])
 object ConnectionInitRequest {
   implicit val param: Stack.Param[ConnectionInitRequest] = Stack.Param(ConnectionInitRequest(None))
 }
+
+/**
+ * To configure the client to use the caching_sha2_password authentication method.
+ * Needed to set the CLIENT_PLUGIN_AUTH capability flag during the handshake phase.
+ */
+final case class CachingSha2PasswordAuth(enabled: Boolean)
+object CachingSha2PasswordAuth {
+  implicit val param: Stack.Param[CachingSha2PasswordAuth] =
+    Stack.Param(CachingSha2PasswordAuth(false))
+}
+
+/**
+ * To configure the local path to the server's RSA public key. This is used during
+ * caching_sha2_password authentication when authenticating over a plaintext connection.
+ */
+final case class PathToServerRsaPublicKey(path: String)
+object PathToServerRsaPublicKey {
+  implicit val param: Stack.Param[PathToServerRsaPublicKey] =
+    Stack.Param(PathToServerRsaPublicKey(""))
+}
+
+/**
+ * To cause a cache miss in the server's password cache to ensure that we are using
+ * full auth during authentication. Used for testing.
+ */
+private[finagle] final case class CachingSha2PasswordMissServerCache(causeMiss: Boolean)
+private[finagle] object CachingSha2PasswordMissServerCache {
+  implicit val param: Stack.Param[CachingSha2PasswordMissServerCache] =
+    Stack.Param(CachingSha2PasswordMissServerCache(false))
+}
