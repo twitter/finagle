@@ -21,6 +21,21 @@ Breaking API Changes
 * finagle-core: `c.t.f.param.Logger` has been removed. Use external configuration supported by
   your logging backend to alter settings of `com.twitter.finagle` logger.  ``PHAB_ID=D618667``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http: Make handling of invalid URI consistent across client implementations. There are
+  behavioral inconsistencies amongst the current HTTP client implementations:
+
+  Our HTTP/1.x clients allow for submitting requests that contain non-ASCII characters and
+  invalid character encoded sequences, while our HTTP/2 clients will either mangle
+  the URI and strip out non-ASCII characters within the Netty pipeline or result in an
+  `UnknownChannelException` when attempting to parse invalid character encoded sequences.
+  With this change, we now consistently propagate an `InvalidUriException` result, which
+  is marked as NonRetryable for all HTTP client implementations. All HTTP server implementations
+  maintain behavior of returning a `400 Bad Request` response status, but now also correctly
+  handle invalid character encoded sequences. ``PHAB_ID=D660069``
+
 Bug Fixes
 ~~~~~~~~~~
 
@@ -33,6 +48,10 @@ Bug Fixes
 
 * finagle-core: `c.t.f.n.NameTreeFactory` will now discard empty elements in
   `c.t.f.NameTree.Union`s with zero weight. ``PHAB_ID=D666635``
+
+* finagle-http: All HTTP server implementations consistently return a `400 Bad Request`
+  response status when encountering a URI with invalid character encoded sequences.
+  ``PHAB_ID=D660069``
 
 21.4.0
 ------

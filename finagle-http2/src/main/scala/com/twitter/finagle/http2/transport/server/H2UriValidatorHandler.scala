@@ -19,7 +19,7 @@ import io.netty.util.ReferenceCountUtil
 @Sharable
 final private[http2] object H2UriValidatorHandler extends ChannelInboundHandlerAdapter {
 
-  val HandlerName: String = "h2UriValidationHandler"
+  val HandlerName: String = "h2UriValidatorHandler"
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = msg match {
     case headers: Http2HeadersFrame if !UriUtils.isValidUri(headers.headers().path()) =>

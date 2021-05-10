@@ -1,11 +1,12 @@
 package com.twitter.finagle.netty4.http.handler
 
+import com.twitter.finagle.http.InvalidUriException
 import com.twitter.finagle.netty4.http.util.UriUtils
-import com.twitter.finagle.netty4.http.util.UriUtils.InvalidUriException
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
+import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
 import io.netty.handler.codec.DecoderResult
 import io.netty.handler.codec.http.{HttpObject, HttpRequest}
+import io.netty.util.ReferenceCountUtil
 
 /**
  * All inbound URIs are validated in the Netty pipeline so we can
@@ -15,23 +16,36 @@ import io.netty.handler.codec.http.{HttpObject, HttpRequest}
  * to an exception if it's a client).
  */
 @Sharable
-private[finagle] object UriValidatorHandler extends ChannelInboundHandlerAdapter {
+private[finagle] object UriValidatorHandler extends ChannelDuplexHandler {
 
-  val HandlerName: String = "uriValidationHandler"
+  val HandlerName: String = "uriValidatorHandler"
 
   override def channelRead(ctx: ChannelHandlerContext, msg: scala.Any): Unit = {
     msg match {
       case req: HttpRequest =>
-        validateUri(ctx, req, req.uri())
+        validateUri(req, req.uri())
       case _ => ()
     }
 
     ctx.fireChannelRead(msg)
   }
 
-  private[this] def validateUri(ctx: ChannelHandlerContext, obj: HttpObject, uri: String): Unit =
+  override def write(
+    ctx: ChannelHandlerContext,
+    msg: Any,
+    promise: ChannelPromise
+  ): Unit =
+    msg match {
+      case req: HttpRequest if !UriUtils.isValidUri(req.uri()) =>
+        ReferenceCountUtil.release(msg)
+        ctx.fireExceptionCaught(InvalidUriException(req.uri()))
+      case _ =>
+        super.write(ctx, msg, promise)
+    }
+
+  private[this] def validateUri(obj: HttpObject, uri: String): Unit =
     if (!UriUtils.isValidUri(uri)) {
-      obj.setDecoderResult(DecoderResult.failure(new InvalidUriException(uri)))
+      obj.setDecoderResult(DecoderResult.failure(InvalidUriException(uri)))
     }
 
 }

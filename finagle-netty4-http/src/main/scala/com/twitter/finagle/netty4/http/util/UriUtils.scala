@@ -2,8 +2,6 @@ package com.twitter.finagle.netty4.http.util
 
 private[finagle] object UriUtils {
 
-  case class InvalidUriException(uri: CharSequence) extends Exception(s"Invalid URI found: $uri")
-
   /**
    * @return true if the uri is valid or null, false otherwise
    */
@@ -18,9 +16,14 @@ private[finagle] object UriUtils {
 
     // ex: "/1234f.jpg?query=123" should validate everything before ?query=123
 
-    while (idx <= size && ch != '?') { //the query string param will get encoded/decoded by Netty
+    while (idx < size && ch != '?') { //the query string param will get encoded/decoded by Netty
       if (isAscii(ch) && !ch.isWhitespace) {
         idx += 1
+        if (ch == '%') {
+          if (!isValidEncoding(uri, size, idx)) return false
+          idx += 2
+        }
+
         if (idx < size) ch = uri.charAt(idx)
       } else {
         return false
@@ -30,6 +33,11 @@ private[finagle] object UriUtils {
     //otherwise, we're all good
     true
   }
+
+  private[this] def isValidEncoding(uri: CharSequence, size: Int, offset: Int): Boolean =
+    (offset + 1 < size) && isHex(uri.charAt(offset)) && isHex(uri.charAt(offset + 1))
+
+  private[this] def isHex(ch: Char): Boolean = Character.digit(ch, 16) >= 0
 
   private[this] def isAscii(ch: Char): Boolean = ch < 128
 

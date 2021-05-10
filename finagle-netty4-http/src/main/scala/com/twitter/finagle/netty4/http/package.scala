@@ -111,6 +111,9 @@ package object http {
     // We're going to validate our headers right before the client exception mapper.
     fn(HeaderValidatorHandler.HandlerName, HeaderValidatorHandler)
 
+    // Let's see if we can filter out bad URI's before Netty starts handling them...
+    fn(UriValidatorHandler.HandlerName, UriValidatorHandler)
+
     // Map some client related channel exceptions to something meaningful to finagle
     fn("clientExceptionMapper", ClientExceptionMapper)
 

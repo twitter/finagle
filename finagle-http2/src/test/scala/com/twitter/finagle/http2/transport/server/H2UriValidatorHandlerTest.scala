@@ -20,13 +20,25 @@ class H2UriValidatorHandlerTest extends FunSuite with MockitoSugar {
     assert(channel.readInbound[Http2HeadersFrame].headers().path() == "/abc.jpg")
   }
 
-  test("Rejects invalid URI") {
+  test("Rejects invalid URI (non-ascii chars)") {
     val channel = new EmbeddedChannel(H2UriValidatorHandler)
 
     val frame = mock[Http2HeadersFrame]
     val headers = mock[Http2Headers]
     when(frame.headers()).thenReturn(headers)
     when(headers.path()).thenReturn("/DSC02175拷貝.jpg")
+
+    assert(channel.writeInbound(frame) == false)
+    assert(channel.readOutbound[Http2HeadersFrame].headers().status().toString == "400")
+  }
+
+  test("Rejects invalid URI (encoding)") {
+    val channel = new EmbeddedChannel(H2UriValidatorHandler)
+
+    val frame = mock[Http2HeadersFrame]
+    val headers = mock[Http2Headers]
+    when(frame.headers()).thenReturn(headers)
+    when(headers.path()).thenReturn("/1%%.jpg")
 
     assert(channel.writeInbound(frame) == false)
     assert(channel.readOutbound[Http2HeadersFrame].headers().status().toString == "400")
