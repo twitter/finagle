@@ -12,7 +12,7 @@ New Features
 
 * finagle-http2: Added `c.t.f.http2.param.EnforceMaxConcurrentStreams` which allows users to
   configure http2 clients to buffer streams once a connection has hit the max concurrent stream
-  limit rather than rejecting them.  A `buffered_streams` gauge has been added to track the 
+  limit rather than rejecting them.  A `buffered_streams` gauge has been added to track the
   current number of buffered streams.  ``PHAB_ID=D643138``
 
 Breaking API Changes
@@ -30,6 +30,9 @@ Bug Fixes
 
 * finagle-http2: The `streams` gauge is now correctly added for http2 connections over TLS.
   ``PHAB_ID=D643138``
+
+* finagle-core: `c.t.f.n.NameTreeFactory` will now discard empty elements in
+  `c.t.f.NameTree.Union`s with zero weight. ``PHAB_ID=D666635``
 
 21.4.0
 ------
@@ -173,7 +176,7 @@ Runtime Behavior Changes
 New Features
 ~~~~~~~~~~~~
 
-* finagle-core: Add `clnt/<FilterName>_rejected` annotation to filters that may throttle requests, 
+* finagle-core: Add `clnt/<FilterName>_rejected` annotation to filters that may throttle requests,
   including `c.t.finagle.filter.NackAdmissionFilter` and `c.t.finagle.filter.RequestSemaphoreFilter`.
   ``PHAB_ID=D597875``
 
@@ -208,7 +211,7 @@ New Features
 * finagle-benchmark: Add a benchmark for LocalContext. ``PHAB_ID=D588632``
 
 * finagle-core: Add a new filter, `ClientExceptionTracingFilter`, that records error annotations for
-  completed spans. Annotations include `error`, `exception.type`, and `exception.message`. 
+  completed spans. Annotations include `error`, `exception.type`, and `exception.message`.
   See https://github.com/open-telemetry/opentelemetry-specification for naming details.
   ``PHAB_ID=D583001``
 

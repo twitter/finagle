@@ -44,6 +44,17 @@ private object NameTreeFactory {
       def close(deadline: Time) = Future.Done
     }
 
+    // Filter 0-weighted empty factories out of Unions. In the case where an
+    // entire Union is zero-weighted, we want to load balance over
+    // non-empty factories.
+    def shouldKeepInUnion(t: NameTree.Weighted[Key]): Boolean = {
+      t.tree match {
+        case NameTree.Neg | NameTree.Fail | NameTree.Empty =>
+          t.weight != 0.0
+        case _ => true
+      }
+    }
+
     def factoryOfTree(tree: NameTree[Key]): ServiceFactory[Req, Rep] =
       tree match {
         case NameTree.Neg | NameTree.Fail | NameTree.Empty => noBrokersAvailableFactory
@@ -53,8 +64,15 @@ private object NameTreeFactory {
         case NameTree.Alt(_*) => Failed(new IllegalArgumentException("NameTreeFactory"))
 
         case NameTree.Union(weightedTrees @ _*) =>
-          val (weights, trees) = weightedTrees.unzip { case NameTree.Weighted(w, t) => (w, t) }
-          Weighted(Drv.fromWeights(weights), trees.map(factoryOfTree))
+          val (weights, trees) = weightedTrees
+            .filter(shouldKeepInUnion)
+            .unzip { case NameTree.Weighted(w, t) => (w, t) }
+
+          if (weights.isEmpty) {
+            noBrokersAvailableFactory
+          } else {
+            Weighted(Drv.fromWeights(weights), trees.map(factoryOfTree))
+          }
       }
 
     factoryOfTree(tree)

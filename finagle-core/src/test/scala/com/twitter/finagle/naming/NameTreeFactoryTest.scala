@@ -129,4 +129,93 @@ class NameTreeFactoryTest extends FunSuite {
       )
     )
   }
+
+  def canBuildServiceFromTree(tree: NameTree[String]): Boolean = {
+    val factoryCache = new ServiceFactoryCache[String, Unit, Unit](
+      _ =>
+        new ServiceFactory[Unit, Unit] {
+          def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =
+            Future.value(Service.const(Future.Done))
+          def close(deadline: Time) = Future.Done
+          override def status = Status.Open
+        },
+      Timer.Nil
+    )
+
+    NameTreeFactory(Path.empty, tree, factoryCache).isAvailable
+  }
+
+  test("filters Zero-weighted Neg/Empty/Fail out of unions") {
+    val oneNonEmpty = NameTree.Union(
+      NameTree.Weighted(0.0, NameTree.Neg),
+      NameTree.Weighted(0.0, NameTree.Fail),
+      NameTree.Weighted(0.0, NameTree.Empty),
+      NameTree.Weighted(0.0, NameTree.Leaf("foo"))
+    )
+
+    assert(canBuildServiceFromTree(oneNonEmpty))
+  }
+
+  test("if only zero-weighted Neg/Empty/Fail in union, then NoBrokersAvailable") {
+    val allEmpty = NameTree.Union(
+      NameTree.Weighted(0.0, NameTree.Neg),
+      NameTree.Weighted(0.0, NameTree.Fail),
+      NameTree.Weighted(0.0, NameTree.Empty)
+    )
+
+    assert(!canBuildServiceFromTree(allEmpty))
+  }
+
+  test("nested all-zero weighted unions filters correctly") {
+    val embeddedNonEmpty = NameTree.Union(
+      NameTree.Weighted(0.0, NameTree.Neg),
+      NameTree.Weighted(0.0, NameTree.Fail),
+      NameTree.Weighted(0.0, NameTree.Empty),
+      NameTree.Weighted(
+        0.0,
+        NameTree.Union(
+          NameTree.Weighted(0.0, NameTree.Neg),
+          NameTree.Weighted(0.0, NameTree.Leaf("foo"))
+        ))
+    )
+
+    assert(canBuildServiceFromTree(embeddedNonEmpty))
+  }
+
+  test("nested not all-zero weighted unions filters correctly") {
+    val embeddedNotAllZerosNonEmpty = NameTree.Union(
+      NameTree.Weighted(0.0, NameTree.Empty),
+      NameTree.Weighted(
+        1.0,
+        NameTree.Union(
+          NameTree.Weighted(0.0, NameTree.Neg),
+          NameTree.Weighted(0.0, NameTree.Union(NameTree.Weighted(0.0, NameTree.Leaf("foo"))))
+        ))
+    )
+
+    assert(canBuildServiceFromTree(embeddedNotAllZerosNonEmpty))
+  }
+
+  test("deeply nested not all-zero weighted unions filters correctly") {
+    val embeddedNotAllZerosNonEmpty = NameTree.Union(
+      NameTree.Weighted(0.0, NameTree.Empty),
+      NameTree.Weighted(
+        0.0,
+        NameTree.Union(
+          NameTree.Weighted(0.0, NameTree.Neg),
+          NameTree.Weighted(0.0, NameTree.Union(NameTree.Weighted(1.0, NameTree.Leaf("foo"))))
+        ))
+    )
+
+    assert(canBuildServiceFromTree(embeddedNotAllZerosNonEmpty))
+  }
+
+  test("non-zero weighted empty are not filtered") {
+    val emptyWeightedNonZero = NameTree.Union(
+      NameTree.Weighted(100.0, NameTree.Empty),
+      NameTree.Weighted(0.0, NameTree.Leaf("foo"))
+    )
+
+    assert(!canBuildServiceFromTree(emptyWeightedNonZero))
+  }
 }
