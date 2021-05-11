@@ -2,6 +2,7 @@ package com.twitter.finagle.netty4.ssl.server
 
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.netty4.ByteBufConversion
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.ssl.TlsSnooping
 import com.twitter.finagle.ssl.TlsSnooping.DetectionResult
 import io.netty.buffer.ByteBuf
@@ -28,6 +29,7 @@ private[finagle] final class Netty4TlsSnoopingHandler(params: Params) extends By
   // event, so we use this state to keep track of whether we intercepted one or not.
   private[this] var channelActiveDeferred = false
 
+  private[this] val snoopingCounter = params[Stats].statsReceiver.counter("tls", "snooped_connects")
   private[this] val snooper = params[TlsSnooping.Param].snooper
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
@@ -79,6 +81,7 @@ private[finagle] final class Netty4TlsSnoopingHandler(params: Params) extends By
     ctx.fireUserEventTriggered(Result.Cleartext)
 
   private[this] def secureDetected(ctx: ChannelHandlerContext): Unit = {
+    snoopingCounter.incr()
     ctx.pipeline.addAfter(
       ctx.name,
       Netty4ServerSslChannelInitializer.HandlerName,

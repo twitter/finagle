@@ -2,7 +2,9 @@ package com.twitter.finagle.netty4.ssl.server
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.ssl.Netty4SslTestComponents
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.ssl.OpportunisticTls
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import io.netty.buffer.{ByteBuf, ByteBufAllocator}
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
@@ -70,8 +72,13 @@ class Netty4TlsSnoopingHandlerTest extends FunSuite with ScalaCheckDrivenPropert
     ch.pipeline.get(classOf[UserEventInterceptor]).events.dequeue()
   }
 
-  private[this] def channel(): EmbeddedChannel = {
-    new EmbeddedChannel(new Netty4TlsSnoopingHandler(params), new UserEventInterceptor)
+  private[this] def channel(stats: Option[StatsReceiver] = None): EmbeddedChannel = {
+    val p = stats match {
+      case Some(s) => params + Stats(s)
+      case None => params
+    }
+
+    new EmbeddedChannel(new Netty4TlsSnoopingHandler(p), new UserEventInterceptor)
   }
 
   test("recognizes known SSL/TLS handshake prefixes") {
@@ -93,6 +100,29 @@ class Netty4TlsSnoopingHandlerTest extends FunSuite with ScalaCheckDrivenPropert
   test("Handshake frame of 0 length is rejected") {
     val ch = channel()
     ch.writeInbound(arrayToBuf(toShortHandshake))
+    assert(getEvent(ch) == Netty4TlsSnoopingHandler.Result.Cleartext)
+  }
+
+  test("Increments counter on a valid prefix") {
+    val stats = new InMemoryStatsReceiver
+    val ch = channel(Some(stats))
+
+    val validPrefix = Array[Byte](0x16, 0x03, 0x00, 0x13, 0x03)
+    ch.writeInbound(arrayToBuf(validPrefix))
+
+    assert(stats.counters(Seq("tls", "snooped_connects")) == 1)
+    assert(getEvent(ch) == Netty4TlsSnoopingHandler.Result.Secure)
+  }
+
+  test("Doesn't increment counter on an invalid prefix") {
+    val stats = new InMemoryStatsReceiver
+    val ch = channel(Some(stats))
+
+    // invalid prefix
+    val invalidPrefix = Array[Byte](0x00, 0x00, 0x00, 0x00, 0x00)
+    ch.writeInbound(arrayToBuf(invalidPrefix))
+
+    assert(stats.counters(Seq("tls", "snooped_connects")) == 0)
     assert(getEvent(ch) == Netty4TlsSnoopingHandler.Result.Cleartext)
   }
 }

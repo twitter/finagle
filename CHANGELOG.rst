@@ -15,6 +15,9 @@ New Features
   limit rather than rejecting them.  A `buffered_streams` gauge has been added to track the
   current number of buffered streams.  ``PHAB_ID=D643138``
 
+* finagle-netty4: Added a new counter to keep track of the number of TLS connections that were
+  started via snooping. ``PHAB_ID=D667652``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

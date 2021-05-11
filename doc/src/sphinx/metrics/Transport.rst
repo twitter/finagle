@@ -89,6 +89,9 @@ ChannelStatsHandler
   A gauge of the total number of SSL/TLS connections that are currently open in
   the channel.
 
+**tls/snooped_connects**
+  A counter of the number of TLS connections that were detected via snooping.
+
 IdleChannelHandler
 <<<<<<<<<<<<<<<<<<
 
