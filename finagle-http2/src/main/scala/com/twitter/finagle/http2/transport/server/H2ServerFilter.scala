@@ -108,10 +108,10 @@ private[http2] final class H2ServerFilter(timer: Timer, channel: Channel)
         // Since we're not sending our own GOAWAY we need to make sure that we set the
         // deadline in `Http2ConnectionHandler` since it try to do the non-graceful shutdown.
         connectionHandler.gracefulShutdownTimeoutMillis(0)
-        logger.debug(s"Deadline already passed ($deadline <= $now). Closing now.")
+        logger.ifDebug(s"Deadline already passed ($deadline <= $now). Closing now.")
         onceCloseChannel(ctx)
       } else {
-        logger.info(s"Closing h2 session with deadline $deadline")
+        logger.ifDebug(s"Closing h2 session with deadline $deadline")
         // Send a GOAWAY frame and set a timer to forcefully close the channel.
         val goawayFrame = new DefaultHttp2GoAwayFrame(Http2Error.NO_ERROR)
         // This is gaming the system. Netty wants you to specify how many bonus racy streams
@@ -139,7 +139,7 @@ private[http2] final class H2ServerFilter(timer: Timer, channel: Channel)
               } else {
                 // Write a second GOAWAY with the last observed stream and then
                 // close up shop.
-                logger.info(
+                logger.debug(
                   "Graceful draining period lapsed. " +
                     "Sending final GOAWAY and closing the connection."
                 )
