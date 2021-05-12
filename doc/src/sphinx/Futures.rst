@@ -249,9 +249,9 @@ Other resources
   importantly how to detect and fix it.
 
 .. _Akka: https://akka.io/
-.. _`Effective Scala`: https://twitter.github.com/effectivescala/
+.. _`Effective Scala`: https://twitter.github.io/effectivescala/
 .. _`Finagle Block Party`: https://finagle.github.io/blog/2016/09/01/block-party/
-.. _`section discussing futures`: https://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures
+.. _`section discussing futures`: https://twitter.github.io/effectivescala/#Twitter's%20standard%20libraries-Futures
 .. _here: https://docs.scala-lang.org/overviews/core/futures.html
 .. _`section dedicated to futures`: https://doc.akka.io/docs/akka/2.1.0/scala/futures.html
 
