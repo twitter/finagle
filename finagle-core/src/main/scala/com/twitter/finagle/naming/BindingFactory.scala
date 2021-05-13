@@ -172,11 +172,11 @@ object BindingFactory {
    * [[com.twitter.finagle.naming.BindingFactory]] with a destination
    * [[com.twitter.finagle.Name]] to bind.
    */
-  private[finagle] case class Dest(dest: Name) {
+  case class Dest(dest: Name) {
     def mk(): (Dest, Stack.Param[Dest]) =
       (this, Dest.param)
   }
-  private[finagle] object Dest {
+  object Dest {
     implicit val param = Stack.Param(Dest(Name.Path(Path.read("/$/fail"))))
   }
 
