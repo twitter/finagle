@@ -398,28 +398,22 @@ object Backoff {
  *
  * Finagle provides the following backoff strategies:
  *
- * 1. BackoffFunction           - create backoffs based on a given function,
- *                                can be created via `Backoff.apply`.
- * 2. BackoffFromGeneration     - create backoffs based on a generation
- *                                function, can be created via
- *                                `Backoff.fromFunction`.
- * 3. Const                     - return a constant backoff, can be created via
- *                                `Backoff.const`.
- * 4. Exponential               - create backoffs that grow exponentially, can
- *                                be created via `Backoff.exponential`.
- * 5. Linear                    - create backoffs that grow linearly, can be
- *                                created via `Backoff.linear`.
- * 6. DecorrelatedJittered      - create backoffs that jitter randomly between
- *                                a start value and 3 times of that value, can
- *                                be created via
- *                                `Backoff.decorrelatedJittered`.
- * 7. EqualJittered             - create backoffs that jitter between 0 and
- *                                half of the exponential growth. Can be
- *                                created via `Backoff.equalJittered`.
- * 8. ExponentialJittered       - create backoffs that jitter randomly between
- *                                0 and a value that grows exponentially by 2.
- *                                Can be created via
- *                                `Backoff.exponentialJittered`.
+ *   1. BackoffFunction
+ *     - Create backoffs based on a given function, can be created via `Backoff.apply`.
+ *   1. BackoffFromGeneration
+ *     - Create backoffs based on a generation function, can be created via `Backoff.fromFunction`.
+ *   1. Const
+ *     - Return a constant backoff, can be created via `Backoff.const`.
+ *   1. Exponential
+ *     - Create backoffs that grow exponentially, can be created via `Backoff.exponential`.
+ *   1. Linear
+ *     - Create backoffs that grow linearly, can be created via `Backoff.linear`.
+ *   1. DecorrelatedJittered
+ *     - Create backoffs that jitter randomly between a start value and 3 times of that value, can be created via `Backoff.decorrelatedJittered`.
+ *   1. EqualJittered
+ *     - Create backoffs that jitter between 0 and half of the exponential growth. Can be created via `Backoff.equalJittered`.
+ *   1. ExponentialJittered
+ *     - Create backoffs that jitter randomly between 0 and a value that grows exponentially by 2. Can be created via `Backoff.exponentialJittered`.
  *
  * @note A new [[Backoff]] will be created only when `next` is called.
  * @note None of the [[Backoff]]s are memoized, for strategies that involve
