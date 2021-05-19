@@ -1,6 +1,6 @@
 package com.twitter.finagle.stats
 
-import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema}
+import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, ExpressionSchemaKey}
 import org.scalatest.FunSuite
 
 object MetricsStatsReceiverTest {
@@ -297,6 +297,37 @@ class MetricsStatsReceiverTest extends FunSuite {
       Expression(aaSchema).plus(
         Expression(bbSchema, Left(Expression.Min)).plus(Expression(ccSchema))))
 
-    assert(metrics.expressions.get("test_expression").expr == expected_expression.expr)
+    assert(
+      metrics.expressions
+        .get(ExpressionSchemaKey("test_expression", None, Seq())).expr == expected_expression.expr)
   }
+
+  test(
+    "expressions with different serviceNames or different namespaces are stored without clobbering each other") {
+    val metrics = Metrics.createDetached()
+    val sr = new MetricsStatsReceiver(metrics)
+    val exporter = new MetricsExporter(metrics)
+    val aSchema = CounterSchema(MetricBuilder(name = Seq("a"), statsReceiver = sr).withKernel)
+
+    val expression = ExpressionSchema("test_expression", Expression(aSchema))
+      .register()
+    assert(exporter.expressions.keySet.size == 1)
+
+    val expressionWithServiceName = ExpressionSchema("test_expression", Expression(aSchema))
+      .withServiceName("thrift")
+      .register()
+    assert(exporter.expressions.keySet.size == 2)
+
+    val expressionWithNamespace = ExpressionSchema("test_expression", Expression(aSchema))
+      .withNamespaces("a", "b")
+      .register()
+    assert(exporter.expressions.keySet.size == 3)
+
+    val expressionWithNamespaceAndServiceName =
+      ExpressionSchema("test_expression", Expression(aSchema))
+        .withNamespaces("a", "b").withServiceName("thrift")
+        .register()
+    assert(exporter.expressions.keySet.size == 4)
+  }
+
 }

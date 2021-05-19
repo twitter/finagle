@@ -45,7 +45,7 @@ object Metrics {
     gaugesMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge](),
     /** Store MetricSchemas for each metric in order to surface metric metadata to users. */
     metricSchemas = new ConcurrentHashMap[String, MetricSchema](),
-    expressionSchemas = new ConcurrentHashMap[String, ExpressionSchema](),
+    expressionSchemas = new ConcurrentHashMap[ExpressionSchemaKey, ExpressionSchema](),
     // Memoizing metrics used for building expressions.
     // the key is the object reference hashcode shared between Expression and StatsReceiver,
     // and the value is the fully hydrated metric builder in StatsReceiver.
@@ -101,7 +101,7 @@ object Metrics {
     statsMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreStat],
     gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge],
     metricSchemas: ConcurrentHashMap[String, MetricSchema],
-    expressionSchemas: ConcurrentHashMap[String, ExpressionSchema],
+    expressionSchemas: ConcurrentHashMap[ExpressionSchemaKey, ExpressionSchema],
     metricBuilders: ConcurrentHashMap[Int, MetricBuilder])
 }
 
@@ -257,11 +257,7 @@ private[finagle] class Metrics private (
   }
 
   private[stats] def registerExpression(exprSchema: ExpressionSchema): Unit = {
-    val expressionId = (exprSchema.labels.serviceName match {
-      case Some(serviceName) => exprSchema.name + "_" + serviceName
-      case None => exprSchema.name
-    }) + exprSchema.namespaces.mkString("_")
-    expressionSchemas.putIfAbsent(expressionId, exprSchema)
+    expressionSchemas.putIfAbsent(exprSchema.schemaKey(), exprSchema)
   }
 
   def registerGauge(schema: GaugeSchema, f: => Float): Unit =
@@ -345,16 +341,19 @@ private[finagle] class Metrics private (
   def schemas: util.Map[String, MetricSchema] =
     util.Collections.unmodifiableMap(metricSchemas)
 
-  private[this] val filledExpression: ConcurrentHashMap[String, ExpressionSchema] =
-    new ConcurrentHashMap[String, ExpressionSchema]()
+  private[this] val filledExpression: ConcurrentHashMap[
+    ExpressionSchemaKey,
+    ExpressionSchema
+  ] =
+    new ConcurrentHashMap[ExpressionSchemaKey, ExpressionSchema]()
 
-  def expressions: util.Map[String, ExpressionSchema] = {
+  def expressions: util.Map[ExpressionSchemaKey, ExpressionSchema] = {
     val added = expressionSchemas.keySet().asScala &~ filledExpression.keySet().asScala
 
-    added.foreach { name =>
-      val exprSchema = expressionSchemas.get(name)
+    added.foreach { key =>
+      val exprSchema = expressionSchemas.get(key)
       val newExpression = exprSchema.copy(expr = replaceExpression(exprSchema.expr, metricBuilders))
-      filledExpression.putIfAbsent(name, newExpression)
+      filledExpression.putIfAbsent(key, newExpression)
     }
 
     util.Collections.unmodifiableMap(filledExpression)

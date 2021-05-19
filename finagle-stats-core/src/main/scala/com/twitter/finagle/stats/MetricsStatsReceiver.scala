@@ -2,7 +2,7 @@ package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle.http.{HttpMuxHandler, Route, RouteIndex}
-import com.twitter.finagle.stats.exp.ExpressionSchema
+import com.twitter.finagle.stats.exp.{ExpressionSchema, ExpressionSchemaKey}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, FuturePool, Time}
@@ -188,7 +188,8 @@ class MetricsExporter(val registry: Metrics, val logger: Logger)
    * Exposes Metric Expressions for ExpressionRegistry.
    * @return a map of expression names to their full ExpressionSchema.
    */
-  def expressions(): Map[String, ExpressionSchema] = registry.expressions.asScala.toMap
+  def expressions(): Map[ExpressionSchemaKey, ExpressionSchema] =
+    registry.expressions.asScala.toMap
 
   val pattern = "/admin/metrics.json"
 
