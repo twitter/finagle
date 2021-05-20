@@ -1,9 +1,9 @@
 package com.twitter.finagle.zipkin.core
 
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class EndpointTest extends FunSuite {
+class EndpointTest extends AnyFunSuite {
 
   private[this] val unresolved = InetSocketAddress.createUnresolved("nope", 44)
 

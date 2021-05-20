@@ -1,8 +1,8 @@
 package com.twitter.finagle.tracing
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FlagsTest extends FunSuite {
+class FlagsTest extends AnyFunSuite {
   test("set flag and return it") {
     val flags = Flags()
     assert(!flags.isFlagSet(Flags.Debug))

@@ -6,9 +6,9 @@ import com.twitter.finagle.http.{Method, Request, Response, Version}
 import com.twitter.logging.{BareFormatter, Logger, StringHandler}
 import com.twitter.util.{Await, Future, Time}
 import java.time.ZonedDateTime
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class LoggingFilterTest extends FunSuite {
+class LoggingFilterTest extends AnyFunSuite {
 
   test("log") {
     val logger = Logger.get("access")

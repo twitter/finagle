@@ -7,10 +7,10 @@ import io.netty.handler.codec.http.{Cookie => _, _}
 import java.net.{InetSocketAddress, URI}
 import java.nio.charset.StandardCharsets.UTF_8
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.jdk.CollectionConverters._
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
 object BijectionsTest {
   import Arbitrary.arbitrary
@@ -144,7 +144,7 @@ object BijectionsTest {
   }
 }
 
-class BijectionsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class BijectionsTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   import BijectionsTest._
 
   test("netty http request -> finagle") {

@@ -7,9 +7,9 @@ import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServerChannelConfigurationTest extends FunSuite {
+class ServerChannelConfigurationTest extends AnyFunSuite {
 
   val identityService = Service.mk[String, String] { req => Future.value(req) }
 

@@ -6,9 +6,9 @@ import com.twitter.io.TempFile
 import java.io.File
 import java.security.KeyStore
 import javax.net.ssl.{KeyManagerFactory, TrustManagerFactory}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4ServerEngineFactoryTest extends FunSuite {
+class Netty4ServerEngineFactoryTest extends AnyFunSuite {
 
   // Force JDK version for tests, because the native engine could fail to load in different
   // environments

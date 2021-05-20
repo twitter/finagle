@@ -3,9 +3,9 @@ package com.twitter.finagle.loadbalancer.roundrobin
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.util.{Function => _, _}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
+class RoundRobinBalancerTest extends AnyFunSuite with RoundRobinSuite {
   case class LoadedFactory(id: Int) extends RRServiceFactory {
     @volatile var stat: Status = Status.Open
     var load = 0

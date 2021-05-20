@@ -1,8 +1,8 @@
 package com.twitter.finagle.serverset2
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class EntryTest extends FunSuite {
+class EntryTest extends AnyFunSuite {
   val port = 80 // not bound
   val metadataKeyA = "keyA"
   val metadataValueA = "valueA"

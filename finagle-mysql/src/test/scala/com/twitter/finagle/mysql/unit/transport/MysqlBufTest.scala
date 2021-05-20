@@ -1,9 +1,9 @@
 package com.twitter.finagle.mysql.transport
 
 import com.twitter.finagle.mysql.MysqlCharset
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class BufferTest extends FunSuite {
+class BufferTest extends AnyFunSuite {
   val testBytes = Array[Byte](0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x78)
 
   test("read null terminated string") {

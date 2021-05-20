@@ -7,10 +7,10 @@ import com.twitter.test._
 import com.twitter.util.{Await, Future}
 import java.util.{List => JList}
 import org.apache.thrift.protocol.TProtocolFactory
-import org.scalatest.FunSuite
 import scala.reflect.ClassTag
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientIdEndToEndTest extends FunSuite with ThriftTest {
+class ClientIdEndToEndTest extends AnyFunSuite with ThriftTest {
   type Iface = B.ServiceIface
   def ifaceManifest = implicitly[ClassTag[B.ServiceIface]]
 

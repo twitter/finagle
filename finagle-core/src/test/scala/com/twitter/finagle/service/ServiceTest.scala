@@ -3,9 +3,9 @@ package com.twitter.finagle.service
 import com.twitter.finagle.Service
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Future, Throw, Try}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServiceTest extends FunSuite {
+class ServiceTest extends AnyFunSuite {
   test("Service should rescue") {
     val e = new RuntimeException("yargs")
     val exceptionThrowingService = new Service[Int, Int] {

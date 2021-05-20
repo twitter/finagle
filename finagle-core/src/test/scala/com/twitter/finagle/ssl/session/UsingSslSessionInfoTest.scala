@@ -5,10 +5,10 @@ import java.math.BigInteger
 import java.security.cert.{Certificate, X509Certificate}
 import javax.net.ssl.SSLSession
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class UsingSslSessionInfoTest extends FunSuite with MockitoSugar {
+class UsingSslSessionInfoTest extends AnyFunSuite with MockitoSugar {
 
   val sessionID: Array[Byte] = (1 to 32).toArray.map(_.toByte)
   val localCerts: Array[Certificate] = Array.empty

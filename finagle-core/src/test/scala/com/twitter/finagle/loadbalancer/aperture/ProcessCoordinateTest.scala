@@ -2,10 +2,10 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.util.Closable
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class ProcessCoordinateTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class ProcessCoordinateTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   import ProcessCoordinate._
 
   test("update coordinate") {

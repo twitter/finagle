@@ -23,8 +23,9 @@ import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
 private object StackClientTest {
   case class LocalCheckingStringClient(
@@ -75,7 +76,7 @@ class PushStackClientTest extends AbstractStackClientTest {
 }
 
 abstract class AbstractStackClientTest
-    extends FunSuite
+    extends AnyFunSuite
     with BeforeAndAfter
     with Eventually
     with IntegrationPatience {
@@ -766,7 +767,10 @@ abstract class AbstractStackClientTest
       val role = Stack.Role("verify")
       val description = "Verifies the value of the test param"
 
-      def make(testParam: TestParam, next: ServiceFactory[String, String]): ServiceFactory[String, String] = {
+      def make(
+        testParam: TestParam,
+        next: ServiceFactory[String, String]
+      ): ServiceFactory[String, String] = {
         testParamValue = testParam.p1
         new SimpleFilter[String, String] {
           def apply(request: String, service: Service[String, String]): Future[String] = {

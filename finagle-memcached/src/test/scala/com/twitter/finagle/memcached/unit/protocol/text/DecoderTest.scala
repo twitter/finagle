@@ -2,9 +2,9 @@ package com.twitter.finagle.memcached.protocol.text
 
 import com.twitter.io.Buf
 import com.twitter.util.Promise
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class DecoderTest extends FunSuite {
+class DecoderTest extends AnyFunSuite {
 
   test("Decode tokens when no more data needed returns Decoding") {
     val buffer = Buf.Utf8("I'M ALL DONE")

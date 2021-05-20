@@ -5,15 +5,15 @@ import com.twitter.finagle.http.HeaderMap
 import com.twitter.util.Stopwatch
 import java.util.Date
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * Test battery that all `HeaderMap` types should pass.
  */
 abstract class AbstractHeaderMapTest
-    extends FunSuite
+    extends AnyFunSuite
     with ScalaCheckDrivenPropertyChecks
     with Eventually
     with IntegrationPatience {

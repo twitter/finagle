@@ -9,9 +9,9 @@ import com.twitter.finagle.util.{DefaultLogger, Ema, LossyEma, Rng}
 import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
 import com.twitter.util._
 import java.util.logging.Logger
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class NackAdmissionFilterTest extends FunSuite {
+class NackAdmissionFilterTest extends AnyFunSuite {
   // NB: [[DefaultWindow]] and [[DefaultNackRateThreshold]] values are
   //     arbitrary.
   val DefaultWindow: Duration = 3.seconds

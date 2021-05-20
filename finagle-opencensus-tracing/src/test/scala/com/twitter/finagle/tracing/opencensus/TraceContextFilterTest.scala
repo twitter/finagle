@@ -4,9 +4,9 @@ import io.opencensus.trace.{SpanContext, SpanId, TraceId, TraceOptions, Tracesta
 import java.util.concurrent.ThreadLocalRandom
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class TraceContextFilterTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class TraceContextFilterTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   private def genSpanContext: Gen[SpanContext] =
     Gen.resultOf { isSampled: Boolean =>

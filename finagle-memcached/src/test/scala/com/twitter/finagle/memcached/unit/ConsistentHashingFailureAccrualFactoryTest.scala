@@ -18,10 +18,10 @@ import com.twitter.util.{Await, Awaitable, Future, MockTimer, Time}
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers
 import org.mockito.Matchers._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ConsistentHashingFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
+class ConsistentHashingFailureAccrualFactoryTest extends AnyFunSuite with MockitoSugar {
 
   val TimeOut = 15.seconds
 

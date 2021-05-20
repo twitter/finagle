@@ -7,9 +7,9 @@ import com.twitter.finagle.mux.transport.Message.Tdispatch
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.util.Return
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FragmentingMessageWriterTest extends FunSuite {
+class FragmentingMessageWriterTest extends AnyFunSuite {
 
   private class PendingStreamStatsReceiver extends InMemoryStatsReceiver {
     def pendingStreamCount: Int = gauges(Seq("mux", "framer", "pending_write_streams"))().toInt

@@ -12,11 +12,11 @@ import com.twitter.io.TempFile
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import com.twitter.util.{Await, Awaitable, Future, Promise}
 import java.net.{InetAddress, InetSocketAddress, Socket}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.util.control.NonFatal
+import org.scalatest.funsuite.AnyFunSuite
 
-class StringServerTest extends FunSuite with Eventually with IntegrationPatience {
+class StringServerTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   private[this] val svc = Service.mk[String, String](Future.value)
 

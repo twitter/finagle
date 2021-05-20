@@ -13,11 +13,11 @@ import com.twitter.util.tunable.Tunable
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
-class MethodBuilderTest extends FunSuite with Eventually {
+class MethodBuilderTest extends AnyFunSuite with Eventually {
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)

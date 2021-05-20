@@ -3,9 +3,9 @@ package com.twitter.finagle.netty4
 import com.twitter.finagle.Stack
 import com.twitter.finagle.toggle.flag
 import java.net.SocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4ToggleTest extends FunSuite {
+class Netty4ToggleTest extends AnyFunSuite {
 
   test("pooling is toggled off by default") {
     Netty4Listener(

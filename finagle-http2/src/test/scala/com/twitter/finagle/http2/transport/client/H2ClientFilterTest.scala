@@ -6,9 +6,9 @@ import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.util.{Await, Awaitable}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http2.{DefaultHttp2PingFrame, Http2PingFrame}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class H2ClientFilterTest extends FunSuite {
+class H2ClientFilterTest extends AnyFunSuite {
 
   private[this] def await[T](t: Awaitable[T]): T =
     Await.result(t, 15.seconds)

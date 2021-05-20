@@ -2,9 +2,9 @@ package com.twitter.finagle.mux
 
 import com.twitter.finagle.Path
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RequestTest extends FunSuite {
+class RequestTest extends AnyFunSuite {
 
   test("create request with payload") {
     val buf = Buf.Utf8("Hello")

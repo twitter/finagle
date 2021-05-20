@@ -5,10 +5,10 @@ import com.twitter.finagle.Backoff
 import com.twitter.finagle.Backoff.EqualJittered
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
+class FailureAccrualPolicyTest extends AnyFunSuite with MockitoSugar {
 
   private[this] val constantBackoff = Backoff.const(5.seconds)
   // since `EqualJittered` generates values randomly, we pass the seed

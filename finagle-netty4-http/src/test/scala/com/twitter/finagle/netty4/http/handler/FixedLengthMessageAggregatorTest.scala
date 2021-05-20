@@ -5,9 +5,9 @@ import com.twitter.util.StorageUnit.zero
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FixedLengthMessageAggregatorTest extends FunSuite {
+class FixedLengthMessageAggregatorTest extends AnyFunSuite {
 
   test("full messages pass through") {
     val agg = new FixedLengthMessageAggregator(10.megabytes)

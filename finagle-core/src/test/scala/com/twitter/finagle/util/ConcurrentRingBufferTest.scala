@@ -1,8 +1,8 @@
 package com.twitter.finagle.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ConcurrentRingBufferTest extends FunSuite {
+class ConcurrentRingBufferTest extends AnyFunSuite {
   test("ConcurrentRingBuffer should fetch entries in order") {
     val N = 128
     val b = new ConcurrentRingBuffer[Int](N)

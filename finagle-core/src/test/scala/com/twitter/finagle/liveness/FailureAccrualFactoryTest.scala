@@ -13,11 +13,11 @@ import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
-class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
+class FailureAccrualFactoryTest extends AnyFunSuite with MockitoSugar {
   // since `EqualJittered` generates values randomly, we pass the seed
   // here in order to validate the values returned in the tests.
   def markDeadFor(seed: Long): Backoff =

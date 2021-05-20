@@ -2,9 +2,9 @@ package com.twitter.finagle.stats
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Time, TimeControl}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MetricsBucketedHistogramTest extends FunSuite {
+class MetricsBucketedHistogramTest extends AnyFunSuite {
 
   // use an arbitrary time that will not fall into
   // the next snap window while the test does `roll()`s.

@@ -4,10 +4,10 @@ import com.twitter.finagle.netty4.channel.ChannelRequestStatsHandler.SharedChann
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.channel._
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ChannelRequestStatsHandlerTest extends FunSuite with MockitoSugar {
+class ChannelRequestStatsHandlerTest extends AnyFunSuite with MockitoSugar {
 
   def requestsEqual(sr: InMemoryStatsReceiver, requests: Seq[Float]): Unit =
     assert(

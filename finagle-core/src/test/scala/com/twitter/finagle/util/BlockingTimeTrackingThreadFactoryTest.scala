@@ -3,10 +3,10 @@ package com.twitter.finagle.util
 import java.util.concurrent.ThreadFactory
 import org.mockito.Matchers.any
 import org.mockito.Mockito.verify
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class BlockingTimeTrackingThreadFactoryTest extends FunSuite with MockitoSugar {
+class BlockingTimeTrackingThreadFactoryTest extends AnyFunSuite with MockitoSugar {
 
   private class RunnableCount extends Runnable {
     var runs = 0

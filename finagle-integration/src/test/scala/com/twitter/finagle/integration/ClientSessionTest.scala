@@ -17,13 +17,13 @@ import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util._
 import com.twitter.conversions.DurationOps._
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * We want client session statuses to reflect the status of their underlying transports/handles
  */
-class ClientSessionTest extends FunSuite with MockitoSugar {
+class ClientSessionTest extends AnyFunSuite with MockitoSugar {
 
   def testSessionStatus[Req, Rep](
     name: String,

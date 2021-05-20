@@ -2,10 +2,10 @@ package com.twitter.finagle.exp
 
 import com.twitter.concurrent.{LocalScheduler, Scheduler}
 import com.twitter.finagle.stats.{Gauge, InMemoryStatsReceiver}
-import org.scalatest.FunSuite
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class FinagleSchedulerTest extends FunSuite {
+class FinagleSchedulerTest extends AnyFunSuite {
 
   test("addGauges") {
     val stats = new InMemoryStatsReceiver()

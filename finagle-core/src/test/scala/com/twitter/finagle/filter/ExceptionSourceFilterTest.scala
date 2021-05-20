@@ -5,10 +5,10 @@ import com.twitter.util.{Await, Future}
 
 import org.mockito.Matchers.anyInt
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ExceptionSourceFilterTest extends FunSuite with MockitoSugar {
+class ExceptionSourceFilterTest extends AnyFunSuite with MockitoSugar {
   test("ExceptionSourceFilter should add a name to sourced exceptions") {
     val service = mock[Service[Int, Int]]
     val e = new SourcedException {}

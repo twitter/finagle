@@ -2,11 +2,11 @@ package com.twitter.finagle.memcached.unit
 
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.immutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class GetResultTest extends FunSuite with MockitoSugar {
+class GetResultTest extends AnyFunSuite with MockitoSugar {
 
   class Context {
     val value1 = mock[Value]

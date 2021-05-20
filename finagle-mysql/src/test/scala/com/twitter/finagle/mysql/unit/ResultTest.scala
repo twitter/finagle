@@ -2,7 +2,7 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 trait HexDump {
   val hex: String
@@ -17,7 +17,7 @@ trait HexDump {
   }
 }
 
-class HandshakeInitTest extends FunSuite {
+class HandshakeInitTest extends AnyFunSuite {
   val authPluginHex =
     test("decode protocol version 10")(new HexDump {
       val hex =
@@ -62,7 +62,7 @@ class HandshakeInitTest extends FunSuite {
   })
 }
 
-class AuthSwitchRequestTest extends FunSuite with HexDump {
+class AuthSwitchRequestTest extends AnyFunSuite with HexDump {
   val hex =
     """2C 00 00 02 FE 63 61 63    68 69 6E 67 5F 73 68 61
       |32 5F 70 61 73 73 77 6F    72 64 00 0F 71 2E 02 5B
@@ -79,7 +79,7 @@ class AuthSwitchRequestTest extends FunSuite with HexDump {
   }
 }
 
-class AuthMoreDataFromServerTest extends FunSuite {
+class AuthMoreDataFromServerTest extends AnyFunSuite {
 
   test("fast auth success packet")(new HexDump {
     val hex = """02 00 00 04 01 03"""
@@ -130,7 +130,7 @@ class AuthMoreDataFromServerTest extends FunSuite {
   })
 }
 
-class OKTest extends FunSuite with HexDump {
+class OKTest extends AnyFunSuite with HexDump {
   val hex = """07 00 00 02 00 00 00 02    00 00 00"""
   test("decode") {
     assert(packets.size > 0)
@@ -143,7 +143,7 @@ class OKTest extends FunSuite with HexDump {
   }
 }
 
-class ErrorTest extends FunSuite with HexDump {
+class ErrorTest extends AnyFunSuite with HexDump {
   val hex =
     """17 00 00 01 ff 48 04 23    48 59 30 30 30 4e 6f 20
       |74 61 62 6c 65 73 20 75    73 65 64"""
@@ -157,7 +157,7 @@ class ErrorTest extends FunSuite with HexDump {
   }
 }
 
-class EofTest extends FunSuite with HexDump {
+class EofTest extends AnyFunSuite with HexDump {
   val hex = """05 00 00 05 fe 00 00 02 00"""
   test("decode") {
     assert(packets.size > 0)
@@ -167,7 +167,7 @@ class EofTest extends FunSuite with HexDump {
   }
 }
 
-class PrepareOKTest extends FunSuite with HexDump {
+class PrepareOKTest extends AnyFunSuite with HexDump {
   // SELECT CONCAT(?, ?) AS col1:
   val hex =
     """0c 00 00 01 00 01 00 00    00 01 00 02 00 00 00 00|
@@ -210,7 +210,7 @@ class PrepareOKTest extends FunSuite with HexDump {
   }
 }
 
-class BinaryResultSetTest extends FunSuite with HexDump {
+class BinaryResultSetTest extends AnyFunSuite with HexDump {
   // SELECT CONCAT(?, ?) AS col1
   // execute("foo", "bar")
   val hex =

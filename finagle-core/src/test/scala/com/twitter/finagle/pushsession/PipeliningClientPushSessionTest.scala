@@ -7,8 +7,8 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Await, MockTimer, Promise, Time, TimeoutException => UtilTimeoutException}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.mockito.Mockito.never
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
 class PipeliningMockChannelHandle[In, Out] extends MockChannelHandle[In, Out] {
 
@@ -16,7 +16,7 @@ class PipeliningMockChannelHandle[In, Out] extends MockChannelHandle[In, Out] {
   override val remoteAddress: SocketAddress = new InetSocketAddress("1.2.3.4", 100)
 }
 
-class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
+class PipeliningClientPushSessionTest extends AnyFunSuite with MockitoSugar {
 
   val exns = Seq(
     ("util", new UtilTimeoutException("boom!"), never()),

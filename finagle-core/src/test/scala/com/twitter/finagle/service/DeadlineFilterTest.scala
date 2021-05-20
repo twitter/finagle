@@ -5,10 +5,11 @@ import com.twitter.finagle.context.{Deadline, Contexts}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import com.twitter.conversions.DurationOps._
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class DeadlineFilterTest extends AnyFunSuite with MockitoSugar with OneInstancePerTest {
   import DeadlineFilter.DeadlineExceededException
 
   val promise = new Promise[String]

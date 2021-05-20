@@ -4,10 +4,10 @@ import com.twitter.finagle.http.{Message, Method, Request, Version}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree}
 import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
 import java.util.Base64
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpDtabTest extends FunSuite with AssertionsForJUnit {
+class HttpDtabTest extends AnyFunSuite with AssertionsForJUnit {
   val okDests = Vector("/$/inet/10.0.0.1/9000", "/foo/bar", "/")
   val okPrefixes = Vector("/foo", "/", "/foo/*/bar")
   val okDentries = for {

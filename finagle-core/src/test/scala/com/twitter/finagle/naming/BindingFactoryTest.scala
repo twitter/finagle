@@ -14,8 +14,9 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{atLeastOnce, spy, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
 object BindingFactoryTest {
   object TestNamer {
@@ -50,7 +51,7 @@ case class Factory(i: Int) extends EndpointFactory[String, String] {
   }
 }
 
-class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter {
+class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter {
   import BindingFactoryTest._
 
   var saveBase: Dtab = Dtab.empty

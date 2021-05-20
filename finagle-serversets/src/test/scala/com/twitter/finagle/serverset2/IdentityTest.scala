@@ -1,6 +1,6 @@
 package com.twitter.finagle.serverset2
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 class TestIdentity extends Identity {
   val scheme = "test"
@@ -8,7 +8,7 @@ class TestIdentity extends Identity {
   val priority = 0
 }
 
-class IdentityTest extends FunSuite {
+class IdentityTest extends AnyFunSuite {
   test("UserIdentity captures current user") {
     val userIdent = new UserIdentity()
     val currentUser = System.getProperty("user.name")

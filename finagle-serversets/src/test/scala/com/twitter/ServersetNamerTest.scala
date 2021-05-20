@@ -5,10 +5,10 @@ import com.twitter.finagle.serverset2.Zk2Resolver
 import com.twitter.util.{Activity, Var}
 import org.mockito.Matchers.{anyString, any}
 import org.mockito.Mockito.{verify, when, never, times}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServersetNamerTest extends FunSuite with MockitoSugar {
+class ServersetNamerTest extends AnyFunSuite with MockitoSugar {
   trait Ctx {
     val zk2 = mock[Zk2Resolver]
     val namer = new com.twitter.serverset(zk2)

@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.util.Timer
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientBuilderTest extends FunSuite {
+class ClientBuilderTest extends AnyFunSuite {
   val config = ClientConfig(
     hosts = "localhost:2181",
     sessionTimeout = 10.seconds,

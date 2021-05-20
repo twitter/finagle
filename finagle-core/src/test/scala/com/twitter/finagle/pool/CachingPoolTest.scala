@@ -7,9 +7,10 @@ import com.twitter.util.{Await, Duration, Future, MockTimer, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
+import org.scalatest.funsuite.AnyFunSuite
 
-class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class CachingPoolTest extends AnyFunSuite with MockitoSugar with OneInstancePerTest {
 
   private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
 

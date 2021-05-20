@@ -14,9 +14,9 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import java.net.InetSocketAddress
 import javax.net.ssl.SSLContext
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4ClientSslChannelInitializerTest extends FunSuite {
+class Netty4ClientSslChannelInitializerTest extends AnyFunSuite {
 
   def channel(ps: Stack.Params): EmbeddedChannel =
     new EmbeddedChannel(new Netty4ClientSslChannelInitializer(ps))

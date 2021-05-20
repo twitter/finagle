@@ -5,11 +5,11 @@ import com.twitter.finagle._
 import com.twitter.util.{Await, Future, Promise, MockTimer, Return, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class TimeoutFactoryTest extends FunSuite with MockitoSugar {
+class TimeoutFactoryTest extends AnyFunSuite with MockitoSugar {
 
   trait TimeoutFactoryHelper {
     val timer = new MockTimer

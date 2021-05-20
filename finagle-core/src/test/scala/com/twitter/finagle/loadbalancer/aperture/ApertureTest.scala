@@ -9,9 +9,10 @@ import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Duration, NullTimer, Var}
 import java.net.InetSocketAddress
 import org.scalactic.source.Position
-import org.scalatest.{FunSuite, Tag}
+import org.scalatest.Tag
+import org.scalatest.funsuite.AnyFunSuite
 
-class ApertureTest extends FunSuite with ApertureSuite {
+class ApertureTest extends AnyFunSuite with ApertureSuite {
 
   /**
    * A simple aperture balancer which doesn't have a controller or load metric

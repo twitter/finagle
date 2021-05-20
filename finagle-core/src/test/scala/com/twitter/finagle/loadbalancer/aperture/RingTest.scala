@@ -2,10 +2,10 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.util.Rng
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class RingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class RingTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   val rng = Rng(12345L)
 
   def histo(seq: Seq[Int]): Map[Int, Int] =

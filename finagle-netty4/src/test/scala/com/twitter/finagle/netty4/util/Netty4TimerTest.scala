@@ -4,13 +4,13 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Time}
 import io.netty.util.{HashedWheelTimer, Timeout, Timer, TimerTask}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.FunSuite
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.scalatest.concurrent.Eventually
 import scala.concurrent.duration.TimeUnit
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4TimerTest extends FunSuite with MockitoSugar with Eventually {
+class Netty4TimerTest extends AnyFunSuite with MockitoSugar with Eventually {
 
   test("schedule once") {
     var scheduled = false

@@ -1,10 +1,10 @@
 package com.twitter.finagle.tracing
 
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class TracerTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class TracerTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   case class TestTracer(res: Option[Boolean]) extends Tracer {
     def record(record: Record): Unit = ()

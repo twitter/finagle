@@ -6,10 +6,10 @@ import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.finagle.memcached.{Entry, Interpreter}
 import com.twitter.io.Buf
 import com.twitter.util.Time
-import org.scalatest.FunSuite
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class InterpreterTest extends FunSuite {
+class InterpreterTest extends AnyFunSuite {
 
   val map = mutable.Map[Buf, Entry]()
   val atomicMap = new AtomicMap(Seq(map))

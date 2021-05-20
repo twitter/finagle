@@ -5,12 +5,12 @@ import com.twitter.finagle.Status
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatest.funsuite.AnyFunSuite
 
 class ThresholdFailureDetectorTest
-    extends FunSuite
+    extends AnyFunSuite
     with AssertionsForJUnit
     with Eventually
     with IntegrationPatience {

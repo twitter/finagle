@@ -14,9 +14,9 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.proxy.ProxyConnectException
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4ClientChannelInitializerTest extends FunSuite {
+class Netty4ClientChannelInitializerTest extends AnyFunSuite {
 
   test("framed channel initializer releases direct bufs") {
     val e = new EmbeddedChannel()

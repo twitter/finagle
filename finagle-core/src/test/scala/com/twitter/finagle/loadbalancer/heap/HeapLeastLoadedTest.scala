@@ -4,12 +4,12 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle._
 import com.twitter.util.{Var, ReadWriteVar, Activity, Await, Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
-class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
+class HeapLeastLoadedTest extends AnyFunSuite with MockitoSugar with AssertionsForJUnit {
   class LoadedFactory(which: String) extends ServiceFactory[Unit, LoadedFactory] {
     var load = 0
     var _status: Status = Status.Open

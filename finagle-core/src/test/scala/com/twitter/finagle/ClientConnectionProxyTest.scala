@@ -2,10 +2,10 @@ package com.twitter.finagle
 
 import com.twitter.finagle.ssl.session.SslSessionInfo
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientConnectionProxyTest extends FunSuite with MockitoSugar {
+class ClientConnectionProxyTest extends AnyFunSuite with MockitoSugar {
 
   test("ClientConnectionProxy uses underlying SSL/TLS session info") {
     val sslSessionInfo: SslSessionInfo = mock[SslSessionInfo]

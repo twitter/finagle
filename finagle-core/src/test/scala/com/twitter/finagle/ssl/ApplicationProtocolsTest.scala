@@ -1,8 +1,8 @@
 package com.twitter.finagle.ssl
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ApplicationProtocolsTest extends FunSuite {
+class ApplicationProtocolsTest extends AnyFunSuite {
 
   test("Supported with alpn or npn values succeeds") {
     val appProtos = ApplicationProtocols.Supported(Seq("h2", "http/1.1"))

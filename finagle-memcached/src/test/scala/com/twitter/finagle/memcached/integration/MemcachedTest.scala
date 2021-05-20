@@ -11,11 +11,12 @@ import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.time.{Milliseconds, Seconds, Span}
-import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
+import org.scalatest.{BeforeAndAfter, Outcome}
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
 abstract class MemcachedTest
-    extends FunSuite
+    extends AnyFunSuite
     with BeforeAndAfter
     with Eventually
     with PatienceConfiguration {

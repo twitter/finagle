@@ -5,9 +5,9 @@ import com.twitter.finagle.mysql.transport.MysqlBuf
 import com.twitter.io.Buf
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.{Calendar, Date}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SimpleCommandRequestTest extends FunSuite {
+class SimpleCommandRequestTest extends AnyFunSuite {
   test("encode") {
     val bytes = "table".getBytes
     val cmd = 0x00
@@ -18,7 +18,7 @@ class SimpleCommandRequestTest extends FunSuite {
   }
 }
 
-class SslConnectionRequestTest extends FunSuite {
+class SslConnectionRequestTest extends AnyFunSuite {
   val clientCapabilities: Capability =
     Capability.baseCapabilities + Capability.ConnectWithDB + Capability.FoundRows
   val sslClientCapabilities: Capability = clientCapabilities + Capability.SSL
@@ -58,7 +58,7 @@ class SslConnectionRequestTest extends FunSuite {
 
 }
 
-abstract class HandshakeResponseTest extends FunSuite {
+abstract class HandshakeResponseTest extends AnyFunSuite {
   val username = Some("username")
   val password = Some("password")
   val database = Some("test")
@@ -167,7 +167,7 @@ class SecureHandshakeResponseTest extends HandshakeResponseTest {
   }
 }
 
-class AuthSwitchResponseTest extends FunSuite {
+class AuthSwitchResponseTest extends AnyFunSuite {
   val password = Some("password")
   val salt =
     Array[Byte](70, 38, 43, 66, 74, 48, 79, 126, 76, 66, 70, 118, 67, 40, 63, 68, 120, 80, 103, 54)
@@ -181,7 +181,7 @@ class AuthSwitchResponseTest extends FunSuite {
   }
 }
 
-class AuthMoreDataToServerTest extends FunSuite {
+class AuthMoreDataToServerTest extends AnyFunSuite {
   test("AuthMoreData request public key") {
     val req = PlainAuthMoreDataToServer(seqNum = 1.toShort, NeedPublicKey)
     val br = MysqlBuf.reader(req.toPacket.body)
@@ -212,7 +212,7 @@ class AuthMoreDataToServerTest extends FunSuite {
   }
 }
 
-class ExecuteRequestTest extends FunSuite {
+class ExecuteRequestTest extends AnyFunSuite {
   test("null values") {
     val numOfParams = 18
     val nullParams: Array[Parameter] = Array.fill(numOfParams)(null)

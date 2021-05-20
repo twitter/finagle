@@ -3,9 +3,9 @@ package com.twitter.finagle.memcached.unit.protocol
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.memcached.protocol.ExpiryValidation
 import com.twitter.util.Time
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ExpiryValidationTest extends FunSuite {
+class ExpiryValidationTest extends AnyFunSuite {
 
   private[this] val command = "TestCommand"
 

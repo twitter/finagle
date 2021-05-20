@@ -18,10 +18,10 @@ import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.{Certificate, X509Certificate}
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class PushStackServerTest extends FunSuite with MockitoSugar {
+class PushStackServerTest extends AnyFunSuite with MockitoSugar {
 
   private def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 

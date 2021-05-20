@@ -1,8 +1,8 @@
 package com.twitter.finagle.mysql
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class CapabilityTest extends FunSuite {
+class CapabilityTest extends AnyFunSuite {
   val c = Capability(
     Capability.LongPassword,
     Capability.SSL,

@@ -1,8 +1,8 @@
 package com.twitter.finagle.toggle
 
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
 object ToggleGenerator {
 
@@ -15,7 +15,7 @@ object ToggleGenerator {
 
 }
 
-class ToggleTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class ToggleTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   private val IntGen =
     Gen.chooseNum(Int.MinValue, Int.MaxValue)

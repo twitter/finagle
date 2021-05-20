@@ -1,9 +1,9 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.DurationOps._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends FunSuite {
+abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyFunSuite {
 
   private[this] def testCookies(
     newMessage: () => Message,

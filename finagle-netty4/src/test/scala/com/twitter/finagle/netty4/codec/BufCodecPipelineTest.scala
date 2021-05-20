@@ -2,9 +2,9 @@ package com.twitter.finagle.netty4.codec
 
 import io.netty.channel.{Channel, ChannelHandler, ChannelPipeline}
 import io.netty.channel.embedded.EmbeddedChannel
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class BufCodecPipelineTest extends FunSuite {
+class BufCodecPipelineTest extends AnyFunSuite {
 
   test("BufCodecPipeline adds BufCodec to Channel Pipeline") {
     val channel: Channel = new EmbeddedChannel

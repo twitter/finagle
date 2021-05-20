@@ -5,9 +5,9 @@ import com.twitter.finagle.Backoff
 import com.twitter.finagle.Backoff.DecorrelatedJittered
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Duration
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RetryStreamTest extends FunSuite {
+class RetryStreamTest extends AnyFunSuite {
 
   test("RetryStream never ends") {
     // create a stream with only 2 elements. Make sure we can enumerate 100 entries

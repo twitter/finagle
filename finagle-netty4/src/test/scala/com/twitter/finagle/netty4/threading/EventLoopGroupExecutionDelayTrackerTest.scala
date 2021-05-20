@@ -8,13 +8,13 @@ import com.twitter.logging.Logger
 import java.util.concurrent.Executors
 import org.mockito.Mockito.{never, verify, atLeast}
 import org.mockito.Matchers.{anyString, contains, anyVararg}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
 class EventLoopGroupExecutionDelayTrackerTest
-    extends FunSuite
+    extends AnyFunSuite
     with Eventually
     with IntegrationPatience
     with MockitoSugar {

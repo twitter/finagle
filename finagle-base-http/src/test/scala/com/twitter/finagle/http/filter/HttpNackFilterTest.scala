@@ -7,9 +7,9 @@ import com.twitter.finagle.http.{Fields, Method, Request, Response, Status}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Duration, Future}
 import java.util.concurrent.atomic.AtomicBoolean
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpNackFilterTest extends FunSuite {
+class HttpNackFilterTest extends AnyFunSuite {
 
   private[this] def await[T](awaitable: Awaitable[T]): T =
     Await.result(awaitable, Duration.fromSeconds(30))

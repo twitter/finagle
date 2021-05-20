@@ -6,10 +6,10 @@ import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.util.{Await, Future}
 import io.netty.handler.codec.http._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
+class Http2UpgradingTransportTest extends AnyFunSuite with MockitoSugar {
   class Ctx {
     val (writeq, readq) = (new AsyncQueue[Any](), new AsyncQueue[Any]())
     val transport = new QueueTransport[Any, Any](writeq, readq)

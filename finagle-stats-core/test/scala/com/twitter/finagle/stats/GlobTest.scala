@@ -1,8 +1,8 @@
 package com.twitter.finagle.stats
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class GlobTest extends FunSuite {
+class GlobTest extends AnyFunSuite {
 
   test("exact") {
     assert(Glob("foobar")("foobar"))

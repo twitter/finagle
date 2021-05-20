@@ -7,10 +7,10 @@ import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Await, Future, Return, Stopwatch, Time}
 import org.mockito.Matchers.{any, anyString, anyVararg, contains}
 import org.mockito.Mockito.{never, times, verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class LogFailuresFilterTest extends FunSuite with MockitoSugar {
+class LogFailuresFilterTest extends AnyFunSuite with MockitoSugar {
 
   private[this] def filter(logger: Logger, classifier: ResponseClassifier) =
     new MethodBuilderRetry.LogFailuresFilter[String, String](

@@ -1,9 +1,9 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.http.Status._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StatusTest extends FunSuite {
+class StatusTest extends AnyFunSuite {
   test("sanity check") {
     assert(Status(199).reason == "Informational")
     assert(Status(299).reason == "Successful")

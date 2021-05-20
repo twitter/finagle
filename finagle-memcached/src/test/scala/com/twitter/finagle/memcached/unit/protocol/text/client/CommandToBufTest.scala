@@ -4,10 +4,10 @@ import com.twitter.finagle.memcached.protocol.text.client.AbstractCommandToBuf
 import com.twitter.io.BufByteWriter
 import java.nio.charset.StandardCharsets
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class CommandToBufTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class CommandToBufTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("`commandToBuf.lengthAsString` returns same value as `Integer.toString.length`") {
     forAll(Gen.posNum[Int]) { i: Int =>

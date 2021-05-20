@@ -1,10 +1,10 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.util.{Future, Promise, Return}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
+import org.scalatest.funsuite.AnyFunSuite
 
-class ApertureEagerConnectionsTest extends FunSuite with Eventually {
+class ApertureEagerConnectionsTest extends AnyFunSuite with Eventually {
 
   class SampleConnection extends Function0[Future[Unit]] {
     val p = Promise[Unit]()

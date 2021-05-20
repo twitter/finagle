@@ -9,10 +9,11 @@ import com.twitter.finagle.{Address, Name, RequestTimeoutException, ThriftMux, p
 import com.twitter.util.{Await, Future, Promise}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 
 class ThriftMuxServerMysqlClientTest
-    extends FunSuite
+    extends AnyFunSuite
     with IntegrationClient
     with Eventually
     with IntegrationPatience

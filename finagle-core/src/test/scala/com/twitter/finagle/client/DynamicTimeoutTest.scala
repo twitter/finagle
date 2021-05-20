@@ -8,9 +8,14 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with IntegrationPatience {
+class DynamicTimeoutTest
+    extends AnyFunSuite
+    with Matchers
+    with Eventually
+    with IntegrationPatience {
 
   private[this] val timer = new MockTimer()
 

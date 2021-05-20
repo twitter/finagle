@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.tracing._
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RawZipkinTracerTest extends FunSuite {
+class RawZipkinTracerTest extends AnyFunSuite {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 

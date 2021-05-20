@@ -10,9 +10,10 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Time}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 
-class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
+class InterpreterServiceTest extends AnyFunSuite with BeforeAndAfter {
 
   val TimeOut = 15.seconds
 

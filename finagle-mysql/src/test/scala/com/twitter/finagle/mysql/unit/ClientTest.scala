@@ -1,18 +1,19 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.{ChannelClosedException, Mysql}
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.{ChannelClosedException, Mysql}
 import com.twitter.util.Time
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FunSuite, MustMatchers}
 
 /**
  * Tests the functionality of the MySQL client.
  */
-class ClientTest extends FunSuite with MockitoSugar with MustMatchers {
+class ClientTest extends AnyFunSuite with MockitoSugar with Matchers {
   private val sqlQuery = "SELECT * FROM FOO"
 
   test("client stack excludes NackAdmissionFilter") {

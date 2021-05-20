@@ -1,8 +1,8 @@
 package com.twitter.finagle.tracing
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SpanIdTest extends FunSuite {
+class SpanIdTest extends AnyFunSuite {
   test("parse positive long") {
     assert(SpanId.fromString("7fffffffffffffff").get.toLong == Long.MaxValue)
   }

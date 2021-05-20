@@ -10,10 +10,10 @@ import com.twitter.finagle.ssl.client.{
 }
 import com.twitter.finagle.transport.Transport
 import javax.net.ssl.SSLSession
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientTransportParamsTest extends FunSuite with MockitoSugar {
+class ClientTransportParamsTest extends AnyFunSuite with MockitoSugar {
 
   private val config = SslClientConfiguration()
   private val engine = mock[Engine]

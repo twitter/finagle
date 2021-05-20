@@ -1,8 +1,8 @@
 package com.twitter.finagle.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class AsyncLatchTest extends FunSuite {
+class AsyncLatchTest extends AnyFunSuite {
   test("when count=0, AsyncLatch should execute waiters immediately") {
     val latch = new AsyncLatch(0)
     var didCall = false

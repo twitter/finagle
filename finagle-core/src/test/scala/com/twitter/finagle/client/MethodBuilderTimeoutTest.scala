@@ -14,10 +14,11 @@ import com.twitter.finagle.{
 }
 import com.twitter.util.{Await, Duration, Future, MockTimer, Time, TimeControl}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 class MethodBuilderTimeoutTest
-    extends FunSuite
+    extends AnyFunSuite
     with Matchers
     with Eventually
     with IntegrationPatience {

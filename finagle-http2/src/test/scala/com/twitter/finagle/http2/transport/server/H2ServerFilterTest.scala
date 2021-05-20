@@ -5,9 +5,9 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{MockTimer, Time}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http2.{DefaultHttp2DataFrame, Http2FrameCodecBuilder}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class H2ServerFilterTest extends FunSuite {
+class H2ServerFilterTest extends AnyFunSuite {
 
   private class Ctx {
     val timer = new MockTimer

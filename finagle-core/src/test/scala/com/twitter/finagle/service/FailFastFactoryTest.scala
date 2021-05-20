@@ -14,13 +14,13 @@ import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Conductors, IntegrationPatience}
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
 class FailFastFactoryTest
-    extends FunSuite
+    extends AnyFunSuite
     with MockitoSugar
     with Conductors
     with IntegrationPatience {

@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.io.Buf
 import java.time.ZonedDateTime
 import java.util.Date
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MessageTest extends FunSuite {
+class MessageTest extends AnyFunSuite {
 
   private def defaultMessages(): Seq[Message] = Seq(Request(), Response())
 

@@ -6,8 +6,8 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, Promise, Return, Throw, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
 object SingletonPoolTest {
   private def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)
@@ -39,7 +39,7 @@ object SingletonPoolTest {
   }
 }
 
-class SingletonPoolTest extends FunSuite {
+class SingletonPoolTest extends AnyFunSuite {
   import SingletonPoolTest._
 
   test("doesn't leak connections on interruption with (allowInterrupts=false)") {

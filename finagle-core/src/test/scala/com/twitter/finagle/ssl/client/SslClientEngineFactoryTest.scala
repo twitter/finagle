@@ -4,9 +4,9 @@ import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.{CipherSuites, Engine, Protocols}
 import java.net.InetSocketAddress
 import javax.net.ssl.SSLContext
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SslClientEngineFactoryTest extends FunSuite {
+class SslClientEngineFactoryTest extends AnyFunSuite {
 
   private[this] val isa = new InetSocketAddress("localhost", 12345)
 

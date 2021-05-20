@@ -1,11 +1,11 @@
 package com.twitter.finagle.mux.lease.exp
 
 import org.mockito.Mockito.{when, verify, times}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
-class GenerationalRandomTest extends FunSuite with MockitoSugar {
+class GenerationalRandomTest extends AnyFunSuite with MockitoSugar {
   test("GenerationalRandom stays the same intragenerationally") {
     val nfo = mock[JvmInfo]
     when(nfo.generation()).thenReturn(0)

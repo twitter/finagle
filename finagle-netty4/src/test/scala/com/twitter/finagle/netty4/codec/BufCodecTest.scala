@@ -7,10 +7,11 @@ import io.netty.buffer.{ByteBuf, ByteBufUtil, EmptyByteBuf, Unpooled}
 import io.netty.channel.embedded.EmbeddedChannel
 import java.nio.ByteBuffer
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class BufCodecTest extends FunSuite with ScalaCheckDrivenPropertyChecks with OneInstancePerTest {
+class BufCodecTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks with OneInstancePerTest {
 
   val channel = new EmbeddedChannel(BufCodec)
 

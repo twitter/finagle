@@ -19,12 +19,12 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import javax.net.ssl.SSLSession
 import org.mockito.Matchers._
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
 class ClientBuilderTest
-    extends FunSuite
+    extends AnyFunSuite
     with Eventually
     with IntegrationPatience
     with MockitoSugar {

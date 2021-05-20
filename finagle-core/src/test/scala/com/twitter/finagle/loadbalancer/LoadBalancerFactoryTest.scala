@@ -11,9 +11,9 @@ import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiv
 import com.twitter.util.{Activity, Await, Event, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationPatience {
+class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with IntegrationPatience {
   val echoService = Service.mk[String, String](Future.value(_))
 
   trait PerHostFlagCtx extends App {

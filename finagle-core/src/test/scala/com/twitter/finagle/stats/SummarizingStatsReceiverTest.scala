@@ -1,8 +1,8 @@
 package com.twitter.finagle.stats
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SummarizingStatsReceiverTest extends FunSuite {
+class SummarizingStatsReceiverTest extends AnyFunSuite {
   test("SummarizingStatsReceiver doesn't fail on empty/low stats") {
     val receiver = new SummarizingStatsReceiver
     assert(receiver.summary() == "# counters\n\n# gauges\n\n# stats\n")

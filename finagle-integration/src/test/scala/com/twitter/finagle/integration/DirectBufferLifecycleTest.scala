@@ -13,7 +13,7 @@ import io.netty.channel.ChannelPipeline
 import io.netty.channel.embedded.EmbeddedChannel
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TMemoryBuffer}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * The majority of finagle protocols manage inbound direct buffers in their netty pipeline.
@@ -27,7 +27,7 @@ import org.scalatest.FunSuite
  *  redis (uses framed n4 channel init so coverage comes from c.t.f.n4.channel.Netty4ClientChannelInitializerTest)
  *  http/1.1, http/2 (coverage from c.t.f.http.DirectPayloadsLifecycleTest)
  */
-class DirectBufferLifecycleTest extends FunSuite {
+class DirectBufferLifecycleTest extends AnyFunSuite {
 
   /**
    * @tparam T the framed protocol type

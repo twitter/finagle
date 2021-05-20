@@ -7,9 +7,9 @@ import com.twitter.finagle.mysql.transport.{Packet, MysqlBuf}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientDispatcherTest extends FunSuite {
+class ClientDispatcherTest extends AnyFunSuite {
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)
 
   val params = Stack.Params.empty

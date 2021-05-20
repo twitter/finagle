@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MethodTest extends FunSuite {
+class MethodTest extends AnyFunSuite {
 
   val knownMethods = Set(
     Method.Get,

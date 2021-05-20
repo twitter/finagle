@@ -1,10 +1,10 @@
 package com.twitter.finagle.loadbalancer.heap
 
-import org.scalatest.FunSuite
 import scala.util.Random
 import scala.collection.mutable.HashMap
+import org.scalatest.funsuite.AnyFunSuite
 
-class HeapTest extends FunSuite {
+class HeapTest extends AnyFunSuite {
   private class Helper {
     val N = 100
     val heap = new Array[Int](N + 1)

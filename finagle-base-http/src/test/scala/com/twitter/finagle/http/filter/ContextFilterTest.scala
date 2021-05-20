@@ -6,9 +6,9 @@ import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.http.codec.context.HttpContext
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ContextFilterTest extends FunSuite {
+class ContextFilterTest extends AnyFunSuite {
 
   test("parses Finagle-Ctx headers") {
     val writtenDeadline = Deadline.ofTimeout(5.seconds)

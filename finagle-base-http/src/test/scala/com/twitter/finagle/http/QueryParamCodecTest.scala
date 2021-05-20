@@ -5,13 +5,13 @@ import com.twitter.util.Stopwatch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.jdk.CollectionConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
 class QueryParamCodecTest
-    extends FunSuite
+    extends AnyFunSuite
     with ScalaCheckDrivenPropertyChecks
     with Eventually
     with IntegrationPatience {

@@ -2,11 +2,11 @@ package com.twitter.finagle.memcached.unit.protocol.text
 
 import com.twitter.finagle.memcached.protocol.text.{FrameDecoder, FramingDecoder}
 import com.twitter.io.{Buf, ByteReader}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class FramingDecoderTest extends FunSuite with MockitoSugar {
+class FramingDecoderTest extends AnyFunSuite with MockitoSugar {
 
   private class MockFrameDecoder(private var rawSizes: List[Int]) extends FrameDecoder[Buf] {
     def nextFrameBytes(): Int = rawSizes match {

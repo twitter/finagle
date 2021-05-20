@@ -1,8 +1,8 @@
 package com.twitter.finagle.stats
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class CounterDeltasTest extends FunSuite {
+class CounterDeltasTest extends AnyFunSuite {
 
   test("deltas are computed based on last call to update") {
     val metrics = new Metrics()

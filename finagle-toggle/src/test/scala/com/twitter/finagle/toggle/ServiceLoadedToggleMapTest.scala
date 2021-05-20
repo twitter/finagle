@@ -1,6 +1,6 @@
 package com.twitter.finagle.toggle
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 //
 // These are used via the `LoadService` mechanism.
@@ -24,7 +24,7 @@ class ServiceLoadedToggleTestBToo extends ServiceLoadedToggleMap with ToggleMap.
   def libraryName: String = "com.twitter.finagle.toggle.test.B"
 }
 
-class ServiceLoadedToggleMapTest extends FunSuite {
+class ServiceLoadedToggleMapTest extends AnyFunSuite {
 
   test("one libraryName match") {
     val tm = ServiceLoadedToggleMap("com.twitter.finagle.toggle.test.A")

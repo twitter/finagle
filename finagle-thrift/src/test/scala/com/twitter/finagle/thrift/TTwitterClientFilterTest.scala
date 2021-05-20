@@ -9,11 +9,11 @@ import org.apache.thrift.protocol.{TMessageType, TMessage, TBinaryProtocol}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
-class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
+class TTwitterClientFilterTest extends AnyFunSuite with MockitoSugar {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   test("TTwitterClientFilter should set sampled boolean correctly") {

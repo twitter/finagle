@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MapParamMapTest extends FunSuite {
+class MapParamMapTest extends AnyFunSuite {
 
   test("get") {
     assert(MapParamMap().get("key") == None)

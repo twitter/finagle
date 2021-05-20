@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.collection
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RecordSchemaTest extends FunSuite {
+class RecordSchemaTest extends AnyFunSuite {
 
   private val schema = new RecordSchema
   private val field = schema.newField[Object]()

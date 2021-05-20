@@ -9,11 +9,11 @@ import org.mockito.Matchers._
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify}
 import org.mockito.stubbing.OngoingStubbing
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class Http1ConnectionManagerTest extends FunSuite with MockitoSugar {
+class Http1ConnectionManagerTest extends AnyFunSuite with MockitoSugar {
   // > further tests
   //   - malformed requests/responses
   //   - methods other than GET

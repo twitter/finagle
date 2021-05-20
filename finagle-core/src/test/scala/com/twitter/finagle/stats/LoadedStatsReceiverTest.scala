@@ -1,8 +1,8 @@
 package com.twitter.finagle.stats
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class LoadedStatsReceiverTest extends FunSuite {
+class LoadedStatsReceiverTest extends AnyFunSuite {
   test("Forwarding to LoadedStatsReceiver") {
     val prev = LoadedStatsReceiver.self
     LoadedStatsReceiver.self = NullStatsReceiver

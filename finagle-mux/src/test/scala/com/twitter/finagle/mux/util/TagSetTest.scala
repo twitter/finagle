@@ -1,8 +1,8 @@
 package com.twitter.finagle.mux.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class TagSetTest extends FunSuite {
+class TagSetTest extends AnyFunSuite {
   val range = 0 until 10
   test("assign contiguous, small tags in the range") {
     val set = new TagMap.TagSet(range)

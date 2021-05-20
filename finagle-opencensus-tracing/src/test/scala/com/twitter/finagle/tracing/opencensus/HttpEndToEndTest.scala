@@ -10,9 +10,9 @@ import io.opencensus.trace.{SpanContext, Tracing}
 import io.opencensus.trace.propagation.TextFormat
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicReference
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpEndToEndTest extends FunSuite {
+class HttpEndToEndTest extends AnyFunSuite {
 
   private def await[T](f: Future[T]): T =
     Await.result(f, Duration.fromSeconds(15))

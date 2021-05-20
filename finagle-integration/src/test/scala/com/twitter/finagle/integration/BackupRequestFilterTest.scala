@@ -13,10 +13,10 @@ import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationPatience {
+class BackupRequestFilterTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   private def await[T](f: Future[T]): T = Await.result(f, 15.seconds)
 

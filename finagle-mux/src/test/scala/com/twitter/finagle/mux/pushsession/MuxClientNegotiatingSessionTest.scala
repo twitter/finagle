@@ -19,9 +19,10 @@ import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Await, Awaitable, Future, Promise, Try}
 import org.scalactic.source.Position
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FunSuite, Tag}
+import org.scalatest.Tag
+import org.scalatest.funsuite.AnyFunSuite
 
-class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
+class MuxClientNegotiatingSessionTest extends AnyFunSuite with MockitoSugar {
   import MuxClientNegotiatingSession.PushSessionQueue
 
   // turn off failure detector since we don't need it for these tests.

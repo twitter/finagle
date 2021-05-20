@@ -5,13 +5,13 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.BucketAndCount
 import com.twitter.util.{MockTimer, Time}
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
 class WindowedPercentileHistogramTest
-    extends FunSuite
+    extends AnyFunSuite
     with Eventually
     with IntegrationPatience
     with ScalaCheckDrivenPropertyChecks {

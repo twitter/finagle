@@ -1,11 +1,10 @@
 package com.twitter.finagle.memcached.unit.util
 
-import org.scalatest.FunSuite
-
 import com.twitter.finagle.memcached.util.Bufs.RichBuf
 import com.twitter.io.Buf
+import org.scalatest.funsuite.AnyFunSuite
 
-class BufsTest extends FunSuite {
+class BufsTest extends AnyFunSuite {
 
   test("RichBuf.toInt") {
     val buf = Buf.Utf8(Int.MaxValue.toString)

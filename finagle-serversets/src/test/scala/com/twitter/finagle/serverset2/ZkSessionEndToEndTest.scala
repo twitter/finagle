@@ -9,9 +9,10 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.time._
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 
-class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
+class ZkSessionEndToEndTest extends AnyFunSuite with BeforeAndAfter {
   val zkTimeout = 100.milliseconds
 
   // RetryStream doesn't work with MockTimer (yes, even after we tick it).

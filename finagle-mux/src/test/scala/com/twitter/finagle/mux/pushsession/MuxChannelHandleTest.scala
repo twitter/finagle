@@ -6,10 +6,10 @@ import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.io.{Buf, ByteReader}
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.embedded.EmbeddedChannel
-import org.scalatest.FunSuite
 import scala.jdk.CollectionConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
-class MuxChannelHandleTest extends FunSuite {
+class MuxChannelHandleTest extends AnyFunSuite {
   private[this] val prefs = Compression.LocalPreferences(
     Compression.LocalSetting(
       CompressionLevel.Desired,

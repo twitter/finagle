@@ -15,12 +15,12 @@ import com.twitter.thrift.ServiceInstance
 import com.twitter.util._
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import java.util.concurrent.atomic.AtomicReference
+import org.scalatest.funsuite.AnyFunSuite
 
 class ServiceDiscovererTest
-    extends FunSuite
+    extends AnyFunSuite
     with MockitoSugar
     with Eventually
     with IntegrationPatience {

@@ -1,14 +1,14 @@
 package com.twitter.finagle.memcached.unit.protocol.text.client
 
-import org.scalatest.FunSuite
 import com.twitter.finagle.memcached.protocol
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.client.MemcachedClientDecoder
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class MemcachedClientDecoderTest extends FunSuite {
+class MemcachedClientDecoderTest extends AnyFunSuite {
 
   private class Context {
     val decoder = new MemcachedClientDecoder

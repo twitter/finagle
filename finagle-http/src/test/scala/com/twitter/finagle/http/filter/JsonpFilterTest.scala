@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{MediaType, Method, Request, Response, Status}
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class JsonpFilterTest extends FunSuite {
+class JsonpFilterTest extends AnyFunSuite {
 
   val dummyService = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {

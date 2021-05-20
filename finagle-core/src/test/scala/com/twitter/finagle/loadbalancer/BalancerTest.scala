@@ -5,12 +5,12 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats.{Counter, InMemoryStatsReceiver}
 import com.twitter.util.{Await, Future, Time}
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.Conductors
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropertyChecks {
+class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenPropertyChecks {
 
   private class TestBalancer(
     protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver,

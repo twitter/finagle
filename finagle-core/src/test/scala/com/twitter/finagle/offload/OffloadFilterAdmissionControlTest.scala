@@ -3,9 +3,10 @@ package com.twitter.finagle.offload
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, FuturePool, Promise, Try}
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
+import org.scalatest.funsuite.AnyFunSuite
 
-class OffloadFilterAdmissionControlTest extends FunSuite with OneInstancePerTest {
+class OffloadFilterAdmissionControlTest extends AnyFunSuite with OneInstancePerTest {
 
   private val FastSample: Long = 1l
   private val SlowSample: Long = 5l

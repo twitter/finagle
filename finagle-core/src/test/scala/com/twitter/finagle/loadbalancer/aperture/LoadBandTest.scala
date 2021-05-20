@@ -5,9 +5,9 @@ import com.twitter.finagle.ServiceFactoryProxy
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Await, Closable, Duration}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class LoadBandTest extends FunSuite with ApertureSuite {
+class LoadBandTest extends AnyFunSuite with ApertureSuite {
   private val rng = Rng()
 
   private class Bal(

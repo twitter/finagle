@@ -3,9 +3,9 @@ package com.twitter.finagle.memcached.unit
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.memcached._
 import com.twitter.util.{Await, Awaitable}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class PoolingReadRepairClientTest extends FunSuite {
+class PoolingReadRepairClientTest extends AnyFunSuite {
 
   val TimeOut = 15.seconds
 

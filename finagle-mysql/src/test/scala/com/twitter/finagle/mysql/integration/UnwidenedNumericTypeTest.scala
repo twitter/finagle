@@ -3,13 +3,13 @@ package com.twitter.finagle.mysql.integration
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql._
 import com.twitter.util.{Await, Awaitable}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * Test that makes sure that when unsigned support isn't enabled numeric types are not
  * automatically widened for unsigned columns.
  */
-class UnwidenedNumericTypeTest extends FunSuite with IntegrationClient {
+class UnwidenedNumericTypeTest extends AnyFunSuite with IntegrationClient {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
   private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)

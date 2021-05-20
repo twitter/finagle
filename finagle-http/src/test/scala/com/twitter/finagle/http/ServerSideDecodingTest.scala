@@ -10,8 +10,8 @@ import java.io.{ByteArrayOutputStream, OutputStream, PrintStream}
 import java.net.InetSocketAddress
 import java.util.zip.{DeflaterOutputStream, GZIPOutputStream}
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * Provides tests for server side content decoding.
@@ -21,7 +21,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
  * compression is currently made problematic by netty
  * (see https://github.com/netty/netty/issues/4970).
  */
-class ServerSideDecodingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class ServerSideDecodingTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   // Helper class - might be overkill to have a sum type for just one test, but
   // it makes it simple to provide an Arbitrary instance for encoders and to
   // make the actual test that much more readable.

@@ -3,10 +3,10 @@ package com.twitter.finagle.memcached.unit.util
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 import java.nio.charset.StandardCharsets.UTF_8
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class ParserUtilsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class ParserUtilsTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   private def isDigitsBB(str: String): Boolean = {
     val bb = UTF_8.encode(str)

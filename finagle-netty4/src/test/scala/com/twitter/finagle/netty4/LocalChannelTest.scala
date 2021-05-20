@@ -7,7 +7,7 @@ import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Awaitable, Future, Duration}
 import io.netty.channel.local.LocalAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * This test class uses Netty's `LocalAddress` to signal
@@ -16,7 +16,7 @@ import org.scalatest.FunSuite
  * Using a `LocalChannel` allows for testing of functionality
  * without using actual sockets.
  */
-class LocalChannelTest extends FunSuite {
+class LocalChannelTest extends AnyFunSuite {
 
   private[this] def await[T](a: Awaitable[T]): T = Await.result(a, Duration.fromSeconds(1))
 

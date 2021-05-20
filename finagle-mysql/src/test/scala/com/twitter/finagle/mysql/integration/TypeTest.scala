@@ -11,9 +11,9 @@ import com.twitter.util.{Await, Awaitable, TwitterDateFormat}
 import java.sql.Timestamp
 import java.util.TimeZone
 import org.scalactic.{Equality, TolerantNumerics}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class NumericTypeTest extends FunSuite with IntegrationClient {
+class NumericTypeTest extends AnyFunSuite with IntegrationClient {
 
   private val epsilon = 0.000001
 
@@ -279,7 +279,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
   }
 }
 
-class BlobTypeTest extends FunSuite with IntegrationClient {
+class BlobTypeTest extends AnyFunSuite with IntegrationClient {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
   private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
@@ -437,7 +437,7 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
   }
 }
 
-class DateTimeTypeTest extends FunSuite with IntegrationClient {
+class DateTimeTypeTest extends AnyFunSuite with IntegrationClient {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
   private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
@@ -552,7 +552,7 @@ object JsonTypeTest {
  * JSON Data Type is supported as of MySQL 5.7.8. Ensure the correct MySQL version in
  * order for this integration test to work.
  */
-class JsonTypeTest extends FunSuite with IntegrationClient {
+class JsonTypeTest extends AnyFunSuite with IntegrationClient {
   import JsonTypeTest._
 
   private val mapper = new ObjectMapper with ScalaObjectMapper

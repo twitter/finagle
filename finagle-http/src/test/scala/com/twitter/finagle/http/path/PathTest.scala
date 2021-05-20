@@ -1,12 +1,12 @@
 package com.twitter.finagle.http.path
 
 import com.twitter.finagle.http.{Method, ParamMap}
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalacheck.Gen
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
-class PathTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class PathTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   def alpha(min: Int, max: Int) =
     for {

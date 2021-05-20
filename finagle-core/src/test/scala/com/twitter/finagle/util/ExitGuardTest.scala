@@ -1,12 +1,12 @@
 package com.twitter.finagle.util
 
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
 class ExitGuardTest
-    extends FunSuite
+    extends AnyFunSuite
     with MockitoSugar
     with AssertionsForJUnit
     with Eventually

@@ -6,10 +6,10 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.stack.nilStack
 import com.twitter.util.{Await, Future, Var}
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatest.funsuite.AnyFunSuite
 
-class AddrMetadataExtractionTest extends FunSuite with AssertionsForJUnit {
+class AddrMetadataExtractionTest extends AnyFunSuite with AssertionsForJUnit {
   class Ctx {
     val unbound = Name.Path(Path.read("/$/fail"))
     val metadata = Addr.Metadata("foo" -> "bar")

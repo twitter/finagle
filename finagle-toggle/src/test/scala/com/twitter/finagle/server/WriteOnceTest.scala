@@ -1,8 +1,8 @@
 package com.twitter.finagle.server
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class WriteOnceTest extends FunSuite {
+class WriteOnceTest extends AnyFunSuite {
 
   test("write does not allow null") {
     val wo = new WriteOnce[String]("hello")

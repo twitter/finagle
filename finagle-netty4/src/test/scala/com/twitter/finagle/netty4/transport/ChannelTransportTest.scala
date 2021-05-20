@@ -7,14 +7,15 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Future, Return, Time, Throw}
 import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.Eventually._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.mockito.Mockito._
+import org.scalatest.funsuite.AnyFunSuite
 
 class ChannelTransportTest
-    extends FunSuite
+    extends AnyFunSuite
     with ScalaCheckDrivenPropertyChecks
     with OneInstancePerTest
     with MockitoSugar {

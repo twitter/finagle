@@ -4,10 +4,10 @@ import com.twitter.util.Future
 import io.opencensus.trace.{BlankSpan, EndSpanOptions, Span, SpanBuilder}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class TracingOpsTest extends FunSuite with MockitoSugar {
+class TracingOpsTest extends AnyFunSuite with MockitoSugar {
   import TracingOps._
 
   test("Span.scopedAndEnd") {

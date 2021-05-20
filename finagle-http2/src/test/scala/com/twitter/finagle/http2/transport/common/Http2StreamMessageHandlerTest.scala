@@ -9,12 +9,12 @@ import io.netty.handler.codec.http2._
 import io.netty.util.ReferenceCounted
 import org.mockito.Mockito.when
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
 class Http2StreamMessageHandlerTest
-    extends FunSuite
+    extends AnyFunSuite
     with MockitoSugar
     with ScalaCheckDrivenPropertyChecks {
   test("doesn't leak message written post-RST") {

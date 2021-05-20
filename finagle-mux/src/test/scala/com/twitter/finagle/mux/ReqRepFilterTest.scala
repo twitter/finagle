@@ -3,9 +3,9 @@ package com.twitter.finagle.mux
 import com.twitter.finagle.Failure
 import com.twitter.finagle.mux.transport.{Message, MuxFailure}
 import com.twitter.logging.Level
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ReqRepFilterTest extends FunSuite {
+class ReqRepFilterTest extends AnyFunSuite {
   test(
     "Hydrate a mux failure from a message with encoded error codes, so that it preserves the" +
       " flags and uses the right log level"

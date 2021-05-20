@@ -8,13 +8,13 @@ import com.twitter.finagle.{Http, ListeningServer, Service}
 import com.twitter.io.{Buf, BufReader}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Memoize, StorageUnit}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * A permutated set of client/server/proxy tests of varying large response sizes to
  * verify client/server/streaming configurations behave as expected.
  */
-class ClientServerIntegrationTest extends FunSuite {
+class ClientServerIntegrationTest extends AnyFunSuite {
 
   private[this] def await[T](awaitable: Awaitable[T], timeout: Duration = 1.second): T =
     Await.result(awaitable, timeout)

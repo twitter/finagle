@@ -7,9 +7,9 @@ import com.twitter.finagle.netty4.CopyingByteBufByteReader
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.io.{Buf, ByteReader}
 import io.netty.buffer.ByteBufAllocator
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FragmentDecoderTest extends FunSuite {
+class FragmentDecoderTest extends AnyFunSuite {
 
   private class DecoderStatsReceiver extends InMemoryStatsReceiver {
     def pendingReadStreams: Int = gauges(Seq("mux", "framer", "pending_read_streams"))().toInt

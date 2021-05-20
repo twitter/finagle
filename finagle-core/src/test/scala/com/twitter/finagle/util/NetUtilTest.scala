@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
 import com.twitter.finagle.core.util.NetUtil
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class NetUtilTest extends FunSuite {
+class NetUtilTest extends AnyFunSuite {
   test("NetUtil should isIpv4Address") {
     import NetUtil.isIpv4Address
 

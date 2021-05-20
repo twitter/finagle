@@ -6,10 +6,11 @@ import com.twitter.finagle.memcached.protocol.text.server.MemcachedServerDecoder
 import com.twitter.finagle.memcached.protocol.{Set, Stats}
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Time}
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.funsuite.AnyFunSuite
 
-class MemcachedServerDecoderTest extends FunSuite with OneInstancePerTest {
+class MemcachedServerDecoderTest extends AnyFunSuite with OneInstancePerTest {
 
   val decoder = new MemcachedServerDecoder(StorageCommands)
   case class ExpectedTimeTable(expireTime: Int, expirationTime: Time)

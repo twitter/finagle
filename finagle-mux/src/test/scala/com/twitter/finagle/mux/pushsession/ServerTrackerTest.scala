@@ -13,10 +13,10 @@ import com.twitter.finagle.{Dtab, Path, Service, mux}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServerTrackerTest extends FunSuite {
+class ServerTrackerTest extends AnyFunSuite {
 
   def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 

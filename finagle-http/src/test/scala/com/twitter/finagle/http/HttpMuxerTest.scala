@@ -5,9 +5,9 @@ import com.twitter.finagle.http.Method.Patch
 import com.twitter.finagle.Service
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpMuxerTest extends FunSuite {
+class HttpMuxerTest extends AnyFunSuite {
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 
   class DummyService(reply: String) extends Service[Request, Response] {

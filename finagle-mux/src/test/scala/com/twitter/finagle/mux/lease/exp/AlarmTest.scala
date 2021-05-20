@@ -4,9 +4,10 @@ import com.twitter.util.{StorageUnit, Time}
 import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.StorageUnitOps._
 import org.scalactic.source.Position
-import org.scalatest.{FunSuite, Tag}
+import org.scalatest.Tag
+import org.scalatest.funsuite.AnyFunSuite
 
-class AlarmTest extends FunSuite with LocalConductors {
+class AlarmTest extends AnyFunSuite with LocalConductors {
 
   val skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY")
 

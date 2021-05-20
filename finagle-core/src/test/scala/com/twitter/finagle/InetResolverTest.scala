@@ -5,9 +5,9 @@ import com.twitter.finagle.stats.{DefaultStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util._
 import java.net.{InetAddress, UnknownHostException}
 import java.util.concurrent.{CountDownLatch, TimeUnit}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class InetResolverTest extends FunSuite {
+class InetResolverTest extends AnyFunSuite {
   val statsReceiver = new InMemoryStatsReceiver
 
   val dnsResolver = new DnsResolver(statsReceiver, FuturePool.unboundedPool)

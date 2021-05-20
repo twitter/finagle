@@ -2,10 +2,10 @@ package com.twitter.finagle.stats
 
 import java.util
 import java.util.Collections
-import org.scalatest.FunSuite
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
-class MetricsViewTest extends FunSuite {
+class MetricsViewTest extends AnyFunSuite {
 
   private val EmptySnapshot: Snapshot = new Snapshot {
     def count: Long = 0L

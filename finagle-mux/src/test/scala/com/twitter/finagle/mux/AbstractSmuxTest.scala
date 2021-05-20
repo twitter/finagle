@@ -13,10 +13,10 @@ import com.twitter.io.{Buf, TempFile}
 import com.twitter.util.{Await, Closable, Future, Try}
 import io.netty.channel.ChannelPipeline
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 // duplicated in ThriftSmuxTest, please update there too
-abstract class AbstractSmuxTest extends FunSuite {
+abstract class AbstractSmuxTest extends AnyFunSuite {
 
   import AbstractSmuxTest._
 

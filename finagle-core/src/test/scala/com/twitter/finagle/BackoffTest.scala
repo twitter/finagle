@@ -5,11 +5,11 @@ import com.twitter.finagle.Backoff.{DecorrelatedJittered, EqualJittered, Exponen
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Duration
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.collection.mutable.ArrayBuffer
+import org.scalatest.funsuite.AnyFunSuite
 
-class BackoffTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class BackoffTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   test("empty") {
     val backoff: Backoff = Backoff.empty
     assert(backoff.isExhausted)

@@ -6,9 +6,9 @@ import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util.{Await, Future, FuturePool}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.{Executors, ThreadFactory}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientServerTest extends FunSuite {
+class ClientServerTest extends AnyFunSuite {
 
   private def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 

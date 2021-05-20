@@ -3,14 +3,14 @@ package com.twitter.finagle.naming
 import com.twitter.finagle._
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.util.{Activity, Var}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 class testnamer extends Namer {
   override def lookup(path: Path) =
     Activity.value(NameTree.Leaf(Name.Path(Path.read("/rewritten/by/test/namer"))))
 }
 
-class DefaultInterpreterTest extends FunSuite {
+class DefaultInterpreterTest extends AnyFunSuite {
 
   def assertEval(dtab: Dtab, path: String, expected: Name.Bound*): Unit = {
     DefaultInterpreter.bind(dtab, Path.read(path)).sample().eval match {

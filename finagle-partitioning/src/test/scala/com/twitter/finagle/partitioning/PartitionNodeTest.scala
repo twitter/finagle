@@ -2,9 +2,9 @@ package com.twitter.finagle.partitioning
 
 import com.twitter.finagle.{Addr, Address}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class PartitionNodeTest extends FunSuite {
+class PartitionNodeTest extends AnyFunSuite {
 
   test("fromInetSocketAddress to PartitionNode") {
     val isa1 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)

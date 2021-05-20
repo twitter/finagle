@@ -6,9 +6,9 @@ import com.twitter.finagle.ssl.{Protocols, TrustCredentials}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Mysql, Stack}
 import com.twitter.util.{Await, Duration}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MysqlSslTest extends FunSuite with IntegrationClient {
+class MysqlSslTest extends AnyFunSuite with IntegrationClient {
 
   private def downgradedHandshake(
     params: Stack.Params,

@@ -14,9 +14,9 @@ import com.twitter.finagle.stats.{
 import com.twitter.util.{Await, Awaitable, Future}
 import java.util.concurrent.atomic.LongAdder
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MetricsTest extends FunSuite {
+class MetricsTest extends AnyFunSuite {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 

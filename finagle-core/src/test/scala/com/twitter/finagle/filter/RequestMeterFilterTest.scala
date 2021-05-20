@@ -8,10 +8,10 @@ import com.twitter.util._
 import java.util.concurrent.RejectedExecutionException
 
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class RequestMeterFilterTest extends FunSuite with MockitoSugar {
+class RequestMeterFilterTest extends AnyFunSuite with MockitoSugar {
 
   val echoSvc = new Service[Int, Int] {
     def apply(req: Int) = Future(req)

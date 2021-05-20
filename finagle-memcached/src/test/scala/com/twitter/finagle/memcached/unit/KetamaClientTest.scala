@@ -19,9 +19,9 @@ import com.twitter.finagle.partitioning.{
 import org.mockito.Matchers._
 import org.mockito.Mockito.{RETURNS_SMART_NULLS, times, verify, verifyZeroInteractions, when}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class KetamaClientTest extends FunSuite with MockitoSugar {
+class KetamaClientTest extends AnyFunSuite with MockitoSugar {
 
   val TimeOut = 15.seconds
 

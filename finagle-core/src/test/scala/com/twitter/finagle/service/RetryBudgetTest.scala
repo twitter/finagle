@@ -2,9 +2,10 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Stopwatch, Time, Duration}
-import org.scalatest.{Matchers, FunSuite}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class RetryBudgetTest extends FunSuite with Matchers {
+class RetryBudgetTest extends AnyFunSuite with Matchers {
 
   test("Empty") {
     val rb = RetryBudget.Empty

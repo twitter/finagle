@@ -16,9 +16,9 @@ import com.twitter.finagle.{Address, ListeningServer, Name, Stack}
 import com.twitter.scrooge.ThriftStructIface
 import com.twitter.util.{Activity, Await, Awaitable, Duration, Future, Return, Throw, Var}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-abstract class PartitionAwareClientEndToEndTest extends FunSuite {
+abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)

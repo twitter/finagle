@@ -1,9 +1,9 @@
 package com.twitter.finagle
 
 import collection.mutable
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class GroupTest extends FunSuite {
+class GroupTest extends AnyFunSuite {
   class Ctx {
     val group = Group.mutable[Int]()
     var mapped = mutable.Buffer[Int]()

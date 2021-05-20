@@ -9,7 +9,7 @@ import com.twitter.scrooge.{Request, Response}
 import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
 import org.apache.thrift.TApplicationException
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 class TestServiceImpl extends TestService.ServicePerEndpoint {
 
@@ -56,7 +56,7 @@ class TestFilter extends Filter.TypeAgnostic {
 
 }
 
-class FilteredTest extends FunSuite {
+class FilteredTest extends AnyFunSuite {
 
   private[this] def mkServer(service: ServicePerEndpoint): ListeningServer =
     ThriftMux.server.serveIface(":*", service.toThriftService)

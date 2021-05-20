@@ -3,9 +3,9 @@ package com.twitter.finagle.mysql.integration
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client.DefaultPool
 import com.twitter.util.{Await, Awaitable}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class AbortedClientTest extends FunSuite with IntegrationClient {
+class AbortedClientTest extends AnyFunSuite with IntegrationClient {
 
   private def idleTime = 1.seconds
 

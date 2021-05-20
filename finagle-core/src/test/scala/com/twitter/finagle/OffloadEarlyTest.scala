@@ -3,9 +3,9 @@ package com.twitter.finagle
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.filter.OffloadFilter
 import com.twitter.finagle.server.StackServer
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class OffloadEarlyTest extends FunSuite {
+class OffloadEarlyTest extends AnyFunSuite {
 
   private def offloadAtTheTop(newStack: => Stack[ServiceFactory[Unit, Unit]]): Unit = {
     val total = newStack.tails.size

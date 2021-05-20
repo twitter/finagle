@@ -8,10 +8,10 @@ import com.twitter.finagle.Service
 import com.twitter.util.{Await, Awaitable, Future}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ConnectedClientTest extends FunSuite with MockitoSugar {
+class ConnectedClientTest extends AnyFunSuite with MockitoSugar {
 
   val TimeOut = 15.seconds
 

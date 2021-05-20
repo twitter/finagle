@@ -6,9 +6,9 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.DecoderResult
 import io.netty.handler.codec.http._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class BadRequestHandlerTest extends FunSuite {
+class BadRequestHandlerTest extends AnyFunSuite {
 
   // Get an embedded channel with the BadRequestHandler installed.
   private def getChannel(stats: StatsReceiver = NullStatsReceiver): EmbeddedChannel =

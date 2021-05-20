@@ -5,9 +5,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Retries}
 import com.twitter.finagle.stack.nilStack
 import com.twitter.util.{Promise, Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClearContextValueFilterTest extends FunSuite {
+class ClearContextValueFilterTest extends AnyFunSuite {
 
   trait Helper {
     val setContextFilterCalled = new Promise[Unit]

@@ -9,10 +9,10 @@ import io.netty.handler.codec.http.{
   HttpResponse,
   HttpVersion
 }
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class UriValidatorHandlerTest extends FunSuite with MockitoSugar {
+class UriValidatorHandlerTest extends AnyFunSuite with MockitoSugar {
 
   test("Accepts valid URI") {
     val channel = new EmbeddedChannel(UriValidatorHandler)

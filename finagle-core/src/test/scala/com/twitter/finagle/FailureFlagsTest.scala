@@ -4,10 +4,10 @@ import java.util.concurrent.{Executors, ThreadPoolExecutor}
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Future, FuturePool, Throw}
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class FailureFlagsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class FailureFlagsTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   import FailureFlags._
 
   private def await[T](f: Future[T]): T =

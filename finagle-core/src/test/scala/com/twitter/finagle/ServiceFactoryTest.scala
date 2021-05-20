@@ -2,9 +2,9 @@ package com.twitter.finagle
 
 import com.twitter.finagle.service.{ConstantService, ServiceFactoryRef}
 import com.twitter.util.{Future, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServiceFactoryTest extends FunSuite {
+class ServiceFactoryTest extends AnyFunSuite {
 
   class TestServiceFactory extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection): Future[Service[Int, Int]] =

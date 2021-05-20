@@ -1,6 +1,5 @@
 package com.twitter.finagle.service
 
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito.when
 import org.mockito.Matchers
@@ -8,8 +7,9 @@ import org.mockito.Matchers._
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Duration, Future, Time}
+import org.scalatest.funsuite.AnyFunSuite
 
-class RateLimitingFilterTest extends FunSuite with MockitoSugar {
+class RateLimitingFilterTest extends AnyFunSuite with MockitoSugar {
 
   class RateLimitingFilterHelper(duration: Duration = 1.second, rate: Int = 5) {
     def categorize(i: Int) = (i % 5).toString

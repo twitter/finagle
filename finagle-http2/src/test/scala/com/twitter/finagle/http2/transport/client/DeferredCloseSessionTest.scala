@@ -3,10 +3,11 @@ package com.twitter.finagle.http2.transport.client
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class DeferredCloseSessionTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class DeferredCloseSessionTest extends AnyFunSuite with MockitoSugar with OneInstancePerTest {
 
   private[this] def await[T](t: Awaitable[T]): T =
     Await.result(t, Duration.fromSeconds(5))

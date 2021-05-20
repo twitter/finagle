@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
 import org.scalactic.Tolerance
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class EmaTest extends FunSuite {
+class EmaTest extends AnyFunSuite {
   import Tolerance._
 
   test("updates are time invariant") {

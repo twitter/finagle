@@ -1,8 +1,8 @@
 package com.twitter.finagle.netty4
 
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
 object ReadableBufProcessorTest {
 
@@ -37,7 +37,7 @@ object ReadableBufProcessorTest {
 abstract class ReadableBufProcessorTest(
   processable: String,
   newProcessable: (Array[Byte] => ReadableBufProcessorTest.CanProcess))
-    extends FunSuite
+    extends AnyFunSuite
     with ScalaCheckDrivenPropertyChecks {
   import ReadableBufProcessorTest._
 

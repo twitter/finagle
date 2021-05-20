@@ -8,9 +8,9 @@ import com.twitter.util.{Await, Duration, Future}
 import io.opencensus.trace.{SpanContext, Tracing}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicReference
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ThriftMuxEndToEndTest extends FunSuite {
+class ThriftMuxEndToEndTest extends AnyFunSuite {
 
   private def await[T](f: Future[T]): T =
     Await.result(f, Duration.fromSeconds(15))

@@ -6,10 +6,10 @@ import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Duration, Future, Return}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpTest extends FunSuite with Eventually {
+class HttpTest extends AnyFunSuite with Eventually {
 
   private def classifier(params: Stack.Params): ResponseClassifier =
     params[param.ResponseClassifier].responseClassifier

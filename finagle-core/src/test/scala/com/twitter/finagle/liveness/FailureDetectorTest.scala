@@ -2,9 +2,9 @@ package com.twitter.finagle.liveness
 
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.Future
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FailureDetectorTest extends FunSuite {
+class FailureDetectorTest extends AnyFunSuite {
   def ping = () => Future.Done
   val statsReceiver = NullStatsReceiver
 

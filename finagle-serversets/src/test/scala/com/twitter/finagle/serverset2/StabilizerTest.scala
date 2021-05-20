@@ -6,7 +6,7 @@ import com.twitter.finagle.{Addr, Address}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicReference
-import org.scalatest.fixture.FunSuite
+import org.scalatest.funsuite.FixtureAnyFunSuite
 
 object StabilizerTest {
 
@@ -46,7 +46,7 @@ object StabilizerTest {
   def shard4: Address = newAddress(4, Some(4))
 }
 
-class StabilizerTest extends FunSuite {
+class StabilizerTest extends FixtureAnyFunSuite {
   import StabilizerTest._
 
   // The period is irrelevant for most tests since we pulse the

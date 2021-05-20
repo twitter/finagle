@@ -1,10 +1,10 @@
 package com.twitter.finagle.stats
 
 import com.twitter.util.{FuturePool, Future}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
+import org.scalatest.funsuite.AnyFunSuite
 
-class NonReentrantReadWriteLockTest extends FunSuite with Eventually {
+class NonReentrantReadWriteLockTest extends AnyFunSuite with Eventually {
   test("Read locks block write locks (concurrent)") {
     val lock = new NonReentrantReadWriteLock()
     lock.acquireShared(1)

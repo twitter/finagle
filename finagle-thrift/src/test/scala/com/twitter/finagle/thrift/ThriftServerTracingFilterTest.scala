@@ -7,10 +7,10 @@ import com.twitter.util.Future
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.mockito.Matchers
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ThriftServerTracingFilterTest extends FunSuite with MockitoSugar {
+class ThriftServerTracingFilterTest extends AnyFunSuite with MockitoSugar {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   test("ThriftServerTracingFilter read header correctly") {

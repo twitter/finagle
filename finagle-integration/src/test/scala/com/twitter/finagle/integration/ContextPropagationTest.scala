@@ -11,10 +11,10 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Return}
 import java.net.{InetAddress, InetSocketAddress}
 
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ContextPropagationTest extends FunSuite with MockitoSugar {
+class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
 
   case class TestContext(buf: Buf)
 

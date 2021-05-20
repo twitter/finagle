@@ -15,7 +15,7 @@ import com.twitter.util.routing.{
   Validator
 }
 import com.twitter.util.{Await, Awaitable, Future, Throw}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 // simulate a Thrift style RoutingService
 private object MethodRoutingServiceTest {
@@ -100,7 +100,7 @@ private object MethodRoutingServiceTest {
 
 }
 
-class MethodRoutingServiceTest extends FunSuite {
+class MethodRoutingServiceTest extends AnyFunSuite {
   import MethodRoutingServiceTest._
 
   def await[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 1.second)

@@ -7,10 +7,10 @@ import com.twitter.finagle.mysql.{CloseRequest, PoisonConnectionRequest, Request
 import com.twitter.util.{Future, Promise, Throw, Time}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class PoisonableServiceFactoryTest extends FunSuite with MockitoSugar {
+class PoisonableServiceFactoryTest extends AnyFunSuite with MockitoSugar {
 
   import com.twitter.finagle.mysql.PoisonConnection.PoisonableService
 

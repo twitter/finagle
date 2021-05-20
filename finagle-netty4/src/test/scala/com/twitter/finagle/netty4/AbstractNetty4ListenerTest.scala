@@ -11,12 +11,12 @@ import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.ChannelPipeline
 import java.io.IOException
 import java.net.{InetAddress, InetSocketAddress, Socket, SocketAddress}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.util.control.NonFatal
+import org.scalatest.funsuite.AnyFunSuite
 
 abstract class AbstractNetty4ListenerTest
-    extends FunSuite
+    extends AnyFunSuite
     with Eventually
     with IntegrationPatience {
 

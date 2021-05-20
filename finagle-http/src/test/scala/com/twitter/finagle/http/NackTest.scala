@@ -9,9 +9,9 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Closable, Duration, Future, Throw}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class NackTest extends FunSuite {
+class NackTest extends AnyFunSuite {
   class ClientCtx {
     val n = new AtomicInteger()
     var response = Failure.rejected("unhappy")

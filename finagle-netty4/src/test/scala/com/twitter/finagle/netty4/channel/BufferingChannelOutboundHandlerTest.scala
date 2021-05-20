@@ -3,10 +3,11 @@ package com.twitter.finagle.netty4.channel
 import io.netty.channel.{ChannelHandlerContext, ChannelOutboundHandlerAdapter}
 import io.netty.channel.embedded.EmbeddedChannel
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.OneInstancePerTest
+import org.scalatest.funsuite.AnyFunSuite
 
 class BufferingChannelOutboundHandlerTest
-    extends FunSuite
+    extends AnyFunSuite
     with ScalaCheckDrivenPropertyChecks
     with OneInstancePerTest {
 

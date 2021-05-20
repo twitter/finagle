@@ -3,10 +3,10 @@ package com.twitter.finagle.thrift
 import com.twitter.scrooge.ThriftStruct
 import com.twitter.util.Return
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientDeserializeCtxTest extends FunSuite with MockitoSugar {
+class ClientDeserializeCtxTest extends AnyFunSuite with MockitoSugar {
 
   test("ClientDeserializeCtx only deserializes once") {
     val times = new AtomicInteger()

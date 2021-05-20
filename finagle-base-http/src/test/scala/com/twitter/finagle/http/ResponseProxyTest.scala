@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ResponseProxyTest extends FunSuite {
+class ResponseProxyTest extends AnyFunSuite {
   test("response.ctx") {
     val field = Response.Schema.newField[Int]
     val resp = Response()

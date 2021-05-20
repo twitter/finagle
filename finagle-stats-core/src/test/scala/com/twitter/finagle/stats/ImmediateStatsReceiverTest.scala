@@ -1,8 +1,8 @@
 package com.twitter.finagle.stats
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ImmediateStatsReceiverTest extends FunSuite {
+class ImmediateStatsReceiverTest extends AnyFunSuite {
 
   test("ImmediateStatsReceiver report adds immediately") {
     val histo = ImmediateMetricsHistogram("", IndexedSeq.empty)

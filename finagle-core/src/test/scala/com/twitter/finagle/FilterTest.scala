@@ -6,9 +6,9 @@ import com.twitter.util.{Await, Future, Promise, Time}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{never, spy, times, verify}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FilterTest extends FunSuite {
+class FilterTest extends AnyFunSuite {
   private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
 
   class PassThruFilter extends Filter[Int, Int, Int, Int] {

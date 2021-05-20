@@ -1,8 +1,8 @@
 package com.twitter.finagle.serverset2
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class VectorTest extends FunSuite {
+class VectorTest extends AnyFunSuite {
   val port = 80 // not bound
   test("Selector.matches") {
     val ep1 = Endpoint(

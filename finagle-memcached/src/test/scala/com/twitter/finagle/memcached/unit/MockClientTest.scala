@@ -6,9 +6,9 @@ import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.memcached.{GetResult, MockClient}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Return, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MockClientTest extends FunSuite {
+class MockClientTest extends AnyFunSuite {
   import MockClient.asValue
 
   val TimeOut = 15.seconds

@@ -7,7 +7,7 @@ import com.twitter.io.{Buf, Writer, Reader}
 import com.twitter.util._
 import io.netty.handler.codec.http.{HttpMessage, HttpRequest}
 import java.net.{Socket, InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 private object Http2ListenerTest {
   def await[A](f: Future[A], to: Duration = 5.seconds) = Await.result(f, to)
@@ -50,7 +50,7 @@ private object Http2ListenerTest {
   }
 }
 
-class Http2ListenerTest extends FunSuite {
+class Http2ListenerTest extends AnyFunSuite {
   import Http2ListenerTest._
 
   test("Http2Listener should upgrade neatly")(new Ctx {

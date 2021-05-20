@@ -15,11 +15,11 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
 import com.twitter.util.{Await, Time}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class MemcachedTest extends FunSuite with MockitoSugar with Eventually with IntegrationPatience {
+class MemcachedTest extends AnyFunSuite with MockitoSugar with Eventually with IntegrationPatience {
 
   protected def baseClient: Memcached.Client = Memcached.client
 

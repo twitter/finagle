@@ -6,10 +6,11 @@ import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration}
 import java.util.UUID
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.mutable
 
-final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll {
+final class BtreeClientIntegrationSuite extends AnyFunSuite with BeforeAndAfterAll {
   var client: Client = _
   var dict: mutable.HashMap[String, mutable.HashMap[String, String]] = _
   val TIMEOUT = Duration.fromSeconds(10)

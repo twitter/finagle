@@ -2,9 +2,9 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.cookie.SameSite
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class CookieTest extends FunSuite {
+class CookieTest extends AnyFunSuite {
 
   test("constructor sets correct params") {
     val cookie = new Cookie(

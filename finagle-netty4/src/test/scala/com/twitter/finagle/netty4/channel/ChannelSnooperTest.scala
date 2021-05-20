@@ -5,10 +5,10 @@ import io.netty.buffer.Unpooled.wrappedBuffer
 import io.netty.channel._
 import java.net.InetSocketAddress
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ChannelSnooperTest extends FunSuite with MockitoSugar {
+class ChannelSnooperTest extends AnyFunSuite with MockitoSugar {
 
   val msg = "buffer content"
   val msgBuffer = wrappedBuffer(msg.getBytes("UTF-8"))

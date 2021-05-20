@@ -5,9 +5,9 @@ import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ResolutionRaceTest extends FunSuite {
+class ResolutionRaceTest extends AnyFunSuite {
 
   private[this] val Echoer = Service.mk[String, String](Future.value)
 

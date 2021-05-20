@@ -8,11 +8,11 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify}
 import org.mockito.stubbing.OngoingStubbing
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class TransportClientConnectionTest extends FunSuite with MockitoSugar {
+class TransportClientConnectionTest extends AnyFunSuite with MockitoSugar {
 
   // Don't let the Scala compiler get confused about which `thenReturn`
   // method we want to use.

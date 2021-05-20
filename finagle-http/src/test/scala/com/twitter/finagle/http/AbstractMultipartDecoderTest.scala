@@ -1,10 +1,10 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.http.exp.{Multipart, MultipartDecoder}
-import org.scalatest.FunSuite
 import com.twitter.io.{Buf, Files}
+import org.scalatest.funsuite.AnyFunSuite
 
-abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends FunSuite {
+abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends AnyFunSuite {
 
   /*
    * The generated request is equivalent to the following form:

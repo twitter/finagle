@@ -4,9 +4,9 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Stopwatch, Time, Future}
 import com.twitter.conversions.DurationOps._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServerStatsFilterTest extends FunSuite {
+class ServerStatsFilterTest extends AnyFunSuite {
   test("Records handletime for a service") {
     Time.withCurrentTimeFrozen { ctl =>
       val inMemory = new InMemoryStatsReceiver

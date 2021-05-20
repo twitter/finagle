@@ -8,10 +8,10 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, Stat
 import com.twitter.finagle.thriftmux.ssl.ThriftSmuxSslTestComponents._
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.util.{Await, Awaitable, Closable, Duration}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.concurrent.Eventually
 
-abstract class AbstractThriftSmuxSslTest extends FunSuite with Eventually {
+abstract class AbstractThriftSmuxSslTest extends AnyFunSuite with Eventually {
 
   protected def doMkTlsServer(
     label: String = "server",

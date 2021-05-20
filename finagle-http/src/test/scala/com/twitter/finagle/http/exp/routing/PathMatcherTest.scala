@@ -1,9 +1,9 @@
 package com.twitter.finagle.http.exp.routing
 
 import com.twitter.finagle.http.exp.routing.PathMatcher._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class PathMatcherTest extends FunSuite {
+class PathMatcherTest extends AnyFunSuite {
 
   test("LinearPathMatcher#apply matches constant Path") {
     val path = Path(Seq(Segment.Slash, Segment.Constant("users")))

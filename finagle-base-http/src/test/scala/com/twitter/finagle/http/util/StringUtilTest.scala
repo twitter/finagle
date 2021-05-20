@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StringUtilTest extends FunSuite {
+class StringUtilTest extends AnyFunSuite {
 
   test("toSomeShort") {
     assert(StringUtil.toSomeShort("0") == 0)

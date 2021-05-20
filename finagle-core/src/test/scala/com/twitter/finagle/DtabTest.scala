@@ -1,9 +1,10 @@
 package com.twitter.finagle
 
-import org.scalatest.{FunSuite, Assertion}
+import org.scalatest.Assertion
 import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatest.funsuite.AnyFunSuite
 
-class DtabTest extends FunSuite with AssertionsForJUnit {
+class DtabTest extends AnyFunSuite with AssertionsForJUnit {
 
   def pathTree(t: String) =
     NameTree.read(t).map(Name(_))

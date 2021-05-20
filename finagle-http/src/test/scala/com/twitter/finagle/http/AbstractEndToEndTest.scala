@@ -23,9 +23,10 @@ import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import org.scalactic.source.Position
-import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest, Tag}
+import org.scalatest.{BeforeAndAfter, OneInstancePerTest, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
 // copied from finagle-base-http HttpContext test for marshalling external custom context type via
 // LoadService. We have an end-to-end test here as well
@@ -56,7 +57,7 @@ class LoadedNameContext extends LoadableHttpContext {
 }
 
 abstract class AbstractEndToEndTest
-    extends FunSuite
+    extends AnyFunSuite
     with BeforeAndAfter
     with Eventually
     with IntegrationPatience

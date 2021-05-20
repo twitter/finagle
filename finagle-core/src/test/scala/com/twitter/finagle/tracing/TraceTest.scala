@@ -7,11 +7,12 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, MockTimer, Return, Throw, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{atLeast, never, times, verify, when}
-import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
+import org.scalatest.{BeforeAndAfter, OneInstancePerTest}
 import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
-class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneInstancePerTest {
+class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with OneInstancePerTest {
   val Seq(id0, id1, id2) = 0 until 3 map { i =>
     TraceId(Some(SpanId(i)), Some(SpanId(i)), SpanId(i), None, Flags(i))
   }

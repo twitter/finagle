@@ -6,9 +6,9 @@ import com.twitter.finagle.http.{Method, Request, Response}
 import com.twitter.util.Future
 import com.twitter.util.routing.{Found, NotFound}
 import java.lang.IllegalStateException
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpRouterTest extends FunSuite {
+class HttpRouterTest extends AnyFunSuite {
 
   private[this] val svc: Service[Req[Request], Rep[Response]] =
     Service.const(

@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class EmptyParamMapTest extends FunSuite {
+class EmptyParamMapTest extends AnyFunSuite {
 
   test("isValid") {
     assert(EmptyParamMap.isValid == true)

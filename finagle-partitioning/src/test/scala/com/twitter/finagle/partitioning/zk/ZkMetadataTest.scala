@@ -3,11 +3,11 @@ package com.twitter.finagle.partitioning.zk
 import com.twitter.finagle.{Addr, Address}
 import java.net.InetSocketAddress
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
-class ZkMetadataTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class ZkMetadataTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   val shardHashOrdering = ZkMetadata.shardHashOrdering(ZkMetadata.key.hashCode)
   val metadata = ZkMetadata(Some(4))
 

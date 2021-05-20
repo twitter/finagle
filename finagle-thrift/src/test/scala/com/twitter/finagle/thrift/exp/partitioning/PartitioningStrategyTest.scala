@@ -11,9 +11,9 @@ import com.twitter.scrooge.ThriftStructIface
 import com.twitter.test.thriftscala.{A, B}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Return, Throw}
 import org.apache.thrift.protocol.TProtocol
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class PartitioningStrategyTest extends FunSuite {
+class PartitioningStrategyTest extends AnyFunSuite {
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)

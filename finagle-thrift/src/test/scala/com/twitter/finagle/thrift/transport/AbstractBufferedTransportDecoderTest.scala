@@ -3,9 +3,9 @@ package com.twitter.finagle.thrift.transport
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.test.B.Client
 import org.apache.thrift.transport.TMemoryBuffer
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-abstract class AbstractBufferedTransportDecoderTest extends FunSuite {
+abstract class AbstractBufferedTransportDecoderTest extends AnyFunSuite {
 
   /**
    * Decode the sequence of input 'chunks' into a sequence of messages

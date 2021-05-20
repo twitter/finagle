@@ -7,10 +7,10 @@ import com.twitter.jvm.{Jvm, Gc}
 import com.twitter.util.{TimeControl, Promise, Time, Duration}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class MkJvmFilterTest extends FunSuite with MockitoSugar {
+class MkJvmFilterTest extends AnyFunSuite with MockitoSugar {
   private class JvmHelper {
     var gcEvents: List[Gc] = Nil
 

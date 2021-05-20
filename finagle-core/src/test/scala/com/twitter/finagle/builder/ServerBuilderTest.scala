@@ -14,12 +14,12 @@ import com.twitter.util._
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry}
 import java.net.{InetAddress, InetSocketAddress}
 import javax.net.ssl.SSLSession
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
 class ServerBuilderTest
-    extends FunSuite
+    extends AnyFunSuite
     with Eventually
     with IntegrationPatience
     with MockitoSugar {

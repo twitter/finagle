@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.exp.routing
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ParameterMapTest extends FunSuite {
+class ParameterMapTest extends AnyFunSuite {
 
   private[this] val map = Map(
     "string" -> StringValue("hello"),

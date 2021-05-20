@@ -4,11 +4,11 @@ import com.twitter.finagle.Service
 import com.twitter.util.{Future, Promise, Return}
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.{when, verify}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class MaskCancelFilterTest extends FunSuite with MockitoSugar {
+class MaskCancelFilterTest extends AnyFunSuite with MockitoSugar {
   trait MaskHelper {
     val service = mock[Service[Int, Int]]
     when(service.close(anyObject)).thenReturn(Future.Done)

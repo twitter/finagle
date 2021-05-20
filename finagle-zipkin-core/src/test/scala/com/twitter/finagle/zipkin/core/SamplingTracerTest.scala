@@ -9,11 +9,11 @@ import com.twitter.util._
 import java.net.InetSocketAddress
 import org.mockito.Mockito._
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class SamplingTracerTest extends FunSuite with MockitoSugar with ScalaCheckDrivenPropertyChecks {
+class SamplingTracerTest extends AnyFunSuite with MockitoSugar with ScalaCheckDrivenPropertyChecks {
   test("SamplingTracer should handle sampling") {
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 

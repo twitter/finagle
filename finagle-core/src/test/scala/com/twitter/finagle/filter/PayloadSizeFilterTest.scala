@@ -4,10 +4,10 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Annotation, BufferingTracer, Record, Trace, TraceId}
 import com.twitter.util.{Await, Future, Time}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class PayloadSizeFilterTest extends FunSuite with Eventually with IntegrationPatience {
+class PayloadSizeFilterTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   private def filter(sr: StatsReceiver) = new PayloadSizeFilter[Int, Int](
     sr,

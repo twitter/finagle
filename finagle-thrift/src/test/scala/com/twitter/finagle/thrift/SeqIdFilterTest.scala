@@ -6,10 +6,11 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.apache.thrift.transport.TMemoryBuffer
 import org.mockito.{Matchers, ArgumentCaptor}
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class SeqIdFilterTest extends AnyFunSuite with MockitoSugar with OneInstancePerTest {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   def mkmsg(tmsg: TMessage, strictWrite: Boolean) = {

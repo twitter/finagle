@@ -9,9 +9,9 @@ import com.twitter.finagle.ssl.{ClientAuth, OpportunisticTls, SnoopingLevelInter
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Awaitable, Future}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class TlsSnoopingEndToEndTest extends FunSuite {
+class TlsSnoopingEndToEndTest extends AnyFunSuite {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 

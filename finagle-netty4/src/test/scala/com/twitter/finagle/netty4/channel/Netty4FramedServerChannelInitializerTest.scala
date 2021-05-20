@@ -10,11 +10,11 @@ import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
 class Netty4FramedServerChannelInitializerTest
-    extends FunSuite
+    extends AnyFunSuite
     with Eventually
     with IntegrationPatience {
 

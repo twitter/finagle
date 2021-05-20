@@ -5,10 +5,10 @@ import java.io.IOException
 import java.util.logging.{Level, Logger}
 import org.mockito.Matchers.{any, eq => mockitoEq}
 import org.mockito.Mockito.{never, verify}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class SourceTrackingMonitorTest extends FunSuite with MockitoSugar {
+class SourceTrackingMonitorTest extends AnyFunSuite with MockitoSugar {
   test("handles unrolling properly") {
     val logger = mock[Logger]
     val monitor = new SourceTrackingMonitor(logger, "qux")

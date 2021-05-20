@@ -16,10 +16,10 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class DynamicPartitioningServiceTest extends FunSuite with MockitoSugar {
+class DynamicPartitioningServiceTest extends AnyFunSuite with MockitoSugar {
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)

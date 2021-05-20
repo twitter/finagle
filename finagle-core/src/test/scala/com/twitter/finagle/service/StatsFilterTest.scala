@@ -10,9 +10,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats.exp.{FunctionExpression, HistogramExpression, MetricExpression}
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StatsFilterTest extends FunSuite {
+class StatsFilterTest extends AnyFunSuite {
   val BasicExceptions = new CategorizingExceptionStatsHandler(_ => None, _ => None, rollup = false)
 
   def getService(

@@ -1,9 +1,9 @@
 package com.twitter.finagle
 
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatest.funsuite.AnyFunSuite
 
-class NameTreeParsersTest extends FunSuite with AssertionsForJUnit {
+class NameTreeParsersTest extends AnyFunSuite with AssertionsForJUnit {
   test("parsePath") {
     assert(NameTreeParsers.parsePath("/") == Path.empty)
     assert(NameTreeParsers.parsePath("  /foo/bar  ") == Path.Utf8("foo", "bar"))

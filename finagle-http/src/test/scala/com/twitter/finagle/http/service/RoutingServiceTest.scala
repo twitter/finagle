@@ -4,9 +4,9 @@ import com.twitter.finagle.http.{Request, Status}
 import com.twitter.finagle.http.Method.{Get, Post}
 import com.twitter.finagle.http.path._
 import com.twitter.util.Await
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RoutingServiceTest extends FunSuite {
+class RoutingServiceTest extends AnyFunSuite {
 
   test("RoutingService.byPath") {
     val service = RoutingService.byPath {

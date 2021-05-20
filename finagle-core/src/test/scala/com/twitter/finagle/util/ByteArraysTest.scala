@@ -1,8 +1,8 @@
 package com.twitter.finagle.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ByteArraysTest extends FunSuite {
+class ByteArraysTest extends AnyFunSuite {
   test("ByteArrays.concat: add two arrays") {
     val a = Array[Byte](0, 1, 2)
     val b = Array[Byte](3, 4)

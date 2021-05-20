@@ -8,9 +8,9 @@ import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Status => CoreStatus}
 import com.twitter.io.{Buf, Pipe}
 import com.twitter.util.{Await, Future, Promise, Throw, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpTransportTest extends FunSuite {
+class HttpTransportTest extends AnyFunSuite {
 
   test("exceptions in connection manager stay within Future context") {
     val exc = new IllegalArgumentException("boo")

@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
 import com.twitter.util.Promise
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class CloseNotifierTest extends FunSuite {
+class CloseNotifierTest extends AnyFunSuite {
 
   test("CloseNotifier should invoke onClose handlers in reverse order of adding") {
     val closing = new Promise[Unit]

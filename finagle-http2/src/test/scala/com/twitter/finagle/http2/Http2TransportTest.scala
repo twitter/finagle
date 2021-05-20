@@ -9,9 +9,10 @@ import com.twitter.finagle.http.exp.{Multi, StreamTransport}
 import com.twitter.finagle.http2.transport.client.Http2Transport
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
+import org.scalatest.funsuite.AnyFunSuite
 
-class Http2TransportTest extends FunSuite with OneInstancePerTest with MockitoSugar {
+class Http2TransportTest extends AnyFunSuite with OneInstancePerTest with MockitoSugar {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 30.seconds)
 

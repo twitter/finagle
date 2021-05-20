@@ -3,10 +3,10 @@ package com.twitter.finagle.factory
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.util.{Future, MockTimer, Time, Timer, Await}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
+class ServiceFactoryCacheTest extends AnyFunSuite with MockitoSugar {
   trait Ctx {
     var factories: Map[Int, Int] = Map.empty
     var news: Map[Int, Int] = Map.empty

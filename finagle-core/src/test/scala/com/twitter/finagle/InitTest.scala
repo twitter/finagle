@@ -1,8 +1,8 @@
 package com.twitter.finagle
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class InitTest extends FunSuite {
+class InitTest extends AnyFunSuite {
 
   test("loadBuildProperties") {
     Init.loadBuildProperties match {

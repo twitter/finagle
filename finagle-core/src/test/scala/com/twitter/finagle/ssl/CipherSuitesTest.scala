@@ -1,8 +1,8 @@
 package com.twitter.finagle.ssl
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class CipherSuitesTest extends FunSuite {
+class CipherSuitesTest extends AnyFunSuite {
 
   test("fromString results in unspecified when ciphers are empty") {
     val cipherSuites = CipherSuites.fromString("")

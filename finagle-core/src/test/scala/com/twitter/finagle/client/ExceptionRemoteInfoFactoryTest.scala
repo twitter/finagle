@@ -7,10 +7,10 @@ import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Await, Future, Time}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
+class ExceptionRemoteInfoFactoryTest extends AnyFunSuite with MockitoSugar {
   test(
     "ExceptionRemoteInfoFactory should add remote info to HasRemoteInfo service acquisition exceptions"
   ) {

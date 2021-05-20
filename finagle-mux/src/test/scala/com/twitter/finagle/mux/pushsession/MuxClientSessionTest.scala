@@ -13,9 +13,9 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Await, Awaitable, Future, Return, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MuxClientSessionTest extends FunSuite {
+class MuxClientSessionTest extends AnyFunSuite {
 
   // Expects the Iterable to only contain one message
   private def decode(bufs: Vector[Buf]): Message = {

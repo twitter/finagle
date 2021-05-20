@@ -2,11 +2,11 @@ package com.twitter.finagle.context
 
 import com.twitter.util.{Time, Duration, Return}
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class DeadlineTest extends FunSuite with AssertionsForJUnit with ScalaCheckDrivenPropertyChecks {
+class DeadlineTest extends AnyFunSuite with AssertionsForJUnit with ScalaCheckDrivenPropertyChecks {
 
   val time = for (t <- Gen.choose(0L, Long.MaxValue)) yield Time.fromNanoseconds(t)
   val dur = for (d <- Gen.choose(0L, Long.MaxValue)) yield Duration.fromNanoseconds(d)

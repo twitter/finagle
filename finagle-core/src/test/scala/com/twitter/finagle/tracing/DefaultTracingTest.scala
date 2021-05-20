@@ -7,10 +7,10 @@ import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.{param => fparam, _}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class DefaultTracingTest extends FunSuite with Eventually with IntegrationPatience {
+class DefaultTracingTest extends AnyFunSuite with Eventually with IntegrationPatience {
   object Svc extends Service[String, String] {
     def apply(str: String): Future[String] = Future.value(str)
   }

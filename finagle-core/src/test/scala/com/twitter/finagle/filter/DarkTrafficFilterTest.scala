@@ -12,10 +12,10 @@ import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
+class DarkTrafficFilterTest extends AnyFunSuite with MockitoSugar {
 
   trait Fixture {
     val request = "annyang"

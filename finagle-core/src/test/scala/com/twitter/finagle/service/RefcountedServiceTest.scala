@@ -1,14 +1,14 @@
 package com.twitter.finagle.service
 
 import com.twitter.util._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.{Matchers, Mockito}
 import org.mockito.Matchers._
 import com.twitter.finagle.Service
+import org.scalatest.funsuite.AnyFunSuite
 
-class RefcountedServiceTest extends FunSuite with MockitoSugar {
+class RefcountedServiceTest extends AnyFunSuite with MockitoSugar {
 
   class PoolServiceWrapperHelper {
     val service = mock[Service[Any, Any]]

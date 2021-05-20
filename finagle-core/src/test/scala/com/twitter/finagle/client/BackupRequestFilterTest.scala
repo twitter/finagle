@@ -10,13 +10,15 @@ import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatest.{FunSuite, Matchers, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 class BackupRequestFilterTest
-    extends FunSuite
+    extends AnyFunSuite
     with OneInstancePerTest
     with MockitoSugar
     with Matchers

@@ -9,11 +9,11 @@ import com.twitter.finagle.memcached.protocol.text.{
   ValueLines
 }
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class DecoderTest extends FunSuite with MockitoSugar {
+class DecoderTest extends AnyFunSuite with MockitoSugar {
 
   private class DecodingClientDecoder extends ClientDecoder[Decoding] {
     type Value = TokensWithData

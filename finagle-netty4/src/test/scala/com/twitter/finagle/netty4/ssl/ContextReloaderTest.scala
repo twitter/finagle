@@ -4,10 +4,10 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.util.{FuturePool, MockTimer, Time}
 import io.netty.handler.ssl.SslContext
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ContextReloaderTest extends FunSuite with MockitoSugar {
+class ContextReloaderTest extends AnyFunSuite with MockitoSugar {
 
   test("it polls ctxFac") {
     val ctxFacCalled = new AtomicInteger()

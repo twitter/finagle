@@ -1,8 +1,8 @@
 package com.twitter.finagle.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class CachedHashCodeTest extends FunSuite {
+class CachedHashCodeTest extends AnyFunSuite {
 
   private class HashTo(hc: Int) extends CachedHashCode.ForClass {
     override protected def computeHashCode: Int = hc

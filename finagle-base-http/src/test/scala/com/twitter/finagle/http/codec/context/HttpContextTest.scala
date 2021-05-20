@@ -5,7 +5,7 @@ import com.twitter.finagle.context.{BackupRequest, Contexts, Deadline, Retries}
 import com.twitter.finagle.http.{Message, Method, Request, Version}
 import com.twitter.io.Buf
 import com.twitter.util.Try
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 // This context type is loaded in via the `LoadService` mechanism
 case class Name(name: String)
@@ -35,7 +35,7 @@ class LoadedName extends LoadableHttpContext {
   val key: Contexts.broadcast.Key[ContextKeyType] = Name
 }
 
-class HttpContextTest extends FunSuite {
+class HttpContextTest extends AnyFunSuite {
 
   def newMsg(): Message = Request(Version.Http11, Method.Get, "/")
 

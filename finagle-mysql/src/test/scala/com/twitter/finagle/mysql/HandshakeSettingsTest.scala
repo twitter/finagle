@@ -2,9 +2,9 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.mysql.param.{Charset, Credentials, Database, FoundRows}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HandshakeSettingsTest extends FunSuite {
+class HandshakeSettingsTest extends AnyFunSuite {
 
   private val initial = Capability(
     Capability.Transactions,

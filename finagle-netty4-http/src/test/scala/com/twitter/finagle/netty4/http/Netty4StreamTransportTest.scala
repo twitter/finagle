@@ -15,10 +15,11 @@ import io.netty.handler.codec.http.{
   LastHttpContent
 }
 import java.nio.charset.StandardCharsets.UTF_8
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
+class Netty4StreamTransportTest extends AnyFunSuite with OneInstancePerTest {
   import Netty4StreamTransport._
 
   private def await[A](f: Future[A]): A = Await.result(f, 2.seconds)

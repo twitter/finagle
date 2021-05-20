@@ -23,7 +23,7 @@ import io.netty.handler.codec.http.{
 }
 import java.nio.charset.StandardCharsets
 import org.mockito.Mockito.{spy, times, verify}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 object OpTransport {
   sealed trait Op[In, Out]
@@ -81,7 +81,7 @@ class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Trans
 
 // Note: We need a concrete impl to test it so the finagle-http package is most
 // appropriate even though the implementation is in finagle-base-http.
-class HttpClientDispatcherTest extends FunSuite {
+class HttpClientDispatcherTest extends AnyFunSuite {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, Duration.fromSeconds(15))
 

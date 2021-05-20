@@ -9,9 +9,9 @@ import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestSer
 import com.twitter.io.Buf
 import com.twitter.util.{Return, Throw, Try}
 import java.nio.charset.StandardCharsets.UTF_8
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ThriftMuxResponseClassifierTest extends FunSuite {
+class ThriftMuxResponseClassifierTest extends AnyFunSuite {
 
   private val classifier: ResponseClassifier = {
     case ReqRep(_, Return(rep: String)) if rep == "nope" => RetryableFailure

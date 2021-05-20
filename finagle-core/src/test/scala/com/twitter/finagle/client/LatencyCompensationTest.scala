@@ -11,13 +11,14 @@ import com.twitter.util._
 import java.net.InetSocketAddress
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.junit.AssertionsForJUnit
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * An end-to-end test for LatencyCompensation.
  */
 class LatencyCompensationTest
-    extends FunSuite
+    extends AnyFunSuite
     with AssertionsForJUnit
     with Eventually
     with BeforeAndAfterEach

@@ -7,10 +7,10 @@ import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import java.net.SocketAddress
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class HandlerEventTest extends FunSuite with MockitoSugar {
+class HandlerEventTest extends AnyFunSuite with MockitoSugar {
 
   // verify that custom channel handlers don't swallow pipeline events.
   val handlers = List(

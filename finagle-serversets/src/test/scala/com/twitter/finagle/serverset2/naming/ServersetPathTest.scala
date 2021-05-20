@@ -1,9 +1,9 @@
 package com.twitter.finagle.serverset2.naming
 
 import com.twitter.finagle.Path
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServersetPathTest extends FunSuite {
+class ServersetPathTest extends AnyFunSuite {
   test("of") {
     assert(
       ServersetPath.of(Path.read("/hosts")) == Some(ServersetPath("hosts", Path.empty, None, None))

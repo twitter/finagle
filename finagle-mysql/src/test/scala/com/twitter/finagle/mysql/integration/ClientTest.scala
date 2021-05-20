@@ -1,13 +1,14 @@
 package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{IndividualRequestTimeoutException, Mysql, mysql}
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.{IndividualRequestTimeoutException, Mysql, mysql}
 import com.twitter.util.{Await, Awaitable, Closable, Future}
 import java.sql.Date
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.Eventually
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.mutable.ArrayBuffer
 
 case class SwimmingRecord(
@@ -70,7 +71,7 @@ object SwimmingRecord {
   )
 }
 
-class ClientTest extends FunSuite with IntegrationClient with BeforeAndAfterAll with Eventually {
+class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterAll with Eventually {
   import SwimmingRecord._
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)

@@ -8,9 +8,9 @@ import io.netty.handler.codec.http.cookie.{
   Cookie => NettyCookie,
   DefaultCookie => NettyDefaultCookie
 }
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4CookieCodecTest extends FunSuite {
+class Netty4CookieCodecTest extends AnyFunSuite {
 
   def toggledTest(what: String)(f: => Unit) = {
     for {

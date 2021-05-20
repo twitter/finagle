@@ -3,10 +3,10 @@ package com.twitter.finagle.http2.transport.server
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http2.{Http2Headers, Http2HeadersFrame}
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class H2UriValidatorHandlerTest extends FunSuite with MockitoSugar {
+class H2UriValidatorHandlerTest extends AnyFunSuite with MockitoSugar {
 
   test("Accepts valid URI") {
     val channel = new EmbeddedChannel(H2UriValidatorHandler)

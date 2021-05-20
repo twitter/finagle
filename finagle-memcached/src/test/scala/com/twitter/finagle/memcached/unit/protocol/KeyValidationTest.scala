@@ -2,9 +2,9 @@ package com.twitter.finagle.memcached.unit.protocol
 
 import com.twitter.finagle.memcached.protocol.KeyValidation
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class KeyValidationTest extends FunSuite {
+class KeyValidationTest extends AnyFunSuite {
 
   private val illegalCharKeys = Seq(
     "hi withwhitespace",

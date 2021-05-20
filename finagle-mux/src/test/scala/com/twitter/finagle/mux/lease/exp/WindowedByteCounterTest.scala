@@ -4,10 +4,10 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.util._
 import com.twitter.conversions.StorageUnitOps._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.FunSuite
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
 
-class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationPatience {
+class WindowedByteCounterTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   trait ByteCounterHelper {
     val fakePool = new FakeMemoryPool(new FakeMemoryUsage(StorageUnit.zero, StorageUnit.zero))

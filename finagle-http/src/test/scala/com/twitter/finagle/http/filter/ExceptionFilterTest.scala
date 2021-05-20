@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.{CancelledRequestException, Service}
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ExceptionFilterTest extends FunSuite {
+class ExceptionFilterTest extends AnyFunSuite {
 
   val service = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {

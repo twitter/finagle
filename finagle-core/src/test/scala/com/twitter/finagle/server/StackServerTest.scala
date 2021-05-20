@@ -15,10 +15,10 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.util.{Await, Duration, Future, MockTimer, Promise, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
+import org.scalatest.funsuite.AnyFunSuite
 
-class StackServerTest extends FunSuite with Eventually {
+class StackServerTest extends AnyFunSuite with Eventually {
 
   test("withStack (Function1)") {
     val module = new Module0[ServiceFactory[String, String]] {

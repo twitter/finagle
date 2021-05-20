@@ -8,9 +8,9 @@ import java.io.File
 import java.net.InetSocketAddress
 import java.security.KeyStore
 import javax.net.ssl.{KeyManagerFactory, TrustManagerFactory}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4ClientEngineFactoryTest extends FunSuite {
+class Netty4ClientEngineFactoryTest extends AnyFunSuite {
 
   private[this] val address: Address = Address(new InetSocketAddress("localhost", 12345))
   private[this] val other: Address = Address.Failed(new Exception("testing"))

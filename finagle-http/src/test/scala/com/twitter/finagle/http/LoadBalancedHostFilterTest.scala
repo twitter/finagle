@@ -5,9 +5,9 @@ import com.twitter.finagle.{Address, Service, ServiceFactory, Stack}
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Future, Promise}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class LoadBalancedHostFilterTest extends FunSuite {
+class LoadBalancedHostFilterTest extends AnyFunSuite {
   import Method._
   import Version._
 

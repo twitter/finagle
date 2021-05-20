@@ -5,10 +5,10 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class StatsFactoryWrapperTest extends FunSuite with MockitoSugar {
+class StatsFactoryWrapperTest extends AnyFunSuite with MockitoSugar {
   val underlying = mock[ServiceFactory[Int, Int]]
   val rex = new RuntimeException
   val t = new Throwable(rex)

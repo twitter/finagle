@@ -5,10 +5,10 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId}
 import com.twitter.util.{Await, Future}
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class TracingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class TracingTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   import HttpTracing.{Header, stripParameters}
 

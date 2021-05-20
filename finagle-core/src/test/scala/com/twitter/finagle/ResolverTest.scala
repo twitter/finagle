@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.util.{Future, Time, Var}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 object TestAddr {
   case class StringFactory(s: String) extends ServiceFactory[Any, String] {
@@ -36,7 +36,7 @@ case class ConstResolver(a: Addr) extends Resolver {
   def bind(arg: String) = Var(a)
 }
 
-class ResolverTest extends FunSuite {
+class ResolverTest extends AnyFunSuite {
   test("reject bad names") {
     intercept[ResolverAddressInvalid] { Resolver.eval("!foo!bar") }
   }

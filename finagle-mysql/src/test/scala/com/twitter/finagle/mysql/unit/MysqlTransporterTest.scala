@@ -5,9 +5,9 @@ import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Duration}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, SocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MysqlTransporterTest extends FunSuite {
+class MysqlTransporterTest extends AnyFunSuite {
 
   // This is an example MySQL server response in bytes
   val initialBodyLength: Byte = 74

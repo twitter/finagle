@@ -6,10 +6,10 @@ import com.twitter.finagle.{Service, Status, WriteException}
 import com.twitter.util.{Await, Future, Time, MockTimer, Promise, Return, Duration, Timer}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ExpiringServiceTest extends FunSuite with MockitoSugar {
+class ExpiringServiceTest extends AnyFunSuite with MockitoSugar {
 
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
   val frozenNow = Time.now

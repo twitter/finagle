@@ -6,12 +6,13 @@ import com.twitter.util.{Await, Awaitable, Time}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FunSuite, MustMatchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.must.Matchers
 
 /**
  * Tests the transaction functionality of the MySQL client.
  */
-class TransactionTest extends FunSuite with MockitoSugar with MustMatchers {
+class TransactionTest extends AnyFunSuite with MockitoSugar with Matchers {
   private val sqlQuery = "SELECT * FROM FOO"
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)

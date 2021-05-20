@@ -1,8 +1,8 @@
 package com.twitter.finagle
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StackTest extends FunSuite {
+class StackTest extends AnyFunSuite {
   val testRole1 = Stack.Role("TestRole1")
   val testRole2 = Stack.Role("TestRole2")
   val testRole3 = Stack.Role("TestRole3")

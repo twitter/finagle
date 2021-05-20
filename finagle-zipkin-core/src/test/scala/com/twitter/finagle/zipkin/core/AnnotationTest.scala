@@ -1,9 +1,9 @@
 package com.twitter.finagle.zipkin.core
 
-import org.scalatest.FunSuite
 import com.twitter.util.Time
+import org.scalatest.funsuite.AnyFunSuite
 
-class AnnotationTest extends FunSuite {
+class AnnotationTest extends AnyFunSuite {
   test("ZipkinAnnotation should serialize properly") {
     val ann = ZipkinAnnotation(Time.fromSeconds(123), "value", Endpoint(123, 123))
     val tann = ann.toThrift

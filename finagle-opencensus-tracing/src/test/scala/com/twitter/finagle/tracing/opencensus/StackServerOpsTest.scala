@@ -1,9 +1,9 @@
 package com.twitter.finagle.tracing.opencensus
 
 import com.twitter.finagle.{Http, ThriftMux}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StackServerOpsTest extends FunSuite {
+class StackServerOpsTest extends AnyFunSuite {
 
   test("Http.withOpenCensusTracing") {
     import StackServerOps._

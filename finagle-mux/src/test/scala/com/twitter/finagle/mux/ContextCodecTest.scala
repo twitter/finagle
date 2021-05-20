@@ -1,9 +1,9 @@
 package com.twitter.finagle.mux
 
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ContextCodecTest extends FunSuite {
+class ContextCodecTest extends AnyFunSuite {
   test("Message.coerceTrimmed(Buf.Empty)") {
     val coerced = ContextCodec.coerceTrimmed(Buf.Empty)
     assert(coerced eq Buf.Empty)

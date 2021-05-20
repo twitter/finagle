@@ -17,12 +17,14 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, FunSuite, MustMatchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.must.Matchers
 
 class MemcachedPartitioningServiceTest
-    extends FunSuite
+    extends AnyFunSuite
     with MockitoSugar
-    with MustMatchers
+    with Matchers
     with BeforeAndAfterEach {
 
   private[this] val clientName = "unit_test"

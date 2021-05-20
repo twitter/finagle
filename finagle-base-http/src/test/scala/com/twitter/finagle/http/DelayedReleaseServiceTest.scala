@@ -4,10 +4,10 @@ import com.twitter.finagle.Service
 import com.twitter.util.{Await, Duration, Future}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, stub, verify}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
+class DelayedReleaseServiceTest extends AnyFunSuite with MockitoSugar {
 
   def await[A](f: Future[A]): A = Await.result(f, Duration.fromSeconds(30))
 

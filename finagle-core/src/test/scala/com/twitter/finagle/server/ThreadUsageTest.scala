@@ -5,9 +5,10 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future, FuturePool, MockTimer, Time, TimeControl}
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 import org.scalactic.Tolerance._
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 
-class ThreadUsageTest extends FunSuite with BeforeAndAfter {
+class ThreadUsageTest extends AnyFunSuite with BeforeAndAfter {
 
   private[this] val epsilon = 1e-3
 

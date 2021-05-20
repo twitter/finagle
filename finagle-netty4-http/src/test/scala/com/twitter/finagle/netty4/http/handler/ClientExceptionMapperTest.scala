@@ -4,9 +4,10 @@ import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.DecoderResult
 import io.netty.handler.codec.http.{DefaultHttpContent, HttpContent}
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientExceptionMapperTest extends FunSuite with OneInstancePerTest {
+class ClientExceptionMapperTest extends AnyFunSuite with OneInstancePerTest {
 
   val embed: EmbeddedChannel = new EmbeddedChannel(ClientExceptionMapper)
 

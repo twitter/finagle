@@ -7,9 +7,9 @@ import com.twitter.finagle.thrift.{ClientDeserializeCtx, ServerToReqRep}
 import com.twitter.finagle.thrift.thriftscala.{Echo, InvalidQueryException}
 import com.twitter.util.{Return, Throw, Try}
 import java.nio.charset.StandardCharsets.UTF_8
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ThriftResponseClassifierTest extends FunSuite {
+class ThriftResponseClassifierTest extends AnyFunSuite {
 
   private val classifier: ResponseClassifier = {
     case ReqRep(_, Return(rep: String)) if rep == "nope" => RetryableFailure

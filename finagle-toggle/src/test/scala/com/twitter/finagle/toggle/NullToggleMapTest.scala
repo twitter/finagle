@@ -1,9 +1,9 @@
 package com.twitter.finagle.toggle
 
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class NullToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class NullToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("apply") {
     val toggle = NullToggleMap("hi")

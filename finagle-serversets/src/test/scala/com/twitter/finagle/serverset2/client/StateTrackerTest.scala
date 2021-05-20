@@ -3,9 +3,9 @@ package com.twitter.finagle.serverset2.client
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{MockTimer, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StateTrackerTest extends FunSuite {
+class StateTrackerTest extends AnyFunSuite {
   val statsReceiver = new InMemoryStatsReceiver
 
   test("StateTracker correctly counts state durations") {

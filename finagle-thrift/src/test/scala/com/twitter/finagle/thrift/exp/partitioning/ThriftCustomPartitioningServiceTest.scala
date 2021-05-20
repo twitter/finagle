@@ -12,10 +12,11 @@ import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
 import com.twitter.test.thriftscala.B
 import com.twitter.util.{Future, Return, Var}
-import org.scalatest.{FunSuite, PrivateMethodTester}
+import org.scalatest.PrivateMethodTester
+import org.scalatest.funsuite.AnyFunSuite
 
 class ThriftCustomPartitioningServiceTest
-    extends FunSuite
+    extends AnyFunSuite
     with ThriftPartitioningTest
     with PrivateMethodTester {
 

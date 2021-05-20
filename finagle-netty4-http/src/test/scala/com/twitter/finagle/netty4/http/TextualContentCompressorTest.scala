@@ -2,10 +2,10 @@ package com.twitter.finagle.netty4.http
 
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class TextualContentCompressorTest extends FunSuite with MockitoSugar {
+class TextualContentCompressorTest extends AnyFunSuite with MockitoSugar {
   import com.twitter.finagle.http.codec.TextualContentCompressor.TextLike
 
   val compressor = new TextualContentCompressor

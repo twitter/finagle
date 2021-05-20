@@ -5,7 +5,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.tracing.{BufferingTracer, DefaultTracer, Trace}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.protocol._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.mutable
 import scala.language.reflectiveCalls
 import scala.reflect.ClassTag
@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
 /**
  * A test mixin to test all combinations of servers, clients and protocols.
  */
-trait ThriftTest { self: FunSuite =>
+trait ThriftTest { self: AnyFunSuite =>
   type Iface <: AnyRef
   def ifaceManifest: ClassTag[Iface]
   val processor: Iface

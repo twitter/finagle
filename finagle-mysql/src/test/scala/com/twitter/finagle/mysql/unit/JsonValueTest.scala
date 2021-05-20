@@ -1,9 +1,9 @@
 package com.twitter.finagle.mysql.unit
 
 import com.twitter.finagle.mysql.{JsonValue, MysqlCharset, RawValue, Type}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class JsonValueTest extends FunSuite {
+class JsonValueTest extends AnyFunSuite {
   private val jsonStr = """{"foo": "quick"}"""
 
   test("read json value bytes") {

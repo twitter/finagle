@@ -7,9 +7,9 @@ import com.twitter.finagle.{Service, Http => FinagleHttp}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class DirectPayloadsLifecycleTest extends FunSuite {
+class DirectPayloadsLifecycleTest extends AnyFunSuite {
 
   def doTest(name: String, client: FinagleHttp.Client, server: FinagleHttp.Server): Unit = {
     def assertNonDirect(b: Buf): Unit = b match {

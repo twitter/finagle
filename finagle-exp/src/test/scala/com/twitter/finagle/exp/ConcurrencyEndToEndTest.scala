@@ -10,10 +10,10 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Duration, Future, Promise, Throw}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class ConcurrencyEndToEndTest extends FunSuite with Eventually with IntegrationPatience {
+class ConcurrencyEndToEndTest extends AnyFunSuite with Eventually with IntegrationPatience {
   private[this] val initialConcurrentReqLimit = 10
   private[this] val maxConcurrentReqLimit = 1000
   private[this] val excessRps = 5

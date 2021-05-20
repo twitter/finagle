@@ -3,10 +3,10 @@ package com.twitter.finagle.tracing.opencensus
 import io.opencensus.trace.{BlankSpan, Sampler, Span, SpanBuilder}
 import java.util
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class LazySpanTest extends FunSuite with MockitoSugar {
+class LazySpanTest extends AnyFunSuite with MockitoSugar {
 
   private class BlankSpanBuilder extends SpanBuilder {
     def setSampler(sampler: Sampler): SpanBuilder = ???

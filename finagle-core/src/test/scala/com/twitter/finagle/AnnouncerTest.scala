@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 case class TestAnnouncement(ia: InetSocketAddress, addr: String) extends Announcement {
   def unannounce() = Future.Done
@@ -14,7 +14,7 @@ class TestAnnouncer extends Announcer {
     Future.value(TestAnnouncement(ia, addr))
 }
 
-class AnnouncerTest extends FunSuite {
+class AnnouncerTest extends AnyFunSuite {
   val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
 
   test("reject bad names") {

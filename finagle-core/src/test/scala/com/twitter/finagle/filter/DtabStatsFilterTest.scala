@@ -1,12 +1,12 @@
 package com.twitter.finagle.filter
 
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Dtab, Service}
 import com.twitter.util.{Await, Future}
+import org.scalatest.funsuite.AnyFunSuite
 
-class DtabStatsFilterTest extends FunSuite with AssertionsForJUnit {
+class DtabStatsFilterTest extends AnyFunSuite with AssertionsForJUnit {
 
   test("empty Dtab.local") {
     val statsReceiver = new InMemoryStatsReceiver

@@ -1,11 +1,11 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.naming.{DefaultInterpreter, NamerExceededMaxDepthException}
-import org.scalatest.FunSuite
 import scala.util.Random
 import scala.util.control.NonFatal
+import org.scalatest.funsuite.AnyFunSuite
 
-class NameTreeTest extends FunSuite {
+class NameTreeTest extends AnyFunSuite {
   val rng = new Random(1234L)
 
   val words = Seq(

@@ -4,9 +4,9 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http.HttpHeaderNames.EXPECT
 import io.netty.handler.codec.http.HttpHeaderValues.CONTINUE
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FinagleHttpObjectAggregatorTest extends FunSuite {
+class FinagleHttpObjectAggregatorTest extends AnyFunSuite {
   def headers = {
     val res = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     res.headers.set(EXPECT, CONTINUE)

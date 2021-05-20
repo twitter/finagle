@@ -5,9 +5,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
 import com.twitter.finagle.tracing.{BufferingTracer, Record, Trace}
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RequestSemaphoreFilterTest extends FunSuite {
+class RequestSemaphoreFilterTest extends AnyFunSuite {
   def tracingAnnotations(tracer: BufferingTracer): Seq[(String, Any)] = {
     tracer.iterator.toList collect {
       case Record(_, _, BinaryAnnotation(k, v), _) => k -> v

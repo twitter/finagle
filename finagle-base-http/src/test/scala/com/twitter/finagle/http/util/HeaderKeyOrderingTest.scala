@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HeaderKeyOrderingTest extends FunSuite {
+class HeaderKeyOrderingTest extends AnyFunSuite {
   test("keys are case insensitive") {
     val key1 = "coffee"
     val key2 = "COFFEE"

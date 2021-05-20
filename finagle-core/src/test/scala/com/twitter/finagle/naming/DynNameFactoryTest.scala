@@ -5,10 +5,10 @@ import com.twitter.finagle.factory.ServiceFactoryCache
 import com.twitter.util.{Await, Activity, Future, Return, Throw}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class DynNameFactoryTest extends FunSuite with MockitoSugar {
+class DynNameFactoryTest extends AnyFunSuite with MockitoSugar {
   private trait Ctx {
     val cache = mock[ServiceFactoryCache[NameTree[Name.Bound], String, String]]
     val svc = mock[Service[String, String]]

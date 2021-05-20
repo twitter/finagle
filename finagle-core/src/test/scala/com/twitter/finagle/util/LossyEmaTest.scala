@@ -2,10 +2,10 @@ package com.twitter.finagle.util
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Stopwatch, Time}
-import org.scalatest.FunSuite
 import org.scalatest.Matchers.convertNumericToPlusOrMinusWrapper
+import org.scalatest.funsuite.AnyFunSuite
 
-class LossyEmaTest extends FunSuite {
+class LossyEmaTest extends AnyFunSuite {
 
   private class TestNow(private var now: Long) extends (() => Long) {
     def apply(): Long = now

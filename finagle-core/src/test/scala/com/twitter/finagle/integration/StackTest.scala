@@ -9,9 +9,9 @@ import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StackTest extends FunSuite {
+class StackTest extends AnyFunSuite {
   class TestCtx {
     val failService =
       Service.mk[String, String] { s: String => Future.exception(Failure.rejected("unhappy")) }

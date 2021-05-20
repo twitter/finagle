@@ -14,11 +14,11 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message.{Rerr, Rinit, Tdispatch, Tinit}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Future, Promise, Time, Timer}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationPatience {
+class MuxServerNegotiatorTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   private val data: Buf = Buf.ByteArray.Owned((0 until 1024).map(_.toByte).toArray)
 

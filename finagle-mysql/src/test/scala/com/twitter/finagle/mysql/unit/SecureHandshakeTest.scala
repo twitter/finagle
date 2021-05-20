@@ -14,9 +14,9 @@ import com.twitter.finagle.ssl.{Protocols, TrustCredentials}
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.Buf
 import com.twitter.util.Promise
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SecureHandshakeTest extends FunSuite {
+class SecureHandshakeTest extends AnyFunSuite {
   val mysql5HandshakeInit = HandshakeInit(
     protocol = 121,
     version = "5.7.24",

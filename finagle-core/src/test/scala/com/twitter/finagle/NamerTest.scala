@@ -4,11 +4,11 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.finagle.naming.namerMaxDepth
 import com.twitter.util._
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class NamerTest extends FunSuite with AssertionsForJUnit {
+class NamerTest extends AnyFunSuite with AssertionsForJUnit {
   trait Ctx {
     case class OrElse(fst: Namer, snd: Namer) extends Namer {
       def lookup(path: Path): Activity[NameTree[Name]] =

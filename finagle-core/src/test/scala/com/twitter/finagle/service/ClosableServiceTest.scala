@@ -3,9 +3,9 @@ package com.twitter.finagle.service
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Service, ServiceClosedException, Status}
 import com.twitter.util.{Await, Future, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClosableServiceTest extends FunSuite {
+class ClosableServiceTest extends AnyFunSuite {
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 
   trait Ctx {

@@ -7,8 +7,8 @@ import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
 object ServiceTest {
 
@@ -23,7 +23,7 @@ object ServiceTest {
     Await.result(fa, timeout)
 }
 
-class ServiceTest extends FunSuite with MockitoSugar {
+class ServiceTest extends AnyFunSuite with MockitoSugar {
   import ServiceTest._
 
   test("ServiceProxy should proxy all requests") {

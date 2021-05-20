@@ -6,9 +6,9 @@ import com.twitter.finagle.http.{Method, Request, Response, Status, Version}
 import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, InMemoryStatsReceiver}
 import com.twitter.io.{Buf, Pipe, Reader}
 import com.twitter.util.{Await, Future, Stopwatch, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StreamingStatsFilterTest extends FunSuite {
+class StreamingStatsFilterTest extends AnyFunSuite {
 
   def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
 

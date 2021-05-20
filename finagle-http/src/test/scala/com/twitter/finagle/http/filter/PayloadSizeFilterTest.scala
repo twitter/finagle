@@ -7,10 +7,10 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, Stat
 import com.twitter.finagle.tracing.{Annotation, BufferingTracer, Record, Trace, TraceId}
 import com.twitter.io.{Buf, BufReader, Reader}
 import com.twitter.util.{Await, Future, Time}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
+import org.scalatest.funsuite.AnyFunSuite
 
-class PayloadSizeFilterTest extends FunSuite with Eventually {
+class PayloadSizeFilterTest extends AnyFunSuite with Eventually {
 
   private def filter(sr: StatsReceiver) =
     new PayloadSizeFilter(sr, PayloadSizeFilter.serverTraceKeyPrefix)

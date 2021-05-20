@@ -2,9 +2,9 @@ package com.twitter.finagle.http2.transport.common
 
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StripHeadersHandlerTest extends FunSuite {
+class StripHeadersHandlerTest extends AnyFunSuite {
   test("removes the headers connection points to") {
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(StripHeadersHandler)

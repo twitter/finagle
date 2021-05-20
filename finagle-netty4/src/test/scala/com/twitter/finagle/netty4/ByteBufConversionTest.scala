@@ -7,9 +7,10 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.nio.{ByteBuffer, ReadOnlyBufferException}
 import java.util._
 import org.junit.Assert._
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 
-class ByteBufConversionTest extends FunSuite with BeforeAndAfter {
+class ByteBufConversionTest extends AnyFunSuite with BeforeAndAfter {
   private[this] val Capacity = 4096 // Must be even
   private[this] val BlockSize = 128
   private[this] var seed: Long = 0

@@ -10,10 +10,10 @@ import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import java.util.concurrent.TimeoutException
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
+class ChannelStatsHandlerTest extends AnyFunSuite with MockitoSugar {
 
   trait SocketTest {
     val chan = mock[Channel]

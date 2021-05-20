@@ -15,10 +15,11 @@ import java.net.InetSocketAddress
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{atLeastOnce, spy, verify, when}
-import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
+import org.scalatest.{BeforeAndAfter, Outcome}
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
-class SimpleClientTest extends FunSuite with BeforeAndAfter {
+class SimpleClientTest extends AnyFunSuite with BeforeAndAfter {
 
   /**
    * Note: This integration test requires a real Memcached server to run.

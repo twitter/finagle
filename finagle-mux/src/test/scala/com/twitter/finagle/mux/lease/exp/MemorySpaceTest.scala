@@ -3,10 +3,10 @@ package com.twitter.finagle.mux.lease.exp
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.util.StorageUnit
 import org.mockito.Mockito.{when, verify}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class MemorySpaceTest extends FunSuite with MockitoSugar {
+class MemorySpaceTest extends AnyFunSuite with MockitoSugar {
   test("MemorySpace#left should find the number of bytes left before we hit minDiscount") {
     val nfo = mock[JvmInfo]
     when(nfo.remaining()).thenReturn(10.megabytes)

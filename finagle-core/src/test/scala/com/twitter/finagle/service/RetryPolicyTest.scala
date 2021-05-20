@@ -11,9 +11,9 @@ import com.twitter.finagle.{
   WriteException
 }
 import com.twitter.util._
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class RetryPolicyTest extends FunSpec {
+class RetryPolicyTest extends AnyFunSpec {
 
   def getBackoffs(
     policy: RetryPolicy[Try[Nothing]],

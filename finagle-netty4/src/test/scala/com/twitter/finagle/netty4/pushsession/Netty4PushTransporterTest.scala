@@ -23,10 +23,10 @@ import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket, SocketAdd
 import java.nio.channels.UnresolvedAddressException
 import java.nio.charset.StandardCharsets
 import java.util
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4PushTransporterTest extends FunSuite with Eventually with IntegrationPatience {
+class Netty4PushTransporterTest extends AnyFunSuite with Eventually with IntegrationPatience {
   private val frameSize = 4
   private val data = "hello world"
 

@@ -2,9 +2,10 @@ package com.twitter.finagle.zookeeper
 
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.ZooDefs.Ids
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 
-class ZkInstanceTest extends FunSuite with BeforeAndAfter {
+class ZkInstanceTest extends AnyFunSuite with BeforeAndAfter {
   @volatile var inst: ZkInstance = _
 
   before {

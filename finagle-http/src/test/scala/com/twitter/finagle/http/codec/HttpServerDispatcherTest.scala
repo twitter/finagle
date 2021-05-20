@@ -20,11 +20,11 @@ import io.netty.handler.codec.http.{
   LastHttpContent
 }
 import java.nio.charset.StandardCharsets
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 // Note: We need a concrete impl to test it so the finagle-http package is most
 // appropriate even though the implementation is in finagle-base-http.
-class HttpServerDispatcherTest extends FunSuite {
+class HttpServerDispatcherTest extends AnyFunSuite {
   import HttpServerDispatcherTest._
 
   private[this] def from(req: Request): HttpRequest =

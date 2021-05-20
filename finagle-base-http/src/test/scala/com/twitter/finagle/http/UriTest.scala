@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class UriTest extends FunSuite {
+class UriTest extends AnyFunSuite {
   test("Can construct a URI from a request") {
     val req = Request("/whatever")
     req.host = "twitter.com"

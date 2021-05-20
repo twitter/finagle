@@ -1,8 +1,8 @@
 package com.twitter.finagle.context
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class BackupRequestTest extends FunSuite {
+class BackupRequestTest extends AnyFunSuite {
 
   test("basics") {
     assert(!BackupRequest.wasInitiated)

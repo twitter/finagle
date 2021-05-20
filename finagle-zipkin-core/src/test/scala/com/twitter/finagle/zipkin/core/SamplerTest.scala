@@ -1,11 +1,11 @@
 package com.twitter.finagle.zipkin.core
 
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.FunSuite
 import com.twitter.finagle.tracing.{Annotation, Record, SpanId, TraceId}
 import com.twitter.util.Time
+import org.scalatest.funsuite.AnyFunSuite
 
-class SamplerTest extends FunSuite with MockitoSugar {
+class SamplerTest extends AnyFunSuite with MockitoSugar {
 
   class SamplerHelper {
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)

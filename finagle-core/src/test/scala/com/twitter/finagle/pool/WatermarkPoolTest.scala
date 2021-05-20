@@ -6,11 +6,11 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
-import org.scalatest.FunSpec
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
+import org.scalatest.funspec.AnyFunSpec
 
-class WatermarkPoolTest extends FunSpec with MockitoSugar {
+class WatermarkPoolTest extends AnyFunSpec with MockitoSugar {
   describe("A WatermarkPool") {
     it("should reflect the underlying availability") {
       val factory = mock[ServiceFactory[Int, Int]]

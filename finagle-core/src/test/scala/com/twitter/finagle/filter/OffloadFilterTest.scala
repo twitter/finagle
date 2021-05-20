@@ -7,10 +7,11 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, FuturePool, MockTimer, Promise, Time}
 import com.twitter.finagle.util.DefaultTimer.Implicit
 import java.util.concurrent.{CountDownLatch, Executors}
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import org.scalatest.BeforeAndAfterAll
 import scala.collection.mutable.ArrayBuffer
+import org.scalatest.funsuite.AnyFunSuite
 
-class OffloadFilterTest extends FunSuite with BeforeAndAfterAll {
+class OffloadFilterTest extends AnyFunSuite with BeforeAndAfterAll {
   private class ExpectedException extends Exception("boom")
 
   // NOTE: some tests require that this be a single thread so that we can ensure that

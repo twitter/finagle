@@ -10,9 +10,9 @@ import com.twitter.finagle.ssl.{
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
 import com.twitter.io.TempFile
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ExternalClientEngineFactoryTest extends FunSuite {
+class ExternalClientEngineFactoryTest extends AnyFunSuite {
 
   // Fully testing the `ExternalClientEngineFactory` would require
   // connecting to remote hosts and verifying whether the TLS

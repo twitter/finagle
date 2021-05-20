@@ -2,9 +2,9 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.loadbalancer.exp.apertureEagerConnections
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ParamsTest extends FunSuite {
+class ParamsTest extends AnyFunSuite {
 
   test("EagerConnections takes on the default flag value unless set") {
     // ensure that there's a default value

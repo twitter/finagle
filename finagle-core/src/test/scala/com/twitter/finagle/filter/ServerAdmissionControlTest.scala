@@ -8,10 +8,10 @@ import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.util.{Await, Future}
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServerAdmissionControlTest extends FunSuite with MockitoSugar {
+class ServerAdmissionControlTest extends AnyFunSuite with MockitoSugar {
   class Ctx {
     val a = new AtomicInteger(1)
 

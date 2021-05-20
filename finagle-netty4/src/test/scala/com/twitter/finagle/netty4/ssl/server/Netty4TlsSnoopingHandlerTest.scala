@@ -10,11 +10,11 @@ import io.netty.buffer.{ByteBuf, ByteBufAllocator}
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.channel.embedded.EmbeddedChannel
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4TlsSnoopingHandlerTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class Netty4TlsSnoopingHandlerTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   /*
   See https://tools.ietf.org/html/rfc5246#section-6.2.1 for what a TLS frame looks like.

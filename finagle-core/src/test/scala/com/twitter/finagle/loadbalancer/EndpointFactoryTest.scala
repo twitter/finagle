@@ -4,9 +4,10 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.util.{Await, Future, Time}
 import java.net.InetSocketAddress
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
+import org.scalatest.funsuite.AnyFunSuite
 
-class EndpointFactoryTest extends FunSuite with OneInstancePerTest {
+class EndpointFactoryTest extends AnyFunSuite with OneInstancePerTest {
   private[this] val address = Address(InetSocketAddress.createUnresolved("nop", 0))
 
   private[this] var makeCount = 0

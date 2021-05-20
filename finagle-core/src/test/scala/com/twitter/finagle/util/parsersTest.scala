@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
 import com.twitter.conversions.DurationOps._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class parsersTest extends FunSuite {
+class parsersTest extends AnyFunSuite {
   import parsers._
 
   test("double") {

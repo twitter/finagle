@@ -19,10 +19,10 @@ import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket, SocketAddress}
 import java.nio.channels.UnresolvedAddressException
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPatience {
+class Netty4TransporterTest extends AnyFunSuite with Eventually with IntegrationPatience {
   val timeout = 15.seconds
   val frameSize = 4
   val data = "hello world"

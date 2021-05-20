@@ -1,9 +1,9 @@
 package com.twitter.finagle.loadbalancer
 
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class BalancerRegistryTest extends FunSuite with MockitoSugar {
+class BalancerRegistryTest extends AnyFunSuite with MockitoSugar {
 
   test("empty registry") {
     val registry = new BalancerRegistry()

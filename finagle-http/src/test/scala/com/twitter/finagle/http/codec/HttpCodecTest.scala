@@ -2,9 +2,9 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.http.{Fields, Request, Response, Status}
 import java.nio.charset.StandardCharsets.UTF_8
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpCodecTest extends FunSuite {
+class HttpCodecTest extends AnyFunSuite {
   test("encodeRequestToString") {
     val request = Request("/search.json", "q" -> "twitter")
     request.headerMap.set("Host", "search.twitter.com")

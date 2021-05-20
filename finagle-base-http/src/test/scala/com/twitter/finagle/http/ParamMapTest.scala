@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ParamMapTest extends FunSuite {
+class ParamMapTest extends AnyFunSuite {
   test("no params") {
     val request = Request("/search.json")
     assert(request.params.get("q") == None)

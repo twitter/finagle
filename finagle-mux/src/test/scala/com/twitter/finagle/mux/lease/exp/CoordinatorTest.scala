@@ -7,11 +7,12 @@ import java.lang.management.{GarbageCollectorMXBean, MemoryPoolMXBean}
 import java.util.logging.Logger
 import org.mockito.Mockito.when
 import org.scalactic.source.Position
-import org.scalatest.{FunSuite, Tag}
+import org.scalatest.Tag
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.mutable.Buffer
+import org.scalatest.funsuite.AnyFunSuite
 
-class CoordinatorTest extends FunSuite with LocalConductors with MockitoSugar {
+class CoordinatorTest extends AnyFunSuite with LocalConductors with MockitoSugar {
 
   val skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY")
 

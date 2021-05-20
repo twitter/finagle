@@ -5,11 +5,11 @@ import com.twitter.finagle.decoder.Framer
 import com.twitter.io.Buf
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.mutable.ArrayBuffer
+import org.scalatest.funsuite.AnyFunSuite
 
-class DecoderHandlerTest extends FunSuite with MockitoSugar {
+class DecoderHandlerTest extends AnyFunSuite with MockitoSugar {
 
   object FixedFramer extends TestFramer(4)
 

@@ -4,10 +4,10 @@ import com.twitter.finagle._
 import com.twitter.finagle.factory.ServiceFactoryCache
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Future, Time, Timer}
-import org.scalatest.FunSuite
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class NameTreeFactoryTest extends FunSuite {
+class NameTreeFactoryTest extends AnyFunSuite {
   test("distributes requests according to weight") {
     val tree =
       NameTree.Union(

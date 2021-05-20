@@ -4,9 +4,9 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.exp.routing.{Route => BaseRoute, Request => Req, Response => Rep}
 import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RouteCompileTest extends FunSuite {
+class RouteCompileTest extends AnyFunSuite {
 
   test("A Route's service has access to path parameters") {
     val underlying: Service[Req[Request], Rep[Response]] =

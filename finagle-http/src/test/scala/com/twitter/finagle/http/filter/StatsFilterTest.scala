@@ -9,10 +9,10 @@ import com.twitter.finagle.stats.{
   MetricBuilder
 }
 import com.twitter.util.{Await, Duration, Future, Stopwatch, Time}
-import org.scalatest.FunSuite
 import org.mockito.Mockito.{spy, verify}
+import org.scalatest.funsuite.AnyFunSuite
 
-class StatsFilterTest extends FunSuite {
+class StatsFilterTest extends AnyFunSuite {
 
   val service = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {

@@ -9,9 +9,9 @@ import com.twitter.finagle.ssl.{
   TrustCredentials
 }
 import java.io.File
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SslServerConfigurationTest extends FunSuite {
+class SslServerConfigurationTest extends AnyFunSuite {
 
   test("server configuration should contain non-destructive defaults") {
     val config = SslServerConfiguration()

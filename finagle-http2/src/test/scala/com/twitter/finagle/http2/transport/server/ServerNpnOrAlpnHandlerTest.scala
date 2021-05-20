@@ -10,10 +10,11 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.{ApplicationProtocolNames, SslHandler, SslHandshakeCompletionEvent}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServerNpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
+class ServerNpnOrAlpnHandlerTest extends AnyFunSuite with BeforeAndAfter with MockitoSugar {
 
   val http2 = ApplicationProtocolNames.HTTP_2
   val http11 = ApplicationProtocolNames.HTTP_1_1

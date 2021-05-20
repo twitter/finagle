@@ -10,9 +10,9 @@ import com.twitter.finagle.exp.ConcurrencyLimitFilter.ConcurrencyLimitFilter
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.service.FailedService
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ConcurrencyLimitFilterTest extends FunSuite {
+class ConcurrencyLimitFilterTest extends AnyFunSuite {
 
   class Ctx() {
     // NB: [[filterDuration]], [[mockRequestValue]] values are arbitrary

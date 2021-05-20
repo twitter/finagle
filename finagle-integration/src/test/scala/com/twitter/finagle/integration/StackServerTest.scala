@@ -2,9 +2,9 @@ package com.twitter.finagle.integration
 
 import com.twitter.finagle.service.StatsFilter
 import com.twitter.finagle.{Http, Memcached, Thrift, ThriftMux}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StackServerTest extends FunSuite {
+class StackServerTest extends AnyFunSuite {
 
   private val role = StatsFilter.role
 

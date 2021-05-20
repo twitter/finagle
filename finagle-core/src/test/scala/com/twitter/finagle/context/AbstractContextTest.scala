@@ -2,10 +2,10 @@ package com.twitter.finagle.context
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Future, Promise, Return}
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatest.funsuite.AnyFunSuite
 
-abstract class AbstractContextTest extends FunSuite with AssertionsForJUnit {
+abstract class AbstractContextTest extends AnyFunSuite with AssertionsForJUnit {
   val ctx: Context
   val a: ctx.Key[String]
   val b: ctx.Key[Int]

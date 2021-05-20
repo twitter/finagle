@@ -7,9 +7,9 @@ import com.twitter.finagle.ServiceFactoryProxy
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import org.scalatest.fixture.FunSuite
+import org.scalatest.funsuite.FixtureAnyFunSuite
 
-class ExpirationTest extends FunSuite with ApertureSuite {
+class ExpirationTest extends FixtureAnyFunSuite with ApertureSuite {
 
   /**
    * An aperture load balancer which mixes in expiration but no

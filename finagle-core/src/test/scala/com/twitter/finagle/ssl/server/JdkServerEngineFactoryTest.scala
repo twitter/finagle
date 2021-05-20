@@ -3,9 +3,9 @@ package com.twitter.finagle.ssl.server
 import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
 import java.io.File
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class JdkServerEngineFactoryTest extends FunSuite {
+class JdkServerEngineFactoryTest extends AnyFunSuite {
 
   test("default config succeeds") {
     val config = SslServerConfiguration()

@@ -9,10 +9,10 @@ import com.twitter.util.{Await, Awaitable, Closable, Duration, Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class H2PoolTest extends FunSuite with MockitoSugar {
+class H2PoolTest extends AnyFunSuite with MockitoSugar {
 
   private def await[T](t: Awaitable[T]): T = Await.result(t, Duration.fromSeconds(5))
 

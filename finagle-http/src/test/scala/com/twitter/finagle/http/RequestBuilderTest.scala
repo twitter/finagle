@@ -2,9 +2,9 @@ package com.twitter.finagle.http
 
 import com.twitter.io.Buf
 import java.net.URL
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RequestBuilderTest extends FunSuite {
+class RequestBuilderTest extends AnyFunSuite {
   val URL0 = new URL("http://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL1 = new URL("https://www.google.com/")
   val URL2 = new URL("http://joe%40host.com:blow@www.google.com:77/xxx?foo=bar#xxx")

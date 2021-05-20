@@ -1,8 +1,8 @@
 package com.twitter.finagle.netty4.http.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class UriUtilsTest extends FunSuite {
+class UriUtilsTest extends AnyFunSuite {
 
   test("accepts acceptable ascii characters") {
     assert(UriUtils.isValidUri("/abc/xyz/123.jpg"))

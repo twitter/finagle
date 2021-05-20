@@ -20,11 +20,12 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.junit.AssertionsForJUnit
-import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
+import org.scalatest.{BeforeAndAfter, Tag}
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
 abstract class AbstractEndToEndTest
-    extends FunSuite
+    extends AnyFunSuite
     with Eventually
     with IntegrationPatience
     with BeforeAndAfter

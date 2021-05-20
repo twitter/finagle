@@ -10,9 +10,9 @@ import com.twitter.io._
 import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-abstract class AbstractStreamingTest extends FunSuite {
+abstract class AbstractStreamingTest extends AnyFunSuite {
 
   protected def configureClient(
     client: FinagleHttp.Client,

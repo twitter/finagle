@@ -1,8 +1,8 @@
 package com.twitter.finagle.param
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ParamsTest extends FunSuite {
+class ParamsTest extends AnyFunSuite {
   test("Tags") {
     val tags = Tags("goodnight", "moon")
     assert(tags.matchAny("goodnight"))

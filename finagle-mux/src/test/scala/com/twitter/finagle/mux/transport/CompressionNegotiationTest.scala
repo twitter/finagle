@@ -3,9 +3,9 @@ package com.twitter.finagle.mux.transport
 import com.twitter.finagle.mux.transport.Compression._
 import com.twitter.finagle.mux.transport.CompressionNegotiation._
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class CompressionNegotiationTest extends FunSuite {
+class CompressionNegotiationTest extends AnyFunSuite {
   test(s"Can encode and decode preferences") {
     CompressionTest.configurations.foreach { preferences =>
       val preferencesString = preferences.toString

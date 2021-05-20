@@ -6,10 +6,10 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.tunable.Tunable
 import com.twitter.util.{Await, MockTimer, Time}
 import java.io.{BufferedWriter, File, FileOutputStream, OutputStreamWriter}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience {
+class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   import JsonExporter._
 

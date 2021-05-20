@@ -27,7 +27,8 @@ import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FunSuite, OneInstancePerTest, Tag}
+import org.scalatest.{OneInstancePerTest, Tag}
+import org.scalatest.funsuite.AnyFunSuite
 
 private object TestContext {
   val testContext = new Contexts.broadcast.Key[Buf]("com.twitter.finagle.mux.MuxContext") {
@@ -37,7 +38,7 @@ private object TestContext {
 }
 
 private[mux] abstract class ClientServerTest
-    extends FunSuite
+    extends AnyFunSuite
     with OneInstancePerTest
     with MockitoSugar
     with AssertionsForJUnit

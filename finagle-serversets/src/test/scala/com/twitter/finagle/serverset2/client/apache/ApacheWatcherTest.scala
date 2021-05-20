@@ -7,9 +7,10 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.Await
 import org.apache.zookeeper.WatchedEvent
 import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
+import org.scalatest.funsuite.AnyFunSuite
 
-class ApacheWatcherTest extends FunSuite with OneInstancePerTest {
+class ApacheWatcherTest extends AnyFunSuite with OneInstancePerTest {
 
   val statsReceiver = new InMemoryStatsReceiver
   val watcher = new ApacheWatcher(statsReceiver)

@@ -23,9 +23,9 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSession
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TMemoryBuffer}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MuxDowngradingNegotiatorTest extends FunSuite {
+class MuxDowngradingNegotiatorTest extends AnyFunSuite {
 
   private class Ctx {
     class MockMuxChannelHandle

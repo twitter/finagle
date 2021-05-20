@@ -1,9 +1,9 @@
 package com.twitter.finagle.mux.transport
 
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class OpportunisticTlsTest extends FunSuite {
+class OpportunisticTlsTest extends AnyFunSuite {
   test("OpportunisticTls.Header levels can be decoded to themselves") {
     for (level <- Seq(OpportunisticTls.Off, OpportunisticTls.Desired, OpportunisticTls.Required)) {
       assert(OpportunisticTls.Header.decodeLevel(level.buf) == level)

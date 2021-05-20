@@ -5,13 +5,13 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Closable, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 private object Svc extends Service[Request, Response] {
   def apply(req: Request) = Future.value(req.response)
 }
 
-class TraceInitializationTest extends FunSuite {
+class TraceInitializationTest extends AnyFunSuite {
   def req = RequestBuilder().url("http://foo/this/is/a/uri/path").buildGet()
 
   def assertAnnotationsInOrder(records: Seq[Record], annos: Seq[Annotation]): Unit = {

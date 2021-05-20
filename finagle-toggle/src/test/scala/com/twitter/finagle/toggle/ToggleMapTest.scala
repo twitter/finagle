@@ -5,11 +5,12 @@ import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{FunSuite, Matchers}
 import scala.collection.immutable
 import scala.util.Random
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class ToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Matchers {
+class ToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks with Matchers {
 
   private val IntGen = arbitrary[Int]
 

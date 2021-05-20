@@ -8,9 +8,10 @@ import com.twitter.util._
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.when
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
 object crtnamer {
   @volatile var observationsOpened = 0
@@ -35,7 +36,7 @@ class crtnamer extends Namer {
 }
 
 class ClientRegistryTest
-    extends FunSuite
+    extends AnyFunSuite
     with Eventually
     with IntegrationPatience
     with BeforeAndAfter

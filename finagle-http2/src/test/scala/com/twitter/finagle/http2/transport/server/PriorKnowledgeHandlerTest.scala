@@ -14,10 +14,11 @@ import io.netty.util.CharsetUtil._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.mockito.{ArgumentCaptor, Matchers}
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
+class PriorKnowledgeHandlerTest extends AnyFunSuite with BeforeAndAfter with MockitoSugar {
 
   val PriorKnowledgeHandlerName = "priorKnowledgeHandler"
 

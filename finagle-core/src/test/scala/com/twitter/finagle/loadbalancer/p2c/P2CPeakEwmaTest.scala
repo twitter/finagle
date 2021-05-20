@@ -5,11 +5,11 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Status}
 import com.twitter.util.{Activity, Await, Closable, Future, Time, Var}
-import org.scalatest.FunSuite
 import scala.annotation.tailrec
 import scala.collection.immutable.SortedMap
+import org.scalatest.funsuite.AnyFunSuite
 
-class P2CPeakEwmaTest extends FunSuite with P2CSuite {
+class P2CPeakEwmaTest extends AnyFunSuite with P2CSuite {
   override val ε: Double = 0.0005 * R
 
   override def newBal(

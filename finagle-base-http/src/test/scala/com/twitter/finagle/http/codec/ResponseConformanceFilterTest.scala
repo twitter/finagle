@@ -7,9 +7,9 @@ import com.twitter.finagle.http.Status._
 import com.twitter.io.Buf
 import com.twitter.io.ReaderDiscardedException
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ResponseConformanceFilterTest extends FunSuite {
+class ResponseConformanceFilterTest extends AnyFunSuite {
 
   test("add content-length header") {
     val resp = Response()

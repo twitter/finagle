@@ -6,7 +6,8 @@ import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.{Failure, TimeoutException}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Duration, TimeoutException => UtilTimeoutException}
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.funsuite.AnyFunSuite
 
 // This class exists because mockito is not good at
 // mocking Scala methods which use by-name parameters.
@@ -29,7 +30,7 @@ class FakeLogger extends Logger("fake", null) {
 
 }
 
-class DefaultMonitorTest extends FunSuite with BeforeAndAfterEach {
+class DefaultMonitorTest extends AnyFunSuite with BeforeAndAfterEach {
 
   private var monitor: DefaultMonitor = _
 

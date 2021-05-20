@@ -4,10 +4,10 @@ import com.twitter.finagle.{Dentry, Dtab, Failure, Path, tracing}
 import com.twitter.io.Buf
 import com.twitter.util.Time
 import com.twitter.conversions.DurationOps._
-import org.scalatest.FunSuite
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class MessageTest extends FunSuite {
+class MessageTest extends AnyFunSuite {
   import Message._
 
   def buf(n: Int) = Buf.ByteArray.Owned((0 until n).toArray.map(_.toByte))

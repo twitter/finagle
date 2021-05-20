@@ -30,10 +30,11 @@ import java.util.{List => JList}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocol, TProtocolFactory}
 import org.apache.thrift.transport.TTransport
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
 import scala.reflect.ClassTag
+import org.scalatest.funsuite.AnyFunSuite
 
-class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
+class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
   var saveBase: Dtab = Dtab.empty
   before {
     saveBase = Dtab.base

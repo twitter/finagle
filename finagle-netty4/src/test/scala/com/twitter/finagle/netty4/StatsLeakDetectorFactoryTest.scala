@@ -2,12 +2,12 @@ package com.twitter.finagle.netty4
 
 import io.netty.buffer.ByteBuf
 import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
 import org.mockito.Matchers._
+import org.scalatest.funsuite.AnyFunSuite
 
-class StatsLeakDetectorFactoryTest extends FunSuite with MockitoSugar {
+class StatsLeakDetectorFactoryTest extends AnyFunSuite with MockitoSugar {
   test("counts netty resource leaks") {
     var leaks = 0
 

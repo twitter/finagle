@@ -4,11 +4,11 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql.{IsolationLevel, LongValue, ServerError, StdClient}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Awaitable}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
 class TransactionTest
-    extends FunSuite
+    extends AnyFunSuite
     with IntegrationClient
     with Eventually
     with IntegrationPatience {

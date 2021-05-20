@@ -5,9 +5,9 @@ import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Service, ServiceFactory, Stack, StackBuilder, param}
 import com.twitter.util.Future
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ConcurrentRequestFilterTest extends FunSuite {
+class ConcurrentRequestFilterTest extends AnyFunSuite {
   val neverFactory = ServiceFactory.const(new Service[Int, Int] {
     def apply(req: Int) = Future.never
   })

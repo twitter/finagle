@@ -2,10 +2,10 @@ package com.twitter.finagle.zipkin.core
 
 import com.twitter.finagle.tracing.{SpanId, TraceId, Tracer}
 import com.twitter.finagle.zipkin.initialSampleRate
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class DefaultSamplerTest extends FunSuite with MockitoSugar {
+class DefaultSamplerTest extends AnyFunSuite with MockitoSugar {
 
   test("initialSampleRate flag overrides the default sample rate") {
     initialSampleRate.let(0.42f) {

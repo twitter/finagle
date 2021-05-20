@@ -1,8 +1,8 @@
 package com.twitter.finagle.stats
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MetricsHostStatsReceiverTest extends FunSuite {
+class MetricsHostStatsReceiverTest extends AnyFunSuite {
   val hostStatsReceiver = new MetricsHostStatsReceiver()
 
   def readHostStatsReceiverGauge(name: String): Number =

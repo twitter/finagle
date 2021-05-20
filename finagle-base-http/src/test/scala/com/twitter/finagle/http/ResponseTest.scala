@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ResponseTest extends FunSuite {
+class ResponseTest extends AnyFunSuite {
   test("constructors") {
     List(
       Response(),

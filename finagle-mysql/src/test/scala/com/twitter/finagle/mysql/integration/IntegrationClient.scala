@@ -7,10 +7,11 @@ import java.net.{BindException, InetAddress, ServerSocket}
 import java.util.logging.{Level, Logger}
 import java.util.Properties
 import org.scalactic.source.Position
-import org.scalatest.{FunSuiteLike, Tag}
+import org.scalatest.Tag
 import scala.util.control.NonFatal
+import org.scalatest.funsuite.AnyFunSuiteLike
 
-trait IntegrationClient extends FunSuiteLike {
+trait IntegrationClient extends AnyFunSuiteLike {
   protected val maxConcurrentPreparedStatements = 10
   private val logger = Logger.getLogger("integration-client")
 

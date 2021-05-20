@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
 import java.net.{InetAddress, InetSocketAddress, UnknownHostException}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class InetSocketAddressUtilTest extends FunSuite {
+class InetSocketAddressUtilTest extends AnyFunSuite {
   val port1 = 80 // never bound
   val port2 = 53 // ditto
   val weight1: Double = 0.5

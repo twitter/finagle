@@ -8,9 +8,9 @@ import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Future, MockTimer, Promise, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MuxServerSessionTest extends FunSuite {
+class MuxServerSessionTest extends AnyFunSuite {
 
   private val data = Buf.ByteArray.Owned((0 until 1024).map(_.toByte).toArray)
 

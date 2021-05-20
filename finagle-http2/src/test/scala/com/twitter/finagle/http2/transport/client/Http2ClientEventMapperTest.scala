@@ -4,9 +4,9 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2.{Http2Error, Http2Exception}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Http2ClientEventMapperTest extends FunSuite {
+class Http2ClientEventMapperTest extends AnyFunSuite {
   private class Ctx {
     val ec = new EmbeddedChannel(Http2ClientEventMapper)
   }

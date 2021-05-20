@@ -6,9 +6,9 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle._
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RetriesTest extends FunSuite {
+class RetriesTest extends AnyFunSuite {
 
   private[this] class MyRetryEx(val flags: Long = FailureFlags.Empty)
       extends Exception

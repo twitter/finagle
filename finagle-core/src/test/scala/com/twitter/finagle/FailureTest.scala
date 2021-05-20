@@ -4,11 +4,11 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Await, Future}
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class FailureTest extends FunSuite with AssertionsForJUnit with ScalaCheckDrivenPropertyChecks {
+class FailureTest extends AnyFunSuite with AssertionsForJUnit with ScalaCheckDrivenPropertyChecks {
   private val exc = Gen.oneOf[Throwable](null, new Exception("first"), new Exception("second"))
 
   private val flag = Gen.oneOf(

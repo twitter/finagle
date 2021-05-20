@@ -5,10 +5,10 @@ import com.twitter.finagle.Service
 import com.twitter.util.{Await, Future}
 import org.mockito.Matchers
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
+class ClientIdRequiredFilterTest extends AnyFunSuite with MockitoSugar {
 
   case class ClientIdRequiredFilterContext(underlying: Service[String, String]) {
     lazy val service = new ClientIdRequiredFilter andThen underlying

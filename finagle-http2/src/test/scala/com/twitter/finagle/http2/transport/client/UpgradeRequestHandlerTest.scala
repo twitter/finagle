@@ -17,10 +17,10 @@ import io.netty.handler.codec.http.{
   HttpMethod,
   HttpVersion
 }
-import org.scalatest.FunSuite
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class UpgradeRequestHandlerTest extends FunSuite {
+class UpgradeRequestHandlerTest extends AnyFunSuite {
 
   private class Ctx {
     val stats = new InMemoryStatsReceiver

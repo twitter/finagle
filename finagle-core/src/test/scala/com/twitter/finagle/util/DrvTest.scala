@@ -1,8 +1,8 @@
 package com.twitter.finagle.util
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class DrvTest extends FunSuite {
+class DrvTest extends AnyFunSuite {
   val N = 100000
 
   test("Drv.newVose(weights)") {

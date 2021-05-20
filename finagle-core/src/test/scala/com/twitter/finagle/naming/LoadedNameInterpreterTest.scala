@@ -2,9 +2,10 @@ package com.twitter.finagle.naming
 
 import com.twitter.finagle.{Addr, Dtab, Path, Name, NameTree}
 import com.twitter.util.{Var, Activity}
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 
-class LoadedNameInterpreterTest extends FunSuite with BeforeAndAfter {
+class LoadedNameInterpreterTest extends AnyFunSuite with BeforeAndAfter {
   class TestInterpreter(id: String) extends NameInterpreter {
     val va = Var.value(Addr.Bound())
     override def bind(dtab: Dtab, path: Path) =

@@ -4,10 +4,11 @@ import com.twitter.finagle.{FailureFlags, Service, Status}
 import com.twitter.util.{Await, Awaitable, Duration, Future}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class RefCountedFactoryTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class RefCountedFactoryTest extends AnyFunSuite with MockitoSugar with OneInstancePerTest {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, Duration.fromSeconds(2))
 

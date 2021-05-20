@@ -4,9 +4,9 @@ import com.twitter.finagle.http.cookie.{SameSite, supportSameSiteCodec}
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.{Await, Duration, Future}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SameSiteEndToEndTest extends FunSuite {
+class SameSiteEndToEndTest extends AnyFunSuite {
 
   class Ctx {
     def setCookieservice(sameSite: SameSite): Service[Request, Response] =

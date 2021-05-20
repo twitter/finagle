@@ -1,9 +1,9 @@
 package com.twitter.finagle.ssl.session
 
 import com.twitter.util.security.NullSslSession
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class NullSslSessionInfoTest extends FunSuite {
+class NullSslSessionInfoTest extends AnyFunSuite {
 
   test("NullSslSessionInfo is an SslSessionInfo") {
     val sessionInfo: SslSessionInfo = NullSslSessionInfo

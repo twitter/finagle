@@ -10,9 +10,9 @@ import com.twitter.finagle.{
 import com.twitter.finagle.service.ResponseClass._
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Return, Throw}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ResponseClassifierTest extends FunSuite {
+class ResponseClassifierTest extends AnyFunSuite {
   def reqRepFromException(exception: Exception): ReqRep = ReqRep(null, Throw(exception))
 
   val timeoutExc = new TimeoutException {

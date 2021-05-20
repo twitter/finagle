@@ -1,9 +1,9 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.tracing._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class TraceInfoTest extends FunSuite {
+class TraceInfoTest extends AnyFunSuite {
 
   // The only use-case for flags is the debug flag. Don't burn headers on an edge case
   test("setClientRequestHeaders doesn't set header on default flags") {

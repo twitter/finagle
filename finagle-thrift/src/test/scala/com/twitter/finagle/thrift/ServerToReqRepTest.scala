@@ -2,9 +2,9 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle.service.ReqRep
 import com.twitter.util.Return
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ServerToReqRepTest extends FunSuite {
+class ServerToReqRepTest extends AnyFunSuite {
 
   test("ServerToReqRep only set the ReqRep once") {
     val reqRep1 = ReqRep(1, Return(1))

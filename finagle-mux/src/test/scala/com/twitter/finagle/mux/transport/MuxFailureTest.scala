@@ -2,9 +2,9 @@ package com.twitter.finagle.mux.transport
 
 import com.twitter.finagle.{Failure, FailureFlags}
 import com.twitter.io.{Buf, BufByteWriter}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MuxFailureTest extends FunSuite {
+class MuxFailureTest extends AnyFunSuite {
 
   class FlaggedClass(val flags: Long) extends FailureFlags[FlaggedClass] {
     protected def copyWithFlags(f: Long): FlaggedClass = ???

@@ -3,9 +3,9 @@ package com.twitter.finagle.stats
 import com.twitter.conversions.DurationOps._
 import com.twitter.logging.{Logger, StringHandler}
 import com.twitter.util.{Await, Awaitable, Duration, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MetricsExporterTest extends FunSuite {
+class MetricsExporterTest extends AnyFunSuite {
 
   def await[T](a: Awaitable[T], timeout: Duration): T = Await.result(a, timeout)
 

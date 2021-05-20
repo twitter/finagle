@@ -11,9 +11,9 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Http, IndividualRequestTimeoutException, Memcached, Mux, Service, http}
 import com.twitter.util.{Await, Future, Timer}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class DynamicTimeoutTest extends FunSuite {
+class DynamicTimeoutTest extends AnyFunSuite {
 
   private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
 

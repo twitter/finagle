@@ -6,9 +6,9 @@ import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionV
 import com.twitter.finagle.netty4.ssl.Netty4SslTestComponents._
 import com.twitter.util.{Await, Future}
 import javax.net.ssl.SSLSession
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4SslAddressTest extends FunSuite {
+class Netty4SslAddressTest extends AnyFunSuite {
 
   // Timeout for blocking calls
   private[this] val timeout = 15.seconds

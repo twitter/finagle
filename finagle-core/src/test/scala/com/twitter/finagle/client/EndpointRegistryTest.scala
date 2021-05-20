@@ -3,9 +3,9 @@ package com.twitter.finagle.client
 import com.twitter.finagle.{Addr, Dtab, Address}
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.util.Var
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class EndpointRegistryTest extends FunSuite {
+final class EndpointRegistryTest extends AnyFunSuite {
 
   val name = "fooClient"
   val path = "/foo"

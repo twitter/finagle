@@ -10,9 +10,9 @@ import com.twitter.finagle.{
   Status
 }
 import com.twitter.util.{Await, Awaitable, Future, Time}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RollbackFactoryTest extends FunSuite {
+class RollbackFactoryTest extends AnyFunSuite {
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 

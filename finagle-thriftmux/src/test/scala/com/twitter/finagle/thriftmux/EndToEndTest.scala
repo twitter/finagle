@@ -33,12 +33,13 @@ import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol._
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSuite, Tag}
+import org.scalatest.Tag
 import org.scalatestplus.junit.AssertionsForJUnit
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
 class EndToEndTest
-    extends FunSuite
+    extends AnyFunSuite
     with AssertionsForJUnit
     with Eventually
     with IntegrationPatience {

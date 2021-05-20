@@ -7,10 +7,10 @@ import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.mockito.Matchers
 import org.mockito.Mockito.{verify, when, times}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
+class ValidateThriftServiceTest extends AnyFunSuite with MockitoSugar {
 
   case class ValidateThriftServiceContext(p: Promise[Array[Byte]] = new Promise[Array[Byte]]) {
     def newValidate() = new ValidateThriftService(service, protocolFactory)

@@ -1,14 +1,14 @@
 package com.twitter.finagle.integration
 
 import com.twitter.finagle._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
  * We adopt the convention that all of our protocol objects
  * use deferred evaluation for the client/server aliases to
  * avoid initialization order bugs.
  */
-class ProtocolObjectInitTest extends FunSuite {
+class ProtocolObjectInitTest extends AnyFunSuite {
 
   def assertNonNull(obj: Any) = assert(obj != null)
 

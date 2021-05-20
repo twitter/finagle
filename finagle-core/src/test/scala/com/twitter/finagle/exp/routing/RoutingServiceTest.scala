@@ -14,8 +14,8 @@ import com.twitter.util.routing.{
   RouterInfo
 }
 import com.twitter.util.{Await, Awaitable, Future, Return, Throw}
-import org.scalatest.FunSuite
 import scala.util.control.NonFatal
+import org.scalatest.funsuite.AnyFunSuite
 
 private object RoutingServiceTest {
 
@@ -60,7 +60,7 @@ private object RoutingServiceTest {
 
 }
 
-class RoutingServiceTest extends FunSuite {
+class RoutingServiceTest extends AnyFunSuite {
   import RoutingServiceTest._
 
   def await[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 1.second)

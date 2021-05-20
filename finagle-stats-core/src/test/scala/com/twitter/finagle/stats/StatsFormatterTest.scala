@@ -1,9 +1,9 @@
 package com.twitter.finagle.stats
 
-import org.scalatest.FunSuite
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
-class StatsFormatterTest extends FunSuite {
+class StatsFormatterTest extends AnyFunSuite {
 
   private[this] def newMetrics(): Metrics =
     Metrics.createDetached(mkHistogram = ImmediateMetricsHistogram.apply _, separator = "/")

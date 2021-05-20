@@ -1,9 +1,9 @@
 package com.twitter.finagle.util
 
-import org.scalatest.FunSuite
 import java.util.concurrent.{CyclicBarrier, CountDownLatch}
+import org.scalatest.funsuite.AnyFunSuite
 
-class UpdaterTest extends FunSuite {
+class UpdaterTest extends AnyFunSuite {
   test("Prioritization") {
     case class Work(p: Int)
     @volatile var worked: Seq[Work] = Nil

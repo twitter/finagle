@@ -3,10 +3,10 @@ package com.twitter.finagle.memcached.unit.protocol.text.server
 import com.twitter.finagle.memcached.protocol.{ClientError, Error, NonexistentCommand, ServerError}
 import com.twitter.finagle.memcached.protocol.text.server.ResponseToBuf
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
-class ResponseToBufTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class ResponseToBufTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("encode errors - ERROR") {
     val error = Error(new NonexistentCommand("No such command"))

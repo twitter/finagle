@@ -4,9 +4,9 @@ import com.twitter.finagle.memcached.protocol.StorageCommand
 import com.twitter.finagle.memcached.protocol.text.Framer
 import com.twitter.finagle.memcached.protocol.text.server.ServerFramer
 import com.twitter.io.{Buf, ByteReader}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FramerTest extends FunSuite {
+class FramerTest extends AnyFunSuite {
 
   private class TestFramer extends ServerFramer(StorageCommand.StorageCommands)
 

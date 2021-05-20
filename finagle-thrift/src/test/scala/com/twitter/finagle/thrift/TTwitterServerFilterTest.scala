@@ -6,9 +6,9 @@ import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.{Await, Future}
 import java.nio.charset.StandardCharsets.UTF_8
 import org.apache.thrift.protocol.{TMessage, TMessageType}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class TTwitterServerFilterTest extends FunSuite {
+class TTwitterServerFilterTest extends AnyFunSuite {
   val protocolFactory = Protocols.binaryFactory()
 
   test("handles legacy client_id headers") {

@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class AddResponseHeadersFilterTest extends FunSuite {
+class AddResponseHeadersFilterTest extends AnyFunSuite {
   test("add headers") {
     val service = new Service[Request, Response] {
       def apply(request: Request): Future[Response] =

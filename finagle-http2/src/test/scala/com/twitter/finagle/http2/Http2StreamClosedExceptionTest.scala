@@ -1,8 +1,8 @@
 package com.twitter.finagle.http2
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Http2StreamClosedExceptionTest extends FunSuite {
+class Http2StreamClosedExceptionTest extends AnyFunSuite {
   test("Changing RstException flags will produce another RstException") {
     val rst = new RstException(0, 1, None)
     val next = rst.flagged(1)

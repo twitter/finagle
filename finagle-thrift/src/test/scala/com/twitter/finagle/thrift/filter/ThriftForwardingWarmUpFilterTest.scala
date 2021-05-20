@@ -4,12 +4,12 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import com.twitter.util.{Future, Time}
-import org.scalatest.FunSuite
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ThriftForwardingWarmUpFilterTest extends FunSuite with MockitoSugar {
+class ThriftForwardingWarmUpFilterTest extends AnyFunSuite with MockitoSugar {
 
   def newCtx() = new {
     val service = mock[Service[Array[Byte], Array[Byte]]]

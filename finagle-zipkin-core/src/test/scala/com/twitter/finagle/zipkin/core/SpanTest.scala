@@ -3,9 +3,9 @@ package com.twitter.finagle.zipkin.core
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.util.Time
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SpanTest extends FunSuite {
+class SpanTest extends AnyFunSuite {
   test("Span should serialize properly") {
     val ann = ZipkinAnnotation(Time.now, "value", Endpoint(1, 2))
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)

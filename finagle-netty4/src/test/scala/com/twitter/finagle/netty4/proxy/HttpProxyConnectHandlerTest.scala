@@ -10,10 +10,11 @@ import io.netty.channel.{
 }
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import java.net.{InetSocketAddress, SocketAddress}
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
+class HttpProxyConnectHandlerTest extends AnyFunSuite with OneInstancePerTest {
 
   class ConnectPromiseSnooper extends ChannelOutboundHandlerAdapter {
     var promise: ChannelPromise = _

@@ -2,8 +2,8 @@ package com.twitter.finagle.http.headers
 
 import com.twitter.finagle.http.headers.Rfc7230HeaderValidation.{ObsFoldDetected, ValidationFailure}
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
 
 private object Rfc7230HeaderValidationTest {
 
@@ -72,7 +72,7 @@ private object Rfc7230HeaderValidationTest {
     } yield (v + c)
 }
 
-class Rfc7230HeaderValidationTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class Rfc7230HeaderValidationTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   import Rfc7230HeaderValidationTest._
 
   private[this] def assertFailure(expectedMsgFragment: String)(f: => Any): Unit = {

@@ -5,9 +5,9 @@ import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.http.ssl.HttpSslTestComponents._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Awaitable, Duration, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class HttpSslTest extends FunSuite {
+class HttpSslTest extends AnyFunSuite {
 
   private[this] def await[T](f: Awaitable[T]): T =
     Await.result(f, Duration.fromSeconds(5))

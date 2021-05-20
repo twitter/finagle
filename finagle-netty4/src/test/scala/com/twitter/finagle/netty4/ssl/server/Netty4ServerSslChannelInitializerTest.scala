@@ -12,9 +12,9 @@ import com.twitter.io.TempFile
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import javax.net.ssl.SSLContext
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4ServerSslHandlerTest extends FunSuite {
+class Netty4ServerSslHandlerTest extends AnyFunSuite {
 
   def channel(ps: Stack.Params): EmbeddedChannel =
     new EmbeddedChannel(new Netty4ServerSslChannelInitializer(ps))

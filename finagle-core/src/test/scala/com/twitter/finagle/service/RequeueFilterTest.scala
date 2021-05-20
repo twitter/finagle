@@ -7,9 +7,9 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import java.io.IOException
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RequeueFilterTest extends FunSuite {
+class RequeueFilterTest extends AnyFunSuite {
 
   test("respects maxRetriesPerReq") {
     val stats = new InMemoryStatsReceiver()

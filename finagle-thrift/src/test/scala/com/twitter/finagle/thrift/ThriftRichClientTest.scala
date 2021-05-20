@@ -8,10 +8,11 @@ import org.apache.thrift.protocol.TProtocolFactory
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
 import org.mockito.Matchers._
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class ThriftRichClientTest extends AnyFunSuite with MockitoSugar with OneInstancePerTest {
   object ThriftRichClientMock
       extends Client[ThriftClientRequest, Array[Byte]]
       with ThriftRichClient {

@@ -11,10 +11,11 @@ import org.scalatest.concurrent.Eventually._
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.exceptions.TestFailedDueToTimeoutException
 import org.scalatest.time.{Span, SpanSugar}
-import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
+import org.scalatest.{BeforeAndAfter, Tag}
+import org.scalatest.funsuite.AnyFunSuite
 
 class ZkAnnouncerTest
-    extends FunSuite
+    extends AnyFunSuite
     with BeforeAndAfter
     with SpanSugar
     with PatienceConfiguration {

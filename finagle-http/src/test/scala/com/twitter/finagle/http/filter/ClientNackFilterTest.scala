@@ -7,9 +7,9 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Closable, Duration, Future}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientNackFilterTest extends FunSuite {
+class ClientNackFilterTest extends AnyFunSuite {
 
   private def await[T](t: Awaitable[T]): T =
     Await.result(t, Duration.fromSeconds(15))

@@ -5,9 +5,9 @@ import com.twitter.finagle.thrift.thriftscala.{Echo, ExtendedEcho}
 import com.twitter.finagle.{Address, Name, Thrift}
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MultiplexedServiceTest extends FunSuite {
+class MultiplexedServiceTest extends AnyFunSuite {
 
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 

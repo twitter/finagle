@@ -10,9 +10,9 @@ import com.twitter.finagle.http.param.{ClientKerberosConfiguration, ServerKerber
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.util.{Await, Future, Promise}
 import java.nio.file.{FileSystems, Files}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class KerberosAuthenticationFilterTest extends FunSuite {
+class KerberosAuthenticationFilterTest extends AnyFunSuite {
   private val serverFilter =
     new AsyncFilter[Request, SpnegoAuthenticator.Authenticated[Request], Response](
       SpnegoServerFilter(
@@ -56,7 +56,7 @@ class KerberosAuthenticationFilterTest extends FunSuite {
   }
 }
 
-class AsyncFilterTest extends FunSuite {
+class AsyncFilterTest extends AnyFunSuite {
   case class TestFilter(prefix: String, suffix: String) extends SimpleFilter[String, String] {
     def apply(
       request: String,

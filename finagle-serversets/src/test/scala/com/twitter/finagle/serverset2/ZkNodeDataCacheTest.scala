@@ -2,9 +2,9 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.Future
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ZkNodeDataCacheTest extends FunSuite {
+class ZkNodeDataCacheTest extends AnyFunSuite {
 
   def nilZkSession = () => ZkSession.nil
 

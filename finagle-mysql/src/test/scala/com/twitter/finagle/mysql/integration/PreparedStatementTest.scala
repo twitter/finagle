@@ -4,7 +4,8 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql.{Client, OK, ServerError}
 import com.twitter.util.{Await, Awaitable, Future}
 import java.sql.SQLException
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 
 private object PreparedStatementTest {
 
@@ -30,7 +31,7 @@ private object PreparedStatementTest {
 
 }
 
-class PreparedStatementTest extends FunSuite with IntegrationClient with BeforeAndAfter {
+class PreparedStatementTest extends AnyFunSuite with IntegrationClient with BeforeAndAfter {
   import PreparedStatementTest._
 
   private[this] val c: Client = client.orNull

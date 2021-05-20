@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.exp.routing
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class PathTest extends FunSuite {
+class PathTest extends AnyFunSuite {
 
   test("toString") {
     assert(Path(Seq(Segment.Slash)).toString == "/")

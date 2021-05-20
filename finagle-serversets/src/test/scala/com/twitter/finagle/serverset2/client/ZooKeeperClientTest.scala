@@ -1,8 +1,8 @@
 package com.twitter.finagle.serverset2.client
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ZooKeeperClientTest extends FunSuite {
+class ZooKeeperClientTest extends AnyFunSuite {
   test("ZooKeeperReader.patToPathAndPrefix") {
     import ZooKeeperReader.{patToPathAndPrefix => p}
 

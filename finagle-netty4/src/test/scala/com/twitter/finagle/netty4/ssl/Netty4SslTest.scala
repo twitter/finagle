@@ -7,10 +7,10 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{ChannelClosedException, Failure, Service}
 import com.twitter.util.{Await, Future}
 import com.twitter.util.{Return, Throw, Try}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
+class Netty4SslTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   // Timeout for blocking calls
   private val timeout = 15.seconds

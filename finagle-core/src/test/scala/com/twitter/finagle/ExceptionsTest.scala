@@ -5,9 +5,9 @@ import com.twitter.finagle.tracing.{SpanId, TraceId}
 import com.twitter.util.Duration
 import java.net.{InetSocketAddress, SocketAddress}
 import javax.net.ssl.SSLException
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ExceptionsTest extends FunSuite {
+class ExceptionsTest extends AnyFunSuite {
 
   private val address = new SocketAddress {
     override def toString: String = "foo"

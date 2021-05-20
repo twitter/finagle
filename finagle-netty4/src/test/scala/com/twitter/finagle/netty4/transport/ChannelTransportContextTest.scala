@@ -7,9 +7,9 @@ import java.security.cert.{Certificate, X509Certificate}
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ChannelTransportContextTest extends FunSuite with MockitoSugar {
+class ChannelTransportContextTest extends AnyFunSuite with MockitoSugar {
 
   test("localAddress returns channel's local address") {
     val ch = new EmbeddedChannel()

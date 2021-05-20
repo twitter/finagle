@@ -3,9 +3,9 @@ package com.twitter.finagle.util
 import com.twitter.finagle.{Stack, StackBuilder, Stackable, param, stack}
 import com.twitter.util.Var
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StackRegistryTest extends FunSuite {
+class StackRegistryTest extends AnyFunSuite {
 
   val headRole = Stack.Role("head")
   val nameRole = Stack.Role("name")

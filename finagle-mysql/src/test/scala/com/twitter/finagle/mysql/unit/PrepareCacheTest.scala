@@ -6,9 +6,9 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util.Future
 import java.util.concurrent.Executor
 import java.util.concurrent.LinkedBlockingQueue
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class PrepareCacheTest extends FunSuite {
+class PrepareCacheTest extends AnyFunSuite {
 
   test("cache prepare requests") {
 

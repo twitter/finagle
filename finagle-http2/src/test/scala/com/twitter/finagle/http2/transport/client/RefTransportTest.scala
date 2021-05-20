@@ -5,10 +5,10 @@ import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.util.{Await, Future, Time}
 import org.mockito.Matchers.{any, anyInt}
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class RefTransportTest extends FunSuite with MockitoSugar {
+class RefTransportTest extends AnyFunSuite with MockitoSugar {
 
   // wrapping the transport in a thin proxy provides a correct map
   // implementation

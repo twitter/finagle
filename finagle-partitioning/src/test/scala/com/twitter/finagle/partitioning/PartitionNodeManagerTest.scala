@@ -13,10 +13,10 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Activity, Await, Awaitable, Duration, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
-import org.scalatest.FunSuite
 import scala.collection.immutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class PartitionNodeManagerTest extends FunSuite {
+class PartitionNodeManagerTest extends AnyFunSuite {
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)

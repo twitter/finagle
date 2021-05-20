@@ -11,8 +11,9 @@ import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.{FunSuite, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 private object MethodBuilderTest {
   private val neverSvc: Service[Int, Int] =
@@ -55,7 +56,7 @@ private object MethodBuilderTest {
 }
 
 class MethodBuilderTest
-    extends FunSuite
+    extends AnyFunSuite
     with Matchers
     with Eventually
     with MockitoSugar

@@ -5,10 +5,10 @@ import com.twitter.finagle.memcached._
 import com.twitter.util.{Await, Future}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class RubyMemCacheClientTest extends FunSuite with MockitoSugar {
+class RubyMemCacheClientTest extends AnyFunSuite with MockitoSugar {
 
   class Context {
     private def newClient(): Client = {

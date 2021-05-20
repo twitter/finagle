@@ -9,9 +9,10 @@ import com.twitter.io.Buf
 import com.twitter.scrooge.{Request, Response}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Return, Try}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
+import org.scalatest.funsuite.AnyFunSuite
 
-class ContextAmplificationTest extends FunSuite with OneInstancePerTest {
+class ContextAmplificationTest extends AnyFunSuite with OneInstancePerTest {
 
   def await[T](a: Awaitable[T], d: Duration = 60.seconds): T =
     Await.result(a, d)

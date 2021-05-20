@@ -10,10 +10,10 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Mockito
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class MonitorFilterTest extends FunSuite with MockitoSugar {
+class MonitorFilterTest extends AnyFunSuite with MockitoSugar {
 
   class MockMonitor extends Monitor {
     def handle(cause: Throwable) = false

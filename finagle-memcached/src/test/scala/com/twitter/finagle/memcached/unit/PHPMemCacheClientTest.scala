@@ -6,10 +6,10 @@ import com.twitter.hashing.KeyHasher
 import com.twitter.util.{Await, Future}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class PHPMemCacheClientTest extends FunSuite with MockitoSugar {
+class PHPMemCacheClientTest extends AnyFunSuite with MockitoSugar {
 
   class Context {
     private def newClient(): Client = {

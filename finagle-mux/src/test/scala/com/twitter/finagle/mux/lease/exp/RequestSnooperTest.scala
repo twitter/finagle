@@ -4,10 +4,10 @@ import com.twitter.util.{MockTimer, Stopwatch, Time}
 import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.StorageUnitOps._
 import org.mockito.Mockito.when
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class RequestSnooperTest extends FunSuite with MockitoSugar {
+class RequestSnooperTest extends AnyFunSuite with MockitoSugar {
   test("RequestSnooper should compute handleBytes reasonably") {
     val ctr = mock[ByteCounter]
     val percentile = 50

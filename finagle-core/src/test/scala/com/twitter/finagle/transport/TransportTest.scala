@@ -5,11 +5,11 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
 import com.twitter.io.{Buf, Pipe, BufReader, ReaderDiscardedException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
-import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class TransportTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
+class TransportTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   private def awaitResult[T](f: Future[T]): T = {
     Await.result(f, 5.seconds)

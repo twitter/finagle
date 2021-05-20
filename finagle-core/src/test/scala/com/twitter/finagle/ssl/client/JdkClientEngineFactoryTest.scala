@@ -5,9 +5,9 @@ import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
 import java.io.File
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class JdkClientEngineFactoryTest extends FunSuite {
+class JdkClientEngineFactoryTest extends AnyFunSuite {
 
   private[this] val address: Address = Address(new InetSocketAddress("localhost", 12345))
   private[this] val other: Address = Address.Failed(new Exception("testing"))

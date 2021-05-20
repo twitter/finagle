@@ -2,9 +2,9 @@ package com.twitter.finagle
 
 import com.twitter.util.{Future, Var, Witness}
 import java.net.{InetSocketAddress, SocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class NameTest extends FunSuite {
+class NameTest extends AnyFunSuite {
   test("Name.fromGroup") {
     val g = Group.mutable[SocketAddress]()
     val n = Name.fromGroup(g)

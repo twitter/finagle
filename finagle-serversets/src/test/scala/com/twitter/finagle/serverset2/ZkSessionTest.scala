@@ -7,8 +7,8 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.FunSuite
 import scala.collection.immutable
+import org.scalatest.funsuite.AnyFunSuite
 
 sealed private trait ZkOp { type Res; val res = new Promise[Res] }
 private object ZkOp {
@@ -96,7 +96,7 @@ private class OpqueueZkReader(
   def getACL(path: String): Future[Node.ACL] = Future.never
 }
 
-class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
+class ZkSessionTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   import ZkOp._
 

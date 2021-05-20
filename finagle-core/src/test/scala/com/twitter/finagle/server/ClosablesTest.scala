@@ -2,10 +2,10 @@ package com.twitter.finagle.server
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Awaitable, Closable, Future, Promise, Time}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClosablesTest extends FunSuite with Eventually with IntegrationPatience {
+class ClosablesTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   private def await[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 5.seconds)
 

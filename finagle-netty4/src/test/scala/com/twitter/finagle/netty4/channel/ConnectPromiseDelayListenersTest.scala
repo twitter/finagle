@@ -3,9 +3,9 @@ package com.twitter.finagle.netty4.channel
 import io.netty.channel.ChannelOutboundHandlerAdapter
 import io.netty.channel.embedded.EmbeddedChannel
 import java.util.concurrent.CancellationException
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ConnectPromiseDelayListenersTest extends FunSuite {
+class ConnectPromiseDelayListenersTest extends AnyFunSuite {
 
   import ConnectPromiseDelayListeners._
 

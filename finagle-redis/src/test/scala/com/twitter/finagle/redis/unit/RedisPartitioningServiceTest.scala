@@ -14,11 +14,12 @@ import com.twitter.util.{Await, Duration, Future}
 import java.net.{InetAddress, InetSocketAddress}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.{Set => SSet}
+import org.scalatest.funsuite.AnyFunSuite
 
-class RedisPartitioningServiceTest extends FunSuite with MockitoSugar with BeforeAndAfterEach {
+class RedisPartitioningServiceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfterEach {
 
   private[this] val clientName = "unit_test"
   private[this] val Timeout: Duration = 15.seconds

@@ -3,7 +3,7 @@ package com.twitter.finagle.tunable
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.util.tunable.{NullTunableMap, ServiceLoadedTunableMap, TunableMap}
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 class StandardTunableMapTestClient extends ServiceLoadedTunableMap with TunableMap.Proxy {
   val serviceLoaded = TunableMap.newMutable()
@@ -13,7 +13,7 @@ class StandardTunableMapTestClient extends ServiceLoadedTunableMap with TunableM
   def id: String = "IdForStandardTunableMapTest"
 }
 
-class StandardTunableMapTest extends FunSuite {
+class StandardTunableMapTest extends AnyFunSuite {
 
   test("Application returns the same map for the same id") {
     val map1 = StandardTunableMap("foo")

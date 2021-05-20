@@ -10,9 +10,9 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class EndToEndTest extends FunSuite {
+class EndToEndTest extends AnyFunSuite {
 
   test("IndividualRequestTimeoutException should include RemoteInfo") {
     val timer = new MockTimer

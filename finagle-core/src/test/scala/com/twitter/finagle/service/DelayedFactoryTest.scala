@@ -2,9 +2,9 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.{Status, ClientConnection, Service, ServiceFactory, Failure}
 import com.twitter.util._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class DelayedFactoryTest extends FunSuite {
+class DelayedFactoryTest extends AnyFunSuite {
   trait DelayedHelper {
     val service = Service.mk[Int, Int] { int: Int => Future.value(int) }
     val future = Promise[ServiceFactory[Int, Int]]()

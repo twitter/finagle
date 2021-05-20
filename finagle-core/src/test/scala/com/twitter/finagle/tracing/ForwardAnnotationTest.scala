@@ -7,9 +7,9 @@ import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
 import com.twitter.finagle.{Address, Name, Service}
 import com.twitter.util.{Await, Future, Time}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ForwardAnnotationTest extends FunSuite {
+class ForwardAnnotationTest extends AnyFunSuite {
   test("ChildTraceContext.let traces in child context") {
     def getAnnotation(tracer: BufferingTracer, name: String): Option[Record] = {
       tracer.toSeq.find { record =>

@@ -6,10 +6,10 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{spy, times, verify}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class SessionsTest extends FunSuite with MockitoSugar {
+class SessionsTest extends AnyFunSuite with MockitoSugar {
   private[this] val sqlQuery = "SELECT * FROM FOO"
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)

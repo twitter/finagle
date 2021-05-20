@@ -11,11 +11,12 @@ import org.scalactic.source.Position
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.{Span, SpanSugar}
-import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
+import org.scalatest.{BeforeAndAfter, Tag}
 import scala.jdk.CollectionConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
 class Zk2ResolverTest
-    extends FunSuite
+    extends AnyFunSuite
     with BeforeAndAfter
     with Eventually
     with PatienceConfiguration

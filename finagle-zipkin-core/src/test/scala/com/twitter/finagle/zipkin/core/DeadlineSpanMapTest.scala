@@ -4,10 +4,10 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.thrift.thrift.Constants
 import com.twitter.finagle.tracing.{SpanId, TraceId}
 import com.twitter.util.{Duration, Future, MockTimer, Time}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.funsuite.AnyFunSuite
 
-class DeadlineSpanMapTest extends FunSuite with Eventually with IntegrationPatience {
+class DeadlineSpanMapTest extends AnyFunSuite with Eventually with IntegrationPatience {
 
   /**
    * Tests state transition sequence (iii): live -> flushed -> logged.

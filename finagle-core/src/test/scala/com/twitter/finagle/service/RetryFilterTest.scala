@@ -13,11 +13,12 @@ import com.twitter.finagle.{
 import com.twitter.util._
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.{BeforeAndAfter, FunSpec}
+import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
+import org.scalatest.funspec.AnyFunSpec
 
-class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
+class RetryFilterTest extends AnyFunSpec with MockitoSugar with BeforeAndAfter {
   var timer: JavaTimer = _
   val backoffs = Backoff.linear(1.second, 1.second).take(3)
   val shouldRetryException: PartialFunction[Try[Nothing], Boolean] = {

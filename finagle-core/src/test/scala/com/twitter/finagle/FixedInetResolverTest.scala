@@ -6,9 +6,9 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Await, Future, MockTimer, Time}
 import java.net.{InetAddress, UnknownHostException}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FixedInetResolverTest extends FunSuite {
+class FixedInetResolverTest extends AnyFunSuite {
 
   // The caching resolver (like the InetResolver, NilResolver)
   // should be installed by default and is capable of resolving addresses.

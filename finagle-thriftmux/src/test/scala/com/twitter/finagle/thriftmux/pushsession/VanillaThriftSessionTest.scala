@@ -10,10 +10,10 @@ import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Future, MockTimer, Promise, Return, Time}
 import java.nio.charset.StandardCharsets
-import org.scalatest.FunSuite
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-class VanillaThriftSessionTest extends FunSuite {
+class VanillaThriftSessionTest extends AnyFunSuite {
 
   private[this] val data = Buf.Utf8("data")
 

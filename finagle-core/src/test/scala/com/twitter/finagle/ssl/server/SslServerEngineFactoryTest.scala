@@ -2,9 +2,9 @@ package com.twitter.finagle.ssl.server
 
 import com.twitter.finagle.ssl.{CipherSuites, ClientAuth, Engine, Protocols}
 import javax.net.ssl.{SSLContext, SSLEngine}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SslServerEngineFactoryTest extends FunSuite {
+class SslServerEngineFactoryTest extends AnyFunSuite {
 
   private[this] def createTestSslContext(): SSLContext = {
     val sslContext = SSLContext.getInstance("TLSv1.2")

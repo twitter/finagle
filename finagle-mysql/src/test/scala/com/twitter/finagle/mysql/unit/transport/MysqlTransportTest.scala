@@ -4,9 +4,9 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MysqlTransportTest extends FunSuite {
+class MysqlTransportTest extends AnyFunSuite {
   // This is an example MySQL server response in bytes
   val serverBytes: Array[Byte] = Array(74, 0, 0, 0, 10, 53, 46, 55, 46, 50, 49, 0, -110, 14, 0, 0,
     29, 65, 18, 114, 89, 41, 104, 101, 0, -1, -9, 33, 2, 0, -1, -127, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0,

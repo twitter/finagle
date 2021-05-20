@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status, Method}
 import com.twitter.util.{Await, Future, Duration}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class CorsTest extends FunSuite {
+class CorsTest extends AnyFunSuite {
   val TRAP = Method("TRAP")
   val underlying = Service.mk[Request, Response] { request =>
     val response = Response()

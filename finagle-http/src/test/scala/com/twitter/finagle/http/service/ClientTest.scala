@@ -7,9 +7,9 @@ import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.{ChannelClosedException, ClientConnection, Http, ServiceFactory}
 import com.twitter.util.Await
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientTest extends FunSuite {
+class ClientTest extends AnyFunSuite {
   def withServer(
     factory: ServiceFactory[Request, Response]
   )(

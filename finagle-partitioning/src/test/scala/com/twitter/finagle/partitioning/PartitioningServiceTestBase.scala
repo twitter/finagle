@@ -16,10 +16,11 @@ import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.CountDownLatch
 import org.scalatest.concurrent.Eventually
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.BeforeAndAfterEach
 import scala.collection.mutable
+import org.scalatest.funsuite.AnyFunSuite
 
-trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with Eventually {
+trait PartitioningServiceTestBase extends AnyFunSuite with BeforeAndAfterEach with Eventually {
   import PartitioningServiceTestBase._
 
   protected[this] val failingHosts = new mutable.HashSet[String]()

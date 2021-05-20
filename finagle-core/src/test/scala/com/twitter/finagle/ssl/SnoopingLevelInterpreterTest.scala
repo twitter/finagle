@@ -4,9 +4,9 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.param.OppTls
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.transport.Transport
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class SnoopingLevelInterpreterTest extends FunSuite {
+class SnoopingLevelInterpreterTest extends AnyFunSuite {
 
   private[this] val optTlsOptions = Seq(
     OpportunisticTls.Off,

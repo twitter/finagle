@@ -1,9 +1,9 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
-class RequestTest extends FunSuite {
+class RequestTest extends AnyFunSuite {
   test("constructors") {
     Seq(
       Request(),

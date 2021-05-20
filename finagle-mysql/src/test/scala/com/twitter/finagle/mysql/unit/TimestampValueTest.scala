@@ -6,9 +6,9 @@ import com.twitter.io.Buf
 import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
 import java.sql.Timestamp
 import java.util.TimeZone
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class TimestampValueTest extends FunSuite {
+class TimestampValueTest extends AnyFunSuite {
   val timestampValueLocal = new TimestampValue(TimeZone.getDefault, TimeZone.getDefault)
 
   test("encode timestamp") {

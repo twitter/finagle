@@ -1,9 +1,9 @@
 package com.twitter.finagle.mysql.transport
 
 import com.twitter.io.Buf
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class PacketTest extends FunSuite {
+class PacketTest extends AnyFunSuite {
   val seq = 2.toShort
   val bytes = Array[Byte](0x01, 0x02, 0x03, 0x04)
   val body = Buf.ByteArray.Owned(bytes)

@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, ExpressionSchemaKey}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 object MetricsStatsReceiverTest {
   trait TestCtx {
@@ -85,7 +85,7 @@ object MetricsStatsReceiverTest {
   }
 }
 
-class MetricsStatsReceiverTest extends FunSuite {
+class MetricsStatsReceiverTest extends AnyFunSuite {
   import MetricsStatsReceiverTest._
 
   test("toString") {

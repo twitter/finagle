@@ -8,10 +8,11 @@ import com.twitter.util.{Await, Duration, Future, Stopwatch, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers.{anyObject, contains}
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class RequestLoggerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
+class RequestLoggerTest extends AnyFunSuite with BeforeAndAfter with MockitoSugar {
 
   private[this] val roleName = "RequestLoggerTest"
 

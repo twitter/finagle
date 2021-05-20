@@ -9,11 +9,11 @@ import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.security.cert.{Certificate, X509Certificate}
 import org.mockito.Mockito
 import org.mockito.stubbing.OngoingStubbing
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
+import org.scalatest.funsuite.AnyFunSuite
 
-class StdStackServerTest extends FunSuite with MockitoSugar {
+class StdStackServerTest extends AnyFunSuite with MockitoSugar {
 
   // Don't let the Scala compiler get confused about which `thenReturn`
   // method we want to use.

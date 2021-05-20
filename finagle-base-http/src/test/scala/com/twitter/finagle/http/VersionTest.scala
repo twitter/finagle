@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class VersionTest extends FunSuite {
+class VersionTest extends AnyFunSuite {
 
   test("version string") {
     Version.Http10.versionString == "HTTP/1.0"

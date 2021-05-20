@@ -4,9 +4,9 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class IdentityStreamTransportTest extends FunSuite {
+class IdentityStreamTransportTest extends AnyFunSuite {
   class Ctx {
     val in = new AsyncQueue[Int]
     val out = new AsyncQueue[Int]

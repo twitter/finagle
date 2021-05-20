@@ -6,7 +6,7 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.util.{Await, Awaitable, Future, Time}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 object BalancingPoolTest {
   def await[T](a: Awaitable[T]): T = Await.result(a, 1.second)
@@ -45,7 +45,7 @@ object BalancingPoolTest {
   }
 }
 
-class BalancingPoolTest extends FunSuite {
+class BalancingPoolTest extends AnyFunSuite {
   import BalancingPoolTest._
   import BalancingPool.ResourceManagedBal
 

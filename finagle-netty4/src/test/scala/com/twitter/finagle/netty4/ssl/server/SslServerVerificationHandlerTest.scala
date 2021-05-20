@@ -8,10 +8,14 @@ import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.DefaultPromise
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.mockito.Mockito.when
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class SslServerVerificationHandlerTest
+    extends AnyFunSuite
+    with MockitoSugar
+    with OneInstancePerTest {
 
   class TestVerifier(result: => Boolean) extends SslServerSessionVerifier {
     def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Boolean =

@@ -11,10 +11,10 @@ import javax.security.auth.login.LoginContext
 import org.ietf.jgss.GSSContext
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{stub, verify}
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
+class SpnegoAuthenticatorTest extends AnyFunSuite with MockitoSugar {
   import SpnegoAuthenticator._
 
   def builder = RequestBuilder().url("http://0.0.0.0/arbitrary")

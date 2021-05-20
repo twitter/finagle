@@ -5,10 +5,10 @@ import com.twitter.finagle.{Stack, Thrift}
 import com.twitter.scrooge.{ThriftStruct, ThriftStructIface}
 import org.apache.thrift.protocol.{TJSONProtocol, TMessage, TMessageType, TProtocolUtil, TType}
 import org.apache.thrift.transport.TMemoryInputTransport
-import org.scalatest.FunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.funsuite.AnyFunSuite
 
-class ThriftRequestSerializerTest extends FunSuite with MockitoSugar {
+class ThriftRequestSerializerTest extends AnyFunSuite with MockitoSugar {
 
   val protocolFactory = new TJSONProtocol.Factory()
   val stackParams = Stack.Params.empty + Thrift.param.ProtocolFactory(protocolFactory)

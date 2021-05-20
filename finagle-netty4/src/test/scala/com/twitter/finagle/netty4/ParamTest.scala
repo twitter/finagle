@@ -1,9 +1,9 @@
 package com.twitter.finagle.netty4
 
-import org.scalatest.FunSuite
 import com.twitter.finagle.Stack
+import org.scalatest.funsuite.AnyFunSuite
 
-class ParamTest extends FunSuite {
+class ParamTest extends AnyFunSuite {
   test("WorkerPool is global") {
     val params = Stack.Params.empty
     // make sure that we have referential equality across

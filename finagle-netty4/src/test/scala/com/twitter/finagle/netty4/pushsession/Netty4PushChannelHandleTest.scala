@@ -15,11 +15,11 @@ import io.netty.channel.{
   ChannelPromise
 }
 import io.netty.channel.embedded.EmbeddedChannel
-import org.scalatest.FunSuite
 import scala.collection.mutable
 import scala.collection.JavaConverters._
+import org.scalatest.funsuite.AnyFunSuite
 
-class Netty4PushChannelHandleTest extends FunSuite {
+class Netty4PushChannelHandleTest extends AnyFunSuite {
 
   private class NoopSession(handle: PushChannelHandle[Any, Any])
       extends PushSession[Any, Any](handle) {

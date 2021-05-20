@@ -7,9 +7,9 @@ import com.twitter.finagle.netty4.transport.ChannelTransport
 import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http2.Http2MultiplexHandler
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Http2PipelineInitializerTest extends FunSuite {
+class Http2PipelineInitializerTest extends AnyFunSuite {
 
   private[this] class TestHandler extends ChannelHandlerAdapter
 

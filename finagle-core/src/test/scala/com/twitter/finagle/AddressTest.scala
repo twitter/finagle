@@ -2,9 +2,9 @@ package com.twitter.finagle
 
 import com.twitter.util.Future
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class AddressTest extends FunSuite {
+class AddressTest extends AnyFunSuite {
 
   def assertFactory[Req, Rep](address: Address, factory: ServiceFactory[Req, Rep]): Unit =
     address match {

@@ -3,9 +3,9 @@ package com.twitter.finagle.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, InMemoryStatsReceiver}
 import com.twitter.util.{Await, Future}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class StatsTransportTest extends FunSuite {
+class StatsTransportTest extends AnyFunSuite {
 
   test("read/write failures") {
     val exc = new Exception("boom")

@@ -2,9 +2,9 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.Parameter._
 import com.twitter.finagle.mysql.transport.MysqlBuf
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ParameterTest extends FunSuite {
+class ParameterTest extends AnyFunSuite {
   test("Parameter.unsafeWrap(null)") {
     assert(Parameter.unsafeWrap(null) == NullParameter)
   }

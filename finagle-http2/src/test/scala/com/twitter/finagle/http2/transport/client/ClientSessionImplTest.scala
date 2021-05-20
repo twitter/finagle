@@ -13,9 +13,9 @@ import io.netty.handler.codec.http2.{
   Http2MultiplexCodecBuilder,
   Http2StreamFrameToHttpObjectCodec
 }
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ClientSessionImplTest extends FunSuite {
+class ClientSessionImplTest extends AnyFunSuite {
 
   private[this] def await[T](t: Awaitable[T]): T =
     Await.result(t, 15.seconds)
