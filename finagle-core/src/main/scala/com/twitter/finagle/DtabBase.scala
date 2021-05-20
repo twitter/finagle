@@ -303,13 +303,38 @@ private[finagle] abstract class DtabCompanionBase {
   def setBase(dtab: Dtab): Unit =
     base = dtab
 
-  private[this] val l = new Local[Dtab]
+  private[this] val _local = new Local[Dtab]
+  private[this] val _limited = new Local[Dtab]
+
+  /**
+   * The limited, or "non-propagated, per-request", delegation table applies to the
+   * current [[com.twitter.util.Local Local]] scope which is usually
+   * propagated from the upstream.
+   *
+   * Limited's scope is dictated by [[com.twitter.util.Local Local]].
+   *
+   * Unlike `local`, `limited` is not propagated to the entire request graph.
+   *
+   */
+  private[finagle] def limited: Dtab = _limited() match {
+    case Some(dtab) => dtab
+    case None => Dtab.empty
+  }
+
+  private[finagle] def limited_=(dtab: Dtab): Unit =
+    _limited() = dtab
+
+  /**
+   * Java API for `limited_=`
+   */
+  private[finagle] def setLimited(dtab: Dtab): Unit =
+    limited = dtab
 
   /**
    * The local, or "per-request", delegation table applies to the
    * current [[com.twitter.util.Local Local]] scope which is usually
    * defined on a per-request basis. Finagle uses the Dtab
-   * `Dtab.base ++ Dtab.local` to bind [[com.twitter.finagle.Name.Path
+   * `Dtab.base (++ Dtab.limited) ++ Dtab.local` to bind [[com.twitter.finagle.Name.Path
    * Paths]] via a [[com.twitter.finagle.naming.NameInterpreter]].
    *
    * Local's scope is dictated by [[com.twitter.util.Local Local]].
@@ -320,12 +345,13 @@ private[finagle] abstract class DtabCompanionBase {
    * defined for the entire request graph, so that a local dtab
    * defined here will apply to downstream services as well.
    */
-  def local: Dtab = l() match {
+  def local: Dtab = _local() match {
     case Some(dtab) => dtab
     case None => Dtab.empty
   }
+
   def local_=(dtab: Dtab): Unit =
-    l() = dtab
+    _local() = dtab
 
   /**
    * Java API for `local_=`
@@ -333,10 +359,19 @@ private[finagle] abstract class DtabCompanionBase {
   def setLocal(dtab: Dtab): Unit =
     local = dtab
 
+  /**
+   * `Unwind` provides an api to create scoped, local and limited Dtabs
+   * and restore the original state upon exit.
+   * @param f a function to be executed with the scoped Dtabs
+   */
   def unwind[T](f: => T): T = {
-    val save = l()
+    val saveLocal = _local()
+    val saveLimited = _limited()
     try f
-    finally l.set(save)
+    finally {
+      _limited.set(saveLimited)
+      _local.set(saveLocal)
+    }
   }
 
   /**

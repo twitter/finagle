@@ -1,8 +1,8 @@
 package com.twitter.finagle
 
 import org.scalatest.Assertion
-import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.junit.AssertionsForJUnit
 
 class DtabTest extends AnyFunSuite with AssertionsForJUnit {
 
@@ -103,5 +103,59 @@ class DtabTest extends AnyFunSuite with AssertionsForJUnit {
   test("dtab rewrites with wildcards") {
     val dtab = Dtab.read("/a/*/c => /d")
     assert(dtab.lookup(Path.read("/a/b/c/e/f")) == NameTree.Leaf(Name.Path(Path.read("/d/e/f"))))
+  }
+
+  test("Set Dtab.limited") {
+    assert(Dtab.limited.isEmpty)
+    Dtab.unwind {
+      Dtab.limited = Dtab.read("/a/*/c => /d")
+      assert(Dtab.limited.show == "/a/*/c=>/d")
+    }
+    assert(Dtab.limited.isEmpty)
+  }
+
+  test("Set Dtab.limited - Java Api") {
+    assert(Dtab.limited.isEmpty)
+    Dtab.unwind {
+      Dtab.setLimited(Dtab.read("/a/*/c => /d"))
+      assert(Dtab.limited.show == "/a/*/c=>/d")
+    }
+    assert(Dtab.limited.isEmpty)
+  }
+
+  test("Dtab.unwind restores state for both local, limited") {
+    val dtab1 = "/a/*/c=>/d"
+    val n1 = Dtab.read(dtab1)
+
+    assert(Dtab.limited.isEmpty)
+    assert(Dtab.local.isEmpty)
+    Dtab.unwind {
+      Dtab.limited = n1
+      Dtab.local = n1
+      assert(Dtab.limited.show == dtab1)
+      assert(Dtab.local.show == dtab1)
+    }
+    assert(Dtab.limited.isEmpty)
+    assert(Dtab.local.isEmpty)
+  }
+
+  test("Dtab.limited and Dtab.local do not interfere with one another") {
+    val dtab1 = "/a/*/c=>/d"
+    val dtab2 = "/a/*/c=>/e"
+    val n1 = Dtab.read(dtab1)
+    val n2 = Dtab.read(dtab2)
+
+    assert(Dtab.limited.isEmpty)
+    assert(Dtab.local.isEmpty)
+    Dtab.unwind {
+      Dtab.limited = n1
+      assert(Dtab.limited.show == dtab1)
+      assert(Dtab.local.isEmpty)
+      Dtab.local = n2
+      assert(Dtab.limited.show == dtab1)
+      assert(Dtab.local.show == dtab2)
+    }
+    assert(Dtab.limited.isEmpty)
+    assert(Dtab.local.isEmpty)
   }
 }
