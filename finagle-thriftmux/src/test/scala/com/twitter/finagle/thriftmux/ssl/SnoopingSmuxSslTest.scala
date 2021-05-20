@@ -8,19 +8,26 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thriftmux.ssl.ThriftSmuxSslTestComponents.{mkTlsClient, mkTlsServer}
 import com.twitter.finagle.thriftmux.thriftscala.TestService
 
-class ThriftSmuxSslTest extends AbstractThriftSmuxSslTest {
+class TlsRequiredSnoopingSmuxSslTest extends AbstractSnoopingSmuxSslTest(OpportunisticTls.Required)
+class TlsDesiredSnoopingSmuxSslTest extends AbstractSnoopingSmuxSslTest(OpportunisticTls.Desired)
+
+// Tests for supporting a prior-knowledge TLS client against a snooping server.
+abstract class AbstractSnoopingSmuxSslTest(level: OpportunisticTls.Level)
+    extends AbstractThriftSmuxSslTest {
+
   protected def doMkTlsClient(
     port: Int,
     label: String,
     statsReceiver: StatsReceiver,
     sessionVerifier: SslClientSessionVerifier
   ): TestService.MethodPerEndpoint =
-    mkTlsClient(port, label, statsReceiver, sessionVerifier, Some(OpportunisticTls.Required))
+    mkTlsClient(port, label, statsReceiver, sessionVerifier, None)
 
   protected def doMkTlsServer(
     label: String,
     statsReceiver: StatsReceiver,
     sessionVerifier: SslServerSessionVerifier
   ): ListeningServer =
-    mkTlsServer(label, statsReceiver, sessionVerifier, false, Some(OpportunisticTls.Required))
+    mkTlsServer(label, statsReceiver, sessionVerifier, true, Some(level))
+
 }

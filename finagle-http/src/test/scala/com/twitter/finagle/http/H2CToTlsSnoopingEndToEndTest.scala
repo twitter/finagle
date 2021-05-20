@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle
 import com.twitter.finagle.http.ssl.HttpSslTestComponents
+import com.twitter.finagle.param.OppTls
 import com.twitter.finagle.ssl.{OpportunisticTls, SnoopingLevelInterpreter}
 import com.twitter.finagle.transport.Transport
 
@@ -15,5 +16,5 @@ class H2CToTlsSnoopingEndToEndTest extends H2CEndToEndTest {
       .serverImpl()
       .configured(SnoopingLevelInterpreter.EnabledForNonNegotiatingProtocols)
       .configured(Transport.ServerSsl(Some(HttpSslTestComponents.unauthenticatedServerConfig)))
-      .configured(OpportunisticTls.Param(OpportunisticTls.Desired))
+      .configured(OppTls(Some(OpportunisticTls.Desired)))
 }

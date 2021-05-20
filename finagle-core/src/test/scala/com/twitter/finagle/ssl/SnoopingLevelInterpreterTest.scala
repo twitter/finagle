@@ -1,6 +1,7 @@
 package com.twitter.finagle.ssl
 
 import com.twitter.finagle.Stack
+import com.twitter.finagle.param.OppTls
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.transport.Transport
 import org.scalatest.FunSuite
@@ -32,7 +33,7 @@ class SnoopingLevelInterpreterTest extends FunSuite {
       c <- clientAuthServerConfigs
       l <- optTlsOptions
     } {
-      val params = base + OpportunisticTls.Param(l) + Transport.ServerSsl(Some(c))
+      val params = base + OppTls(Some(l)) + Transport.ServerSsl(Some(c))
       assert(!SnoopingLevelInterpreter.shouldEnableSnooping(params))
     }
   }
@@ -43,7 +44,7 @@ class SnoopingLevelInterpreterTest extends FunSuite {
       l <- optTlsOptions
       i <- interpreters
     } {
-      val params = base + OpportunisticTls.Param(l) + i
+      val params = base + OppTls(Some(l)) + i
       assert(!SnoopingLevelInterpreter.shouldEnableSnooping(params))
     }
   }
@@ -56,7 +57,7 @@ class SnoopingLevelInterpreterTest extends FunSuite {
     for {
       l <- optTlsOptions
     } {
-      val params = base + OpportunisticTls.Param(l)
+      val params = base + OppTls(Some(l))
       assert(!SnoopingLevelInterpreter.shouldEnableSnooping(params))
     }
   }
@@ -69,7 +70,7 @@ class SnoopingLevelInterpreterTest extends FunSuite {
       c <- clientAuthServerConfigs if c.clientAuth != ClientAuth.Needed
       l <- optTlsOptions
     } {
-      val params = base + Transport.ServerSsl(Some(c)) + OpportunisticTls.Param(l)
+      val params = base + Transport.ServerSsl(Some(c)) + OppTls(Some(l))
       assert(
         SnoopingLevelInterpreter.shouldEnableSnooping(params) == (l == OpportunisticTls.Desired))
     }
@@ -82,7 +83,7 @@ class SnoopingLevelInterpreterTest extends FunSuite {
       c <- clientAuthServerConfigs
       l <- optTlsOptions
     } {
-      val params = base + Transport.ServerSsl(Some(c)) + OpportunisticTls.Param(l)
+      val params = base + Transport.ServerSsl(Some(c)) + OppTls(Some(l))
       assert(SnoopingLevelInterpreter.shouldEnableSnooping(params) == (l != OpportunisticTls.Off))
     }
   }

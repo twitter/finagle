@@ -15,6 +15,11 @@ New Features
   limit rather than rejecting them.  A `buffered_streams` gauge has been added to track the
   current number of buffered streams.  ``PHAB_ID=D643138``
 
+* finagle-mux: Added support for TLS snooping to the mux protocol. This allows a thriftmux
+  server to start a connection as TLS or follow the existing upgrade pathway at the leisure of
+  the client. This also allows the server to support opportunistic TLS and still downgrade to
+  vanilla thrift. ``PHAB_ID=D584638``
+
 * finagle-netty4: Added a new counter to keep track of the number of TLS connections that were
   started via snooping. ``PHAB_ID=D667652``
 

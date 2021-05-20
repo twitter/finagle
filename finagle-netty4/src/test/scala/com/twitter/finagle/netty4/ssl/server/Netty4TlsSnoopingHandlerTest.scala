@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4.ssl.server
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.ssl.Netty4SslTestComponents
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{OppTls, Stats}
 import com.twitter.finagle.ssl.OpportunisticTls
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
@@ -59,7 +59,7 @@ class Netty4TlsSnoopingHandlerTest extends FunSuite with ScalaCheckDrivenPropert
 
   private[this] val params: Stack.Params = {
     Stack.Params.empty + Transport.ServerSsl(Some(Netty4SslTestComponents.serverConfig)) +
-      OpportunisticTls.Param(OpportunisticTls.Desired)
+      OppTls(Some(OpportunisticTls.Desired))
   }
 
   private[this] def arrayToBuf(bytes: Array[Byte]): ByteBuf = {

@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.finagle.Mux.param.{CompressionPreferences, OppTls}
+import com.twitter.finagle.Mux.param.CompressionPreferences
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
@@ -9,9 +9,11 @@ import com.twitter.finagle.mux.transport.{
   CompressionNegotiation,
   IncompatibleNegotiationException,
   MuxFramer,
-  OpportunisticTls
+  OpportunisticTls => MuxOpportunisticTls
 }
 import com.twitter.finagle.mux.{Handshake, Request, Response}
+import com.twitter.finagle.param.OppTls
+import com.twitter.finagle.ssl.OpportunisticTls
 import com.twitter.finagle.{Service, Stack, param}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
@@ -65,11 +67,24 @@ private[finagle] abstract class Negotiation(
     handle: PushChannelHandle[ByteReader, Buf],
     peerHeaders: Option[Headers],
     onTlsHandshakeComplete: Try[Unit] => Unit
+  ): Unit =
+    if (handle.sslSessionInfo.usingSsl) {
+      // If we're already encrypted this is already decided and we're at max security.
+      log.debug("Session already encrypted. Skipping OppTls header check.")
+      onTlsHandshakeComplete(Try.Unit)
+    } else {
+      negotiateOppTlsViaHeaders(handle, peerHeaders, onTlsHandshakeComplete)
+    }
+
+  private[this] def negotiateOppTlsViaHeaders(
+    handle: PushChannelHandle[ByteReader, Buf],
+    peerHeaders: Option[Headers],
+    onTlsHandshakeComplete: Try[Unit] => Unit
   ): Unit = {
     val localEncryptLevel = params[OppTls].level.getOrElse(OpportunisticTls.Off)
     val remoteEncryptLevel = peerHeaders
-      .flatMap(Handshake.valueOf(OpportunisticTls.Header.KeyBuf, _)) match {
-      case Some(buf) => OpportunisticTls.Header.decodeLevel(buf)
+      .flatMap(Handshake.valueOf(MuxOpportunisticTls.Header.KeyBuf, _)) match {
+      case Some(buf) => MuxOpportunisticTls.Header.decodeLevel(buf)
       case None =>
         log.debug(
           "Peer either didn't negotiate or didn't send an Opportunistic Tls preference: " +
@@ -79,7 +94,7 @@ private[finagle] abstract class Negotiation(
     }
 
     try {
-      val useTls = OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
+      val useTls = MuxOpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
       if (log.isLoggable(Level.DEBUG)) {
         log.debug(
           s"Successfully negotiated TLS with remote peer. Using TLS: $useTls local level: " +

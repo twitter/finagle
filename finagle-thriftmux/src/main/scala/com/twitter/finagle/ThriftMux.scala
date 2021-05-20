@@ -9,7 +9,7 @@ import com.twitter.finagle.client.{
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.filter.{ClientExceptionTracingFilter => ExceptionTracingFilter}
-import com.twitter.finagle.mux.transport.{MuxFailure, OpportunisticTls}
+import com.twitter.finagle.mux.transport.MuxFailure
 import com.twitter.finagle.mux.{OpportunisticTlsParams, WithCompressionPreferences}
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.{
@@ -21,6 +21,7 @@ import com.twitter.finagle.param.{
 }
 import com.twitter.finagle.server.{BackupRequest, StackBasedServer, StackServer}
 import com.twitter.finagle.service._
+import com.twitter.finagle.ssl.OpportunisticTls
 import com.twitter.finagle.stats.{
   ClientStatsReceiver,
   ExceptionStatsHandler,

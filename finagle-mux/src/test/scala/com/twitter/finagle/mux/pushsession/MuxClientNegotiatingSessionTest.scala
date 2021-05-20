@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.pushsession
 
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.Mux.param.{CompressionPreferences, MaxFrameSize, OppTls}
+import com.twitter.finagle.Mux.param.{CompressionPreferences, MaxFrameSize}
 import com.twitter.finagle.mux.transport.CompressionNegotiation
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.pushsession.PushChannelHandle
@@ -10,7 +10,9 @@ import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.mux.Request
 import com.twitter.finagle.mux.transport.Message.Tdispatch
-import com.twitter.finagle.mux.transport.{Message, MuxFramer, OpportunisticTls}
+import com.twitter.finagle.mux.transport.{Message, MuxFramer}
+import com.twitter.finagle.param.OppTls
+import com.twitter.finagle.ssl.OpportunisticTls
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Mux, Path, liveness}
 import com.twitter.io.{Buf, ByteReader}

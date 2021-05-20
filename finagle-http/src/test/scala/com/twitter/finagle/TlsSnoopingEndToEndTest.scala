@@ -4,6 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.ssl.HttpSslTestComponents
+import com.twitter.finagle.param.OppTls
 import com.twitter.finagle.ssl.{ClientAuth, OpportunisticTls, SnoopingLevelInterpreter, TlsSnooping}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Awaitable, Future}
@@ -25,7 +26,7 @@ class TlsSnoopingEndToEndTest extends FunSuite {
     (if (useH2) base.withHttp2 else base.withNoHttp2)
       .configured(Transport.ServerSsl(
         Some(HttpSslTestComponents.unauthenticatedServerConfig.copy(clientAuth = clientAuth))))
-      .configured(OpportunisticTls.Param(level))
+      .configured(OppTls(Some(level)))
       .configured(TlsSnooping.Param(snooper))
   }
 

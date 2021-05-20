@@ -1,11 +1,16 @@
 package com.twitter.finagle.thriftmux.ssl
 
-import com.twitter.finagle.{Address, ListeningServer, ThriftMux}
-import com.twitter.finagle.mux.transport.OpportunisticTls
-import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
+import com.twitter.finagle.{Address, ListeningServer, Thrift, ThriftMux}
+import com.twitter.finagle.ssl.{
+  ClientAuth,
+  KeyCredentials,
+  OpportunisticTls,
+  SnoopingLevelInterpreter,
+  TrustCredentials
+}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.io.TempFile
 import com.twitter.util.Future
@@ -45,32 +50,55 @@ object ThriftSmuxSslTestComponents {
       false
   }
 
+  val sslClientConfiguration = SslClientConfiguration(
+    keyCredentials = KeyCredentials.CertAndKey(clientCert, clientKey),
+    trustCredentials = TrustCredentials.CertCollection(chainCert)
+  )
+
   def getPort(server: ListeningServer): Int =
     server.boundAddress.asInstanceOf[InetSocketAddress].getPort
 
-  def mkTlsClient(
+  def mkTlsVanillaThriftClient(
     port: Int,
-    label: String = "client",
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    sessionVerifier: SslClientSessionVerifier = SslClientSessionVerifier.AlwaysValid
+    label: String,
+    statsReceiver: StatsReceiver,
+    sessionVerifier: SslClientSessionVerifier
   ): TestService.MethodPerEndpoint = {
-    val clientConfig = SslClientConfiguration(
-      keyCredentials = KeyCredentials.CertAndKey(clientCert, clientKey),
-      trustCredentials = TrustCredentials.CertCollection(chainCert)
-    )
-
-    ThriftMux.client.withTransport
-      .tls(clientConfig, sessionVerifier)
-      .withOpportunisticTls(OpportunisticTls.Required)
+    Thrift.client.withTransport
+      .tls(sslClientConfiguration, sessionVerifier)
       .withStatsReceiver(statsReceiver)
       .withLabel(label)
       .build[TestService.MethodPerEndpoint]("localhost:" + port)
   }
 
+  def mkTlsClient(
+    port: Int,
+    label: String,
+    statsReceiver: StatsReceiver,
+    sessionVerifier: SslClientSessionVerifier,
+    oppTlsLevel: Option[OpportunisticTls.Level]
+  ): TestService.MethodPerEndpoint = {
+
+    var client =
+      ThriftMux.client.withTransport
+        .tls(sslClientConfiguration, sessionVerifier)
+        .withStatsReceiver(statsReceiver)
+        .withLabel(label)
+
+    client = oppTlsLevel match {
+      case Some(level) => client.withOpportunisticTls(level)
+      case None => client.withNoOpportunisticTls
+    }
+
+    client.build[TestService.MethodPerEndpoint]("localhost:" + port)
+  }
+
   def mkTlsServer(
-    label: String = "server",
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    sessionVerifier: SslServerSessionVerifier = SslServerSessionVerifier.AlwaysValid
+    label: String,
+    statsReceiver: StatsReceiver,
+    sessionVerifier: SslServerSessionVerifier,
+    snoopingEnabled: Boolean,
+    oppTlsLevel: Option[OpportunisticTls.Level]
   ): ListeningServer = {
     val serverConfig = SslServerConfiguration(
       keyCredentials = KeyCredentials.CertAndKey(serverCert, serverKey),
@@ -78,11 +106,21 @@ object ThriftSmuxSslTestComponents {
       clientAuth = ClientAuth.Needed
     )
 
-    ThriftMux.server.withTransport
+    val snoopingLevel =
+      if (snoopingEnabled) SnoopingLevelInterpreter.EnabledForNegotiatingProtocols
+      else SnoopingLevelInterpreter.Off
+
+    var server = ThriftMux.server.withTransport
       .tls(serverConfig, sessionVerifier)
-      .withOpportunisticTls(OpportunisticTls.Required)
+      .configured(snoopingLevel)
       .withStatsReceiver(statsReceiver)
       .withLabel(label)
-      .serveIface("localhost:*", concatService)
+
+    server = oppTlsLevel match {
+      case Some(level) => server.withOpportunisticTls(level)
+      case None => server.withNoOpportunisticTls
+    }
+
+    server.serveIface("localhost:*", concatService)
   }
 }

@@ -144,6 +144,33 @@ import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
  *  Rejected      1 << 1    Request was rejected/Nacked by the server
  *  NonRetryable  1 << 2    Request should not be retried
  *
+ * =Security=
+ *
+ * TLS is supported via three mechanisms:
+ * - Explicit and exclusive TLS. This pathway involves requiring the establishment of TLS
+ *   immediately after establishing the socket connection. This is configured by adding TLS
+ *   configuration to the client or server and __not__ configuring opportunistic TLS or
+ *   TLS snooping (see below).
+ *
+ * - Negotiated Opportunistic TLS. This pathway involves starting the connection as cleartext
+ *   and the client and server subsequently negotiate a TLS level via the handshake. Based on
+ *   that handshake the connection is either left as cleartext or upgraded to TLS. This is
+ *   configured by adding TLS configuration and also configuring an opportunistic TLS level
+ *   but __not__ configuring TLS snooping.
+ *
+ *   In this pathway there are three configuration options:
+ *   - `Off` signals that TLS is not supported by this peer
+ *   - `Desired` signals that TLS is preferred but not required by this peer
+ *   - `Required` signals that this peer will only allow the session to continue over TLS
+ *
+ * - TLS snooping. This pathway allows a server to use TLS either by performing a TLS
+ *   handshake immediately after the socket is established or by starting the session as
+ *   cleartext or using the negotiated pathway described above. If the session is started as
+ *   a TLS session the headers that drive the opportunistic TLS pathway are ignored.
+ *
+ *   Note that the server may still require TLS but leaves the option to start TLS immediately
+ *   after establishing the socket or starting cleartext and requiring TLS via the opportunistic
+ *   TLS pathway described above.
  */
 package object mux {
 
