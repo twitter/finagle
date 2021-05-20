@@ -747,8 +747,7 @@ class MethodBuilderTest
         assert(maxExtraLoadTunable().get == 1.percent && sendInterrupts)
       case _ => fail("BackupRequestFilter not configured")
     }
-    assert(
-      mb.params[param.ResponseClassifier].responseClassifier.toString == s"Idempotent($classifier)")
+    assert(mb.config.retry.responseClassifier.toString == s"Idempotent($classifier)")
 
     // ensure that the response classifier was also used to configure retries
 

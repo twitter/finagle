@@ -47,11 +47,8 @@ object MethodBuilder {
    */
   def from[Req, Rep](dest: Name, stackClient: StackClient[Req, Rep]): MethodBuilder[Req, Rep] = {
     val stack = modifiedStack(stackClient.stack)
-    val service: Service[Req, Rep] = stackClient
-      .withStack(stack)
-      .newService(dest, param.Label.Default)
     new MethodBuilder(
-      new RefcountedClosable(service),
+      new MethodPool[Req, Rep](stackClient.withStack(stack), dest, param.Label.Default),
       dest,
       stack,
       stackClient.params,
@@ -122,15 +119,29 @@ object MethodBuilder {
  * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
  */
 final class MethodBuilder[Req, Rep] private[finagle] (
-  val refCounted: RefcountedClosable[Service[Req, Rep]],
+  val methodPool: MethodPool[Req, Rep],
   dest: Name,
   stack: Stack[_],
-  stackParams: Stack.Params,
-  private[client] val config: MethodBuilder.Config) { self =>
+  val params: Stack.Params,
+  private[client] val config: MethodBuilder.Config)
+    extends Stack.Parameterized[MethodBuilder[Req, Rep]] { self =>
   import MethodBuilder._
 
   override def toString: String =
-    s"MethodBuilder(dest=$dest, stack=$stack, params=$stackParams, config=$config)"
+    s"MethodBuilder(dest=$dest, stack=$stack, params=$params, config=$config)"
+
+  //
+  // Stack.Configured machinery
+  //
+
+  def withParams(ps: Stack.Params): MethodBuilder[Req, Rep] =
+    new MethodBuilder[Req, Rep](
+      methodPool,
+      dest,
+      stack,
+      params ++ ps,
+      config
+    )
 
   //
   // Configuration
@@ -293,16 +304,15 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     val idempotentedConfigClassifier = idempotentify(configClassifier, classifier)
 
     new MethodBuilder[Req, Rep](
-      refCounted,
+      methodPool,
       dest,
       stack,
       // If the RetryBudget is not configured, BackupRequestFilter and RetryFilter will each
       // get a new instance of the default budget. Since we want them to share the same
       // client retry budget, insert the budget into the params.
-      stackParams
+      params
         + brfParam
-        + param.ResponseClassifier(idempotentedStackClassifier)
-        + stackParams[Retries.Budget],
+        + params[Retries.Budget],
       config
     ).withRetry.forClassifier(idempotentedConfigClassifier)
   }
@@ -337,19 +347,13 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     val nonidempotentedConfigClassifier = nonidempotentify(configClassifier)
 
     new MethodBuilder[Req, Rep](
-      refCounted,
+      methodPool,
       dest,
       stack,
-      stackParams + BackupRequestFilter.Disabled,
+      params + BackupRequestFilter.Disabled,
       config
     ).withRetry.forClassifier(nonidempotentedConfigClassifier)
   }
-
-  /**
-   * Returns the client stack parameters.
-   */
-  def params: Stack.Params =
-    stackParams
 
   /**
    * Allow customizations for protocol-specific trace initialization.
@@ -372,8 +376,10 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   //
   // Build
   //
-  private[this] def newService(methodName: Option[String]): Service[Req, Rep] =
+  private[this] def newService(methodName: Option[String]): Service[Req, Rep] = {
+    materialize()
     filters(methodName).andThen(wrappedService(methodName))
+  }
 
   /**
    * Create a [[Service]] from the current configuration.
@@ -406,6 +412,8 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     builder: ServicePerEndpointBuilder[Req, Rep, ServicePerEndpoint],
     methodName: Option[String]
   ): ServicePerEndpoint = {
+    materialize()
+
     builder
       .servicePerEndpoint(wrappedService(methodName))
       .filtered(filters(methodName))
@@ -422,20 +430,24 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    * `Config` modified.
    */
   private[client] def withConfig(config: Config): MethodBuilder[Req, Rep] =
-    new MethodBuilder(refCounted, dest, stack, stackParams, config)
+    new MethodBuilder(methodPool, dest, stack, params, config)
 
   private[this] def clientName: String =
-    stackParams[param.Label].label match {
+    params[param.Label].label match {
       case param.Label.Default => Showable.show(dest)
       case label => label
     }
 
   private[finagle] def statsReceiver(methodName: Option[String]): StatsReceiver = {
-    val clientScoped = stackParams[param.Stats].statsReceiver.scope(clientName)
+    val clientScoped = params[param.Stats].statsReceiver.scope(clientName)
     methodName match {
       case Some(name) => new LazyStatsReceiver(clientScoped.scope(name))
       case None => clientScoped
     }
+  }
+
+  private[this] def materialize(): Unit = {
+    methodPool.materialize(params)
   }
 
   private[this] def filters(methodName: Option[String]): Filter.TypeAgnostic = {
@@ -524,12 +536,13 @@ final class MethodBuilder[Req, Rep] private[finagle] (
 
   private[this] def wrappedService(name: Option[String]): Service[Req, Rep] = {
     addToRegistry(name)
-    refCounted.open()
+    methodPool.open()
 
-    val underlying = BackupRequestFilter.filterService(
-      stackParams + param.Stats(statsReceiver(name)),
-      refCounted.get
-    )
+    val backupRequestParams = params +
+      param.Stats(statsReceiver(name)) +
+      param.ResponseClassifier(config.retry.responseClassifier)
+
+    val underlying = BackupRequestFilter.filterService(backupRequestParams, methodPool.get)
 
     new ServiceProxy[Req, Rep](underlying) with CloseOnce {
       override def apply(request: Req): Future[Rep] =
@@ -545,7 +558,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
         ClientRegistry.unregisterPrefixes(registryEntry(), registryKeyPrefix(name))
         // call refCounted.close to decrease the ref count. `underlying.close` is only
         // called when the closable underlying `refCounted` is closed.
-        refCounted.close(deadline).transform(_ => underlying.close(deadline))
+        methodPool.close(deadline).transform(_ => underlying.close(deadline))
       }
     }
   }

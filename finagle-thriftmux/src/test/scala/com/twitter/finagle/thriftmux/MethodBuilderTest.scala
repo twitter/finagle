@@ -686,7 +686,7 @@ class MethodBuilderTest extends FunSuite with Eventually {
     server.close()
   }
 
-  test("methodBuilder is closed after all ServicePerEndpoints closed") {
+  test("methodBuilder can be closed and opened again") {
     val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = Future.value(x)
       def question(y: String): Future[String] = Future.value(y)
@@ -705,11 +705,37 @@ class MethodBuilderTest extends FunSuite with Eventually {
     await(spe1.close())
     assert(spe1.close().isDefined)
     val spe2 = builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query2").query
-    assert(!spe2.isAvailable)
-    intercept[ServiceClosedException] {
-      assert(await(spe2(TestService.Query.Args("echo2"))) == "echo2")
+    assert(spe2.isAvailable)
+    assert(await(spe2(TestService.Query.Args("echo2"))) == "echo2")
+
+    await(spe2.close())
+    server.close()
+  }
+
+  test("methodBuilder throws ServiceClosedException after closing") {
+    val service = new TestService.MethodPerEndpoint {
+      def query(x: String): Future[String] = Future.value(x)
+      def question(y: String): Future[String] = Future.value(y)
+      def inquiry(z: String): Future[String] = Future.value(z)
     }
-    spe2.close()
+
+    val server =
+      serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+    val client = clientImpl.withLabel("a_label")
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    val spe = builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
+    assert(await(spe(TestService.Query.Args("echo1"))) == "echo1")
+
+    await(spe.close())
+    assert(spe.close().isDefined)
+
+    assert(!spe.isAvailable)
+    intercept[ServiceClosedException] {
+      assert(await(spe(TestService.Query.Args("echo2"))) == "echo2")
+    }
+
     server.close()
   }
 

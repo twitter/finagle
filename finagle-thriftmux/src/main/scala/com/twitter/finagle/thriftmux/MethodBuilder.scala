@@ -2,7 +2,7 @@ package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle.{client, _}
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
-import com.twitter.finagle.client.RefcountedClosable
+import com.twitter.finagle.client.MethodPool
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.thrift.exp.partitioning.{PartitioningStrategy, ThriftPartitioningService}
 import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
@@ -53,11 +53,12 @@ object MethodBuilder {
     val stack = modifiedStack(thriftMuxClient.stack)
       .replace(ThriftPartitioningService.role, DynamicPartitioningService.perRequestModule)
     val params = thriftMuxClient.params
-    val service: Service[ThriftClientRequest, Array[Byte]] = thriftMuxClient
-      .withStack(stack)
-      .newService(dest, param.Label.Default)
+
     val mb = new client.MethodBuilder[ThriftClientRequest, Array[Byte]](
-      new RefcountedClosable(service),
+      new MethodPool[ThriftClientRequest, Array[Byte]](
+        thriftMuxClient.withStack(stack),
+        dest,
+        param.Label.Default),
       dest,
       stack,
       params,
