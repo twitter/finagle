@@ -1,9 +1,13 @@
 package com.twitter.finagle.service
 
-import com.twitter.conversions.PercentOps._
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, GreaterThan, MonotoneThresholds}
+import com.twitter.finagle.service.MetricBuilderRegistry.{
+  FailureCounter,
+  LatencyP99Histogram,
+  RequestCounter,
+  SuccessCounter
+}
 import com.twitter.finagle.stats._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
@@ -46,12 +50,13 @@ object StatsFilter {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module5[
+    new Stack.Module6[
       param.Stats,
       param.ExceptionStatsHandler,
       param.ResponseClassifier,
       Param,
       Now,
+      param.MetricBuilders,
       ServiceFactory[Req, Rep]
     ] {
       val role: Stack.Role = StatsFilter.role
@@ -62,6 +67,7 @@ object StatsFilter {
         _classifier: param.ResponseClassifier,
         _param: Param,
         now: Now,
+        metrics: param.MetricBuilders,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val param.Stats(statsReceiver) = _stats
@@ -73,7 +79,8 @@ object StatsFilter {
             _classifier.responseClassifier,
             _exceptions.categorizer,
             _param.unit,
-            now.nowOrDefault(_param.unit)
+            now.nowOrDefault(_param.unit),
+            metrics.registry
           ).andThen(next)
         }
       }
@@ -155,13 +162,17 @@ object StatsFilter {
  * but other values are valid. The choice of this changes the name of the stat
  * attached to the given [[StatsReceiver]]. For the common units,
  * it will be "request_latency_ms".
+ *
+ * @param metricsRegistry an optional [MetricBuilderRegistry] set by stack parameter
+ * for injecting metrics and instrumenting top-line expressions
  */
 class StatsFilter[Req, Rep] private[service] (
   statsReceiver: StatsReceiver,
   responseClassifier: ResponseClassifier,
   exceptionStatsHandler: ExceptionStatsHandler,
   timeUnit: TimeUnit,
-  now: () => Long)
+  now: () => Long,
+  metricsRegistry: Option[MetricBuilderRegistry] = None)
     extends SimpleFilter[Req, Rep] {
   import StatsFilter.SyntheticException
 
@@ -222,6 +233,21 @@ class StatsFilter[Req, Rep] private[service] (
    */
   def this(statsReceiver: StatsReceiver) = this(statsReceiver, StatsFilter.DefaultExceptions)
 
+  //expose for testing
+  private[service] def this(
+    statsReceiver: StatsReceiver,
+    exceptionStatsHandler: ExceptionStatsHandler,
+    metricBuilderRegistry: MetricBuilderRegistry
+  ) = {
+    this(
+      statsReceiver,
+      ResponseClassifier.Default,
+      exceptionStatsHandler,
+      TimeUnit.MILLISECONDS,
+      StatsFilter.nowForTimeUnit(TimeUnit.MILLISECONDS),
+      Some(metricBuilderRegistry))
+  }
+
   private[this] def latencyStatSuffix: String = {
     timeUnit match {
       case TimeUnit.NANOSECONDS => "ns"
@@ -257,26 +283,19 @@ class StatsFilter[Req, Rep] private[service] (
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
 
-  private[this] val successRate =
-    ExpressionSchema(
-      "success_rate",
-      Expression(100).multiply(Expression(successSchema).divide(
-        Expression(successSchema).plus(Expression(failureSchema)))))
-      .withBounds(MonotoneThresholds(GreaterThan, 99.5, 99.97))
-      .withUnit(Percentage)
-      .withDescription("The Success Rate")
-      .register()
+  // inject metrics and instrument top-line expressions
+  private[this] val instrumentExpressions = metricsRegistry.map { registry =>
+    registry.setMetricBuilder(SuccessCounter, successCount.metadata)
+    registry.setMetricBuilder(FailureCounter, failureCount.metadata)
+    registry.setMetricBuilder(RequestCounter, dispatchCount.metadata)
+    registry.setMetricBuilder(LatencyP99Histogram, latencyStat.metadata)
 
-  private[this] val throughput = ExpressionSchema("throughput", Expression(requestSchema))
-    .withUnit(Requests)
-    .withDescription("The total requests")
-    .register()
-
-  private[this] val latency =
-    ExpressionSchema("latency", Expression(latencySchema, Right(99.percent)))
-      .withUnit(Milliseconds)
-      .withDescription("The p99 latency of a request.")
-      .register()
+    // Construct expressions
+    registry.successRate
+    registry.latencyP99
+    registry.throughput
+    registry.acRejection
+  }
 
   private[this] def isIgnorableResponse(rep: Try[Rep]): Boolean = rep match {
     case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Ignorable) =>

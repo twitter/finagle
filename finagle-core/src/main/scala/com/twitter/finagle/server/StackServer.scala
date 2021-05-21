@@ -1,12 +1,17 @@
 package com.twitter.finagle.server
 
-import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{DeadlineFilter, ExpiringService, StatsFilter, TimeoutFilter}
-import com.twitter.finagle.{StackTransformer, Stack}
+import com.twitter.finagle.service.{
+  DeadlineFilter,
+  ExpiringService,
+  MetricBuilderRegistry,
+  StatsFilter,
+  TimeoutFilter
+}
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.{Stack, StackTransformer, _}
 import com.twitter.jvm.Jvm
 import scala.collection.immutable
 
@@ -142,9 +147,12 @@ object StackServer {
 
   /**
    * The default params used for StackServers.
+   * @note The MetricBuilderRegistry is stateful for each stack,
+   *       this should be evaluated every time calling,
    */
-  val defaultParams: Stack.Params =
-    Stack.Params.empty + Stats(ServerStatsReceiver)
+  def defaultParams: Stack.Params =
+    Stack.Params.empty + Stats(ServerStatsReceiver) +
+      MetricBuilders(Some(new MetricBuilderRegistry()))
 
   /**
    * A set of StackTransformers for transforming server stacks.

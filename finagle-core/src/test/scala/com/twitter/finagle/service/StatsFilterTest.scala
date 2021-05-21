@@ -19,7 +19,9 @@ class StatsFilterTest extends AnyFunSuite {
     exceptionStatsHandler: ExceptionStatsHandler = BasicExceptions
   ): (Promise[String], InMemoryStatsReceiver, Service[String, String]) = {
     val receiver = new InMemoryStatsReceiver()
-    val statsFilter = new StatsFilter[String, String](receiver, exceptionStatsHandler)
+    val metricBuilderRegistry = new MetricBuilderRegistry()
+    val statsFilter =
+      new StatsFilter[String, String](receiver, exceptionStatsHandler, metricBuilderRegistry)
     val promise = new Promise[String]
     val service = new Service[String, String] {
       def apply(request: String): Future[String] = promise

@@ -398,7 +398,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           ServerContextFilter.role,
           BackupRequest.traceAnnotationModule[Request, Response])
 
-    private val params: Stack.Params = StackServer.defaultParams +
+    private def params: Stack.Params = StackServer.defaultParams +
       protocolLibrary +
       responseClassifierParam
   }

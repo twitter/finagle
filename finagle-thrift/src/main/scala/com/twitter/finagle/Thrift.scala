@@ -489,7 +489,7 @@ object Thrift
       .insertBefore(StackServer.Role.preparer, ServerToReqRepPreparer)
       .replace(StackServer.Role.preparer, preparer)
 
-    private val params: Stack.Params = StackServer.defaultParams +
+    private def params: Stack.Params = StackServer.defaultParams +
       ProtocolLibrary("thrift")
   }
 

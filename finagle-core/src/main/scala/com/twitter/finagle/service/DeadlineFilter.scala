@@ -3,6 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Deadline
+import com.twitter.finagle.service.MetricBuilderRegistry.DeadlineRejectedCounter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Duration, Future, Stopwatch, Time, TokenBucket}
@@ -105,18 +106,20 @@ object DeadlineFilter {
    * [[com.twitter.finagle.service.DeadlineFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module4[
+    new Stack.Module5[
       param.Stats,
+      param.MetricBuilders,
       DeadlineFilter.RejectPeriod,
       DeadlineFilter.MaxRejectFraction,
       DeadlineFilter.Mode,
       ServiceFactory[Req, Rep]
     ] {
-      val role = new Stack.Role("DeadlineFilter")
+      val role = Stack.Role("DeadlineFilter")
       val description = "Reject requests when their deadline has passed"
 
       def make(
         _stats: param.Stats,
+        _metrics: param.MetricBuilders,
         _rejectPeriod: DeadlineFilter.RejectPeriod,
         _maxRejectFraction: DeadlineFilter.MaxRejectFraction,
         mode: DeadlineFilter.Mode,
@@ -141,7 +144,8 @@ object DeadlineFilter {
                       rejectPeriod = rejectPeriod,
                       maxRejectFraction = maxRejectFraction,
                       statsReceiver = scopedStatsReceiver,
-                      isDarkMode = darkMode
+                      metricsRegistry = _metrics.registry,
+                      isDarkMode = darkMode,
                     ).andThen(service)
 
                 override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
@@ -188,6 +192,8 @@ object DeadlineFilter {
  *        ".../admission_control/deadline/"
  * @param nowMillis current time in milliseconds
  * @param isDarkMode DarkMode will collect stats but not reject requests
+ * @param metricsRegistry an optional [MetricBuilderRegistry] set by stack parameter
+ *        for injecting metrics and instrumenting top-line expressions
  * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline user guide]]
  *      for more details.
  */
@@ -196,6 +202,7 @@ class DeadlineFilter[Req, Rep](
   maxRejectFraction: Double = DeadlineFilter.DefaultMaxRejectFraction,
   statsReceiver: StatsReceiver,
   nowMillis: () => Long = Stopwatch.systemMillis,
+  metricsRegistry: Option[MetricBuilderRegistry] = None,
   isDarkMode: Boolean)
     extends SimpleFilter[Req, Rep] {
 
@@ -205,7 +212,7 @@ class DeadlineFilter[Req, Rep](
     statsReceiver: StatsReceiver,
     nowMillis: () => Long
   ) =
-    this(rejectPeriod, maxRejectFraction, statsReceiver, nowMillis, false)
+    this(rejectPeriod, maxRejectFraction, statsReceiver, nowMillis, None, false)
 
   import DeadlineFilter.DeadlineExceededException
 
@@ -217,9 +224,15 @@ class DeadlineFilter[Req, Rep](
     maxRejectFraction <= 1.0,
     s"maxRejectFraction must be between 0.0 and 1.0: $maxRejectFraction"
   )
-
   private[this] val exceededCounter = statsReceiver.counter("exceeded")
   private[this] val rejectedCounter = statsReceiver.counter("rejected")
+
+  // inject deadline rejection counter and instrument deadline rejection rate expression
+  metricsRegistry.map { registry =>
+    registry.setMetricBuilder(DeadlineRejectedCounter, rejectedCounter.metadata)
+    registry.deadlineRejection
+  }
+
   private[this] val expiredTimeStat = statsReceiver.stat("expired_ms")
   private[this] val remainingTimeStat = statsReceiver.stat("remaining_ms")
 

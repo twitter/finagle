@@ -375,7 +375,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     /**
      * Default stack parameters used for memcached server.
      */
-    private val params: Stack.Params = StackServer.defaultParams +
+    private def params: Stack.Params = StackServer.defaultParams +
       ProtocolLibrary("memcached")
   }
 

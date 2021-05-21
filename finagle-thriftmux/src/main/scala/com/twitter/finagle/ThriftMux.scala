@@ -168,7 +168,7 @@ object ThriftMux
   /**
    * Base [[com.twitter.finagle.Stack.Params]] for ThriftMux servers.
    */
-  val BaseServerParams: Stack.Params = Mux.Server.params + ProtocolLibrary("thriftmux")
+  def BaseServerParams: Stack.Params = Mux.Server.params + ProtocolLibrary("thriftmux")
 
   object Client extends ThriftClient {
 

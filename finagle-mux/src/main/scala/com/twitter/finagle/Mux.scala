@@ -343,7 +343,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
       pipeline.addFirst("opportunisticSslInit", new Netty4ServerSslChannelInitializer(params))
 
-    private[finagle] val params: Stack.Params = StackServer.defaultParams +
+    private[finagle] def params: Stack.Params = StackServer.defaultParams +
       ProtocolLibrary("mux") +
       param.TurnOnTlsFn(tlsEnable)
 
