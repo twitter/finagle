@@ -391,6 +391,8 @@ class MethodBuilder(
     override def servicePerEndpoint(
       service: => Service[ThriftClientRequest, Array[Byte]]
     ): ServiceIface = thriftMuxClient.newServiceIface(service, label)(builder)
+
+    override def serviceClass: Class[_] = builder.serviceClass
   }
 
   final private class ClientServicePerEndpointBuilder[
@@ -413,6 +415,8 @@ class MethodBuilder(
         )(builder)
       )
     }
+
+    override def serviceClass: Class[_] = builder.serviceClass
   }
 
   // used to delay creation of the Service until the first request

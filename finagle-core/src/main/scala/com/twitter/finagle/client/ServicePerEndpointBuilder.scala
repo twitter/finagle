@@ -10,6 +10,11 @@ import com.twitter.finagle.service.Filterable
 trait ServicePerEndpointBuilder[Req, Rep, ServicePerEndpoint <: Filterable[ServicePerEndpoint]] {
 
   /**
+   * A runtime class for this service.
+   */
+  def serviceClass: Class[_]
+
+  /**
    * Build a client ServicePerEndpoint wrapping an underlying service.
    *
    * @param service An underlying client service.
