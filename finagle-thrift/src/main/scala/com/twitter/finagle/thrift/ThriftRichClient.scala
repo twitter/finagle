@@ -1,9 +1,10 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.finagle.client.StackBasedClient
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
 import com.twitter.finagle.util.Showable
-import com.twitter.finagle.{Client, Name, Resolver, Service, Stack}
+import com.twitter.finagle.{Name, Resolver, Service, Stack, Thrift}
 import org.apache.thrift.protocol.TProtocolFactory
 import scala.reflect.ClassTag
 
@@ -110,7 +111,7 @@ import scala.reflect.ClassTag
  *   client.extendedEcho.getStatus(ExtendedEcho.GetStatus.Args())
  * }}}
  */
-trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
+trait ThriftRichClient { self: StackBasedClient[ThriftClientRequest, Array[Byte]] =>
   import ThriftUtil._
 
   protected val clientParam: RichClientParam
@@ -175,7 +176,12 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    */
   @deprecated("Use com.twitter.finagle.ThriftRichClient#build", "2017-11-20")
   def newIface[Iface](name: Name, label: String, cls: Class[_]): Iface = {
-    newIface(name, label, cls, clientParam, newService(name, label))
+    val service =
+      self
+        .configured(Thrift.param.ServiceClass(Some(cls)))
+        .newService(name, label)
+
+    newIface(name, label, cls, clientParam, service)
   }
 
   /**
@@ -243,7 +249,12 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $build
    */
   def build[ThriftServiceType](name: Name, label: String, cls: Class[_]): ThriftServiceType = {
-    build(name, label, cls, clientParam, newService(name, label))
+    val service =
+      self
+        .configured(Thrift.param.ServiceClass(Some(cls)))
+        .newService(name, label)
+
+    build(name, label, cls, clientParam, service)
   }
 
   /**
@@ -259,7 +270,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     val clientLabel = (label, defaultClientName) match {
       case ("", "") => Showable.show(name)
       case ("", l1) => l1
-      case (l0, l1) => l0
+      case (l0, _) => l0
     }
 
     val clientConfigScoped =
@@ -324,8 +335,12 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   )(
     implicit builder: ServiceIfaceBuilder[ServiceIface]
   ): ServiceIface = {
-    val thriftService = newService(dest, label)
-    newServiceIface(thriftService, label)
+    val service =
+      self
+        .configured(Thrift.param.ServiceClass(Option(builder.serviceClass)))
+        .newService(dest, label)
+
+    newServiceIface(service, label)
   }
 
   /**
@@ -379,8 +394,12 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   )(
     implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
   ): ServicePerEndpoint = {
-    val thriftService = newService(dest, label)
-    newServicePerEndpoint(thriftService, label)
+    val service =
+      self
+        .configured(Thrift.param.ServiceClass(Option(builder.serviceClass)))
+        .newService(dest, label)
+
+    newServicePerEndpoint(service, label)
   }
 
   /**

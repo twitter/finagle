@@ -354,7 +354,9 @@ class MethodBuilder(
     implicit builder: ServiceIfaceBuilder[ServiceIface]
   ): ServiceIface = {
     val clientBuilder = new ClientServiceIfaceBuilder[ServiceIface](builder)
-    mb.newServicePerEndpoint(clientBuilder, methodName)
+
+    mb.configured(Thrift.param.ServiceClass(Option(clientBuilder.serviceClass)))
+      .newServicePerEndpoint(clientBuilder, methodName)
   }
 
   /**
@@ -368,7 +370,9 @@ class MethodBuilder(
     implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
   ): ServicePerEndpoint = {
     val clientBuilder = new ClientServicePerEndpointBuilder[ServicePerEndpoint](builder)
-    mb.newServicePerEndpoint(clientBuilder, methodName).getServicePerEndpoint
+
+    mb.configured(Thrift.param.ServiceClass(Option(clientBuilder.serviceClass)))
+      .newServicePerEndpoint(clientBuilder, methodName).getServicePerEndpoint
   }
 
   /**
@@ -378,7 +382,9 @@ class MethodBuilder(
     implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
   ): ServicePerEndpoint = {
     val clientBuilder = new ClientServicePerEndpointBuilder[ServicePerEndpoint](builder)
-    mb.newServicePerEndpoint(clientBuilder).getServicePerEndpoint
+
+    mb.configured(Thrift.param.ServiceClass(Option(builder.serviceClass)))
+      .newServicePerEndpoint(clientBuilder).getServicePerEndpoint
   }
 
   final private class ClientServiceIfaceBuilder[ServiceIface <: Filterable[ServiceIface]](

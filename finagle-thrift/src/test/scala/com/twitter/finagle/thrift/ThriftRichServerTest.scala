@@ -14,7 +14,7 @@ object ThriftRichServerTest {
     protected def serverParam: RichServerParam = RichServerParam()
 
     def withParams(ps: Stack.Params): StackBasedServer[Array[Byte], Array[Byte]] =
-      new MockServer(params ++ ps)(onServe)
+      new MockServer(ps)(onServe)
 
     def serve(
       addr: SocketAddress,

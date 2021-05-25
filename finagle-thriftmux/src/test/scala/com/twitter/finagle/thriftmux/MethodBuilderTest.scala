@@ -3,6 +3,7 @@ package com.twitter.finagle.thriftmux
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle._
+import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.service.{ReqRep, ResponseClass}
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestService}
@@ -760,6 +761,71 @@ class MethodBuilderTest extends AnyFunSuite with Eventually {
 
     builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
     assert(sr.gauges(Seq("eager_clnt", "loadbalancer", "eager_connections"))() == 1.0)
+
+    server.close()
+  }
+
+  private class ServiceClassCaptor
+      extends Stack.Module1[Thrift.param.ServiceClass, ServiceFactory[Request, Response]] {
+
+    @volatile var serviceClass: Option[Class[_]] = _
+
+    def make(
+      p1: Thrift.param.ServiceClass,
+      next: ServiceFactory[Request, Response]
+    ): ServiceFactory[Request, Response] = {
+      serviceClass = p1.clazz
+      next
+    }
+
+    def role: Stack.Role = Stack.Role("")
+    def description: String = ""
+  }
+
+  test("captures service class via servicePerEndpoint") {
+    val server = serverImpl.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new TestService.MethodPerEndpoint {
+        def query(x: String): Future[String] = Future.value(x)
+        def question(y: String): Future[String] = Future.value(y)
+        def inquiry(z: String): Future[String] = Future.value(z)
+      }
+    )
+
+    val captor = new ServiceClassCaptor
+    val client = clientImpl
+      .withStack(stack => stack.prepend(captor))
+
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
+
+    assert(captor.serviceClass == Some(classOf[TestService.ServicePerEndpoint]))
+
+    server.close()
+  }
+
+  test("captures service class via newServiceIface") {
+    val server = serverImpl.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new TestService.MethodPerEndpoint {
+        def query(x: String): Future[String] = Future.value(x)
+        def question(y: String): Future[String] = Future.value(y)
+        def inquiry(z: String): Future[String] = Future.value(z)
+      }
+    )
+
+    val captor = new ServiceClassCaptor
+    val client = clientImpl
+      .withStack(stack => stack.prepend(captor))
+
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    builder.newServiceIface[TestService.ServiceIface]("query1").query
+
+    assert(captor.serviceClass == Some(classOf[TestService.ServiceIface]))
 
     server.close()
   }
