@@ -1,5 +1,6 @@
 package com.twitter.finagle.util
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 trait Drv extends (Rng => Int)
@@ -9,6 +10,11 @@ trait Drv extends (Rng => Int)
  */
 object Drv {
   private val ε = 0.01
+
+  // We need the sum to be approximately equal to 1.0 +/- ε
+  private[this] def isNormalized(sum: Double): Boolean = {
+    1 - ε < sum && sum < 1 + ε
+  }
 
   /**
    * A Drv using the Aliasing method [1]: a distribution is described
@@ -67,11 +73,14 @@ object Drv {
     val p = new Array[Double](N)
     dist.copyToArray(p, 0, N)
 
-    for (i <- p.indices) {
+    @tailrec
+    def fillQueues(i: Int): Unit = if (i < N) {
       p(i) *= N
-      if (p(i) < 1) small.enqueue(i)
+      if (p(i) < 1d) small.enqueue(i)
       else large.enqueue(i)
+      fillQueues(i + 1)
     }
+    fillQueues(0)
 
     while (large.nonEmpty && small.nonEmpty) {
       val s = small.dequeue()
@@ -85,9 +94,9 @@ object Drv {
       else large.enqueue(l)
     }
 
-    while (large.nonEmpty) prob(large.dequeue()) = 1
+    while (large.nonEmpty) prob(large.dequeue()) = 1d
 
-    while (small.nonEmpty) prob(small.dequeue()) = 1
+    while (small.nonEmpty) prob(small.dequeue()) = 1d
 
     Aliased(alias, prob)
   }
@@ -101,7 +110,7 @@ object Drv {
   def apply(dist: Seq[Double]): Drv = {
     require(dist.nonEmpty)
     val sum = dist.sum
-    if (!(sum < 1 + ε && sum > 1 - ε))
+    if (!isNormalized(sum))
       throw new AssertionError("Bad sum %.001f".format(sum))
     newVose(dist)
   }
@@ -113,9 +122,11 @@ object Drv {
   def fromWeights(weights: Seq[Double]): Drv = {
     require(weights.nonEmpty)
     val sum = weights.sum
-    if (sum == 0)
-      Drv(Seq.fill(weights.size) { 1d / weights.size })
-    else
-      Drv(weights.map(_ / sum))
+
+    newVose(
+      if (sum == 0d) Seq.fill(weights.size) { 1d / weights.size }
+      else if (isNormalized(sum)) weights
+      else weights.map(_ / sum)
+    )
   }
 }
