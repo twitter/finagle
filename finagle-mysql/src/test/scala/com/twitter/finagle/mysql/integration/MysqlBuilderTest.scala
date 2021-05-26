@@ -7,8 +7,8 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.param
 
 class MysqlBuilderTest extends EmbeddedSuite {
-  override val instanceConfig: InstanceConfig = defaultInstanceConfig
-  override val databaseConfig: DatabaseConfig = defaultDatabaseConfig
+  val instanceConfig: InstanceConfig = defaultInstanceConfig
+  val databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
   test("clients have granular tracing") { fixture =>
     Trace.enable()

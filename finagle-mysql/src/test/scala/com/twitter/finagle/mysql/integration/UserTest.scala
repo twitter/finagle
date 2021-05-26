@@ -9,8 +9,8 @@ class UserTest extends EmbeddedSuite {
   val noPwUser: User = User("noPwUser", None, User.Permission.Select)
   val nonDbUser: User = User("willFail", None, User.Permission.Select)
 
-  override val instanceConfig: InstanceConfig = defaultInstanceConfig
-  override val databaseConfig: DatabaseConfig = defaultDatabaseConfig.copy(
+  val instanceConfig: InstanceConfig = defaultInstanceConfig
+  val databaseConfig: DatabaseConfig = defaultDatabaseConfig.copy(
     databaseName = "usersTest",
     users = Seq(
       aUser,

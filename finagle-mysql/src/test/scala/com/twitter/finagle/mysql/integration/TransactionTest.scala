@@ -1,53 +1,48 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.mysql.harness.EmbeddedSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 import com.twitter.finagle.mysql.{IsolationLevel, LongValue, ServerError, StdClient}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Awaitable}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.funsuite.AnyFunSuite
 
-class TransactionTest
-    extends AnyFunSuite
-    with IntegrationClient
-    with Eventually
-    with IntegrationPatience {
+class TransactionTest extends EmbeddedSuite with Eventually with IntegrationPatience {
 
-  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
+  val instanceConfig: InstanceConfig = defaultInstanceConfig
+  val databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
-  test("Simple transaction") {
-    for (c <- client) {
+  test("Simple transaction") { fixture =>
+    val client = fixture.newRichClient()
+    assertResult(Seq(Seq(LongValue(1)))) {
+      await(client.transaction { client => client.select("SELECT 1") { row => row.values } })
+    }
+  }
+
+  test("Simple transaction with isolation level") { fixture =>
+    val client = fixture.newRichClient()
+    val isolationLevels = Seq(
+      IsolationLevel.ReadCommitted,
+      IsolationLevel.ReadUncommitted,
+      IsolationLevel.RepeatableRead,
+      IsolationLevel.Serializable
+    )
+
+    for (iso <- isolationLevels) {
       assertResult(Seq(Seq(LongValue(1)))) {
-        await(c.transaction { client => client.select("SELECT 1") { row => row.values } })
+        await(client.transactionWithIsolation(iso) { client =>
+          client.select("SELECT 1") { row => row.values }
+        })
       }
     }
   }
 
-  test("Simple transaction with isolation level") {
-    for (c <- client) {
-      val isolationLevels = Seq(
-        IsolationLevel.ReadCommitted,
-        IsolationLevel.ReadUncommitted,
-        IsolationLevel.RepeatableRead,
-        IsolationLevel.Serializable
-      )
-
-      for (iso <- isolationLevels) {
-        assertResult(Seq(Seq(LongValue(1)))) {
-          await(c.transactionWithIsolation(iso) { client =>
-            client.select("SELECT 1") { row => row.values }
-          })
-        }
-      }
-    }
-  }
-
-  test("transaction fails during rollback") {
+  test("transaction fails during rollback") { fixture =>
     val stats = new InMemoryStatsReceiver()
-    val finagleClient = configureClient()
+    val finagleClient = fixture
+      .newClient()
       .withLabel("mysqlClient")
       .withStatsReceiver(stats)
-      .newClient(dest)
+      .newClient(fixture.instance.dest)
 
     def poolSize: Int = {
       stats.gauges.get(Seq("mysqlClient", "pool_size")) match {

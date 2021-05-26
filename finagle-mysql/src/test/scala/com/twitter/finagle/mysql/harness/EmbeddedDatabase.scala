@@ -18,7 +18,7 @@ object EmbeddedDatabase {
     new ConcurrentHashMap[String, EmbeddedDatabase]()
 
   /**
-   * Get or create a new EmbeddedDatabse for the given database name in `config`.
+   * Get or create a new EmbeddedDatabase for the given database name in `config`.
    * This database will be created using `instance`.
    *
    * @param instance The mysql instance that will contain this database.

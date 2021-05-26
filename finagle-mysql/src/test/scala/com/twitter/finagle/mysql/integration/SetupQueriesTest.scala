@@ -5,8 +5,8 @@ import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 import java.lang
 
 class SetupQueriesTest extends EmbeddedSuite {
-  override val instanceConfig: InstanceConfig = defaultInstanceConfig
-  override val databaseConfig: DatabaseConfig = defaultDatabaseConfig.copy(
+  val instanceConfig: InstanceConfig = defaultInstanceConfig
+  val databaseConfig: DatabaseConfig = defaultDatabaseConfig.copy(
     databaseName = "setupQueriesTest",
     setupQueries = Seq(
       "CREATE TABLE for_testing(data Int);",

@@ -2,20 +2,19 @@ package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client.DefaultPool
-import com.twitter.util.{Await, Awaitable}
-import org.scalatest.funsuite.AnyFunSuite
+import com.twitter.finagle.mysql.harness.EmbeddedSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 
-class AbortedClientTest extends AnyFunSuite with IntegrationClient {
+class AbortedClientTest extends EmbeddedSuite {
+
+  val instanceConfig: InstanceConfig = defaultInstanceConfig
+  val databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
   private def idleTime = 1.seconds
 
-  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
-
-  override def configureClient(username: String, password: String, db: String) =
-    super
-      .configureClient(username, password, db)
-      // Configure the connection pool such that connections aren't kept around long.
-      .configured(
+  test("MySql connections are closed cleanly, so MySql doesn't count them as aborted.") { fixture =>
+    val client = fixture
+      .newClient().configured(
         DefaultPool.Param(
           // Don't keep any minimum of connections in the pool.
           low = 0,
@@ -24,29 +23,25 @@ class AbortedClientTest extends AnyFunSuite with IntegrationClient {
           // Set idleTime to a short duration, so the connection pool will close old connections quickly.
           idleTime = idleTime,
           maxWaiters = 100
-        )
-      )
+        )).newRichClient(fixture.instance.dest)
 
-  for (c <- client) {
-    test("MySql connections are closed cleanly, so MySql doesn't count them as aborted.") {
-      val abortedClientQuery = "SHOW GLOBAL STATUS LIKE 'Aborted_clients'"
-      val initialAbortedValue: String =
-        await(c.select(abortedClientQuery)(row => row.stringOrNull("Value"))).head
+    val abortedClientQuery = "SHOW GLOBAL STATUS LIKE 'Aborted_clients'"
+    val initialAbortedValue: String =
+      await(client.select(abortedClientQuery)(row => row.stringOrNull("Value"))).head
 
-      val query = "SELECT '1' as ONE, '2' as TWO from information_schema.processlist;"
-      // Run a query so the mysql client gets used
-      await(c.select(query) { row =>
-        row("ONE").get
-        row("TWO").get
-      })
+    val query = "SELECT '1' as ONE, '2' as TWO from information_schema.processlist;"
+    // Run a query so the mysql client gets used
+    await(client.select(query) { row =>
+      row("ONE").get
+      row("TWO").get
+    })
 
-      // Wait a bit longer than the idleTime so the connection used above is removed from the pool.
-      Thread.sleep((idleTime + 5.seconds).inMilliseconds)
+    // Wait a bit longer than the idleTime so the connection used above is removed from the pool.
+    Thread.sleep((idleTime + 5.seconds).inMilliseconds)
 
-      await(c.select(abortedClientQuery) { row =>
-        val abortedValue = row.stringOrNull("Value")
-        assert(initialAbortedValue.toInt == abortedValue.toInt)
-      })
-    }
+    await(client.select(abortedClientQuery) { row =>
+      val abortedValue = row.stringOrNull("Value")
+      assert(initialAbortedValue.toInt == abortedValue.toInt)
+    })
   }
 }
