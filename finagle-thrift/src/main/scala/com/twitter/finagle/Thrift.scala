@@ -212,7 +212,40 @@ object Thrift
       val default = PerEndpointStats(false)
     }
 
-    final case class ServiceClass(clazz: Option[Class[_]])
+    // This is based on the generated stubs from Scrooge.
+    private val ScroogeGeneratedSuffixes = Seq(
+      "$ServiceIface",
+      "$FutureIface",
+      "$MethodPerEndpoint",
+      "$ServicePerEndpoint",
+      "$MethodIface",
+      "$MethodPerEndpoint$MethodPerEndpointImpl",
+      "$ReqRepServicePerEndpoint",
+      "$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl"
+    )
+
+    private def stripSuffix(iface: Class[_]): Option[String] = {
+      val ifaceName = iface.getName
+      ScroogeGeneratedSuffixes.find(s => ifaceName.endsWith(s)).map(s => ifaceName.stripSuffix(s))
+    }
+
+    /**
+     * A `Param` that captures a class of a Scrooge-generated service stub that's associated
+     * with a given client or server.
+     */
+    final case class ServiceClass(clazz: Option[Class[_]]) {
+
+      /**
+       * Extracts the Thrift IDL FQN from the Scrooge-generated service class in `clazz`. The main
+       * purpose of this method is to drop the Scrooge-specific suffix from the class name, leaving
+       * only domain-relevant name behind.
+       */
+      val fullyQualifiedName: Option[String] = clazz.flatMap { c =>
+        val all = Seq(c) ++ c.getInterfaces.toSeq ++ Option(c.getSuperclass)
+        all.flatMap(stripSuffix).headOption
+      }
+    }
+
     implicit object ServiceClass extends Stack.Param[ServiceClass] {
       val default = ServiceClass(None)
     }
