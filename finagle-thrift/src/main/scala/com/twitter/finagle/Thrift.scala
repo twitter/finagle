@@ -212,8 +212,8 @@ object Thrift
       val default = PerEndpointStats(false)
     }
 
-    private[finagle] final case class ServiceClass(clazz: Option[Class[_]])
-    private[finagle] implicit object ServiceClass extends Stack.Param[ServiceClass] {
+    final case class ServiceClass(clazz: Option[Class[_]])
+    implicit object ServiceClass extends Stack.Param[ServiceClass] {
       val default = ServiceClass(None)
     }
   }

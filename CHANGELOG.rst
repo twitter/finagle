@@ -23,6 +23,10 @@ New Features
 * finagle-netty4: Added a new counter to keep track of the number of TLS connections that were
   started via snooping. ``PHAB_ID=D667652``
 
+* finagle-thrift: Thrift(Mux) clients and servers now fill in a `c.t.f.Thrift.param.ServiceClass`
+  stack param with the runtime class corresponding to a IDL-generated service stub.
+  ``PHAB_ID=D676781``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
