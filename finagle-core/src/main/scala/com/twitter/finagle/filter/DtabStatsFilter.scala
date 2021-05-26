@@ -1,7 +1,7 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.util.Future
 
 object DtabStatsFilter {
@@ -23,17 +23,37 @@ object DtabStatsFilter {
 }
 
 /**
- * Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all
- * requests with a non-empty Dtab.
+ * Adds three stats:
+ *    - dtab/size, a default stat that tracks the size of both Dtab.limited and Dtab.local for all
+ *                  requests with a non-empty Dtab
+ *    - dtab/local/size, a debug stat which tracks just the size of Dtab.local for all requests
+ *                  with a non-empty Dtab
+ *    - dtab/limited/size, a debug stat which tracks just the size of Dtab.limited for all requests
+ *                  with a non-empty Dtab
  */
 class DtabStatsFilter[Req, Rep](statsReceiver: StatsReceiver) extends SimpleFilter[Req, Rep] {
 
   private[this] val dtabSizes = statsReceiver.stat("dtab", "size")
+  private[this] val dtabLocalSize = statsReceiver.stat(Verbosity.Debug, "dtab", "local", "size")
+  private[this] val dtabLimitedSize = statsReceiver.stat(Verbosity.Debug, "dtab", "limited", "size")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    if (Dtab.local.nonEmpty) {
-      dtabSizes.add(Dtab.local.size)
-    }
+    val localSize =
+      if (Dtab.local.nonEmpty) {
+        val size = Dtab.local.size
+        dtabLocalSize.add(size)
+        size
+      } else 0
+
+    val limitedSize =
+      if (Dtab.limited.nonEmpty) {
+        val size = Dtab.limited.size
+        dtabLimitedSize.add(size)
+        size
+      } else 0
+
+    val totalSize = localSize + limitedSize
+    if (totalSize > 0) dtabSizes.add(totalSize)
     service(request)
   }
 }

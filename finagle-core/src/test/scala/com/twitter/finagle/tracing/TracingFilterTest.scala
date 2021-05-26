@@ -77,16 +77,17 @@ class TracingFilterTest
       assert(versions == Seq("?"))
     }
 
-    def withDtab(dtab: Dtab) = Filter.mk[Int, Int, Int, Int] { (req, svc) =>
+    def withDtab(local: Dtab, limited: Dtab) = Filter.mk[Int, Int, Int, Int] { (req, svc) =>
       Dtab.unwind {
-        Dtab.local = dtab
+        Dtab.limited = limited
+        Dtab.local = local
         svc(req)
       }
     }
 
     test(s"$prefix: should trace Dtab.local") {
       val dtab = Dtab.read("/fox=>/spooky;/dana=>/starbuck")
-      val dtabs = record(withDtab(dtab) andThen mkFilter("")) collect {
+      val dtabs = record(withDtab(dtab, Dtab.empty) andThen mkFilter("")) collect {
         case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
             if key == s"$prefix/dtab.local" =>
           dtab
@@ -94,13 +95,46 @@ class TracingFilterTest
       assert(dtabs == Seq(dtab.show))
     }
 
+    test(s"$prefix: should trace Dtab.limited") {
+      val dtab = Dtab.read("/fox=>/spooky;/dana=>/starbuck")
+      val dtabs = record(withDtab(Dtab.empty, dtab) andThen mkFilter("")) collect {
+        case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
+            if key == s"$prefix/dtab.limited" =>
+          dtab
+      }
+      assert(dtabs == Seq(dtab.show))
+    }
+
     test(s"$prefix: should not trace empty Dtab.local") {
-      val dtabs = record(withDtab(Dtab.empty) andThen mkFilter("")) collect {
+      val dtabs = record(withDtab(Dtab.empty, Dtab.empty) andThen mkFilter("")) collect {
         case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
             if key == s"$prefix/dtab.local" =>
           dtab
       }
       assert(dtabs.isEmpty)
+    }
+
+    test(s"$prefix: should not trace empty Dtab.limited") {
+      val dtabs = record(withDtab(Dtab.empty, Dtab.empty) andThen mkFilter("")) collect {
+        case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
+            if key == s"$prefix/dtab.limited" =>
+          dtab
+      }
+      assert(dtabs.isEmpty)
+    }
+
+    test(s"$prefix: should trace Dtab.limited and Dtab.local") {
+      val dtab1 = Dtab.read("/fox=>/spooky;/dana=>/starbuck")
+      val dtab2 = Dtab.read("/fox=>/spooky2;/dana=>/starbuck2")
+      val dtabs = record(withDtab(dtab1, dtab2) andThen mkFilter("")) collect {
+        case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
+            if key == s"$prefix/dtab.local" =>
+          dtab
+        case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
+            if key == s"$prefix/dtab.limited" =>
+          dtab
+      }
+      assert(dtabs == Seq(dtab1.show, dtab2.show))
     }
   }
 

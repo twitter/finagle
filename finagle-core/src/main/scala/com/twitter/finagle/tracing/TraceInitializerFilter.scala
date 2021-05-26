@@ -77,7 +77,7 @@ class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean)
  * of a trace. Finagle-specific trace information should live here.
  *
  * @param label The given name of the service
- * @param prefix A prefix for `finagle.version` and `dtab.local`.
+ * @param prefix A prefix for `finagle.version`, `dtab.local`, & `dtab.limited`.
  * [[com.twitter.finagle.tracing.Annotation Annotation]] keys.
  * @param before An [[com.twitter.finagle.tracing.Annotation]] to be recorded
  * before the service is called
@@ -111,6 +111,7 @@ sealed class AnnotatingTracingFilter[Req, Rep](
 
   private[this] val finagleVersionKey = s"$prefix/finagle.version"
   private[this] val dtabLocalKey = s"$prefix/dtab.local"
+  private[this] val dtabLimitedKey = s"$prefix/dtab.limited"
   private[this] val labelKey = s"$prefix/finagle.label"
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
@@ -126,6 +127,9 @@ sealed class AnnotatingTracingFilter[Req, Rep](
         // Trace dtab propagation on all requests that have them.
         if (Dtab.local.nonEmpty) {
           trace.recordBinary(dtabLocalKey, Dtab.local.show)
+        }
+        if (Dtab.limited.nonEmpty) {
+          trace.recordBinary(dtabLimitedKey, Dtab.limited.show)
         }
       }
 
