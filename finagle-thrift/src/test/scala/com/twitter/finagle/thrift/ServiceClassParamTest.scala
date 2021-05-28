@@ -30,6 +30,10 @@ object ServiceClassParamTest {
   class EchoServiceIface extends JavaEcho.ServiceIface {
     override def echo(msg: String): Future[String] = ???
   }
+
+  class EchoFuture extends ScalaEcho[Future] {
+    override def echo(msg: String): Future[String] = ???
+  }
 }
 
 class ServiceClassParamTest extends AnyFunSuite {
@@ -42,6 +46,7 @@ class ServiceClassParamTest extends AnyFunSuite {
     assert(fqn[ScalaEcho.MethodPerEndpoint] == "com.twitter.finagle.thrift.thriftscala.Echo")
     assert(fqn[ScalaEcho.ServicePerEndpoint] == "com.twitter.finagle.thrift.thriftscala.Echo")
     assert(fqn[ScalaEcho.ServiceIface] == "com.twitter.finagle.thrift.thriftscala.Echo")
+    assert(fqn[ScalaEcho[Future]] == "com.twitter.finagle.thrift.thriftscala.Echo")
   }
 
   test("extractServiceFqn for Java clients") {
@@ -53,6 +58,7 @@ class ServiceClassParamTest extends AnyFunSuite {
     assert(fqn[EchoSPE] == "com.twitter.finagle.thrift.thriftscala.Echo")
     assert(fqn[EchoReqRepSPE] == "com.twitter.finagle.thrift.thriftscala.Echo")
     assert(fqn[EchoFutureIface] == "com.twitter.finagle.thrift.thriftscala.Echo")
+    assert(fqn[EchoFuture] == "com.twitter.finagle.thrift.thriftscala.Echo")
   }
 
   test("extractServiceFqn for java servers") {

@@ -236,14 +236,37 @@ object Thrift
     final case class ServiceClass(clazz: Option[Class[_]]) {
 
       /**
+       * Runs a recursive search for a Scrooge-generated service stub class, starting with the class
+       * passed to a Finagle client or a server. This function isn't tail-recursive so there is a
+       * risk it can run out of stack space. We, however, don't anticipate this to happen since
+       * service stubs hierarchies are finite and frankly very short (0 to 2 hops at most).
+       */
+      private[this] def search(root: Class[_]): Option[String] = {
+        // Maybe it's already Scrooge-generated type?
+        stripSuffix(root).orElse {
+          val interfaces = root.getInterfaces.toSeq
+          // Maybe it's a HKT Foo[Future]?
+          if (interfaces.contains(classOf[com.twitter.finagle.thrift.ThriftService]))
+            Some(root.getName)
+          else {
+            // Repeat for its supper class.
+            Option(root.getSuperclass)
+              .filter(_ != classOf[java.lang.Object])
+              .flatMap(search)
+              .orElse {
+                // Repeat for all of its interfaces.
+                interfaces.flatMap(search).headOption
+              }
+          }
+        }
+      }
+
+      /**
        * Extracts the Thrift IDL FQN from the Scrooge-generated service class in `clazz`. The main
        * purpose of this method is to drop the Scrooge-specific suffix from the class name, leaving
        * only domain-relevant name behind.
        */
-      val fullyQualifiedName: Option[String] = clazz.flatMap { c =>
-        val all = Seq(c) ++ c.getInterfaces.toSeq ++ Option(c.getSuperclass)
-        all.flatMap(stripSuffix).headOption
-      }
+      val fullyQualifiedName: Option[String] = clazz.flatMap(search)
     }
 
     implicit object ServiceClass extends Stack.Param[ServiceClass] {
