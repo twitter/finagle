@@ -22,7 +22,7 @@ class ContextBenchmark extends StdBenchAnnotations {
   @Param(Array("5"))
   var depth: Int = 0
 
-  var env: Map[Buf, broadcast.Cell] = _
+  var env: Map[String, broadcast.Cell] = _
 
   // Build up a context with some keys that won't be used
   @Setup(Level.Iteration)

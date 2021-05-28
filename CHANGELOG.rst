@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Broadcast context keys lookups are now case insensitive. This change is backwards
+  compatible as the marshalled key id is unchanged. Although enabled by default, this change will
+  be temporarily sitting behind a toggle, `com.twitter.finagle.context.MarshalledContextLookupId`
+  that can be used to turn off this change. ``PHAB_ID=D665209``.
+
 21.5.0
 ------
 

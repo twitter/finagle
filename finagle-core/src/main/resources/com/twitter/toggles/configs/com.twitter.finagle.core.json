@@ -4,6 +4,11 @@
       "id": "com.twitter.finagle.OffloadEarly",
       "description": "Hand off work to the Offload pool right after we enter the Finagle stack",
       "fraction": 0.0
+    },
+    {
+      "id": "com.twitter.finagle.context.MarshalledContextLookupId",
+      "description": "Case insenstive broadcast context key lookups",
+      "fraction": 1.0
     }
   ]
 }

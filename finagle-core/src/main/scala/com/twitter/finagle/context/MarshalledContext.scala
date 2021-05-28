@@ -1,9 +1,18 @@
 package com.twitter.finagle.context
 
+import com.twitter.finagle.CoreToggles
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Local, Return, Throw, Try}
 import java.security.{MessageDigest, NoSuchAlgorithmException}
+import java.util.Locale
+
+private object MarshalledContext {
+  val toggle = CoreToggles("com.twitter.finagle.context.MarshalledContextLookupId")
+
+  def caseInsensitiveLookupId(id: String): String = id.toLowerCase(Locale.US)
+}
 
 /**
  * A marshalled context contains bindings that may be
@@ -14,10 +23,15 @@ import java.security.{MessageDigest, NoSuchAlgorithmException}
  * tree.
  */
 final class MarshalledContext private[context] extends Context {
+  import MarshalledContext._
+
+  private[this] val useCaseInsensitiveLookup: Boolean =
+    if (toggle.isDefined) toggle(ServerInfo().id.hashCode)
+    else true
 
   private[this] val log = Logger.get()
 
-  private[this] val local = new Local[Map[Buf, Cell]]
+  private[this] val local = new Local[Map[String, Cell]]
 
   // Cell and its sub types are package visible for testing purposes only.
   private[context] sealed trait Cell
@@ -53,10 +67,12 @@ final class MarshalledContext private[context] extends Context {
 
   /**
    * Keys in MarshalledContext must provide a marshaller
-   * and unmarshaller. The key `id` is used for marshalling and
+   * and unmarshaller. The `key` is used for marshalling and
    * unmarshalling and thus must be unique. The behavior of the
    * MarshalledContext when using two keys with the same key `id`
    * is undefined.
+   *
+   * @Note the key's `id` is treated without case sensitivity.
    */
   abstract class Key[A](val id: String) {
 
@@ -66,6 +82,14 @@ final class MarshalledContext private[context] extends Context {
      * pick the the appropriate unmarshaller for a given value.
      */
     final val marshalId: Buf = Buf.ByteBuffer.coerce(Buf.Utf8(id))
+
+    /**
+     * The identifier used to lookup the key in the stored context.
+     */
+    private[context] final val lookupId: String = {
+      if (useCaseInsensitiveLookup) MarshalledContext.caseInsensitiveLookupId(id)
+      else id
+    }
 
     /**
      * Marshal an A-typed value into a Buf.
@@ -78,35 +102,35 @@ final class MarshalledContext private[context] extends Context {
     def tryUnmarshal(buf: Buf): Try[A]
   }
 
-  def get[A](key: Key[A]): Option[A] = env.get(key.marshalId) match {
+  def get[A](key: Key[A]): Option[A] = env.get(key.lookupId) match {
     case Some(Real(_, someValue)) => someValue.asInstanceOf[Some[A]]
     case Some(t: Translucent) => t.unmarshal(key)
     case None => None
   }
 
   def let[A, R](key: Key[A], value: A)(fn: => R): R =
-    letLocal(env.updated(key.marshalId, Real(key, Some(value))))(fn)
+    letLocal(env.updated(key.lookupId, Real(key, Some(value))))(fn)
 
   def let[A, B, R](key1: Key[A], value1: A, key2: Key[B], value2: B)(fn: => R): R = {
     val next = env
-      .updated(key1.marshalId, Real(key1, Some(value1)))
-      .updated(key2.marshalId, Real(key2, Some(value2)))
+      .updated(key1.lookupId, Real(key1, Some(value1)))
+      .updated(key2.lookupId, Real(key2, Some(value2)))
     letLocal(next)(fn)
   }
 
   def let[R](pairs: Iterable[KeyValuePair[_]])(fn: => R): R = {
     val next = pairs.foldLeft(env) {
       case (e, KeyValuePair(k, v)) =>
-        e.updated(k.marshalId, Real(k, Some(v)))
+        e.updated(k.lookupId, Real(k, Some(v)))
     }
     letLocal(next)(fn)
   }
 
   def letClear[R](key: Key[_])(fn: => R): R =
-    letLocal(env - key.marshalId)(fn)
+    letLocal(env - key.lookupId)(fn)
 
   def letClear[R](keys: Iterable[Key[_]])(fn: => R): R = {
-    val next = keys.foldLeft(env) { case (e, k) => e - k.marshalId }
+    val next = keys.foldLeft(env) { case (e, k) => e - k.lookupId }
     letLocal(next)(fn)
   }
 
@@ -127,27 +151,31 @@ final class MarshalledContext private[context] extends Context {
   def marshal(): Iterable[(Buf, Buf)] = marshal(env)
 
   // Exposed for testing
-  private[context] def marshal(env: Map[Buf, Cell]): Iterable[(Buf, Buf)] = {
-    env.mapValues {
-      case Real(k, v) => k.marshal(v.get)
-      case Translucent(_, vBuf) => vBuf
+  private[context] def marshal(env: Map[String, Cell]): Iterable[(Buf, Buf)] = {
+    // Since we internally store our keys in a case insensitive format, we want to
+    // make sure we marshal our keys using the original `marshalId` which preserves
+    // the casing of the context key.
+    env.map {
+      case (_, Real(k, v)) => (k.marshalId, k.marshal(v.get))
+      case (_, Translucent(k, vBuf)) => (k, vBuf)
     }
   }
 
   // Exposed for testing
-  private[context] def env: Map[Buf, Cell] = local() match {
+  private[context] def env: Map[String, Cell] = local() match {
     case Some(env) => env
     case None => Map.empty
   }
 
   // Exposed for testing
   private[context] def doUnmarshal(
-    env: Map[Buf, Cell],
+    env: Map[String, Cell],
     contexts: Iterable[(Buf, Buf)]
-  ): Map[Buf, Cell] = {
+  ): Map[String, Cell] = {
     contexts.foldLeft(env) {
-      case (env, (k, v)) =>
-        env.updated(k, Translucent(k, v))
+      case (env, (k @ Buf.Utf8(id), v)) =>
+        if (useCaseInsensitiveLookup) env.updated(caseInsensitiveLookupId(id), Translucent(k, v))
+        else env.updated(id, Translucent(k, v))
     }
   }
 
@@ -172,5 +200,5 @@ final class MarshalledContext private[context] extends Context {
   }
 
   // Exposed for testing
-  private[context] def letLocal[T](env: Map[Buf, Cell])(fn: => T): T = local.let(env)(fn)
+  private[context] def letLocal[T](env: Map[String, Cell])(fn: => T): T = local.let(env)(fn)
 }
