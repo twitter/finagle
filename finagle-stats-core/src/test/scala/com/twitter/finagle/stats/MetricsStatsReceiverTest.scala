@@ -319,13 +319,13 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     assert(exporter.expressions.keySet.size == 2)
 
     val expressionWithNamespace = ExpressionSchema("test_expression", Expression(aSchema))
-      .withNamespaces("a", "b")
+      .withNamespace("a", "b")
       .register()
     assert(exporter.expressions.keySet.size == 3)
 
     val expressionWithNamespaceAndServiceName =
       ExpressionSchema("test_expression", Expression(aSchema))
-        .withNamespaces("a", "b").withServiceName("thrift")
+        .withNamespace("a", "b").withServiceName("thrift")
         .register()
     assert(exporter.expressions.keySet.size == 4)
   }
