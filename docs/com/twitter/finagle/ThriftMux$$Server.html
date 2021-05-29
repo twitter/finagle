@@ -1314,9 +1314,9 @@ exceptions are propagated down to the next monitor.
 configure this to be <code>Off</code>, use <code>withOpportunisticTls(OpportunisticTls.Off)</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server#withOpportunisticTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withOpportunisticTls(level:com.twitter.finagle.mux.transport.OpportunisticTls.Level):com.twitter.finagle.ThriftMux.Server"></a><a id="withOpportunisticTls(Level):Server"></a>
+      <a id="withOpportunisticTls(level:com.twitter.finagle.ssl.OpportunisticTls.Level):com.twitter.finagle.ThriftMux.Server"></a><a id="withOpportunisticTls(Level):Server"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$$Server.html#withOpportunisticTls(level:com.twitter.finagle.mux.transport.OpportunisticTls.Level):com.twitter.finagle.ThriftMux.Server" title="Permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Server.html#withOpportunisticTls(level:com.twitter.finagle.ssl.OpportunisticTls.Level):com.twitter.finagle.ThriftMux.Server" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1325,7 +1325,7 @@ configure this to be <code>Off</code>, use <code>withOpportunisticTls(Opportunis
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withOpportunisticTls</span><span class="params">(<span name="level">level: <span class="extype" name="com.twitter.finagle.mux.transport.OpportunisticTls.Level">Level</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
+        <span class="name">withOpportunisticTls</span><span class="params">(<span name="level">level: <a href="ssl/OpportunisticTls$$Level.html" class="extype" name="com.twitter.finagle.ssl.OpportunisticTls.Level">Level</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures whether to speak TLS or not.</p><div class="fullcomment"><div class="comment cmt"><p>Configures whether to speak TLS or not.</p><p>By default, don't use opportunistic TLS, and instead try to speak mux over TLS

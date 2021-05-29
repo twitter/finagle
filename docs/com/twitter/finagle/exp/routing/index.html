@@ -183,8 +183,8 @@ stabilized (moved elsewhere) at any time.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.exp">exp</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Field.html" title="The key associated with a Message field."></a>
-                        <a href="Field.html" title="The key associated with a Message field.">Field</a>
+                        <a class="class" href="Field.html" title="The key associated with a field value of type T."></a>
+                        <a href="Field.html" title="The key associated with a field value of type T.">Field</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="Fields$.html" title=""></a>
@@ -193,6 +193,10 @@ stabilized (moved elsewhere) at any time.
                         <span class="separator"></span>
                         <a class="class" href="Message.html" title="A contract for a container envelope for a value, which can allow for setting extra field metadata associated with the value."></a>
                         <a href="Message.html" title="A contract for a container envelope for a value, which can allow for setting extra field metadata associated with the value.">Message</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="MessageField.html" title="The key associated with a Message field."></a>
+                        <a href="MessageField.html" title="The key associated with a Message field.">MessageField</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Request$.html" title=""></a>
                         <a class="class" href="Request.html" title="A contract for a container envelope for a request value, which can allow for setting extra field metadata associated with the value."></a>
@@ -205,6 +209,10 @@ stabilized (moved elsewhere) at any time.
                         <span class="separator"></span>
                         <a class="object" href="Route$.html" title=""></a>
                         <a href="Route$.html" title="">Route</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="RouteField.html" title="The key associated with a Route field."></a>
+                        <a href="RouteField.html" title="The key associated with a Route field.">RouteField</a>
                       </li>
               </ul>
             </div>
@@ -276,16 +284,16 @@ stabilized (moved elsewhere) at any time.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier">abstract </span>
+        <span class="modifier">sealed abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="The key associated with a Message field." href="Field.html"><span class="name">Field</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+        <a title="The key associated with a field value of type T." href="Field.html"><span class="name">Field</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">The key associated with a <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a> field.</p><div class="fullcomment"><div class="comment cmt"><p>The key associated with a <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a> field.</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>The type of value associated with this message field key.</p></dd></dl></div>
+      <p class="shortcomment cmt">The key associated with a field value of type <code>T</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The key associated with a field value of type <code>T</code>.</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>The type of value associated with this message field key.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.exp.routing.Message" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="Message[+T]extendsAnyRef"></a><a id="Message[+T]:Message[T]"></a>
+      <a id="Message[+T]extendsFieldMap"></a><a id="Message[+T]:Message[T]"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/exp/routing/Message.html" title="Permalink">
         <i class="material-icons"></i>
@@ -296,11 +304,27 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A contract for a container envelope for a value, which can allow for setting extra field metadata associated with the value." href="Message.html"><span class="name">Message</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A contract for a container envelope for a value, which can allow for setting extra field metadata associated with the value." href="Message.html"><span class="name">Message</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.exp.routing.FieldMap">FieldMap</span></span>
       </span>
       
       <p class="shortcomment cmt">A contract for a container envelope for a value,
 which can allow for setting extra field metadata associated with the value.</p>
+    </li><li name="com.twitter.finagle.exp.routing.MessageField" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="MessageField[+T]extendsField[T]"></a><a id="MessageField[+T]:MessageField[T]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/exp/routing/MessageField.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The key associated with a Message field." href="MessageField.html"><span class="name">MessageField</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[<span class="extype" name="com.twitter.finagle.exp.routing.MessageField.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The key associated with a <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a> field.</p><div class="fullcomment"><div class="comment cmt"><p>The key associated with a <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a> field.</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>The type of value associated with this message field key.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.exp.routing.Request" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Request[+T]extendsMessage[T]"></a><a id="Request[+T]:Request[T]"></a>
       <span class="permalink">
@@ -309,7 +333,7 @@ which can allow for setting extra field metadata associated with the value.</p>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -326,7 +350,7 @@ which can allow for setting extra field metadata associated with the value.</p>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -335,6 +359,22 @@ which can allow for setting extra field metadata associated with the value.</p>
       
       <p class="shortcomment cmt">A contract for a container envelope for a response value,
 which can allow for setting extra field metadata associated with the value.</p>
+    </li><li name="com.twitter.finagle.exp.routing.RouteField" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="RouteField[+T]extendsField[T]"></a><a id="RouteField[+T]:RouteField[T]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/exp/routing/RouteField.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The key associated with a Route field." href="RouteField.html"><span class="name">RouteField</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[<span class="extype" name="com.twitter.finagle.exp.routing.RouteField.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The key associated with a <span class="extype" name="Route">Route</span> field.</p><div class="fullcomment"><div class="comment cmt"><p>The key associated with a <span class="extype" name="Route">Route</span> field.</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>The type of value associated with this message field key.</p></dd></dl></div>
     </li></ol>
             </div>
 

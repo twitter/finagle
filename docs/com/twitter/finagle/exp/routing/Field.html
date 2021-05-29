@@ -183,8 +183,8 @@ stabilized (moved elsewhere) at any time.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.exp">exp</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="" title="The key associated with a Message field."></a>
-                        <a href="" title="The key associated with a Message field.">Field</a>
+                        <a class="class" href="" title="The key associated with a field value of type T."></a>
+                        <a href="" title="The key associated with a field value of type T.">Field</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="Fields$.html" title=""></a>
@@ -193,6 +193,10 @@ stabilized (moved elsewhere) at any time.
                         <span class="separator"></span>
                         <a class="class" href="Message.html" title="A contract for a container envelope for a value, which can allow for setting extra field metadata associated with the value."></a>
                         <a href="Message.html" title="A contract for a container envelope for a value, which can allow for setting extra field metadata associated with the value.">Message</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="MessageField.html" title="The key associated with a Message field."></a>
+                        <a href="MessageField.html" title="The key associated with a Message field.">MessageField</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Request$.html" title=""></a>
                         <a class="class" href="Request.html" title="A contract for a container envelope for a request value, which can allow for setting extra field metadata associated with the value."></a>
@@ -205,6 +209,10 @@ stabilized (moved elsewhere) at any time.
                         <span class="separator"></span>
                         <a class="object" href="Route$.html" title=""></a>
                         <a href="Route$.html" title="">Route</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="RouteField.html" title="The key associated with a Route field."></a>
+                        <a href="RouteField.html" title="The key associated with a Route field.">RouteField</a>
                       </li>
               </ul>
             </div>
@@ -224,7 +232,7 @@ stabilized (moved elsewhere) at any time.
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">abstract </span>
+        <span class="modifier">sealed abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -233,7 +241,7 @@ stabilized (moved elsewhere) at any time.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The key associated with a <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a> field.</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>The type of value associated with this message field key.</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The key associated with a field value of type <code>T</code>.</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>The type of value associated with this message field key.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -242,7 +250,7 @@ stabilized (moved elsewhere) at any time.
             <span class="toggle">
               Known Subclasses
             </span>
-            <div class="subClasses hiddenContent"><a href="Fields$$RouteInfo$.html" class="extype" name="com.twitter.finagle.exp.routing.Fields.RouteInfo">RouteInfo</a>, <a href="../../http/exp/routing/Fields$$ParameterMapField$.html" class="extype" name="com.twitter.finagle.http.exp.routing.Fields.ParameterMapField">ParameterMapField</a>, <a href="../../http/exp/routing/Fields$$PathField$.html" class="extype" name="com.twitter.finagle.http.exp.routing.Fields.PathField">PathField</a></div>
+            <div class="subClasses hiddenContent"><a href="Fields$$RouteInfo$.html" class="extype" name="com.twitter.finagle.exp.routing.Fields.RouteInfo">RouteInfo</a>, <a href="MessageField.html" class="extype" name="com.twitter.finagle.exp.routing.MessageField">MessageField</a>, <a href="RouteField.html" class="extype" name="com.twitter.finagle.exp.routing.RouteField">RouteField</a>, <a href="../../http/exp/routing/Fields$$ParameterMapField$.html" class="extype" name="com.twitter.finagle.http.exp.routing.Fields.ParameterMapField">ParameterMapField</a>, <a href="../../http/exp/routing/Fields$$PathField$.html" class="extype" name="com.twitter.finagle.http.exp.routing.Fields.PathField">PathField</a></div>
           </div></div>
         
 
@@ -286,26 +294,7 @@ stabilized (moved elsewhere) at any time.
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.exp.routing.Field#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;():com.twitter.finagle.exp.routing.Field[T]"></a><a id="&lt;init&gt;:Field[T]"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/exp/routing/Field.html#&lt;init&gt;():com.twitter.finagle.exp.routing.Field[T]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Field</span><span class="params">()</span>
-      </span>
-      
-      <p class="shortcomment cmt"></p>
-    </li></ol>
-            </div>
+        
 
         
 

@@ -184,6 +184,10 @@ resources for using Finagle.
                         <a class="class" href="EncoderIgnoreMaxHeaderListSize.html" title="A class for configuring the http/2 encoder to ignore MaxHeaderListSize."></a>
                         <a href="EncoderIgnoreMaxHeaderListSize.html" title="A class for configuring the http/2 encoder to ignore MaxHeaderListSize.">EncoderIgnoreMaxHeaderListSize</a>
                       </li><li class="current-entities indented5">
+                        <a class="object" href="EnforceMaxConcurrentStreams$.html" title=""></a>
+                        <a class="class" href="EnforceMaxConcurrentStreams.html" title="A class for configuring overrides to the default encoderEnforceMaxConcurrentStreams setting."></a>
+                        <a href="EnforceMaxConcurrentStreams.html" title="A class for configuring overrides to the default encoderEnforceMaxConcurrentStreams setting.">EnforceMaxConcurrentStreams</a>
+                      </li><li class="current-entities indented5">
                         <a class="object" href="FrameLoggerNamePrefix$.html" title=""></a>
                         <a class="class" href="FrameLoggerNamePrefix.html" title="The logger name to be used for the root HTTP/2 frame logger."></a>
                         <a href="FrameLoggerNamePrefix.html" title="The logger name to be used for the root HTTP/2 frame logger.">FrameLoggerNamePrefix</a>
@@ -314,6 +318,25 @@ resources for using Finagle.
       </span>
       
       <p class="shortcomment cmt">A class for configuring the http/2 encoder to ignore MaxHeaderListSize.</p><div class="fullcomment"><div class="comment cmt"><p>A class for configuring the http/2 encoder to ignore MaxHeaderListSize.</p><p>This is useful when creating clients for testing the behavior of a server.
+</p></div></div>
+    </li><li name="com.twitter.finagle.http2.param.EnforceMaxConcurrentStreams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="EnforceMaxConcurrentStreamsextendsProductwithSerializable"></a><a id="EnforceMaxConcurrentStreams:EnforceMaxConcurrentStreams"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http2/param/EnforceMaxConcurrentStreams.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A class for configuring overrides to the default encoderEnforceMaxConcurrentStreams setting." href="EnforceMaxConcurrentStreams.html"><span class="name">EnforceMaxConcurrentStreams</span></a><span class="params">(<span name="enabled">enabled: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A class for configuring overrides to the default <code>encoderEnforceMaxConcurrentStreams</code> setting.</p><div class="fullcomment"><div class="comment cmt"><p>A class for configuring overrides to the default <code>encoderEnforceMaxConcurrentStreams</code> setting. If
+enabled the encoder will queue frames if the maximum number of concurrent streams would otherwise
+be exceeded.
 </p></div></div>
     </li><li name="com.twitter.finagle.http2.param.FrameLoggerNamePrefix" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FrameLoggerNamePrefixextendsProductwithSerializable"></a><a id="FrameLoggerNamePrefix:FrameLoggerNamePrefix"></a>
@@ -494,6 +517,22 @@ protocol or not.</p><p>Note that both client and server must be configured for p
       </span>
       <span class="symbol">
         <a title="" href="EncoderIgnoreMaxHeaderListSize$.html"><span class="name">EncoderIgnoreMaxHeaderListSize</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http2.param.EnforceMaxConcurrentStreams" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EnforceMaxConcurrentStreams"></a><a id="EnforceMaxConcurrentStreams:EnforceMaxConcurrentStreams"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http2/param/EnforceMaxConcurrentStreams$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="EnforceMaxConcurrentStreams$.html"><span class="name">EnforceMaxConcurrentStreams</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

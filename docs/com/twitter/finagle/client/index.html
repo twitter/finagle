@@ -307,22 +307,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.exception" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="exception"></a><a id="exception:exception"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exception/index.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../exception/index.html"><span class="name">exception</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.exp" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -557,7 +541,21 @@ will be ignored silently, but should all be considered reserved for future
 use.</p><p> Flag          Value     Meaning
  Restartable   1 &lt;&lt; 0    Request is safe to re-issue
  Rejected      1 &lt;&lt; 1    Request was rejected/Nacked by the server
- NonRetryable  1 &lt;&lt; 2    Request should not be retried</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+ NonRetryable  1 &lt;&lt; 2    Request should not be retried</p><h3>Security</h3><p>TLS is supported via three mechanisms:
+- Explicit and exclusive TLS. This pathway involves requiring the establishment of TLS
+  immediately after establishing the socket connection. This is configured by adding TLS
+  configuration to the client or server and <u>not</u> configuring opportunistic TLS or
+  TLS snooping (see below).</p><p>- Negotiated Opportunistic TLS. This pathway involves starting the connection as cleartext
+  and the client and server subsequently negotiate a TLS level via the handshake. Based on
+  that handshake the connection is either left as cleartext or upgraded to TLS. This is
+  configured by adding TLS configuration and also configuring an opportunistic TLS level
+  but <u>not</u> configuring TLS snooping.</p><p>  In this pathway there are three configuration options:</p><ul><li><code>Off</code> signals that TLS is not supported by this peer</li><li><code>Desired</code> signals that TLS is preferred but not required by this peer</li><li><code>Required</code> signals that this peer will only allow the session to continue over TLS</li></ul><p>- TLS snooping. This pathway allows a server to use TLS either by performing a TLS
+  handshake immediately after the socket is established or by starting the session as
+  cleartext or using the negotiated pathway described above. If the session is started as
+  a TLS session the headers that drive the opportunistic TLS pathway are ignored.</p><p>  Note that the server may still require TLS but leaves the option to start TLS immediately
+  after establishing the socket or starting cleartext and requiring TLS via the opportunistic
+  TLS pathway described above.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mysql"></a><a id="mysql:mysql"></a>
       <span class="permalink">
@@ -1151,7 +1149,7 @@ endpointer.</p>
      for further details on Finagle clients and their configuration.</p></span><span class="cmt"><p><a href="StackClient$.html#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.client.StackClient#newStack">StackClient.newStack</a> for the default modules used by Finagle
      clients.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.client.MethodBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MethodBuilder[Req,Rep]extendsAnyRef"></a><a id="MethodBuilder[Req,Rep]:MethodBuilder[Req,Rep]"></a>
+      <a id="MethodBuilder[Req,Rep]extendsStack.Parameterized[com.twitter.finagle.client.MethodBuilder[Req,Rep]]"></a><a id="MethodBuilder[Req,Rep]:MethodBuilder[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/client/MethodBuilder.html" title="Permalink">
         <i class="material-icons"></i>
@@ -1162,7 +1160,7 @@ endpointer.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="MethodBuilder.html"><span class="name">MethodBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+        <a title="" href="MethodBuilder.html"><span class="name">MethodBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="MethodBuilder.html" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]]</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><code>methodBuilder</code> methods on client protocols, such as <code>Http.Client</code>

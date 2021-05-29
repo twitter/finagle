@@ -1114,6 +1114,22 @@ session.</p><div class="fullcomment"><div class="comment cmt"><p>Don't set the C
 session. This will make &quot;INSERT ... ON DUPLICATE KEY UPDATE&quot;
 statements return the &quot;correct&quot; update count.</p><p>See https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_row-count
 </p></div></div>
+    </li><li name="com.twitter.finagle.Mysql.Client#withCachingSha2Password" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withCachingSha2Password:com.twitter.finagle.Mysql.Client"></a><a id="withCachingSha2Password:Client"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#withCachingSha2Password:com.twitter.finagle.Mysql.Client" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withCachingSha2Password</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">To enable the client to use the <code>caching_sha2_password</code> authentication method.</p>
     </li><li name="com.twitter.finagle.Mysql.Client#withCharset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="withCharset(charset:Short):com.twitter.finagle.Mysql.Client"></a><a id="withCharset(Short):Client"></a>
       <span class="permalink">
@@ -1578,6 +1594,23 @@ that causes an implicit commit is issued.</p><p>The additional work incurred for
 connection pool and, as such, may require configuring the pool (via <code>withSessionPool</code>)
 to offer more available connections connections.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>this module is installed by default.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="mysql/RollbackFactory.html" class="extype" name="com.twitter.finagle.mysql.RollbackFactory">com.twitter.finagle.mysql.RollbackFactory</a></p></span><span class="cmt"><p>https://dev.mysql.com/doc/en/implicit-commit.html</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.Mysql.Client#withServerRsaPublicKey" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withServerRsaPublicKey(path:String):com.twitter.finagle.Mysql.Client"></a><a id="withServerRsaPublicKey(String):Client"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#withServerRsaPublicKey(path:String):com.twitter.finagle.Mysql.Client" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withServerRsaPublicKey</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">To configure the local path to the server's RSA public key for encryption
+during <code>caching_sha2_password</code> authentication.</p>
     </li><li name="com.twitter.finagle.Mysql.Client#withSession" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withSession:com.twitter.finagle.param.ClientSessionParams[com.twitter.finagle.Mysql.Client]"></a><a id="withSession:ClientSessionParams[Client]"></a>
       <span class="permalink">

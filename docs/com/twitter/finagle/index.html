@@ -243,22 +243,6 @@ resources for using Finagle.
       </span>
       
       
-    </li><li name="com.twitter.finagle.exception" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="exception"></a><a id="exception:exception"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/exception/index.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="exception/index.html"><span class="name">exception</span></a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.exp" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -493,7 +477,21 @@ will be ignored silently, but should all be considered reserved for future
 use.</p><p> Flag          Value     Meaning
  Restartable   1 &lt;&lt; 0    Request is safe to re-issue
  Rejected      1 &lt;&lt; 1    Request was rejected/Nacked by the server
- NonRetryable  1 &lt;&lt; 2    Request should not be retried</p></div></div>
+ NonRetryable  1 &lt;&lt; 2    Request should not be retried</p><h3>Security</h3><p>TLS is supported via three mechanisms:
+- Explicit and exclusive TLS. This pathway involves requiring the establishment of TLS
+  immediately after establishing the socket connection. This is configured by adding TLS
+  configuration to the client or server and <u>not</u> configuring opportunistic TLS or
+  TLS snooping (see below).</p><p>- Negotiated Opportunistic TLS. This pathway involves starting the connection as cleartext
+  and the client and server subsequently negotiate a TLS level via the handshake. Based on
+  that handshake the connection is either left as cleartext or upgraded to TLS. This is
+  configured by adding TLS configuration and also configuring an opportunistic TLS level
+  but <u>not</u> configuring TLS snooping.</p><p>  In this pathway there are three configuration options:</p><ul><li><code>Off</code> signals that TLS is not supported by this peer</li><li><code>Desired</code> signals that TLS is preferred but not required by this peer</li><li><code>Required</code> signals that this peer will only allow the session to continue over TLS</li></ul><p>- TLS snooping. This pathway allows a server to use TLS either by performing a TLS
+  handshake immediately after the socket is established or by starting the session as
+  cleartext or using the negotiated pathway described above. If the session is started as
+  a TLS session the headers that drive the opportunistic TLS pathway are ignored.</p><p>  Note that the server may still require TLS but leaves the option to start TLS immediately
+  after establishing the socket or starting cleartext and requiring TLS via the opportunistic
+  TLS pathway described above.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="mysql"></a><a id="mysql:mysql"></a>
       <span class="permalink">
@@ -1685,29 +1683,8 @@ returns the current backoff, and <code>next</code> returns a new <a href="Backof
 returns the current backoff, and <code>next</code> returns a new <a href="Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a>.</p><p>All <a href="Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a>s are infinite unless it <a href="Backoff.html#isExhausted:Boolean" class="extmbr" name="com.twitter.finagle.Backoff#isExhausted">isExhausted</a> (an empty
 <a href="Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a>), in this case, calling <code>duration</code> will return a
 <span class="extype" name="NoSuchElementException">NoSuchElementException</span>, calling <code>next</code> will return an
-<span class="extype" name="UnsupportedOperationException">UnsupportedOperationException</span>.</p><p>Finagle provides the following backoff strategies:</p><p>1. BackoffFunction           - create backoffs based on a given function,
-                               can be created via <code>Backoff.apply</code>.
-2. BackoffFromGeneration     - create backoffs based on a generation
-                               function, can be created via
-                               <code>Backoff.fromFunction</code>.
-3. Const                     - return a constant backoff, can be created via
-                               <code>Backoff.const</code>.
-4. Exponential               - create backoffs that grow exponentially, can
-                               be created via <code>Backoff.exponential</code>.
-5. Linear                    - create backoffs that grow linearly, can be
-                               created via <code>Backoff.linear</code>.
-6. DecorrelatedJittered      - create backoffs that jitter randomly between
-                               a start value and 3 times of that value, can
-                               be created via
-                               <code>Backoff.decorrelatedJittered</code>.
-7. EqualJittered             - create backoffs that jitter between 0 and
-                               half of the exponential growth. Can be
-                               created via <code>Backoff.equalJittered</code>.
-8. ExponentialJittered       - create backoffs that jitter randomly between
-                               0 and a value that grows exponentially by 2.
-                               Can be created via
-                               <code>Backoff.exponentialJittered</code>.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>A new <a href="Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a> will be created only when <code>next</code> is called.</p></span>, <span class="cmt"><p>None of the <a href="Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a>s are memoized, for strategies that involve
+<span class="extype" name="UnsupportedOperationException">UnsupportedOperationException</span>.</p><p>Finagle provides the following backoff strategies:</p><ol class="decimal"><li>BackoffFunction<ul><li>Create backoffs based on a given function, can be created via <code>Backoff.apply</code>.</li></ul></li><li>BackoffFromGeneration<ul><li>Create backoffs based on a generation function, can be created via <code>Backoff.fromFunction</code>.</li></ul></li><li>Const<ul><li>Return a constant backoff, can be created via <code>Backoff.const</code>.</li></ul></li><li>Exponential<ul><li>Create backoffs that grow exponentially, can be created via <code>Backoff.exponential</code>.</li></ul></li><li>Linear<ul><li>Create backoffs that grow linearly, can be created via <code>Backoff.linear</code>.</li></ul></li><li>DecorrelatedJittered<ul><li>Create backoffs that jitter randomly between a start value and 3 times of that value, can be created via <code>Backoff.decorrelatedJittered</code>.</li></ul></li><li>EqualJittered<ul><li>Create backoffs that jitter between 0 and half of the exponential growth. Can be created via <code>Backoff.equalJittered</code>.</li></ul></li><li>ExponentialJittered<ul><li>Create backoffs that jitter randomly between 0 and a value that grows exponentially by 2. Can be created via <code>Backoff.exponentialJittered</code>.
+</li></ul></li></ol></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>A new <a href="Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a> will be created only when <code>next</code> is called.</p></span>, <span class="cmt"><p>None of the <a href="Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a>s are memoized, for strategies that involve
       randomness (<code>DecorrelatedJittered</code>, <code>EqualJittered</code> and
       <code>ExponentialJittered</code>), there is no way to foresee the next backoff
       value.</p></span>, <span class="cmt"><p>All <a href="Backoff.html" class="extype" name="com.twitter.finagle.Backoff">Backoff</a>s are infinite unless using <span class="extype" name="take(Int)">take(Int)</span> to create a

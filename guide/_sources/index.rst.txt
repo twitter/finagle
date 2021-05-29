@@ -31,7 +31,7 @@ Other useful resources include:
 
 - `Your Server as a Function <https://monkey.org/~marius/funsrv.pdf>`_, a paper motivating the core abstractions behind finagle (`PLOS’13 <https://sigops.org/sosp/sosp13/plos.html>`_).
 - `Twitter engineering blog entry introducing Finagle <https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system>`_
-- Twitter's `Scala School <https://twitter.github.com/scala_school/>`_ has a section `introducing Finagle <https://twitter.github.com/scala_school/finagle.html>`_ and another `constructing a distributed search engine using Finagle <https://twitter.github.com/scala_school/searchbird.html>`_
+- Twitter's `Scala School <https://twitter.github.io/scala_school/>`_ has a section `introducing Finagle <https://twitter.github.io/scala_school/finagle.html>`_ and another `constructing a distributed search engine using Finagle <https://twitter.github.io/scala_school/searchbird.html>`_
 - `Finagle 101 <https://kostyukov.net/posts/finagle-101/>`_ by Vladimir Kostyukov
 
 .. _Dapper: https://research.google.com/pubs/pub36356.html

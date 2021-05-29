@@ -243,22 +243,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.exception" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="exception"></a><a id="exception:exception"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/exception/index.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="exception/index.html"><span class="name">exception</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.exp" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -493,7 +477,21 @@ will be ignored silently, but should all be considered reserved for future
 use.</p><p> Flag          Value     Meaning
  Restartable   1 &lt;&lt; 0    Request is safe to re-issue
  Rejected      1 &lt;&lt; 1    Request was rejected/Nacked by the server
- NonRetryable  1 &lt;&lt; 2    Request should not be retried</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+ NonRetryable  1 &lt;&lt; 2    Request should not be retried</p><h3>Security</h3><p>TLS is supported via three mechanisms:
+- Explicit and exclusive TLS. This pathway involves requiring the establishment of TLS
+  immediately after establishing the socket connection. This is configured by adding TLS
+  configuration to the client or server and <u>not</u> configuring opportunistic TLS or
+  TLS snooping (see below).</p><p>- Negotiated Opportunistic TLS. This pathway involves starting the connection as cleartext
+  and the client and server subsequently negotiate a TLS level via the handshake. Based on
+  that handshake the connection is either left as cleartext or upgraded to TLS. This is
+  configured by adding TLS configuration and also configuring an opportunistic TLS level
+  but <u>not</u> configuring TLS snooping.</p><p>  In this pathway there are three configuration options:</p><ul><li><code>Off</code> signals that TLS is not supported by this peer</li><li><code>Desired</code> signals that TLS is preferred but not required by this peer</li><li><code>Required</code> signals that this peer will only allow the session to continue over TLS</li></ul><p>- TLS snooping. This pathway allows a server to use TLS either by performing a TLS
+  handshake immediately after the socket is established or by starting the session as
+  cleartext or using the negotiated pathway described above. If the session is started as
+  a TLS session the headers that drive the opportunistic TLS pathway are ignored.</p><p>  Note that the server may still require TLS but leaves the option to start TLS immediately
+  after establishing the socket or starting cleartext and requiring TLS via the opportunistic
+  TLS pathway described above.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mysql"></a><a id="mysql:mysql"></a>
       <span class="permalink">
@@ -1810,7 +1808,7 @@ current <a href="https://twitter.github.io/util/docs/com/twitter/util/Local.html
 defined on a per-request basis.</p><div class="fullcomment"><div class="comment cmt"><p>The local, or &quot;per-request&quot;, delegation table applies to the
 current <a href="https://twitter.github.io/util/docs/com/twitter/util/Local.html" class="extype" name="com.twitter.util.Local">Local</a> scope which is usually
 defined on a per-request basis. Finagle uses the Dtab
-<code>Dtab.base ++ Dtab.local</code> to bind <a href="Name$$Path.html" class="extype" name="com.twitter.finagle.Name.Path">Paths</a> via a <a href="naming/NameInterpreter.html" class="extype" name="com.twitter.finagle.naming.NameInterpreter">com.twitter.finagle.naming.NameInterpreter</a>.</p><p>Local's scope is dictated by <a href="https://twitter.github.io/util/docs/com/twitter/util/Local.html" class="extype" name="com.twitter.util.Local">Local</a>.</p><p>The local dtab is serialized into outbound requests when
+<code>Dtab.base (++ Dtab.limited) ++ Dtab.local</code> to bind <a href="Name$$Path.html" class="extype" name="com.twitter.finagle.Name.Path">Paths</a> via a <a href="naming/NameInterpreter.html" class="extype" name="com.twitter.finagle.naming.NameInterpreter">com.twitter.finagle.naming.NameInterpreter</a>.</p><p>Local's scope is dictated by <a href="https://twitter.github.io/util/docs/com/twitter/util/Local.html" class="extype" name="com.twitter.util.Local">Local</a>.</p><p>The local dtab is serialized into outbound requests when
 supported protocols are used. (Http, Thrift via TTwitter, Mux,
 and ThriftMux are among these.) The upshot is that <code>local</code> is
 defined for the entire request graph, so that a local dtab
@@ -2002,7 +2000,9 @@ defined here will apply to downstream services as well.
         <span class="name">unwind</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.DtabCompanionBase.unwind.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.DtabCompanionBase.unwind.T">T</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
+      <p class="shortcomment cmt"><code>Unwind</code> provides an api to create scoped, local and limited Dtabs
+and restore the original state upon exit.</p><div class="fullcomment"><div class="comment cmt"><p><code>Unwind</code> provides an api to create scoped, local and limited Dtabs
+and restore the original state upon exit.</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>a function to be executed with the scoped Dtabs</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd>DtabCompanionBase</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

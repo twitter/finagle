@@ -252,7 +252,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MethodBuilder</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">MethodBuilder</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]]</span>
       </span>
       </h4>
 
@@ -262,7 +262,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]], <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -288,7 +288,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.client.MethodBuilder"><span>MethodBuilder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.client.MethodBuilder"><span>MethodBuilder</span></li><li class="in" name="com.twitter.finagle.Stack.Parameterized"><span>Parameterized</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -403,6 +403,60 @@ resources for using Finagle.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack.Parameterized#configured" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):T"></a><a id="configured[P]((P,Param[P])):MethodBuilder[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/MethodBuilder.html#configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="psp">psp: (<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>, <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>])</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Java friendly API for <code>configured</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Java friendly API for <code>configured</code>.</p><p>The <code>Tuple2</code> can often be created by calls to a <code>mk(): (P, Stack.Param[P])</code>
+method on parameters (see
+<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()">com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()</span>
+as an example).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack.Parameterized#configured" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="configured[P](p:P)(implicitsp:com.twitter.finagle.Stack.Param[P]):T"></a><a id="configured[P](P)(Param[P]):MethodBuilder[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/MethodBuilder.html#configured[P](p:P)(implicitsp:com.twitter.finagle.Stack.Param[P]):T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: <span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="sp">sp: <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Add the parameter, <code>p</code>, to the current <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Add the parameter, <code>p</code>, to the current <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>.</p><p>Java users may find it easier to use the <code>Tuple2</code> version below.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack.Parameterized#configuredParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="configuredParams(newParams:com.twitter.finagle.Stack.Params):T"></a><a id="configuredParams(Params):MethodBuilder[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/MethodBuilder.html#configuredParams(newParams:com.twitter.finagle.Stack.Params):T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configuredParams</span><span class="params">(<span name="newParams">newParams: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Adds all parameters, <code>newParams</code>, to the current <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Adds all parameters, <code>newParams</code>, to the current <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -570,6 +624,22 @@ retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</sp
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.client.MethodBuilder#methodPool" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="methodPool:com.twitter.finagle.client.MethodPool[Req,Rep]"></a><a id="methodPool:MethodPool[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/MethodBuilder.html#methodPool:com.twitter.finagle.client.MethodPool[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">methodPool</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.MethodPool">MethodPool</span>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -708,7 +778,7 @@ retries are removed.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.client.MethodBuilder#params" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.client.MethodBuilder#params" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="params:com.twitter.finagle.Stack.Params"></a><a id="params:Params"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/client/MethodBuilder.html#params:com.twitter.finagle.Stack.Params" title="Permalink">
@@ -717,29 +787,13 @@ retries are removed.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">params</span><span class="result">: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
       </span>
       
-      <p class="shortcomment cmt">Returns the client stack parameters.</p>
-    </li><li name="com.twitter.finagle.client.MethodBuilder#refCounted" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="refCounted:com.twitter.finagle.client.RefcountedClosable[com.twitter.finagle.Service[Req,Rep]]"></a><a id="refCounted:RefcountedClosable[Service[Req,Rep]]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/MethodBuilder.html#refCounted:com.twitter.finagle.client.RefcountedClosable[com.twitter.finagle.Service[Req,Rep]]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">refCounted</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.RefcountedClosable">RefcountedClosable</span>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]]</span>
-      </span>
-      
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -840,6 +894,22 @@ retries are removed.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.client.MethodBuilder#withParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withParams(ps:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.MethodBuilder[Req,Rep]"></a><a id="withParams(Params):MethodBuilder[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/MethodBuilder.html#withParams(ps:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.MethodBuilder[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withParams</span><span class="params">(<span name="ps">ps: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.MethodBuilder#withRetry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRetry:com.twitter.finagle.client.MethodBuilderRetry[Req,Rep]"></a><a id="withRetry:MethodBuilderRetry[Req,Rep]"></a>
       <span class="permalink">
@@ -928,7 +998,9 @@ builder.withTimeout.perRequest(<span class="num">50.</span>milliseconds)</pre></
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.finagle.Stack.Parameterized">
+              <h3>Inherited from <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="" class="extype" name="com.twitter.finagle.client.MethodBuilder">MethodBuilder</a>[<span class="extype" name="com.twitter.finagle.client.MethodBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.MethodBuilder.Rep">Rep</span>]]</h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>

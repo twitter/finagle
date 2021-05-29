@@ -243,22 +243,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.exception" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="exception"></a><a id="exception:exception"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exception/index.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../exception/index.html"><span class="name">exception</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.exp" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -493,7 +477,21 @@ will be ignored silently, but should all be considered reserved for future
 use.</p><p> Flag          Value     Meaning
  Restartable   1 &lt;&lt; 0    Request is safe to re-issue
  Rejected      1 &lt;&lt; 1    Request was rejected/Nacked by the server
- NonRetryable  1 &lt;&lt; 2    Request should not be retried</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+ NonRetryable  1 &lt;&lt; 2    Request should not be retried</p><h3>Security</h3><p>TLS is supported via three mechanisms:
+- Explicit and exclusive TLS. This pathway involves requiring the establishment of TLS
+  immediately after establishing the socket connection. This is configured by adding TLS
+  configuration to the client or server and <u>not</u> configuring opportunistic TLS or
+  TLS snooping (see below).</p><p>- Negotiated Opportunistic TLS. This pathway involves starting the connection as cleartext
+  and the client and server subsequently negotiate a TLS level via the handshake. Based on
+  that handshake the connection is either left as cleartext or upgraded to TLS. This is
+  configured by adding TLS configuration and also configuring an opportunistic TLS level
+  but <u>not</u> configuring TLS snooping.</p><p>  In this pathway there are three configuration options:</p><ul><li><code>Off</code> signals that TLS is not supported by this peer</li><li><code>Desired</code> signals that TLS is preferred but not required by this peer</li><li><code>Required</code> signals that this peer will only allow the session to continue over TLS</li></ul><p>- TLS snooping. This pathway allows a server to use TLS either by performing a TLS
+  handshake immediately after the socket is established or by starting the session as
+  cleartext or using the negotiated pathway described above. If the session is started as
+  a TLS session the headers that drive the opportunistic TLS pathway are ignored.</p><p>  Note that the server may still require TLS but leaves the option to start TLS immediately
+  after establishing the socket or starting cleartext and requiring TLS via the opportunistic
+  TLS pathway described above.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mysql"></a><a id="mysql:mysql"></a>
       <span class="permalink">
@@ -635,9 +633,9 @@ finagle clients and servers.
                         <a class="class" href="Label.html" title="A class eligible for configuring a label used to identify finagle clients and servers."></a>
                         <a href="Label.html" title="A class eligible for configuring a label used to identify finagle clients and servers.">Label</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Logger$.html" title=""></a>
-                        <a class="class" href="Logger.html" title="A class eligible for configuring a java.util.logging.Logger used throughout finagle clients and servers."></a>
-                        <a href="Logger.html" title="A class eligible for configuring a java.util.logging.Logger used throughout finagle clients and servers.">Logger</a>
+                        <a class="object" href="MetricBuilders$.html" title=""></a>
+                        <a class="class" href="MetricBuilders.html" title="A class eligible for configuring a com.twitter.finagle.service.MetricBuilderRegistry throughout finagle servers."></a>
+                        <a href="MetricBuilders.html" title="A class eligible for configuring a com.twitter.finagle.service.MetricBuilderRegistry throughout finagle servers.">MetricBuilders</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Monitor$.html" title=""></a>
                         <a class="class" href="Monitor.html" title="A class eligible for configuring a com.twitter.util.Monitor throughout finagle servers and clients."></a>
@@ -1310,10 +1308,10 @@ such that tasks are run tighter to their schedule.
       
       <p class="shortcomment cmt">A class eligible for configuring a label used to identify finagle
 clients and servers.</p>
-    </li><li name="com.twitter.finagle.param.Logger" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="LoggerextendsProductwithSerializable"></a><a id="Logger:Logger"></a>
+    </li><li name="com.twitter.finagle.param.MetricBuilders" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MetricBuildersextendsProductwithSerializable"></a><a id="MetricBuilders:MetricBuilders"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/param/Logger.html" title="Permalink">
+      <a href="../../../../com/twitter/finagle/param/MetricBuilders.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1322,11 +1320,15 @@ clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a java.util.logging.Logger used throughout finagle clients and servers." href="Logger.html"><span class="name">Logger</span></a><span class="params">(<span name="log">log: <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.service.MetricBuilderRegistry throughout finagle servers." href="MetricBuilders.html"><span class="name">MetricBuilders</span></a><span class="params">(<span name="registry">registry: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.service.MetricBuilderRegistry">MetricBuilderRegistry</span>]</span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">A class eligible for configuring a <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span>
-used throughout finagle clients and servers.</p>
+      <p class="shortcomment cmt">A class eligible for configuring a <span class="extype" name="com.twitter.finagle.service.MetricBuilderRegistry">com.twitter.finagle.service.MetricBuilderRegistry</span>
+throughout finagle servers.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a <span class="extype" name="com.twitter.finagle.service.MetricBuilderRegistry">com.twitter.finagle.service.MetricBuilderRegistry</span>
+throughout finagle servers. The MetricBuilderRegistry allows for constructing a set of
+essential metrics expressions, <span class="extype" name="MetricBuilderRegistry">MetricBuilderRegistry</span> is a stateful class and should
+be configured per-stack.
+</p></div></div>
     </li><li name="com.twitter.finagle.param.Monitor" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MonitorextendsProductwithSerializable"></a><a id="Monitor:Monitor"></a>
       <span class="permalink">
@@ -1833,10 +1835,10 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
       </span>
       
       
-    </li><li name="com.twitter.finagle.param.Logger" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Logger"></a><a id="Logger:Logger"></a>
+    </li><li name="com.twitter.finagle.param.MetricBuilders" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MetricBuilders"></a><a id="MetricBuilders:MetricBuilders"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/param/Logger$.html" title="Permalink">
+      <a href="../../../../com/twitter/finagle/param/MetricBuilders$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1845,7 +1847,7 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Logger$.html"><span class="name">Logger</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="MetricBuilders$.html"><span class="name">MetricBuilders</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

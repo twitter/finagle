@@ -246,7 +246,21 @@ will be ignored silently, but should all be considered reserved for future
 use.</p><p> Flag          Value     Meaning
  Restartable   1 &lt;&lt; 0    Request is safe to re-issue
  Rejected      1 &lt;&lt; 1    Request was rejected/Nacked by the server
- NonRetryable  1 &lt;&lt; 2    Request should not be retried</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+ NonRetryable  1 &lt;&lt; 2    Request should not be retried</p><h3>Security</h3><p>TLS is supported via three mechanisms:
+- Explicit and exclusive TLS. This pathway involves requiring the establishment of TLS
+  immediately after establishing the socket connection. This is configured by adding TLS
+  configuration to the client or server and <u>not</u> configuring opportunistic TLS or
+  TLS snooping (see below).</p><p>- Negotiated Opportunistic TLS. This pathway involves starting the connection as cleartext
+  and the client and server subsequently negotiate a TLS level via the handshake. Based on
+  that handshake the connection is either left as cleartext or upgraded to TLS. This is
+  configured by adding TLS configuration and also configuring an opportunistic TLS level
+  but <u>not</u> configuring TLS snooping.</p><p>  In this pathway there are three configuration options:</p><ul><li><code>Off</code> signals that TLS is not supported by this peer</li><li><code>Desired</code> signals that TLS is preferred but not required by this peer</li><li><code>Required</code> signals that this peer will only allow the session to continue over TLS</li></ul><p>- TLS snooping. This pathway allows a server to use TLS either by performing a TLS
+  handshake immediately after the socket is established or by starting the session as
+  cleartext or using the negotiated pathway described above. If the session is started as
+  a TLS session the headers that drive the opportunistic TLS pathway are ignored.</p><p>  Note that the server may still require TLS but leaves the option to start TLS immediately
+  after establishing the socket or starting cleartext and requiring TLS via the opportunistic
+  TLS pathway described above.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mux.pushsession" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pushsession"></a><a id="pushsession:pushsession"></a>
       <span class="permalink">

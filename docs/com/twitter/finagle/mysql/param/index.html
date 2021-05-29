@@ -180,6 +180,10 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.mysql">mysql</a></dd></dl></div>
     </li><li class="current-entities indented5">
+                        <a class="object" href="CachingSha2PasswordAuth$.html" title=""></a>
+                        <a class="class" href="CachingSha2PasswordAuth.html" title="To configure the client to use the caching_sha2_password authentication method."></a>
+                        <a href="CachingSha2PasswordAuth.html" title="To configure the client to use the caching_sha2_password authentication method.">CachingSha2PasswordAuth</a>
+                      </li><li class="current-entities indented5">
                         <a class="object" href="Charset$.html" title=""></a>
                         <a class="class" href="Charset.html" title="A class eligible for configuring a mysql client's charset during the Handshake phase."></a>
                         <a href="Charset.html" title="A class eligible for configuring a mysql client's charset during the Handshake phase.">Charset</a>
@@ -203,6 +207,10 @@ resources for using Finagle.
                         <a class="object" href="MaxConcurrentPrepareStatements$.html" title=""></a>
                         <a class="class" href="MaxConcurrentPrepareStatements.html" title="A class eligible for configuring the maximum number of prepare statements."></a>
                         <a href="MaxConcurrentPrepareStatements.html" title="A class eligible for configuring the maximum number of prepare statements.">MaxConcurrentPrepareStatements</a>
+                      </li><li class="current-entities indented5">
+                        <a class="object" href="PathToServerRsaPublicKey$.html" title=""></a>
+                        <a class="class" href="PathToServerRsaPublicKey.html" title="To configure the local path to the server's RSA public key."></a>
+                        <a href="PathToServerRsaPublicKey.html" title="To configure the local path to the server's RSA public key.">PathToServerRsaPublicKey</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="UnsignedColumns$.html" title=""></a>
                         <a class="class" href="UnsignedColumns.html" title="Configure whether to support unsigned integer fields when returning elements of a Row."></a>
@@ -286,7 +294,25 @@ resources for using Finagle.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.mysql.param.Charset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.mysql.param.CachingSha2PasswordAuth" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CachingSha2PasswordAuthextendsProductwithSerializable"></a><a id="CachingSha2PasswordAuth:CachingSha2PasswordAuth"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/param/CachingSha2PasswordAuth.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="To configure the client to use the caching_sha2_password authentication method." href="CachingSha2PasswordAuth.html"><span class="name">CachingSha2PasswordAuth</span></a><span class="params">(<span name="enabled">enabled: <a href="https://www.scala-lang.org/api/2.12.12/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">To configure the client to use the caching_sha2_password authentication method.</p><div class="fullcomment"><div class="comment cmt"><p>To configure the client to use the caching_sha2_password authentication method.
+Needed to set the CLIENT_PLUGIN_AUTH capability flag during the handshake phase.
+</p></div></div>
+    </li><li name="com.twitter.finagle.mysql.param.Charset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CharsetextendsProductwithSerializable"></a><a id="Charset:Charset"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/param/Charset.html" title="Permalink">
@@ -390,6 +416,24 @@ statements.</p><div class="fullcomment"><div class="comment cmt"><p>A class elig
 statements.  After creating <code>num</code> prepare statements, we'll start purging
 old ones.
 </p></div></div>
+    </li><li name="com.twitter.finagle.mysql.param.PathToServerRsaPublicKey" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PathToServerRsaPublicKeyextendsProductwithSerializable"></a><a id="PathToServerRsaPublicKey:PathToServerRsaPublicKey"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/param/PathToServerRsaPublicKey.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="To configure the local path to the server's RSA public key." href="PathToServerRsaPublicKey.html"><span class="name">PathToServerRsaPublicKey</span></a><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">To configure the local path to the server's RSA public key.</p><div class="fullcomment"><div class="comment cmt"><p>To configure the local path to the server's RSA public key. This is used during
+caching_sha2_password authentication when authenticating over a plaintext connection.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.param.UnsignedColumns" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="UnsignedColumnsextendsProductwithSerializable"></a><a id="UnsignedColumns:UnsignedColumns"></a>
       <span class="permalink">
@@ -423,7 +467,23 @@ unsigned variants. For example, an unsigned Int is represented as a Long.</p><p>
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.mysql.param.Charset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.mysql.param.CachingSha2PasswordAuth" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CachingSha2PasswordAuth"></a><a id="CachingSha2PasswordAuth:CachingSha2PasswordAuth"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/param/CachingSha2PasswordAuth$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="CachingSha2PasswordAuth$.html"><span class="name">CachingSha2PasswordAuth</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.mysql.param.Charset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Charset"></a><a id="Charset:Charset"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/param/Charset$.html" title="Permalink">
@@ -516,6 +576,22 @@ unsigned variants. For example, an unsigned Int is represented as a Long.</p><p>
       </span>
       <span class="symbol">
         <a title="" href="MaxConcurrentPrepareStatements$.html"><span class="name">MaxConcurrentPrepareStatements</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.mysql.param.PathToServerRsaPublicKey" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PathToServerRsaPublicKey"></a><a id="PathToServerRsaPublicKey:PathToServerRsaPublicKey"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/param/PathToServerRsaPublicKey$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PathToServerRsaPublicKey$.html"><span class="name">PathToServerRsaPublicKey</span></a><span class="result"> extends <a href="https://www.scala-lang.org/api/2.12.12/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

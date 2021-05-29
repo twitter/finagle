@@ -1062,26 +1062,6 @@ a strategy for choosing one host from a set to service a request.</p><p>To migra
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.client.withLoadBalancer(loadBalancer)</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#logger" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="logger(logger:java.util.logging.Logger):ClientBuilder.this.This"></a><a id="logger(Logger):This"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ClientBuilder.html#logger(logger:java.util.logging.Logger):ClientBuilder.this.This" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">logger</span><span class="params">(<span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Log very detailed debug information to the given logger.</p><div class="fullcomment"><div class="comment cmt"><p>Log very detailed debug information to the given logger.</p><p>To migrate to the Stack-based APIs, use <code>configured</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-<span class="kw">import</span> com.twitter.finagle.param.Logger
-
-Http.client.configured(Logger(logger))</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#monitor" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="monitor(mFactory:String=&gt;com.twitter.util.Monitor):ClientBuilder.this.This"></a><a id="monitor((String)⇒Monitor):This"></a>
       <span class="permalink">

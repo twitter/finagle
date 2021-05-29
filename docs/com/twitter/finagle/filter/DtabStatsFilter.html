@@ -177,8 +177,8 @@ resources for using Finagle.
                         <a href="DarkTrafficFilter.html" title="Forwards dark traffic to the given service when the given function returns true for a request.">DarkTrafficFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="DtabStatsFilter$.html" title=""></a>
-                        <a class="class" href="" title="Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all requests with a non-empty Dtab."></a>
-                        <a href="" title="Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all requests with a non-empty Dtab.">DtabStatsFilter</a>
+                        <a class="class" href="" title="Adds three stats:"></a>
+                        <a href="" title="Adds three stats:">DtabStatsFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="ExceptionSourceFilter$.html" title=""></a>
                         <a class="class" href="ExceptionSourceFilter.html" title="A com.twitter.finagle.Filter that sources exceptions."></a>
@@ -261,9 +261,11 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all
-requests with a non-empty Dtab.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Adds three stats:</p><ul><li>dtab/size, a default stat that tracks the size of both Dtab.limited and Dtab.local for all
+                 requests with a non-empty Dtab</li><li>dtab/local/size, a debug stat which tracks just the size of Dtab.local for all requests
+                 with a non-empty Dtab</li><li>dtab/limited/size, a debug stat which tracks just the size of Dtab.limited for all requests
+                 with a non-empty Dtab
+</li></ul></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>

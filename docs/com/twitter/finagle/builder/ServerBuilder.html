@@ -826,26 +826,6 @@ Http.server.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl clas
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.server.withTransport.verbose</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#logger" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="logger(logger:java.util.logging.Logger):ServerBuilder.this.This"></a><a id="logger(Logger):This"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#logger(logger:java.util.logging.Logger):ServerBuilder.this.This" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">logger</span><span class="params">(<span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>configured</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>configured</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-<span class="kw">import</span> com.twitter.finagle.param
-
-Http.server.configured(param.Logger(logger))</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#maxConcurrentRequests" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="maxConcurrentRequests(max:Int):ServerBuilder.this.This"></a><a id="maxConcurrentRequests(Int):This"></a>
       <span class="permalink">

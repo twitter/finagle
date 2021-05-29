@@ -183,8 +183,8 @@ stabilized (moved elsewhere) at any time.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.exp">exp</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Field.html" title="The key associated with a Message field."></a>
-                        <a href="Field.html" title="The key associated with a Message field.">Field</a>
+                        <a class="class" href="Field.html" title="The key associated with a field value of type T."></a>
+                        <a href="Field.html" title="The key associated with a field value of type T.">Field</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="Fields$.html" title=""></a>
@@ -193,6 +193,10 @@ stabilized (moved elsewhere) at any time.
                         <span class="separator"></span>
                         <a class="class" href="Message.html" title="A contract for a container envelope for a value, which can allow for setting extra field metadata associated with the value."></a>
                         <a href="Message.html" title="A contract for a container envelope for a value, which can allow for setting extra field metadata associated with the value.">Message</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="MessageField.html" title="The key associated with a Message field."></a>
+                        <a href="MessageField.html" title="The key associated with a Message field.">MessageField</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Request$.html" title=""></a>
                         <a class="class" href="" title="A contract for a container envelope for a request value, which can allow for setting extra field metadata associated with the value."></a>
@@ -205,6 +209,10 @@ stabilized (moved elsewhere) at any time.
                         <span class="separator"></span>
                         <a class="object" href="Route$.html" title=""></a>
                         <a href="Route$.html" title="">Route</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="RouteField.html" title="The key associated with a Route field."></a>
+                        <a href="RouteField.html" title="The key associated with a Route field.">RouteField</a>
                       </li>
               </ul>
             </div>
@@ -226,7 +234,7 @@ stabilized (moved elsewhere) at any time.
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -241,7 +249,7 @@ which can allow for setting extra field metadata associated with the value.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span>], <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span>], <span class="extype" name="com.twitter.finagle.exp.routing.FieldMap">FieldMap</span>, <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a>, <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -267,7 +275,7 @@ which can allow for setting extra field metadata associated with the value.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.exp.routing.Request"><span>Request</span></li><li class="in" name="com.twitter.finagle.exp.routing.Message"><span>Message</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.exp.routing.Request"><span>Request</span></li><li class="in" name="com.twitter.finagle.exp.routing.Message"><span>Message</span></li><li class="in" name="com.twitter.finagle.exp.routing.FieldMap"><span>FieldMap</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -304,9 +312,9 @@ which can allow for setting extra field metadata associated with the value.
       
       
     </li><li name="com.twitter.finagle.exp.routing.Request#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(value:T,fields:Map[com.twitter.finagle.exp.routing.Field[_],Any]):com.twitter.finagle.exp.routing.Request[T]"></a><a id="&lt;init&gt;:Request[T]"></a>
+      <a id="&lt;init&gt;(value:T,fields:Map[com.twitter.finagle.exp.routing.MessageField[_],Any]):com.twitter.finagle.exp.routing.Request[T]"></a><a id="&lt;init&gt;:Request[T]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#&lt;init&gt;(value:T,fields:Map[com.twitter.finagle.exp.routing.Field[_],Any]):com.twitter.finagle.exp.routing.Request[T]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#&lt;init&gt;(value:T,fields:Map[com.twitter.finagle.exp.routing.MessageField[_],Any]):com.twitter.finagle.exp.routing.Request[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -315,7 +323,7 @@ which can allow for setting extra field metadata associated with the value.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Request</span><span class="params">(<span name="value">value: <span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span></span>, <span name="fields">fields: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[_], <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span>
+        <span class="name">Request</span><span class="params">(<span name="value">value: <span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span></span>, <span name="fields">fields: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="MessageField.html" class="extype" name="com.twitter.finagle.exp.routing.MessageField">MessageField</a>[_], <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span>
       </span>
       
       
@@ -471,7 +479,24 @@ which can allow for setting extra field metadata associated with the value.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.routing.Message#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.routing.Request#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="get[FieldType](field:com.twitter.finagle.exp.routing.MessageField[FieldType]):Option[FieldType]"></a><a id="get[FieldType](MessageField[FieldType]):Option[FieldType]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#get[FieldType](field:com.twitter.finagle.exp.routing.MessageField[FieldType]):Option[FieldType]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="MessageField.html" class="extype" name="com.twitter.finagle.exp.routing.MessageField">MessageField</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.get.FieldType">FieldType</span>]</span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.get.FieldType">FieldType</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Return <code>Some(value: FieldType)</code> for the specified <a href="MessageField.html" class="extype" name="com.twitter.finagle.exp.routing.MessageField">field</a>
+if it is present in the <span class="extype" name="FieldMap">FieldMap</span>, otherwise <code>None</code>.</p>
+    </li><li name="com.twitter.finagle.exp.routing.FieldMap#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get[FieldType](field:com.twitter.finagle.exp.routing.Field[FieldType]):Option[FieldType]"></a><a id="get[FieldType](Field[FieldType]):Option[FieldType]"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#get[FieldType](field:com.twitter.finagle.exp.routing.Field[FieldType]):Option[FieldType]" title="Permalink">
@@ -483,13 +508,13 @@ which can allow for setting extra field metadata associated with the value.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Message.get.FieldType">FieldType</span>]</span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Message.get.FieldType">FieldType</span>]</span>
+        <span class="name">get</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[<span class="extype" name="com.twitter.finagle.exp.routing.FieldMap.get.FieldType">FieldType</span>]</span>)</span><span class="result">: <a href="https://www.scala-lang.org/api/2.12.12/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.exp.routing.FieldMap.get.FieldType">FieldType</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Return <code>Some(value: FieldType)</code> for the specified <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">field</a>
-if it is present in this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a>, otherwise <code>None</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Return <code>Some(value: FieldType)</code> for the specified <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">field</a>
-if it is present in this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a>, otherwise <code>None</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a></dd></dl></div>
+if it is present in this <span class="extype" name="FieldMap">FieldMap</span>, otherwise <code>None</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Return <code>Some(value: FieldType)</code> for the specified <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">field</a>
+if it is present in this <span class="extype" name="FieldMap">FieldMap</span>, otherwise <code>None</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FieldMap</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -509,7 +534,25 @@ if it is present in this <a href="Message.html" class="extype" name="com.twitter
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.routing.Message#getOrElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.routing.Request#getOrElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getOrElse[FieldType](field:com.twitter.finagle.exp.routing.MessageField[FieldType],orElse:=&gt;FieldType):FieldType"></a><a id="getOrElse[FieldType](MessageField[FieldType],⇒FieldType):FieldType"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#getOrElse[FieldType](field:com.twitter.finagle.exp.routing.MessageField[FieldType],orElse:=&gt;FieldType):FieldType" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getOrElse</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="MessageField.html" class="extype" name="com.twitter.finagle.exp.routing.MessageField">MessageField</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.getOrElse.FieldType">FieldType</span>]</span>, <span name="orElse">orElse: ⇒ <span class="extype" name="com.twitter.finagle.exp.routing.Request.getOrElse.FieldType">FieldType</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.exp.routing.Request.getOrElse.FieldType">FieldType</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Return the <span class="extype" name="FieldType">value</span> for the specified <a href="MessageField.html" class="extype" name="com.twitter.finagle.exp.routing.MessageField">field</a>
+if it is present in the <span class="extype" name="FieldMap">FieldMap</span>, otherwise return the
+user supplied <span class="extype" name="FieldType">FieldType</span>.</p>
+    </li><li name="com.twitter.finagle.exp.routing.FieldMap#getOrElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getOrElse[FieldType](field:com.twitter.finagle.exp.routing.Field[FieldType],orElse:=&gt;FieldType):FieldType"></a><a id="getOrElse[FieldType](Field[FieldType],⇒FieldType):FieldType"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#getOrElse[FieldType](field:com.twitter.finagle.exp.routing.Field[FieldType],orElse:=&gt;FieldType):FieldType" title="Permalink">
@@ -521,15 +564,15 @@ if it is present in this <a href="Message.html" class="extype" name="com.twitter
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getOrElse</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Message.getOrElse.FieldType">FieldType</span>]</span>, <span name="orElse">orElse: ⇒ <span class="extype" name="com.twitter.finagle.exp.routing.Message.getOrElse.FieldType">FieldType</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.exp.routing.Message.getOrElse.FieldType">FieldType</span></span>
+        <span class="name">getOrElse</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[<span class="extype" name="com.twitter.finagle.exp.routing.FieldMap.getOrElse.FieldType">FieldType</span>]</span>, <span name="orElse">orElse: ⇒ <span class="extype" name="com.twitter.finagle.exp.routing.FieldMap.getOrElse.FieldType">FieldType</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.exp.routing.FieldMap.getOrElse.FieldType">FieldType</span></span>
       </span>
       
       <p class="shortcomment cmt">Return the <span class="extype" name="FieldType">value</span> for the specified <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">field</a>
-if it is present in this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a>, otherwise return the
+if it is present in this <span class="extype" name="FieldMap">FieldMap</span>, otherwise return the
 user supplied <span class="extype" name="FieldType">FieldType</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Return the <span class="extype" name="FieldType">value</span> for the specified <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">field</a>
-if it is present in this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a>, otherwise return the
+if it is present in this <span class="extype" name="FieldMap">FieldMap</span>, otherwise return the
 user supplied <span class="extype" name="FieldType">FieldType</span>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FieldMap</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -619,10 +662,10 @@ user supplied <span class="extype" name="FieldType">FieldType</span>.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.routing.Request#set" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="set[FieldType](field:com.twitter.finagle.exp.routing.Field[FieldType],value:FieldType):com.twitter.finagle.exp.routing.Request[T]"></a><a id="set[FieldType](Field[FieldType],FieldType):Request[T]"></a>
+    </li><li name="com.twitter.finagle.exp.routing.Request#set" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="set[FieldType](field:com.twitter.finagle.exp.routing.MessageField[FieldType],value:FieldType):com.twitter.finagle.exp.routing.Request[T]"></a><a id="set[FieldType](MessageField[FieldType],FieldType):Request[T]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#set[FieldType](field:com.twitter.finagle.exp.routing.Field[FieldType],value:FieldType):com.twitter.finagle.exp.routing.Request[T]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#set[FieldType](field:com.twitter.finagle.exp.routing.MessageField[FieldType],value:FieldType):com.twitter.finagle.exp.routing.Request[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -631,14 +674,14 @@ user supplied <span class="extype" name="FieldType">FieldType</span>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.set.FieldType">FieldType</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.exp.routing.Request.set.FieldType">FieldType</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.routing.Request">Request</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span>]</span>
+        <span class="name">set</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="MessageField.html" class="extype" name="com.twitter.finagle.exp.routing.MessageField">MessageField</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.set.FieldType">FieldType</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.exp.routing.Request.set.FieldType">FieldType</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.routing.Request">Request</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span>]</span>
       </span>
       
-      <p class="shortcomment cmt"> Set the value for a <span class="extype" name="FieldType">field</span> on this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">message</a></p><div class="fullcomment"><div class="comment cmt"><p> Set the value for a <span class="extype" name="FieldType">field</span> on this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">message</a></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.routing.Request">Request</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.routing.Request#setAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setAll(append:Map[com.twitter.finagle.exp.routing.Field[_],Any]):com.twitter.finagle.exp.routing.Request[T]"></a><a id="setAll(Map[Field[_],Any]):Request[T]"></a>
+      <p class="shortcomment cmt">&lt;invalid inheritdoc annotation&gt;</p>
+    </li><li name="com.twitter.finagle.exp.routing.FieldMap#set" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set[FieldType](field:com.twitter.finagle.exp.routing.Field[FieldType],value:FieldType):com.twitter.finagle.exp.routing.FieldMap"></a><a id="set[FieldType](Field[FieldType],FieldType):FieldMap"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#setAll(append:Map[com.twitter.finagle.exp.routing.Field[_],Any]):com.twitter.finagle.exp.routing.Request[T]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#set[FieldType](field:com.twitter.finagle.exp.routing.Field[FieldType],value:FieldType):com.twitter.finagle.exp.routing.FieldMap" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -647,29 +690,10 @@ user supplied <span class="extype" name="FieldType">FieldType</span>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setAll</span><span class="params">(<span name="append">append: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[_], <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.routing.Request">Request</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span>]</span>
+        <span class="name">set</span><span class="tparams">[<span name="FieldType">FieldType</span>]</span><span class="params">(<span name="field">field: <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[<span class="extype" name="com.twitter.finagle.exp.routing.FieldMap.set.FieldType">FieldType</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.exp.routing.FieldMap.set.FieldType">FieldType</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.exp.routing.FieldMap">FieldMap</span></span>
       </span>
       
-      <p class="shortcomment cmt"> Set the values for the corresponding <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">fields</a> on this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">message</a></p><div class="fullcomment"><div class="comment cmt"><p> Set the values for the corresponding <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">fields</a> on this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">message</a></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.routing.Request">Request</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.routing.Request#setAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setAll(fields:(com.twitter.finagle.exp.routing.Field[_],Any)*):com.twitter.finagle.exp.routing.Request[T]"></a><a id="setAll((Field[_],Any)*):Request[T]"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/exp/routing/Request.html#setAll(fields:(com.twitter.finagle.exp.routing.Field[_],Any)*):com.twitter.finagle.exp.routing.Request[T]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setAll</span><span class="params">(<span name="fields">fields: (<a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">Field</a>[_], <a href="https://www.scala-lang.org/api/2.12.12/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>)*</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.routing.Request">Request</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt"> Set the values for the corresponding <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">fields</a> on this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">message</a></p><div class="fullcomment"><div class="comment cmt"><p> Set the values for the corresponding <a href="Field.html" class="extype" name="com.twitter.finagle.exp.routing.Field">fields</a> on this <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">message</a></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.routing.Request">Request</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@varargs</span><span class="args">()</span>
-              
-        </dd></dl></div>
+      <p class="shortcomment cmt">Set the value for a <span class="extype" name="FieldType">field</span> on this <span class="extype" name="FieldMap">FieldMap</span></p><div class="fullcomment"><div class="comment cmt"><p>Set the value for a <span class="extype" name="FieldType">field</span> on this <span class="extype" name="FieldMap">FieldMap</span></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FieldMap</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -798,6 +822,8 @@ user supplied <span class="extype" name="FieldType">FieldType</span>.
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.exp.routing.Message">
               <h3>Inherited from <a href="Message.html" class="extype" name="com.twitter.finagle.exp.routing.Message">Message</a>[<span class="extype" name="com.twitter.finagle.exp.routing.Request.T">T</span>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.exp.routing.FieldMap">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.exp.routing.FieldMap">FieldMap</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="../../../../../scala/index.html#AnyRef=Object" class="extmbr" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

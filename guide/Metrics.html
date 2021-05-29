@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 21.4.0 documentation</title>
+    <title>Metrics &#8212; Finagle 21.5.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -882,6 +882,8 @@ a Netty pipeline.</dd>
 <dt><strong>tls/connections</strong></dt>
 <dd>A gauge of the total number of SSL/TLS connections that are currently open in
 the channel.</dd>
+<dt><strong>tls/snooped_connects</strong></dt>
+<dd>A counter of the number of TLS connections that were detected via snooping.</dd>
 </dl>
 </div>
 <div class="section" id="idlechannelhandler">
@@ -1287,6 +1289,8 @@ count as 5XX for this counter.</dd>
 <dd>A gauge exposing the number of opened streams on the server.</dd>
 <dt><strong>&lt;client_label&gt;/streams</strong></dt>
 <dd>A gauge exposing the number of opened streams on the client.</dd>
+<dt><strong>&lt;client_label&gt;/buffered_streams</strong></dt>
+<dd>A gauge exposing the number of buffered streams on the client.</dd>
 <dt><strong>&lt;client_label&gt;/dead_session</strong></dt>
 <dd>A counter of the number of closed sessions evicted.</dd>
 <dt><strong>&lt;client_label&gt;/dead_child_transport</strong></dt>
