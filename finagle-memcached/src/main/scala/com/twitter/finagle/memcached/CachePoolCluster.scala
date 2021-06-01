@@ -4,7 +4,6 @@ import _root_.java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.finagle.{Addr, Address, Group, Resolver}
 import com.twitter.finagle.common.zookeeper._
 import com.twitter.finagle.partitioning.{PartitionNode, PartitionNodeMetadata}
-import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.zookeeper.{DefaultZkClientFactory, ZkGroup}
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
@@ -22,7 +21,7 @@ class TwitterCacheResolverException(msg: String) extends Exception(msg)
 class TwitterCacheResolver extends Resolver {
   val scheme = "twcache"
 
-  def bind(arg: String) = {
+  def bind(arg: String): Var[Addr] = {
     arg.split("!") match {
       // twcache!<host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
       case Array(hosts) =>
@@ -33,14 +32,8 @@ class TwitterCacheResolver extends Resolver {
         val zkClient = DefaultZkClientFactory.get(DefaultZkClientFactory.hostSet(zkHosts))._1
         val group = CacheNodeGroup.newZkCacheNodeGroup(
           path,
-          zkClient,
-          ClientStatsReceiver.scope(scheme).scope(path)
+          zkClient
         )
-
-        val underlyingSizeGauge =
-          ClientStatsReceiver.scope(scheme).scope(path).addGauge("underlyingPoolSize") {
-            group.members.size
-          }
         group.set.map(toUnresolvedAddr)
 
       case _ =>
@@ -62,7 +55,7 @@ class TwitterCacheResolver extends Resolver {
 // TODO: Rewrite Memcache cluster representation in terms of Var[Addr].
 object CacheNodeGroup {
   // <host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
-  def apply(hosts: String) = {
+  def apply(hosts: String): Group[PartitionNode] = {
     val hostSeq = hosts
       .split(Array(' ', ','))
       .filter((_ != ""))
@@ -79,7 +72,10 @@ object CacheNodeGroup {
     }.toSet)
   }
 
-  def apply(group: Group[SocketAddress], useOnlyResolvedAddress: Boolean = false) = group collect {
+  def apply(
+    group: Group[SocketAddress],
+    useOnlyResolvedAddress: Boolean = false
+  ): Group[PartitionNode] = group collect {
     case node: PartitionNode => node
     // Note: we ignore weights here
     case ia: InetSocketAddress if useOnlyResolvedAddress && !ia.isUnresolved =>
@@ -91,12 +87,12 @@ object CacheNodeGroup {
       new PartitionNode(ia.getHostName, ia.getPort, 1, None)
   }
 
-  def newStaticGroup(cacheNodeSet: Set[PartitionNode]) = Group(cacheNodeSet.toSeq: _*)
+  def newStaticGroup(cacheNodeSet: Set[PartitionNode]): Group[PartitionNode] = Group(
+    cacheNodeSet.toSeq: _*)
 
   def newZkCacheNodeGroup(
     path: String,
-    zkClient: ZooKeeperClient,
-    statsReceiver: StatsReceiver = NullStatsReceiver
+    zkClient: ZooKeeperClient
   ): Group[PartitionNode] = {
     new ZkGroup(new ServerSetImpl(zkClient, path), path) collect {
       case inst if inst.getStatus == ALIVE =>
@@ -106,7 +102,10 @@ object CacheNodeGroup {
     }
   }
 
-  private[finagle] def fromVarAddr(va: Var[Addr], useOnlyResolvedAddress: Boolean = false) =
+  private[finagle] def fromVarAddr(
+    va: Var[Addr],
+    useOnlyResolvedAddress: Boolean = false
+  ): Group[PartitionNode] =
     new Group[PartitionNode] {
       protected[finagle] val set: Var[Set[PartitionNode]] = va map {
         case Addr.Bound(addrs, _) =>
