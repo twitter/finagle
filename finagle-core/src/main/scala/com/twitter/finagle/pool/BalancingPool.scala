@@ -73,7 +73,8 @@ private[finagle] object BalancingPool {
       extends NoBrokersAvailableException(
         name = "balancing_pool",
         baseDtabFn = () => Dtab.empty,
-        localDtabFn = () => Dtab.empty
+        localDtabFn = () => Dtab.empty,
+        limitedDtabFn = () => Dtab.empty
       ) {
     override def exceptionMessage: String = "PoolNodes should be non-empty!"
   }

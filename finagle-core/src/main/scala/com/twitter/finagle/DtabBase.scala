@@ -309,32 +309,34 @@ private[finagle] abstract class DtabCompanionBase {
   /**
    * The limited, or "non-propagated, per-request", delegation table applies to the
    * current [[com.twitter.util.Local Local]] scope which is usually
-   * propagated from the upstream.
+   * propagated from the upstream. Finagle uses the Dtab
+   * `Dtab.base ++ Dtab.limited ++ Dtab.local` to bind [[com.twitter.finagle.Name.Path
+   * Paths]] via a [[com.twitter.finagle.naming.NameInterpreter]].
    *
    * Limited's scope is dictated by [[com.twitter.util.Local Local]].
    *
    * Unlike `local`, `limited` is not propagated to the entire request graph.
    *
    */
-  private[finagle] def limited: Dtab = _limited() match {
+  def limited: Dtab = _limited() match {
     case Some(dtab) => dtab
     case None => Dtab.empty
   }
 
-  private[finagle] def limited_=(dtab: Dtab): Unit =
+  def limited_=(dtab: Dtab): Unit =
     _limited() = dtab
 
   /**
    * Java API for `limited_=`
    */
-  private[finagle] def setLimited(dtab: Dtab): Unit =
+  def setLimited(dtab: Dtab): Unit =
     limited = dtab
 
   /**
    * The local, or "per-request", delegation table applies to the
    * current [[com.twitter.util.Local Local]] scope which is usually
    * defined on a per-request basis. Finagle uses the Dtab
-   * `Dtab.base (++ Dtab.limited) ++ Dtab.local` to bind [[com.twitter.finagle.Name.Path
+   * `Dtab.base ++ Dtab.limited ++ Dtab.local` to bind [[com.twitter.finagle.Name.Path
    * Paths]] via a [[com.twitter.finagle.naming.NameInterpreter]].
    *
    * Local's scope is dictated by [[com.twitter.util.Local Local]].

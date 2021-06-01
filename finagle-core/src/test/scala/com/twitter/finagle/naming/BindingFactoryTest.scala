@@ -210,6 +210,7 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
 
     assert(noBrokers.name == "/foo/bar")
     assert(noBrokers.localDtab == localDtab)
+    assert(noBrokers.limitedDtab == Dtab.empty)
   })
 
   test("Includes path and Dtab.local in NoBrokersAvailableException from service creation") {
@@ -237,6 +238,7 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
 
     assert(noBrokers.name == "/foo/bar")
     assert(noBrokers.localDtab == localDtab)
+    assert(noBrokers.limitedDtab == Dtab.empty)
   }
 
   test("Traces name information per request")(new Ctx {
@@ -499,6 +501,16 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
     await(factory())
     assert(endpoint.total == 5)
 
+    // With the flag set, we should still get an extra connection when a new Dtab.limited is defined
+    Dtab.unwind {
+      Dtab.limited = Dtab.read("/foo=>/$/inet/3")
+      await(factory())
+      assert(endpoint.total == 7)
+    }
+
+    await(factory())
+    assert(endpoint.total == 8)
+
   }
 
   test(
@@ -539,5 +551,12 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
 
     await(factory())
     assert(endpoint.total == 4)
+
+    Dtab.unwind {
+      Dtab.local = Dtab.empty
+      Dtab.limited = Dtab.read("/foo=>/$/inet/3")
+      await(factory())
+      assert(endpoint.total == 5)
+    }
   }
 }

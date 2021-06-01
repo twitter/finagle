@@ -25,10 +25,13 @@ private[finagle] object AddrLifecycle {
     Activity(dest.map {
       case Addr.Bound(set, _) => Activity.Ok(set)
       case Addr.Neg =>
-        log.info(s"$label: name resolution is negative (local dtab: ${Dtab.local})")
+        log.info(
+          s"$label: name resolution is negative (limited dtab: ${Dtab.limited} local dtab: ${Dtab.local})")
         Activity.Ok(Set.empty[Address])
       case Addr.Failed(e) =>
-        log.info(s"$label: name resolution failed  (local dtab: ${Dtab.local})", e)
+        log.info(
+          s"$label: name resolution failed  (limited dtab: ${Dtab.limited} local dtab: ${Dtab.local})",
+          e)
         Activity.Failed(e)
       case Addr.Pending =>
         log.debug(s"$label: name resolution is pending")

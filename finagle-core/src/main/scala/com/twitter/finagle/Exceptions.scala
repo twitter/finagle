@@ -156,21 +156,24 @@ class GlobalRequestTimeoutException(timeout: Duration)
 class NoBrokersAvailableException(
   val name: String,
   val baseDtabFn: () => Dtab,
-  val localDtabFn: () => Dtab)
+  val localDtabFn: () => Dtab,
+  val limitedDtabFn: () => Dtab)
     extends RequestException
     with SourcedException {
 
   // backwards compatibility constructor
-  def this(name: String, baseDtab: Dtab, localDtab: Dtab) =
-    this(name, () => baseDtab, () => localDtab)
+  def this(name: String, baseDtab: Dtab, localDtab: Dtab, limitedDtab: Dtab) =
+    this(name, () => baseDtab, () => localDtab, () => limitedDtab)
 
-  def this(name: String = "unknown") = this(name, () => Dtab.base, () => Dtab.local)
+  def this(name: String = "unknown") =
+    this(name, () => Dtab.base, () => Dtab.local, () => Dtab.limited)
 
   def baseDtab: Dtab = baseDtabFn()
   def localDtab: Dtab = localDtabFn()
+  def limitedDtab: Dtab = limitedDtabFn()
 
   override def exceptionMessage: String =
-    s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
+    s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.limited=[${limitedDtab.show}], Dtab.local=[${localDtab.show}]"
 
   serviceName = name
 }

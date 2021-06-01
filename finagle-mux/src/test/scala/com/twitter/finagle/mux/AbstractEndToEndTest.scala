@@ -110,6 +110,30 @@ abstract class AbstractEndToEndTest
     await(client.close())
   }
 
+  test(s"$implName: (no) Dtab propagation with Dtab.limited") {
+    val server = serverImpl.serve(
+      "localhost:*",
+      Service.mk[Request, Response] { _ =>
+        val bw = BufByteWriter.fixed(4)
+        bw.writeIntBE(Dtab.limited.size)
+        Future.value(Response(Nil, bw.owned()))
+      })
+
+    val client = clientImpl.newService(getName(server), "client")
+
+    Dtab.unwind {
+      Dtab.limited ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
+      val payload = await(client(Request.empty), 30.seconds).body
+      val br = ByteReader(payload)
+
+      assert(br.remaining == 4)
+      assert(br.readIntBE() == 0)
+    }
+
+    await(server.close())
+    await(client.close())
+  }
+
   def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]): Unit = {
     assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }

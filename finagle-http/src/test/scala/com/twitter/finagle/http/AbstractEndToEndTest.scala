@@ -409,8 +409,6 @@ abstract class AbstractEndToEndTest
     test(implName + ": (no) dtab") {
       val service = new HttpService {
         def apply(request: Request) = {
-          val stringer = new StringWriter
-
           val response = Response(request)
           response.contentString = "%d".format(Dtab.local.length)
           Future.value(response)
@@ -421,6 +419,27 @@ abstract class AbstractEndToEndTest
 
       val res = await(client(Request("/")))
       assert(res.contentString == "0")
+
+      await(client.close())
+    }
+
+    test(implName + ": Dtab.limited does not propagate") {
+      val service = new HttpService {
+        def apply(request: Request) = {
+          val response = Response(request)
+          response.contentString = "%d".format(Dtab.limited.length)
+          Future.value(response)
+        }
+      }
+
+      val client = connect(service)
+
+      Dtab.unwind {
+        Dtab.limited ++= Dtab.read("/a=>/b; /c=>/d")
+
+        val res = await(client(Request("/")))
+        assert(res.contentString == "0")
+      }
 
       await(client.close())
     }

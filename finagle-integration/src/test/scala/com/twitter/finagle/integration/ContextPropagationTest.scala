@@ -28,41 +28,47 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
-          (Contexts.broadcast.get(testContext), Dtab.local) match {
-            case (None, Dtab.empty) =>
+          (Contexts.broadcast.get(testContext), Dtab.local, Dtab.limited) match {
+            case (_, _, dtab) if dtab != Dtab.empty =>
+              Future.exception(new IllegalStateException(s"Dtab.limited propagated: ${dtab.show}"))
+            case (None, Dtab.empty, _) =>
               Future.value(x + x)
 
-            case (Some(TestContext(buf)), _) =>
+            case (Some(TestContext(buf)), _, _) =>
               val Buf.Utf8(str) = buf
               Future.value(str)
 
-            case (_, dtab) =>
+            case (_, dtab, _) =>
               Future.value(dtab.show)
           }
 
         def question(y: String): Future[String] =
-          (Contexts.broadcast.get(testContext), Dtab.local) match {
-            case (None, Dtab.empty) =>
+          (Contexts.broadcast.get(testContext), Dtab.local, Dtab.limited) match {
+            case (_, _, dtab) if dtab != Dtab.empty =>
+              Future.exception(new IllegalStateException(s"Dtab.limited propagated: ${dtab.show}"))
+            case (None, Dtab.empty, _) =>
               Future.value(y + y)
 
-            case (Some(TestContext(buf)), _) =>
+            case (Some(TestContext(buf)), _, _) =>
               val Buf.Utf8(str) = buf
               Future.value(str)
 
-            case (_, dtab) =>
+            case (_, dtab, _) =>
               Future.value(dtab.show)
           }
 
         def inquiry(z: String): Future[String] =
-          (Contexts.broadcast.get(testContext), Dtab.local) match {
-            case (None, Dtab.empty) =>
+          (Contexts.broadcast.get(testContext), Dtab.local, Dtab.limited) match {
+            case (_, _, dtab) if dtab != Dtab.empty =>
+              Future.exception(new IllegalStateException(s"Dtab.limited propagated: ${dtab.show}"))
+            case (None, Dtab.empty, _) =>
               Future.value(z + z)
 
-            case (Some(TestContext(buf)), _) =>
+            case (Some(TestContext(buf)), _, _) =>
               val Buf.Utf8(str) = buf
               Future.value(str)
 
-            case (_, dtab) =>
+            case (_, dtab, _) =>
               Future.value(dtab.show)
           }
       }
@@ -76,13 +82,13 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
         "client"
       )
 
-      assert(Await.result(client.query("ok"), 5.second) == "okok")
+      assert(Await.result(client.query("ok"), 5.seconds) == "okok")
 
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(Await.result(client.query("ok"), 5.second) == "hello context world")
+        assert(Await.result(client.query("ok"), 5.seconds) == "hello context world")
       }
 
-      Await.result(server.close(), 5.second)
+      Await.result(server.close(), 5.seconds)
     }
   }
 
@@ -94,13 +100,13 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
           "client"
         )
 
-      assert(Await.result(client.query("ok"), 5.second) == "okok")
+      assert(Await.result(client.query("ok"), 5.seconds) == "okok")
 
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(Await.result(client.query("ok"), 5.second) == "hello context world")
+        assert(Await.result(client.query("ok"), 5.seconds) == "hello context world")
       }
 
-      Await.result(server.close(), 5.second)
+      Await.result(server.close(), 5.seconds)
     }
   }
 
@@ -112,14 +118,33 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
           "client"
         )
 
-      assert(Await.result(client.query("ok"), 5.second) == "okok")
+      assert(Await.result(client.query("ok"), 5.seconds) == "okok")
 
       Dtab.unwind {
         Dtab.local = Dtab.read("/foo=>/bar")
-        assert(Await.result(client.query("ok"), 5.second) == "/foo=>/bar")
+        assert(Await.result(client.query("ok"), 5.seconds) == "/foo=>/bar")
       }
 
-      Await.result(server.close(), 5.second)
+      Await.result(server.close(), 5.seconds)
+    }
+  }
+
+  test("thriftmux server + Finagle thrift client: do NOT propagate Dtab.limited") {
+    new ThriftMuxTestServer {
+      val client =
+        Thrift.client.build[TestService.MethodPerEndpoint](
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "client"
+        )
+
+      assert(Await.result(client.query("ok"), 5.seconds) == "okok")
+
+      Dtab.unwind {
+        Dtab.limited = Dtab.read("/foo=>/bar")
+        assert(Await.result(client.query("ok"), 5.seconds) == "okok")
+      }
+
+      Await.result(server.close(), 5.seconds)
     }
   }
 

@@ -145,9 +145,13 @@ object Namer {
     }
 
   /**
-   * Resolve a path to an address set (taking [[Dtab.local]] into account).
+   * Resolve a path to an address set (taking [[Dtab.limited]] and [[Dtab.local]] into account).
+   *
+   * @note The [[Path path]] resolution order will have the [[Dtab.local]] will take precedence,
+   *       followed by the [[Dtab.limited]], and lastly the [[Dtab.base]]. This ensures that the
+   *       [[Dtab.local]] remote request propagation behavior is retained.
    */
-  def resolve(path: Path): Var[Addr] = resolve(Dtab.base ++ Dtab.local, path)
+  def resolve(path: Path): Var[Addr] = resolve(Dtab.base ++ Dtab.limited ++ Dtab.local, path)
 
   /**
    * Resolve a path to an address set (taking [[Dtab.local]] into account).

@@ -317,6 +317,58 @@ class NamerTest extends AnyFunSuite with AssertionsForJUnit {
     })
   }
 
+  test("Namer.resolve: No resolution for empty Dtab.base") {
+    Dtab.unwind {
+      Namer.resolve(Path.read("/s/foo")).sample() match {
+        case Addr.Neg =>
+          () // pass
+        case _ => fail()
+      }
+    }
+  }
+
+  test("Namer.resolve: resolve when Dtab.local is set") {
+    Dtab.unwind {
+      Dtab.limited = Dtab.empty
+      Dtab.local = Dtab.read("/s/foo => /$/inet/5678")
+
+      Namer.resolve(Path.read("/s/foo")).sample() match {
+        case Addr.Bound(addr, _) =>
+          // pass
+          assert(addr == Set(Address(5678)))
+        case e => fail(e.toString)
+      }
+    }
+  }
+
+  test("Namer.resolve: resolve when Dtab.limited is set") {
+    Dtab.unwind {
+      Dtab.limited = Dtab.read("/s/foo => /$/inet/1234")
+      Dtab.local = Dtab.empty
+
+      Namer.resolve(Path.read("/s/foo")).sample() match {
+        case Addr.Bound(addr, _) =>
+          assert(addr == Set(Address(1234)))
+        case _ => fail()
+      }
+    }
+  }
+
+  test(
+    "Namer.resolve: resolve prefers Dtab.local when both Dtab.local and Dtab.limited" +
+      " are set for same Path") {
+    Dtab.unwind {
+      Dtab.limited = Dtab.read("/s/foo => /$/inet/1234")
+      Dtab.local = Dtab.read("/s/foo => /$/inet/5678")
+
+      Namer.resolve(Path.read("/s/foo")).sample() match {
+        case Addr.Bound(addr, _) =>
+          assert(addr == Set(Address(5678)))
+        case _ => fail()
+      }
+    }
+  }
+
   test("Namer.bind: max recursion level reached") {
     namerMaxDepth.let(2) {
       assert(Namer.resolve(Dtab.read("/s => /s/srv"), Path.read("/s/foo/bar")).sample() match {
