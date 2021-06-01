@@ -2,14 +2,17 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.p2c.P2CPick
+import com.twitter.finagle.util.Rng
 import com.twitter.logging.Level
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
 
 private object RandomAperture {
   private def nodeToken[Req, Rep](node: ApertureNode[Req, Rep]): Int = node.token
+
   private def nodeOpen[Req, Rep](node: ApertureNode[Req, Rep]): Boolean =
     node.status == Status.Open
+
   private def nodeBusy[Req, Rep](node: ApertureNode[Req, Rep]): Boolean =
     node.status == Status.Busy
 
@@ -37,6 +40,65 @@ private object RandomAperture {
 
     resultNodes ++= busyNodes ++= closedNodes
     resultNodes.result
+  }
+
+  private[aperture] final class RandomApertureProbabilityDist[
+    Req,
+    Rep,
+    Node <: ApertureNode[Req, Rep]
+  ](
+    vec: Vector[Node],
+    logicalAperture: () => Int,
+    rng: Rng)
+      extends ProbabilityDistribution[Node] {
+    assert(logicalAperture() <= vec.size)
+    // An array of the cumulative probabilities normalized such that their sum is 1.0
+    // exposed for testing
+    private[aperture] val cumulativeProbability: Array[Double] = {
+      val totalProbability = vec.iterator.map(_.factory.weight).sum
+      val result = new Array[Double](vec.size)
+      var acc = 0.0
+      var i = 0
+
+      while (i < vec.size) {
+        acc += (vec(i).factory.weight / totalProbability)
+        result(i) = acc
+        i += 1
+      }
+      result
+    }
+    private[aperture] def scaledAperture: Double = {
+      assert(logicalAperture() <= vec.size)
+      logicalAperture().toDouble / vec.size
+    }
+
+    def pickOne(): Int = {
+      // We need to scale our window to the logical aperture size while making sure
+      // it's limited to the number of elements we have in our logicalAperture window.
+      // Unfortunately, that window is in terms of indexes so we have to do some
+      // conversion.
+      val p = rng.nextDouble() * scaledAperture
+      binSearch(p)
+    }
+
+    def weight(i: Int): Double = vec(i).factory.weight
+
+    def get(i: Int): Node = vec(i)
+
+    def maxIdx: Int = binSearch(scaledAperture)
+
+    private[this] def binSearch(value: Double): Int = {
+      val i = java.util.Arrays.binarySearch(cumulativeProbability, value)
+      // The case of an exact match. Should be rare.
+      // For a non exact match the binarySearch method returns
+      // (-(insertion point) - 1) so we have to invert that
+      // to figure out what that insertion point would be, which is
+      // just our index. See `j.u.Arrays.binarySearch` for come context.
+
+      // We have to do the math.min to deal with floating point rounding errors:
+      // we really don't want to overflow the index.
+      if (i >= 0) i else Math.min(cumulativeProbability.size - 1, -(i + 1))
+    }
   }
 }
 
@@ -73,11 +135,6 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
   // when the node is created.
   protected val vec: Vector[NodeT] = statusOrder[Req, Rep, NodeT](vector.sortBy(nodeToken))
 
-  def pick(): NodeT = {
-    if (vec.isEmpty) aperture.failingNode
-    else P2CPick.pick(vec, logicalAperture, aperture.rng)
-  }
-
   private[this] def vecAsString: String =
     vec
       .take(logicalAperture)
@@ -88,7 +145,10 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     aperture.rebuildLog.debug(s"[RandomAperture.rebuild $labelForLogging] nodes=$vecAsString")
   }
 
-  def indices: Set[Int] = (0 until logicalAperture).toSet
+  def indices: Set[Int] = {
+    val range = if (pdist.isEmpty) (0 until logicalAperture) else (0 to pdist.get.maxIdx)
+    range.toSet
+  }
 
   // we iterate over the entire set as RandomAperture has the ability for
   // the nodes within its logical aperture to change dynamically. `needsRebuild`
@@ -105,6 +165,24 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     }
 
     status
+  }
+
+  // This is only necessary for aperture.manageEndpoints == true
+  private[aperture] val pdist: Option[RandomApertureProbabilityDist[Req, Rep, NodeT]] = {
+    if (aperture.manageEndpoints)
+      Some(
+        new RandomApertureProbabilityDist[Req, Rep, NodeT](
+          vec,
+          () => logicalAperture,
+          aperture.rng))
+    else None
+  }
+
+  def pick(): NodeT = {
+    if (vector.isEmpty) aperture.failingNode
+    else if (vector.length == 1) vector(0)
+    else if (pdist.isDefined) WeightedP2CPick.pick(pdist.get, aperture.pickLog)
+    else P2CPick.pick(vec, logicalAperture, aperture.rng)
   }
 
   // To reduce the amount of rebuilds needed, we rely on the probabilistic

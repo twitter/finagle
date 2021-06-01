@@ -27,8 +27,14 @@ class WeightedApertureTest extends AnyFunSuite with ScalaCheckDrivenPropertyChec
       case (map, i) => map + (i -> (map.getOrElse(i, 0) + 1))
     }
 
+  def nodehisto(seq: Seq[TestNode]): Map[TestNode, Int] =
+    seq.foldLeft(Map.empty[TestNode, Int]) {
+      case (map, i) => map + (i -> (map.getOrElse(i, 0) + 1))
+    }
+
   val numRuns = 100000
   def run(mk: => Seq[Int]): Map[Int, Int] = histo(Seq.fill(numRuns)(mk).flatten)
+  def noderun(mk: => TestNode): Map[TestNode, Int] = nodehisto(Seq.fill(numRuns)(mk))
 
   def approxEqual(a: Double, b: Double, eps: Double = 0.0001): Boolean = {
     if (abs(a - b) < eps) true
@@ -235,5 +241,182 @@ class WeightedApertureTest extends AnyFunSuite with ScalaCheckDrivenPropertyChec
         case (i, weight) => assert(weight === ringWeights(i))
       }
     }
+  }
+
+  /**
+   * The following tests are for the weighted RandomAperture implementation
+   */
+  test("weighted RandomAperture") {
+    val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory()))
+    val sum: Double = endpoints.map(_.factory.weight).sum
+
+    val rap = new RandomAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture() {
+        override val manageEndpoints = true
+      },
+      vector = endpoints,
+      initAperture = 10,
+    )
+
+    assert(rap.pdist.isDefined)
+    val pdist = rap.pdist.get
+
+    val histo0 = run {
+      val a = pdist.pickOne()
+      val b = pdist.tryPickSecond(a)
+      Seq(a, b)
+    }
+
+    for (key <- histo0.keys) {
+      // the number of times key is selected over total node selections
+      val a = histo0(key) / (numRuns * 2d)
+      // the normalized weight of that key
+      val b = (pdist.weight(key) / sum)
+      assert(math.abs(a - b) / math.max(a, b) < 1e-1)
+    }
+  }
+
+  test("weighted RandomAperture with evenly weighted endpoints") {
+    val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory(true)))
+    val sum: Double = endpoints.map(_.factory.weight).sum
+
+    val rap = new RandomAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture() {
+        override val manageEndpoints = true
+      },
+      vector = endpoints,
+      initAperture = 10,
+    )
+
+    assert(rap.pdist.isDefined)
+    val pdist = rap.pdist.get
+
+    val histo0 = run {
+      val a = pdist.pickOne()
+      val b = pdist.tryPickSecond(a)
+      Seq(a, b)
+    }
+
+    for (key <- histo0.keys) {
+      // the number of times key is selected over total node selections
+      val a = histo0(key) / (numRuns * 2d)
+      // the normalized weight of that key
+      val b = (pdist.weight(key) / sum)
+      assert(math.abs(a - b) / math.max(a, b) < 1e-1)
+    }
+  }
+
+  test("weighted RandomAperture with aperture subset") {
+    val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
+    val sum: Double = endpoints.map(_.factory.weight).sum
+    val apertureSum: Double = 1 / 20d * 12d
+
+    val rap = new RandomAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture() {
+        override val manageEndpoints = true
+      },
+      vector = endpoints,
+      initAperture = 12,
+    )
+
+    assert(rap.pdist.isDefined)
+    assert(rap.logicalAperture == 12)
+    val pdist = rap.pdist.get
+
+    val histo0 = run {
+      val a = pdist.pickOne()
+      val b = pdist.tryPickSecond(a)
+      Seq(a, b)
+    }
+
+    for (key <- histo0.keys) {
+      // the number of times key is selected over total node selections
+      val a = histo0(key) / (numRuns * 2d)
+      // the normalized weight of that key is normalized to the aperture size
+      val b = (pdist.weight(key) / sum / apertureSum)
+      assert(math.abs(a - b) / math.max(a, b) < 1e-1)
+    }
+  }
+
+  test("RandomAperture.indices works as expected") {
+    val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory()))
+    val sum: Double = endpoints.map(_.factory.weight).sum
+    val rap = new RandomAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture() {
+        override val manageEndpoints = true
+      },
+      vector = endpoints,
+      initAperture = 12,
+    )
+
+    val cumulativeProbability = Seq(0.015237645043305353, 0.031365087942818656, 0.0630951250697316,
+      0.11666610907349896, 0.17493368334189416, 0.23250412378175594, 0.2664395912672639,
+      0.36513496562276027, 0.46545611292466704, 0.5566089839530769, 0.6104686494845901,
+      0.6462222968878701, 0.6693704100586275, 0.6850570324997741, 0.7273997490787484,
+      0.7600717754383199, 0.8376813232943813, 0.880604996241379, 0.975629885236866,
+      1.0000000000000002)
+
+    val pdist = rap.pdist.get
+    assert(cumulativeProbability == pdist.cumulativeProbability.toSeq)
+    val physicalAperture = 12d / 20d
+    assert(pdist.scaledAperture == physicalAperture)
+
+    // Because the physical Aperture is 0.6, nodes 0 through 10 should exist within the aperture
+    assert(rap.indices == (0 to 10).toSet)
+  }
+
+  test("weighted and unweighted pathway parity") {
+    val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory(true)))
+    val wrap = new RandomAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture() {
+        override val manageEndpoints = true
+      },
+      vector = endpoints,
+      initAperture = 12,
+    )
+    val urap = new RandomAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture(),
+      vector = endpoints,
+      initAperture = 12,
+    )
+
+    assert(wrap.pdist.isDefined)
+    assert(urap.pdist.isEmpty)
+
+    val nodehisto1 = noderun {
+      wrap.pick()
+    }
+
+    val nodehisto2 = noderun {
+      urap.pick()
+    }
+
+    for (key <- nodehisto1.keys) {
+      val a = nodehisto1(key)
+      val b = nodehisto2(key)
+      assert(math.abs(a - b) / math.max(a, b) < 1e-3)
+    }
+  }
+
+  test("logical aperture can change") {
+    val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
+    val rap = new RandomAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture() {
+        override val manageEndpoints = true
+      },
+      vector = endpoints,
+      initAperture = 12,
+    )
+
+    val pdist = rap.pdist.get
+
+    assert(rap.logicalAperture == 12)
+    assert(pdist.scaledAperture == 12 / 20d)
+
+    rap.adjust(1)
+
+    assert(rap.logicalAperture == 13)
+    assert(pdist.scaledAperture == 13 / 20d)
+
   }
 }

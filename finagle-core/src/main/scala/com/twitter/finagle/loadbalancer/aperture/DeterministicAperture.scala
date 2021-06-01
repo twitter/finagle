@@ -117,7 +117,7 @@ private final class DeterministicAperture[Req, Rep, NodeT <: ApertureNode[Req, R
 
   private[this] val pdist = new ProbabilityDistribution[NodeT] {
     def pickOne(): Int = ring.pick(coord.offset, apertureWidth)
-    def tryPickSecond(a: Int): Int = ring.tryPickSecond(a, coord.offset, apertureWidth)
+    override def tryPickSecond(a: Int): Int = ring.tryPickSecond(a, coord.offset, apertureWidth)
     def weight(a: Int): Double = ring.weight(a, coord.offset, apertureWidth)
     def get(i: Int): NodeT = vector(i)
   }

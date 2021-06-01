@@ -63,6 +63,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   private[aperture] def minAperture: Int
 
   /**
+   * Enables [[Aperture]] to create weight-aware balancers
+   */
+  private[aperture] def manageEndpoints: Boolean = false
+
+  /**
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
    * to derive an ordering for the endpoints used by this [[Balancer]] instance.
    */
