@@ -1,16 +1,13 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.mysql.harness.EmbeddedSimpleSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 import com.twitter.finagle.mysql.{Client, OK, ServerError}
-import com.twitter.util.{Await, Awaitable, Future}
+import com.twitter.util.Future
 import java.sql.SQLException
 import org.scalatest.BeforeAndAfter
-import org.scalatest.funsuite.AnyFunSuite
 
 private object PreparedStatementTest {
-
-  private def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
-
   private val createTable =
     """
       |CREATE TEMPORARY TABLE IF NOT EXISTS prepared_stmt (
@@ -31,10 +28,16 @@ private object PreparedStatementTest {
 
 }
 
-class PreparedStatementTest extends AnyFunSuite with IntegrationClient with BeforeAndAfter {
+class PreparedStatementTest extends EmbeddedSimpleSuite with BeforeAndAfter {
   import PreparedStatementTest._
 
-  private[this] val c: Client = client.orNull
+  def instanceConfig: InstanceConfig = defaultInstanceConfig
+  def databaseConfig: DatabaseConfig = defaultDatabaseConfig
+
+  private[this] val c: Client = fixture match {
+    case Some(f) => f.newRichClient()
+    case None => null
+  }
 
   before {
     if (c != null)

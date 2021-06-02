@@ -1,55 +1,65 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql._
-import com.twitter.util.{Await, Awaitable}
-import org.scalatest.funsuite.AnyFunSuite
+import com.twitter.finagle.mysql.harness.EmbeddedSimpleSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
+
+object UnwidenedNumericTypeTest {
+  val createTableQuery: String = s"""CREATE TEMPORARY TABLE IF NOT EXISTS `unwidened_numeric` (
+                                    |        `tinyint` tinyint(4) NOT NULL,
+                                    |        `tinyint_unsigned` tinyint(4) UNSIGNED NOT NULL,
+                                    |        `smallint` smallint(6) NOT NULL,
+                                    |        `smallint_unsigned` smallint(6) UNSIGNED NOT NULL,
+                                    |        `int` int(11) NOT NULL,
+                                    |        `int_unsigned` int(11) UNSIGNED NOT NULL,
+                                    |        `bigint` bigint(20) NOT NULL,
+                                    |        `bigint_unsigned` bigint(20) UNSIGNED NOT NULL,
+                                    |        PRIMARY KEY (`smallint`)
+                                    |      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;""".stripMargin
+
+  val insertQuery: String = s"""INSERT INTO `unwidened_numeric` (
+                               |        `tinyint`, `tinyint_unsigned`,
+                               |        `smallint`, `smallint_unsigned`,
+                               |        `int`, `int_unsigned`,
+                               |        `bigint`, `bigint_unsigned`) VALUES (
+                               |        127, 127,
+                               |        32767, 32767,
+                               |        2147483647, 2147483647,
+                               |        9223372036854775807, 9223372036854775807);""".stripMargin
+
+  val sqlQuery: String =
+    s"""SELECT `tinyint`, `tinyint_unsigned`, `smallint`, `smallint_unsigned`, `int`,
+       |`int_unsigned`, `bigint`, `bigint_unsigned` FROM `unwidened_numeric`;""".stripMargin
+}
 
 /**
  * Test that makes sure that when unsigned support isn't enabled numeric types are not
  * automatically widened for unsigned columns.
  */
-class UnwidenedNumericTypeTest extends AnyFunSuite with IntegrationClient {
+class UnwidenedNumericTypeTest extends EmbeddedSimpleSuite {
+  import UnwidenedNumericTypeTest._
 
-  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
-  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
+  def instanceConfig: InstanceConfig = defaultInstanceConfig
+  def databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
-  for (c <- client) {
-    ready(c.query("""CREATE TEMPORARY TABLE IF NOT EXISTS `unwidened_numeric` (
-        `tinyint` tinyint(4) NOT NULL,
-        `tinyint_unsigned` tinyint(4) UNSIGNED NOT NULL,
-        `smallint` smallint(6) NOT NULL,
-        `smallint_unsigned` smallint(6) UNSIGNED NOT NULL,
-        `int` int(11) NOT NULL,
-        `int_unsigned` int(11) UNSIGNED NOT NULL,
-        `bigint` bigint(20) NOT NULL,
-        `bigint_unsigned` bigint(20) UNSIGNED NOT NULL,
-        PRIMARY KEY (`smallint`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""))
-
-    ready(c.query("""INSERT INTO `unwidened_numeric` (
-        `tinyint`, `tinyint_unsigned`,
-        `smallint`, `smallint_unsigned`,
-        `int`, `int_unsigned`,
-        `bigint`, `bigint_unsigned`) VALUES (
-        127, 127,
-        32767, 32767,
-        2147483647, 2147483647,
-        9223372036854775807, 9223372036854775807);"""))
-
-    runTest(c, false)
-    runTest(c, true)
+  fixture match {
+    case Some(f) =>
+      val client = f.newRichClient()
+      // Setup temporary table and insert into it
+      await(client.query(createTableQuery))
+      await(client.query(insertQuery))
+      runTest(client, false)
+      runTest(client, true)
+    case None => // do nothing
   }
 
   def runTest(c: Client, unsignedColumns: Boolean): Unit = {
-    val sql = """SELECT `tinyint`, `smallint`, `int`, `bigint` FROM `unwidened_numeric` """
-
-    val textEncoded = await(c.query(sql) map {
+    val textEncoded = await(c.query(sqlQuery) map {
       case rs: ResultSet if rs.rows.size > 0 => rs.rows(0)
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
-    val ps = c.prepare(sql)
+    val ps = c.prepare(sqlQuery)
     val binaryrows = await(ps.select()(identity))
     assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows(0)
@@ -69,28 +79,28 @@ class UnwidenedNumericTypeTest extends AnyFunSuite with IntegrationClient {
     val rowType = row.getClass.getName
 
     test(s"extract ${rowName("tinyint")} from $rowType") {
-      row("tinyint") match {
+      row(rowName("tinyint")) match {
         case Some(ByteValue(b)) => assert(b == 127)
         case v => fail("expected ByteValue but got %s".format(v))
       }
     }
 
     test(s"extract ${rowName("smallint")} from $rowType") {
-      row("smallint") match {
+      row(rowName("smallint")) match {
         case Some(ShortValue(s)) => assert(s == 32767)
         case v => fail("expected ShortValue but got %s".format(v))
       }
     }
 
     test(s"extract ${rowName("int")} from $rowType") {
-      row("int") match {
+      row(rowName("int")) match {
         case Some(IntValue(i)) => assert(i == 2147483647)
         case v => fail("expected IntValue but got %s".format(v))
       }
     }
 
     test(s"extract ${rowName("bigint")} from $rowType") {
-      row("bigint") match {
+      row(rowName("bigint")) match {
         case Some(LongValue(l)) => assert(l == 9223372036854775807L)
         case v => fail("expected LongValue but got %s".format(v))
       }
