@@ -8,6 +8,7 @@ import com.twitter.finagle.service.MetricBuilderRegistry.{
   RequestCounter,
   SuccessCounter
 }
+import com.twitter.finagle.stats.MetricBuilder.{CounterType, HistogramType}
 import com.twitter.finagle.stats._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
@@ -259,19 +260,25 @@ class StatsFilter[Req, Rep] private[service] (
   }
 
   private[this] val successSchema =
-    CounterSchema(MetricBuilder(name = Seq("success"), statsReceiver = statsReceiver).withKernel)
+    MetricBuilder(
+      name = Seq("success"),
+      metricType = CounterType,
+      statsReceiver = statsReceiver).withKernel
   private[this] val failureSchema =
-    CounterSchema(
-      MetricBuilder(
-        name = Seq(ExceptionStatsHandler.Failures),
-        statsReceiver = statsReceiver).withKernel)
+    MetricBuilder(
+      name = Seq(ExceptionStatsHandler.Failures),
+      metricType = CounterType,
+      statsReceiver = statsReceiver).withKernel
   private[this] val requestSchema =
-    CounterSchema(MetricBuilder(name = Seq("requests"), statsReceiver = statsReceiver).withKernel)
+    MetricBuilder(
+      name = Seq("requests"),
+      metricType = CounterType,
+      statsReceiver = statsReceiver).withKernel
   private[this] val latencySchema =
-    HistogramSchema(
-      MetricBuilder(
-        name = Seq(s"request_latency_$latencyStatSuffix"),
-        statsReceiver = statsReceiver).withKernel)
+    MetricBuilder(
+      name = Seq(s"request_latency_$latencyStatSuffix"),
+      metricType = HistogramType,
+      statsReceiver = statsReceiver).withKernel
 
   private[this] val outstandingRequestCount = new LongAdder()
   private[this] val dispatchCount = statsReceiver.counter(requestSchema)

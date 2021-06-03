@@ -1,6 +1,7 @@
 package com.twitter.finagle.stats
 
-import com.github.benmanes.caffeine.cache.{Caffeine, CacheLoader}
+import com.github.benmanes.caffeine.cache.{CacheLoader, Caffeine}
+import com.twitter.finagle.stats.MetricBuilder.{CounterType, GaugeType, HistogramType}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.JavaConverters._
@@ -27,31 +28,39 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   private[this] var _gauges = Map[Seq[String], () => Float]()
   def gauges: Map[Seq[String], () => Float] = synchronized { _gauges }
 
-  def counter(schema: CounterSchema): Counter = new Counter {
-    counters.putIfAbsent(schema.metricBuilder.name, new AtomicLong(0))
-    def incr(delta: Long): Unit = counters.get(schema.metricBuilder.name).getAndAdd(delta)
-    def metadata: Metadata = schema.metricBuilder
-  }
-
-  def stat(schema: HistogramSchema): Stat = new Stat {
-    def add(value: Float): Unit = SummarizingStatsReceiver.this.synchronized {
-      stats.get(schema.metricBuilder.name) += value
+  def counter(metricBuilder: MetricBuilder): Counter = {
+    validateMetricType(metricBuilder, CounterType)
+    new Counter {
+      counters.putIfAbsent(metricBuilder.name, new AtomicLong(0))
+      def incr(delta: Long): Unit = counters.get(metricBuilder.name).getAndAdd(delta)
+      def metadata: Metadata = metricBuilder
     }
-    def metadata: Metadata = schema.metricBuilder
   }
 
-  override def addGauge(schema: GaugeSchema)(f: => Float): Gauge =
+  def stat(metricBuilder: MetricBuilder): Stat = {
+    validateMetricType(metricBuilder, HistogramType)
+    new Stat {
+      def add(value: Float): Unit = SummarizingStatsReceiver.this.synchronized {
+        stats.get(metricBuilder.name) += value
+      }
+      def metadata: Metadata = metricBuilder
+    }
+  }
+
+  override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge = {
+    validateMetricType(metricBuilder, GaugeType)
     synchronized {
-      _gauges += (schema.metricBuilder.name -> (() => f))
+      _gauges += (metricBuilder.name -> (() => f))
       new Gauge {
         def remove(): Unit = ()
-        def metadata: Metadata = schema.metricBuilder
+        def metadata: Metadata = metricBuilder
       }
     }
+  }
 
-  protected[this] def registerGauge(schema: GaugeSchema, f: => Float): Unit =
+  protected[this] def registerGauge(metricBuilder: MetricBuilder, f: => Float): Unit =
     synchronized {
-      _gauges += (schema.metricBuilder.name -> (() => f))
+      _gauges += (metricBuilder.name -> (() => f))
     }
 
   protected[this] def deregisterGauge(name: Seq[String]): Unit = synchronized {

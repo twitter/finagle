@@ -69,12 +69,10 @@ private[twitter] class MetricBuilderRegistry {
     val failureMb = Metadata.getMetricBuilder(failureCounter.get())
     (successMb, failureMb) match {
       case (Some(success), Some(failure)) =>
-        val successSchema = CounterSchema(success)
-        val failureSchema = CounterSchema(failure)
         ExpressionSchema(
           successRateName,
-          Expression(100).multiply(Expression(successSchema).divide(
-            Expression(successSchema).plus(Expression(failureSchema)))))
+          Expression(100).multiply(
+            Expression(success).divide(Expression(success).plus(Expression(failure)))))
           .withBounds(MonotoneThresholds(GreaterThan, 99.5, 99.97))
           .withUnit(Percentage)
           .withDescription(s"The success rate expression $descriptionSuffix.")
@@ -86,8 +84,7 @@ private[twitter] class MetricBuilderRegistry {
   lazy val throughput: Unit = {
     Metadata.getMetricBuilder(requestCounter.get()) match {
       case Some(request) =>
-        val requestSchema = CounterSchema(request)
-        ExpressionSchema(throughputName, Expression(requestSchema))
+        ExpressionSchema(throughputName, Expression(request))
           .withUnit(Requests)
           .withDescription(s"The total requests expression $descriptionSuffix.")
           .register()
@@ -98,8 +95,7 @@ private[twitter] class MetricBuilderRegistry {
   lazy val latencyP99: Unit = {
     Metadata.getMetricBuilder(latencyP99Histogram.get()) match {
       case Some(latencyP99) =>
-        val latencySchema = HistogramSchema(latencyP99)
-        ExpressionSchema(latencyName, Expression(latencySchema, Right(99.percent)))
+        ExpressionSchema(latencyName, Expression(latencyP99, Right(99.percent)))
           .withUnit(Milliseconds)
           .withDescription(s"The p99 latency of a request $descriptionSuffix.")
           .register()
@@ -112,11 +108,9 @@ private[twitter] class MetricBuilderRegistry {
     val rejectionMb = Metadata.getMetricBuilder(deadlineRejectedCounter.get())
     (requestMb, rejectionMb) match {
       case (Some(request), Some(reject)) =>
-        val requestSchema = CounterSchema(request)
-        val rejectSchema = CounterSchema(reject)
         ExpressionSchema(
           deadlineRejectName,
-          Expression(100).multiply(Expression(rejectSchema).divide(Expression(requestSchema))))
+          Expression(100).multiply(Expression(reject).divide(Expression(request))))
           .withUnit(Percentage)
           .withDescription(s"Deadline Filter rejection rate $descriptionSuffix.")
           .register()
@@ -129,11 +123,9 @@ private[twitter] class MetricBuilderRegistry {
     val rejectionMb = Metadata.getMetricBuilder(aCRejectedCounter.get())
     (requestMb, rejectionMb) match {
       case (Some(request), Some(reject)) =>
-        val requestSchema = CounterSchema(request)
-        val rejectSchema = CounterSchema(reject)
         ExpressionSchema(
           acRejectName,
-          Expression(100).multiply(Expression(rejectSchema).divide(Expression(requestSchema))))
+          Expression(100).multiply(Expression(reject).divide(Expression(request))))
           .withUnit(Percentage)
           .withDescription(s"Admission Control rejection rate $descriptionSuffix.")
           .register()

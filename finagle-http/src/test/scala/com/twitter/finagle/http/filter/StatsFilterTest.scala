@@ -2,12 +2,8 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.stats.{
-  CounterSchema,
-  HistogramSchema,
-  InMemoryStatsReceiver,
-  MetricBuilder
-}
+import com.twitter.finagle.stats.MetricBuilder.{CounterType, HistogramType}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, MetricBuilder}
 import com.twitter.util.{Await, Duration, Future, Stopwatch, Time}
 import org.mockito.Mockito.{spy, verify}
 import org.scalatest.funsuite.AnyFunSuite
@@ -48,12 +44,24 @@ class StatsFilterTest extends AnyFunSuite {
 
     // Verify that the counters and stats were only created once
     verify(receiver).counter(
-      CounterSchema(MetricBuilder(name = Seq("status", "404"), statsReceiver = receiver)))
+      MetricBuilder(
+        name = Seq("status", "404"),
+        metricType = CounterType,
+        statsReceiver = receiver))
     verify(receiver).counter(
-      CounterSchema(MetricBuilder(name = Seq("status", "4XX"), statsReceiver = receiver)))
+      MetricBuilder(
+        name = Seq("status", "4XX"),
+        metricType = CounterType,
+        statsReceiver = receiver))
     verify(receiver).stat(
-      HistogramSchema(MetricBuilder(name = Seq("time", "404"), statsReceiver = receiver)))
+      MetricBuilder(
+        name = Seq("time", "404"),
+        metricType = HistogramType,
+        statsReceiver = receiver))
     verify(receiver).stat(
-      HistogramSchema(MetricBuilder(name = Seq("time", "4XX"), statsReceiver = receiver)))
+      MetricBuilder(
+        name = Seq("time", "4XX"),
+        metricType = HistogramType,
+        statsReceiver = receiver))
   }
 }

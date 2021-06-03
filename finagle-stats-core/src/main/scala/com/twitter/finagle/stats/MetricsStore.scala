@@ -57,7 +57,7 @@ private[stats] trait MetricsStore {
    *
    * Throws a [MetricCollisionException] if there's already a gauge of that name.
    */
-  def getOrCreateCounter(schema: CounterSchema): MetricsStore.StoreCounter
+  def getOrCreateCounter(metricBuilder: MetricBuilder): MetricsStore.StoreCounter
 
   /**
    * Registers a new gauge, replacing the previous one if it already existed.
@@ -67,7 +67,7 @@ private[stats] trait MetricsStore {
    *
    * Throws a [MetricCollisionException] if there's already a counter of that name.
    */
-  def registerGauge(schema: GaugeSchema, f: => Float): Unit
+  def registerGauge(metricBuilder: MetricBuilder, f: => Float): Unit
 
   /**
    * Deregisters a gauge.
@@ -84,5 +84,5 @@ private[stats] trait MetricsStore {
    * Deduplicates by formatted name, so that Seq("foo", "bar") and
    * Seq("foo/bar") with the separator "/" are the same name.
    */
-  def getOrCreateStat(schema: HistogramSchema): MetricsStore.StoreStat
+  def getOrCreateStat(metricBuilder: MetricBuilder): MetricsStore.StoreStat
 }

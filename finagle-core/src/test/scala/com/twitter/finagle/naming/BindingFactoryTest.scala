@@ -408,11 +408,11 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
 
     val service = await(factory())
     await(service("foo"))
-    assert(stats.schemas(Seq("foo")).metricBuilder.processPath.get == "/$/inet/1")
+    assert(stats.schemas(Seq("foo")).processPath.get == "/$/inet/1")
     assert(stats.counters(Seq("foo")) == 1)
-    assert(stats.schemas(Seq("bar")).metricBuilder.processPath.get == "/$/inet/1")
+    assert(stats.schemas(Seq("bar")).processPath.get == "/$/inet/1")
     assert(stats.stats(Seq("bar")) == Seq(1))
-    assert(stats.schemas(Seq("baz")).metricBuilder.processPath.get == "/$/inet/1")
+    assert(stats.schemas(Seq("baz")).processPath.get == "/$/inet/1")
     assert(stats.gauges(Seq("baz"))() == 0)
   }
 
@@ -452,11 +452,11 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
 
     val service = await(factory())
     await(service("foo"))
-    assert(stats.schemas(Seq("foo")).metricBuilder.processPath.get == "/$/inet/1".reverse)
+    assert(stats.schemas(Seq("foo")).processPath.get == "/$/inet/1".reverse)
     assert(stats.counters(Seq("foo")) == 1)
-    assert(stats.schemas(Seq("bar")).metricBuilder.processPath.get == "/$/inet/1".reverse)
+    assert(stats.schemas(Seq("bar")).processPath.get == "/$/inet/1".reverse)
     assert(stats.stats(Seq("bar")) == Seq(1))
-    assert(stats.schemas(Seq("baz")).metricBuilder.processPath.get == "/$/inet/1".reverse)
+    assert(stats.schemas(Seq("baz")).processPath.get == "/$/inet/1".reverse)
     assert(stats.gauges(Seq("baz"))() == 0)
   }
 

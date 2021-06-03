@@ -44,7 +44,7 @@ object Metrics {
     statsMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreStat](),
     gaugesMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge](),
     /** Store MetricSchemas for each metric in order to surface metric metadata to users. */
-    metricSchemas = new ConcurrentHashMap[String, MetricSchema](),
+    metricSchemas = new ConcurrentHashMap[String, MetricBuilder](),
     expressionSchemas = new ConcurrentHashMap[ExpressionSchemaKey, ExpressionSchema](),
     // Memoizing metrics used for building expressions.
     // the key is the object reference hashcode shared between Expression and StatsReceiver,
@@ -100,7 +100,7 @@ object Metrics {
     countersMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreCounter],
     statsMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreStat],
     gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge],
-    metricSchemas: ConcurrentHashMap[String, MetricSchema],
+    metricSchemas: ConcurrentHashMap[String, MetricBuilder],
     expressionSchemas: ConcurrentHashMap[ExpressionSchemaKey, ExpressionSchema],
     metricBuilders: ConcurrentHashMap[Int, MetricBuilder])
 }
@@ -167,26 +167,26 @@ private[finagle] class Metrics private (
   private[this] def format(names: Seq[String]): String =
     names.mkString(separator)
 
-  def getOrCreateCounter(schema: CounterSchema): MetricsStore.StoreCounter = {
-    val counter = countersMap.get(schema.metricBuilder.name)
+  def getOrCreateCounter(metricBuilder: MetricBuilder): MetricsStore.StoreCounter = {
+    val counter = countersMap.get(metricBuilder.name)
     if (counter != null)
       return counter
 
-    val formatted = format(schema.metricBuilder.name)
+    val formatted = format(metricBuilder.name)
     val curNameUsage = reservedNames.putIfAbsent(formatted, CounterRepr)
 
     if (curNameUsage == null || curNameUsage == CounterRepr) {
-      val next = new Metrics.StoreCounterImpl(formatted, schema.metricBuilder)
-      val prev = countersMap.putIfAbsent(schema.metricBuilder.name, next)
+      val next = new Metrics.StoreCounterImpl(formatted, metricBuilder)
+      val prev = countersMap.putIfAbsent(metricBuilder.name, next)
 
-      if (schema.metricBuilder.verbosity != Verbosity.Default)
-        verbosityMap.put(formatted, schema.metricBuilder.verbosity)
+      if (metricBuilder.verbosity != Verbosity.Default)
+        verbosityMap.put(formatted, metricBuilder.verbosity)
 
       if (prev != null) {
         prev
       } else {
-        metricSchemas.put(formatted, schema)
-        storeMetricBuilder(schema)
+        metricSchemas.put(formatted, metricBuilder)
+        storeMetricBuilder(metricBuilder)
         next
       }
     } else {
@@ -197,24 +197,22 @@ private[finagle] class Metrics private (
     }
   }
 
-  def getOrCreateStat(schema: HistogramSchema): MetricsStore.StoreStat = {
-    val stat = statsMap.get(schema.metricBuilder.name)
+  def getOrCreateStat(metricBuilder: MetricBuilder): MetricsStore.StoreStat = {
+    val stat = statsMap.get(metricBuilder.name)
     if (stat != null)
       return stat
 
-    if (schema.metricBuilder.percentiles.isEmpty) {
-      createStat(
-        HistogramSchema(
-          schema.metricBuilder.withPercentiles(BucketedHistogram.DefaultQuantiles: _*)))
+    if (metricBuilder.percentiles.isEmpty) {
+      createStat(metricBuilder.withPercentiles(BucketedHistogram.DefaultQuantiles: _*))
     } else {
-      createStat(schema)
+      createStat(metricBuilder)
     }
   }
 
-  private def createStat(schema: HistogramSchema): MetricsStore.StoreStat = {
-    val formatted = format(schema.metricBuilder.name)
+  private def createStat(metricBuilder: MetricBuilder): MetricsStore.StoreStat = {
+    val formatted = format(metricBuilder.name)
     val doLog = loggedStats.contains(formatted)
-    val histogram = mkHistogram(formatted, schema.metricBuilder.percentiles)
+    val histogram = mkHistogram(formatted, metricBuilder.percentiles)
 
     histogram match {
       case histo: MetricsBucketedHistogram =>
@@ -223,25 +221,25 @@ private[finagle] class Metrics private (
         log.debug(s"$formatted's histogram implementation doesn't support details")
     }
 
-    val next = new Metrics.StoreStatImpl(histogram, formatted, doLog, schema.metricBuilder)
-    val prev = statsMap.putIfAbsent(schema.metricBuilder.name, next)
+    val next = new Metrics.StoreStatImpl(histogram, formatted, doLog, metricBuilder)
+    val prev = statsMap.putIfAbsent(metricBuilder.name, next)
 
-    if (schema.metricBuilder.verbosity != Verbosity.Default) {
-      verbosityMap.put(formatted, schema.metricBuilder.verbosity)
+    if (metricBuilder.verbosity != Verbosity.Default) {
+      verbosityMap.put(formatted, metricBuilder.verbosity)
     }
 
     if (prev != null) {
       prev
     } else {
-      metricSchemas.put(formatted, schema)
-      storeMetricBuilder(schema)
+      metricSchemas.put(formatted, metricBuilder)
+      storeMetricBuilder(metricBuilder)
       next
     }
   }
 
-  private[this] def storeMetricBuilder(schema: MetricSchema): Unit = {
-    schema.metricBuilder.kernel match {
-      case Some(kernel) => metricBuilders.put(kernel, schema.metricBuilder)
+  private[this] def storeMetricBuilder(metricBuilder: MetricBuilder): Unit = {
+    metricBuilder.kernel match {
+      case Some(kernel) => metricBuilders.put(kernel, metricBuilder)
       case None =>
     }
   }
@@ -249,7 +247,7 @@ private[finagle] class Metrics private (
   private[this] def removeMetricBuilder(formattedName: String): Unit = {
     val metricSchema = metricSchemas.get(formattedName)
     if (metricSchema != null) {
-      metricSchema.metricBuilder.kernel match {
+      metricSchema.kernel match {
         case Some(kernel) => metricBuilders.remove(kernel)
         case None =>
       }
@@ -260,33 +258,33 @@ private[finagle] class Metrics private (
     expressionSchemas.putIfAbsent(exprSchema.schemaKey(), exprSchema)
   }
 
-  def registerGauge(schema: GaugeSchema, f: => Float): Unit =
-    registerNumberGauge(schema, f)
+  def registerGauge(metricBuilder: MetricBuilder, f: => Float): Unit =
+    registerNumberGauge(metricBuilder, f)
 
-  def registerLongGauge(schema: GaugeSchema, f: => Long): Unit =
-    registerNumberGauge(schema, f)
+  def registerLongGauge(metricBuilder: MetricBuilder, f: => Long): Unit =
+    registerNumberGauge(metricBuilder, f)
 
-  private def registerNumberGauge(schema: GaugeSchema, f: => Number): Unit = {
-    val formatted = format(schema.metricBuilder.name)
+  private def registerNumberGauge(metricBuilder: MetricBuilder, f: => Number): Unit = {
+    val formatted = format(metricBuilder.name)
     val curNameUsage = reservedNames.putIfAbsent(formatted, GaugeRepr)
 
     if (curNameUsage == null) {
       val next = new Metrics.StoreGaugeImpl(formatted, f)
-      gaugesMap.putIfAbsent(schema.metricBuilder.name, next)
-      metricSchemas.putIfAbsent(formatted, schema)
-      storeMetricBuilder(schema)
+      gaugesMap.putIfAbsent(metricBuilder.name, next)
+      metricSchemas.putIfAbsent(formatted, metricBuilder)
+      storeMetricBuilder(metricBuilder)
 
-      if (schema.metricBuilder.verbosity != Verbosity.Default) {
-        verbosityMap.put(formatted, schema.metricBuilder.verbosity)
+      if (metricBuilder.verbosity != Verbosity.Default) {
+        verbosityMap.put(formatted, metricBuilder.verbosity)
       }
     } else if (curNameUsage == GaugeRepr) {
       // it should be impossible to collide with a gauge in finagle since
       // StatsReceiverWithCumulativeGauges already protects us.
       // we replace existing gauges to support commons metrics behavior.
       val next = new Metrics.StoreGaugeImpl(formatted, f)
-      gaugesMap.put(schema.metricBuilder.name, next)
-      metricSchemas.put(formatted, schema)
-      storeMetricBuilder(schema)
+      gaugesMap.put(metricBuilder.name, next)
+      metricSchemas.put(formatted, metricBuilder)
+      storeMetricBuilder(metricBuilder)
     } else {
       throw new MetricCollisionException(
         s"A Counter with the name $formatted had already" +
@@ -338,7 +336,7 @@ private[finagle] class Metrics private (
   def verbosity: util.Map[String, Verbosity] =
     util.Collections.unmodifiableMap(verbosityMap)
 
-  def schemas: util.Map[String, MetricSchema] =
+  def schemas: util.Map[String, MetricBuilder] =
     util.Collections.unmodifiableMap(metricSchemas)
 
   private[this] val filledExpression: ConcurrentHashMap[

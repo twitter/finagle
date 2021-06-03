@@ -9,6 +9,7 @@ import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.{
   throughputName
 }
 import com.twitter.finagle.service.MetricBuilderRegistry._
+import com.twitter.finagle.stats.MetricBuilder.{CounterType, HistogramType}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, Metadata, MetricBuilder}
 import com.twitter.util.Future
 import org.scalatest.funsuite.AnyFunSuite
@@ -20,14 +21,28 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
     val metricBuilders = Map[MetricName, Metadata](
       DeadlineRejectedCounter -> MetricBuilder(
         name = Seq("deadline", "rejected"),
+        metricType = CounterType,
         statsReceiver = sr),
       ACRejectedCounter -> MetricBuilder(
         name = Seq("admission_control", "rejections"),
+        metricType = CounterType,
         statsReceiver = sr),
-      SuccessCounter -> MetricBuilder(name = Seq("success"), statsReceiver = sr),
-      FailureCounter -> MetricBuilder(name = Seq("failures"), statsReceiver = sr),
-      RequestCounter -> MetricBuilder(name = Seq("requests"), statsReceiver = sr),
-      LatencyP99Histogram -> MetricBuilder(name = Seq("latency"), statsReceiver = sr)
+      SuccessCounter -> MetricBuilder(
+        name = Seq("success"),
+        metricType = CounterType,
+        statsReceiver = sr),
+      FailureCounter -> MetricBuilder(
+        name = Seq("failures"),
+        metricType = CounterType,
+        statsReceiver = sr),
+      RequestCounter -> MetricBuilder(
+        name = Seq("requests"),
+        metricType = CounterType,
+        statsReceiver = sr),
+      LatencyP99Histogram -> MetricBuilder(
+        name = Seq("latency"),
+        metricType = HistogramType,
+        statsReceiver = sr)
     )
   }
   test("Expression Factory generates all expressions when metrics are injected") {

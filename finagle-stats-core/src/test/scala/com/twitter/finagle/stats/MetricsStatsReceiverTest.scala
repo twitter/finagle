@@ -1,5 +1,6 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.MetricBuilder.{CounterType, GaugeType, HistogramType}
 import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, ExpressionSchemaKey}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -65,7 +66,7 @@ object MetricsStatsReceiverTest {
       verbosity: Verbosity = Verbosity.Default
     ) =
       statsReceiver.counter(
-        CounterSchema(statsReceiver.metricBuilder().withName(name: _*).withVerbosity(verbosity)))
+        statsReceiver.metricBuilder(CounterType).withName(name: _*).withVerbosity(verbosity))
     def addGauge(
       statsReceiver: StatsReceiver,
       name: Seq[String],
@@ -74,14 +75,14 @@ object MetricsStatsReceiverTest {
       f: => Float
     ) =
       statsReceiver.addGauge(
-        GaugeSchema(statsReceiver.metricBuilder().withName(name: _*).withVerbosity(verbosity)))(f)
+        statsReceiver.metricBuilder(GaugeType).withName(name: _*).withVerbosity(verbosity))(f)
     def addHisto(
       statsReceiver: StatsReceiver,
       name: Seq[String],
       verbosity: Verbosity = Verbosity.Default
     ) =
       statsReceiver.stat(
-        HistogramSchema(statsReceiver.metricBuilder().withName(name: _*).withVerbosity(verbosity)))
+        statsReceiver.metricBuilder(HistogramType).withName(name: _*).withVerbosity(verbosity))
   }
 }
 
@@ -251,13 +252,13 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
 
       val sr = new MetricsStatsReceiver(metrics)
       val counter = addCounter(sr, Seq("aaa"))
-      assert(metrics.schemas.get("aaa").metricBuilder == counter.metadata)
+      assert(metrics.schemas.get("aaa") == counter.metadata)
 
       val gauge = addGauge(sr, Seq("bbb"))(1f)
-      assert(metrics.schemas.get("bbb").metricBuilder == gauge.metadata)
+      assert(metrics.schemas.get("bbb") == gauge.metadata)
 
       val histo = addHisto(sr, Seq("ccc"))
-      assert(metrics.schemas.get("ccc").metricBuilder == histo.metadata)
+      assert(metrics.schemas.get("ccc") == histo.metadata)
     }
 
     // scalafix:on StoreGaugesAsMemberVariables
@@ -270,9 +271,12 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     val metrics = Metrics.createDetached()
     val sr = new MetricsStatsReceiver(metrics)
 
-    val aSchema = CounterSchema(MetricBuilder(name = Seq("a"), statsReceiver = sr).withKernel)
-    val bSchema = HistogramSchema(MetricBuilder(name = Seq("b"), statsReceiver = sr).withKernel)
-    val cSchema = GaugeSchema(MetricBuilder(name = Seq("c"), statsReceiver = sr).withKernel)
+    val aSchema =
+      MetricBuilder(name = Seq("a"), metricType = CounterType, statsReceiver = sr).withKernel
+    val bSchema =
+      MetricBuilder(name = Seq("b"), metricType = HistogramType, statsReceiver = sr).withKernel
+    val cSchema =
+      MetricBuilder(name = Seq("c"), metricType = GaugeType, statsReceiver = sr).withKernel
 
     val expression = ExpressionSchema(
       "test_expression",
@@ -284,13 +288,16 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     val cGauge = sr.scope(("test")).addGauge(cSchema) { 1 }
 
     // what we expected as hydrated metric builders
-    val aaSchema = CounterSchema(MetricBuilder(name = Seq("test", "a"), statsReceiver = sr))
-    val bbSchema = HistogramSchema(
+    val aaSchema =
+      MetricBuilder(name = Seq("test", "a"), metricType = CounterType, statsReceiver = sr)
+    val bbSchema =
       MetricBuilder(
         name = Seq("test", "b"),
         percentiles = BucketedHistogram.DefaultQuantiles,
-        statsReceiver = sr))
-    val ccSchema = GaugeSchema(MetricBuilder(name = Seq("test", "c"), statsReceiver = sr))
+        metricType = HistogramType,
+        statsReceiver = sr)
+    val ccSchema =
+      MetricBuilder(name = Seq("test", "c"), metricType = GaugeType, statsReceiver = sr)
 
     val expected_expression = ExpressionSchema(
       "test_expression",
@@ -307,24 +314,25 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     val metrics = Metrics.createDetached()
     val sr = new MetricsStatsReceiver(metrics)
     val exporter = new MetricsExporter(metrics)
-    val aSchema = CounterSchema(MetricBuilder(name = Seq("a"), statsReceiver = sr).withKernel)
+    val aCounter =
+      MetricBuilder(name = Seq("a"), metricType = CounterType, statsReceiver = sr).withKernel
 
-    val expression = ExpressionSchema("test_expression", Expression(aSchema))
+    val expression = ExpressionSchema("test_expression", Expression(aCounter))
       .register()
     assert(exporter.expressions.keySet.size == 1)
 
-    val expressionWithServiceName = ExpressionSchema("test_expression", Expression(aSchema))
+    val expressionWithServiceName = ExpressionSchema("test_expression", Expression(aCounter))
       .withServiceName("thrift")
       .register()
     assert(exporter.expressions.keySet.size == 2)
 
-    val expressionWithNamespace = ExpressionSchema("test_expression", Expression(aSchema))
+    val expressionWithNamespace = ExpressionSchema("test_expression", Expression(aCounter))
       .withNamespace("a", "b")
       .register()
     assert(exporter.expressions.keySet.size == 3)
 
     val expressionWithNamespaceAndServiceName =
-      ExpressionSchema("test_expression", Expression(aSchema))
+      ExpressionSchema("test_expression", Expression(aCounter))
         .withNamespace("a", "b").withServiceName("thrift")
         .register()
     assert(exporter.expressions.keySet.size == 4)

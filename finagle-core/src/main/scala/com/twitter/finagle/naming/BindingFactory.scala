@@ -259,12 +259,12 @@ object BindingFactory {
         val displayed = displayFn(bound)
         val statsWithBoundName = new StatsReceiverProxy {
           protected def self: StatsReceiver = stats
-          override def stat(schema: HistogramSchema): Stat =
-            stats.stat(HistogramSchema(schema.metricBuilder.withIdentifier(Some(displayed))))
-          override def counter(schema: CounterSchema): Counter =
-            stats.counter(CounterSchema(schema.metricBuilder.withIdentifier(Some(displayed))))
-          override def addGauge(schema: GaugeSchema)(f: => Float): Gauge =
-            stats.addGauge(GaugeSchema(schema.metricBuilder.withIdentifier(Some(displayed))))(f)
+          override def stat(metricBuilder: MetricBuilder): Stat =
+            stats.stat(metricBuilder.withIdentifier(Some(displayed)))
+          override def counter(metricBuilder: MetricBuilder): Counter =
+            stats.counter(metricBuilder.withIdentifier(Some(displayed)))
+          override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge =
+            stats.addGauge(metricBuilder.withIdentifier(Some(displayed)))(f)
         }
 
         val updatedParams =

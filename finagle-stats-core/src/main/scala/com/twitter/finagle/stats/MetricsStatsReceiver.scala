@@ -2,11 +2,12 @@ package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle.http.{HttpMuxHandler, Route, RouteIndex}
+import com.twitter.finagle.stats.MetricBuilder.{CounterType, GaugeType, HistogramType}
 import com.twitter.finagle.stats.exp.{ExpressionSchema, ExpressionSchemaKey}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Future, FuturePool, Time}
 import com.twitter.util.lint.{Category, GlobalRules, Issue, Rule}
+import com.twitter.util.{Future, FuturePool, Time}
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.LongAdder
 import scala.collection.JavaConverters._
@@ -115,35 +116,38 @@ class MetricsStatsReceiver(val registry: Metrics)
   /**
    * Create and register a counter inside the underlying Metrics library
    */
-  def counter(schema: CounterSchema): Counter = {
+  def counter(metricBuilder: MetricBuilder): Counter = {
+    validateMetricType(metricBuilder, CounterType)
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.counter on $schema.metricBuilder.name")
+      log.trace(s"Calling StatsReceiver.counter on $metricBuilder.name")
     counterRequests.increment()
 
-    val storeCounter = registry.getOrCreateCounter(schema)
+    val storeCounter = registry.getOrCreateCounter(metricBuilder)
     storeCounter.counter
   }
 
   /**
    * Create and register a stat (histogram) inside the underlying Metrics library
    */
-  def stat(schema: HistogramSchema): Stat = {
+  def stat(metricBuilder: MetricBuilder): Stat = {
+    validateMetricType(metricBuilder, HistogramType)
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.stat for $schema.metricBuilder.name")
+      log.trace(s"Calling StatsReceiver.stat for $metricBuilder.name")
     statRequests.increment()
-    val storeStat = registry.getOrCreateStat(schema)
+    val storeStat = registry.getOrCreateStat(metricBuilder)
     storeStat.stat
   }
 
-  override def addGauge(schema: GaugeSchema)(f: => Float): Gauge = {
+  override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge = {
+    validateMetricType(metricBuilder, GaugeType)
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.addGauge for $schema.metricBuilder.name")
+      log.trace(s"Calling StatsReceiver.addGauge for $metricBuilder.name")
     gaugeRequests.increment()
-    super.addGauge(schema)(f)
+    super.addGauge(metricBuilder)(f)
   }
 
-  protected[this] def registerGauge(gaugeSchema: GaugeSchema, f: => Float): Unit = {
-    registry.registerGauge(gaugeSchema, f)
+  protected[this] def registerGauge(metricBuilder: MetricBuilder, f: => Float): Unit = {
+    registry.registerGauge(metricBuilder, f)
   }
 
   protected[this] def deregisterGauge(name: Seq[String]): Unit = {
@@ -182,7 +186,7 @@ class MetricsExporter(val registry: Metrics, val logger: Logger)
    * Exposes MetricSchemas for SchemaRegistry.
    * @return a map of metric names to their full MetricSchemas.
    */
-  override def schemas(): Map[String, MetricSchema] = registry.schemas.asScala.toMap
+  override def schemas(): Map[String, MetricBuilder] = registry.schemas.asScala.toMap
 
   /**
    * Exposes Metric Expressions for ExpressionRegistry.

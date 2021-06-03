@@ -119,15 +119,15 @@ object StatsReceiverBenchmark {
           self.stat(verbosity, names: _*)
       }
 
-    def counter(schema: CounterSchema): Counter =
-      counterMemo(schema.metricBuilder.name -> schema.metricBuilder.verbosity)
+    def counter(metricBuilder: MetricBuilder): Counter =
+      counterMemo(metricBuilder.name -> metricBuilder.verbosity)
 
-    def stat(schema: HistogramSchema): Stat =
-      statMemo(schema.metricBuilder.name -> schema.metricBuilder.verbosity)
+    def stat(metricBuilder: MetricBuilder): Stat =
+      statMemo(metricBuilder.name -> metricBuilder.verbosity)
 
-    def addGauge(schema: GaugeSchema)(f: => Float): Gauge = {
+    def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge = {
       // scalafix:off StoreGaugesAsMemberVariablesStatsReceiverProxyStatsReceiverProxy
-      self.addGauge(schema)(f)
+      self.addGauge(metricBuilder)(f)
       // scalafix:on StoreGaugesAsMemberVariables
     }
 

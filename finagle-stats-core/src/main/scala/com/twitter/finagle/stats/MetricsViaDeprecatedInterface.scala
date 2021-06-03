@@ -1,5 +1,5 @@
 package com.twitter.finagle.stats
-
+import com.twitter.finagle.stats.MetricBuilder.{CounterType, GaugeType, HistogramType}
 import java.util
 
 /**
@@ -15,21 +15,37 @@ private[stats] class MetricsViaDeprecatedInterface(metrics: Metrics) {
 
   def getOrCreateCounter(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreCounter =
     underlying.getOrCreateCounter(
-      CounterSchema(MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)))
+      MetricBuilder(
+        name = names,
+        verbosity = verbosity,
+        metricType = CounterType,
+        statsReceiver = null))
 
   def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit =
     underlying.registerGauge(
-      GaugeSchema(MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)),
+      MetricBuilder(
+        name = names,
+        verbosity = verbosity,
+        metricType = GaugeType,
+        statsReceiver = null),
       f)
 
   def registerLongGauge(verbosity: Verbosity, names: Seq[String], f: => Long): Unit =
     underlying.registerLongGauge(
-      GaugeSchema(MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)),
+      MetricBuilder(
+        name = names,
+        verbosity = verbosity,
+        metricType = GaugeType,
+        statsReceiver = null),
       f)
 
   def getOrCreateStat(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreStat =
     underlying.getOrCreateStat(
-      HistogramSchema(MetricBuilder(name = names, verbosity = verbosity, statsReceiver = null)))
+      MetricBuilder(
+        name = names,
+        verbosity = verbosity,
+        metricType = GaugeType,
+        statsReceiver = null))
 
   def getOrCreateStat(
     verbosity: Verbosity,
@@ -37,12 +53,12 @@ private[stats] class MetricsViaDeprecatedInterface(metrics: Metrics) {
     percentiles: IndexedSeq[Double]
   ): MetricsStore.StoreStat =
     underlying.getOrCreateStat(
-      HistogramSchema(
-        MetricBuilder(
-          name = names,
-          verbosity = verbosity,
-          percentiles = percentiles,
-          statsReceiver = null)))
+      MetricBuilder(
+        name = names,
+        verbosity = verbosity,
+        percentiles = percentiles,
+        metricType = HistogramType,
+        statsReceiver = null))
 
   def gauges(): util.Map[String, Number] = underlying.gauges
   def counters(): util.Map[String, Number] = underlying.counters
