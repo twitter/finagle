@@ -3,6 +3,7 @@ package com.twitter.finagle.integration
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.thrift.{Protocols, RichServerParam, ThriftUtil}
@@ -10,7 +11,6 @@ import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Return}
 import java.net.{InetAddress, InetSocketAddress}
-
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -127,6 +127,60 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
 
       Await.result(server.close(), 5.seconds)
     }
+  }
+
+  val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+  def mkService(): Service[Request, Response] = {
+    new Service[Request, Response] {
+      override def apply(request: Request): Future[Response] = {
+        val response = Response(Status.Ok)
+        val localSize = Dtab.local.dentries0.length.toString
+        val limitedSize = Dtab.limited.dentries0.length.toString
+        response.contentString = s"local:${localSize} limited:${limitedSize}"
+        Future.value(response)
+      }
+    }
+  }
+  test("Http server + Http client:  propagate Dtab.local") {
+    val service = mkService()
+    val http = Http.server
+      .withLabel("someservice")
+      .serve(address, service)
+
+    val httpAddr = http.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = Http.client.newService(s":${httpAddr.getPort}", "http")
+    val request = Request("/foo")
+    val response = Await.result(client(request), 5.seconds)
+
+    assert(response.contentString == "local:0 limited:0")
+
+    Dtab.unwind {
+      Dtab.local = Dtab.read("/foo=>/bar")
+      assert(Await.result(client(request), 5.seconds).contentString == "local:1 limited:0")
+    }
+
+    Await.result(client.close(), 5.seconds)
+  }
+
+  test("Http server + Http client: do NOT propagate Dtab.limited") {
+    val service = mkService()
+    val http = Http.server
+      .withLabel("someservice")
+      .serve(address, service)
+
+    val httpAddr = http.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = Http.client.newService(s":${httpAddr.getPort}", "http")
+    val request = Request("/foo")
+    val response = Await.result(client(request), 5.seconds)
+
+    assert(response.contentString == "local:0 limited:0")
+
+    Dtab.unwind {
+      Dtab.limited = Dtab.read("/foo=>/bar")
+      assert(Await.result(client(request), 5.seconds).contentString == "local:0 limited:0")
+    }
+
+    Await.result(client.close(), 5.seconds)
   }
 
   test("thriftmux server + Finagle thrift client: do NOT propagate Dtab.limited") {

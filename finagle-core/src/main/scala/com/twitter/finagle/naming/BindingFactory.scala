@@ -95,7 +95,7 @@ class BindingFactory[Req, Rep] private[naming] (
 
   private[this] val dtabCache = {
     val newFactory: Dtabs => ServiceFactory[Req, Rep] = {
-      case Dtabs(baseDtab, localDtab, limitedDtab) =>
+      case Dtabs(baseDtab, limitedDtab, localDtab) =>
         val dynFactory = new DynNameFactory(
           NameInterpreter.bind(baseDtab ++ limitedDtab ++ localDtab, path),
           nameTreeCache,
@@ -141,12 +141,12 @@ class BindingFactory[Req, Rep] private[naming] (
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-    dtabCache(Dtabs(baseDtab(), Dtab.local, Dtab.limited), conn)
+    dtabCache(Dtabs(baseDtab(), Dtab.limited, Dtab.local), conn)
 
   def close(deadline: Time): Future[Unit] =
     Closable.sequence(dtabCache, nameTreeCache, nameCache).close(deadline)
 
-  override def status: Status = dtabCache.status(Dtabs(baseDtab(), Dtab.local, Dtab.limited))
+  override def status: Status = dtabCache.status(Dtabs(baseDtab(), Dtab.limited, Dtab.local))
 }
 
 object BindingFactory {
@@ -156,7 +156,7 @@ object BindingFactory {
   private[finagle] val NamerPathAnnotationKey = "clnt/namer.path"
   private[finagle] val DtabBaseAnnotationKey = "clnt/namer.dtab.base"
 
-  private case class Dtabs(base: Dtab, local: Dtab, limited: Dtab) extends CachedHashCode.ForClass {
+  private case class Dtabs(base: Dtab, limited: Dtab, local: Dtab) extends CachedHashCode.ForClass {
     override protected def computeHashCode: Int = {
       var hash = 1
       hash = 31 * hash + base.hashCode

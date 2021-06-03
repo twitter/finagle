@@ -11,8 +11,8 @@ New Features
 ~~~~~~~~~~~~
 
 * finagle-core: Introduce `Dtab.limited`, which is a process-local `Dtab` that will
-  NOT be remotely broadcast for protocols for any protocol, where `Dtab.local` will
-  be broadcast for propagation on supported protocols. For path name resolution, the
+  NOT be remotely broadcast for any protocol, where `Dtab.local` will be
+  broadcast for propagation on supported protocols. For path name resolution, the
   `Dtab.local` will take precedence over the `Dtab.limited`, if the same path is
   defined in both, and both take precedence over the `Dtab.base`. The existing
   `Dtab.local` request propagation behavior remains unchanged. ``PHAB_ID=D677860``
