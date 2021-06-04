@@ -1,5 +1,7 @@
 package com.twitter.finagle.server
 
+import com.twitter.finagle._
+import com.twitter.finagle.exp.ForkingSchedulerFilter
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.{
@@ -129,9 +131,9 @@ object StackServer {
     // as measure queueing within the server via ConcurrentRequestFilter.
     stk.push(WireTracingFilter.serverModule)
     stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
-    // The TraceInitializerFilter must be pushed after most other modules so that
-    // any Tracing produced by those modules is enclosed in the appropriate
-    // span.
+
+    // forks the execution if the current scheduler supports forking
+    stk.push(ForkingSchedulerFilter.server)
 
     if (shouldOffloadEarly) {
       // This module is placed at the top of the stack and shifts Future execution context
@@ -139,6 +141,9 @@ object StackServer {
       stk.push(OffloadFilter.server)
     }
 
+    // The TraceInitializerFilter must be pushed after most other modules so that
+    // any Tracing produced by those modules is enclosed in the appropriate
+    // span.
     stk.push(TraceInitializerFilter.serverModule)
     stk.push(MonitorFilter.serverModule)
 
