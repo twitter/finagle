@@ -1,21 +1,23 @@
 #!/bin/bash
 
-sbtver=1.3.10
-sbtjar=sbt-launch.jar
-sbtsha128=f49861befe36746728182ea7efb30096c724b0d7
+set -eo pipefail
+
+sbtver="1.5.3"
+sbtjar="sbt-launch-$sbtver.jar"
+sbtsha128="1ca2d0ee419a1f82f512f2aa8556d6e262b37961"
 
 sbtrepo="https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch"
 
-if [ ! -f $sbtjar ]; then
+if [ ! -f "sbt-launch.jar" ]; then
   echo "downloading $PWD/$sbtjar" 1>&2
-  if ! curl --location --silent --fail --remote-name $sbtrepo/$sbtver/$sbtjar; then
+  if ! curl --location --silent --fail -o "sbt-launch.jar" "$sbtrepo/$sbtver/$sbtjar"; then
     exit 1
   fi
 fi
 
-checksum=`openssl dgst -sha1 $sbtjar | awk '{ print $2 }'`
+checksum=`openssl dgst -sha1 sbt-launch.jar | awk '{ print $2 }'`
 if [ "$checksum" != $sbtsha128 ]; then
-  echo "bad $PWD/$sbtjar.  delete $PWD/$sbtjar and run $0 again."
+  echo "bad $PWD/sbt-launch.jar.  delete $PWD/sbt-launch.jar and run $0 again."
   exit 1
 fi
 
@@ -26,4 +28,4 @@ java -ea                          \
   $SBT_OPTS                       \
   $JAVA_OPTS                      \
   -DSKIP_SBT=1                    \
-  -jar $sbtjar "$@"
+  -jar "sbt-launch.jar" "$@"
