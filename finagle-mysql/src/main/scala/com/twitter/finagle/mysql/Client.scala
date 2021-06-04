@@ -315,6 +315,8 @@ private class StdClient(
 
   def prepare(sql: String): PreparedStatement = new PreparedStatement {
     def apply(ps: Parameter*): Future[Result] = factory().flatMap { svc =>
+      // PrepareRequests and Responses are cached per-connection. Unique prepare requests are
+      // issued and update cache. See [[com.twitter.finagle.mysql.PrepareCache]]
       svc(PrepareRequest(sql))
         .flatMap {
           case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
