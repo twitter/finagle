@@ -3,7 +3,6 @@ name: continuous integration
 env:
   JAVA_OPTS: "-Dsbt.log.noformat=true"
   TRAVIS: "true" # pretend we're TravisCI
-  SBT_VERSION: "1.5.3"
 
 defaults:
   run:
@@ -37,13 +36,14 @@ jobs:
         uses: actions/cache@v2
         env:
           cache-name: cache-build-deps
+          sbt-version: 1.5.3
         with:
           path: |
             ~/.dodo
             ~/.ivy2/cache
             ~/.ivy2/local/com.twitter
             ~/.sbt
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ SBT_VERSION }}-${{ matrix.scala }}-${{ matrix.java }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.sbt-version }}-${{ matrix.scala }}-${{ matrix.java }}
       - name: update cache
         run: |
           if [ -f ~/.ivy2/cache ]; then
