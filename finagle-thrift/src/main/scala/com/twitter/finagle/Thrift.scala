@@ -614,6 +614,16 @@ object Thrift
       service: Service[Array[Byte], Array[Byte]]
     ): Closable = new ThriftSerialServerDispatcher(transport, service)
 
+    /**
+     * Configure the service class that may be used with this server to
+     * collect instrumentation metadata. This is not necessary to run a
+     * service.
+     *
+     * @note that when using the `.serveIface` methods this is unnecessary.
+     */
+    def withServiceClass(clazz: Class[_]): Server =
+      configured(param.ServiceClass(Some(clazz)))
+
     def withProtocolFactory(protocolFactory: TProtocolFactory): Server =
       configured(param.ProtocolFactory(protocolFactory))
 

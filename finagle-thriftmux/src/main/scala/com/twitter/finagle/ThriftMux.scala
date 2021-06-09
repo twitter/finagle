@@ -578,6 +578,16 @@ object ThriftMux
       configured(Thrift.param.ProtocolFactory(pf))
 
     /**
+     * Configure the service class that may be used with this server to
+     * collect instrumentation metadata. This is not necessary to run a
+     * service.
+     *
+     * @note that when using the `.serveIface` methods this is unnecessary.
+     */
+    def withServiceClass(clazz: Class[_]): Server =
+      configured(Thrift.param.ServiceClass(Some(clazz)))
+
+    /**
      * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided stack.
      */
     def withStack(stack: Stack[ServiceFactory[mux.Request, mux.Response]]): Server =
