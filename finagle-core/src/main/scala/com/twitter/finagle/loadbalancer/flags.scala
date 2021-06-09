@@ -58,7 +58,7 @@ package exp {
           "\tAccepts one of 3 values of EagerConnectionType: Enable, Disable, and ForceWithDtab.\n" +
           "\tWhen enabled, the aperture load balancer will eagerly establish connections with\n" +
           "\tall endpoints in the aperture. This does not typically apply for hosts resolved in\n" +
-          "\tresult of request-leve dtab overrides unless set to ForceWithDtab."
+          "\tresult of request-level dtab overrides unless set to ForceWithDtab."
       )
 
 }
