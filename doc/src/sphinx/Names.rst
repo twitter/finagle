@@ -319,12 +319,63 @@ Finagle has protocol support for delegation passing in :ref:`TTwitter
 <thrift_and_scrooge>`, :ref:`Mux <mux>`, its variant :api:`ThriftMux
 <com/twitter/finagle/ThriftMux$>`, and :api:`HTTP
 <com/twitter/finagle/Http$>`. When these protocols are used,
-delegations that are added dynamically to a request are in effect
+delegations that are added dynamically to a request can be in effect
 throughout the distributed request graph --- i.e. scope of the
 namespace is a transaction. Delegations are added dynamically through
 the :api:`Dtab <com/twitter/finagle/Dtab$>` API.
 
 (This is a powerful facility that should be used with care.)
+
+The Dtab API 
+-----------
+
+Delegations can be added or overridden dynamically through the 
+:api:`Dtab <com/twitter/finagle/Dtab$>` API -- specifically by way of scoped 
+delegation tables `Dtab.local` and `Dtab.limited`.
+
+The `local` delegation is defined as the "per-request," propagated
+scope. It's ideal for overrides you'd like to apply to the entire request
+graph, as it applies to downstream services. 
+
+The `limited` delegation is the "per-request," non-propagated
+scope. Unlike `Dtab.local`, `Dtab.limited` applies only to the current request
+and does not affect the rest of the call graph. Furthermore, when a 
+`Dtab.limited` conflicts with a `Dtab.local`, only the `Dtab.local` is respected.  
+
+The higher granularity of a `limited` delegation allows for more fine-grained 
+control over fallback and failover behavior. This is ideal for large request 
+graphs in which only some endpoints need to be rerouted. As more endpoints
+begin to fail, the `local` granularity becomes a more useful "broad
+strokes" approach to rerouting. 
+
+To demonstrate this further, consider the following example service graph:
+`ServiceA -> ServiceB -> ServiceC`
+
+A `Dtab.local` set on a request to *ServiceA* will also be reflected in 
+*ServiceB* and *ServiceC*. A `Dtab.limited` set on a request to *ServiceA*, 
+however, will only exist for the scope of the request in *ServiceA*. The state 
+of the `Dtab.limited` will not be visible to *ServiceB* or *ServiceC*.
+
+Let's consider a few more examples:
+
+1.  *ServiceA* sets a `Dtab.local` for *ServiceC* for a request, rerouting it to 
+    *ServiceD*. *ServiceB* will, accordingly, propagate the `Dtab.local` and 
+    re-route requests to *ServiceD*.  
+
+
+2.  *ServiceA* sets a `Dtab.limited` for *ServiceC* for a request, rerouting it to
+    *ServiceD*. This has no effect because *ServiceA* does not call *ServiceC* 
+    directly and the limited state is not propagated to *ServiceB*.
+
+
+3.  *ServiceA* sets a `Dtab.local` for *ServiceC*, rerouting it to *ServiceD*. 
+    *ServiceA* also sets a `Dtab.limited` for *ServiceC*, rerouting it to *ServiceE*. 
+    The behavior of example 1 will be seen again.
+
+
+4.  *ServiceA* sets a `Dtab.limited` for *ServiceB* for a request, rerouting it to 
+    *ServiceD*. The request to *ServiceB* will be rerouted, but the state will not
+    be propagated. 
 
 .. _addr:
 
