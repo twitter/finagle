@@ -192,8 +192,9 @@ abstract class AbstractThriftSmuxSslTest extends AnyFunSuite with Eventually {
       }
       // await(client.query("hello"))
       e match {
-        case x: com.twitter.finagle.UnknownChannelException => throw x 
-        case x: com.twitter.finagle.Failure => throw x
+        case x: com.twitter.finagle.UnknownChannelException => println(x.toString); throw x 
+        case x: com.twitter.finagle.Failure => println(x.toString); throw x
+	case _ => // nothing
       }
 
       eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
