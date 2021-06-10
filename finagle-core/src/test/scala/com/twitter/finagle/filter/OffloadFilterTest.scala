@@ -3,12 +3,10 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Awaitable, Future, FuturePool, MockTimer, Promise, Time}
+import com.twitter.util.{Await, Awaitable, Future, FuturePool, Promise}
 import com.twitter.finagle.util.DefaultTimer.Implicit
 import java.util.concurrent.{CountDownLatch, Executors}
 import org.scalatest.BeforeAndAfterAll
-import scala.collection.mutable.ArrayBuffer
 import org.scalatest.funsuite.AnyFunSuite
 
 class OffloadFilterTest extends AnyFunSuite with BeforeAndAfterAll {
@@ -156,80 +154,5 @@ class OffloadFilterTest extends AnyFunSuite with BeforeAndAfterAll {
       new OffloadFilter.Server[Unit, Option[Int]](FuturePool.interruptible(executor)).andThen(next)
     assert(await(s()) == None)
     assert(await(Contexts.local.let(key, 4) { s() }) == Some(4))
-  }
-
-  class MockFuturePool extends FuturePool {
-    private val queue = ArrayBuffer.empty[() => Any]
-    def apply[T](f: => T): Future[T] = {
-      queue += { () => f }
-      Future.never
-    }
-
-    def runAll(): Unit = {
-      while (queue.nonEmpty) {
-        queue.remove(0).apply()
-      }
-    }
-
-    def isEmpty: Boolean = queue.isEmpty
-
-    override def numPendingTasks: Long = queue.size
-  }
-
-  test("sample delay should sample the stats") {
-    val stats = new InMemoryStatsReceiver
-    val pool = new MockFuturePool
-    val timer = new MockTimer
-    val sampleDelay = new OffloadFilter.SampleQueueStats(pool, stats, timer)
-    Time.withCurrentTimeFrozen { ctrl =>
-      sampleDelay()
-
-      ctrl.advance(50.milliseconds)
-      pool.runAll()
-      assert(stats.stats(Seq("delay_ms")) == Seq(50))
-      assert(stats.stats(Seq("pending_tasks")) == Seq(0))
-      assert(timer.tasks.nonEmpty)
-      assert(pool.isEmpty)
-
-      ctrl.advance(50.milliseconds)
-      timer.tick()
-      assert(timer.tasks.isEmpty)
-      assert(!pool.isEmpty)
-
-      ctrl.advance(200.milliseconds)
-      pool(()) // one pending task
-      pool.runAll()
-
-      assert(stats.stats(Seq("delay_ms")) == Seq(50, 200))
-      assert(stats.stats(Seq("pending_tasks")) == Seq(0, 1))
-    }
-  }
-
-  test("rejection handler does what it's supposed to do") {
-    val stats = new InMemoryStatsReceiver
-    val pool = new OffloadFilter.OffloadThreadPool(1, 1, stats)
-    val blockOnMe = new Promise[Unit] with Runnable {
-      def run(): Unit = Await.result(this)
-    }
-
-    // block the only worker we have
-    pool.submit(blockOnMe)
-
-    // Take up a slot in the queue
-    pool.submit(new Runnable {
-      def run(): Unit = ()
-    })
-    assert(stats.counters(Seq("not_offloaded_tasks")) == 0)
-
-    // Submit a task for rejection
-    var caller: Thread = null
-    pool.submit(new Runnable {
-      def run(): Unit = caller = Thread.currentThread()
-    })
-
-    assert(caller eq Thread.currentThread())
-    assert(stats.counters(Seq("not_offloaded_tasks")) == 1)
-    blockOnMe.setDone()
-    pool.shutdown()
   }
 }
