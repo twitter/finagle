@@ -2,7 +2,7 @@ package com.twitter.finagle.zipkin.core
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.tracing.TraceId
-import com.twitter.util.{Duration, Future, Time, Timer}
+import com.twitter.util.{Duration, Future, Local, Time, Timer}
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable.ListBuffer
 
@@ -67,7 +67,16 @@ private class DeadlineSpanMap(
       } else {
         f(ms)
         if (ms.isOnHold) {
-          timer.doLater(hold) { complete(traceId, ms) }
+          // We clear the locals because we don't need them and we don't want them to
+          // be dragged through the GC unnecessarily. However, since we're clearing
+          // them we need to compute the `Time` at which to trigger the task beforehand.
+          // If we don't we'll be missing locals used to manipulate the Time.now
+          // function which is used to compute the absolute time from `hold` and this
+          // can make it really tough to test.
+          val when = hold.fromNow
+          Local.letClear {
+            timer.doAt(when) { complete(traceId, ms) }
+          }
         }
         None
       }
