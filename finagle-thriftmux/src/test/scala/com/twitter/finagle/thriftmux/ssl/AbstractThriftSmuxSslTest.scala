@@ -187,7 +187,7 @@ abstract class AbstractThriftSmuxSslTest extends AnyFunSuite with Eventually {
 
       // If the server rejects the handshake, it just hangs up. Therefore,
       // we expect to get a ChannelClosedException here.
-      val e = intercept[ChannelClosedException] {
+      intercept[ChannelClosedException] {
         await(client.query("hello"))
       }
 
