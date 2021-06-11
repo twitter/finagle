@@ -2,6 +2,7 @@ package com.twitter.finagle.netty4
 
 import com.twitter.finagle.{
   CancelledConnectionException,
+  ChannelClosedException,
   ConnectionFailedException,
   Failure,
   FailureFlags,
@@ -107,7 +108,10 @@ private[finagle] final class ConnectionBuilder(
         } else if (!channelF.channel.isOpen) {
           // Somehow the channel ended up closed before we got here, likely as
           // a result of `init` `ChannelInitializer` behavior.
-          transportP.setException(Failure.rejected("Netty4 Channel was found in a closed state"))
+          transportP.setException(
+            new ChannelClosedException(
+              Failure.rejected("Netty4 Channel was found in a closed state"),
+              addr))
         } else {
           connectLatencyStat.add(latency)
           val ch = channelF.channel
