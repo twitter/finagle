@@ -134,6 +134,12 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       }
 
       def boundAddress: SocketAddress = underlying.boundAddress
+
+      override def toString: String = {
+        val protocol = params[ProtocolLibrary].name
+        val label = if (serverLabel.isEmpty) "<unlabeled>" else serverLabel
+        s"ListeningServer($protocol, $label, $boundAddress)"
+      }
     }
 
   /**
