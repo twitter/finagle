@@ -40,7 +40,6 @@ junit_tests(
         "finagle/finagle-memcached/src/test/resources",
         "finagle/finagle-partitioning/src/main/scala",
         "finagle/finagle-serversets",
-        "finagle/finagle-toggle/src/main/scala",
         "util/util-core:scala",
         "util/util-hashing",
         "util/util-registry/src/main/scala",

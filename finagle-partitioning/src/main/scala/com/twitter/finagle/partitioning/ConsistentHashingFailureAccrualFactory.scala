@@ -82,8 +82,8 @@ private[finagle] object ConsistentHashingFailureAccrualFactory {
 
 /**
  * A FailureAccrual module that can additionally communicate `NodeHealth` via
- * `healthBroker`. The broker is shared between the `KetamaPartitionedClient` and
- * allows for unhealthy nodes to be ejected from the ring if ejectFailedHost is true.
+ * `healthBroker`. The broker allows for unhealthy nodes to be ejected from the
+ * ring if ejectFailedHost is true.
  */
 private[finagle] class ConsistentHashingFailureAccrualFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],

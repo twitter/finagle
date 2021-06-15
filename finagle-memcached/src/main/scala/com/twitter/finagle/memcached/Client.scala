@@ -3,7 +3,6 @@ package com.twitter.finagle.memcached
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.nio.charset.StandardCharsets
 import com.twitter.bijection.Bijection
-import com.twitter.concurrent.Broker
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.memcached.protocol._
@@ -12,21 +11,13 @@ import com.twitter.finagle.memcached.util.Bufs.{
   nonEmptyStringToBuf,
   seqOfNonEmptyStringToBuf
 }
-import com.twitter.finagle.partitioning.{
-  HashNodeKey,
-  NodeHealth,
-  NodeMarkedDead,
-  NodeRevived,
-  PartitionNode,
-  PartitionNodeMetadata
-}
-import com.twitter.finagle.service._
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.partitioning.PartitionNode
+
 import com.twitter.hashing._
 import com.twitter.io.Buf
 import com.twitter.util.{Command => _, Function => _, _}
 import com.twitter.finagle.memcached.util.{NotFound => muNotFound}
-import scala.collection.{immutable, mutable}
+import scala.collection.immutable
 
 object Client {
 
@@ -908,245 +899,6 @@ trait PartitionedClient extends Client {
 
   def stats(args: Option[String]): Future[Seq[String]] =
     throw new UnsupportedOperationException("No logical way to perform stats without a key")
-}
-
-private[finagle] object KetamaPartitionedClient {
-
-  private object NodeState extends Enumeration {
-    type t = this.Value
-    val Live, Ejected = Value
-  }
-
-  private case class Node(node: HashNode[Client], var state: NodeState.Value)
-
-  val DefaultNumReps = 160
-
-  val shardNotAvailableDistributor: Distributor[Client] = {
-    val failedService = new FailedService(new ShardNotAvailableException)
-    new SingletonDistributor(TwemcacheClient(failedService): Client)
-  }
-}
-
-/**
- * A partitioned client which implements consistent hashing across `cacheNodeGroup`.
- * The group is dynamic and the hash ring is rebuilt upon observed changes to
- * the group. It's also possible to communicate node health to this client by wiring
- * in a `nodeHealthBroker`. Unhealthy nodes are removed from the hash ring.
- *
- * TODO: This partitioning scheme should be moved inside the finagle stack
- * so that we can support non-bound names.
- */
-private[finagle] class KetamaPartitionedClient(
-  addrs: Var[Addr],
-  newService: PartitionNode => Service[Command, Response],
-  nodeHealthBroker: Broker[NodeHealth] = new Broker[NodeHealth],
-  statsReceiver: StatsReceiver = NullStatsReceiver,
-  keyHasher: KeyHasher = KeyHasher.KETAMA,
-  numReps: Int = KetamaPartitionedClient.DefaultNumReps,
-  oldLibMemcachedVersionComplianceMode: Boolean = false)
-    extends PartitionedClient { self =>
-
-  import KetamaPartitionedClient._
-
-  // We update those out of the request path so we need to make sure to synchronize on
-  // read-modify-write operations on `currentDistributor` and `distributor`.
-  // Note: Volatile-read from `clientOf` safety (not raciness) is guaranteed by JMM.
-  @volatile private[this] var currentDistributor: Distributor[Client] =
-    shardNotAvailableDistributor
-  @volatile private[this] var snapshot: immutable.Set[(HashNodeKey, HashNode[Client])] =
-    immutable.Set.empty
-
-  /** exposed for testing */
-  private[memcached] def ketamaNodes: immutable.Set[(HashNodeKey, HashNode[Client])] =
-    snapshot
-
-  private[this] val nodes = mutable.Map[HashNodeKey, Node]()
-
-  private[this] val ketamaNodesChanges: Event[immutable.Set[(HashNodeKey, HashNode[Client])]] = {
-
-    // Addresses in the current serverset that have been processed and have associated cache nodes.
-    // Access synchronized on `self`
-    var mapped: Map[Address, (HashNodeKey, HashNode[Client])] = Map.empty
-
-    // Last set Addrs that have been processed.
-    // Access synchronized on `self`
-    var prevAddrs = immutable.Set[Address]()
-
-    // `map` is called on updates to `addrs`.
-    // Cache nodes must only be created for new additions to the set of addresses; therefore
-    // we must keep track of addresses in the current set that already have associated nodes
-    val nodes: Var[Option[immutable.Set[(HashNodeKey, HashNode[Client])]]] = addrs.map {
-      case Addr.Bound(currAddrs, _) =>
-        self.synchronized {
-
-          // Add new nodes for new addresses
-          mapped ++= (currAddrs &~ prevAddrs).collect {
-            case addr @ Address.Inet(ia, cn) =>
-              val node = cn match {
-                case PartitionNodeMetadata(w, k) =>
-                  PartitionNode(ia.getHostName, ia.getPort, w, k)
-                case _ =>
-                  PartitionNode(ia.getHostName, ia.getPort, 1, None)
-              }
-              val key = HashNodeKey.fromPartitionNode(node)
-              val service = TwemcacheClient(newService(node))
-              addr -> (key -> HashNode[Client](key.identifier, node.weight, service))
-          }
-
-          // Remove old nodes no longer in the serverset
-          mapped --= prevAddrs &~ currAddrs
-          prevAddrs = currAddrs
-        }
-        Some(mapped.values.toSet)
-
-      case Addr.Pending =>
-        // listener can filter these out
-        None
-      case _ =>
-        Some(immutable.Set.empty)
-    }
-    nodes.changes
-      .filter(_.isDefined) // Do not notify clients about Addr.Pending changes
-      .map(_.get)
-  }
-
-  private[this] val ejectionCount = statsReceiver.counter("ejections")
-  private[this] val revivalCount = statsReceiver.counter("revivals")
-  private[this] val nodeLeaveCount = statsReceiver.counter("leaves")
-  private[this] val nodeJoinCount = statsReceiver.counter("joins")
-  private[this] val keyRingRedistributeCount = statsReceiver.counter("redistributes")
-
-  // We need to keep this reference so the gauge is not garbage collected.
-  private[this] val liveNodesGauge = statsReceiver.addGauge("live_nodes") {
-    self.synchronized { nodes.count { case (_, Node(_, state)) => state == NodeState.Live } }
-  }
-
-  // We need to keep this reference so the gauge is not garbage collected.
-  private[this] val deadNodesGauge = statsReceiver.addGauge("dead_nodes") {
-    self.synchronized { nodes.count { case (_, Node(_, state)) => state == NodeState.Ejected } }
-  }
-
-  // We also listen on a broker to eject/revive cache nodes.
-  nodeHealthBroker.recv.foreach {
-    case NodeMarkedDead(key) => ejectNode(key)
-    case NodeRevived(key) => reviveNode(key)
-  }
-
-  // We listen for changes to the set of nodes to update the cache ring.
-  private[this] val listener: Closable = ketamaNodesChanges.filter(_.nonEmpty).respond(updateNodes)
-
-  override def clientOf(key: String): Client = {
-    // use `getBytes(String)` as it is faster
-    val bytes = key.getBytes(StandardCharsets.UTF_8.name())
-    val hash = keyHasher.hashKey(bytes)
-    currentDistributor.nodeForHash(hash)
-  }
-
-  private[this] def rebuildDistributor(): Unit = self.synchronized {
-    keyRingRedistributeCount.incr()
-
-    val liveNodes = nodes.collect({ case (_, Node(node, NodeState.Live)) => node })
-
-    currentDistributor =
-      if (liveNodes.isEmpty) shardNotAvailableDistributor
-      else
-        new ConsistentHashingDistributor(
-          liveNodes.toSeq,
-          numReps,
-          oldLibMemcachedVersionComplianceMode)
-  }
-
-  private[this] def updateNodes(current: immutable.Set[(HashNodeKey, HashNode[Client])]): Unit =
-    self.synchronized {
-      val old = snapshot
-      // remove old nodes and release clients
-      nodes --= (old &~ current).collect {
-        case (key, node) =>
-          node.handle.close()
-          nodeLeaveCount.incr()
-          key
-      }
-
-      // new joined node appears as Live state
-      nodes ++= (current &~ old).collect {
-        case (key, node) =>
-          nodeJoinCount.incr()
-          key -> Node(node, NodeState.Live)
-      }
-
-      snapshot = current
-      rebuildDistributor()
-    }
-
-  private[this] def ejectNode(key: HashNodeKey) = self.synchronized {
-    nodes.get(key) match {
-      case Some(node) if node.state == NodeState.Live =>
-        node.state = NodeState.Ejected
-        rebuildDistributor()
-        ejectionCount.incr()
-      case _ =>
-    }
-  }
-
-  private[this] def reviveNode(key: HashNodeKey) = self.synchronized {
-    nodes.get(key) match {
-      case Some(node) if node.state == NodeState.Ejected =>
-        node.state = NodeState.Live
-        rebuildDistributor()
-        revivalCount.incr()
-      case _ =>
-    }
-  }
-
-  // await for the readiness of initial loading of ketamaNodeGrp prior to first request
-  // this readiness here will be fulfilled the first time the ketamaNodeGrp is updated.
-  // If the group is empty, requests will throw NoShardAvailableException to users
-  // indicating a loss of cache access.
-  val ready: Future[Unit] = ketamaNodesChanges.toFuture().unit
-
-  override def getsResult(keys: Iterable[String]) =
-    ready.interruptible().before(super.getsResult(keys))
-
-  override def getResult(keys: Iterable[String]) =
-    ready.interruptible().before(super.getResult(keys))
-
-  override def set(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready.interruptible().before(super.set(key, flags, expiry, value))
-
-  override def delete(key: String) =
-    ready.interruptible().before(super.delete(key))
-
-  override def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
-    ready.interruptible().before(super.checkAndSet(key, flags, expiry, value, casUnique))
-
-  override def add(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready.interruptible().before(super.add(key, flags, expiry, value))
-
-  override def replace(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready.interruptible().before(super.replace(key, flags, expiry, value))
-
-  override def prepend(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready.interruptible().before(super.prepend(key, flags, expiry, value))
-
-  override def append(key: String, flags: Int, expiry: Time, value: Buf) =
-    ready.interruptible().before(super.append(key, flags, expiry, value))
-
-  override def incr(key: String, delta: Long) =
-    ready.interruptible().before(super.incr(key, delta))
-
-  override def decr(key: String, delta: Long) =
-    ready.interruptible().before(super.decr(key, delta))
-
-  def close(deadline: Time): Future[Unit] = synchronized {
-    val closables = mutable.ArrayBuffer[Closable]()
-    closables ++= nodes.values.map(_.node.handle)
-    closables += listener
-    Closables.all(closables.result().toSeq: _*).close(deadline)
-  }
-}
-
-object KetamaClient {
-  val DefaultNumReps = KetamaPartitionedClient.DefaultNumReps
 }
 
 /**

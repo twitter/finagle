@@ -2,18 +2,16 @@ package com.twitter.finagle.memcached.unit.util
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.Memcached.UsePartitioningMemcachedClientToggle
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
-import com.twitter.finagle.memcached.{Client, KetamaPartitionedClient, TwemcacheClient}
+import com.twitter.finagle.memcached.{Client, TwemcacheClient}
 import com.twitter.finagle.pool.BalancingPool
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.partitioning.{param => pparam}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
 import com.twitter.util.{Await, Time}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.mockito.MockitoSugar
@@ -51,32 +49,17 @@ class MemcachedTest extends AnyFunSuite with MockitoSugar with Eventually with I
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))
   }
 
-  test("Memcache.newPartitionedClient enables FactoryToService for old client") {
+  test("Memcache.newPartitionedClient enables FactoryToService for new client") {
     val sr = new InMemoryStatsReceiver
     val client = baseClient
       .configured(
         FailureAccrualFactory
           .Param(() => FailureAccrualPolicy.consecutiveFailures(100, Backoff.const(1.seconds)))
       )
-      .withStatsReceiver(sr)
+      .configured(Stats(sr))
       .newRichClient("memcache=127.0.0.1:12345")
-    testFactoryToService(client, Seq("memcache", "live_nodes"), sr)
+    testFactoryToService(client, Seq("memcache", "partitioner", "live_nodes"), sr)
     client.close()
-  }
-
-  test("Memcache.newPartitionedClient enables FactoryToService for new client") {
-    flag.overrides.let(UsePartitioningMemcachedClientToggle, 1.0) {
-      val sr = new InMemoryStatsReceiver
-      val client = baseClient
-        .configured(
-          FailureAccrualFactory
-            .Param(() => FailureAccrualPolicy.consecutiveFailures(100, Backoff.const(1.seconds)))
-        )
-        .configured(Stats(sr))
-        .newRichClient("memcache=127.0.0.1:12345")
-      testFactoryToService(client, Seq("memcache", "partitioner", "live_nodes"), sr)
-      client.close()
-    }
   }
 
   private[this] def testFactoryToService(
@@ -107,19 +90,10 @@ class MemcachedTest extends AnyFunSuite with MockitoSugar with Eventually with I
     client.close()
   }
 
-  test("Use new client when destination is Name.Bound") {
+  test("Use new client when destination is Name.bound") {
     val boundName = Name.bound((1 to 3).map(Address("localhost", _)): _*)
     val client = baseClient.newRichClient(boundName, "foo")
-    assert(client.isInstanceOf[KetamaPartitionedClient]) // old client
+    assert(client.isInstanceOf[TwemcacheClient]) // new client
     client.close()
-  }
-
-  test("Use new client with toggle even when destination is Name.bound") {
-    flag.overrides.let(UsePartitioningMemcachedClientToggle, 1.0) {
-      val boundName = Name.bound((1 to 3).map(Address("localhost", _)): _*)
-      val client = baseClient.newRichClient(boundName, "foo")
-      assert(client.isInstanceOf[TwemcacheClient]) // new client
-      client.close()
-    }
   }
 }

@@ -1,19 +1,16 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.Memcached.UsePartitioningMemcachedClientToggle
 import com.twitter.finagle.{param => ctfparam, _}
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.memcached.{Client, TwemcacheClient}
 import com.twitter.finagle.partitioning.param
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
 import com.twitter.util.ReadWriteVar
 import java.net.InetSocketAddress
 
 class MemcachedUtilityTest extends MemcachedTest {
 
-  protected[this] val isOldClient: Boolean = false
   protected[this] val redistributesKey: Seq[String] =
     Seq("test_client", "partitioner", "redistributes")
   protected[this] val leavesKey: Seq[String] = Seq(clientName, "partitioner", "leaves")
@@ -30,9 +27,7 @@ class MemcachedUtilityTest extends MemcachedTest {
     create: (Name, String) => Client = defaultCreate
   ): Client = {
     var client: Client = null
-    flag.overrides.let(UsePartitioningMemcachedClientToggle, 1.0) {
-      client = create(dest, label)
-    }
+    client = create(dest, label)
     assert(client.isInstanceOf[TwemcacheClient]) // assert new client
     client
   }

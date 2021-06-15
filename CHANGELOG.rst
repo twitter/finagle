@@ -17,6 +17,14 @@ New Features
   defined in both, and both take precedence over the `Dtab.base`. The existing
   `Dtab.local` request propagation behavior remains unchanged. ``PHAB_ID=D677860``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-memcached: Ketama Partitioned Client has been removed and the Partition Aware
+  Memcached Client has been made the default. As part of this change,
+  `com.twitter.finagle.memcached.UsePartitioningMemcachedClient` toggle has been removed,
+  and it no longer applies. ``PHAB_ID=D661460``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

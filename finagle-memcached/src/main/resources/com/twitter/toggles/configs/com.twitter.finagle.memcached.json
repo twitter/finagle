@@ -1,9 +1,0 @@
-{
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.memcached.UsePartitioningMemcachedClient",
-      "description": "Enables the new partitioning client for Memcached",
-      "fraction": 0.0
-    }
-  ]
-}

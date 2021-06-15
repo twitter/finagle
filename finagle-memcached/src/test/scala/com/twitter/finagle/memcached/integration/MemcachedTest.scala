@@ -34,7 +34,6 @@ abstract class MemcachedTest
   protected[this] var client: Client = _
   protected[this] val clientName = "test_client"
 
-  protected[this] val isOldClient: Boolean
   protected[this] val redistributesKey: Seq[String]
   protected[this] val leavesKey: Seq[String]
   protected[this] val revivalsKey: Seq[String]
@@ -230,13 +229,9 @@ abstract class MemcachedTest
     intercept[ClientError] { awaitResult(client.get("foo   ")) }
     intercept[ClientError] { awaitResult(client.get("    foo")) }
     val nullString: String = null
-    if (isOldClient) {
-      intercept[NullPointerException] { awaitResult(client.get(nullString)) }
-      intercept[NullPointerException] { awaitResult(client.set(nullString, Buf.Utf8("bar"))) }
-    } else {
-      intercept[ClientError] { awaitResult(client.get(nullString)) }
-      intercept[ClientError] { awaitResult(client.set(nullString, Buf.Utf8("bar"))) }
-    }
+
+    intercept[ClientError] { awaitResult(client.get(nullString)) }
+    intercept[ClientError] { awaitResult(client.set(nullString, Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.set("    ", Buf.Utf8("bar"))) }
 
     // "\t" is a valid key
@@ -482,34 +477,26 @@ abstract class MemcachedTest
     servers.head.stop()
 
     // test partial success with getResult()
-    if (isOldClient) {
-      intercept[Failure] {
-        // old client blows up while creating the connection, whereas the new one will just
-        // remove it from the ring
-        awaitResult { client.getResult(keys) }
-      }
-    } else {
-      val getResult = awaitResult { client.getResult(keys) }
-
-      // assert the failures are set to the exception received from the failing partition
-      assert(getResult.failures.nonEmpty)
-      getResult.failures.foreach {
-        case (_, e) =>
-          assert(e.isInstanceOf[Failure])
-      }
-      // there should be no misses as all keys are known
-      assert(getResult.misses.isEmpty)
-
-      // assert that the values are what we expect them to be. We are not checking for exact
-      // number of failures and successes here because we don't know how many keys will fall into
-      // the failed partition. The accuracy of the responses are tested in other tests anyways.
-      assert(getResult.values.nonEmpty)
-      assert(getResult.values.size < keys.size)
-      getResult.values.foreach {
-        case (keyStr, valueBuf) =>
-          val Buf.Utf8(valStr) = valueBuf
-          assert(valStr == s"$keyStr$ValueSuffix")
-      }
+    val getResult = awaitResult { client.getResult(keys) }
+    // assert the failures are set to the exception received from the failing partition
+    assert(getResult.failures.nonEmpty)
+    getResult.failures.foreach {
+      case (_, e) =>
+        assert(e.isInstanceOf[Failure])
     }
+    // there should be no misses as all keys are known
+    assert(getResult.misses.isEmpty)
+
+    // assert that the values are what we expect them to be. We are not checking for exact
+    // number of failures and successes here because we don't know how many keys will fall into
+    // the failed partition. The accuracy of the responses are tested in other tests anyways.
+    assert(getResult.values.nonEmpty)
+    assert(getResult.values.size < keys.size)
+    getResult.values.foreach {
+      case (keyStr, valueBuf) =>
+        val Buf.Utf8(valStr) = valueBuf
+        assert(valStr == s"$keyStr$ValueSuffix")
+    }
+
   }
 }
