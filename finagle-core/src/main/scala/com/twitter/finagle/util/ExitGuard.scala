@@ -7,7 +7,7 @@ package com.twitter.finagle.util
 object ExitGuard {
   @volatile private[util] var guards: Option[(Thread, List[Guard])] = None
 
-  private[finagle] case class Guard(reason: String) {
+  final case class Guard(reason: String) {
     def unguard(): Unit = {
       ExitGuard.synchronized {
         guards match {
@@ -33,7 +33,7 @@ object ExitGuard {
    * Prevent the process from exiting normally. You must retain the returned ExitGuard and call
    * `release` to remove the guard.
    */
-  private[finagle] def guard(reason: String): Guard = {
+  def guard(reason: String): Guard = {
     val guard = Guard(reason)
     addGuard(guard)
     guard
