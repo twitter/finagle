@@ -18,6 +18,48 @@ import scala.collection.immutable.Queue
 
 object StackClient {
 
+  object RequestDraining {
+    def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+      new Stack.Module0[ServiceFactory[Req, Rep]] {
+        val role: Stack.Role = Role.requestDraining
+        val description: String =
+          "Ensures that services wait until all outstanding requests complete before closure"
+        def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+          new RefcountedFactory(next)
+      }
+  }
+
+  object PrepFactory {
+    def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+      new Stack.Module0[ServiceFactory[Req, Rep]] {
+        val role: Stack.Role = Role.prepFactory
+        val description: String =
+          """A pre-allocated module at the top of the stack (after name resolution).
+            | Injects codec-specific behavior during service acquisition""".stripMargin
+        def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = next
+      }
+  }
+
+  object PrepConn {
+    def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+      new Stack.Module0[ServiceFactory[Req, Rep]] {
+        val role: Stack.Role = Role.prepConn
+        val description: String =
+          "Pre-allocated module at the bottom of the stack that handles newly connected sessions"
+        def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = next
+      }
+  }
+
+  object ProtoTracing {
+    def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+      new Stack.Module0[ServiceFactory[Req, Rep]] {
+        val role: Stack.Role = Role.protoTracing
+        val description: String =
+          "Pre-allocated stack module for protocols to inject tracing"
+        def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = next
+      }
+  }
+
   /**
    * Canonical Roles for some Client-related Stack module. Other roles are defined
    * within the companion objects of the respective modules.
@@ -56,14 +98,14 @@ object StackClient {
     val postNameResolutionTimeout = Stack.Role("PostNameResolutionTimeout")
 
     /**
-     * Defines a preallocated position at the "bottom" of the stack which is
+     * Defines a pre-allocated position at the "bottom" of the stack which is
      * special in that it's the first role before the client sends the request to
      * the underlying transport implementation.
      */
     val prepConn = Stack.Role("PrepConn")
 
     /**
-     * Defines a preallocated position in the stack for protocols to inject tracing.
+     * Defines a pre-allocated position in the stack for protocols to inject tracing.
      */
     val protoTracing = Stack.Role("protoTracing")
   }
@@ -124,7 +166,7 @@ object StackClient {
      * finagle-thrift uses this role to install session upgrading logic from
      * vanilla Thrift to Twitter Thrift.
      */
-    stk.push(Role.prepConn, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(PrepConn.module)
 
     /**
      * `WriteTracingFilter` annotates traced requests. Annotations are timestamped
@@ -302,7 +344,7 @@ object StackClient {
      *    below `FactoryToService` so that it is called on each
      *    service acquisition.
      *
-     *  * `Role.requestDraining` ensures that a service is not closed
+     *  * `RequestDraining` ensures that a service is not closed
      *    until all outstanding requests on it have completed. It must
      *    appear below `FactoryToService` so that services are not
      *    prematurely closed by `FactoryToService`. (However it is
@@ -316,7 +358,7 @@ object StackClient {
      *    `FactoryToService` so that it is called on each service
      *    acquisition.
      *
-     *  * `Role.prepFactory` is a hook used to inject codec-specific
+     *  * `PrepFactory` is a hook used to inject codec-specific
      *    behavior that needs to run for each session before it's been acquired.
      *
      *  * `FactoryToService` acquires a new endpoint service from the
@@ -344,9 +386,9 @@ object StackClient {
     stk.push(ExportSslUsage.module)
     stk.push(LoadBalancerFactory.module)
     stk.push(StatsFactoryWrapper.module)
-    stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) => new RefcountedFactory(fac))
+    stk.push(RequestDraining.module)
     stk.push(TimeoutFactory.module(Role.postNameResolutionTimeout))
-    stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(PrepFactory.module)
     stk.push(FactoryToService.module)
     stk.push(Retries.moduleRequeueable)
     stk.push(ClearContextValueFilter.module(context.Retries))
@@ -414,7 +456,7 @@ object StackClient {
      * These modules set up tracing for the request span and miscellaneous
      * actions before a request leaves the client stack:
      *
-     *  * `Role.protoTracing` is a hook for protocol-specific tracing
+     *  * `ProtoTracing` is a hook for protocol-specific tracing
      *
      *  * `Failure` processes request failures for external representation
      *
@@ -443,7 +485,7 @@ object StackClient {
      *    request span encompasses all tracing in the course of a
      *    request.
      */
-    stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(ProtoTracing.module)
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
     stk.push(ForwardAnnotation.module)

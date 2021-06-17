@@ -327,7 +327,9 @@ object Failure {
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module0[ServiceFactory[Req, Rep]] {
       val role: Stack.Role = Failure.role
-      val description: String = "process failures"
+      val description: String =
+        """Converts failures into a format suitable for users by unwrapping inner failures or 
+          |Throwables and stripping out dangerous flags""".stripMargin
 
       private[this] val filter = new ProcessFailures[Req, Rep]
 

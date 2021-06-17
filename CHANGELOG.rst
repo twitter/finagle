@@ -17,6 +17,10 @@ New Features
   defined in both, and both take precedence over the `Dtab.base`. The existing
   `Dtab.local` request propagation behavior remains unchanged. ``PHAB_ID=D677860``
 
+* finagle-core: Add descriptions to RequestDraining, PrepFactory, PrepConn, and
+  protoTracing modules in StackClient. Add descriptions to preparer and
+  protoTracing modules in StackServer. ``PHAB_ID=D685887``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

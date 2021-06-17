@@ -31,12 +31,44 @@ object StackServer {
     }
   }
 
+  object ProtoTracing {
+    def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+      new Stack.Module0[ServiceFactory[Req, Rep]] {
+        val role: Stack.Role = Role.protoTracing
+        val description: String =
+          "Pre-allocated stack module for protocols to inject tracing"
+        def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = next
+      }
+  }
+
+  object Preparer {
+    def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+      new Stack.Module0[ServiceFactory[Req, Rep]] {
+        val role: Stack.Role = Role.preparer
+        val description: String =
+          "Prepares the server"
+        def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = next
+      }
+  }
+
   /**
    * Canonical Roles for each Server-related Stack modules.
    */
   object Role extends Stack.Role("StackServer") {
+
+    /**
+     * Server-side JVM tracing
+     */
     val jvmTracing: Stack.Role = Stack.Role("JvmTracing")
+
+    /**
+     * Prepares the server for transport-level connection
+     */
     val preparer: Stack.Role = Stack.Role("preparer")
+
+    /**
+     * Defines a pre-allocated position in the stack for protocols to inject tracing.
+     */
     val protoTracing: Stack.Role = Stack.Role("protoTracing")
   }
 
@@ -121,7 +153,7 @@ object StackServer {
     stk.push(ExceptionSourceFilter.module)
     stk.push(new JvmTracing)
     stk.push(ServerStatsFilter.module)
-    stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(ProtoTracing.module)
     // `WriteTracingFilter` annotates traced requests. Annotations are timestamped
     // so this should be low in the stack to accurately delineate between wire time
     // and handling time. Ideally this would live closer to the "wire" in the netty
@@ -130,7 +162,7 @@ object StackServer {
     // allowing us to provide a complimentary annotation to the Client WR/WS as well
     // as measure queueing within the server via ConcurrentRequestFilter.
     stk.push(WireTracingFilter.serverModule)
-    stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(Preparer.module)
 
     // forks the execution if the current scheduler supports forking
     stk.push(ForkingSchedulerFilter.server)
@@ -241,9 +273,9 @@ trait StackServer[Req, Rep]
 
   def withParams(ps: Stack.Params): StackServer[Req, Rep]
 
-  override def configured[P: Stack.Param](p: P): StackServer[Req, Rep]
+  def configured[P: Stack.Param](p: P): StackServer[Req, Rep]
 
-  override def configured[P](psp: (P, Stack.Param[P])): StackServer[Req, Rep]
+  def configured[P](psp: (P, Stack.Param[P])): StackServer[Req, Rep]
 
-  override def configuredParams(params: Stack.Params): StackServer[Req, Rep]
+  def configuredParams(params: Stack.Params): StackServer[Req, Rep]
 }
