@@ -16,7 +16,7 @@
 
 create_thrift_libraries(
     base_name = "thrift",
-    sources = ["com/twitter/thrift/endpoint.thrift"],
+    sources = ["com/twitter/serversets/endpoint.thrift"],
     generate_languages = [
         "java",
         "scala",
@@ -31,6 +31,6 @@ python_thrift_library(
 
 python_thrift_library(
     name = "py-thrift",
-    sources = ["com/twitter/thrift/endpoint.thrift"],
+    sources = ["com/twitter/serversets/endpoint.thrift"],
     compatibility = ["CPython>=2.7,<4"],
 )
