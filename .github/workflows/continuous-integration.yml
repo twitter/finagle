@@ -32,6 +32,8 @@ jobs:
         run: java -Xmx32m -version
       - name: echo javac version
         run: javac -J-Xmx32m -version
+      - name: echo env
+        run: printenv
       - name: cache build dependencies
         uses: actions/cache@v2
         env:
