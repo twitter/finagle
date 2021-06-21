@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: [2.12.12, 2.13.1]
+        scala: [2.12.12, 2.13.6]
         java: ['1.8', '1.11']
         project: ['finagle-base-http', 'finagle-benchmark', 'finagle-benchmark-thrift', 'finagle-core', 'finagle-example', 'finagle-exp', 'finagle-grpc-context', 'finagle-http', 'finagle-http2','finagle-init','finagle-integration','finagle-memcached','finagle-mux','finagle-mysql','finagle-netty4','finagle-netty4-http','finagle-opencensus-tracing','finagle-partitioning','finagle-redis','finagle-scribe','finagle-serversets','finagle-stats','finagle-stats-core','finagle-thrift','finagle-thriftmux','finagle-toggle','finagle-tunable','finagle-zipkin-core','finagle-zipkin-scribe']
     runs-on: ubuntu-latest
