@@ -171,38 +171,39 @@ abstract class AbstractThriftSmuxSslTest extends AnyFunSuite with Eventually {
     }
   }
 
-  test("Single client and rejecting server results in both sides TLS connections at 0") {
-    val serverStats = new InMemoryStatsReceiver
-    val serverTlsConnections = Array("server", "tls", "connections")
+  if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
+    test("Single client and rejecting server results in both sides TLS connections at 0") {
+      val serverStats = new InMemoryStatsReceiver
+      val serverTlsConnections = Array("server", "tls", "connections")
 
-    val clientStats = new InMemoryStatsReceiver
-    val clientTlsConnections = Array("client", "tls", "connections")
+      val clientStats = new InMemoryStatsReceiver
+      val clientTlsConnections = Array("client", "tls", "connections")
 
-    val server = doMkTlsServer("server", serverStats, NeverValidServerSide)
-    val client = doMkTlsClient(getPort(server), "client", clientStats)
+      val server = doMkTlsServer("server", serverStats, NeverValidServerSide)
+      val client = doMkTlsClient(getPort(server), "client", clientStats)
 
-    tryWithResources(server, client.asClosable) {
-      assertGaugeIsZero(serverStats, serverTlsConnections)
-      assertGaugeIsZero(clientStats, clientTlsConnections)
-
-      // If the server rejects the handshake, it just hangs up. Therefore,
-      // we expect to get a ChannelClosedException here.
-      intercept[ChannelClosedException] {
-        await(client.query("hello"))
-      }
-
-      eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
-      eventually { assertGaugeIsZero(clientStats, clientTlsConnections) }
-
-      await(client.asClosable.close())
-      await(server.close())
-
-      eventually {
+      tryWithResources(server, client.asClosable) {
         assertGaugeIsZero(serverStats, serverTlsConnections)
         assertGaugeIsZero(clientStats, clientTlsConnections)
+
+        // If the server rejects the handshake, it just hangs up. Therefore,
+        // we expect to get a ChannelClosedException here.
+        intercept[ChannelClosedException] {
+          await(client.query("hello"))
+        }
+
+        eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
+        eventually { assertGaugeIsZero(clientStats, clientTlsConnections) }
+
+        await(client.asClosable.close())
+        await(server.close())
+
+        eventually {
+          assertGaugeIsZero(serverStats, serverTlsConnections)
+          assertGaugeIsZero(clientStats, clientTlsConnections)
+        }
       }
     }
-  }
 
   test("Single rejecting client and server results in both sides TLS connections at 0") {
     val serverStats = new InMemoryStatsReceiver

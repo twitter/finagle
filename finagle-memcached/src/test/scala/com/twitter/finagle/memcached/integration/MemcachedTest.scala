@@ -482,7 +482,7 @@ abstract class MemcachedTest
     assert(getResult.failures.nonEmpty)
     getResult.failures.foreach {
       case (_, e) =>
-        assert(e.isInstanceOf[Failure])
+        assert(e.isInstanceOf[Exception])
     }
     // there should be no misses as all keys are known
     assert(getResult.misses.isEmpty)

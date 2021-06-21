@@ -41,11 +41,11 @@ class MysqlTransporterTest extends AnyFunSuite {
       outStream.write(handshakeResponseResult)
       outStream.flush()
 
-      val transport = Await.result(transportFut, Duration.fromSeconds(2))
+      val transport = Await.result(transportFut, Duration.fromSeconds(5))
       try {
         assert(transport.status == Status.Open)
 
-        val result = Await.result(transport.close(), Duration.fromSeconds(2))
+        val result = Await.result(transport.close(), Duration.fromSeconds(5))
       } finally {
         transport.close()
       }
