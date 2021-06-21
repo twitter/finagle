@@ -37,6 +37,12 @@ Runtime Behavior Changes
   be temporarily sitting behind a toggle, `com.twitter.finagle.context.MarshalledContextLookupId`
   that can be used to turn off this change. ``PHAB_ID=D665209``
 
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-core: The `ServerBuilder` pattern has been deprecated. Use the stack server pattern
+  instead. ``PHAB_ID=D691414``
+
 21.5.0
 ------
 

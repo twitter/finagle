@@ -30,8 +30,11 @@ object ServerBuilder {
   type Complete[Req, Rep] =
     ServerBuilder[Req, Rep, ServerConfig.Yes, ServerConfig.Yes, ServerConfig.Yes]
 
+  @deprecated("Use the stack server pattern instead", "2021-06-21")
   def apply(): ServerBuilder[Nothing, Nothing, Nothing, Nothing, Nothing] =
     new ServerBuilder()
+
+  @deprecated("Use the stack server pattern instead", "2021-06-21")
   def get(): ServerBuilder[Nothing, Nothing, Nothing, Nothing, Nothing] =
     apply()
 
@@ -175,6 +178,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * @see The [[https://twitter.github.io/finagle/guide/Configuration.html user guide]]
  *      for information on the preferred `with`-style APIs instead.
  */
+@deprecated("Use the stack server pattern instead", "2021-06-21")
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
   private[finagle] val server: StackBasedServer[Req, Rep]) {
   import ServerConfig._
