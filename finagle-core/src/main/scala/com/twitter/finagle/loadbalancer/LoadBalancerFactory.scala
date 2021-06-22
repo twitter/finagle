@@ -2,11 +2,11 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.loadbalancer.aperture.EagerConnections
+import com.twitter.finagle.loadbalancer.aperture.{EagerConnections, WeightedApertureToggle}
 import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.stats._
-import com.twitter.finagle.util.{DefaultMonitor, DefaultLogger}
+import com.twitter.finagle.util.{DefaultLogger, DefaultMonitor}
 import com.twitter.util.{Activity, Event, Var}
 import java.util.logging.{Level, Logger}
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle
@@ -20,6 +20,15 @@ import scala.util.control.NonFatal
  */
 object LoadBalancerFactory {
   val role: Stack.Role = Stack.Role("LoadBalancer")
+
+  /** For now, some load balancers can support a mode where they can either manage
+   * their weights or not. In the future they'll only do what they advertise but
+   * we want to support both for now so we can toggle the behavior on. */
+  private[loadbalancer] case class ManageWeights(enabled: Boolean)
+
+  private[loadbalancer] object ManageWeights {
+    implicit val param = Stack.Param(ManageWeights(false))
+  }
 
   /**
    * A class eligible for configuring a client's load balancer probation setting.
@@ -310,7 +319,8 @@ object LoadBalancerFactory {
 
       def newBalancer(
         endpoints: Activity[Set[EndpointFactory[Req, Rep]]],
-        disableEagerConnections: Boolean
+        disableEagerConnections: Boolean,
+        manageWeights: Boolean
       ): ServiceFactory[Req, Rep] = {
         val ordering = params[AddressOrdering].ordering
         val orderedEndpoints = endpoints.map { set =>
@@ -327,10 +337,10 @@ object LoadBalancerFactory {
           }
         }
 
-        val paramsWithStats = params + param.Stats(balancerStats)
-        val finalParams =
-          if (disableEagerConnections) paramsWithStats + EagerConnections(false)
-          else paramsWithStats
+        var finalParams = params + param.Stats(balancerStats) + ManageWeights(manageWeights)
+        if (disableEagerConnections) {
+          finalParams = finalParams + EagerConnections(false)
+        }
 
         val underlying = loadBalancerFactory.newBalancer(
           orderedEndpoints,
@@ -357,16 +367,35 @@ object LoadBalancerFactory {
         )
       }
 
-      // Instead of simply creating a newBalancer here, we defer to the
-      // traffic distributor to interpret weighted `Addresses`.
-      Stack.leaf(
-        role,
-        new TrafficDistributor[Req, Rep](
-          dest = endpoints,
-          newBalancer = newBalancer,
-          statsReceiver = balancerStats
+      // If weight-aware aperture load balancers are enabled, we do not wrap the
+      // newBalancer in a TrafficDistributor.
+      if (loadBalancerFactory.supportsWeighted && WeightedApertureToggle()) {
+
+        // Convert endpoints from AddressedFactories to EndpointFactories
+        val formattedEndpoints: Activity[Set[EndpointFactory[Req, Rep]]] = {
+          Activity(endpoints).map { set: Set[AddressedFactory[Req, Rep]] =>
+            set.map { af: AddressedFactory[Req, Rep] =>
+              af.factory
+            }
+          }
+        }
+        // Add the newBalancer to the stack
+        Stack.leaf(
+          role,
+          newBalancer(formattedEndpoints, disableEagerConnections = false, manageWeights = true)
         )
-      )
+      } else {
+        // Instead of simply creating a newBalancer here, we defer to the
+        // TrafficDistributor to interpret weighted `Addresses`.
+        Stack.leaf(
+          role,
+          new TrafficDistributor[Req, Rep](
+            dest = endpoints,
+            newBalancer = newBalancer(_, _, manageWeights = false),
+            statsReceiver = balancerStats
+          )
+        )
+      }
     }
   }
 
@@ -388,6 +417,7 @@ object LoadBalancerFactory {
 abstract class LoadBalancerFactory {
 
   protected[twitter] def supportsEagerConnections: Boolean = false
+  protected[twitter] def supportsWeighted: Boolean = false
 
   /**
    * Returns a new balancer which is represented by a [[com.twitter.finagle.ServiceFactory]].
@@ -417,6 +447,7 @@ object FlagBalancerFactory extends LoadBalancerFactory {
   private val log = Logger.getLogger(getClass.getName)
 
   override def supportsEagerConnections: Boolean = underlying.supportsEagerConnections
+  override def supportsWeighted: Boolean = underlying.supportsWeighted
 
   /**
    * Java friendly getter.

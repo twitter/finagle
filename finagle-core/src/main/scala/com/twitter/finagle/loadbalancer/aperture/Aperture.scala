@@ -65,7 +65,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   /**
    * Enables [[Aperture]] to create weight-aware balancers
    */
-  private[aperture] def manageEndpoints: Boolean = false
+  private[aperture] def manageEndpoints: Boolean
 
   /**
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
@@ -185,12 +185,21 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     initAperture: Int,
     coord: Coord
   ): BaseDist[Req, Rep, Node] = {
-    new DeterministicAperture[Req, Rep, Node](
-      this,
-      vector,
-      initAperture,
-      coord
-    )
+    if (manageEndpoints) {
+      new WeightedAperture[Req, Rep, Node](
+        this,
+        vector,
+        initAperture,
+        coord
+      )
+    } else {
+      new DeterministicAperture[Req, Rep, Node](
+        this,
+        vector,
+        initAperture,
+        coord
+      )
+    }
   }
 
   private[aperture] def mkRandomAperture(

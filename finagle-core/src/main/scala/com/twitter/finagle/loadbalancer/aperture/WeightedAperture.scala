@@ -2,7 +2,13 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.loadbalancer.aperture.DeterministicAperture.MinDeterministicAperture
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
-import com.twitter.finagle.Status
+import com.twitter.finagle.server.ServerInfo
+import com.twitter.finagle.{CoreToggles, Status}
+
+object WeightedApertureToggle {
+  private val toggle = CoreToggles("com.twitter.finagle.loadbalancer.WeightedAperture")
+  def apply(): Boolean = toggle(ServerInfo().clusterId.hashCode)
+}
 
 private object WeightedAperture {
 

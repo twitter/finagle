@@ -18,6 +18,7 @@ class LoadBandTest extends AnyFunSuite with ApertureSuite {
       with LeastLoaded[Unit, Unit]
       with LoadBand[Unit, Unit] {
 
+    val manageEndpoints: Boolean = false
     protected def statsReceiver = NullStatsReceiver
     protected def smoothWin: Duration = Duration.Zero
 

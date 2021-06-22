@@ -26,7 +26,8 @@ private[loadbalancer] final class AperturePeakEwma[Req, Rep](
   protected val timer: Timer,
   protected val emptyException: NoBrokersAvailableException,
   protected val useDeterministicOrdering: Option[Boolean],
-  private[aperture] val eagerConnections: Boolean)
+  private[aperture] val eagerConnections: Boolean,
+  private[aperture] val manageEndpoints: Boolean)
     extends Aperture[Req, Rep]
     with PeakEwma[Req, Rep]
     with LoadBand[Req, Rep]

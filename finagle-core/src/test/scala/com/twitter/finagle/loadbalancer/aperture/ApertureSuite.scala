@@ -39,6 +39,7 @@ private[loadbalancer] trait ApertureSuite {
     def isDeterministicAperture: Boolean =
       dist.isInstanceOf[DeterministicAperture[Unit, Unit, Node]]
     def isRandomAperture: Boolean = dist.isInstanceOf[RandomAperture[Unit, Unit, Node]]
+    def isWeightedAperture: Boolean = dist.isInstanceOf[WeightedAperture[Unit, Unit, Node]]
   }
 
   case class Factory(i: Int) extends EndpointFactory[Unit, Unit] {

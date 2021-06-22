@@ -12,7 +12,9 @@ import org.scalactic.source.Position
 import org.scalatest.Tag
 import org.scalatest.funsuite.AnyFunSuite
 
-class ApertureTest extends AnyFunSuite with ApertureSuite {
+class ApertureTest extends BaseApertureTest(manageWeights = false)
+
+abstract class BaseApertureTools(manageWeights: Boolean) extends AnyFunSuite with ApertureSuite {
 
   /**
    * A simple aperture balancer which doesn't have a controller or load metric
@@ -25,8 +27,9 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
    * uses P2C to select nodes, we inherit the same probabilistic properties that help
    * us avoid down nodes with the important caveat that we only select over a subset.
    */
-  private class Bal extends TestBal {
+  private[aperture] class Bal extends TestBal {
 
+    val manageEndpoints: Boolean = manageWeights
     protected def nodeLoad: Double = 0.0
 
     protected def statsReceiver: StatsReceiver = NullStatsReceiver
@@ -54,6 +57,9 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
       super.rebuild()
     }
   }
+}
+
+abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTools(manageWeights) {
 
   // Ensure the flag value is 12 since many of the tests depend on it.
   override protected def test(
@@ -85,7 +91,8 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
         timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
         useDeterministicOrdering = None,
-        eagerConnections = false
+        eagerConnections = false,
+        manageEndpoints = manageWeights
       )
     }
   }
@@ -107,7 +114,8 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      eagerConnections = false
+      eagerConnections = false,
+      manageEndpoints = manageWeights
     )
 
     assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -131,7 +139,8 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(false),
-      eagerConnections = false
+      eagerConnections = false,
+      manageEndpoints = manageWeights
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -156,7 +165,8 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(false),
-      eagerConnections = false
+      eagerConnections = false,
+      manageEndpoints = manageWeights
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -182,7 +192,8 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      eagerConnections = true
+      eagerConnections = true,
+      manageEndpoints = manageWeights
     )
     assert(factories.forall(_.total == 1))
 
@@ -209,7 +220,8 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      eagerConnections = false
+      eagerConnections = false,
+      manageEndpoints = manageWeights
     )
     assert(stats.counters(Seq("rebuilds")) == 1)
 
@@ -240,7 +252,8 @@ class ApertureTest extends AnyFunSuite with ApertureSuite {
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      eagerConnections = false
+      eagerConnections = false,
+      manageEndpoints = manageWeights
     )
     assert(stats.counters(Seq("rebuilds")) == 1)
 

@@ -250,6 +250,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "ApertureLeastLoaded"
     override def supportsEagerConnections: Boolean = true
+    override def supportsWeighted: Boolean = true
 
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
@@ -260,6 +261,7 @@ object Balancers {
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
+      val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
 
       val balancer = new ApertureLeastLoaded(
         endpoints,
@@ -274,7 +276,8 @@ object Balancers {
         timer,
         exc,
         useDeterministicOrdering,
-        eagerConnections
+        eagerConnections,
+        manageWeights
       )
       newScopedBal(
         label,
@@ -346,6 +349,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "AperturePeakEwma"
     override def supportsEagerConnections: Boolean = true
+    override def supportsWeighted: Boolean = true
 
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
@@ -356,6 +360,7 @@ object Balancers {
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
+      val manageEndpoints = params[LoadBalancerFactory.ManageWeights].enabled
 
       val balancer = new AperturePeakEwma(
         endpoints,
@@ -372,7 +377,8 @@ object Balancers {
         timer,
         exc,
         useDeterministicOrdering,
-        eagerConnections
+        eagerConnections,
+        manageEndpoints
       )
       newScopedBal(
         label,

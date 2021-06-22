@@ -5,20 +5,24 @@ import com.twitter.finagle.{
   ClientConnection,
   NoBrokersAvailableException,
   Service,
-  ServiceFactoryProxy
+  ServiceFactoryProxy,
+  Status
 }
 import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
 import com.twitter.finagle.stats.{Counter, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Await, Future, Time}
 import org.scalacheck.Gen
 import org.scalactic.TolerantNumerics
-import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.math.abs
 
-class WeightedApertureTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
+class WeightedApertureTest extends BaseWeightedApertureTest(manageWeights = true)
+
+abstract class BaseWeightedApertureTest(manageWeights: Boolean)
+    extends BaseApertureTools(manageWeights)
+    with ScalaCheckDrivenPropertyChecks {
 
   private val rng = Rng(123)
 
@@ -69,10 +73,12 @@ class WeightedApertureTest extends AnyFunSuite with ScalaCheckDrivenPropertyChec
 
   class TestAperture() extends Aperture[Unit, Unit] {
     override type Node = TestNode
-    override private[aperture] def rng = WeightedApertureTest.this.rng
+    override private[aperture] def rng = BaseWeightedApertureTest.this.rng
     override private[aperture] def minAperture = 12
     override protected val useDeterministicOrdering: Option[Boolean] = Some(true)
     override private[aperture] def eagerConnections = true
+    override private[aperture] val manageEndpoints: Boolean =
+      BaseWeightedApertureTest.this.manageWeights
     override protected def label: String = ""
     override protected def maxEffort: Int = 0
     override protected def emptyException: Throwable = new NoBrokersAvailableException
@@ -243,139 +249,281 @@ class WeightedApertureTest extends AnyFunSuite with ScalaCheckDrivenPropertyChec
     }
   }
 
+  test("weighted aperture doesn't unduly bias") {
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val counts = new Counts
+        val bal = new Bal {
+          override val minAperture = 1
+          override protected def nodeLoad: Double = 1.0
+          override val useDeterministicOrdering: Option[Boolean] = Some(true)
+        }
+
+        ProcessCoordinate.setCoordinate(0, 3)
+        bal.update(counts.range(3))
+        bal.rebuildx()
+        assert(bal.isWeightedAperture)
+        bal.applyn(3000)
+
+        val requests = counts.toIterator.map(_._total).toVector
+        val avg = requests.sum.toDouble / requests.size
+        val relativeDiffs = requests.map { i => math.abs(avg - i) / avg }
+        relativeDiffs.foreach { i => assert(i < 0.05) }
+      }
+  }
+
+  test("can't switch between weighted and unweighted aperture via rebuilds") {
+    val bal = new Bal {
+      override protected val useDeterministicOrdering = Some(true)
+      override val manageEndpoints: Boolean = false
+    }
+    ProcessCoordinate.setCoordinate(0, 50)
+    bal.update(Vector.tabulate(20)(Factory))
+    bal.rebuildx()
+    assert(bal.isDeterministicAperture)
+
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        bal.update(Vector.tabulate(20)(Factory))
+        bal.rebuildx()
+        assert(bal.isDeterministicAperture)
+        assert(!bal.isWeightedAperture)
+      }
+  }
+
+  test("weighted aperture avoids unavailable hosts") {
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val counts = new Counts
+        val bal = new Bal
+
+        bal.update(counts.range(10))
+        bal.adjustx(3)
+        bal.applyn(100)
+        assert(counts.nonzero.size == 10)
+        assert(bal.isWeightedAperture)
+
+        // Since tokens are assigned, we don't know apriori what's in the
+        // aperture*, so figure it out by observation.
+        //
+        // *Ok, technically we can, since we're using deterministic
+        // randomness.
+        for (unavailableStatus <- List(Status.Closed, Status.Busy)) {
+          val nonZeroKeys = counts.nonzero
+          val closed0 = counts(nonZeroKeys.head)
+          val closed1 = counts(nonZeroKeys.tail.head)
+
+          closed0.status = unavailableStatus
+          closed1.status = unavailableStatus
+
+          val closed0Req = closed0.total
+          val closed1Req = closed1.total
+
+          bal.applyn(100)
+
+          // We want to make sure that we haven't sent requests to the
+          // `Closed` nodes since our aperture is wide enough to avoid
+          // them.
+          assert(closed0Req == closed0.total)
+          assert(closed1Req == closed1.total)
+        }
+      }
+  }
+
+  test("ignore minaperture") {
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val bal = new Bal {
+          override val minAperture = 150
+        }
+        ProcessCoordinate.setCoordinate(0, 150)
+        bal.update(Vector.tabulate(150)(Factory))
+        bal.rebuildx()
+        assert(bal.isWeightedAperture)
+        assert(bal.minUnitsx == 12)
+
+        // Now unset the coordinate which should send us back to random aperture
+        ProcessCoordinate.unsetCoordinate()
+        assert(bal.isRandomAperture)
+        bal.update(Vector.tabulate(150)(Factory))
+        bal.rebuildx()
+        assert(bal.minUnitsx == 150)
+      }
+  }
+
+  test("Empty vectors") {
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val bal = new Bal
+        intercept[Empty] {
+          Await.result(bal.apply())
+        }
+
+        // transient update
+        val counts = new Counts
+        ProcessCoordinate.setCoordinate(0, 2)
+        bal.update(counts.range(5))
+        bal.applyn(100)
+        assert(bal.isWeightedAperture)
+        assert(counts.nonzero.size > 0)
+
+        bal.update(Vector.empty)
+        intercept[Empty] {
+          Await.result(bal.apply())
+        }
+      }
+  }
+
   /**
    * The following tests are for the weighted RandomAperture implementation
    */
   test("weighted RandomAperture") {
-    val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory()))
-    val sum: Double = endpoints.map(_.factory.weight).sum
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory()))
+        val sum: Double = endpoints.map(_.factory.weight).sum
 
-    val rap = new RandomAperture[Unit, Unit, TestNode](
-      aperture = new TestAperture() {
-        override val manageEndpoints = true
-      },
-      vector = endpoints,
-      initAperture = 10,
-    )
+        val rap = new RandomAperture[Unit, Unit, TestNode](
+          aperture = new TestAperture() {
+            override val manageEndpoints = true
+          },
+          vector = endpoints,
+          initAperture = 10,
+        )
 
-    assert(rap.pdist.isDefined)
-    val pdist = rap.pdist.get
+        assert(rap.pdist.isDefined)
+        val pdist = rap.pdist.get
 
-    val histo0 = run {
-      val a = pdist.pickOne()
-      val b = pdist.tryPickSecond(a)
-      Seq(a, b)
-    }
+        val histo0 = run {
+          val a = pdist.pickOne()
+          val b = pdist.tryPickSecond(a)
+          Seq(a, b)
+        }
 
-    for (key <- histo0.keys) {
-      // the number of times key is selected over total node selections
-      val a = histo0(key) / (numRuns * 2d)
-      // the normalized weight of that key
-      val b = (pdist.weight(key) / sum)
-      assert(math.abs(a - b) / math.max(a, b) < 1e-1)
-    }
+        for (key <- histo0.keys) {
+          // the number of times key is selected over total node selections
+          val a = histo0(key) / (numRuns * 2d)
+          // the normalized weight of that key
+          val b = (pdist.weight(key) / sum)
+          assert(math.abs(a - b) / math.max(a, b) < 1e-1)
+        }
+      }
   }
 
   test("weighted RandomAperture with evenly weighted endpoints") {
-    val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory(true)))
-    val sum: Double = endpoints.map(_.factory.weight).sum
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory(true)))
+        val sum: Double = endpoints.map(_.factory.weight).sum
 
-    val rap = new RandomAperture[Unit, Unit, TestNode](
-      aperture = new TestAperture() {
-        override val manageEndpoints = true
-      },
-      vector = endpoints,
-      initAperture = 10,
-    )
+        val rap = new RandomAperture[Unit, Unit, TestNode](
+          aperture = new TestAperture() {
+            override val manageEndpoints = true
+          },
+          vector = endpoints,
+          initAperture = 10,
+        )
 
-    assert(rap.pdist.isDefined)
-    val pdist = rap.pdist.get
+        assert(rap.pdist.isDefined)
+        val pdist = rap.pdist.get
 
-    val histo0 = run {
-      val a = pdist.pickOne()
-      val b = pdist.tryPickSecond(a)
-      Seq(a, b)
-    }
+        val histo0 = run {
+          val a = pdist.pickOne()
+          val b = pdist.tryPickSecond(a)
+          Seq(a, b)
+        }
 
-    for (key <- histo0.keys) {
-      // the number of times key is selected over total node selections
-      val a = histo0(key) / (numRuns * 2d)
-      // the normalized weight of that key
-      val b = (pdist.weight(key) / sum)
-      assert(math.abs(a - b) / math.max(a, b) < 1e-1)
-    }
+        for (key <- histo0.keys) {
+          // the number of times key is selected over total node selections
+          val a = histo0(key) / (numRuns * 2d)
+          // the normalized weight of that key
+          val b = (pdist.weight(key) / sum)
+          assert(math.abs(a - b) / math.max(a, b) < 1e-1)
+        }
+      }
   }
 
   test("weighted RandomAperture with aperture subset") {
-    val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
-    val sum: Double = endpoints.map(_.factory.weight).sum
-    val apertureSum: Double = 1 / 20d * 12d
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
+        val sum: Double = endpoints.map(_.factory.weight).sum
+        val apertureSum: Double = 1 / 20d * 12d
 
-    val rap = new RandomAperture[Unit, Unit, TestNode](
-      aperture = new TestAperture() {
-        override val manageEndpoints = true
-      },
-      vector = endpoints,
-      initAperture = 12,
-    )
+        val rap = new RandomAperture[Unit, Unit, TestNode](
+          aperture = new TestAperture() {
+            override val manageEndpoints = true
+          },
+          vector = endpoints,
+          initAperture = 12,
+        )
 
-    assert(rap.pdist.isDefined)
-    assert(rap.logicalAperture == 12)
-    val pdist = rap.pdist.get
+        assert(rap.pdist.isDefined)
+        assert(rap.logicalAperture == 12)
+        val pdist = rap.pdist.get
 
-    val histo0 = run {
-      val a = pdist.pickOne()
-      val b = pdist.tryPickSecond(a)
-      Seq(a, b)
-    }
+        val histo0 = run {
+          val a = pdist.pickOne()
+          val b = pdist.tryPickSecond(a)
+          Seq(a, b)
+        }
 
-    for (key <- histo0.keys) {
-      // the number of times key is selected over total node selections
-      val a = histo0(key) / (numRuns * 2d)
-      // the normalized weight of that key is normalized to the aperture size
-      val b = (pdist.weight(key) / sum / apertureSum)
-      assert(math.abs(a - b) / math.max(a, b) < 1e-1)
-    }
+        for (key <- histo0.keys) {
+          // the number of times key is selected over total node selections
+          val a = histo0(key) / (numRuns * 2d)
+          // the normalized weight of that key is normalized to the aperture size
+          val b = (pdist.weight(key) / sum / apertureSum)
+          assert(math.abs(a - b) / math.max(a, b) < 1e-1)
+        }
+      }
   }
 
   test("RandomAperture.indices works as expected") {
-    val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory()))
-    val sum: Double = endpoints.map(_.factory.weight).sum
-    val rap = new RandomAperture[Unit, Unit, TestNode](
-      aperture = new TestAperture() {
-        override val manageEndpoints = true
-      },
-      vector = endpoints,
-      initAperture = 12,
-    )
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory()))
+        val sum: Double = endpoints.map(_.factory.weight).sum
+        val rap = new RandomAperture[Unit, Unit, TestNode](
+          aperture = new TestAperture() {
+            override val manageEndpoints = true
+          },
+          vector = endpoints,
+          initAperture = 12,
+        )
 
-    val cumulativeProbability = Seq(0.015237645043305353, 0.031365087942818656, 0.0630951250697316,
-      0.11666610907349896, 0.17493368334189416, 0.23250412378175594, 0.2664395912672639,
-      0.36513496562276027, 0.46545611292466704, 0.5566089839530769, 0.6104686494845901,
-      0.6462222968878701, 0.6693704100586275, 0.6850570324997741, 0.7273997490787484,
-      0.7600717754383199, 0.8376813232943813, 0.880604996241379, 0.975629885236866,
-      1.0000000000000002)
+        val cumulativeProbability = Seq(0.015237645043305353, 0.031365087942818656,
+          0.0630951250697316, 0.11666610907349896, 0.17493368334189416, 0.23250412378175594,
+          0.2664395912672639, 0.36513496562276027, 0.46545611292466704, 0.5566089839530769,
+          0.6104686494845901, 0.6462222968878701, 0.6693704100586275, 0.6850570324997741,
+          0.7273997490787484, 0.7600717754383199, 0.8376813232943813, 0.880604996241379,
+          0.975629885236866, 1.0000000000000002)
 
-    val pdist = rap.pdist.get
-    assert(cumulativeProbability == pdist.cumulativeProbability.toSeq)
-    val physicalAperture = 12d / 20d
-    assert(pdist.scaledAperture == physicalAperture)
+        val pdist = rap.pdist.get
+        assert(cumulativeProbability == pdist.cumulativeProbability.toSeq)
+        val physicalAperture = 12d / 20d
+        assert(pdist.scaledAperture == physicalAperture)
 
-    // Because the physical Aperture is 0.6, nodes 0 through 10 should exist within the aperture
-    assert(rap.indices == (0 to 10).toSet)
+        // Because the physical Aperture is 0.6, nodes 0 through 10 should exist within the aperture
+        assert(rap.indices == (0 to 10).toSet)
+      }
   }
 
   test("weighted and unweighted pathway parity") {
     val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory(true)))
-    val wrap = new RandomAperture[Unit, Unit, TestNode](
-      aperture = new TestAperture() {
-        override val manageEndpoints = true
-      },
-      vector = endpoints,
-      initAperture = 12,
-    )
+    val wrap = com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        new RandomAperture[Unit, Unit, TestNode](
+          aperture = new TestAperture() {
+            override val manageEndpoints = true
+          },
+          vector = endpoints,
+          initAperture = 12,
+        )
+      }
     val urap = new RandomAperture[Unit, Unit, TestNode](
-      aperture = new TestAperture(),
+      aperture = new TestAperture() {
+        override val manageEndpoints = false
+      },
       vector = endpoints,
       initAperture = 12,
     )
@@ -399,24 +547,53 @@ class WeightedApertureTest extends AnyFunSuite with ScalaCheckDrivenPropertyChec
   }
 
   test("logical aperture can change") {
-    val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
-    val rap = new RandomAperture[Unit, Unit, TestNode](
-      aperture = new TestAperture() {
-        override val manageEndpoints = true
-      },
-      vector = endpoints,
-      initAperture = 12,
-    )
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
+        val rap = new RandomAperture[Unit, Unit, TestNode](
+          aperture = new TestAperture() {
+            override val manageEndpoints = true
+          },
+          vector = endpoints,
+          initAperture = 12,
+        )
 
-    val pdist = rap.pdist.get
+        val pdist = rap.pdist.get
 
-    assert(rap.logicalAperture == 12)
-    assert(pdist.scaledAperture == 12 / 20d)
+        assert(rap.logicalAperture == 12)
+        assert(pdist.scaledAperture == 12 / 20d)
 
-    rap.adjust(1)
+        rap.adjust(1)
 
-    assert(rap.logicalAperture == 13)
-    assert(pdist.scaledAperture == 13 / 20d)
+        assert(rap.logicalAperture == 13)
+        assert(pdist.scaledAperture == 13 / 20d)
+      }
+  }
 
+  // copied from ApertureTest - can remove test when we remove toggle.
+  test("weighted RandomAperture doesn't unduly bias") {
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+        val counts = new Counts
+        val bal = new Bal {
+          override protected val useDeterministicOrdering = Some(false)
+        }
+
+        bal.update(counts.range(2))
+        assert(bal.aperturex == 1)
+        assert(bal.isRandomAperture)
+
+        // last endpoint outside the aperture is open.
+        counts(0).status = Status.Busy
+
+        // should be available due to the single endpoint
+        assert(bal.status == Status.Open)
+
+        // should be moved forward on rebuild
+        val svc = Await.result(bal(ClientConnection.nil))
+        assert(bal.rebuilds == 1)
+        assert(bal.status == Status.Open)
+        assert(svc.status == Status.Open)
+      }
   }
 }
