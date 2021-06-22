@@ -457,7 +457,6 @@ div#search-progress > div#progress-fill {
 }
 
 div#content-scroll-container {
-  position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
@@ -478,6 +477,13 @@ div#content-container > div#content {
   overflow-y: hidden;
   max-width: 1140px;
   margin: 4em auto 0;
+}
+
+a.anchorToMember {
+  display: inline-block;
+  position: relative;
+  top: -5em;
+  width: 0;
 }
 
 div#content-container > div#subpackage-spacer {
@@ -546,6 +552,11 @@ div#packages > ul > li > a.object {
 
 div#packages > ul > li > a.abstract.type {
   background: url("abstract_type.svg") no-repeat center;
+  background-size: 0.9rem;
+}
+
+div#packages > ul > li > a.annotation {
+  background: url("annotation.svg") no-repeat center;
   background-size: 0.9rem;
 }
 
@@ -703,6 +714,12 @@ div#results-content > div#entity-results > ul.entities > li > .icon {
 div#results-content > div#member-results > ul.entities > li > .icon.class,
 div#results-content > div#entity-results > ul.entities > li > .icon.class {
   background: url("class.svg") no-repeat center;
+  background-size: 1em 1em;
+}
+
+div#results-content > div#member-results > ul.entities > li > .icon.annotation,
+div#results-content > div#entity-results > ul.entities > li > .icon.annotation {
+  background: url("annotation.svg") no-repeat center;
   background-size: 1em 1em;
 }
 

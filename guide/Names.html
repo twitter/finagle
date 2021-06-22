@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Names and Naming in Finagle &#8212; Finagle 21.5.0 documentation</title>
+    <title>Names and Naming in Finagle &#8212; Finagle 21.6.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -295,11 +295,50 @@ development version of that component. This can be done by
 orchestrating the originator (for example, an HTTP frontend) to add a
 delegation expressing this override.</p>
 <p>Finagle has protocol support for delegation passing in <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">TTwitter</span></a>, <a class="reference internal" href="Protocols.html#mux"><span class="std std-ref">Mux</span></a>, its variant <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/ThriftMux$">ThriftMux</a>, and <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Http$">HTTP</a>. When these protocols are used,
-delegations that are added dynamically to a request are in effect
+delegations that are added dynamically to a request can be in effect
 throughout the distributed request graph — i.e. scope of the
 namespace is a transaction. Delegations are added dynamically through
 the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Dtab$">Dtab</a> API.</p>
 <p>(This is a powerful facility that should be used with care.)</p>
+</div>
+<div class="section" id="the-dtab-api">
+<h2>The Dtab API<a class="headerlink" href="#the-dtab-api" title="Permalink to this headline">¶</a></h2>
+<p>Delegations can be added or overridden dynamically through the
+<a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Dtab$">Dtab</a> API – specifically by way of scoped
+delegation tables <cite>Dtab.local</cite> and <cite>Dtab.limited</cite>.</p>
+<p>The <cite>local</cite> delegation is defined as the “per-request,” propagated
+scope. It’s ideal for overrides you’d like to apply to the entire request
+graph, as it applies to downstream services.</p>
+<p>The <cite>limited</cite> delegation is the “per-request,” non-propagated
+scope. Unlike <cite>Dtab.local</cite>, <cite>Dtab.limited</cite> applies only to the current request
+and does not affect the rest of the call graph. Furthermore, when a
+<cite>Dtab.limited</cite> conflicts with a <cite>Dtab.local</cite>, only the <cite>Dtab.local</cite> is respected.</p>
+<p>The higher granularity of a <cite>limited</cite> delegation allows for more fine-grained
+control over fallback and failover behavior. This is ideal for large request
+graphs in which only some endpoints need to be rerouted. As more endpoints
+begin to fail, the <cite>local</cite> granularity becomes a more useful “broad
+strokes” approach to rerouting.</p>
+<p>To demonstrate this further, consider the following example service graph:
+<cite>ServiceA -&gt; ServiceB -&gt; ServiceC</cite></p>
+<p>A <cite>Dtab.local</cite> set on a request to <em>ServiceA</em> will also be reflected in
+<em>ServiceB</em> and <em>ServiceC</em>. A <cite>Dtab.limited</cite> set on a request to <em>ServiceA</em>,
+however, will only exist for the scope of the request in <em>ServiceA</em>. The state
+of the <cite>Dtab.limited</cite> will not be visible to <em>ServiceB</em> or <em>ServiceC</em>.</p>
+<p>Let’s consider a few more examples:</p>
+<ol class="arabic simple">
+<li><em>ServiceA</em> sets a <cite>Dtab.local</cite> for <em>ServiceC</em> for a request, rerouting it to
+<em>ServiceD</em>. <em>ServiceB</em> will, accordingly, propagate the <cite>Dtab.local</cite> and
+re-route requests to <em>ServiceD</em>.</li>
+<li><em>ServiceA</em> sets a <cite>Dtab.limited</cite> for <em>ServiceC</em> for a request, rerouting it to
+<em>ServiceD</em>. This has no effect because <em>ServiceA</em> does not call <em>ServiceC</em>
+directly and the limited state is not propagated to <em>ServiceB</em>.</li>
+<li><em>ServiceA</em> sets a <cite>Dtab.local</cite> for <em>ServiceC</em>, rerouting it to <em>ServiceD</em>.
+<em>ServiceA</em> also sets a <cite>Dtab.limited</cite> for <em>ServiceC</em>, rerouting it to <em>ServiceE</em>.
+The behavior of example 1 will be seen again.</li>
+<li><em>ServiceA</em> sets a <cite>Dtab.limited</cite> for <em>ServiceB</em> for a request, rerouting it to
+<em>ServiceD</em>. The request to <em>ServiceB</em> will be rerouted, but the state will not
+be propagated.</li>
+</ol>
 </div>
 <div class="section" id="addr">
 <span id="id2"></span><h2>Addr<a class="headerlink" href="#addr" title="Permalink to this headline">¶</a></h2>
@@ -354,6 +393,7 @@ for example a dynamic <a class="reference external" href="https://github.com/twi
 <li><a class="reference internal" href="#">Names and Naming in Finagle</a><ul>
 <li><a class="reference internal" href="#paths">Paths</a></li>
 <li><a class="reference internal" href="#interpreting-paths-with-delegation-tables">Interpreting Paths With Delegation Tables</a></li>
+<li><a class="reference internal" href="#the-dtab-api">The Dtab API</a></li>
 <li><a class="reference internal" href="#addr">Addr</a></li>
 </ul>
 </li>
