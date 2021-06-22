@@ -13,3 +13,5 @@ Result
 What will change as a result of your pull request? Note that sometimes
 this section is unnecessary because it is self-explanatory based on
 the solution.
+
+Closes twitter/finagle#PR_NUMBER
