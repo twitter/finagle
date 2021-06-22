@@ -2,7 +2,7 @@ package com.twitter.finagle.integration
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
@@ -48,11 +48,9 @@ class StackTest extends AnyFunSuite {
 
   test("ClientBuilder: Status.busy propagates from failAccrual to the top of the stack") {
     new TestCtx {
-      val server = ServerBuilder()
-        .stack(StringServer.server)
-        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-        .name("server")
-        .build(failService)
+      val server = StringServer.server
+        .withLabel("server")
+        .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), failService)
 
       val client = ClientBuilder()
         .stack(StringClient.client)

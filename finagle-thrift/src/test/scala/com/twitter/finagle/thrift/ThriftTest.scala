@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.tracing.{BufferingTracer, DefaultTracer, Trace}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.protocol._
@@ -53,22 +53,6 @@ trait ThriftTest { self: AnyFunSuite =>
   ): Unit = {
     () // noop
   }
-
-  private val newBuilderServer = (protocolFactory: TProtocolFactory) =>
-    new {
-      val server = ServerBuilder()
-        .stack(Thrift.server.withProtocolFactory(protocolFactory))
-        .bindTo(new InetSocketAddress(loopback, 0))
-        .name("thriftserver")
-        .tracer(DefaultTracer)
-        .build(ifaceToService(processor, RichServerParam(protocolFactory)))
-
-      val boundAddr = server.boundAddress
-
-      def close(): Unit = {
-        server.close()
-      }
-    }
 
   private val newBuilderClient = (
     protocolFactory: TProtocolFactory,
@@ -160,7 +144,6 @@ trait ThriftTest { self: AnyFunSuite =>
   )
 
   private val servers = Map[String, NewServer](
-    "builder" -> newBuilderServer,
     "api" -> newAPIServer()
   )
 

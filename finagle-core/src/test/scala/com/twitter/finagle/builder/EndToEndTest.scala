@@ -202,11 +202,9 @@ class EndToEndTest extends AnyFunSuite {
       def apply(request: String) = new Promise[String]
     }
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = ServerBuilder()
-      .stack(StringServer.server)
-      .bindTo(address)
-      .name("FinagleServer")
-      .build(never)
+    val server = StringServer.server
+      .withLabel("FinagleServer")
+      .serve(address, never)
 
     val mem = new InMemoryStatsReceiver
     val client = {
@@ -276,11 +274,9 @@ class EndToEndTest extends AnyFunSuite {
       def apply(request: String) = Future.value("pong")
     }
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = ServerBuilder()
-      .stack(StringServer.server)
-      .bindTo(address)
-      .name("FinagleServer")
-      .build(always)
+    val server = StringServer.server
+      .withLabel("FinagleServer")
+      .serve(address, always)
 
     val mem = new InMemoryStatsReceiver
     val client = {

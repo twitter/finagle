@@ -6,7 +6,6 @@ import java.net.InetSocketAddress;
 import com.twitter.finagle.Http;
 import com.twitter.finagle.Server;
 import com.twitter.finagle.Service;
-import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.http.Request;
 import com.twitter.finagle.http.Response;
 import com.twitter.finagle.param.Label;
@@ -30,12 +29,9 @@ public final class HttpServerTest {
         }
       };
 
-    ServerBuilder.safeBuild(
-      service,
-        ServerBuilder.get()
-            .stack(Http.server())
-            .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0))
-      .name("HttpServer"));
+    Http.server()
+        .withLabel("HttpServer")
+        .serve(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), service);
   }
 
   /**

@@ -3,7 +3,7 @@ package com.twitter.finagle.thriftmux
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Transformer
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
@@ -210,11 +210,6 @@ class EndToEndTest
       }
 
       val pfSvc = new TestService$FinagleService(iface, pf)
-      val builder = ServerBuilder()
-        .stack(serverImpl.withProtocolFactory(pf))
-        .name("ThriftMuxServer")
-        .bindTo(new InetSocketAddress(0))
-        .build(pfSvc)
       val netty4 = serverImpl
         .withProtocolFactory(pf)
         .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
@@ -223,7 +218,6 @@ class EndToEndTest
         socketAddr.asInstanceOf[InetSocketAddress].getPort
 
       Seq(
-        ("ServerBuilder", builder, port(builder.boundAddress)),
         ("ThriftMux", netty4, port(netty4.boundAddress))
       )
     }
@@ -1300,36 +1294,6 @@ class EndToEndTest
     server.close()
   }
 
-  test("scala thriftmux ServerBuilder deserialized response classification") {
-    val sr = new InMemoryStatsReceiver()
-
-    val svc = new TestService.FinagledService(
-      iface,
-      RichServerParam(
-        serverStats = sr,
-        responseClassifier = scalaClassifier,
-        perEndpointStats = true
-      )
-    )
-
-    val server = ServerBuilder()
-      .stack(ThriftMux.server)
-      .responseClassifier(scalaClassifier)
-      .requestTimeout(100.milliseconds)
-      .name("thrift")
-      .reportTo(sr)
-      .bindTo(new InetSocketAddress(0))
-      .build(svc)
-
-    val client = ThriftMux.client.build[TestService.MethodPerEndpoint](
-      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-      "client"
-    )
-
-    testScalaServerResponseClassification(sr, client)
-    server.close()
-  }
-
   test("java thriftmux ClientBuilder deserialized response classification") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
@@ -1347,28 +1311,6 @@ class EndToEndTest
     )
 
     testJavaClientFailureClassification(sr, client)
-    server.close()
-  }
-
-  test("java thriftmux ServerBuilder deserialized response classification") {
-    val sr = new InMemoryStatsReceiver()
-    val svc = new thriftjava.TestService.Service(new TestServiceImpl, RichServerParam())
-
-    val server = ServerBuilder()
-      .stack(ThriftMux.server)
-      .responseClassifier(javaClassifier)
-      .requestTimeout(100.milliseconds)
-      .name("thrift")
-      .reportTo(sr)
-      .bindTo(new InetSocketAddress(0))
-      .build(svc)
-
-    val client = ThriftMux.client.build[thriftjava.TestService.ServiceIface](
-      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-      "client"
-    )
-
-    testJavaServerFailureClassification(sr, client)
     server.close()
   }
 

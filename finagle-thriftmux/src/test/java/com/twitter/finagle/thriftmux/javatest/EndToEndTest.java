@@ -31,14 +31,11 @@ import com.twitter.finagle.Names;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.SimpleFilter;
-import com.twitter.finagle.Stack;
 import com.twitter.finagle.ThriftMux;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.mux.Request;
 import com.twitter.finagle.mux.Response;
 import com.twitter.finagle.mux.Responses;
-import com.twitter.finagle.param.Label;
 import com.twitter.finagle.partitioning.zk.ZkMetadata;
 import com.twitter.finagle.thrift.ClientId;
 import com.twitter.finagle.thrift.MethodMetadata;
@@ -207,29 +204,6 @@ public class EndToEndTest {
     RichServerParam serverParam = new RichServerParam(new TBinaryProtocol.Factory());
 
     Service<byte[], byte[]> service = new TestService.Service(iface, serverParam);
-
-    ServerBuilder.safeBuild(
-      service,
-      ServerBuilder.get()
-        .name("java-test-server")
-        .bindTo(addr)
-        .stack(ThriftMux.server())
-    );
-
-    ServerBuilder.get().stack(ThriftMux.server());
-
-    ThriftMux.Server withParams = ThriftMux.server()
-      .withParams(Stack.Params$.MODULE$.empty());
-    ServerBuilder.get().stack(withParams);
-
-    ThriftMux.Server configured = ThriftMux.server()
-      .configured(new Label("hi").mk());
-    ServerBuilder.get().stack(configured);
-
-    ThriftMux.Server withParamsAndConfigured = ThriftMux.server()
-      .withParams(Stack.Params$.MODULE$.empty())
-      .configured(new Label("hi").mk());
-    ServerBuilder.get().stack(withParamsAndConfigured);
 
     ClientBuilder.safeBuild(
       ClientBuilder.get()

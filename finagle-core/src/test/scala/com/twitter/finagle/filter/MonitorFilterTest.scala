@@ -2,7 +2,7 @@ package com.twitter.finagle.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util._
@@ -96,12 +96,10 @@ class MonitorFilterTest extends AnyFunSuite with MockitoSugar {
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val service = mock[Service[String, String]]
     when(service.close(any[Time])) thenReturn Future.Done
-    val server = ServerBuilder()
-      .stack(StringServer.server)
-      .name("FakeService2")
-      .bindTo(address)
-      .monitor((_, _) => monitor)
-      .build(service)
+    val server = StringServer.server
+      .withLabel("FakeService2")
+      .withMonitor(monitor)
+      .serve(address, service)
 
     // We cannot mock "service" directly, because we are testing an internal filter defined in the ServerBuilder
     // that sits on top of "service". Therefore we need to create a client to initiates the requests.

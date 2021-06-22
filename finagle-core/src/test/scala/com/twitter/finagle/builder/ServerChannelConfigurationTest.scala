@@ -16,11 +16,11 @@ class ServerChannelConfigurationTest extends AnyFunSuite {
   test("close connection after max life time duration") {
     val lifeTime = 100.millis
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = ServerBuilder()
-      .stack(StringServer.Server().withSession.maxLifeTime(lifeTime))
-      .bindTo(address)
-      .name("FinagleServer")
-      .build(identityService)
+    val server = StringServer
+      .Server()
+      .withSession.maxLifeTime(lifeTime)
+      .withLabel("FinagleServer")
+      .serve(address, identityService)
 
     val client: Service[String, String] = ClientBuilder()
       .stack(StringClient.Client(appendDelimeter = false))
@@ -38,11 +38,11 @@ class ServerChannelConfigurationTest extends AnyFunSuite {
   test("close connection after max idle time duration") {
     val idleTime = 100.millis
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = ServerBuilder()
-      .stack(StringServer.Server().withSession.maxIdleTime(idleTime))
-      .bindTo(address)
-      .name("FinagleServer")
-      .build(identityService)
+    val server = StringServer
+      .Server()
+      .withSession.maxIdleTime(idleTime)
+      .withLabel("FinagleServer")
+      .serve(address, identityService)
 
     val client: Service[String, String] = ClientBuilder()
       .stack(StringClient.Client(appendDelimeter = false))

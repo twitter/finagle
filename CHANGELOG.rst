@@ -32,6 +32,9 @@ Breaking API Changes
   `com.twitter.finagle.memcached.UsePartitioningMemcachedClient` toggle has been removed,
   and it no longer applies. ``PHAB_ID=D661460``
 
+* finagle-core: c.t.f.builder.ServerBuilder has been removed. Use the StackServer interfaces
+  instead. ``PHAB_ID=D689067``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

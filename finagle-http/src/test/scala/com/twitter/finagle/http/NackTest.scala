@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.{Address, Failure, FailureFlags, Name, Service, http, Http => FHttp}
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server.StackServer
@@ -114,37 +114,6 @@ class NackTest extends AnyFunSuite {
       assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
 
       assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
-
-      Closable.all(client, server).close()
-    }
-  }
-
-  test("HttpNack works with ServerBuilder") {
-    new ClientCtx {
-      val serverLabel = "myservice"
-      val server =
-        ServerBuilder()
-          .stack(FHttp.server.withLabel(serverLabel))
-          .bindTo(new InetSocketAddress(0))
-          .name(serverLabel)
-          .reportTo(serverSr)
-          .build(flakyService)
-      val client =
-        FHttp.client
-          .configured(Stats(clientSr))
-          .newService(
-            Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-            "http"
-          )
-
-      assert(Await.result(client(request), timeout).status == Status.Ok)
-      assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
-
-      n.set(-1)
-      assert(Await.result(client(request).liftToTry, timeout).isThrow)
-
-      assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
-      assert(serverSr.counters(Seq("myservice", "nonretryable_nacks")) == 1)
 
       Closable.all(client, server).close()
     }

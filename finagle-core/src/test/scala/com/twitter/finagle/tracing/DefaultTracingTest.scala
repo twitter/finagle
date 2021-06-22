@@ -1,7 +1,7 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.{param => fparam, _}
@@ -92,14 +92,12 @@ class DefaultTracingTest extends AnyFunSuite with Eventually with IntegrationPat
     }
   }
 
-  test("core events are traced in the ClientBuilder/ServerBuilder") {
+  test("core events are traced in the ClientBuilder") {
     testCoreTraces { (serverTracer, clientTracer) =>
-      val svc = ServerBuilder()
-        .name("theServer")
-        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-        .stack(StringServer.server)
-        .tracer(serverTracer)
-        .build(Svc)
+      val svc = StringServer.server
+        .withLabel("theServer")
+        .withTracer(serverTracer)
+        .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), Svc)
 
       val client = ClientBuilder()
         .name("theClient")
