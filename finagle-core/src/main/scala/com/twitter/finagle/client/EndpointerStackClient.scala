@@ -111,6 +111,8 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
 
   protected def injectors: Seq[ClientParamsInjector] = StackClient.DefaultInjectors.injectors
 
+  protected def transformers: Seq[StackTransformer] = StackClient.DefaultTransformer.transformers
+
   /**
    * @inheritdoc
    *
@@ -130,7 +132,7 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
       case _ => label0
     }
 
-    val clientStack = {
+    val originalStack = {
       val baseStack = stack ++ (endpointer +: nilStack)
       params[RequestLogger.Param] match {
         case RequestLogger.Param.Enabled =>
@@ -141,7 +143,10 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
       }
     }
 
-    val clientSr = new RoleConfiguredStatsReceiver(
+    val transformedStack =
+      transformers.foldLeft(originalStack)((clnt, transformer) => transformer(clnt))
+
+    val clientSr = RoleConfiguredStatsReceiver(
       new RelativeNameMarkingStatsReceiver(stats.scope(clientLabel)),
       Client,
       Some(clientLabel))
@@ -152,7 +157,7 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
         Stats(clientSr) +
         BindingFactory.Dest(dest)) { case (prms, injector) => injector(prms) }
 
-    clientStack.make(clientParams)
+    transformedStack.make(clientParams)
   }
 
   def newService(dest: Name, label: String): Service[Req, Rep] = {

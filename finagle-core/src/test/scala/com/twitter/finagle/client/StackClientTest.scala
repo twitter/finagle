@@ -790,4 +790,34 @@ abstract class AbstractStackClientTest
 
     assert(testParamValue == 37)
   }
+
+  test("DefaultTransformers") {
+    val exc = new Exception("DefaultTransformer.boom!")
+    val defaultElem = new StackTransformer {
+      def name = "prepend-nop-module"
+      def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
+        stack.prepend(new Stack.Module0[ServiceFactory[Req, Rep]] {
+          def role = Stack.Role("defaulttransformers-module")
+          def description = "a stack module added via global DefaultTransformers"
+          def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
+            val filter = new SimpleFilter[Req, Rep] {
+              def apply(req: Req, svc: Service[Req, Rep]): Future[Rep] = {
+                Future.exception(exc)
+              }
+            }
+            filter.andThen(next)
+          }
+        })
+    }
+    try {
+      StackClient.DefaultTransformer.append(defaultElem)
+      val listeningServer = StringServer.server
+        .serve(":*", Service.mk[String, String](Future.value))
+      val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
+      val svc = baseClient.newService(Name.bound(Address(boundAddress)), "stringClient")
+      assert(exc == (intercept[Exception] { await(svc("hello")) }))
+    } finally {
+      StackClient.DefaultTransformer.clear()
+    }
+  }
 }

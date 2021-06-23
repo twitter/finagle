@@ -13,9 +13,8 @@ import com.twitter.finagle.service.{
 }
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.{Stack, StackTransformer, _}
+import com.twitter.finagle.{Stack, _}
 import com.twitter.jvm.Jvm
-import scala.collection.immutable
 
 object StackServer {
   private[this] lazy val newJvmFilter = new MkJvmFilter(Jvm())
@@ -194,15 +193,7 @@ object StackServer {
   /**
    * A set of StackTransformers for transforming server stacks.
    */
-  private[finagle] object DefaultTransformer {
-    @volatile private var underlying = immutable.Queue.empty[StackTransformer]
-
-    def append(transformer: StackTransformer): Unit =
-      synchronized { underlying = underlying :+ transformer }
-
-    def transformers: Seq[StackTransformer] =
-      underlying
-  }
+  private[finagle] object DefaultTransformer extends StackTransformerCollection
 }
 
 /**

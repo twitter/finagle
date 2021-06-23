@@ -12,7 +12,6 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{ClientStatsReceiver, LoadedHostStatsReceiver}
 import com.twitter.finagle.tracing._
-
 import com.twitter.util.registry.GlobalRegistry
 import scala.collection.immutable.Queue
 
@@ -505,6 +504,11 @@ object StackClient {
     Stack.Params.empty +
       Stats(ClientStatsReceiver) +
       LoadBalancerFactory.HostStats(LoadedHostStatsReceiver)
+
+  /**
+   * A set of StackTransformers for transforming client stacks.
+   */
+  private[twitter] object DefaultTransformer extends StackTransformerCollection
 
   /**
    * A set of ClientParamsInjectors for transforming client params.

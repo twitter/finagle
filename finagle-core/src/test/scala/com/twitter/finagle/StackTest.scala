@@ -229,4 +229,14 @@ class StackTest extends AnyFunSuite {
   test("Role.toString: should return lowercase object name") {
     assert(testRole1.toString == "testrole1")
   }
+
+  test("StackTransformerCollection") {
+    val ts = new StackTransformerCollection {}
+    ts.append(new StackTransformer {
+      def name: String = "test"
+      def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
+        stack
+    })
+    assert(ts.transformers.size == 1)
+  }
 }

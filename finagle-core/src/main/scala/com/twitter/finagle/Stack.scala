@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import scala.annotation.{implicitNotFound, tailrec}
-import scala.collection.mutable
+import scala.collection.{mutable, immutable}
 
 /**
  * Stacks represent stackable elements of type T. It is assumed that
@@ -756,6 +756,31 @@ object Stack {
 abstract class StackTransformer extends Stack.Transformer {
   def name: String
   override def toString: String = s"StackTransformer(name=$name)"
+}
+
+/**
+ * A [[TransformerCollection]] is a collection of transformers which are typically
+ * used globally by a stack. For example, both StackClient and StackServer have
+ * a global collection of [[StackTransformers]] which can be "injected" before
+ * the stack is materialized for all clients/servers in a process.
+ *
+ * This is purely additive and there isn't a way to remove elements from this collection
+ * to limit the type mutations allowed.
+ */
+abstract class StackTransformerCollection {
+  @volatile private var underlying = immutable.Queue.empty[StackTransformer]
+
+  def append(transformer: StackTransformer): Unit =
+    synchronized { underlying = underlying :+ transformer }
+
+  def transformers: Seq[StackTransformer] =
+    underlying
+
+  // Used for testing only! Allows us to clear any state that we set here
+  // so we don't pollute other tests.
+  private[finagle] def clear(): Unit = synchronized {
+    underlying = immutable.Queue.empty[StackTransformer]
+  }
 }
 
 /**
