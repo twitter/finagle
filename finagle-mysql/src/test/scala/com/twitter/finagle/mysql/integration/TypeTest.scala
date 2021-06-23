@@ -1,48 +1,19 @@
 package com.twitter.finagle.mysql.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.ScalaObjectMapper
-import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.Mysql
+import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
 import com.twitter.finagle.mysql._
+import com.twitter.finagle.mysql.harness.EmbeddedSimpleSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 import com.twitter.finagle.mysql.param.UnsignedColumns
-import com.twitter.util.{Await, Awaitable, TwitterDateFormat}
+import com.twitter.util.TwitterDateFormat
 import java.sql.Timestamp
 import java.util.TimeZone
 import org.scalactic.{Equality, TolerantNumerics}
-import org.scalatest.funsuite.AnyFunSuite
 
-class NumericTypeTest extends AnyFunSuite with IntegrationClient {
-
-  private val epsilon = 0.000001
-
-  private implicit val doubleEq: Equality[Double] =
-    TolerantNumerics.tolerantDoubleEquality(epsilon)
-
-  private implicit val bigDecimalEq: Equality[BigDecimal] = new Equality[BigDecimal] {
-    def areEqual(a: BigDecimal, b: Any): Boolean = b match {
-      case bd: BigDecimal => (a <= bd + epsilon) && (a >= bd - epsilon)
-      case _ => false
-    }
-  }
-
-  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
-  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
-
-  // This test requires support for unsigned integers
-  override protected def configureClient(
-    username: String,
-    password: String,
-    db: String
-  ): Mysql.Client = {
-    super
-      .configureClient(username, password, db)
-      .configured(UnsignedColumns(supported = true))
-  }
-
-  for (c <- client) {
-    ready(c.query("""CREATE TEMPORARY TABLE IF NOT EXISTS `numeric` (
+object NumericTypeTest {
+  val createTableQuery: String =
+    """CREATE TEMPORARY TABLE IF NOT EXISTS `numeric` (
         `boolean` boolean NOT NULL,
         `tinyint` tinyint(4) NOT NULL,
         `tinyint_unsigned` tinyint(4) UNSIGNED NOT NULL,
@@ -59,9 +30,10 @@ class NumericTypeTest extends AnyFunSuite with IntegrationClient {
         `decimal` decimal(30,11) NOT NULL,
         `bit` bit(1) NOT NULL,
         PRIMARY KEY (`smallint`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""))
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""
 
-    ready(c.query("""INSERT INTO `numeric` (
+  val insertQuery: String =
+    """INSERT INTO `numeric` (
         `boolean`,
         `tinyint`, `tinyint_unsigned`,
         `smallint`, `smallint_unsigned`,
@@ -75,15 +47,43 @@ class NumericTypeTest extends AnyFunSuite with IntegrationClient {
         -8388608, 16777215,
         -2147483648, 4294967295,
         -9223372036854775808, 18446744073709551615,
-        1.61, 1.618, 1.61803398875, 1);"""))
+        1.61, 1.618, 1.61803398875, 1);"""
 
-    val signedTextEncodedQuery =
-      """SELECT `boolean`, `tinyint`, `smallint`, `mediumint`, `int`, `bigint`, `float`, `double`,`decimal`, `bit` FROM `numeric` """
-    runTest(c, signedTextEncodedQuery)(testRow)
+  val signedTextEncodedQuery: String =
+    """SELECT `boolean`, `tinyint`, `smallint`, `mediumint`, `int`, `bigint`, `float`, `double`,`decimal`, `bit` FROM `numeric` """
 
-    val unsignedTextEncodedQuery =
-      """SELECT `boolean`, `tinyint_unsigned`, `smallint_unsigned`, `mediumint_unsigned`, `int_unsigned`, `bigint_unsigned` FROM `numeric` """
-    runTest(c, unsignedTextEncodedQuery)(testUnsignedRow)
+  val unsignedTextEncodedQuery: String =
+    """SELECT `boolean`, `tinyint_unsigned`, `smallint_unsigned`, `mediumint_unsigned`, `int_unsigned`, `bigint_unsigned` FROM `numeric` """
+}
+
+class NumericTypeTest extends EmbeddedSimpleSuite {
+  import NumericTypeTest._
+
+  private val epsilon = 0.000001
+
+  private implicit val doubleEq: Equality[Double] =
+    TolerantNumerics.tolerantDoubleEquality(epsilon)
+
+  private implicit val bigDecimalEq: Equality[BigDecimal] = new Equality[BigDecimal] {
+    def areEqual(a: BigDecimal, b: Any): Boolean = b match {
+      case bd: BigDecimal => (a <= bd + epsilon) && (a >= bd - epsilon)
+      case _ => false
+    }
+  }
+
+  def instanceConfig: InstanceConfig = defaultInstanceConfig
+  def databaseConfig: DatabaseConfig = defaultDatabaseConfig
+
+  fixture match {
+    case Some(f) =>
+      val client =
+        f.newClient().configured(UnsignedColumns(supported = true)).newRichClient(f.instance.dest)
+      // Setup temporary table and insert into it
+      await(client.query(createTableQuery))
+      await(client.query(insertQuery))
+      runTest(client, signedTextEncodedQuery)(testRow)
+      runTest(client, unsignedTextEncodedQuery)(testUnsignedRow)
+    case None => // do nothing
   }
 
   def runTest(c: Client, sql: String)(testFunc: Row => Unit): Unit = {
@@ -279,13 +279,9 @@ class NumericTypeTest extends AnyFunSuite with IntegrationClient {
   }
 }
 
-class BlobTypeTest extends AnyFunSuite with IntegrationClient {
-
-  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
-  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
-
-  for (c <- client) {
-    ready(c.query("""CREATE TEMPORARY TABLE `blobs` (
+object BlobTypeTest {
+  val createTableQuery: String =
+    """CREATE TEMPORARY TABLE `blobs` (
         `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
         `char` char(5) DEFAULT NULL,
         `varchar` varchar(10) DEFAULT NULL,
@@ -300,28 +296,51 @@ class BlobTypeTest extends AnyFunSuite with IntegrationClient {
         `enum` enum('small','medium','large') DEFAULT NULL,
         `set` set('1','2','3','4') DEFAULT NULL,
         PRIMARY KEY (`id`)
-      ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;"""))
+      ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;"""
 
-    ready(c.query("""INSERT INTO `blobs` (`id`, `char`,
+  val insertQuery: String =
+    """INSERT INTO `blobs` (`id`, `char`,
         `varchar`, `tinytext`,
         `text`, `mediumtext`, `tinyblob`,
         `mediumblob`, `blob`, `binary`,
         `varbinary`, `enum`, `set`)
         VALUES (1, 'a', 'b', 'c', 'd', 'e', X'66',
-        X'67', X'68', X'6970', X'6A', 'small', '1');"""))
+        X'67', X'68', X'6970', X'6A', 'small', '1');"""
 
-    val textEncoded = await(c.query("SELECT * FROM `blobs`") map {
+  val sqlQuery: String = "SELECT * FROM `blobs`"
+}
+
+class BlobTypeTest extends EmbeddedSimpleSuite {
+  import BlobTypeTest._
+
+  def instanceConfig: InstanceConfig = defaultInstanceConfig
+  def databaseConfig: DatabaseConfig = defaultDatabaseConfig
+
+  fixture match {
+    case Some(f) =>
+      val client = f.newRichClient()
+      // Setup temporary table and insert into it
+      await(client.query(createTableQuery))
+      await(client.query(insertQuery))
+      val textEncoded = getTextEncodedRow(client)
+      val binaryEncoded = getBinaryEncodedRow(client)
+
+      testRow(textEncoded)
+      testRow(binaryEncoded)
+    case None => // do nothing
+  }
+
+  def getTextEncodedRow(client: Client with Transactions): Row =
+    await(client.query(sqlQuery) map {
       case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
-    val ps = c.prepare("SELECT * FROM `blobs`")
+  def getBinaryEncodedRow(client: Client with Transactions): Row = {
+    val ps = client.prepare(sqlQuery)
     val binaryrows: Seq[Row] = await(ps.select()(identity))
     assert(binaryrows.size == 1)
-    val binaryEncoded = binaryrows.head
-
-    testRow(textEncoded)
-    testRow(binaryEncoded)
+    binaryrows.head
   }
 
   def testRow(row: Row): Unit = {
@@ -437,14 +456,9 @@ class BlobTypeTest extends AnyFunSuite with IntegrationClient {
   }
 }
 
-class DateTimeTypeTest extends AnyFunSuite with IntegrationClient {
-
-  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
-  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
-
-  for (c <- client) {
-    ready(
-      c.query("""CREATE TEMPORARY TABLE `datetime` (
+object DateTimeTypeTest {
+  val createTableQuery: String =
+    """CREATE TEMPORARY TABLE `datetime` (
         `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
         `date` date NOT NULL,
         `datetime` datetime NOT NULL,
@@ -452,26 +466,47 @@ class DateTimeTypeTest extends AnyFunSuite with IntegrationClient {
         `time` time NOT NULL,
         `year` year(4) NOT NULL,
         PRIMARY KEY (`id`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;""")
-    )
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""
 
-    ready(c.query("""INSERT INTO `datetime`
-        (`id`, `date`, `datetime`, `timestamp`, `time`, `year`)
+  val insertQuery: String =
+    """INSERT INTO `datetime` (`id`, `date`, `datetime`, `timestamp`, `time`, `year`)
         VALUES (1, '2013-11-02', '2013-11-02 19:56:24',
-        '2013-11-02 19:56:36', '19:56:32', '2013');"""))
+        '2013-11-02 19:56:36', '19:56:32', '2013');"""
 
-    val textEncoded = await(c.query("SELECT * FROM `datetime`") map {
+  val sqlQuery: String = "SELECT * FROM `datetime`"
+}
+
+class DateTimeTypeTest extends EmbeddedSimpleSuite {
+  import DateTimeTypeTest._
+
+  def instanceConfig: InstanceConfig = defaultInstanceConfig
+  def databaseConfig: DatabaseConfig = defaultDatabaseConfig
+
+  fixture match {
+    case Some(f) =>
+      val client = f.newRichClient()
+      // Setup temporary table and insert into it
+      await(client.query(createTableQuery))
+      await(client.query(insertQuery))
+      val textEncoded = getTextEncodedRow(client)
+      val binaryEncoded = getBinaryEncodedRow(client)
+
+      testRow(textEncoded)
+      testRow(binaryEncoded)
+    case None => // do nothing
+  }
+
+  def getTextEncodedRow(client: Client with Transactions): Row =
+    await(client.query(sqlQuery) map {
       case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
-    val ps = c.prepare("SELECT * FROM `datetime`")
+  def getBinaryEncodedRow(client: Client with Transactions): Row = {
+    val ps = client.prepare(sqlQuery)
     val binaryrows = await(ps.select()(identity))
     assert(binaryrows.size == 1)
-    val binaryEncoded = binaryrows.head
-
-    testRow(textEncoded)
-    testRow(binaryEncoded)
+    binaryrows.head
   }
 
   def testRow(row: Row): Unit = {
@@ -546,42 +581,50 @@ object JsonTypeTest {
   private val JsonTestStr = """{"attribute1": "test1", "attribute2": "test2"}"""
 
   case class TestJson(attribute1: String, attribute2: String)
+
+  val createTableQuery: String = """CREATE TEMPORARY TABLE `jsons` (
+        `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+        `json1` json NOT NULL,
+        `json2` json NULL,
+        `varchar` varchar(10) NOT NULL,
+        PRIMARY KEY (`id`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""
+
+  val insertQuery: String = s"""INSERT INTO `jsons` (`id`, `json1`, `json2`, `varchar`)
+        VALUES (1, '$JsonTestStr', NULL, 'test value');"""
+
+  val sqlQuery: String = "SELECT * FROM `jsons`"
 }
 
 /**
  * JSON Data Type is supported as of MySQL 5.7.8. Ensure the correct MySQL version in
  * order for this integration test to work.
  */
-class JsonTypeTest extends AnyFunSuite with IntegrationClient {
+class JsonTypeTest extends EmbeddedSimpleSuite {
   import JsonTypeTest._
+
+  def instanceConfig: InstanceConfig = defaultInstanceConfig
+  def databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
   private val mapper = new ObjectMapper with ScalaObjectMapper
   mapper.registerModule(DefaultScalaModule)
 
-  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
-  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
+  fixture match {
+    case Some(f) =>
+      val client = f.newRichClient()
+      // Setup temporary table and insert into it
+      await(client.query(createTableQuery))
+      await(client.query(insertQuery))
+      val row = getRow(client)
+      testRow(row)
+    case None => // do nothing
+  }
 
-  for (c <- client) {
-    ready(
-      c.query("""CREATE TEMPORARY TABLE `jsons` (
-        `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-        `json1` json NOT NULL,
-        `json2` json NULL,
-        `varchar` varchar(10) NOT NULL,
-        PRIMARY KEY (`id`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;""")
-    )
-
-    ready(c.query(s"""INSERT INTO `jsons` (`id`, `json1`, `json2`, `varchar`)
-        VALUES (1, '$JsonTestStr', NULL, 'test value');"""))
-
-    val row = await(c.query("SELECT * FROM `jsons`") map {
+  def getRow(client: Client with Transactions): Row =
+    await(client.query(sqlQuery) map {
       case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
-
-    testRow(row)
-  }
 
   def testRow(row: Row): Unit = {
     test("RawValue is set the correct type") {
