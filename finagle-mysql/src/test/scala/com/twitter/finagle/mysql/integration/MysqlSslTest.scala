@@ -1,14 +1,32 @@
 package com.twitter.finagle.mysql.integration
 
+import com.twitter.finagle.Stack
+import com.twitter.finagle.mysql.harness.EmbeddedSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 import com.twitter.finagle.mysql.{HandshakeInit, HandshakeStackModifier}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.{Protocols, TrustCredentials}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Mysql, Stack}
-import com.twitter.util.{Await, Duration}
-import org.scalatest.funsuite.AnyFunSuite
 
-class MysqlSslTest extends AnyFunSuite with IntegrationClient {
+class MysqlSslTest extends EmbeddedSuite {
+
+  val baseSslCaPath: String = "/ssl/certs/mysql-server-ca.crt"
+  val baseSslCertPath: String = "/ssl/certs/mysql-server.crt"
+  val baseSslKeyPath: String = "/ssl/keys/mysql-server.key"
+
+  private val sslParameters: Seq[String] = Seq(
+    s"--ssl-ca=${getClass.getResource(baseSslCaPath).getPath}",
+    s"--ssl-cert=${getClass.getResource(baseSslCertPath).getPath}",
+    s"--ssl-key=${getClass.getResource(baseSslKeyPath).getPath}"
+  )
+
+  private val sslStartServerParameters: Seq[String] =
+    defaultInstanceConfig.startServerParameters ++ sslParameters
+
+  val instanceConfig: InstanceConfig =
+    defaultInstanceConfig.copy(startServerParameters = sslStartServerParameters)
+  val databaseConfig: DatabaseConfig =
+    DatabaseConfig(databaseName = "ssl_database", users = Seq.empty, setupQueries = Seq.empty)
 
   private def downgradedHandshake(
     params: Stack.Params,
@@ -28,20 +46,13 @@ class MysqlSslTest extends AnyFunSuite with IntegrationClient {
     params + Transport.ClientSsl(Some(selectedConfig))
   }
 
-  override protected def configureClient(
-    username: String,
-    password: String,
-    db: String
-  ): Mysql.Client = {
-    super
-      .configureClient(username, password, db).configured(
-        HandshakeStackModifier(downgradedHandshake)).withTransport.tls
-  }
-
-  test("ping over ssl") {
-    val theClient = client.orNull
-    val result = Await.result(theClient.ping(), Duration.fromSeconds(2))
-    // If we get here, result is Unit, and all is good
+  test("ping over ssl") { fixture =>
+    val theClient = fixture
+      .newClient().configured(
+        HandshakeStackModifier(downgradedHandshake)).withTransport.tls.newRichClient(
+        fixture.instance.dest)
+    val result = await(theClient.ping())
+  // If we get here, result is Unit, and all is good
   }
 
 }

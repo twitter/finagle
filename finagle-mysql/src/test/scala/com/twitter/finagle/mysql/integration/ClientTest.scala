@@ -2,13 +2,14 @@ package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql._
+import com.twitter.finagle.mysql.harness.EmbeddedSuite
+import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{IndividualRequestTimeoutException, Mysql, mysql}
-import com.twitter.util.{Await, Awaitable, Closable, Future}
+import com.twitter.util.{Closable, Future}
 import java.sql.Date
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.Eventually
-import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.mutable.ArrayBuffer
 
 case class SwimmingRecord(
@@ -25,7 +26,7 @@ case class SwimmingRecord(
 }
 
 object SwimmingRecord {
-  val schema = """CREATE TEMPORARY TABLE IF NOT EXISTS `finagle-mysql-test` (
+  val schema = """CREATE TABLE IF NOT EXISTS `finagle-mysql-test` (
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `event` varchar(30) DEFAULT NULL,
     `time` float DEFAULT NULL,
@@ -71,31 +72,18 @@ object SwimmingRecord {
   )
 }
 
-class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterAll with Eventually {
+class ClientTest extends EmbeddedSuite with BeforeAndAfterAll with Eventually {
   import SwimmingRecord._
 
-  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
+  val maxConcurrentPreparedStatements: Int = 10
 
-  private val c: Client with Transactions = client.orNull
+  val instanceConfig: InstanceConfig = defaultInstanceConfig
+  val databaseConfig: DatabaseConfig =
+    DatabaseConfig(databaseName = "b_database", users = Seq.empty, setupQueries = Seq(schema))
 
-  override def beforeAll(): Unit = {
-    if (c != null) {
-      await(c.query(schema)) match {
-        case _: OK => // ok, table created. good.
-        case x => fail("Create table was not ok: " + x)
-      }
-    }
-  }
-
-  override def afterAll(): Unit = {
-    if (c != null) {
-      c.close()
-    }
-  }
-
-  test("failed auth") {
+  test("failed auth") { fixture =>
     try {
-      await(Mysql.newRichClient("localhost:3306").ping())
+      await(Mysql.newRichClient(fixture.instance.dest).ping())
       fail("Expected an error when using an unauthenticated client")
     } catch {
       // Expected Access Denied Error Code
@@ -103,32 +91,37 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
     }
   }
 
-  test("ping") {
-    await(c.ping())
+  test("ping") { fixture =>
+    val client = fixture.newRichClient()
+    await(client.ping())
   }
 
   private val createTableSql =
-    """CREATE TEMPORARY TABLE IF NOT EXISTS table_create_test (id int(5))"""
+    """CREATE TABLE IF NOT EXISTS table_create_test (id int(5))"""
 
-  test("query: create a table") {
-    val createResult = await(c.query(createTableSql))
+  test("query: create a table") { fixture =>
+    val client = fixture.newRichClient()
+    val createResult = await(client.query(createTableSql))
     assert(createResult.isInstanceOf[OK])
   }
 
-  test("modify: create a table") {
-    await(c.modify(createTableSql))
+  test("modify: create a table") { fixture =>
+    val client = fixture.newRichClient()
+    await(client.modify(createTableSql))
   }
 
-  test("query: insert values") {
+  test("query: insert values") { fixture =>
     val insertSql =
       """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
-       VALUES %s;""".format(allRecords.mkString(", "))
-    val insertResult = await(c.query(insertSql))
+        |VALUES %s;""".stripMargin
+        .format(allRecords.mkString(", "))
+    val client = fixture.newRichClient()
+    val insertResult = await(client.query(insertSql))
     val ok = insertResult.asInstanceOf[OK]
     assert(ok.insertId == 1)
   }
 
-  test("modify: insert values") {
+  test("modify: insert values") { fixture =>
     // other tests are dependent on the data setup, so we are mindful
     // to not modify any rows.
     val insertSql =
@@ -137,24 +130,29 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
         |SELECT 'event', 1.0, 'name', 'nationality', 'date'
         |WHERE 1 = 0
       """.stripMargin
-    val insertResult = await(c.modify(insertSql))
+    val client = fixture.newRichClient()
+    val insertResult = await(client.modify(insertSql))
     assert(insertResult.affectedRows == 0)
   }
 
-  test("read: select values") {
-    val resultSet = await(c.read("SELECT * FROM `finagle-mysql-test`"))
+  test("read: select values") { fixture =>
+    val client = fixture.newRichClient()
+    val resultSet =
+      await(client.read("SELECT * FROM `finagle-mysql-test`"))
     assert(resultSet.rows.size == allRecords.size)
   }
 
-  test("select: select values") {
-    val selectResult = await(c.select("SELECT * FROM `finagle-mysql-test`") { row =>
-      val event = row.stringOrNull("event")
-      val time = row.floatOrZero("time")
-      val name = row.stringOrNull("name")
-      val nation = row.stringOrNull("nationality")
-      val date = row.javaSqlDateOrNull("date")
-      SwimmingRecord(event, time, name, nation, date)
-    })
+  test("select: select values") { fixture =>
+    val client = fixture.newRichClient()
+    val selectResult =
+      await(client.select("SELECT * FROM `finagle-mysql-test`") { row =>
+        val event = row.stringOrNull("event")
+        val time = row.floatOrZero("time")
+        val name = row.stringOrNull("name")
+        val nation = row.stringOrNull("nationality")
+        val date = row.javaSqlDateOrNull("date")
+        SwimmingRecord(event, time, name, nation, date)
+      })
 
     var i = 0
     for (res <- selectResult) {
@@ -163,19 +161,24 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
     }
   }
 
-  test("can execute more prepared statements than allowed in cache") {
+  test("can execute more prepared statements than allowed in cache") { fixture =>
+    val client = fixture
+      .newClient()
+      .withMaxConcurrentPrepareStatements(maxConcurrentPreparedStatements)
+      .newRichClient(fixture.instance.dest)
     val queryStrings = (0 to (maxConcurrentPreparedStatements * 2)).map { i => s"SELECT $i" }
     val queryResults = Future.collect(queryStrings.map { query =>
-      c.prepare(query)().map(_ => "ok")
+      client.prepare(query)().map(_ => "ok")
     })
     val results = await(queryResults)
     results.map { result => assert(result == "ok") }
   }
 
-  test("prepared statement") {
+  test("prepared statement") { fixture =>
     val prepareQuery =
       "SELECT COUNT(*) AS 'numRecords' FROM `finagle-mysql-test` WHERE `name` LIKE ?"
-    val ps = c.prepare(prepareQuery)
+    val client = fixture.newRichClient()
+    val ps = client.prepare(prepareQuery)
     for (i <- 0 to 10) {
       val randomIdx = math.floor(math.random * (allRecords.size - 1)).toInt
       val recordName = allRecords(randomIdx).name
@@ -186,9 +189,10 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
     }
   }
 
-  test("cursored statement") {
+  test("cursored statement") { fixture =>
     val query = "select * from `finagle-mysql-test` where `event` = ?"
-    val cursoredStatement = c.cursor(query)
+    val client = fixture.newRichClient()
+    val cursoredStatement = client.cursor(query)
     val cursorResult = await(cursoredStatement(1, "50 m freestyle")(r => r))
     val rows = await(cursorResult.stream.toSeq())
 
@@ -196,20 +200,22 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
     assert(rows(0)("event").get == StringValue("50 m freestyle"))
   }
 
-  test("query with invalid sql includes sql in exception message") {
+  test("query with invalid sql includes sql in exception message") { fixture =>
     // this has a mismatched number of columns.
     val invalidSql =
       """INSERT INTO `finagle-mysql-test` (
         |  `event`, `time`, `name`, `nationality`, `date`
         |) VALUES (1)""".stripMargin
 
+    val client = fixture.newRichClient()
+
     val err = intercept[ServerError] {
-      await(c.query(invalidSql))
+      await(client.query(invalidSql))
     }
     assert(err.getMessage.contains(invalidSql))
   }
 
-  test("select with invalid sql includes sql in exception message") {
+  test("select with invalid sql includes sql in exception message") { fixture =>
     // this has a mismatched number of columns.
     val invalidSql =
       """
@@ -218,32 +224,36 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
         |WHERE `event` IN (SELECT ?, ?)
       """.stripMargin
 
+    val client = fixture.newRichClient()
+
     val err = intercept[ServerError] {
-      await(c.select(invalidSql)(identity))
+      await(client.select(invalidSql)(identity))
     }
     assert(err.getMessage.contains(invalidSql))
   }
 
-  test("prepare with invalid sql includes sql in exception message") {
+  test("prepare with invalid sql includes sql in exception message") { fixture =>
     val invalidSql =
       """INSERT INTO `finagle-mysql-test` (
         |  `event`, `time`, `name`, `nationality`, `date`
         |) VALUES (?)""".stripMargin
-    val prepared = c.prepare(invalidSql)
+    val client = fixture.newRichClient()
+    val prepared = client.prepare(invalidSql)
     val err = intercept[ServerError] {
       await(prepared(1))
     }
     assert(err.getMessage.contains(invalidSql))
   }
 
-  test("cursor with invalid sql includes sql in exception message") {
+  test("cursor with invalid sql includes sql in exception message") { fixture =>
     val invalidSql =
       """
         |SELECT 1
         |FROM `finagle-mysql-test`
         |WHERE `event` IN (SELECT ?, ?)
       """.stripMargin
-    val statement = c.cursor(invalidSql)
+    val client = fixture.newRichClient()
+    val statement = client.cursor(invalidSql)
     val cursor = await(statement(1, "X", "Y")(identity))
     val err = intercept[ServerError] {
       await(cursor.stream.toSeq())
@@ -251,23 +261,25 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
     assert(err.getMessage.contains(invalidSql))
   }
 
-  test("prepare can read records with empty strings") {
+  test("prepare can read records with empty strings") { fixture =>
     val sql =
       """
         |SELECT *
         |FROM `finagle-mysql-test`
         |WHERE `name` = ?
       """.stripMargin
-    val prepared = c.prepare(sql)
+    val client = fixture.newRichClient()
+    val prepared = client.prepare(sql)
     val res = prepared.select("")(identity)
     val rows = await(res)
     assert(rows.size == 1)
     assert(rows.head("time").get == FloatValue(100))
   }
 
-  test("CursorResult does not store head of stream") {
+  test("CursorResult does not store head of stream") { fixture =>
     val query = "select * from `finagle-mysql-test`"
-    val cursoredStatement = c.cursor(query)
+    val client = fixture.newRichClient()
+    val cursoredStatement = client.cursor(query)
     val cursorResult = await(cursoredStatement(1)(r => r))
     val first = cursorResult.stream.take(1)
     val second = cursorResult.stream.take(1)
@@ -280,14 +292,18 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
   // the timeout then it's possible the test will fail.
   //
   // We may wish to mark this test flaky if we observe that it fails.
-  test("client connection closed on interrupt") {
+  test("client connection closed on interrupt") { fixture =>
     val stats: InMemoryStatsReceiver = new InMemoryStatsReceiver()
 
-    val timeoutClient: Client with Transactions = configureClient()
-      .withLabel("timeoutClient")
-      .withStatsReceiver(stats)
-      .withRequestTimeout(100.milliseconds)
-      .newRichClient(dest)
+    val client = fixture.newRichClient()
+    val timeoutClient =
+      fixture
+        .newClient()
+        .withMaxConcurrentPrepareStatements(maxConcurrentPreparedStatements)
+        .withLabel("timeoutClient")
+        .withStatsReceiver(stats)
+        .withRequestTimeout(100.milliseconds)
+        .newRichClient(fixture.instance.dest)
 
     def poolSize: Int = {
       stats.gauges.get(Seq("timeoutClient", "pool_size")) match {
@@ -310,7 +326,8 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
     }
 
     // Query timed out but it's still running on the server.
-    def processes: String = await(c.query(processesQuery)).asInstanceOf[ResultSet].rows.toString
+    def processes: String =
+      await(client.query(processesQuery)).asInstanceOf[ResultSet].rows.toString
     assert(processes.contains(expensiveQuery))
 
     // Client connection closed.
@@ -319,7 +336,7 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
     }
   }
 
-  test("stored procedure returns result set") {
+  test("stored procedure returns result set") { fixture =>
     val createProcedure =
       """
         |create procedure getSwimmerByEvent(IN eventName varchar(30))
@@ -340,26 +357,30 @@ class ClientTest extends AnyFunSuite with IntegrationClient with BeforeAndAfterA
         |drop procedure if exists getSwimmerByEvent
       """.stripMargin
 
+    val client = fixture.newRichClient()
     // Drop the procedure if it was left over from a previously
     // failed run.
-    await(c.query(dropProcedure))
-    await(c.query(createProcedure))
+    await(client.query(dropProcedure))
+    await(client.query(createProcedure))
 
     val result = await(
-      c.select(executeProcedure) { row => row.stringOrNull("name") }
+      client.select(executeProcedure) { row => row.stringOrNull("name") }
     )
 
     assert(result == List("Cesar Cielo"))
-    await(c.query(dropProcedure))
+    await(client.query(dropProcedure))
   }
 
-  test("mysql server error during handshake is reported with error code") {
+  test("mysql server error during handshake is reported with error code") { fixture =>
     // The default maximum number of connections is 150, so we open 151.
     val clients = new ArrayBuffer[mysql.Client]()
     try {
       val err = intercept[Exception] {
         for (_ <- 0 to 150) {
-          val newClient = configureClient().newRichClient(dest)
+          val newClient = fixture
+            .newClient()
+            .withMaxConcurrentPrepareStatements(maxConcurrentPreparedStatements)
+            .newRichClient(fixture.instance.dest)
           clients += newClient
           await(newClient.ping)
         }
