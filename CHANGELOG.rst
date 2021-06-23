@@ -7,6 +7,11 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Update Caffeine cache library to version 2.9.1 ``PHAB_ID=D660908``
+
 21.6.0
 ------
 
