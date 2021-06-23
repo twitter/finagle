@@ -1,21 +1,23 @@
 package com.twitter.finagle.client
 
-import com.twitter.conversions.PercentOps._
 import com.twitter.conversions.DurationOps._
+import com.twitter.conversions.PercentOps._
 import com.twitter.finagle._
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{WindowedPercentileHistogram, MockWindowedPercentileHistogram}
+import com.twitter.finagle.util.{MockWindowedPercentileHistogram, WindowedPercentileHistogram}
 import com.twitter.util._
+import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import com.twitter.util.tunable.Tunable
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatestplus.mockito.MockitoSugar
-import scala.util.Random
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
+import scala.util.Random
 
 class BackupRequestFilterTest
     extends AnyFunSuite
@@ -824,6 +826,70 @@ class BackupRequestFilterTest
       assert(f.poll == Some(Return("orig")))
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 0)
+    }
+  }
+
+  test(
+    "BackupRequestFilter is added to the Registry when protocolLibrary, label, and dest are present in the stack params") {
+    val mockService = mock[Service[String, String]]
+    val registry = new SimpleRegistry()
+    GlobalRegistry.withRegistry(registry) {
+      val params =
+        Stack.Params.empty +
+          param.ProtocolLibrary("thrift") +
+          param.Label("test") +
+          BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))) +
+          BackupRequestFilter.Configured(50.percent, false)
+
+      BackupRequestFilter.filterService(params, mockService)
+
+      def key(name: String, suffix: String*): Seq[String] =
+        Seq("client", name) ++ suffix
+
+      def filteredRegistry: Set[Entry] =
+        registry.filter { entry => entry.key.contains("BackupRequestFilter") }.toSet
+
+      val registeredEntries = Set(
+        Entry(
+          key("thrift", "test", "/$/inet/localhost/0", "BackupRequestFilter"),
+          "maxExtraLoad: Some(0.5), sendInterrupts: false")
+      )
+
+      filteredRegistry should contain theSameElementsAs registeredEntries
+    }
+  }
+
+  test(
+    "BackupRequestFilter is not added to the Registry when any of protocolLibrary, label, or dest is missing in the stack params") {
+    val mockService = mock[Service[String, String]]
+    val registry = new SimpleRegistry()
+    GlobalRegistry.withRegistry(registry) {
+      val paramsMissingProtocolLibrary =
+        Stack.Params.empty +
+          param.Label("test") +
+          BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))) +
+          BackupRequestFilter.Configured(50.percent, false)
+
+      val paramsMissingLabel =
+        Stack.Params.empty +
+          param.ProtocolLibrary("thrift") +
+          BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))) +
+          BackupRequestFilter.Configured(50.percent, false)
+
+      val paramsMissingDest =
+        Stack.Params.empty +
+          param.ProtocolLibrary("thrift") +
+          param.Label("test") +
+          BackupRequestFilter.Configured(50.percent, false)
+
+      BackupRequestFilter.filterService(paramsMissingProtocolLibrary, mockService)
+      BackupRequestFilter.filterService(paramsMissingLabel, mockService)
+      BackupRequestFilter.filterService(paramsMissingDest, mockService)
+
+      def filteredRegistry: Set[Entry] =
+        registry.filter { entry => entry.key.contains("BackupRequestFilter") }.toSet
+
+      filteredRegistry should contain theSameElementsAs Set.empty
     }
   }
 }

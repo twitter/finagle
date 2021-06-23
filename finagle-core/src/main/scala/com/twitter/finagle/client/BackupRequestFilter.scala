@@ -4,10 +4,12 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.context.BackupRequest
+import com.twitter.finagle.naming.BindingFactory.Dest
+import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, Retries, RetryBudget}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.{Annotation, Trace, TraceId, Tracing}
-import com.twitter.finagle.util.WindowedPercentileHistogram
+import com.twitter.finagle.util.{Showable, WindowedPercentileHistogram}
 import com.twitter.logging.Logger
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
@@ -151,10 +153,40 @@ object BackupRequestFilter {
    *
    * Users should only use this method for filtering generic services; otherwise,
    * usage through the `idempotent` method on [[MethodBuilder]] implementations is preferred.
+   *
+   * @note The BackupRequestFilter will be added to the ClientRegistry if and only if
+   *       [[ProtocolLibrary]], [[Label]], and [[Dest]] are present in {@code params}.
+   *       The BackupRequestFilter will be registered under scope:
+   *       "client"/"client_protocol_library"/"client_label"/"dest"/"BackupRequestFilter"
+   *       If any of the 3 params is missing, BRF will not be registered.
    */
   def filterService[Req, Rep](params: Stack.Params, service: Service[Req, Rep]): Service[Req, Rep] =
+    if (params.contains[ProtocolLibrary] && params.contains[Label] && params.contains[Dest]) {
+      filterServiceWithPrefix(params, service, Seq(Showable.show(params[Dest].dest)))
+    } else {
+      filterServiceWithPrefix(params, service, Seq.empty)
+    }
+
+  // an internal api to register BRF to client registry under `keyPrefixes`.
+  // We need to do it explicitly since BackupRequestFilter is never placed on Client stack.
+  // When invoked via `MethodBuilder.idempotent` endpoint, BRF will be registered under:
+  // "client"/"client_protocol_library"/"client_name"/"dest"/"methods"/"service_name"/"BackupRequestFilter"
+  // When invoked without `MethodBuilder`, BRF will be registered under:
+  // "client"/"client_protocol_library"/"client_name"/"dest"/"BackupRequestFilter"
+  private[client] def filterServiceWithPrefix[Req, Rep](
+    params: Stack.Params,
+    service: Service[Req, Rep],
+    keyPrefixes: Seq[String]
+  ): Service[Req, Rep] =
     params[BackupRequestFilter.Param] match {
       case BackupRequestFilter.Param.Configured(maxExtraLoad, sendInterrupts) =>
+        // register BRF when registry prefixes are provided
+        if (keyPrefixes.nonEmpty) {
+          val value =
+            "maxExtraLoad: " + maxExtraLoad().toString + ", sendInterrupts: " + sendInterrupts
+          val prefixes = keyPrefixes ++ Seq(BackupRequestFilter.role.name, value)
+          ClientRegistry.export(params, prefixes: _*)
+        }
         val brf = mkFilterFromParams[Req, Rep](maxExtraLoad, sendInterrupts, params)
         new ServiceProxy[Req, Rep](brf.andThen(service)) {
           override def close(deadline: Time): Future[Unit] =

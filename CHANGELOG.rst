@@ -12,6 +12,11 @@ Runtime Behavior Changes
 
 * finagle: Update Caffeine cache library to version 2.9.1 ``PHAB_ID=D660908``
 
+Bug Fixes
+~~~~~~~~~~
+
+* finagle-core: Add `BackupRequestFilter` to client registry when configured. ``PHAB_ID=D686981``
+
 21.6.0
 ------
 

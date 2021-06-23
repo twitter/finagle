@@ -64,8 +64,11 @@ class MethodBuilderTest
 
   import MethodBuilderTest._
 
-  def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
+  def awaitResult[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)
+
+  def awaitReady[T <: Awaitable[_]](a: T, d: Duration = 5.seconds): T =
+    Await.ready(a, d)
 
   test("retries do not see the total timeout") {
     val stats = new InMemoryStatsReceiver()
@@ -86,7 +89,7 @@ class MethodBuilderTest
       .newService("a_client")
 
     intercept[GlobalRequestTimeoutException] {
-      await(client(1))
+      awaitResult(client(1))
     }
     // while we have a RetryFilter, the underlying service returns `Future.never`
     // and as such, the stats are never updated.
@@ -149,7 +152,7 @@ class MethodBuilderTest
       assert(rep.isDefined)
 
       intercept[GlobalRequestTimeoutException] {
-        await(rep)
+        awaitResult(rep)
       }
 
       eventually {
@@ -212,7 +215,7 @@ class MethodBuilderTest
       val delta = 5.milliseconds
       tc.advance(delta)
       timer.tick()
-      Await.ready(rep, 5.seconds)
+      awaitReady(rep)
 
       assert(2 == attempts.get)
       eventually {
@@ -235,7 +238,7 @@ class MethodBuilderTest
 
       // issue the request
       val rep2 = client2(2)
-      Await.ready(rep2, 5.seconds)
+      awaitReady(rep2)
 
       assert(3 == attempts.get)
       eventually {
@@ -267,7 +270,7 @@ class MethodBuilderTest
 
     // issue a failing request
     intercept[Failure] {
-      await(client(1))
+      awaitResult(client(1))
     }
 
     eventually {
@@ -280,7 +283,7 @@ class MethodBuilderTest
 
     // issue a failing request
     intercept[Failure] {
-      await(aMethodClient(1))
+      awaitResult(aMethodClient(1))
     }
 
     eventually {
@@ -316,7 +319,7 @@ class MethodBuilderTest
       )
       assert(filteredRegistry == totalSvcEntries)
 
-      await(totalSvc.close())
+      awaitResult(totalSvc.close())
       assert(Set.empty == filteredRegistry)
     }
   }
@@ -376,8 +379,53 @@ class MethodBuilderTest
       assert(!vanillaClose.isDefined)
       filteredRegistry should contain theSameElementsAs sundaeEntries
 
-      Await.ready(sundaeSvc.close(), 5.seconds)
+      awaitReady(sundaeSvc.close())
       assert(vanillaClose.isDefined)
+      assert(Set.empty == filteredRegistry)
+    }
+  }
+
+  test("BackupRequestFilter is added to the Registry") {
+    val registry = new SimpleRegistry()
+    GlobalRegistry.withRegistry(registry) {
+      val protocolLib = "test_lib"
+      val clientName = "some_svc"
+      val addr = "test_addr"
+      val stats = new InMemoryStatsReceiver()
+      val params =
+        Stack.Params.empty +
+          param.Stats(stats) +
+          param.Label(clientName) +
+          param.ProtocolLibrary(protocolLib)
+      val stackClient = TestStackClient(stack, params)
+      val methodBuilder = MethodBuilder.from(addr, stackClient)
+
+      val classifier: ResponseClassifier = ResponseClassifier.named("foo") {
+        case ReqRep(_, Throw(_: IndividualRequestTimeoutException)) =>
+          ResponseClass.RetryableFailure
+      }
+
+      def key(name: String, suffix: String*): Seq[String] =
+        Seq("client", protocolLib, clientName, addr, "methods", name) ++ suffix
+
+      def filteredRegistry: Set[Entry] =
+        registry.filter { entry => entry.key.head == "client" }.toSet
+
+      val sundaeSvc = methodBuilder
+        .idempotent(1.percent, false, classifier)
+        .newService("sundae")
+
+      val sundaeEntries = Set(
+        Entry(key("sundae", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/sundae"),
+        Entry(key("sundae", "retry"), "Config(Some(Idempotent(foo)),2)"),
+        Entry(
+          key("sundae", "BackupRequestFilter"),
+          "maxExtraLoad: Some(0.01), sendInterrupts: false")
+      )
+
+      filteredRegistry should contain theSameElementsAs sundaeEntries
+
+      awaitReady(sundaeSvc.close())
       assert(Set.empty == filteredRegistry)
     }
   }
@@ -404,7 +452,7 @@ class MethodBuilderTest
 
     // issue a failing request
     intercept[Failure] {
-      await(client(1))
+      awaitResult(client(1))
     }
 
     eventually {
@@ -453,7 +501,7 @@ class MethodBuilderTest
 
     // issue a failing request
     intercept[Failure] {
-      await(client(1))
+      awaitResult(client(1))
     }
 
     eventually {
@@ -536,7 +584,7 @@ class MethodBuilderTest
     val m1Close = m1.close()
     assert(!m1Close.isDefined)
     assert(!m1.isAvailable)
-    intercept[ServiceClosedException] { await(m1(1)) }
+    intercept[ServiceClosedException] { awaitResult(m1(1)) }
     assert(m2.isAvailable)
     assert(svc.isAvailable)
 
@@ -547,11 +595,11 @@ class MethodBuilderTest
     assert(svc.isAvailable)
 
     // validate that closing the last method closes the underlying service.
-    Await.ready(m2.close(), 5.seconds)
+    awaitReady(m2.close())
     assert(m1Close.isDefined)
     assert(!m1.isAvailable)
     assert(!m2.isAvailable)
-    intercept[ServiceClosedException] { await(m2(1)) }
+    intercept[ServiceClosedException] { awaitResult(m2(1)) }
     assert(!svc.isAvailable)
   }
 
@@ -571,7 +619,7 @@ class MethodBuilderTest
 
     // issue a failing request
     val f = intercept[Failure] {
-      await(client(1))
+      awaitResult(client(1))
     }
 
     assert(f.getSource(Failure.Source.Method).contains(methodName))
@@ -592,7 +640,7 @@ class MethodBuilderTest
 
     // issue a failing request
     val f = intercept[Failure] {
-      await(client(1))
+      awaitResult(client(1))
     }
 
     assert(f.getSource(Failure.Source.Method).isEmpty)
@@ -678,7 +726,7 @@ class MethodBuilderTest
 
     val rep1 = client(0)
     intercept[Exception] {
-      await(rep1, 1.second)
+      awaitResult(rep1, 1.second)
     }
     eventually {
       assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 1)
@@ -690,7 +738,7 @@ class MethodBuilderTest
 
     val rep2 = nonIdempotentClient(0)
     intercept[Exception] {
-      await(rep2, 1.second)
+      awaitResult(rep2, 1.second)
     }
     eventually {
       assert(stats.counters(Seq("mb", "a_client_nonidempotent", "logical", "requests")) == 1)
@@ -701,7 +749,7 @@ class MethodBuilderTest
     // per ResponseClassifier.default, but not retried in MethodBuilder's retries.
     val writeExceptionReq = nonIdempotentClient(1)
     intercept[Exception] {
-      await(writeExceptionReq, 1.second)
+      awaitResult(writeExceptionReq, 1.second)
     }
     eventually {
       assert(stats.counters(Seq("mb", "a_client_nonidempotent", "logical", "requests")) == 2)
@@ -775,7 +823,7 @@ class MethodBuilderTest
       assert(rep.isDefined)
 
       intercept[GlobalRequestTimeoutException] {
-        await(rep)
+        awaitResult(rep)
       }
 
       eventually {
@@ -821,7 +869,7 @@ class MethodBuilderTest
 
     val client = mb.newService("a_method")
     Time.withCurrentTimeFrozen { tc =>
-      await(client(1), 1.second)
+      awaitResult(client(1), 1.second)
       tc.advance(5.seconds)
       timer.tick()
       assert(
@@ -870,7 +918,7 @@ class MethodBuilderTest
 
     val rep1 = client(0)
     val exc1 = intercept[Exception] {
-      await(rep1, 1.second)
+      awaitResult(rep1, 1.second)
     }
     assert(exc1 == myException1)
 
@@ -883,7 +931,7 @@ class MethodBuilderTest
 
     val rep2 = client(1)
     val exc2 = intercept[Exception] {
-      await(rep2, 1.second)
+      awaitResult(rep2, 1.second)
     }
     assert(exc2 == myException2)
 
@@ -914,7 +962,7 @@ class MethodBuilderTest
 
     val rep = client(0)
     val exc = intercept[Exception] {
-      await(rep, 1.second)
+      awaitResult(rep, 1.second)
     }
     assert(exc == myException)
     eventually {
@@ -944,7 +992,7 @@ class MethodBuilderTest
 
     val rep = client(0)
     val exc = intercept[Exception] {
-      await(rep, 1.second)
+      awaitResult(rep, 1.second)
     }
     assert(exc == myException)
     eventually {
@@ -980,7 +1028,7 @@ class MethodBuilderTest
 
     val rep1 = client(0)
     val exc = intercept[Exception] {
-      await(rep1, 1.second)
+      awaitResult(rep1, 1.second)
     }
     assert(exc == myException)
     eventually {
@@ -990,7 +1038,7 @@ class MethodBuilderTest
     }
 
     val rep2 = client(1)
-    val result = await(rep2, 1.second)
+    val result = awaitResult(rep2, 1.second)
     assert(result == 1)
     eventually {
       assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 2)
@@ -1026,7 +1074,7 @@ class MethodBuilderTest
 
     val rep1 = client(0)
     val exc = intercept[Exception] {
-      await(rep1, 1.second)
+      awaitResult(rep1, 1.second)
     }
     assert(exc == myException)
     eventually {
@@ -1036,7 +1084,7 @@ class MethodBuilderTest
     }
 
     val rep2 = client(1)
-    val result = await(rep2, 1.second)
+    val result = awaitResult(rep2, 1.second)
     assert(result == 1)
     eventually {
       assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 2)
@@ -1118,8 +1166,8 @@ class MethodBuilderTest
     val clientA = methodBuilder.filtered(filterBoom).newService("a_client")
     val clientB = methodBuilder.filtered(filterCalled).newService("b_client")
 
-    intercept[Exception](await(clientA(1)))
-    await(clientB(1))
+    intercept[Exception](awaitResult(clientA(1)))
+    awaitResult(clientB(1))
     assert(called.get() == 1)
   }
 }

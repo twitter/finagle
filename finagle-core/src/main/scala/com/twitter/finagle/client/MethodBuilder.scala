@@ -524,6 +524,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     val entry = registryEntry()
     val keyPrefix = registryKeyPrefix(name)
     ClientRegistry.register(entry, keyPrefix :+ "statsReceiver", statsReceiver(name).toString)
+
     withTimeout.registryEntries.foreach {
       case (suffix, value) =>
         ClientRegistry.register(entry, keyPrefix ++ suffix, value)
@@ -542,7 +543,10 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       param.Stats(statsReceiver(name)) +
       param.ResponseClassifier(config.retry.responseClassifier)
 
-    val underlying = BackupRequestFilter.filterService(backupRequestParams, methodPool.get)
+    // register BackupRequestFilter under the same prefixes as other method entries
+    val prefixes = Seq(registryEntry().addr) ++ registryKeyPrefix(name)
+    val underlying = BackupRequestFilter
+      .filterServiceWithPrefix(backupRequestParams, methodPool.get, prefixes)
 
     new ServiceProxy[Req, Rep](underlying) with CloseOnce {
       override def apply(request: Req): Future[Rep] =
