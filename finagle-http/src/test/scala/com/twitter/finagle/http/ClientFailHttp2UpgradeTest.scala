@@ -18,7 +18,7 @@ class ClientFailHttp2UpgradeTest extends AbstractHttp1EndToEndTest {
     finagle.Http.client.withHttp2
       .configured(FailureDetector.Param(FailureDetector.NullConfig))
 
-  def serverImpl(): finagle.Http.Server = finagle.Http.server
+  def serverImpl(): finagle.Http.Server = finagle.Http.server.withNoHttp2
 
   def featureImplemented(feature: Feature): Boolean = feature != NoBodyMessage
 

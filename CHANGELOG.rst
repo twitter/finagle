@@ -12,6 +12,19 @@ Runtime Behavior Changes
 
 * finagle: Update Caffeine cache library to version 2.9.1 ``PHAB_ID=D660908``
 
+* finagle-http: remove the `com.twitter.finagle.http.UseH2`,
+  `com.twitter.finagle.http.UseH2CClients2`, `com.twitter.finagle.http.UseH2CServers` and
+  `com.twitter.finagle.http.UseHttp2MultiplexCodecClient` toggles. The configuration for
+  `c.t.finagle.Http.client` and `c.t.finagle.Http.server` now default to using the HTTP/2 based
+  implementation. To disable this behavior, use `c.t.finagle.Http.client.withNoHttp2` and
+  `c.t.finagle.Http.server.withNoHttp2` respectively.
+
+  Alternatively, new GlobalFlag's have been introduced to modify the default behavior of clients
+  and servers that have not been explicitly configured, where
+  the `com.twitter.finagle.http.defaultClientProtocol`
+  and `com.twitter.finagle.http.defaultServerProtocol` flags can be set to `HTTP/1.1` to modify
+  the default client or server configuration, respectively. `PHAB_ID=D625880``
+
 Bug Fixes
 ~~~~~~~~~~
 

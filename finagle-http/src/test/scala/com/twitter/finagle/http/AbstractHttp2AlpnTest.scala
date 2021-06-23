@@ -8,7 +8,6 @@ import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag.overrides
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.TempFile
 import com.twitter.util.{Closable, Future}
@@ -57,40 +56,34 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
     await(client.close())
   }
 
-  test("Upgrades to HTTP/2 only if both have the toggle on and it's H2, not H2C") {
+  test("Upgrades to HTTP/2 only if both support H2, not H2C") {
     for {
-      clientUseHttp2 <- Seq(1d, 0d)
-      serverUseHttp2 <- Seq(1d, 0d)
-      clientToggleName <- Seq(
-        "com.twitter.finagle.http.UseH2",
-        "com.twitter.finagle.http.UseH2CClients2"
-      )
-      serverToggleName <- Seq(
-        "com.twitter.finagle.http.UseH2",
-        "com.twitter.finagle.http.UseH2CServers"
-      )
+      clientUseHttp2 <- Seq(true, false)
+      serverUseHttp2 <- Seq(true, false)
     } {
       val sr = new InMemoryStatsReceiver()
-      val server = overrides.let(Map(serverToggleName -> serverUseHttp2)) {
-        finagle.Http.server
+      val server = {
+        val srv = finagle.Http.server
           .withStatsReceiver(sr)
           .withLabel("server")
           .configured(Transport.ServerSsl(Some(serverConfiguration())))
+
+        (if (serverUseHttp2) srv.withHttp2 else srv.withNoHttp2)
           .serve("localhost:*", initService)
       }
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = overrides.let(Map(clientToggleName -> clientUseHttp2)) {
-        finagle.Http.client
+      val client = {
+        val clnt = finagle.Http.client
           .withStatsReceiver(sr)
           .configured(Transport.ClientSsl(Some(clientConfiguration())))
+
+        (if (clientUseHttp2) clnt.withHttp2 else clnt.withNoHttp2)
           .newService(s"${addr.getHostName}:${addr.getPort}", "client")
       }
       val rep = client(Request("/"))
       await(rep)
-      if (clientUseHttp2 == 1.0 &&
-        serverUseHttp2 == 1.0 &&
-        clientToggleName == "com.twitter.finagle.http.UseH2" &&
-        serverToggleName == "com.twitter.finagle.http.UseH2") {
+      if (clientUseHttp2 &&
+        serverUseHttp2) {
         assert(
           sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
           "Failed to upgrade when both parties were toggled on"
@@ -100,11 +93,10 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
           "Failed to upgrade when both parties were toggled on"
         )
       } else {
-        val clientStatus = if (clientUseHttp2 == 1) "on" else "off"
-        val serverStatus = if (serverUseHttp2 == 1) "on" else "off"
+        val clientStatus = if (clientUseHttp2) "on" else "off"
+        val serverStatus = if (serverUseHttp2) "on" else "off"
         val errorMsg = s"Upgraded when the client was $clientStatus, the server was " +
-          s"$serverStatus, the client toggle was $clientToggleName, the server toggle was " +
-          s"$serverToggleName"
+          s"$serverStatus"
 
         val clientSuccess = sr.counters.get(Seq("client", "upgrade", "success"))
         assert(clientSuccess.isEmpty || clientSuccess.contains(0), errorMsg)

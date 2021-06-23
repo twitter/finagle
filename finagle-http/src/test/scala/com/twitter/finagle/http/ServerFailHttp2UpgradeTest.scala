@@ -11,7 +11,7 @@ import com.twitter.util.Future
 class ServerFailHttp2UpgradeTest extends AbstractHttp1EndToEndTest {
   def implName: String = "http/1.1 client, http/2 server"
   def clientImpl(): finagle.Http.Client =
-    finagle.Http.client.configured(FailureDetector.Param(FailureDetector.NullConfig))
+    finagle.Http.client.withNoHttp2.configured(FailureDetector.Param(FailureDetector.NullConfig))
 
   def serverImpl(): finagle.Http.Server = finagle.Http.server.withHttp2
 

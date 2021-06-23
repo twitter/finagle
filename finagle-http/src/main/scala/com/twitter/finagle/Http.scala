@@ -15,7 +15,6 @@ import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.ssl.ApplicationProtocols
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future, FuturePool, Monitor, StorageUnit}
@@ -43,20 +42,6 @@ trait HttpRichClient { self: Client[Request, Response] =>
  * HTTP/1.1 protocol support, including client and server.
  */
 object Http extends Client[Request, Response] with HttpRichClient with Server[Request, Response] {
-
-  // Toggles transport implementation to Http/2.
-  private[this] object useH2 {
-    private[this] val underlying: Toggle = Toggles("com.twitter.finagle.http.UseH2")
-    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
-  }
-  object useH2CClients {
-    private[twitter] val underlying: Toggle = Toggles("com.twitter.finagle.http.UseH2CClients2")
-    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
-  }
-  private[this] object useH2CServers {
-    private[this] val underlying: Toggle = Toggles("com.twitter.finagle.http.UseH2CServers")
-    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
-  }
 
   /**
    * configure alternative http 1.1 implementations
@@ -351,13 +336,14 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       super.newClient(dest, label0)
     }
     override def newClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
-      val shouldHttp2 =
-        if (params[Transport.ClientSsl].sslClientConfiguration == None) useH2CClients()
-        else useH2()
-      val explicitlyConfigured = params.contains[HttpImpl]
       val client =
-        if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
-        else this
+        if (params.contains[HttpImpl]) this
+        else
+          defaultClientProtocol() match {
+            case Protocol.HTTP_2 => withHttp2
+            case Protocol.HTTP_1_1 => withNoHttp2
+          }
+
       client.superNewClient(dest, label0)
     }
 
@@ -602,13 +588,14 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       addr: SocketAddress,
       factory: ServiceFactory[Request, Response]
     ): ListeningServer = {
-      val shouldHttp2 =
-        if (params[Transport.ServerSsl].sslServerConfiguration == None) useH2CServers()
-        else useH2()
-      val explicitlyConfigured = params.contains[HttpImpl]
       val server =
-        if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
-        else this
+        if (params.contains[HttpImpl]) this
+        else
+          defaultServerProtocol() match {
+            case Protocol.HTTP_2 => withHttp2
+            case Protocol.HTTP_1_1 => withNoHttp2
+          }
+
       server.superServe(addr, factory)
     }
   }

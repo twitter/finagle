@@ -8,7 +8,6 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.http2.RstException
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.service.ServiceFactoryRef
-import com.twitter.finagle.toggle.flag.overrides
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.util._
@@ -175,36 +174,26 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
 
   test("Upgrades to HTTP/2 only if both have the toggle on, and it's H2C, not H2") {
     for {
-      clientUseHttp2 <- Seq(1d, 0d)
-      serverUseHttp2 <- Seq(1d, 0d)
-      clientToggleName <- Seq(
-        "com.twitter.finagle.http.UseH2",
-        "com.twitter.finagle.http.UseH2CClients2"
-      )
-      serverToggleName <- Seq(
-        "com.twitter.finagle.http.UseH2",
-        "com.twitter.finagle.http.UseH2CServers"
-      )
+      clientUseHttp2 <- Seq(true, false)
+      serverUseHttp2 <- Seq(true, false)
     } {
       val sr = new InMemoryStatsReceiver()
-      val server = overrides.let(Map(serverToggleName -> serverUseHttp2)) {
-        finagle.Http.server
+      val server = {
+        val srv = finagle.Http.server
           .withStatsReceiver(sr)
           .withLabel("server")
-          .serve("localhost:*", initService)
+        (if (serverUseHttp2) srv else srv.withNoHttp2).serve("localhost:*", initService)
       }
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = overrides.let(Map(clientToggleName -> clientUseHttp2)) {
-        finagle.Http.client
+      val client = {
+        val clnt = finagle.Http.client
           .withStatsReceiver(sr)
+        (if (clientUseHttp2) clnt else clnt.withNoHttp2)
           .newService(s"${addr.getHostName}:${addr.getPort}", "client")
       }
       val rep = client(Request("/"))
       await(rep)
-      if (clientUseHttp2 == 1.0 &&
-        serverUseHttp2 == 1.0 &&
-        clientToggleName == "com.twitter.finagle.http.UseH2CClients2" &&
-        serverToggleName == "com.twitter.finagle.http.UseH2CServers") {
+      if (clientUseHttp2 && serverUseHttp2) {
         assert(
           sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
           "Failed to upgrade when both parties were toggled on"
@@ -214,11 +203,10 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
           "Failed to upgrade when both parties were toggled on"
         )
       } else {
-        val clientStatus = if (clientUseHttp2 == 1) "on" else "off"
-        val serverStatus = if (serverUseHttp2 == 1) "on" else "off"
+        val clientStatus = if (clientUseHttp2) "on" else "off"
+        val serverStatus = if (serverUseHttp2) "on" else "off"
         val errorMsg = s"Upgraded when the client was $clientStatus, the server was " +
-          s"$serverStatus, the client toggle was $clientToggleName, the server toggle was " +
-          s"$serverToggleName"
+          s"$serverStatus"
         val clientSuccess = sr.counters.get(Seq("client", "upgrade", "success"))
         assert(clientSuccess.isEmpty || clientSuccess.contains(0), errorMsg)
 
@@ -229,9 +217,9 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
     }
   }
 
-  test("Configuration params take precedence over the toggle for the client") {
+  test("Configuration params take precedence over the defaults for the client") {
     for {
-      clientUseHttp2 <- Seq(1d, 0d)
+      clientUseHttp2 <- Seq(true, false)
     } {
       val sr = new InMemoryStatsReceiver()
       val server = serverImpl
@@ -239,17 +227,17 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
         .withLabel("server")
         .serve("localhost:*", initService)
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = overrides.let(Map("com.twitter.finagle.http.UseH2CClients2" -> clientUseHttp2)) {
+      val client = {
         val c = finagle.Http.client
           .withStatsReceiver(sr)
 
-        (if (clientUseHttp2 == 1.0) c.withNoHttp2
-         else c.withHttp2)
+        (if (clientUseHttp2) c.withHttp2
+         else c.withNoHttp2)
           .newService(s"${addr.getHostName}:${addr.getPort}", "client")
       }
       val rep = client(Request("/"))
       await(rep)
-      if (clientUseHttp2 == 0.0) {
+      if (clientUseHttp2) {
         assert(
           sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
           "Failed to upgrade when both parties were on"
@@ -267,18 +255,18 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
     }
   }
 
-  test("Configuration params take precedence over the toggle for the server") {
+  test("Configuration params take precedence over the defaults for the server") {
     for {
-      serverUseHttp2 <- Seq(1d, 0d)
+      serverUseHttp2 <- Seq(true, false)
     } {
       val sr = new InMemoryStatsReceiver()
-      val server = overrides.let(Map("com.twitter.finagle.http.UseH2CServers" -> serverUseHttp2)) {
+      val server = {
         val s = finagle.Http.server
           .withStatsReceiver(sr)
           .withLabel("server")
 
-        (if (serverUseHttp2 == 1.0) s.withNoHttp2
-         else s.withHttp2)
+        (if (serverUseHttp2) s.withHttp2
+         else s.withNoHttp2)
           .serve("localhost:*", initService)
       }
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
@@ -287,7 +275,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
         .newService(s"${addr.getHostName}:${addr.getPort}", "client")
       val rep = client(Request("/"))
       await(rep)
-      if (serverUseHttp2 == 0.0) {
+      if (serverUseHttp2) {
         assert(
           sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
           "Failed to upgrade when both parties were on"
