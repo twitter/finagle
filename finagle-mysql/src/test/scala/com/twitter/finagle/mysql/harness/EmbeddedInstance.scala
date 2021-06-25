@@ -35,6 +35,7 @@ object EmbeddedInstance {
     port: Int
   ): Seq[String] = {
     val derivedServerParameters: Seq[String] = Seq(
+      s"--basedir=${config.extractedMySqlPath}",
       s"--datadir=$dataDirectory",
       s"--port=$port",
       s"--socket=${Files.createTempFile(null, ".sock")}"
@@ -56,7 +57,7 @@ object EmbeddedInstance {
             val dest = s"${InetAddress.getLoopbackAddress.getHostAddress}:$port"
             val serverParameters: Seq[String] = getServerParameters(config, dataDirectory, port)
 
-            initializeDataDir(dataDirectory, executables)
+            initializeDataDir(dataDirectory, config.extractedMySqlPath, executables)
 
             val instance = new EmbeddedInstance(executables, serverParameters, port, dest)
             instance.startInstance()
@@ -110,12 +111,18 @@ object EmbeddedInstance {
    * Initialize the MySql --datadir.
    *
    * @param dataDirectory The location of --datadir
+   * @param baseDirectory The location of --basedir
    * @param executables The location of the MySql executables
    */
-  private def initializeDataDir(dataDirectory: Path, executables: MySqlExecutables): Unit = {
+  private def initializeDataDir(
+    dataDirectory: Path,
+    baseDirectory: Path,
+    executables: MySqlExecutables
+  ): Unit = {
     log.info(s"Initializing $dataDirectory")
     executables.initDatabase(
       Seq(
+        s"--basedir=$baseDirectory",
         s"--datadir=$dataDirectory",
         "--initialize-insecure",
         // mysql_native_password is used for the default authentication plugin as a convenience when
