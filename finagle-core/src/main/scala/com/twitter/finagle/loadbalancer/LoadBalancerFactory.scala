@@ -446,6 +446,7 @@ abstract class LoadBalancerFactory {
 object FlagBalancerFactory extends LoadBalancerFactory {
   private val log = Logger.getLogger(getClass.getName)
 
+  override def toString: String = s"FlagBalancerFactory($underlying)"
   override def supportsEagerConnections: Boolean = underlying.supportsEagerConnections
   override def supportsWeighted: Boolean = underlying.supportsWeighted
 
