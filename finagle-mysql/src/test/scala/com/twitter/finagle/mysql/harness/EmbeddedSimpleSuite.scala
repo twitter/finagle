@@ -46,6 +46,13 @@ trait EmbeddedSimpleSuite extends AnyFunSuite {
       case NonFatal(_) => None
     }
 
+  /**
+   * Run whatever is passed through the lambda if the fixture is present.
+   */
+  def run(runOnFixture: Fixture => Unit): Unit = {
+    fixture.foreach(runOnFixture)
+  }
+
   override def withFixture(noArgTest: NoArgTest): Outcome = fixture match {
     case Some(_) => super.withFixture(noArgTest)
     case None => new Canceled(new TestCanceledException("no available embedded fixture", 1))

@@ -74,17 +74,18 @@ class NumericTypeTest extends EmbeddedSimpleSuite {
   def instanceConfig: InstanceConfig = defaultInstanceConfig
   def databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
-  fixture match {
-    case Some(f) =>
-      val client =
-        f.newClient().configured(UnsignedColumns(supported = true)).newRichClient(f.instance.dest)
-      // Setup temporary table and insert into it
-      await(client.query(createTableQuery))
-      await(client.query(insertQuery))
-      runTest(client, signedTextEncodedQuery)(testRow)
-      runTest(client, unsignedTextEncodedQuery)(testUnsignedRow)
-    case None => // do nothing
-  }
+  run(fixture => {
+    val client =
+      fixture
+        .newClient()
+        .configured(UnsignedColumns(supported = true))
+        .newRichClient(fixture.instance.dest)
+    // Setup temporary table and insert into it
+    await(client.query(createTableQuery))
+    await(client.query(insertQuery))
+    runTest(client, signedTextEncodedQuery)(testRow)
+    runTest(client, unsignedTextEncodedQuery)(testUnsignedRow)
+  })
 
   def runTest(c: Client, sql: String)(testFunc: Row => Unit): Unit = {
     val textEncoded = await(c.query(sql).map {
@@ -316,19 +317,17 @@ class BlobTypeTest extends EmbeddedSimpleSuite {
   def instanceConfig: InstanceConfig = defaultInstanceConfig
   def databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
-  fixture match {
-    case Some(f) =>
-      val client = f.newRichClient()
-      // Setup temporary table and insert into it
-      await(client.query(createTableQuery))
-      await(client.query(insertQuery))
-      val textEncoded = getTextEncodedRow(client)
-      val binaryEncoded = getBinaryEncodedRow(client)
+  run(fixture => {
+    val client = fixture.newRichClient()
+    // Setup temporary table and insert into it
+    await(client.query(createTableQuery))
+    await(client.query(insertQuery))
+    val textEncoded = getTextEncodedRow(client)
+    val binaryEncoded = getBinaryEncodedRow(client)
 
-      testRow(textEncoded)
-      testRow(binaryEncoded)
-    case None => // do nothing
-  }
+    testRow(textEncoded)
+    testRow(binaryEncoded)
+  })
 
   def getTextEncodedRow(client: Client with Transactions): Row =
     await(client.query(sqlQuery) map {
@@ -482,19 +481,17 @@ class DateTimeTypeTest extends EmbeddedSimpleSuite {
   def instanceConfig: InstanceConfig = defaultInstanceConfig
   def databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
-  fixture match {
-    case Some(f) =>
-      val client = f.newRichClient()
-      // Setup temporary table and insert into it
-      await(client.query(createTableQuery))
-      await(client.query(insertQuery))
-      val textEncoded = getTextEncodedRow(client)
-      val binaryEncoded = getBinaryEncodedRow(client)
+  run(fixture => {
+    val client = fixture.newRichClient()
+    // Setup temporary table and insert into it
+    await(client.query(createTableQuery))
+    await(client.query(insertQuery))
+    val textEncoded = getTextEncodedRow(client)
+    val binaryEncoded = getBinaryEncodedRow(client)
 
-      testRow(textEncoded)
-      testRow(binaryEncoded)
-    case None => // do nothing
-  }
+    testRow(textEncoded)
+    testRow(binaryEncoded)
+  })
 
   def getTextEncodedRow(client: Client with Transactions): Row =
     await(client.query(sqlQuery) map {
@@ -609,16 +606,14 @@ class JsonTypeTest extends EmbeddedSimpleSuite {
   private val mapper = new ObjectMapper with ScalaObjectMapper
   mapper.registerModule(DefaultScalaModule)
 
-  fixture match {
-    case Some(f) =>
-      val client = f.newRichClient()
-      // Setup temporary table and insert into it
-      await(client.query(createTableQuery))
-      await(client.query(insertQuery))
-      val row = getRow(client)
-      testRow(row)
-    case None => // do nothing
-  }
+  run(fixture => {
+    val client = fixture.newRichClient()
+    // Setup temporary table and insert into it
+    await(client.query(createTableQuery))
+    await(client.query(insertQuery))
+    val row = getRow(client)
+    testRow(row)
+  })
 
   def getRow(client: Client with Transactions): Row =
     await(client.query(sqlQuery) map {

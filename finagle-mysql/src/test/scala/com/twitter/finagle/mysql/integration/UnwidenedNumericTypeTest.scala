@@ -42,16 +42,14 @@ class UnwidenedNumericTypeTest extends EmbeddedSimpleSuite {
   def instanceConfig: InstanceConfig = defaultInstanceConfig
   def databaseConfig: DatabaseConfig = defaultDatabaseConfig
 
-  fixture match {
-    case Some(f) =>
-      val client = f.newRichClient()
-      // Setup temporary table and insert into it
-      await(client.query(createTableQuery))
-      await(client.query(insertQuery))
-      runTest(client, false)
-      runTest(client, true)
-    case None => // do nothing
-  }
+  run(fixture => {
+    val client = fixture.newRichClient()
+    // Setup temporary table and insert into it
+    await(client.query(createTableQuery))
+    await(client.query(insertQuery))
+    runTest(client, false)
+    runTest(client, true)
+  })
 
   def runTest(c: Client, unsignedColumns: Boolean): Unit = {
     val textEncoded = await(c.query(sqlQuery) map {

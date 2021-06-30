@@ -22,16 +22,3 @@ junit_tests(
         "util/util-core:scala",
     ],
 )
-
-scala_library(
-    name = "integration-client",
-    sources = [
-        "IntegrationClient.scala",
-    ],
-    compiler_option_sets = ["fatal_warnings"],
-    dependencies = [
-        "3rdparty/jvm/org/scalatest",
-        "finagle/finagle-core/src/main",
-        "finagle/finagle-mysql/src/main/scala",
-    ],
-)
