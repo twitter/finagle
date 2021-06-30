@@ -147,7 +147,7 @@ val sharedSettings = Seq(
   libraryDependencies ++= Seq(
     // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
     "com.novocode" % "junit-interface" % "0.11" % "test",
-    "org.scalacheck" %% "scalacheck" % "1.14.3" % "test",
+    "org.scalacheck" %% "scalacheck" % "1.15.4" % "test",
     "org.scalatest" %% "scalatest" % "3.1.1" % "test",
     "org.scalatestplus" %% "junit-4-12" % "3.1.2.0" % "test",
     "org.scalatestplus" %% "mockito-1-10" % "3.1.0.0" % "test",
