@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.{ListeningServer, Stack}
 import com.twitter.finagle.netty4.channel.{
   Netty4FramedServerChannelInitializer,
@@ -15,8 +14,7 @@ import com.twitter.util.{CloseAwaitably, Future, Promise, Time}
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel._
 import io.netty.channel.unix.UnixChannelOption
-import io.netty.channel.epoll.{Epoll, EpollEventLoopGroup, EpollServerSocketChannel}
-import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.epoll.{Epoll, EpollServerSocketChannel}
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.local.{LocalAddress, LocalServerChannel}
 import io.netty.util.concurrent.{FutureListener, Future => NettyFuture}
@@ -24,7 +22,6 @@ import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
-
 import com.twitter.finagle.netty4.Netty4Listener.MaxConnections
 
 /**
@@ -55,18 +52,6 @@ private class ListeningServerBuilder(
   // netty4 params
   private[this] val param.Allocator(allocator) = params[param.Allocator]
 
-  private[ListeningServerBuilder] def mkEpollEventLoopGroup(): EventLoopGroup =
-    new EpollEventLoopGroup(
-      1 /*nThreads*/,
-      new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
-    )
-
-  private[ListeningServerBuilder] def mkNioEventLoopGroup(): EventLoopGroup =
-    new NioEventLoopGroup(
-      1 /*nThreads*/,
-      new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
-    )
-
   /**
    * Listen for connections and apply the `serveTransport` callback on
    * connected [[Transport transports]].
@@ -81,9 +66,8 @@ private class ListeningServerBuilder(
   def bindWithBridge(bridge: ChannelInboundHandler, addr: SocketAddress): ListeningServer =
     new ListeningServer with CloseAwaitably {
       private[this] val bossLoop: EventLoopGroup =
-        if (ListeningServerBuilder.isLocal(addr)) mkNioEventLoopGroup()
-        else if (useNativeEpoll() && Epoll.isAvailable) mkEpollEventLoopGroup()
-        else mkNioEventLoopGroup()
+        if (ListeningServerBuilder.isLocal(addr)) new DefaultEventLoopGroup(1)
+        else BossEventLoop.Global
 
       private[this] val bootstrap = new ServerBootstrap()
 
@@ -204,23 +188,28 @@ private class ListeningServerBuilder(
         // a non-blocking socket so it should not block.
         ch.close().awaitUninterruptibly()
 
-        val p = new Promise[Unit]
-
         val timeout = deadline - Time.now
         val timeoutMs = timeout.inMillis
 
-        // The boss loop immediately starts refusing new work.
-        // Existing tasks have ``timeoutMs`` time to finish executing.
-        bossLoop
-          .shutdownGracefully(0 /* quietPeriod */, timeoutMs.max(0), TimeUnit.MILLISECONDS)
-          .addListener(new FutureListener[Any] {
-            def operationComplete(future: NettyFuture[Any]): Unit = p.setDone()
-          })
+        // We only need to shutdown bossLoop if the bind address is a local address.
+        // Otherwise, the bossLoop is shared across the process.
+        if (!ListeningServerBuilder.isLocal(addr)) Future.Done
+        else {
+          val p = new Promise[Unit]
 
-        // Don't rely on netty to satisfy the promise and transform all results to
-        // success because we don't want the non-deterministic lifecycle of external
-        // resources to affect application success.
-        p.raiseWithin(timeout)(timer).transform { _ => Future.Done }
+          // The boss loop immediately starts refusing new work.
+          // Existing tasks have ``timeoutMs`` time to finish executing.
+          bossLoop
+            .shutdownGracefully(0 /* quietPeriod */, timeoutMs.max(0), TimeUnit.MILLISECONDS)
+            .addListener(new FutureListener[Any] {
+              def operationComplete(future: NettyFuture[Any]): Unit = p.setDone()
+            })
+
+          // Don't rely on netty to satisfy the promise and transform all results to
+          // success because we don't want the non-deterministic lifecycle of external
+          // resources to affect application success.
+          p.raiseWithin(timeout)(timer).transform { _ => Future.Done }
+        }
       }
 
       def boundAddress: SocketAddress = ch.localAddress()

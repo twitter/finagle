@@ -25,6 +25,11 @@ Runtime Behavior Changes
   and `com.twitter.finagle.http.defaultServerProtocol` flags can be set to `HTTP/1.1` to modify
   the default client or server configuration, respectively. `PHAB_ID=D625880``
 
+* finagle-netty4: Finagle now reuses Netty "boss" (or parent) threads instead of creating a new
+  thread per server. Netty parent threads are servicing the server acceptor, a relatively
+  lightweight component that listens for new incoming connections before handing them out to the
+  global worker pool.  ``PHAB_ID=D662116``
+
 Bug Fixes
 ~~~~~~~~~~
 
