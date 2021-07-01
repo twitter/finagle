@@ -60,7 +60,8 @@ object Balancers {
     label: String,
     sr: StatsReceiver,
     lbType: String,
-    bal: ServiceFactory[Req, Rep]
+    bal: ServiceFactory[Req, Rep],
+    manageWeights: Boolean
   ): ServiceFactory[Req, Rep] = {
     bal match {
       case balancer: Balancer[Req, Rep] => balancer.register(label)
@@ -68,7 +69,8 @@ object Balancers {
     }
 
     new ServiceFactoryProxy(bal) {
-      private[this] val typeGauge = sr.scope("algorithm").addGauge(lbType)(1)
+      val lbWithSuffix = if (manageWeights) lbType + "_weighted" else lbType
+      private[this] val typeGauge = sr.scope("algorithm").addGauge(lbWithSuffix)(1)
       override def close(when: Time): Future[Unit] = {
         typeGauge.remove()
         super.close(when)
@@ -102,7 +104,12 @@ object Balancers {
       ): ServiceFactory[Req, Rep] = {
         val sr = params[param.Stats].statsReceiver
         val balancer = new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc)
-        newScopedBal(params[param.Label].label, sr, "p2c_least_loaded", balancer)
+        newScopedBal(
+          params[param.Label].label,
+          sr,
+          "p2c_least_loaded",
+          balancer,
+          manageWeights = false)
       }
     }
 
@@ -151,7 +158,8 @@ object Balancers {
         params[param.Label].label,
         sr,
         "p2c_peak_ewma",
-        balancer
+        balancer,
+        manageWeights = false
       )
     }
   }
@@ -177,7 +185,8 @@ object Balancers {
           params[param.Label].label,
           sr,
           "heap_least_loaded",
-          new HeapLeastLoaded(endpoints, sr, exc, rng)
+          new HeapLeastLoaded(endpoints, sr, exc, rng),
+          manageWeights = false
         )
       }
     }
@@ -283,7 +292,8 @@ object Balancers {
         label,
         sr,
         "aperture_least_loaded",
-        balancer
+        balancer,
+        manageWeights
       )
     }
   }
@@ -384,7 +394,8 @@ object Balancers {
         label,
         sr,
         "aperture_peak_ewma",
-        balancer
+        balancer,
+        manageWeights
       )
     }
   }
@@ -412,7 +423,7 @@ object Balancers {
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
       val balancer = new RoundRobinBalancer(endpoints, sr, exc, maxEffort)
-      newScopedBal(params[param.Label].label, sr, "round_robin", balancer)
+      newScopedBal(params[param.Label].label, sr, "round_robin", balancer, manageWeights = false)
     }
   }
 }
