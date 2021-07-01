@@ -65,7 +65,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   /**
    * Enables [[Aperture]] to create weight-aware balancers
    */
-  private[aperture] def manageEndpoints: Boolean
+  private[aperture] def manageWeights: Boolean
 
   /**
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
@@ -185,7 +185,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     initAperture: Int,
     coord: Coord
   ): BaseDist[Req, Rep, Node] = {
-    if (manageEndpoints) {
+    if (manageWeights) {
       new WeightedAperture[Req, Rep, Node](
         this,
         vector,

@@ -77,7 +77,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     override private[aperture] def minAperture = 12
     override protected val useDeterministicOrdering: Option[Boolean] = Some(true)
     override private[aperture] def eagerConnections = true
-    override private[aperture] val manageEndpoints: Boolean =
+    override private[aperture] val manageWeights: Boolean =
       BaseWeightedApertureTest.this.manageWeights
     override protected def label: String = ""
     override protected def maxEffort: Int = 0
@@ -275,7 +275,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
   test("can't switch between weighted and unweighted aperture via rebuilds") {
     val bal = new Bal {
       override protected val useDeterministicOrdering = Some(true)
-      override val manageEndpoints: Boolean = false
+      override val manageWeights: Boolean = false
     }
     ProcessCoordinate.setCoordinate(0, 50)
     bal.update(Vector.tabulate(20)(Factory))
@@ -385,7 +385,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
         val rap = new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
-            override val manageEndpoints = true
+            override val manageWeights = true
           },
           vector = endpoints,
           initAperture = 10,
@@ -418,7 +418,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
         val rap = new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
-            override val manageEndpoints = true
+            override val manageWeights = true
           },
           vector = endpoints,
           initAperture = 10,
@@ -452,7 +452,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
         val rap = new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
-            override val manageEndpoints = true
+            override val manageWeights = true
           },
           vector = endpoints,
           initAperture = 12,
@@ -485,7 +485,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
         val sum: Double = endpoints.map(_.factory.weight).sum
         val rap = new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
-            override val manageEndpoints = true
+            override val manageWeights = true
           },
           vector = endpoints,
           initAperture = 12,
@@ -514,7 +514,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
       .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
         new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
-            override val manageEndpoints = true
+            override val manageWeights = true
           },
           vector = endpoints,
           initAperture = 12,
@@ -522,7 +522,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
       }
     val urap = new RandomAperture[Unit, Unit, TestNode](
       aperture = new TestAperture() {
-        override val manageEndpoints = false
+        override val manageWeights = false
       },
       vector = endpoints,
       initAperture = 12,
@@ -552,7 +552,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
         val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
         val rap = new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
-            override val manageEndpoints = true
+            override val manageWeights = true
           },
           vector = endpoints,
           initAperture = 12,

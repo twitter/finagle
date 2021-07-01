@@ -360,7 +360,7 @@ object Balancers {
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
-      val manageEndpoints = params[LoadBalancerFactory.ManageWeights].enabled
+      val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
 
       val balancer = new AperturePeakEwma(
         endpoints,
@@ -378,7 +378,7 @@ object Balancers {
         exc,
         useDeterministicOrdering,
         eagerConnections,
-        manageEndpoints
+        manageWeights
       )
       newScopedBal(
         label,

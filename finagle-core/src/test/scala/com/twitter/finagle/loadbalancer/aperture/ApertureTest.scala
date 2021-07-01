@@ -12,9 +12,11 @@ import org.scalactic.source.Position
 import org.scalatest.Tag
 import org.scalatest.funsuite.AnyFunSuite
 
-class ApertureTest extends BaseApertureTest(manageWeights = false)
+class ApertureTest extends BaseApertureTest(doesManageWeights = false)
 
-abstract class BaseApertureTools(manageWeights: Boolean) extends AnyFunSuite with ApertureSuite {
+abstract class BaseApertureTools(doesManageWeights: Boolean)
+    extends AnyFunSuite
+    with ApertureSuite {
 
   /**
    * A simple aperture balancer which doesn't have a controller or load metric
@@ -29,7 +31,7 @@ abstract class BaseApertureTools(manageWeights: Boolean) extends AnyFunSuite wit
    */
   private[aperture] class Bal extends TestBal {
 
-    val manageEndpoints: Boolean = manageWeights
+    val manageWeights: Boolean = doesManageWeights
     protected def nodeLoad: Double = 0.0
 
     protected def statsReceiver: StatsReceiver = NullStatsReceiver
@@ -59,7 +61,8 @@ abstract class BaseApertureTools(manageWeights: Boolean) extends AnyFunSuite wit
   }
 }
 
-abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTools(manageWeights) {
+abstract class BaseApertureTest(doesManageWeights: Boolean)
+    extends BaseApertureTools(doesManageWeights) {
 
   // Ensure the flag value is 12 since many of the tests depend on it.
   override protected def test(
@@ -92,7 +95,7 @@ abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTool
         emptyException = new NoBrokersAvailableException,
         useDeterministicOrdering = None,
         eagerConnections = false,
-        manageEndpoints = manageWeights
+        manageWeights = doesManageWeights
       )
     }
   }
@@ -115,7 +118,7 @@ abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTool
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
       eagerConnections = false,
-      manageEndpoints = manageWeights
+      manageWeights = doesManageWeights
     )
 
     assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -140,7 +143,7 @@ abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTool
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(false),
       eagerConnections = false,
-      manageEndpoints = manageWeights
+      manageWeights = doesManageWeights
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -166,7 +169,7 @@ abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTool
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(false),
       eagerConnections = false,
-      manageEndpoints = manageWeights
+      manageWeights = doesManageWeights
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -193,7 +196,7 @@ abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTool
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
       eagerConnections = true,
-      manageEndpoints = manageWeights
+      manageWeights = doesManageWeights
     )
     assert(factories.forall(_.total == 1))
 
@@ -221,7 +224,7 @@ abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTool
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
       eagerConnections = false,
-      manageEndpoints = manageWeights
+      manageWeights = doesManageWeights
     )
     assert(stats.counters(Seq("rebuilds")) == 1)
 
@@ -253,7 +256,7 @@ abstract class BaseApertureTest(manageWeights: Boolean) extends BaseApertureTool
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
       eagerConnections = false,
-      manageEndpoints = manageWeights
+      manageWeights = doesManageWeights
     )
     assert(stats.counters(Seq("rebuilds")) == 1)
 

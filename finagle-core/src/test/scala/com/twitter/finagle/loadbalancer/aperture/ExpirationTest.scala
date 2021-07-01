@@ -23,7 +23,7 @@ class ExpirationTest extends FixtureAnyFunSuite with ApertureSuite {
       extends TestBal
       with Expiration[Unit, Unit] {
 
-    val manageEndpoints: Boolean = false
+    val manageWeights: Boolean = false
     def expired: Long = stats.counters(Seq("expired"))
     def noExpired: Boolean = stats.counters(Seq("expired")) == 0
 

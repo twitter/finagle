@@ -167,9 +167,9 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     status
   }
 
-  // This is only necessary for aperture.manageEndpoints == true
+  // This is only necessary for aperture.manageWeights == true
   private[aperture] val pdist: Option[RandomApertureProbabilityDist[Req, Rep, NodeT]] = {
-    if (aperture.manageEndpoints)
+    if (aperture.manageWeights)
       Some(
         new RandomApertureProbabilityDist[Req, Rep, NodeT](
           vec,
