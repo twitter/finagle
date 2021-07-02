@@ -32,6 +32,9 @@ Runtime Behavior Changes
   lightweight component that listens for new incoming connections before handing them out to the
   global worker pool.  ``PHAB_ID=D662116``
 
+* finagle-http2: introduce optional parameter `NackRstFrameHandling` to enable or disable NACK
+  conversion to RST_STREAM frames.
+
 Bug Fixes
 ~~~~~~~~~~
 
