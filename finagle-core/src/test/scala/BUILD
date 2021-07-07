@@ -7,6 +7,7 @@ scala_library(
         "com/twitter/finagle/server/utils/StringServer.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-core",
         "finagle/finagle-netty4",
@@ -23,6 +24,7 @@ scala_library(
         "com/twitter/finagle/pushsession/utils/MockPushSession.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-core/src/main",
     ],
@@ -31,6 +33,7 @@ scala_library(
 junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         ":pushsession-utils",
         ":stringprotocol",

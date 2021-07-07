@@ -8,4 +8,5 @@ java_thrift_library(
         name = "finagle-integration-thrift-scala",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
 )

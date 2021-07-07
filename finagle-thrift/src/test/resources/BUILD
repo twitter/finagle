@@ -3,4 +3,5 @@ resources(
         "!BUILD",
         "**/*",
     ],
+    tags = ["bazel-compatible"],
 )

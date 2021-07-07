@@ -8,4 +8,5 @@ java_thrift_library(
         name = "finagle-benchmark",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
 )

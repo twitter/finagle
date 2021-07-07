@@ -5,6 +5,7 @@ scala_library(
         name = "finagle-redis",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-core",
         "finagle/finagle-netty4",

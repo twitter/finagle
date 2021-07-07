@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-scribe",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-core",
         "finagle/finagle-thrift/src/main/scala",

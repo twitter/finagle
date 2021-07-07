@@ -12,6 +12,7 @@ scala_library(
     # and so ideally we would mark this "scope=runtime". But there are enough consumers that also
     # need it at compiletime that it is non-trivial to split the target at this juncture.
     scope = "forced",
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-core/src/main",
         "finagle/finagle-stats-core/src/main/scala",

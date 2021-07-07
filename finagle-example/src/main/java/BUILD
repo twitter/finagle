@@ -6,6 +6,7 @@ java_library(
         name = "finagle-example-java",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
         "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",
@@ -22,6 +23,7 @@ java_library(
 jvm_binary(
     name = "thrift-server",
     main = "com.twitter.finagle.example.java.thrift.ThriftServer",
+    tags = ["bazel-compatible"],
     dependencies = [
         ":java",
     ],
@@ -30,6 +32,7 @@ jvm_binary(
 jvm_binary(
     name = "thrift-client",
     main = "com.twitter.finagle.example.java.thrift.ThriftClient",
+    tags = ["bazel-compatible"],
     dependencies = [
         ":java",
     ],

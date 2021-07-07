@@ -5,4 +5,5 @@ resources(
         "ssl/certs/*.crt",
         "ssl/keys/*.key",
     ],
+    tags = ["bazel-compatible"],
 )

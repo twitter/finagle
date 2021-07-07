@@ -1,4 +1,5 @@
 test_suite(
+    tags = ["bazel-compatible"],
     dependencies = [
         ":client",
         ":defaultloader",
@@ -8,6 +9,7 @@ test_suite(
 
 target(
     name = "core",
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
@@ -27,6 +29,7 @@ target(
 junit_tests(
     name = "defaultloader",
     sources = ["com/twitter/finagle/serverset2/client/apache/*.scala"],
+    tags = ["bazel-compatible"],
     dependencies = [
         ":core",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
@@ -42,6 +45,7 @@ junit_tests(
     name = "client",
     sources = ["com/twitter/finagle/serverset2/client/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         ":core",
         "3rdparty/jvm/org/scalatestplus:junit",
@@ -60,6 +64,7 @@ junit_tests(
         "com/twitter/finagle/serverset2/naming/*.scala",
         "com/twitter/finagle/zookeeper/*.scala",
     ],
+    tags = ["bazel-compatible"],
     dependencies = [
         ":core",
         "3rdparty/jvm/com/google/inject:guice",

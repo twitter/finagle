@@ -1,3 +1,4 @@
 resources(
     sources = ["**/*"],
+    tags = ["bazel-compatible"],
 )

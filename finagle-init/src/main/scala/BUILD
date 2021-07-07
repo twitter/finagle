@@ -6,5 +6,6 @@ scala_library(
         name = "finagle-init",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [],
 )

@@ -1,4 +1,5 @@
 target(
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-redis/src/main/scala",
     ],
@@ -6,6 +7,7 @@ target(
 
 test_suite(
     name = "tests",
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-redis/src/test/scala",
     ],
@@ -13,6 +15,7 @@ test_suite(
 
 test_suite(
     name = "integration-tests",
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-redis/src/it/scala",
     ],

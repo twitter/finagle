@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-http2",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/io/netty:netty4",
         "3rdparty/jvm/io/netty:netty4-codec",

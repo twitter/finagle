@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-server",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "util/util-core:scala",
         "util/util-registry/src/main/scala",

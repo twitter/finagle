@@ -6,6 +6,7 @@ java_library(
         name = "finagle-core-java",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-core/src/main",
         "util/util-core:scala",

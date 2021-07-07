@@ -29,11 +29,13 @@ scala_library(
     name = "lib",
     sources = SOURCES,
     compiler_option_sets = COMPILER_OPTION_SETS,
+    tags = ["bazel-compatible"],
     dependencies = DEPENDENCIES,
 )
 
 junit_tests(
     sources = SOURCES,
     compiler_option_sets = COMPILER_OPTION_SETS,
+    tags = ["bazel-compatible"],
     dependencies = DEPENDENCIES,
 )

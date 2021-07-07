@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-partitioning",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/org/scala-lang/modules:scala-collection-compat",
         "finagle/finagle-core",

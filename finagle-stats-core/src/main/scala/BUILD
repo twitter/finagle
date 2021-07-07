@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-stats-core-filterflags",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "util/util-app/src/main/scala",
     ],
@@ -26,6 +27,7 @@ scala_library(
     # and so ideally we would mark this "scope=runtime". But there are enough consumers that also
     # need it at compiletime that it is non-trivial to split the target at this juncture.
     scope = "forced",
+    tags = ["bazel-compatible"],
     dependencies = [
         ":filter_flags",
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-annotations",

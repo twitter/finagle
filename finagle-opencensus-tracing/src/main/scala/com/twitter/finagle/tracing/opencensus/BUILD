@@ -1,5 +1,6 @@
 scala_library(
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/io/opencensus:opencensus-api",
         "finagle/finagle-core",

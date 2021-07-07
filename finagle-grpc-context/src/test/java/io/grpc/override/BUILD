@@ -1,5 +1,6 @@
 junit_tests(
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/io/grpc:grpc-context",
         "3rdparty/jvm/junit",

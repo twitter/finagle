@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-thriftmux",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/io/netty:netty4",
         "3rdparty/jvm/org/apache/thrift:libthrift",

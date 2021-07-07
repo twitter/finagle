@@ -1,4 +1,5 @@
 target(
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-mysql/src/main/scala",
     ],

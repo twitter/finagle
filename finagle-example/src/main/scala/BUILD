@@ -5,6 +5,7 @@ scala_library(
         name = "finagle-example",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/google/inject:guice",
         "3rdparty/jvm/org/apache/thrift:libthrift",
@@ -26,113 +27,127 @@ scala_library(
 )
 
 jvm_binary(
-  name="http-client",
-  main="com.twitter.finagle.example.http.HttpClient",
-  dependencies=[
-    ':scala'
-  ]
+    name = "http-client",
+    main = "com.twitter.finagle.example.http.HttpClient",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="http-server",
-  main="com.twitter.finagle.example.http.HttpServer",
-  dependencies=[
-    ':scala'
-  ]
+    name = "http-server",
+    main = "com.twitter.finagle.example.http.HttpServer",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="http-streaming-client",
-  main="com.twitter.finagle.example.http.HttpStreamingClient",
-  dependencies=[
-    ':scala'
-  ]
+    name = "http-streaming-client",
+    main = "com.twitter.finagle.example.http.HttpStreamingClient",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="http-streaming-server",
-  main="com.twitter.finagle.example.http.HttpStreamingServer",
-  dependencies=[
-    ':scala'
-  ]
+    name = "http-streaming-server",
+    main = "com.twitter.finagle.example.http.HttpStreamingServer",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="kestrel-client",
-  main="com.twitter.finagle.example.kestrel.KestrelClient",
-  dependencies=[
-    ':scala'
-  ]
+    name = "kestrel-client",
+    main = "com.twitter.finagle.example.kestrel.KestrelClient",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="memcached-ketama-stress",
-  main="com.twitter.finagle.example.memcache.KetamaClientStress",
-  dependencies=[
-    ':scala'
-  ]
+    name = "memcached-ketama-stress",
+    main = "com.twitter.finagle.example.memcache.KetamaClientStress",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="memcached-proxy",
-  main="com.twitter.finagle.example.memcachedproxy.MemcachedProxy",
-  dependencies=[
-    ':scala'
-  ]
+    name = "memcached-proxy",
+    main = "com.twitter.finagle.example.memcachedproxy.MemcachedProxy",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="memcached-stress",
-  main="com.twitter.finagle.example.memcache.MemcacheStress",
-  dependencies=[
-    ':scala'
-  ]
+    name = "memcached-stress",
+    main = "com.twitter.finagle.example.memcache.MemcacheStress",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="mysql",
-  main="com.twitter.finagle.example.mysql.Example",
-  dependencies=[
-    ':scala'
-  ]
+    name = "mysql",
+    main = "com.twitter.finagle.example.mysql.Example",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="redis-client",
-  main="com.twitter.finagle.example.redis.RedisClient",
-  dependencies=[
-    ':scala'
-  ]
+    name = "redis-client",
+    main = "com.twitter.finagle.example.redis.RedisClient",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="stress",
-  main="com.twitter.finagle.example.stress.Stress",
-  dependencies=[
-    ':scala'
-  ]
+    name = "stress",
+    main = "com.twitter.finagle.example.stress.Stress",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="thrift-client",
-  main="com.twitter.finagle.example.thrift.ThriftClient",
-  dependencies=[
-    ':scala'
-  ]
+    name = "thrift-client",
+    main = "com.twitter.finagle.example.thrift.ThriftClient",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="thrift-server",
-  main="com.twitter.finagle.example.thrift.ThriftServer",
-  dependencies=[
-    ':scala'
-  ]
+    name = "thrift-server",
+    main = "com.twitter.finagle.example.thrift.ThriftServer",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )
 
 jvm_binary(
-  name="thrift-service-iface",
-  main="com.twitter.finagle.example.thrift.ThriftServicePerEndpointExample",
-  dependencies=[
-    ':scala'
-  ]
+    name = "thrift-service-iface",
+    main = "com.twitter.finagle.example.thrift.ThriftServicePerEndpointExample",
+    tags = ["bazel-compatible"],
+    dependencies = [
+        ":scala",
+    ],
 )

@@ -17,6 +17,7 @@
 create_thrift_libraries(
     base_name = "thrift",
     sources = ["com/twitter/serversets/endpoint.thrift"],
+    tags = ["bazel-compatible"],
     generate_languages = [
         "java",
         "scala",
@@ -27,10 +28,12 @@ create_thrift_libraries(
 python_thrift_library(
     name = "thrift-python",
     sources = ["com/twitter/thrift/endpoint.thrift"],
+    tags = ["bazel-compatible"],
 )
 
 python_thrift_library(
     name = "py-thrift",
     sources = ["com/twitter/serversets/endpoint.thrift"],
     compatibility = ["CPython>=2.7,<4"],
+    tags = ["bazel-compatible"],
 )

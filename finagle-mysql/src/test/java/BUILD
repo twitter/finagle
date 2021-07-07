@@ -1,6 +1,7 @@
 junit_tests(
     sources = ["**/*.java"],
     compiler_option_sets = [],
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",

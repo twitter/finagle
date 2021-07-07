@@ -5,6 +5,7 @@ java_library(
         name = "finagle-serversets-java",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/com/google/code/findbugs:jsr305",

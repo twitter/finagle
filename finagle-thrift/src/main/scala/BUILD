@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-thrift",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/io/netty:netty4-codec",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
@@ -38,5 +39,6 @@ scala_library(
 target(
     name = "forced",
     scope = "forced",
+    tags = ["bazel-compatible"],
     dependencies = [":scala"],
 )

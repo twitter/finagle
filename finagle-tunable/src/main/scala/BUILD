@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-tunable",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",
         "finagle/finagle-toggle/src/main/scala/com/twitter/finagle/server",

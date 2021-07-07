@@ -6,6 +6,7 @@ scala_library(
         name = "finagle-exp",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/netflix/concurrency:concurrency-limits-core",
         "finagle/finagle-core/src/main",

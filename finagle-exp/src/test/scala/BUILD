@@ -1,6 +1,7 @@
 junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/netflix/concurrency:concurrency-limits-core",
         "3rdparty/jvm/junit",

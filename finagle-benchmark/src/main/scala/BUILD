@@ -1,5 +1,6 @@
 scala_library(
     sources = ["**/*.scala"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/org/apache/curator:curator-framework",
@@ -33,6 +34,7 @@ scala_library(
 jvm_binary(
     name = "lbsim",
     main = "com.twitter.finagle.loadbalancer.Simulation",
+    tags = ["bazel-compatible"],
     dependencies = [
         ":scala",
         "finagle/finagle-benchmark/src/main/resources",
@@ -42,11 +44,13 @@ jvm_binary(
 jvm_binary(
     name = "hello-server",
     main = "com.twitter.finagle.thrift.HelloServer",
+    tags = ["bazel-compatible"],
     dependencies = [":scala"],
 )
 
 jvm_binary(
     name = "serverset-service",
     main = "com.twitter.finagle.serverset2.LocalServerSetService",
+    tags = ["bazel-compatible"],
     dependencies = [":scala"],
 )

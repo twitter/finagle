@@ -1,5 +1,6 @@
 junit_tests(
     sources = ["**/*.java"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/apache/thrift:libthrift",

@@ -11,6 +11,7 @@ scala_library(
     ),
     # Exposes a service-loaded class.
     scope = "forced",
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
         "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",

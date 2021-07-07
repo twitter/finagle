@@ -9,6 +9,7 @@ scala_library(
         name = "finagle-toggle",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-annotations",
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-core",

@@ -5,6 +5,7 @@ scala_library(
         name = "finagle-zipkin-scribe",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/org/apache/thrift:libthrift",
         "finagle/finagle-core/src/main",

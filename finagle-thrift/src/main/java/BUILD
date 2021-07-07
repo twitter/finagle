@@ -5,6 +5,7 @@ java_library(
         name = "finagle-thrift-java",
         repo = artifactory,
     ),
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/org/apache/thrift:libthrift",
     ],
@@ -15,5 +16,6 @@ java_library(
 target(
     name = "forced",
     scope = "forced",
+    tags = ["bazel-compatible"],
     dependencies = [":java"],
 )

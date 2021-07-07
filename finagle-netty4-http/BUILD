@@ -1,4 +1,5 @@
 target(
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-netty4-http/src/main/scala",
     ],
@@ -6,6 +7,7 @@ target(
 
 test_suite(
     name = "tests",
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-netty4-http/src/test/scala",
     ],

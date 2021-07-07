@@ -1,6 +1,7 @@
 junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/io/netty:netty4",
         "3rdparty/jvm/io/netty:netty4-codec-http",
@@ -22,6 +23,7 @@ scala_library(
     name = "cookie-map-test-lib",
     sources = ["com/twitter/finagle/http/CookieMapTest.scala"],
     compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/org/scalatest",
         "finagle/finagle-base-http",
