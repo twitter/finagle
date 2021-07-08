@@ -12,7 +12,7 @@ Runtime Behavior Changes
 
 * finagle: Update Caffeine cache library to version 2.9.1 ``PHAB_ID=D660908``
 
-* finagle: Update Scalatest to version 1.15.4 ``PHAB_ID=D691691``
+* finagle: Update ScalaCheck to version 1.15.4 ``PHAB_ID=D691691``
 
 * finagle-http: remove the `com.twitter.finagle.http.UseH2`,
   `com.twitter.finagle.http.UseH2CClients2`, `com.twitter.finagle.http.UseH2CServers` and
