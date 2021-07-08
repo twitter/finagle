@@ -3,6 +3,7 @@ package com.twitter.finagle.thrift.exp.partitioning
 import com.twitter.conversions.DurationOps._
 import com.twitter.delivery.thriftscala.DeliveryService._
 import com.twitter.delivery.thriftscala._
+import com.twitter.finagle.Addr
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.param.CommonParams
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
@@ -55,7 +56,9 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
         addrs: collection.Seq[AddrInfo],
         passcode: Byte
       ): Future[collection.Seq[Box]] =
-        Future.value(addrs.map(Box(_, s"size: ${addrs.size}")))
+        Future.value(
+          addrs.map(Box(_, s"size: ${addrs.size}")) // shows how many sub-requests hit an endpoint
+        )
 
       def sendBox(box: Box): Future[String] = Future.value(box.item)
 
@@ -84,6 +87,7 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
       val inet = server.boundAddress.asInstanceOf[InetSocketAddress]
       newAddress(inet, 1)
     }
+
     val addrInfo0 = AddrInfo("zero", 12345)
     val addrInfo1 = AddrInfo("one", 11111)
     val addrInfo11 = AddrInfo("one", 11112)
@@ -103,7 +107,9 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
       case getBox: GetBox.Args => Map(getBox.addrInfo.name -> getBox)
       case getBoxes: GetBoxes.Args =>
         getBoxes.listAddrInfo
-          .groupBy { _.name }.map {
+          .groupBy {
+            _.name
+          }.map {
             case (hashingKey, subListAddrInfo) =>
               hashingKey -> GetBoxes.Args(subListAddrInfo, getBoxes.passcode)
           }
@@ -202,6 +208,8 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
 
   test("with custom partitioning strategy, each shard is a partition") {
     new Ctx {
+      // structs with key zero/two are routed to partition 0,
+      // and structs with key one are routed to partition 1
       def lookUp(addrInfo: AddrInfo): Int = {
         addrInfo.name match {
           case "zero" | "two" => fixedInetAddresses(0).getPort
@@ -250,7 +258,7 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
         val partitionPositions = List(0.to(1), 1.to(2), 3.until(fixedInetAddresses.size))
         val position = fixedInetAddresses.indexWhere(_.getPort == instance)
         partitionPositions.zipWithIndex
-          .filter { case (range, index) => range.contains(position) }.map(_._2)
+          .filter { case (range, _) => range.contains(position) }.map(_._2)
       }
     )
 
@@ -258,6 +266,7 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
   }
 
   test("with custom partitioning strategy, logical partition") {
+    // struct keys to partition Ids
     def lookUp(addrInfo: AddrInfo): Int = {
       addrInfo.name match {
         case "four" => 0
@@ -265,6 +274,7 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
         case "one" | "zero" => 2
       }
     }
+
     new CustomPartitioningCtx(lookUp) {
       val client = clientImpl().withPartitioning
         .strategy(customPartitioningStrategy)
@@ -311,6 +321,7 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
         case _ => 4
       }
     }
+
     new CustomPartitioningCtx(lookUp) {
       val client = clientImpl().withPartitioning
         .strategy(customPartitioningStrategy)
@@ -325,6 +336,7 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
   }
 
   test("with custom strategy, unset endpoint") {
+    // struct keys to partition Ids
     def lookUp(addrInfo: AddrInfo): Int = {
       addrInfo.name match {
         case "four" => 0
@@ -349,6 +361,8 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
       val sr0 = new InMemoryStatsReceiver
       val sr1 = new InMemoryStatsReceiver
       var index = 0
+
+      // for testing purpose, set separate statsReceivers for instance0 and instance1
       override val servers: Seq[ListeningServer] =
         inetAddresses.map { inet =>
           if (index == 0) {
@@ -362,22 +376,27 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
           }
         }
 
+      // the observable state is a dynamic Integer,
+      // when state changed, we route requests to a partition with current Integer as the Id
       val dynamic = Var(0)
+      val observable: Activity[Int] = Activity(dynamic.map(Activity.Ok(_)))
+      val getPartitionIdAndRequest: Int => ClientCustomStrategy.ToPartitionedMap = { state =>
+        {
+          case sendBox: SendBox.Args =>
+            Future.value(Map(state -> sendBox))
+        }
+      }
+      val getLogicalPartitionId: Int => Int => Seq[Int] = {
+        _ =>
+          { instance: Int =>
+            Seq(fixedInetAddresses.indexWhere(_.getPort == instance))
+          }
+      }
 
       val dynamicStrategy = ClientCustomStrategy.resharding[Int](
-        { fakePartitionId: Int =>
-          {
-            case sendBox: SendBox.Args =>
-              Future.value(Map(fakePartitionId -> sendBox))
-          }: PartialFunction[ThriftStructIface, Future[Map[Int, ThriftStructIface]]]
-        },
-        {
-          _: Int =>
-            { instance: Int =>
-              Seq(fixedInetAddresses.indexWhere(_.getPort == instance))
-            }
-        },
-        Activity(dynamic.map(Activity.Ok(_)))
+        getPartitionIdAndRequest,
+        getLogicalPartitionId,
+        observable
       )
 
       val client = clientImpl().withPartitioning
@@ -387,7 +406,6 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
       await(client.sendBox(Box(addrInfo0, "")))
       dynamic() += 1
       await(client.sendBox(Box(addrInfo0, "")))
-      dynamic() += 1
       val server0Request =
         if (sr0.counters.isDefinedAt(Seq("requests"))) sr0.counters(Seq("requests"))
         else sr0.counters(Seq("thrift", "requests"))
@@ -398,6 +416,71 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
 
       assert(server0Request == 1)
       assert(server1Request == 1)
+    }
+  }
+
+  test("with cluster resharding, expanding cluster's instances") {
+    new Ctx {
+
+      val sr = new InMemoryStatsReceiver
+      var index = 0
+
+      // set instance 1 a stats receiver
+      override val servers: Seq[ListeningServer] =
+        inetAddresses.map { inet =>
+          if (index == 0) {
+            index = index + 1
+            serverImpl().serveIface(inet, iface)
+          } else if (index == 1) {
+            index = index + 1
+            serverImpl().withStatsReceiver(sr).serveIface(inet, iface)
+          } else {
+            serverImpl().serveIface(inet, iface)
+          }
+        }
+
+      val getPartitionIdAndRequest: Set[Address] => ClientCustomStrategy.ToPartitionedMap = { _ =>
+        {
+          case sendBox: SendBox.Args =>
+            Future.value(Map(1 -> sendBox)) // always route requests to partition 1
+        }
+      }
+
+      val getLogicalPartitionId: Set[Address] => Int => Seq[Int] = {
+        cluster =>
+          { instance: Int =>
+            if (cluster.size == 2) { // p0(0) p1(1)
+              Seq(fixedInetAddresses.indexWhere(_.getPort == instance))
+            } else { //p0(0,1) p1(2,3,4)
+              val partitionPositions = List(0.to(1), 2.until(fixedInetAddresses.size))
+              val position = fixedInetAddresses.indexWhere(_.getPort == instance)
+              partitionPositions.zipWithIndex
+                .filter { case (range, _) => range.contains(position) }.map(_._2)
+            }
+          }
+      }
+      val clusterResharding =
+        ClientCustomStrategy.clusterResharding(getPartitionIdAndRequest, getLogicalPartitionId)
+
+      val dynamicAddresses = Var(Addr.Bound(addresses.take(2): _*))
+      val client = clientImpl().withPartitioning
+        .strategy(clusterResharding)
+        .build[DeliveryService.MethodPerEndpoint](
+          Name.Bound(dynamicAddresses, dynamicAddresses()),
+          "client")
+
+      // pre-resharding, the request goes to server1,
+      // post-resharding, the request goes to server2/3/4
+      await(client.sendBox(Box(addrInfo0, "")))
+      val server1Request =
+        if (sr.counters.isDefinedAt(Seq("requests"))) sr.counters(Seq("requests"))
+        else sr.counters(Seq("thrift", "requests"))
+
+      assert(server1Request == 1)
+      dynamicAddresses() = Addr.Bound(addresses: _*)
+      await(client.sendBox(Box(addrInfo0, "")))
+      assert(server1Request == 1)
+
     }
   }
 }
