@@ -146,6 +146,13 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
   def additionalMetadata: Map[String, Any] = Map(
     "peer_offset" -> coord.offset,
     "peer_unit_width" -> coord.unitWidth,
+    "nodes" -> idxs.map { i =>
+      Map[String, Any](
+        "index" -> i,
+        "weight" -> pdist.weight(i),
+        "address" -> endpoints(i).factory.toString,
+        "status" -> endpoints(i).factory.status.toString)
+    }
   )
 
   def needsRebuild: Boolean = false
