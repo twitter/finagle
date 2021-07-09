@@ -20,5 +20,10 @@ private[mysql] final class MysqlTransport(_self: Transport[Packet, Packet])
   override def close(deadline: Time): Future[Unit] =
     write(QuitRequest.toPacket)
       .by(DefaultTimer, deadline)
+      // the `write(...).by` might throw a TimeoutException,
+      // which isn't material to us since we are going to
+      // close the underlying transport regardless, adding
+      // a transform() here to swallow the exception.
+      .transform(_ => Future.Unit)
       .ensure(_self.close(deadline))
 }

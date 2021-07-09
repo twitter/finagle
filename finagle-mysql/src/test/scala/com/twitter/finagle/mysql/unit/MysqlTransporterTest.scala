@@ -1,8 +1,8 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Stack, Status}
 import com.twitter.util.{Await, Duration}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, SocketAddress}
 import org.scalatest.funsuite.AnyFunSuite
