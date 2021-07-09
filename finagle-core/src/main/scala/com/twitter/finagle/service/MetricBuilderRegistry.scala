@@ -65,8 +65,8 @@ private[twitter] class MetricBuilderRegistry {
 
   // no operation when any needed MetricBuilder is not valid
   lazy val successRate: Unit = {
-    val successMb = Metadata.getMetricBuilder(successCounter.get())
-    val failureMb = Metadata.getMetricBuilder(failureCounter.get())
+    val successMb = successCounter.get().toMetricBuilder
+    val failureMb = failureCounter.get().toMetricBuilder
     (successMb, failureMb) match {
       case (Some(success), Some(failure)) =>
         ExpressionSchema(
@@ -82,7 +82,7 @@ private[twitter] class MetricBuilderRegistry {
   }
 
   lazy val throughput: Unit = {
-    Metadata.getMetricBuilder(requestCounter.get()) match {
+    requestCounter.get().toMetricBuilder match {
       case Some(request) =>
         ExpressionSchema(throughputName, Expression(request))
           .withUnit(Requests)
@@ -93,7 +93,7 @@ private[twitter] class MetricBuilderRegistry {
   }
 
   lazy val latencyP99: Unit = {
-    Metadata.getMetricBuilder(latencyP99Histogram.get()) match {
+    latencyP99Histogram.get().toMetricBuilder match {
       case Some(latencyP99) =>
         ExpressionSchema(latencyName, Expression(latencyP99, Right(99.percent)))
           .withUnit(Milliseconds)
@@ -104,8 +104,8 @@ private[twitter] class MetricBuilderRegistry {
   }
 
   lazy val deadlineRejection: Unit = {
-    val requestMb = Metadata.getMetricBuilder(requestCounter.get())
-    val rejectionMb = Metadata.getMetricBuilder(deadlineRejectedCounter.get())
+    val requestMb = requestCounter.get().toMetricBuilder
+    val rejectionMb = deadlineRejectedCounter.get().toMetricBuilder
     (requestMb, rejectionMb) match {
       case (Some(request), Some(reject)) =>
         ExpressionSchema(
@@ -119,8 +119,8 @@ private[twitter] class MetricBuilderRegistry {
   }
 
   lazy val acRejection: Unit = {
-    val requestMb = Metadata.getMetricBuilder(requestCounter.get())
-    val rejectionMb = Metadata.getMetricBuilder(aCRejectedCounter.get())
+    val requestMb = requestCounter.get().toMetricBuilder
+    val rejectionMb = aCRejectedCounter.get().toMetricBuilder
     (requestMb, rejectionMb) match {
       case (Some(request), Some(reject)) =>
         ExpressionSchema(

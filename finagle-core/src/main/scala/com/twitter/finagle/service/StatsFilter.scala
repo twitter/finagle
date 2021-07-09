@@ -8,7 +8,6 @@ import com.twitter.finagle.service.MetricBuilderRegistry.{
   RequestCounter,
   SuccessCounter
 }
-import com.twitter.finagle.stats.MetricBuilder.{CounterType, HistogramType}
 import com.twitter.finagle.stats._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
@@ -259,34 +258,13 @@ class StatsFilter[Req, Rep] private[service] (
     }
   }
 
-  private[this] val successSchema =
-    MetricBuilder(
-      name = Seq("success"),
-      metricType = CounterType,
-      statsReceiver = statsReceiver).withKernel
-  private[this] val failureSchema =
-    MetricBuilder(
-      name = Seq(ExceptionStatsHandler.Failures),
-      metricType = CounterType,
-      statsReceiver = statsReceiver).withKernel
-  private[this] val requestSchema =
-    MetricBuilder(
-      name = Seq("requests"),
-      metricType = CounterType,
-      statsReceiver = statsReceiver).withKernel
-  private[this] val latencySchema =
-    MetricBuilder(
-      name = Seq(s"request_latency_$latencyStatSuffix"),
-      metricType = HistogramType,
-      statsReceiver = statsReceiver).withKernel
-
   private[this] val outstandingRequestCount = new LongAdder()
-  private[this] val dispatchCount = statsReceiver.counter(requestSchema)
-  private[this] val successCount = statsReceiver.counter(successSchema)
+  private[this] val dispatchCount = statsReceiver.counter("requests")
+  private[this] val successCount = statsReceiver.counter("success")
   // ExceptionStatsHandler creates the failure counter lazily.
   // We need to eagerly register this counter in metrics for success rate expression.
-  private[this] val failureCount = statsReceiver.counter(failureSchema)
-  private[this] val latencyStat = statsReceiver.stat(latencySchema)
+  private[this] val failureCount = statsReceiver.counter(ExceptionStatsHandler.Failures)
+  private[this] val latencyStat = statsReceiver.stat(s"request_latency_$latencyStatSuffix")
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
 
