@@ -740,7 +740,7 @@ particular client.
 .. note::
 
   Because this module fails closed, Finagle will automatically disable `Fail Fast` when only
-  one host is present in the replica set. This is because, without more replicas, Fiangle can
+  one host is present in the replica set. This is because, without more replicas, Finagle can
   not meaningfully handle the failure when breaking the circuit.
 
 :ref:`Related stats <fail_fast_stats>`
