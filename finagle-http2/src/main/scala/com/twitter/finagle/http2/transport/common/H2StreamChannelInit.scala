@@ -1,6 +1,7 @@
 package com.twitter.finagle.http2.transport.common
 
 import com.twitter.finagle.Stack
+import com.twitter.finagle.http2.param.NackRstFrameHandling
 import com.twitter.finagle.http2.transport.client.Http2ClientEventMapper
 import com.twitter.finagle.http2.transport.server.H2UriValidatorHandler
 import com.twitter.finagle.netty4.http
@@ -31,9 +32,10 @@ private[http2] object H2StreamChannelInit {
       val alloc = params[Allocator].allocator
       ch.config.setAllocator(alloc)
       if (isServer) {
-        ch.pipeline
-          .addLast(new Http2NackHandler)
-          .addLast(H2UriValidatorHandler.HandlerName, H2UriValidatorHandler)
+        if (params[NackRstFrameHandling].enabled) {
+          ch.pipeline.addLast(new Http2NackHandler)
+        }
+        ch.pipeline.addLast(H2UriValidatorHandler.HandlerName, H2UriValidatorHandler)
       }
 
       ch.pipeline.addLast(

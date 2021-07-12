@@ -203,3 +203,32 @@ object FrameLoggerNamePrefix {
 
   implicit val param = Stack.Param(FrameLoggerNamePrefix(DefaultFrameLoggerPrefix))
 }
+
+/**
+ * Whether or not [[com.twitter.finagle.http2.transport.common.Http2NackHandler]]
+ * is included in channel pipeline, which is responsible for converting NACKs
+ * to RST_STREAM frame.
+ *
+ * Defaults to enabled.
+ *
+ * @see `Enabled` and `Disabled` on companion class for getting instances.
+ */
+final case class NackRstFrameHandling private (enabled: Boolean) {
+  def mk(): (NackRstFrameHandling, Stack.Param[NackRstFrameHandling]) =
+    (this, NackRstFrameHandling.param)
+}
+
+object NackRstFrameHandling {
+
+  /**
+   * Http2NackHandler is disabled.
+   */
+  val Disabled: NackRstFrameHandling = NackRstFrameHandling(false)
+
+  /**
+   * Http2NackHandler is enabled.
+   */
+  val Enabled: NackRstFrameHandling = NackRstFrameHandling(true)
+
+  implicit val param: Stack.Param[NackRstFrameHandling] = Stack.Param(Enabled)
+}
