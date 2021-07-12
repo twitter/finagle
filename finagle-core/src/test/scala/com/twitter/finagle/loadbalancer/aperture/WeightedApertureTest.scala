@@ -158,7 +158,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
       WeightedAperture.adjustWeights(nodes.map(_.factory.weight), FromInstanceId(0, 5))
     val is2 = wts2.zipWithIndex.collect { case (weight, i) if weight > 0.0 => i }
 
-    // This will include an addl node due to dApertureWidth = 0.8 ...
+    // This will include an additional node due to dApertureWidth = 0.8 ...
     // The cumulative sum to node 11 is only 0.76, so we need to include a small portion of node 12
     assert(is2.size == 13)
     assert(is2 == IndexedSeq(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12))

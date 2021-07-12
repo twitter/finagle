@@ -51,7 +51,7 @@ object OffloadFuturePool {
   }
 
   /**
-   * Get the configured offload pool if avilable or default to the unbounded [[FuturePool]].
+   * Get the configured offload pool if available or default to the unbounded [[FuturePool]].
    *
    * @note that the unbounded `FuturePool` can grow indefinitely, both in queue size and in terms
    *       of thread count and should be used with caution.

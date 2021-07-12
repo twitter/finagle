@@ -29,7 +29,7 @@ class ClearContextValueFilterTest extends AnyFunSuite {
           }.andThen(next)
       }
 
-    val clearContextfilter = ClearContextValueFilter.module[Unit, Unit](Retries)
+    val clearContextFilter = ClearContextValueFilter.module[Unit, Unit](Retries)
 
     val verifyContextClearedFilter =
       new Stack.Module0[ServiceFactory[Unit, Unit]] {
@@ -58,7 +58,7 @@ class ClearContextValueFilterTest extends AnyFunSuite {
       val factory = new StackBuilder[ServiceFactory[Unit, Unit]](nilStack[Unit, Unit])
         .push(svcModule)
         .push(verifyContextClearedFilter)
-        .push(clearContextfilter)
+        .push(clearContextFilter)
         .push(setContextFilter)
         .make(Stack.Params.empty)
 
@@ -74,7 +74,7 @@ class ClearContextValueFilterTest extends AnyFunSuite {
       val factory = new StackBuilder[ServiceFactory[Unit, Unit]](nilStack[Unit, Unit])
         .push(svcModule)
         .push(verifyContextClearedFilter)
-        .push(clearContextfilter)
+        .push(clearContextFilter)
         .make(Stack.Params.empty)
 
       val svc: Service[Unit, Unit] = Await.result(factory(), 1.second)

@@ -98,7 +98,7 @@ class MarshalledContextTest extends AbstractContextTest {
     }
   }
 
-  test("when enabled, key lookups are case insenstive") {
+  test("when enabled, key lookups are case insensitive") {
     withCaseInsensitiveOverride(true) {
       val ctx = new MarshalledContext
       val lowerKey = new ctx.Key[String]("foo") {

@@ -28,8 +28,8 @@ class ParamsTest extends AnyFunSuite {
 
     // if the param is explicitly configured the flag is ignored, always
     apertureEagerConnections.let(EagerConnectionsType.Disable) {
-      val eagerConnectionsEnabed = EagerConnections()
-      assert(eagerConnectionsEnabed.enabled == true)
+      val eagerConnectionsEnabled = EagerConnections()
+      assert(eagerConnectionsEnabled.enabled == true)
     }
 
     apertureEagerConnections.let(EagerConnectionsType.Enable) {
