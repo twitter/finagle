@@ -113,7 +113,8 @@ class PlainHandshakeResponseTest extends HandshakeResponseTest {
       salt,
       serverCapabilities(),
       MysqlCharset.Utf8_general_ci,
-      maxPacketSize
+      maxPacketSize,
+      enableCachingSha2PasswordAuth = false
     )
 }
 
@@ -133,7 +134,8 @@ class SecureHandshakeResponseTest extends HandshakeResponseTest {
       salt,
       serverCapabilities(),
       MysqlCharset.Utf8_general_ci,
-      maxPacketSize
+      maxPacketSize,
+      enableCachingSha2PasswordAuth = false
     )
 
   test("Fails without client SSL capability") {
@@ -146,7 +148,8 @@ class SecureHandshakeResponseTest extends HandshakeResponseTest {
         salt,
         serverCapabilities(),
         MysqlCharset.Utf8_general_ci,
-        maxPacketSize
+        maxPacketSize,
+        enableCachingSha2PasswordAuth = false
       )
     }
   }
@@ -161,7 +164,8 @@ class SecureHandshakeResponseTest extends HandshakeResponseTest {
         salt,
         serverCapabilities() - Capability.SSL,
         MysqlCharset.Utf8_general_ci,
-        maxPacketSize
+        maxPacketSize,
+        enableCachingSha2PasswordAuth = false
       )
     }
   }

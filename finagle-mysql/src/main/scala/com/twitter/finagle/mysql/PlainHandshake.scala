@@ -19,16 +19,22 @@ private[mysql] final class PlainHandshake(
       handshakeInit.salt,
       handshakeInit.serverCapabilities,
       settings.charset,
-      settings.maxPacketSize.inBytes.toInt
+      settings.maxPacketSize.inBytes.toInt,
+      settings.enableCachingSha2PasswordAuth
     )
+  }
+
+  private[this] def initiateAuthNegotiation(handshakeInit: HandshakeInit): Future[Result] = {
+    val handshakeResponse = makePlainHandshakeResponse(handshakeInit)
+    val authInfo = AuthInfo(handshakeInit.version, settings, fastAuthSuccessCounter)
+    new AuthNegotiation(transport, decodeSimpleResult).doAuth(handshakeResponse, authInfo)
   }
 
   // For the `PlainHandshake`, after the init
   // we just return a handshake response.
   def connectionPhase(): Future[Result] =
     readHandshakeInit()
-      .map(makePlainHandshakeResponse)
-      .flatMap(messageDispatch)
+      .flatMap(initiateAuthNegotiation)
       .onFailure(_ => transport.close())
 
 }

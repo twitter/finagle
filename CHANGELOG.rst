@@ -57,6 +57,9 @@ New Features
   protoTracing modules in StackClient. Add descriptions to preparer and
   protoTracing modules in StackServer. ``PHAB_ID=D685887``
 
+* finagle-mysql: Add support for MySQL 8.0's default `caching_sha2_password` pluggable
+  authentication. ``PHAB_ID=D676015``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

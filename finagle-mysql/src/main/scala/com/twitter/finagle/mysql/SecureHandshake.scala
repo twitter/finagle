@@ -77,7 +77,8 @@ private[mysql] final class SecureHandshake(
       handshakeInit.salt,
       handshakeInit.serverCapabilities,
       settings.charset,
-      settings.maxPacketSize.inBytes.toInt
+      settings.maxPacketSize.inBytes.toInt,
+      settings.enableCachingSha2PasswordAuth
     )
 
   private[this] def makePlainHandshakeResponse(handshakeInit: HandshakeInit): HandshakeResponse = {
@@ -89,27 +90,44 @@ private[mysql] final class SecureHandshake(
       handshakeInit.salt,
       handshakeInit.serverCapabilities,
       settings.charset,
-      settings.maxPacketSize.inBytes.toInt
+      settings.maxPacketSize.inBytes.toInt,
+      settings.enableCachingSha2PasswordAuth
     )
+  }
+
+  private[this] def initiateAuthNegotiation(
+    handshakeInit: HandshakeInit,
+    secure: Boolean
+  ): Future[Result] = {
+    val handshakeResponse =
+      if (secure) {
+        makeSecureHandshakeResponse(handshakeInit)
+      } else {
+        makePlainHandshakeResponse(handshakeInit)
+      }
+    val authInfo =
+      AuthInfo(handshakeInit.version, settings, fastAuthSuccessCounter, tlsEnabled = secure)
+
+    new AuthNegotiation(transport, decodeSimpleResult).doAuth(handshakeResponse, authInfo)
   }
 
   // For the `SecureHandshake`, after the init,
   // we return an `SslConnectionRequest`,
-  // neogtiate SSL/TLS, and then return a handshake response.
+  // negotiate SSL/TLS, and then return a handshake response.
   def connectionPhase(): Future[Result] = {
     readHandshakeInit()
       .flatMap { handshakeInit =>
         if (tlsLevel == OpportunisticTls.Off) {
-          Future.value(makePlainHandshakeResponse(handshakeInit))
+          initiateAuthNegotiation(handshakeInit, secure = false)
         } else {
           val serverTlsEnabled = handshakeInit.serverCapabilities.has(Capability.SSL)
           if (serverTlsEnabled) {
             writeSslConnectionRequest(handshakeInit)
               .flatMap(_ => negotiateTls(handshakeInit))
               .map(_ => handshakeInit)
-              .map(makeSecureHandshakeResponse)
+              .flatMap(initiateAuthNegotiation(_, secure = true))
           } else if (tlsLevel == OpportunisticTls.Desired) {
-            Future.value(makePlainHandshakeResponse(handshakeInit))
+            initiateAuthNegotiation(handshakeInit, secure = false)
           } else {
             Future.exception(
               new InsufficientServerCapabilitiesException(
@@ -120,7 +138,6 @@ private[mysql] final class SecureHandshake(
           }
         }
       }
-      .flatMap(messageDispatch)
       .onFailure(_ => transport.close())
   }
 }

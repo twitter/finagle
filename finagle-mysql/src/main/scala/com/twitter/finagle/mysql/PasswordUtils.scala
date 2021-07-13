@@ -45,8 +45,6 @@ private object PasswordUtils {
    *
    * XOR(SHA256(password), SHA256(SHA256(SHA256(password)), "20-bytes random data from server"))
    *
-   * @note This will be used in the future as support for `caching_sha2_password` is added.
-   *
    * @param password the password for the user.
    * @param salt the salt sent from the server.
    * @param charset the character set the client is using.
@@ -72,8 +70,6 @@ private object PasswordUtils {
 
   /**
    * Encrypt the password with the server's RSA public key and the nonce.
-   *
-   * @note This will be used in the future as support for `caching_sha2_password` is added.
    *
    * @param password the password for the user.
    * @param rsaKey the RSA key that is either stored locally or sent to the client from the server.
@@ -111,8 +107,6 @@ private object PasswordUtils {
    * reading the locally stored server's public key and encrypting the password with that key.
    * This approach cuts down on one round trip.
    *
-   * @note This will be used in the future as support for `caching_sha2_password` is added.
-   *
    * @param path The path to the locally stored public key for the server.
    */
   def readFromPath(path: String): String = {
@@ -144,7 +138,7 @@ private object PasswordUtils {
   }
 
   /** Helper method to add a null byte to the end of a byte array. */
-  private def addNullByteToPassword(password: Array[Byte]): Array[Byte] = {
+  private[mysql] def addNullByteToPassword(password: Array[Byte]): Array[Byte] = {
     password :+ 0.toByte
   }
 

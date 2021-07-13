@@ -3,7 +3,15 @@ package com.twitter.finagle.mysql
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.mysql.MysqlCharset.Utf8_general_ci
-import com.twitter.finagle.mysql.param.{Charset, Credentials, Database, FoundRows}
+import com.twitter.finagle.mysql.param.{
+  CachingSha2PasswordAuth,
+  CachingSha2PasswordMissServerCache,
+  Charset,
+  Credentials,
+  Database,
+  FoundRows,
+  PathToServerRsaPublicKey
+}
 import com.twitter.util.StorageUnit
 
 /**
@@ -29,6 +37,16 @@ import com.twitter.util.StorageUnit
  * packet that can be transmitted to or from a MySQL 5.5 server or
  * client is 1GB.
  *
+ * @param enableCachingSha2PasswordAuth enable the client to use the
+ * `caching_sha2_password` authentication method. This auth method is
+ * default in MySQL 8.0 and higher.
+ *
+ * @param pathToServerRsaPublicKey the path to the MySQL server's
+ * locally stored RSA public key to use during `caching_sha2_password`
+ * full authentication with a plaintext connection.
+ *
+ * @param causeAuthCacheMiss enable a server password cache miss.
+ * Used during testing.
  */
 private[mysql] final case class HandshakeSettings(
   username: Option[String] = None,
@@ -37,7 +55,10 @@ private[mysql] final case class HandshakeSettings(
   clientCapabilities: Capability = Capability.baseCapabilities,
   charset: Short = Utf8_general_ci,
   enableFoundRows: Boolean = true,
-  maxPacketSize: StorageUnit = 1.gigabyte) {
+  maxPacketSize: StorageUnit = 1.gigabyte,
+  enableCachingSha2PasswordAuth: Boolean = false,
+  pathToServerRsaPublicKey: String = "",
+  causeAuthCacheMiss: Boolean = false) {
 
   require(maxPacketSize <= 1.gigabyte, s"Max packet size ($maxPacketSize) cannot exceed 1 gigabyte")
 
@@ -54,6 +75,7 @@ private[mysql] final case class HandshakeSettings(
     clientCapabilities
       .set(database.isDefined, Capability.ConnectWithDB)
       .set(enableFoundRows, Capability.FoundRows)
+      .set(enableCachingSha2PasswordAuth, Capability.PluginAuth)
 
   /**
    * Adds the `SSL` capability to the `calculatedClientCapabilities`.
@@ -74,7 +96,10 @@ private[mysql] object HandshakeSettings {
       password = credentials.password,
       database = prms[Database].db,
       charset = prms[Charset].charset,
-      enableFoundRows = prms[FoundRows].enabled
+      enableFoundRows = prms[FoundRows].enabled,
+      enableCachingSha2PasswordAuth = prms[CachingSha2PasswordAuth].enabled,
+      pathToServerRsaPublicKey = prms[PathToServerRsaPublicKey].path,
+      causeAuthCacheMiss = prms[CachingSha2PasswordMissServerCache].causeMiss
     )
   }
 }

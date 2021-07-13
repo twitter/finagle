@@ -23,6 +23,30 @@ package object integration {
     )
   )
 
+  val v8_0_21: MySqlVersion = MySqlVersion(
+    8,
+    0,
+    21,
+    Map(
+      "--default_storage_engine" -> "InnoDB",
+      "--character_set_server" -> "utf8",
+      "--collation_server" -> "utf8_general_ci",
+      "--auto_increment_increment" -> "1",
+      "--auto_increment_offset" -> "2",
+      "--transaction_isolation" -> "REPEATABLE-READ",
+      "--innodb_autoinc_lock_mode" -> "1",
+      "--group_concat_max_len" -> "1024",
+      "--explicit_defaults_for_timestamp" -> "0",
+      "--gtid_mode" -> "OFF",
+      "--enforce-gtid-consistency" -> "WARN",
+      "--sql_mode" -> "NO_ENGINE_SUBSTITUTION",
+      "--default_time_zone" -> "+0:00",
+      "--log-bin" -> "binfile",
+      "--server-id" -> "1",
+      "--mysqlx" -> "OFF"
+    )
+  )
+
   /**
    * This is the default InstanceConfig used by the integration package.
    * This will look for mysql binaries in java.io.tmpdir.

@@ -187,13 +187,19 @@ private[mysql] case class AuthSwitchResponse(
     case None => Array.emptyByteArray
   }
 
+  // If the password is a null password, then we only send a null
+  // byte as the password in the AuthSwitchResponse
+  private[this] val bodySize: Int = password match {
+    case Some(_) => 32
+    case None => 1
+  }
+
   def seq: Short = seqNum
 
   def toPacket: Packet = {
-    val packetBodySize = 32
-    val bw = MysqlBuf.writer(new Array[Byte](packetBodySize))
+    val bw = MysqlBuf.writer(new Array[Byte](bodySize))
     bw.writeBytes(hashPassword)
-    bw.fill(packetBodySize - hashPassword.length, 0.toByte)
+    bw.fill(bodySize - hashPassword.length, 0.toByte)
 
     Packet(seq, bw.owned())
   }
@@ -273,11 +279,17 @@ private[mysql] sealed abstract class HandshakeResponse(
   salt: Array[Byte],
   serverCapabilities: Capability,
   charset: Short,
-  maxPacketSize: Int)
+  maxPacketSize: Int,
+  enableCachingSha2PasswordAuth: Boolean)
     extends ProtocolMessage {
 
   lazy val hashPassword: Array[Byte] = password match {
-    case Some(pword) => PasswordUtils.encryptPasswordWithSha1(pword, salt, charset)
+    case Some(pword) =>
+      if (enableCachingSha2PasswordAuth) {
+        PasswordUtils.encryptPasswordWithSha256(pword, salt, charset)
+      } else {
+        PasswordUtils.encryptPasswordWithSha1(pword, salt, charset)
+      }
     case None => Array.emptyByteArray
   }
 
@@ -316,7 +328,8 @@ private[mysql] case class PlainHandshakeResponse(
   salt: Array[Byte],
   serverCap: Capability,
   charset: Short,
-  maxPacketSize: Int)
+  maxPacketSize: Int,
+  enableCachingSha2PasswordAuth: Boolean)
     extends HandshakeResponse(
       username,
       password,
@@ -325,7 +338,8 @@ private[mysql] case class PlainHandshakeResponse(
       salt,
       serverCap,
       charset,
-      maxPacketSize) {
+      maxPacketSize,
+      enableCachingSha2PasswordAuth) {
 
   def seq: Short = 1
 }
@@ -345,7 +359,8 @@ private[mysql] case class SecureHandshakeResponse(
   salt: Array[Byte],
   serverCap: Capability,
   charset: Short,
-  maxPacketSize: Int)
+  maxPacketSize: Int,
+  enableCachingSha2PasswordAuth: Boolean)
     extends HandshakeResponse(
       username,
       password,
@@ -354,7 +369,8 @@ private[mysql] case class SecureHandshakeResponse(
       salt,
       serverCap,
       charset,
-      maxPacketSize) {
+      maxPacketSize,
+      enableCachingSha2PasswordAuth) {
 
   require(
     serverCap.has(Capability.SSL),
