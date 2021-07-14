@@ -7,6 +7,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
+import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats._
@@ -291,6 +292,103 @@ class EndToEndTest
     assert(thrown.getMessage == "Internal error processing query: 'java.lang.Exception: sad panda'")
 
     await(server.close())
+  }
+
+  test(
+    "thriftmux server + thriftmux client: " +
+      "if the server throws an exception, the client should treat it as a failure"
+  ) {
+    val serverSR = new InMemoryStatsReceiver()
+    val server = serverImpl
+      .withStatsReceiver(serverSR)
+      .withLabel("aserver")
+      .serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.MethodPerEndpoint {
+          def query(x: String): Future[String] = throw new Exception("sad panda")
+          def question(y: String): Future[String] = ???
+          def inquiry(z: String): Future[String] = ???
+        }
+      )
+
+    try {
+      val clientSR = new InMemoryStatsReceiver()
+      val markDeadForMs = 60000
+      val dest = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+
+      val clientBase = ThriftMux.client
+        .withStatsReceiver(clientSR)
+        .withResponseClassifier(ThriftMuxResponseClassifier.ThriftExceptionsAsFailures)
+        .configured(
+          FailureAccrualFactory
+            .Param(numFailures = 1, markDeadFor = Duration.fromMilliseconds(markDeadForMs))
+        )
+
+      val methodBuilderLabel = "methodBuilder"
+      val methodBuilderClient = TestService.MethodPerEndpoint(
+        clientBase
+          .withLabel(methodBuilderLabel)
+          .methodBuilder(dest)
+          .servicePerEndpoint[TestService.ServicePerEndpoint]
+      )
+      testUndeclaredServerException(
+        methodBuilderClient,
+        methodBuilderLabel,
+        clientSR,
+        markDeadForMs,
+        assertLogicalStats = true,
+      )
+
+      assert(serverSR.counter("aserver", "failures")() == 1)
+      assert(serverSR.counter("aserver", "failures", "java.lang.Exception")() == 1)
+      assert(serverSR.counter("aserver", "success")() == 0)
+
+      clientSR.clear()
+
+      val methodPerEndpointLabel = "MethodPerEndpoint"
+      val methodPerEndpointClient = clientBase.build[thriftscala.TestService.MethodPerEndpoint](
+        dest,
+        methodPerEndpointLabel,
+      )
+      testUndeclaredServerException(
+        methodPerEndpointClient,
+        methodPerEndpointLabel,
+        clientSR,
+        markDeadForMs,
+        assertLogicalStats = false,
+      )
+
+    } finally {
+      server.close()
+    }
+  }
+
+  private[this] def testUndeclaredServerException(
+    client: TestService.MethodPerEndpoint,
+    label: String,
+    clientSR: InMemoryStatsReceiver,
+    markDeadForMs: Int,
+    assertLogicalStats: Boolean,
+  ): Unit = {
+    val thrown = intercept[TApplicationException] {
+      await(client.query("ok"))
+    }
+
+    assert(thrown.getMessage == "Internal error processing query: 'java.lang.Exception: sad panda'")
+
+    eventually {
+      if (assertLogicalStats) {
+        assert(clientSR.counter(label, "logical", "failures")() == 1, label)
+        assert(clientSR.counter(label, "logical", "success")() == 0, label)
+      }
+      assert(clientSR.counter(label, "failures")() == 1, label)
+      assert(clientSR.counter(label, "success")() == 0, label)
+      assert(clientSR.counter(label, "failure_accrual", "removals")() == 1, label)
+      assert(
+        clientSR.counter(label, "failure_accrual", "removed_for_ms")() == markDeadForMs,
+        label,
+      )
+    }
   }
 
   test("thriftmux server + Finagle thrift client: traceId should be passed from client to server") {

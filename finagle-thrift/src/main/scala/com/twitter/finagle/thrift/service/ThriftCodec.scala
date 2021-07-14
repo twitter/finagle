@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift.service
 
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.thrift.{ClientDeserializeCtx, ThriftClientRequest, maxReusableBufferSize}
-import com.twitter.finagle.{Filter, Service}
+import com.twitter.finagle.{Filter, Service, SourcedException}
 import com.twitter.scrooge.{TReusableBuffer, ThriftMethod, ThriftStruct, ThriftStructCodec}
 import com.twitter.util.{Future, Return, Throw, Try}
 import java.util.Arrays
@@ -10,32 +10,33 @@ import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
 
-private[thrift] object ThriftCodec {
+object ThriftCodec {
 
   /**
    * A [[Filter]] that wraps a binary thrift Service[ThriftClientRequest, Array[Byte]]
    * and produces a [[Service]] from a [[ThriftStruct]] to [[ThriftClientRequest]] (i.e. bytes).
    */
-  def filter(
+  private[thrift] def filter(
     method: ThriftMethod,
     pf: TProtocolFactory
   ): Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] =
     new Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] {
       private[this] val decodeRepFn: Array[Byte] => Try[method.SuccessType] = { bytes =>
-        val result: method.Result = decodeResponse(bytes, method.responseCodec, pf)
-        result.firstException() match {
-          case Some(ex) => Throw(ex)
-          case None =>
-            result.successField match {
-              case Some(v) => Return(v)
-              case None =>
-                Throw(
-                  new TApplicationException(
-                    TApplicationException.MISSING_RESULT,
-                    s"Thrift method '${method.name}' failed: missing result"
+        decodeResponse(bytes, method.responseCodec, pf).flatMap { result: method.Result =>
+          result.firstException() match {
+            case Some(ex) => Throw(ex)
+            case None =>
+              result.successField match {
+                case Some(v) => Return(v)
+                case None =>
+                  Throw(
+                    new TApplicationException(
+                      TApplicationException.MISSING_RESULT,
+                      s"Thrift method '${method.name}' failed: missing result"
+                    )
                   )
-                )
-            }
+              }
+          }
         }
       }
 
@@ -75,21 +76,22 @@ private[thrift] object ThriftCodec {
     new ThriftClientRequest(bytes, oneway)
   }
 
-  private def decodeResponse[T <: ThriftStruct](
+  def decodeResponse[T <: ThriftStruct](
     resBytes: Array[Byte],
     codec: ThriftStructCodec[T],
-    pf: TProtocolFactory
-  ): T = {
+    pf: TProtocolFactory,
+    serviceName: String = ""
+  ): Try[T] = {
     val iprot = pf.getProtocol(new TMemoryInputTransport(resBytes))
     val msg = iprot.readMessageBegin()
     if (msg.`type` == TMessageType.EXCEPTION) {
       val exception = TApplicationException.readFrom(iprot)
       iprot.readMessageEnd()
-      throw exception
+      Throw(SourcedException.setServiceName(exception, serviceName))
     } else {
       val result = codec.decode(iprot)
       iprot.readMessageEnd()
-      result
+      Return(result)
     }
   }
 }

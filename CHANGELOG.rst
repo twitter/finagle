@@ -35,10 +35,20 @@ Runtime Behavior Changes
 * finagle-http2: introduce optional parameter `NackRstFrameHandling` to enable or disable NACK
   conversion to RST_STREAM frames. ``PHAB_ID=D702696``
 
+* finagle-thrift, finagle-thriftmux: clients may start reporting (correctly) lower success rate.
+  Previously server exceptions not declared in IDL were erroneously considered as successes.
+  The fgix also improves failure detection and thus nodes previously considered as healthy
+  by failure accrual policy may be considered as unhealthy. ``PHAB_ID=D698272``
+
 Bug Fixes
 ~~~~~~~~~~
 
 * finagle-core: Add `BackupRequestFilter` to client registry when configured. ``PHAB_ID=D686981``
+
+* finagle-thrift, finagle-thriftmux: clients now treat server exceptions
+  not declared in IDL as failures, rather than successes,
+  and do not skip the configured response classifier for failure accrual.
+  ``PHAB_ID=D698272``
 
 21.6.0
 ------
