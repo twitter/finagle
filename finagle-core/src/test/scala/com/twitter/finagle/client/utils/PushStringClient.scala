@@ -23,7 +23,7 @@ object PushStringClient {
   case class Client(
     stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
     params: Stack.Params = Stack.Params.empty + ProtocolLibrary(protocolLibrary),
-    appendDelimeter: Boolean = true)
+    appendDelimiter: Boolean = true)
       extends PushStackClient[String, String, Client] {
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
@@ -35,7 +35,7 @@ object PushStringClient {
     protected type SessionT = PipeliningClientPushSession[String, String]
 
     protected def newPushTransporter(sa: SocketAddress): PushTransporter[String, String] = {
-      val init = if (appendDelimeter) StringClientPipeline else NoDelimStringPipeline
+      val init = if (appendDelimiter) StringClientPipeline else NoDelimStringPipeline
       Netty4PushTransporter.raw[String, String](init, sa, params)
     }
 

@@ -52,7 +52,7 @@ object StringClient {
   case class Client(
     stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
     params: Stack.Params = DefaultParams,
-    appendDelimeter: Boolean = true)
+    appendDelimiter: Boolean = true)
       extends StdStackClient[String, String, Client]
       with Stack.Transformable[Client] {
     protected def copy1(
@@ -67,7 +67,7 @@ object StringClient {
     protected def newTransporter(
       addr: SocketAddress
     ): Transporter[String, String, TransportContext] =
-      if (appendDelimeter) Netty4Transporter.raw(StringClientPipeline, addr, params)
+      if (appendDelimiter) Netty4Transporter.raw(StringClientPipeline, addr, params)
       else Netty4Transporter.raw(NoDelimStringPipeline, addr, params)
 
     protected def newDispatcher(

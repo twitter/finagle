@@ -23,7 +23,7 @@ class ServerChannelConfigurationTest extends AnyFunSuite {
       .serve(address, identityService)
 
     val client: Service[String, String] = ClientBuilder()
-      .stack(StringClient.Client(appendDelimeter = false))
+      .stack(StringClient.Client(appendDelimiter = false))
       .daemon(true) // don't create an exit guard
       .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
       .hostConnectionLimit(1)
@@ -45,7 +45,7 @@ class ServerChannelConfigurationTest extends AnyFunSuite {
       .serve(address, identityService)
 
     val client: Service[String, String] = ClientBuilder()
-      .stack(StringClient.Client(appendDelimeter = false))
+      .stack(StringClient.Client(appendDelimiter = false))
       .daemon(true) // don't create an exit guard
       .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
       .hostConnectionLimit(1)
