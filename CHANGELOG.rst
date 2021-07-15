@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-mysql: introduce `newRichClient(dest: String, label: String)` method, which removes the
+  need for extra boilerplate to convert the destination String to a `c.t.finagle.Name` when
+  specifying both `dest` and `label` in String form. ``PHAB_ID=D706140``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
