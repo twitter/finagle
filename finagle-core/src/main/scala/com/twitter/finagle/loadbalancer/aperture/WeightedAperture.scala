@@ -4,10 +4,12 @@ import com.twitter.finagle.loadbalancer.aperture.DeterministicAperture.MinDeterm
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.{CoreToggles, Status}
+import scala.util.hashing.MurmurHash3
 
 object WeightedApertureToggle {
   private val toggle = CoreToggles("com.twitter.finagle.loadbalancer.WeightedAperture")
-  def apply(): Boolean = toggle(ServerInfo().clusterId.hashCode)
+  def apply(client: String): Boolean =
+    toggle(MurmurHash3.mix(ServerInfo().clusterId.hashCode, client.hashCode))
 }
 
 private object WeightedAperture {
@@ -114,7 +116,6 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
   def dapertureActive: Boolean = aperture.dapertureActive
 
   private[this] val rng = aperture.rng
-  private[this] val label = aperture.lbl
 
   //exposed for testing
   private[aperture] val (idxs, pdist) = {

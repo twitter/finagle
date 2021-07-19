@@ -369,7 +369,7 @@ object LoadBalancerFactory {
 
       // If weight-aware aperture load balancers are enabled, we do not wrap the
       // newBalancer in a TrafficDistributor.
-      if (loadBalancerFactory.supportsWeighted && WeightedApertureToggle()) {
+      if (loadBalancerFactory.supportsWeighted && WeightedApertureToggle(label)) {
 
         // Convert endpoints from AddressedFactories to EndpointFactories
         val formattedEndpoints: Activity[Set[EndpointFactory[Req, Rep]]] = {
