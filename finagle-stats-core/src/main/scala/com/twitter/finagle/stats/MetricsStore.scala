@@ -75,7 +75,7 @@ private[stats] trait MetricsStore {
    * Deduplicates by formatted name, so that Seq("foo", "bar") and
    * Seq("foo/bar") with the separator "/" are the same name.
    */
-  def unregisterGauge(names: Seq[String]): Unit
+  def unregisterGauge(metricBuilder: MetricBuilder): Unit
 
   /**
    * Registers a new stat, or gets an existing one of that name if it already

@@ -1,6 +1,7 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.service.{MetricBuilderRegistry, StatsFilter}
+import com.twitter.finagle.stats.Disabled
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Stack, stats, tracing, util}
 import com.twitter.util.{JavaTimer, NullMonitor}
@@ -165,6 +166,20 @@ case class Stats(statsReceiver: stats.StatsReceiver) {
 }
 object Stats {
   implicit val param: Stack.Param[Stats] = Stack.Param(Stats(stats.DefaultStatsReceiver))
+}
+
+/**
+ * A class eligible for configuring a
+ * [[com.twitter.finagle.stats.StandardStats]] throughout finagle
+ * clients and servers.
+ * @see [[stats.StandardStatsReceiver]]
+ */
+private[finagle] case class StandardStats(standardStats: stats.StandardStats) {
+  def mk(): (StandardStats, Stack.Param[StandardStats]) = (this, StandardStats.param)
+}
+private[finagle] object StandardStats {
+  implicit val param: Stack.Param[StandardStats] =
+    Stack.Param(StandardStats(Disabled))
 }
 
 /**

@@ -176,8 +176,8 @@ private object TrafficDistributorTest {
     protected[this] def registerGauge(metricBuilder: MetricBuilder, f: => Float): Unit =
       underlying.addGauge(metricBuilder.name: _*)(f)
 
-    protected[this] def deregisterGauge(name: Seq[String]): Unit =
-      underlying.gauges -= name
+    protected[this] def deregisterGauge(metricBuilder: MetricBuilder): Unit =
+      underlying.gauges -= metricBuilder.name
 
     def counters: Map[Seq[String], Long] = underlying.counters.toMap
     def stats: Map[Seq[String], Seq[Float]] = underlying.stats.toMap

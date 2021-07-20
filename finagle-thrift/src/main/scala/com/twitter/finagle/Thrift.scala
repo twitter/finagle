@@ -13,7 +13,7 @@ import com.twitter.finagle.param.{
 }
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
-import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.stats.{ExceptionStatsHandler, StandardStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
 import com.twitter.finagle.thrift.exp.partitioning.{
   PartitioningParams,
@@ -129,6 +129,8 @@ import org.apache.thrift.protocol.TProtocolFactory
 object Thrift
     extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
+
+  private val protocolLibraryName = "thrift"
 
   object param {
 
@@ -312,7 +314,7 @@ object Thrift
     }
 
     private val params: Stack.Params = StackClient.defaultParams +
-      ProtocolLibrary("thrift")
+      ProtocolLibrary(protocolLibraryName)
   }
 
   /**
@@ -546,7 +548,7 @@ object Thrift
       .replace(StackServer.Role.preparer, preparer)
 
     private def params: Stack.Params = StackServer.defaultParams +
-      ProtocolLibrary("thrift")
+      ProtocolLibrary(protocolLibraryName)
   }
 
   /**
@@ -682,7 +684,12 @@ object Thrift
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  def server: Thrift.Server = Server()
+  def server: Thrift.Server = Server().configured(
+    StandardStats(
+      stats.StatsAndClassifier(
+        StandardStatsReceiver(stats.Server, protocolLibraryName),
+        ThriftResponseClassifier.ThriftExceptionsAsFailures
+      )))
 
   def serve(
     addr: SocketAddress,

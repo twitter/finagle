@@ -55,7 +55,7 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
 
   protected[this] def registerGauge(metricBuilder: MetricBuilder, f: => Float): Unit =
     synchronized {
-      deregisterGauge(metricBuilder.name)
+      deregisterGauge(metricBuilder)
 
       val level =
         if (metricBuilder.verbosity == Verbosity.Debug) Level.FINEST else Level.INFO
@@ -65,8 +65,8 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
       }
     }
 
-  protected[this] def deregisterGauge(name: Seq[String]): Unit = synchronized {
-    timerTasks.remove(name) foreach { _.cancel() }
+  protected[this] def deregisterGauge(metricBuilder: MetricBuilder): Unit = synchronized {
+    timerTasks.remove(metricBuilder.name) foreach { _.cancel() }
   }
 
   private[this] def formatName(description: Seq[String]) = {

@@ -154,15 +154,17 @@ private[finagle] class Metrics private (
 
   val histoDetails = new ConcurrentHashMap[String, HistogramDetail]
 
-  private[this] def format(names: Seq[String]): String =
-    names.mkString(separator)
+  private[this] def format(metricBuilder: MetricBuilder): String = {
+    if (metricBuilder.isStandard) metricBuilder.name.mkString("/")
+    else metricBuilder.name.mkString(separator)
+  }
 
   def getOrCreateCounter(metricBuilder: MetricBuilder): MetricsStore.StoreCounter = {
     val counter = countersMap.get(metricBuilder.name)
     if (counter != null)
       return counter
 
-    val formatted = format(metricBuilder.name)
+    val formatted = format(metricBuilder)
     val curNameUsage = reservedNames.putIfAbsent(formatted, CounterRepr)
 
     if (curNameUsage == null || curNameUsage == CounterRepr) {
@@ -199,7 +201,7 @@ private[finagle] class Metrics private (
   }
 
   private def createStat(metricBuilder: MetricBuilder): MetricsStore.StoreStat = {
-    val formatted = format(metricBuilder.name)
+    val formatted = format(metricBuilder)
     val doLog = loggedStats.contains(formatted)
     val histogram = mkHistogram(formatted, metricBuilder.percentiles)
 
@@ -236,7 +238,7 @@ private[finagle] class Metrics private (
     registerNumberGauge(metricBuilder, f)
 
   private def registerNumberGauge(metricBuilder: MetricBuilder, f: => Number): Unit = {
-    val formatted = format(metricBuilder.name)
+    val formatted = format(metricBuilder)
     val curNameUsage = reservedNames.putIfAbsent(formatted, GaugeRepr)
 
     if (curNameUsage == null) {
@@ -262,9 +264,9 @@ private[finagle] class Metrics private (
     }
   }
 
-  def unregisterGauge(names: Seq[String]): Unit = {
-    gaugesMap.remove(names)
-    val formatted = format(names)
+  def unregisterGauge(metricBuilder: MetricBuilder): Unit = {
+    gaugesMap.remove(metricBuilder.name)
+    val formatted = format(metricBuilder)
     metricSchemas.remove(formatted)
     reservedNames.remove(formatted)
     verbosityMap.remove(formatted)

@@ -26,6 +26,7 @@ import com.twitter.finagle.stats.{
   ClientStatsReceiver,
   ExceptionStatsHandler,
   ServerStatsReceiver,
+  StandardStatsReceiver,
   StatsReceiver
 }
 import com.twitter.finagle.thrift._
@@ -130,6 +131,8 @@ object ThriftMux
     val emptyResponse: mux.Response = mux.Response.empty
   }
 
+  private val protocolLibraryName = "thriftmux"
+
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
    */
@@ -168,7 +171,7 @@ object ThriftMux
   /**
    * Base [[com.twitter.finagle.Stack.Params]] for ThriftMux servers.
    */
-  def BaseServerParams: Stack.Params = Mux.Server.params + ProtocolLibrary("thriftmux")
+  def BaseServerParams: Stack.Params = Mux.Server.params + ProtocolLibrary(protocolLibraryName)
 
   object Client extends ThriftClient {
 
@@ -180,7 +183,7 @@ object ThriftMux
     def standardMuxer: StackClient[mux.Request, mux.Response] =
       Mux.client
         .copy(stack = BaseClientStack)
-        .configured(ProtocolLibrary("thriftmux"))
+        .configured(ProtocolLibrary(protocolLibraryName))
   }
 
   /**
@@ -696,6 +699,12 @@ object ThriftMux
     Server()
       .configured(Label("thrift"))
       .configured(Stats(ServerStatsReceiver))
+      .configured(
+        StandardStats(
+          stats.StatsAndClassifier(
+            StandardStatsReceiver(stats.Server, protocolLibraryName),
+            ThriftMuxResponseClassifier.ThriftExceptionsAsFailures
+          )))
 
   def serve(
     addr: SocketAddress,

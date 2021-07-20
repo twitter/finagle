@@ -61,7 +61,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
         if (serverLabel.isEmpty) RoleConfiguredStatsReceiver(stats, Server)
         else
           RoleConfiguredStatsReceiver(
-            new RelativeNameMarkingStatsReceiver(stats.scope(serverLabel)),
+            RelativeNameMarkingStatsReceiver(stats.scope(serverLabel)),
             Server,
             Some(serverLabel))
 

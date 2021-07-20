@@ -63,8 +63,8 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
       _gauges += (metricBuilder.name -> (() => f))
     }
 
-  protected[this] def deregisterGauge(name: Seq[String]): Unit = synchronized {
-    _gauges -= name
+  protected[this] def deregisterGauge(metricBuilder: MetricBuilder): Unit = synchronized {
+    _gauges -= metricBuilder.name
   }
 
   /* Summary */

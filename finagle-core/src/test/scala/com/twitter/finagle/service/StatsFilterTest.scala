@@ -1,13 +1,9 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.stats.{
-  CategorizingExceptionStatsHandler,
-  ExceptionStatsHandler,
-  InMemoryStatsReceiver
-}
 import com.twitter.finagle._
 import com.twitter.finagle.stats.exp.{FunctionExpression, HistogramExpression, MetricExpression}
+import com.twitter.finagle.stats._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
 import org.scalatest.funsuite.AnyFunSuite
@@ -321,5 +317,102 @@ class StatsFilterTest extends AnyFunSuite {
     assert(receiver.expressions("success_rate").expr.isInstanceOf[FunctionExpression])
     assert(receiver.expressions("throughput").expr.isInstanceOf[MetricExpression])
     assert(receiver.expressions("latency").expr.isInstanceOf[HistogramExpression])
+  }
+
+  test("standard metrics are instrumented") {
+    val sr1 = new InMemoryStatsReceiver()
+    val sr2 = new InMemoryStatsReceiver()
+    val builtinSr = new InMemoryStatsReceiver()
+
+    val svc = Service.mk { i: Int =>
+      if (i < 0) Future.exception(new RuntimeException(i.toString))
+      else Future(i)
+    }
+
+    StandardStatsReceiver.serverCount.set(0)
+    LoadedStatsReceiver.self = builtinSr
+    def standardStats(protoName: String) =
+      StatsOnly(new StandardStatsReceiver(stats.Server, protoName))
+
+    def statsFilter(configuredSr: StatsReceiver, protoName: String) = new StatsFilter[Int, Int](
+      statsReceiver = configuredSr,
+      responseClassifier = ResponseClassifier.Default,
+      exceptionStatsHandler = StatsFilter.DefaultExceptions,
+      timeUnit = TimeUnit.MILLISECONDS,
+      now = Stopwatch.systemMillis,
+      metricsRegistry = None,
+      standardStats = standardStats(protoName))
+
+    val service1 = statsFilter(sr1, "thriftmux").andThen(svc)
+    val service2 = statsFilter(sr2, "https").andThen(svc)
+
+    assert(5 == Await.result(service1(5), 1.second))
+    assert(5 == Await.result(service2(5), 1.second))
+
+    assert(1 == sr1.counter("requests")())
+    assert(
+      1 == builtinSr
+        .counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "requests")())
+    assert(1 == sr1.counter("success")())
+    assert(
+      1 == builtinSr
+        .counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "success")())
+    assert(0 == sr1.counter("failures")())
+    assert(
+      0 == builtinSr
+        .counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "failures")())
+
+    //overall requests
+    assert(2 == builtinSr.counter("standard-service-metric-v1", "srv", "requests")())
+  }
+
+  test("standard metrics respects a different ResponseClassifier") {
+    val sr = new InMemoryStatsReceiver()
+    val svc = Service.mk { i: Int =>
+      if (i < 0) Future.exception(new RuntimeException(i.toString))
+      else Future(i)
+    }
+
+    val aClassifier: ResponseClassifier = {
+      case ReqRep(_, Return(i: Int)) if i == 5 => ResponseClass.RetryableFailure
+      case ReqRep(_, Throw(x)) if x.getMessage == "-5" => ResponseClass.Success
+    }
+
+    StandardStatsReceiver.serverCount.set(0)
+    LoadedStatsReceiver.self = sr
+    val standardStats =
+      StatsAndClassifier(new StandardStatsReceiver(stats.Server, "thriftmux"), aClassifier)
+
+    val statsFilter = new StatsFilter[Int, Int](
+      statsReceiver = sr,
+      responseClassifier = ResponseClassifier.Default,
+      exceptionStatsHandler = StatsFilter.DefaultExceptions,
+      timeUnit = TimeUnit.MILLISECONDS,
+      now = Stopwatch.systemMillis,
+      metricsRegistry = None,
+      standardStats = standardStats)
+
+    val service = statsFilter.andThen(svc)
+
+    assert(5 == Await.result(service(5), 1.second))
+    assert(1 == sr.counter("requests")())
+    assert(
+      1 == sr.counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "requests")())
+    assert(1 == sr.counter("success")())
+    assert(
+      0 == sr.counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "success")())
+    assert(0 == sr.counter("failures")())
+    assert(
+      1 == sr.counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "failures")())
+
+    val stdFailure =
+      sr.counter(
+        "standard-service-metric-v1",
+        "srv",
+        "thriftmux",
+        "server-0",
+        "failures",
+        "com.twitter.finagle.service.ResponseClassificationSyntheticException")
+    assert(1 == stdFailure())
   }
 }

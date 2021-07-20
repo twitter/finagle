@@ -150,8 +150,8 @@ class MetricsStatsReceiver(val registry: Metrics)
     registry.registerGauge(metricBuilder, f)
   }
 
-  protected[this] def deregisterGauge(name: Seq[String]): Unit = {
-    registry.unregisterGauge(name)
+  protected[this] def deregisterGauge(metricBuilder: MetricBuilder): Unit = {
+    registry.unregisterGauge(metricBuilder)
   }
 
   override def metricsCollisionsLinterRule: Rule = registry.metricsCollisionsLinterRule
@@ -159,6 +159,7 @@ class MetricsStatsReceiver(val registry: Metrics)
   override protected[finagle] def registerExpression(expressionSchema: ExpressionSchema): Unit = {
     registry.registerExpression(expressionSchema)
   }
+
 }
 
 private object MetricsExporter {

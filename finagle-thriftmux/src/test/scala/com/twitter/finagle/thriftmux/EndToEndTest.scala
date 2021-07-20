@@ -161,6 +161,25 @@ class EndToEndTest
     }
   }
 
+  test("end-to-end thriftmux with standard metrics") {
+    val sr = new InMemoryStatsReceiver()
+    LoadedStatsReceiver.self = sr
+    StandardStatsReceiver.serverCount.set(0)
+    new ThriftMuxTestServer {
+      val client = clientImpl.build[TestService.MethodPerEndpoint](
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+      assert(await(client.query("ok")) == "okok")
+
+      assert(sr.counter("standard-service-metric-v1", "srv", "requests")() == 1)
+      assert(
+        sr.counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "requests")() == 1)
+
+      await(server.close())
+    }
+  }
+
   test("end-to-end thriftmux: propagate Dtab.local") {
     new ThriftMuxTestServer {
       val client =
