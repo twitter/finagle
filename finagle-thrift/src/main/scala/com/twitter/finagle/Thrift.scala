@@ -216,6 +216,7 @@ object Thrift
 
     // This is based on the generated stubs from Scrooge.
     private val ScroogeGeneratedSuffixes = Seq(
+      "$Iface",
       "$ServiceIface",
       "$FutureIface",
       "$MethodPerEndpoint",
@@ -248,16 +249,24 @@ object Thrift
         stripSuffix(root).orElse {
           val interfaces = root.getInterfaces.toSeq
           // Maybe it's a HKT Foo[Future]?
-          if (interfaces.contains(classOf[com.twitter.finagle.thrift.ThriftService]))
+          if (interfaces.contains(classOf[com.twitter.finagle.thrift.ThriftService])) {
             Some(root.getName)
-          else {
-            // Repeat for its supper class.
+          } else {
+            // Repeat for its superclass.
             Option(root.getSuperclass)
+            // All objects have java.lang.Object at the root of the class
+            // hierarchy. If the superclass is not java.lang.Object, repeat
+            // search on the superclass. If it is, search the interfaces.
               .filter(_ != classOf[java.lang.Object])
               .flatMap(search)
               .orElse {
-                // Repeat for all of its interfaces.
-                interfaces.flatMap(search).headOption
+                if (interfaces.isEmpty) {
+                  // root is the fully qualified Java service class name
+                  Some(root.getName)
+                } else {
+                  // Repeat search for all of its interfaces.
+                  interfaces.flatMap(search).headOption
+                }
               }
           }
         }
