@@ -129,6 +129,7 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
   }
 
   def indices: Set[Int] = idxs
+  override def physicalAperture: Int = indices.size
 
   // copied from DeterministicAperture
   private[this] val seqIndices: Array[Int] = indices.toArray
