@@ -38,10 +38,6 @@ private trait Updating[Req, Rep] extends Closable { self: Balancer[Req, Rep] =>
     case Activity.Pending => // nop
   }
 
-  // This stub is required for correct operation of the Reasonable Scala compiler.
-  // See https://github.com/twitter/rsc/issues/100 for details.
-  private def super$close(self: Closable)(deadline: Time): Future[Unit] = ???
-
   // This must be mixed in with another type that has a `close()` method due to the `super.close` call
   abstract override def close(deadline: Time): Future[Unit] = {
     observation.close(deadline).before { super.close(deadline) }

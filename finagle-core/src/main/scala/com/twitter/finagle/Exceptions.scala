@@ -26,10 +26,6 @@ trait HasRemoteInfo extends Exception {
   private[finagle] def setRemoteInfo(remoteInfo: RemoteInfo): Unit =
     _remoteInfo = remoteInfo
 
-  // This stub is required for correct operation of the Reasonable Scala compiler.
-  // See https://github.com/twitter/rsc/issues/100 for details.
-  private def super$getMessage(self: java.lang.Throwable)(): String = ???
-
   def exceptionMessage(): String = super.getMessage()
 
   override def getMessage(): String =
