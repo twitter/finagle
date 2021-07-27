@@ -102,6 +102,7 @@ class StandardToggleMapTest extends AnyFunSuite {
       def id: String = "testing"
       def instanceId: Option[Long] = None
       def clusterId: String = id
+      def zone: Option[String] = None
     }
     val togMap = StandardToggleMap(
       // this will have corresponding file(s) in test/resources/com/twitter/toggles/configs/

@@ -6,6 +6,7 @@ import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
 import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util.{Activity, Await, Event, Future, Time, Var}
@@ -368,6 +369,14 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
     assert(augmentedAddresses == eps)
   }
   test("does not wrap new Balancer in a Traffic Distributor when toggle is set") {
+    val serverInfo: ServerInfo = new ServerInfo {
+      def environment: Option[String] = Some("staging")
+      def id: String = "testing"
+      def instanceId: Option[Long] = None
+      def clusterId: String = id
+      def zone: Option[String] = Some("smf1")
+    }
+    ServerInfo.initialize(serverInfo)
     com.twitter.finagle.toggle.flag.overrides
       .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
 

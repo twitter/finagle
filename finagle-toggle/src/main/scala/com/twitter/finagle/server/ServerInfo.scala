@@ -36,6 +36,11 @@ abstract class ServerInfo {
    * The instance id of the server, if available
    */
   def instanceId: Option[Long]
+
+  /**
+   * An identifier for the dc in which the server is running
+   */
+  def zone: Option[String]
 }
 
 object ServerInfo {
@@ -49,6 +54,7 @@ object ServerInfo {
     val id: String = NetUtil.getLocalHostName()
     val instanceId: Option[Long] = None
     val clusterId: String = id
+    val zone: Option[String] = None
   }
 
   private[this] def registerServerInfo(serverInfo: ServerInfo): Unit =

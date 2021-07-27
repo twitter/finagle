@@ -8,8 +8,11 @@ import scala.util.hashing.MurmurHash3
 
 object WeightedApertureToggle {
   private val toggle = CoreToggles("com.twitter.finagle.loadbalancer.WeightedAperture")
-  def apply(client: String): Boolean =
-    toggle(MurmurHash3.mix(ServerInfo().clusterId.hashCode, client.hashCode))
+  def apply(client: String): Boolean = {
+    toggle(
+      MurmurHash3.mix(ServerInfo().clusterId.hashCode, client.hashCode)
+    ) && ServerInfo().zone.getOrElse("") == "smf1"
+  }
 }
 
 private object WeightedAperture {
