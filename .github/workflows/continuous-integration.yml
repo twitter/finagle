@@ -63,11 +63,9 @@ jobs:
       - name: test
         run: ${{ format('./sbt ++{0} clean coverage "{1}/test" coverageReport', matrix.scala, matrix.project) }}
       - name: coverage
-        if: ${{ success() }}
         run: ${{ format('./sbt ++{0} coverageAggregate', matrix.scala) }}
       - name: upload coverage
-        if: ${{ success() }}
-        run: unset TRAVIS; bash <(curl -s https://codecov.io/bash)
+        uses: codecov/codecov-action@v2
   build-with-netty-snapshot:
     strategy:
       fail-fast: false
