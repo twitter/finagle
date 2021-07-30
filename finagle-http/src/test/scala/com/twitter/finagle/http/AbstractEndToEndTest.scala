@@ -13,7 +13,12 @@ import com.twitter.finagle.http.{Status => HttpStatus}
 import com.twitter.finagle.http2.param.EncoderIgnoreMaxHeaderListSize
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureDetector}
 import com.twitter.finagle.service._
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{
+  InMemoryStatsReceiver,
+  LoadedStatsReceiver,
+  NullStatsReceiver,
+  StandardStatsReceiver
+}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, BufReader, Pipe, Reader, ReaderDiscardedException, Writer}
@@ -2287,5 +2292,44 @@ abstract class AbstractEndToEndTest
     val resp = Await.result(userClient(Request()), 15.seconds)
     assert(resp.content.length == messageSize.bytes)
     await(Closable.all(userClient, proxyServer, originServer).close())
+  }
+
+  test(s"$implName: standard server metrics") {
+    val service = new HttpService {
+      def apply(request: Request): Future[Response] = {
+        if (request.uri == "/3") Future.value(Response(HttpStatus.InternalServerError))
+        else Future.value(Response())
+      }
+    }
+    val builtinSr = new InMemoryStatsReceiver()
+    val sr = new InMemoryStatsReceiver()
+    val loadedSr = LoadedStatsReceiver.self
+    LoadedStatsReceiver.self = builtinSr
+    StandardStatsReceiver.serverCount.set(0)
+    val server = serverImpl()
+      .withStatsReceiver(sr)
+      .withResponseClassifier(ResponseClassifier.Default)
+      .serve(new InetSocketAddress(0), service)
+
+    val client = clientImpl().newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+    await(client(Request("/1")))
+    await(client(Request("/2")))
+    await(client(Request("/3")))
+
+    assert(builtinSr.counter("standard-service-metric-v1", "srv", "requests")() == 3)
+    assert(sr.counter("requests")() == 3)
+    assert(sr.counter("success")() == 3)
+    assert(
+      builtinSr
+        .counter("standard-service-metric-v1", "srv", "http", "server-0", "requests")() == 3)
+    assert(
+      builtinSr
+        .counter("standard-service-metric-v1", "srv", "http", "server-0", "success")() == 2)
+    LoadedStatsReceiver.self = loadedSr
+    await(client.close())
+    await(server.close())
   }
 }

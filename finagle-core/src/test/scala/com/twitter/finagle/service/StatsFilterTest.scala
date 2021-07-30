@@ -344,7 +344,7 @@ class StatsFilterTest extends AnyFunSuite {
       standardStats = standardStats(protoName))
 
     val service1 = statsFilter(sr1, "thriftmux").andThen(svc)
-    val service2 = statsFilter(sr2, "https").andThen(svc)
+    val service2 = statsFilter(sr2, "http").andThen(svc)
 
     assert(5 == Await.result(service1(5), 1.second))
     assert(5 == Await.result(service2(5), 1.second))
@@ -364,6 +364,10 @@ class StatsFilterTest extends AnyFunSuite {
 
     //overall requests
     assert(2 == builtinSr.counter("standard-service-metric-v1", "srv", "requests")())
+
+    assert(1 == sr2.counter("requests")())
+    assert(
+      1 == builtinSr.counter("standard-service-metric-v1", "srv", "http", "server-1", "requests")())
   }
 
   test("standard metrics respects a different ResponseClassifier") {

@@ -557,7 +557,12 @@ object Thrift
       .replace(StackServer.Role.preparer, preparer)
 
     private def params: Stack.Params = StackServer.defaultParams +
-      ProtocolLibrary(protocolLibraryName)
+      ProtocolLibrary(protocolLibraryName) +
+      StandardStats(
+        stats.StatsAndClassifier(
+          StandardStatsReceiver(stats.Server, protocolLibraryName),
+          ThriftResponseClassifier.ThriftExceptionsAsFailures
+        ))
   }
 
   /**
@@ -693,12 +698,7 @@ object Thrift
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  def server: Thrift.Server = Server().configured(
-    StandardStats(
-      stats.StatsAndClassifier(
-        StandardStatsReceiver(stats.Server, protocolLibraryName),
-        ThriftResponseClassifier.ThriftExceptionsAsFailures
-      )))
+  def server: Thrift.Server = Server()
 
   def serve(
     addr: SocketAddress,

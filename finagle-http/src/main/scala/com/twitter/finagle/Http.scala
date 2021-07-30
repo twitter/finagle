@@ -11,10 +11,11 @@ import com.twitter.finagle.http.param.{ClientKerberosConfiguration, ServerKerber
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.Http2Listener
 import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4ServerStreamTransport}
+import com.twitter.finagle.param.StandardStats
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.ssl.ApplicationProtocols
-import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.stats.{ExceptionStatsHandler, StandardStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future, FuturePool, Monitor, StorageUnit}
@@ -386,7 +387,11 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     private def params: Stack.Params = StackServer.defaultParams +
       protocolLibrary +
-      responseClassifierParam
+      responseClassifierParam +
+      StandardStats(
+        stats.StatsAndClassifier(
+          StandardStatsReceiver(stats.Server, protocolLibrary.name),
+          HttpResponseClassifier.ServerErrorsAsFailures))
   }
 
   case class Server(
