@@ -300,7 +300,7 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
 
     assert(
       metrics.expressions
-        .get(ExpressionSchemaKey("test_expression", None, Seq())).expr == expected_expression.expr)
+        .get(ExpressionSchemaKey("test_expression", Map(), Seq())).expr == expected_expression.expr)
   }
 
   test(

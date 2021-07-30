@@ -15,6 +15,7 @@ import com.twitter.finagle.stats.{
   Server,
   StatsReceiver
 }
+import com.twitter.finagle.stats.exp.{ExpressionSchema, ExpressionSchemaKey}
 import com.twitter.finagle.thrift.{ClientId => FinagleClientId}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
@@ -186,7 +187,9 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters(Seq("success")) == 0)
     assert(sr.counters(Seq("failures")) == 1)
 
-    assert(sr.expressions("success_rate").labels.role == Server)
+    assert(
+      sr.expressions.contains(
+        ExpressionSchemaKey("success_rate", Map(ExpressionSchema.Role -> Server.toString), Nil)))
 
     server.close()
   }

@@ -18,6 +18,7 @@ import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.util.{Await, Duration, Future, MockTimer, Promise, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -250,6 +251,9 @@ class StackServerTest extends AnyFunSuite with Eventually {
     Await.ready(server.close(), 10.seconds)
   }
 
+  private[this] def nameToKey(name: String): ExpressionSchemaKey =
+    ExpressionSchemaKey(name, Map(), Seq())
+
   test("StackServer has MetricBuilderRegistry configured instruments default expressions") {
     val sf = ServiceFactory.const(Service.mk[String, String](_ => Future.value("hi")))
     val stack = StackServer.newStack[String, String] ++ Stack.leaf(Endpoint, sf)
@@ -260,9 +264,9 @@ class StackServerTest extends AnyFunSuite with Eventually {
 
     // ACRejectedCounter is not configured in the default stack
     // We won't create acRejectName which uses that metric
-    assert(sr.expressions.contains(successRateName))
-    assert(sr.expressions.contains(throughputName))
-    assert(sr.expressions.contains(latencyName))
-    assert(sr.expressions.contains(deadlineRejectName))
+    assert(sr.expressions.contains(nameToKey(successRateName)))
+    assert(sr.expressions.contains(nameToKey(throughputName)))
+    assert(sr.expressions.contains(nameToKey(latencyName)))
+    assert(sr.expressions.contains(nameToKey(deadlineRejectName)))
   }
 }

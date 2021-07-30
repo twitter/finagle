@@ -10,6 +10,7 @@ import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.{
 }
 import com.twitter.finagle.service.MetricBuilderRegistry._
 import com.twitter.finagle.stats.MetricBuilder.{CounterType, HistogramType}
+import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, Metadata, MetricBuilder}
 import com.twitter.util.Future
 import org.scalatest.funsuite.AnyFunSuite
@@ -45,6 +46,10 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
         statsReceiver = sr)
     )
   }
+
+  private[this] def nameToKey(name: String): ExpressionSchemaKey =
+    ExpressionSchemaKey(name, Map(), Seq())
+
   test("Expression Factory generates all expressions when metrics are injected") {
     new Ctx {
       val mbr = new MetricBuilderRegistry()
@@ -63,11 +68,11 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
       mbr.acRejection
 
       assert(sr.expressions.size == 5)
-      assert(sr.expressions.contains(successRateName))
-      assert(sr.expressions.contains(throughputName))
-      assert(sr.expressions.contains(latencyName))
-      assert(sr.expressions.contains(deadlineRejectName))
-      assert(sr.expressions.contains(acRejectName))
+      assert(sr.expressions.contains(nameToKey(successRateName)))
+      assert(sr.expressions.contains(nameToKey(throughputName)))
+      assert(sr.expressions.contains(nameToKey(latencyName)))
+      assert(sr.expressions.contains(nameToKey(deadlineRejectName)))
+      assert(sr.expressions.contains(nameToKey(acRejectName)))
     }
   }
 
@@ -87,8 +92,8 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
       mbr.acRejection
 
       assert(sr.expressions.size == 2)
-      assert(sr.expressions.contains(successRateName))
-      assert(sr.expressions.contains(latencyName))
+      assert(sr.expressions.contains(nameToKey(successRateName)))
+      assert(sr.expressions.contains(nameToKey(latencyName)))
     }
   }
 }

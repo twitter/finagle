@@ -2,7 +2,12 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.exp.{FunctionExpression, HistogramExpression, MetricExpression}
+import com.twitter.finagle.stats.exp.{
+  ExpressionSchemaKey,
+  FunctionExpression,
+  HistogramExpression,
+  MetricExpression
+}
 import com.twitter.finagle.stats._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
@@ -25,6 +30,9 @@ class StatsFilterTest extends AnyFunSuite {
 
     (promise, receiver, statsFilter.andThen(service))
   }
+
+  private[this] def nameToKey(name: String): ExpressionSchemaKey =
+    ExpressionSchemaKey(name, Map(), Seq())
 
   test("latency stat defaults to milliseconds") {
     val sr = new InMemoryStatsReceiver()
@@ -314,9 +322,9 @@ class StatsFilterTest extends AnyFunSuite {
   test("expressions are instrumented") {
     val (_, receiver, _) = getService()
 
-    assert(receiver.expressions("success_rate").expr.isInstanceOf[FunctionExpression])
-    assert(receiver.expressions("throughput").expr.isInstanceOf[MetricExpression])
-    assert(receiver.expressions("latency").expr.isInstanceOf[HistogramExpression])
+    assert(receiver.expressions(nameToKey("success_rate")).expr.isInstanceOf[FunctionExpression])
+    assert(receiver.expressions(nameToKey("throughput")).expr.isInstanceOf[MetricExpression])
+    assert(receiver.expressions(nameToKey("latency")).expr.isInstanceOf[HistogramExpression])
   }
 
   test("standard metrics are instrumented") {
