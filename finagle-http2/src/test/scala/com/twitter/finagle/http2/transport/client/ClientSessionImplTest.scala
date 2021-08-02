@@ -3,7 +3,7 @@ package com.twitter.finagle.http2.transport.client
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.Request
 import com.twitter.finagle.netty4.http.Bijections
-import com.twitter.finagle.{Stack, Status}
+import com.twitter.finagle.{FailureFlags, Stack, Status}
 import com.twitter.util.{Await, Awaitable}
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
@@ -17,10 +17,13 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class ClientSessionImplTest extends AnyFunSuite {
 
-  private[this] def await[T](t: Awaitable[T]): T =
-    Await.result(t, 15.seconds)
-
   abstract class Ctx {
+
+    def await[T](t: Awaitable[T]): T = {
+      testChannel.runPendingTasks()
+      Await.result(t, 15.seconds)
+    }
+
     def inboundInitializer: ChannelHandler = new ChannelInitializer[Channel] {
       def initChannel(ch: Channel): Unit =
         throw new IllegalStateException("Shouldn't get here.")
@@ -92,7 +95,19 @@ class ClientSessionImplTest extends AnyFunSuite {
       assert(clientSession.status == Status.Open)
       multiplexCodec.connection.goAwayReceived(0, 0, Unpooled.EMPTY_BUFFER)
       assert(clientSession.status == Status.Closed)
+    }
+  }
 
+  test("Starting a dispatch after a GOAWAY results in a rejection") {
+    new Ctx {
+      multiplexCodec.connection.goAwayReceived(0, 0, Unpooled.EMPTY_BUFFER)
+      assert(clientSession.status == Status.Closed)
+
+      val ex = intercept[FailureFlags[_]] {
+        await(clientSession.newChildTransport())
+      }
+      assert(ex.isFlagged(FailureFlags.Rejected))
+      assert(ex.isFlagged(FailureFlags.Retryable))
     }
   }
 
@@ -113,6 +128,22 @@ class ClientSessionImplTest extends AnyFunSuite {
       assert(clientSession.status == Status.Open)
       multiplexCodec.connection.local.createStream(1, false)
       assert(clientSession.status == Status.Busy)
+    }
+  }
+
+  test("dispatching results in a rejection if we have exhausted the max concurrent stream limit") {
+    new Ctx {
+      assert(clientSession.status == Status.Open)
+      // client streams are odd streams
+      multiplexCodec.connection.local.maxActiveStreams(1)
+      multiplexCodec.connection.local.createStream(1, false)
+      assert(clientSession.status == Status.Busy)
+
+      val ex = intercept[FailureFlags[_]] {
+        await(clientSession.newChildTransport())
+      }
+      assert(ex.isFlagged(FailureFlags.Rejected))
+      assert(ex.isFlagged(FailureFlags.Retryable))
     }
   }
 

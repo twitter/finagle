@@ -21,6 +21,7 @@ import io.netty.handler.codec.http2.{
 import io.netty.util
 import io.netty.util.concurrent.GenericFutureListener
 import java.lang.{Boolean => JBool}
+import scala.util.control.NonFatal
 
 private final class ClientSessionImpl(
   params: Stack.Params,
@@ -139,19 +140,38 @@ private final class ClientSessionImpl(
     // most often a waste of allocations.
 
     val p = Promise[Transport[Any, Any]]
-    bootstrap
-      .open()
-      .addListener(new GenericFutureListener[util.concurrent.Future[Http2StreamChannel]] {
-        def operationComplete(future: util.concurrent.Future[Http2StreamChannel]): Unit = {
-          if (!future.isSuccess) {
-            p.setException(Failure.rejected(future.cause))
-          } else {
-            val channel = future.get
-            val trans = new ChildTransport(channel)
-            p.setValue(trans)
-          }
-        }
-      })
+
+    // We execute these checks in the channels event loop because otherwise we can expect
+    // racy behavior from the different lookups from the codec state.
+    try channel.eventLoop.execute { () =>
+      if (!codec.connection.local.canOpenStream) {
+        // The stream cannot be created because the max active streams are maxed out
+        p.setException(
+          Failure.rejected(
+            "Unable to open stream because his session has the maximum number of active streams allowed: " +
+              codec.connection.local.maxActiveStreams))
+      } else if (codec.connection.goAwayReceived) {
+        p.setException(Failure.rejected("Unable to open stream because the session is draining."))
+      } else {
+        // We should be good to go.
+        bootstrap
+          .open()
+          .addListener(new GenericFutureListener[util.concurrent.Future[Http2StreamChannel]] {
+            def operationComplete(future: util.concurrent.Future[Http2StreamChannel]): Unit = {
+              if (!future.isSuccess) {
+                p.setException(Failure.rejected(future.cause))
+              } else {
+                val channel = future.get
+                val trans = new ChildTransport(channel)
+                p.setValue(trans)
+              }
+            }
+          })
+//        }
+      }
+    } catch {
+      case NonFatal(t) => p.setException(Failure.rejected(t))
+    }
 
     p
   }

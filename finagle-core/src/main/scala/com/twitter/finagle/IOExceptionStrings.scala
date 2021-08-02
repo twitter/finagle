@@ -10,6 +10,7 @@ private[finagle] object IOExceptionStrings {
     "syscall:read(..) failed: Connection reset by peer", // Found on linux w/ native epoll
     "readAddress(..) failed: Connection reset by peer", // Found on linux w/ native epoll
     "writeAddress(..) failed: Connection reset by peer", // Found on linux w/ native epoll
+    "writevAddresses(..) failed: Connection reset by peer", // Found on linux w/ native epoll
     "writevAddresses(..) failed: Broken pipe" // Found on linux w/ native epoll
   )
 
