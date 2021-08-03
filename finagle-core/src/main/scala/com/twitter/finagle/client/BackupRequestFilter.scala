@@ -348,7 +348,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
   private[this] val sendAfterStat = statsReceiver.stat("send_backup_after_ms")
   private[this] val backupsSent = statsReceiver.counter("backups_sent")
 
-  // Indicates that the backup request returned first, regardless of whether it succeeded.
+  // Indicates that the backup request returned first and it succeeded.
   private[this] val backupsWon = statsReceiver.counter("backups_won")
 
   private[this] val budgetExhausted = statsReceiver.counter("budget_exhausted")
@@ -388,7 +388,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     case _ => false
   }
 
-  private[this] def record(req: Req, rep: Future[Rep]): Future[Rep] = {
+  private[this] def record(rep: Future[Rep]): Future[Rep] = {
     val start = nowMs()
     rep.respond { response =>
       if (shouldRecord(response)) {
@@ -422,7 +422,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
           service(req)
         }
       }
-    record(req, rep)
+    record(rep)
   }
 
   private[this] def pickWinner(
@@ -454,7 +454,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     backupRequestRetryBudget.deposit()
-    val orig = record(req, service(req))
+    val orig = record(service(req))
     val howLong = sendBackupAfterMillis
 
     // once our percentile exceeds how high we can track, we should stop sending backups.
