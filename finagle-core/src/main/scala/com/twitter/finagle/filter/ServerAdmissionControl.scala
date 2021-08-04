@@ -6,8 +6,6 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.util.{Future, Time}
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
-import scala.collection.JavaConverters._
 
 /**
  * Register and install admission control filters in the server Stack.
@@ -40,11 +38,7 @@ private[twitter] object ServerAdmissionControl {
    */
   case class ServerParams(protocol: String)
 
-  // a map of admission control filters, key by name
-  private[this] val acs: ConcurrentMap[String, ServerParams => TypeAgnostic] =
-    new ConcurrentHashMap()
-
-  val role = new Stack.Role("Server Admission Controller")
+  val role = Stack.Role("Server Admission Controller")
 
   /**
    * The class is eligible for enabling admission control filters in the server Stack.
@@ -63,53 +57,14 @@ private[twitter] object ServerAdmissionControl {
   }
 
   /**
-   * A collection of filters that overrides those in the global registry
+   * A collection of filter factories that will be used for admission control.
    *
-   * This is primarily useful for testing.
+   * Entries are keyed via name to prevent duplicate filters being inserted.
    */
-  private[finagle] case class Filters(overrides: Option[Seq[ServerParams => TypeAgnostic]])
-  private[finagle] object Filters {
-    implicit val param: Stack.Param[Filters] = Stack.Param(Filters(None))
+  final case class Filters(filters: Map[String, ServerParams => TypeAgnostic])
+  object Filters {
+    implicit val param: Stack.Param[Filters] = Stack.Param(Filters(Map.empty))
   }
-
-  /**
-   * Add a function that takes ServerParams and generates a filter. This allows
-   * for customization of the filter for different server stacks.
-   */
-  def register(name: String, mkFilter: ServerParams => TypeAgnostic): Unit = {
-    acs.putIfAbsent(name, mkFilter)
-  }
-
-  /**
-   * Add a filter to the list of admission control filters. If a controller
-   * with the same name already exists in the map, it's a no-op. It must
-   * be called before the server construction to take effect.
-   */
-  def register(name: String, filter: TypeAgnostic): Unit =
-    acs.putIfAbsent(name, _ => filter)
-
-  /**
-   * Add multiple filters to the list of admission control filters. If a controller
-   * with the same name already exists in the map, it's a no-op. It must
-   * be called before the server construction to take effect.
-   */
-  def register(pairs: (String, TypeAgnostic)*): Unit =
-    pairs.foreach {
-      case (name, filter) =>
-        acs.putIfAbsent(name, _ => filter)
-    }
-
-  /**
-   * Remove a filter from the list of admission control filters. If the map
-   * does not contain a controller with the name, it's a no-op. It must
-   * be called before the server construction to take effect.
-   */
-  def unregister(name: String): Unit = acs.remove(name)
-
-  /**
-   * Clear all filters from the list of admission control filters.
-   */
-  def unregisterAll(): Unit = acs.clear()
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = {
     new Stack.Module4[Param, ProtocolLibrary, param.Stats, Filters, ServiceFactory[Req, Rep]] {
@@ -117,20 +72,16 @@ private[twitter] object ServerAdmissionControl {
       val description = "Proactively reject requests when the server operates beyond its capacity"
 
       def make(
-        _enabled: Param,
+        _enabled: ServerAdmissionControl.Param,
         protoLib: ProtocolLibrary,
         stats: param.Stats,
-        overrides: Filters,
+        acFilters: Filters,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
-        val Param(enabled) = _enabled
-        val ProtocolLibrary(protoString) = protoLib
+        val enabled = _enabled.serverAdmissionControlEnabled
+        val protoString = protoLib.name
         val conf = ServerParams(protoString)
-
-        val filters = overrides.overrides match {
-          case Some(filters) => filters
-          case None => acs.values.asScala
-        }
+        val filters = acFilters.filters.values
 
         if (!enabled || filters.isEmpty) {
           next

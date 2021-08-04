@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger
 // See the `sample()` method for the theory of operation
 private[finagle] object OffloadFilterAdmissionControl {
 
+  private val AcFilterName: String = "offload_ac"
+
   private[this] final class AcFilter(ac: OffloadFilterAdmissionControl, stats: StatsReceiver)
       extends Filter.TypeAgnostic {
 
@@ -78,8 +80,9 @@ private[finagle] object OffloadFilterAdmissionControl {
     pool match {
       case p: OffloadFuturePool if acEnabled && p.admissionControl.isDefined =>
         val stats = params[Stats].statsReceiver.scope("admission_control", "offload_based")
+        val existingFilters = params[ServerAdmissionControl.Filters].filters
         params + ServerAdmissionControl.Filters(
-          Some(Seq(_ => new AcFilter(p.admissionControl.get, stats))))
+          existingFilters + (AcFilterName -> (_ => new AcFilter(p.admissionControl.get, stats))))
 
       case _ => params
     }

@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import scala.annotation.{implicitNotFound, tailrec}
-import scala.collection.{mutable, immutable}
+import scala.collection.{immutable, mutable}
 
 /**
  * Stacks represent stackable elements of type T. It is assumed that
@@ -295,7 +295,20 @@ object Stack {
     def parameters: Seq[Stack.Param[_]]
   }
 
+  object Head {
+
+    /**
+     * Construct a basic `Head` instance from a `Role`
+     */
+    def apply(_role: Stack.Role): Stack.Head = new Head {
+      def role: Role = _role
+      def description: String = role.toString
+      def parameters: Seq[Param[_]] = Nil
+    }
+  }
+
   private case class Leaf[T](head: Stack.Head, t: T) extends Stack[T]
+
   private case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T])
       extends Stack[T]
 
@@ -321,14 +334,7 @@ object Stack {
    * If only a role is given when constructing a leaf, then the head
    * is created automatically
    */
-  def leaf[T](_role: Stack.Role, t: T): Stack[T] = {
-    val head = new Stack.Head {
-      val role: Stack.Role = _role
-      val description: String = _role.toString
-      val parameters: Seq[Stack.Param[_]] = Nil
-    }
-    Leaf(head, t)
-  }
+  def leaf[T](role: Stack.Role, t: T): Stack[T] = leaf(Head(role), t)
 
   /**
    * A typeclass representing P-typed elements, eligible as
@@ -736,6 +742,22 @@ object Stack {
           ),
         next
       )
+  }
+
+  /**
+   * Add an element to the `Stack` that will transform the parameters at that
+   * specific position.
+   */
+  trait TransformParams[T] extends Stackable[T] {
+
+    /**
+     * Transform the provided params for the remaining elements of the `Stack`
+     * to consume.
+     */
+    def transform(params: Stack.Params): Stack.Params
+
+    def toStack(next: Stack[T]): Stack[T] =
+      Node(this, (prms, next) => Stack.leaf(role, next.make(transform(prms))), next)
   }
 }
 

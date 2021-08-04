@@ -2078,7 +2078,7 @@ abstract class AbstractEndToEndTest
       }
 
       val server = serverImpl()
-        .configured(ServerAdmissionControl.Filters(Some(Seq(_ => filter))))
+        .configured(ServerAdmissionControl.Filters(Map("server_ac" -> (_ => filter))))
         .serve("localhost:*", svc)
 
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
@@ -2125,7 +2125,7 @@ abstract class AbstractEndToEndTest
       }
 
       val server = serverImpl()
-        .configured(ServerAdmissionControl.Filters(Some(Seq(_ => filter))))
+        .configured(ServerAdmissionControl.Filters(Map("server_ac" -> (_ => filter))))
         .serve("localhost:*", svc)
 
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]

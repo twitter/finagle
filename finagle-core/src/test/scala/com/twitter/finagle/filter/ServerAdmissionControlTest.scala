@@ -4,6 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.filter.ServerAdmissionControl.ServerParams
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.util.{Await, Future}
@@ -12,45 +13,45 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
 class ServerAdmissionControlTest extends AnyFunSuite with MockitoSugar {
+
   class Ctx {
     val a = new AtomicInteger(1)
 
-    class AdditionFilter[Req, Rep](delta: Int) extends SimpleFilter[Req, Rep] {
-      def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-        a.addAndGet(delta)
-        service(req)
+    class AdditionFilter(delta: Int) extends TypeAgnostic {
+      val name = s"multiple $delta"
+
+      override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
+
+        def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
+          a.addAndGet(delta)
+          service(req)
+        }
       }
     }
 
-    object Addition2Filter {
-      val name = "multiple 2"
-
-      val typeAgnostic: TypeAgnostic =
-        new TypeAgnostic {
-          override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-            new AdditionFilter(2)
+    def injectFilter(filter: AdditionFilter): Stackable[ServiceFactory[Int, Int]] =
+      new Stack.TransformParams[ServiceFactory[Int, Int]] {
+        private val head = Stack.Head(Stack.Role("addAc"))
+        def transform(params: Stack.Params): Stack.Params = {
+          val j: ServerParams => TypeAgnostic = _ => filter
+          val nextFilters =
+            params[ServerAdmissionControl.Filters].filters + (filter.name -> j)
+          params + ServerAdmissionControl.Filters(nextFilters)
         }
-    }
 
-    object Addition3Filter {
-      val name = "multiple 3"
+        def role: Stack.Role = head.role
 
-      val typeAgnostic: TypeAgnostic =
-        new TypeAgnostic {
-          override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-            new AdditionFilter(3)
-        }
-    }
+        def description: String = head.description
 
-    ServerAdmissionControl.unregisterAll()
+        def parameters: Seq[Stack.Param[_]] = head.parameters
+      }
 
     val echo = ServiceFactory.const(Service.mk[Int, Int](v => Future.value(v)))
-    val stack = StackServer.newStack[Int, Int] ++ Stack.leaf(Endpoint, echo)
-
-    ServerAdmissionControl.register(
-      Addition2Filter.name,
-      Addition2Filter.typeAgnostic
-    )
+    val stack = StackServer
+      .newStack[Int, Int].insertBefore(
+        ServerAdmissionControl.role,
+        injectFilter(new AdditionFilter(2))) ++
+      Stack.leaf(Endpoint, echo)
   }
 
   test("register a controller") {
@@ -77,29 +78,14 @@ class ServerAdmissionControlTest extends AnyFunSuite with MockitoSugar {
     assert(a.get == 1)
   }
 
-  test("unregister a controller") {
-    val ctx = new Ctx
-    import ctx._
-
-    ServerAdmissionControl.unregister(Addition2Filter.name)
-
-    val factory = stack.make(StackServer.defaultParams)
-    val svc = Await.result(factory(), 5.seconds)
-
-    assert(Await.result(svc(1), 5.seconds) == 1)
-    assert(a.get == 1)
-  }
-
   test("register multiple controller") {
     val ctx = new Ctx
     import ctx._
 
-    ServerAdmissionControl.register(
-      (Addition2Filter.name, Addition2Filter.typeAgnostic),
-      (Addition3Filter.name, Addition3Filter.typeAgnostic)
-    )
+    val factory = stack
+      .insertBefore(ServerAdmissionControl.role, injectFilter(new AdditionFilter(3)))
+      .make(StackServer.defaultParams)
 
-    val factory = stack.make(StackServer.defaultParams)
     val svc = Await.result(factory(), 5.seconds)
 
     assert(Await.result(svc(1), 5.seconds) == 1)
@@ -110,12 +96,10 @@ class ServerAdmissionControlTest extends AnyFunSuite with MockitoSugar {
     val ctx = new Ctx
     import ctx._
 
-    ServerAdmissionControl.register(
-      Addition2Filter.name,
-      Addition2Filter.typeAgnostic
-    )
+    val factory = stack
+      .insertBefore(ServerAdmissionControl.role, injectFilter(new AdditionFilter(2))).make(
+        StackServer.defaultParams)
 
-    val factory = stack.make(StackServer.defaultParams)
     val svc = Await.result(factory(), 5.seconds)
     assert(Await.result(svc(1), 5.seconds) == 1)
     assert(a.get == 3)
