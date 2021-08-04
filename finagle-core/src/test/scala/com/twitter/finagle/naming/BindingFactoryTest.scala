@@ -8,6 +8,7 @@ import com.twitter.finagle.loadbalancer.{Balancers, EndpointFactory, LoadBalance
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats._
+import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, ExpressionSchemaKey}
 import com.twitter.finagle.tracing.{Annotation, NullTracer, Record, Trace, TraceId, Tracer}
 import com.twitter.util._
 import org.mockito.ArgumentCaptor
@@ -414,6 +415,44 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
     assert(stats.stats(Seq("bar")) == Seq(1))
     assert(stats.schemas(Seq("baz")).processPath.get == "/$/inet/1")
     assert(stats.gauges(Seq("baz"))() == 0)
+  }
+
+  test("BindingFactory.Module: augments metrics expressions with path info") {
+    val unbound = Name.Path(Path.read("/foo"))
+    val baseDtab = () => Dtab.base ++ Dtab.read("/foo => /$/inet/1")
+    val stats = new InMemoryStatsReceiver()
+
+    val verifyModule =
+      new Stack.Module1[Stats, ServiceFactory[String, String]] {
+        val role = Stack.Role("verifyModule")
+        val description = "Verify that the stats were modified properly"
+
+        def make(statsParam: Stats, next: ServiceFactory[String, String]) = {
+          val Stats(stats) = statsParam
+          val fooCounter = stats.counter("foo")
+          fooCounter.incr()
+          stats.stat("bar").add(1)
+          stats.addGauge("baz") { 0 }
+          val schema = ExpressionSchema("foobar", Expression(fooCounter.metadata))
+          stats.registerExpression(schema)
+          ServiceFactory.const(Service.mk[String, String](Future.value))
+        }
+      }
+
+    val params =
+      Stack.Params.empty + BindingFactory.Dest(unbound) + BindingFactory.BaseDtab(baseDtab) +
+        Stats(stats)
+
+    val factory = new StackBuilder[ServiceFactory[String, String]](nilStack[String, String])
+      .push(verifyModule)
+      .push(BindingFactory.module[String, String])
+      .make(params)
+
+    val service = await(factory())
+    await(service("foo"))
+    assert(
+      stats.expressions.contains(
+        ExpressionSchemaKey("foobar", Map(ExpressionSchema.ProcessPath -> "/$/inet/1"), Nil)))
   }
 
   test("BindingFactory.Module: DisplayNameBound allows configuring how a bound name is shown") {

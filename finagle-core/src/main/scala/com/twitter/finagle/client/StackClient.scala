@@ -500,10 +500,11 @@ object StackClient {
   /**
    * The default params used for client stacks.
    */
-  val defaultParams: Stack.Params =
+  def defaultParams: Stack.Params =
     Stack.Params.empty +
       Stats(ClientStatsReceiver) +
-      LoadBalancerFactory.HostStats(LoadedHostStatsReceiver)
+      LoadBalancerFactory.HostStats(LoadedHostStatsReceiver) +
+      MetricBuilders(Some(new MetricBuilderRegistry()))
 
   /**
    * A set of StackTransformers for transforming client stacks.

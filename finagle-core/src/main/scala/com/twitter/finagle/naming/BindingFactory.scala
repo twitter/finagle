@@ -7,6 +7,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.param
 import com.twitter.finagle.stats._
+import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.{CachedHashCode, Showable}
 import com.twitter.logging.Logger
@@ -265,6 +266,8 @@ object BindingFactory {
             stats.counter(metricBuilder.withIdentifier(Some(displayed)))
           override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge =
             stats.addGauge(metricBuilder.withIdentifier(Some(displayed)))(f)
+          override protected[finagle] def registerExpression(expr: ExpressionSchema): Unit =
+            super.registerExpression(expr.withLabel(ExpressionSchema.ProcessPath, displayed))
         }
 
         val updatedParams =
