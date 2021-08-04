@@ -123,6 +123,18 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
   }
 
   /**
+   * Configures SNI hostname for SSL
+   *
+   * @see [[https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/SNIHostName.html Java's
+   * SNIHostName]] for more details.
+   */
+
+  def sni(hostname: String): A = {
+    self
+      .configured(Transport.ClientSsl(Some(SslClientConfiguration(sniHostName = Some(hostname)))))
+  }
+
+  /**
    * Enables TCP tunneling via `HTTP CONNECT` through an HTTP proxy [1] on this client
    * (default: disabled).
    *

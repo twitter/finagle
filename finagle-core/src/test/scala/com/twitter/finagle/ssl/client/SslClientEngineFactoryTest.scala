@@ -3,7 +3,7 @@ package com.twitter.finagle.ssl.client
 import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.{CipherSuites, Engine, Protocols}
 import java.net.InetSocketAddress
-import javax.net.ssl.SSLContext
+import javax.net.ssl.{SNIHostName, SSLContext}
 import org.scalatest.funsuite.AnyFunSuite
 
 class SslClientEngineFactoryTest extends AnyFunSuite {
@@ -87,4 +87,13 @@ class SslClientEngineFactoryTest extends AnyFunSuite {
     assert(sslEngine.getPeerPort() == -1)
   }
 
+  test("If sniHostNames are included, MtlsClientParams should use them") {
+    val sniTestName = "somehost:1234"
+    val sniHostName = new SNIHostName(sniTestName.getBytes)
+    val config = SslClientConfiguration(None, Some(sniTestName))
+    val testengine = createTestEngine()
+    SslClientEngineFactory.configureEngine(testengine, config)
+
+    assert(testengine.self.getSSLParameters.getServerNames.get(0).equals(sniHostName))
+  }
 }

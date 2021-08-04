@@ -72,6 +72,7 @@ public final class HttpClientTest {
           .withAdmissionControl().maxPendingRequests(100)
           .withSessionQualifier().noFailFast()
           .withTls("foo.com")
+          .withSni("somehost:1234")
           .configured(new Label("test").mk())
           .withDecompression(true)
           .withHttp2();

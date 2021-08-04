@@ -17,6 +17,9 @@ New Features
   need for extra boilerplate to convert the destination String to a `c.t.finagle.Name` when
   specifying both `dest` and `label` in String form. ``PHAB_ID=D706140``
 
+* finagle-http, finagle-thriftmux: introduce client.withSni() API. Use this api to specify an
+  SNI hostname for TLS clients. ``PHAB_ID=D712652`` 
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

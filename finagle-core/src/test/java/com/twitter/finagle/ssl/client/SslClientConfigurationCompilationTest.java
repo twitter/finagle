@@ -21,6 +21,7 @@ public class SslClientConfigurationCompilationTest {
 
     SslClientConfiguration config = new SslClientConfiguration(
       hostname,
+      hostname,
       KeyCredentialsConfig.UNSPECIFIED,
       TrustCredentialsConfig.UNSPECIFIED,
       CipherSuitesConfig.UNSPECIFIED,

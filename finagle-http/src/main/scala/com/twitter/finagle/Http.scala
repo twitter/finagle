@@ -180,6 +180,14 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     def withTlsWithoutValidation: Client = withTransport.tlsWithoutValidation
 
     /**
+     * Configures the sni hostname for SSL.
+     *
+     * @see [[https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/SNIHostName.html Java's
+     * SNIHostName]] for more details.
+     */
+    def withSni(hostname: String): Client = withTransport.sni(hostname)
+
+    /**
      * For HTTP1*, configures the max size of headers
      * For HTTP2, sets the MAX_HEADER_LIST_SIZE setting which is the maximum
      * number of uncompressed bytes of header name/values.

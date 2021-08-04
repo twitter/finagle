@@ -10,6 +10,7 @@ import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.service._
+import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift.{
   ClientId,
@@ -22,6 +23,7 @@ import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.transport.Transport.ClientSsl
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
@@ -2250,6 +2252,17 @@ class EndToEndTest
       inquiryMethodMetadata.asCurrent {
         assertMethod(TestService.Inquiry)
       }
+    }
+  }
+
+  test("with sni hostname") {
+    val hostname = "somehost:1234"
+    val client = ThriftMux.client.withTransport.sni(hostname)
+    val ssl = client.params[ClientSsl].sslClientConfiguration
+    ssl match {
+      case Some(s: SslClientConfiguration) =>
+        assert(s.sniHostName.get == hostname)
+      case _ => // no-op
     }
   }
 }

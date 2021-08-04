@@ -3,6 +3,8 @@ package com.twitter.finagle
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.http.{ClientEndpointer, Request, Response, serverErrorsAsFailures}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.transport.Transport.ClientSsl
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Duration, Future, Return}
 import java.net.InetSocketAddress
@@ -35,6 +37,7 @@ class HttpTest extends AnyFunSuite with Eventually {
     import com.twitter.finagle.http.{Status => HStatus}
 
     def rep(code: HStatus): Response = Response(code)
+
     def reqRep(rep: Response): ReqRep = ReqRep(Request("/index.cgi"), Return(rep))
 
     val rc = Http.responseClassifierParam.responseClassifier
@@ -58,6 +61,7 @@ class HttpTest extends AnyFunSuite with Eventually {
     import com.twitter.finagle.http.{Status => HStatus}
 
     def rep(code: HStatus): Response = Response(code)
+
     def reqRep(rep: Response): ReqRep = ReqRep(Request("/index.cgi"), Return(rep))
 
     val rc = Http.responseClassifierParam.responseClassifier
@@ -136,5 +140,16 @@ class HttpTest extends AnyFunSuite with Eventually {
 
     assert(transporter == ClientEndpointer.HttpEndpointer)
     assert(listener(Stack.Params.empty).toString == "Netty4Listener")
+  }
+
+  test("If sniHostNames are included, MtlsClientParams should use them") {
+    val hostname = "somehost:1234"
+    val client = Http.client.withSni(hostname)
+    val ssl = client.params[ClientSsl].sslClientConfiguration
+    ssl match {
+      case Some(s: SslClientConfiguration) =>
+        assert(s.sniHostName.get == hostname)
+      case _ => // no-op
+    }
   }
 }

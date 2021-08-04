@@ -3,7 +3,9 @@ package com.twitter.finagle.ssl.client
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.ssl._
 import java.net.InetSocketAddress
-import javax.net.ssl.SSLContext
+import java.nio.charset.StandardCharsets
+import java.util.Collections
+import javax.net.ssl.{SNIHostName, SSLContext, SSLParameters}
 
 /**
  * Instances of this class provide a method to create Finagle
@@ -54,6 +56,19 @@ object SslClientEngineFactory {
     // Use true here to ensure that this engine is seen as a client engine.
     // This matters for handshaking.
     sslEngine.setUseClientMode(true)
+
+    config.sniHostName match {
+      case Some(sni) =>
+        //SSL Parameters to set SNI TLS Extension
+        val sslParameters = new SSLParameters()
+        sslParameters.setServerNames(
+          Collections.singletonList(
+            new SNIHostName(sni.getBytes(StandardCharsets.UTF_8))
+          )
+        )
+        sslEngine.setSSLParameters(sslParameters)
+      case _ => // no-op
+    }
 
     SslConfigurations.configureProtocols(sslEngine, config.protocols)
     SslConfigurations.configureCipherSuites(sslEngine, config.cipherSuites)

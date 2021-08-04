@@ -30,6 +30,7 @@ import com.twitter.finagle.ssl.{
  */
 case class SslClientConfiguration(
   hostname: Option[String] = None,
+  sniHostName: Option[String] = None,
   keyCredentials: KeyCredentials = KeyCredentials.Unspecified,
   trustCredentials: TrustCredentials = TrustCredentials.Unspecified,
   cipherSuites: CipherSuites = CipherSuites.Unspecified,
