@@ -27,6 +27,9 @@ Runtime Behavior Changes
 
 * finagle: Update ScalaCheck to version 1.15.4 ``PHAB_ID=D691691``
 
+* finagle-core: change ServiceClosedException to extend FailureFlags and to be
+  universally retryable ``PHAB_ID=710580``
+
 * finagle-http: remove the `com.twitter.finagle.http.UseH2`,
   `com.twitter.finagle.http.UseH2CClients2`, `com.twitter.finagle.http.UseH2CServers` and
   `com.twitter.finagle.http.UseHttp2MultiplexCodecClient` toggles. The configuration for

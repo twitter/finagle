@@ -553,7 +553,20 @@ trait ServiceException extends Exception with SourcedException
  * Indicates that a request was applied to a [[com.twitter.finagle.Service]]
  * that is closed (i.e. the connection is closed).
  */
-class ServiceClosedException extends ServiceException
+class ServiceClosedException(val flags: Long = FailureFlags.Retryable)
+    extends ServiceException
+    with FailureFlags[ServiceClosedException] {
+
+  protected def copyWithFlags(newFlags: Long): ServiceClosedException =
+    new ServiceClosedException(newFlags)
+
+  override def exceptionMessage(): String = {
+    if (isFlagged(FailureFlags.Retryable))
+      "The connection was closed, probably by a remote peer. This exception is typically safe to be retried, and Finagle's built-in retry mechanism would have tried hard to continue making your request. Since it was unable to, this may indicate that your remote peer is unhealthy or under heavy load."
+    else
+      "The service was closed, but we didn't think it was retryable. This may indicate that the service was closed by us, typically because we think the remote peer is no longer in the cluster or we're trying to shut down the client entirely."
+  }
+}
 
 /**
  * Indicates that this service was closed and returned to the underlying pool.

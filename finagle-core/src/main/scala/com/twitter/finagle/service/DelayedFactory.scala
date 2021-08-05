@@ -49,7 +49,8 @@ class DelayedFactory[Req, Rep](underlyingF: Future[ServiceFactory[Req, Rep]])
     if (underlyingF.isDefined) wrapped flatMap { svc => svc.close(deadline) }
     else {
       underlyingF.onSuccess(_.close(deadline))
-      val exc = new ServiceClosedException
+      // It may be unsafe to pass as retryable so unset retryable flag
+      val exc = (new ServiceClosedException).unflagged(FailureFlags.Retryable)
       underlyingF.raise(exc)
       for (p <- q.asScala)
         p.raise(exc)
