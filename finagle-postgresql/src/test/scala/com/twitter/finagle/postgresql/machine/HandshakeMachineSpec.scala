@@ -2,7 +2,6 @@ package com.twitter.finagle.postgresql.machine
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationKerberosV5
@@ -22,20 +21,23 @@ import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.io.Buf
 import com.twitter.util.Return
-import org.specs2.matcher.MatchResult
+import org.scalatest.Assertion
 
 class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] with PropertiesSpec {
 
   val checkStartup = checkResult("start is a startup message") {
-    case Transition(_, Send(s)) => s must beAnInstanceOf[FrontendMessage.StartupMessage]
+    case Transition(_, Send(s)) => s mustBe a[FrontendMessage.StartupMessage]
   }
   val checkAuthSuccess = checkResult("expects more messages") {
     // the state machine should expect more messages
-    case Transition(_, action) => action must not(beAnInstanceOf[Respond[_]])
+    case Transition(_, action) => action must not be an[Respond[_]]
   }
 
   def mkMachine(username: String, password: Option[String], dbName: String): HandshakeMachine =
-    HandshakeMachine(Params.Credentials(username = username, password = password), Params.Database(Some(dbName)))
+    HandshakeMachine(
+      Params.Credentials(username = username, password = password),
+      Params.Database(Some(dbName)))
+
   def mkMachine: HandshakeMachine = mkMachine("username", None, "database")
 
   "HandshakeMachine Authentication" should {
@@ -44,8 +46,8 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
       machineSpec(machine) {
         checkResult("start is a startup message") {
           case Transition(_, Send(s: FrontendMessage.StartupMessage)) =>
-            s.user must_== username
-            s.database must beSome(dbName)
+            s.user must be(username)
+            s.database must be(Some(dbName))
         }
       }
     }
@@ -63,7 +65,7 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
         checkStartup,
         receive(BackendMessage.AuthenticationCleartextPassword),
         checkFailure("complete with failure") { ex =>
-          ex must beEqualTo(PgSqlPasswordRequired)
+          ex must be(PgSqlPasswordRequired)
         }
       )
     }
@@ -73,12 +75,19 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
         checkStartup,
         receive(BackendMessage.AuthenticationMD5Password(Buf.Empty)),
         checkFailure("complete with failure") { ex =>
-          ex must beEqualTo(PgSqlPasswordRequired)
+          ex must be(PgSqlPasswordRequired)
         }
       )
     }
 
-    def passwordAuthSpec(username: String, password: String)(f: => BackendMessage)(check: String => MatchResult[_]) =
+    def passwordAuthSpec(
+      username: String,
+      password: String
+    )(
+      f: => BackendMessage
+    )(
+      check: String => Assertion
+    ) =
       machineSpec(mkMachine(username, Some(password), "database"))(
         checkStartup,
         receive(f),
@@ -90,46 +99,47 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
       )
 
     "support clear text password authentication" in prop { (username: String, password: String) =>
-      passwordAuthSpec(username, password)(BackendMessage.AuthenticationCleartextPassword)(_ must_== password)
+      passwordAuthSpec(username, password)(BackendMessage.AuthenticationCleartextPassword)(
+        _ must be(password))
     }
 
     def hex(input: Array[Byte]) = input.map(s => f"$s%02x").mkString
     def bytes(str: String) = str.getBytes(StandardCharsets.UTF_8)
     def md5(input: Array[Byte]*): String =
-      hex(input.foldLeft(MessageDigest.getInstance("MD5")) { case (d, v) => d.update(v); d }.digest())
+      hex(
+        input.foldLeft(MessageDigest.getInstance("MD5")) { case (d, v) => d.update(v); d }.digest())
 
-    "support md5 password authentication" in prop { (username: String, password: String, salt: Array[Byte]) =>
-      passwordAuthSpec(username, password)(BackendMessage.AuthenticationMD5Password(Buf.ByteArray.Owned(salt))) {
-        hashed =>
+    "support md5 password authentication" in prop {
+      (username: String, password: String, salt: Array[Byte]) =>
+        passwordAuthSpec(username, password)(
+          BackendMessage.AuthenticationMD5Password(Buf.ByteArray.Owned(salt))) { hashed =>
           val expectedHash = md5(bytes(md5(bytes(password), bytes(username))), salt)
-          hashed must_== s"md5$expectedHash"
-      }
+          hashed must be(s"md5$expectedHash")
+        }
     }
 
-    fragments {
-      List(
-        AuthenticationGSS,
-        AuthenticationKerberosV5,
-        AuthenticationSCMCredential,
-        AuthenticationSSPI,
-        AuthenticationSASL("bogus")
-      )
-        .map { method =>
-          s"fails with unsupported authentication method for $method" in {
-            machineSpec(mkMachine("username", Some("password"), "database"))(
-              checkStartup,
-              receive(method),
-              checkFailure("complete with failure") { ex =>
-                ex must beEqualTo(PgSqlUnsupportedAuthenticationMechanism(method))
-              }
-            )
+    List(
+      AuthenticationGSS,
+      AuthenticationKerberosV5,
+      AuthenticationSCMCredential,
+      AuthenticationSSPI,
+      AuthenticationSASL("bogus")
+    ).foreach { method =>
+      registerTest(s"fails with unsupported authentication method for $method") {
+        machineSpec(mkMachine("username", Some("password"), "database"))(
+          checkStartup,
+          receive(method),
+          checkFailure("complete with failure") { ex =>
+            ex must be(PgSqlUnsupportedAuthenticationMechanism(method))
           }
-        }
+        )
+      }
     }
   }
 
   "HandshakeMachine Startup" should {
-    val authSuccess = checkStartup :: receive(BackendMessage.AuthenticationOk) :: checkAuthSuccess :: Nil
+    val authSuccess =
+      checkStartup :: receive(BackendMessage.AuthenticationOk) :: checkAuthSuccess :: Nil
 
     "accumulate backend parameters" in prop {
       (parameters: List[BackendMessage.ParameterStatus], bkd: BackendMessage.BackendKeyData) =>
@@ -141,8 +151,8 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
           receive(BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
           checkResult("responds success") {
             case Complete(_, Some(Return(result))) =>
-              result.parameters must containTheSameElementsAs(parameters)
-              result.backendData must beSome(bkd)
+              result.parameters must contain theSameElementsAs (parameters)
+              result.backendData must be(Some(bkd))
           }
         )
 
@@ -158,8 +168,8 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
           receive(BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
           checkResult("responds success") {
             case Complete(_, Some(Return(result))) =>
-              result.parameters must beEmpty
-              result.backendData must beNone
+              result.parameters mustBe empty
+              result.backendData mustBe None
           }
         ): _*
       )
@@ -167,9 +177,9 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
 
     "fail when no transition exist" in {
       val machine = mkMachine
-      machine.receive(machine.Authenticating, BackendMessage.PortalSuspended) must throwA[PgSqlNoSuchTransition](
-        "HandshakeMachine"
-      )
+      an[PgSqlNoSuchTransition] must be thrownBy machine.receive(
+        machine.Authenticating,
+        BackendMessage.PortalSuspended)
     }
   }
 }

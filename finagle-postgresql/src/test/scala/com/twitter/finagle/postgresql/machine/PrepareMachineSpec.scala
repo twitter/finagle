@@ -1,6 +1,12 @@
 package com.twitter.finagle.postgresql.machine
 
-import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.{
+  BackendMessage,
+  FrontendMessage,
+  PgSqlNoSuchTransition,
+  PropertiesSpec,
+  Response
+}
 import com.twitter.finagle.postgresql.BackendMessage.NoData
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.ParameterDescription
@@ -11,9 +17,6 @@ import com.twitter.finagle.postgresql.FrontendMessage.Describe
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.FrontendMessage.Parse
 import com.twitter.finagle.postgresql.FrontendMessage.Sync
-import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
-import com.twitter.finagle.postgresql.PropertiesSpec
-import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
@@ -28,17 +31,17 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
   def checkStartup(name: Name, query: String): StepSpec =
     checkResult("start is several messages") {
       case Transition(_, SendSeveral(msgs)) =>
-        msgs.toList must beLike {
+        msgs.toList must beLike[List[Send[_ <: FrontendMessage]]] {
           case a :: b :: c :: Nil =>
-            a must beEqualTo(Send(Parse(name, query, Nil)))
-            b must beEqualTo(Send(Describe(name, DescriptionTarget.PreparedStatement)))
-            c must beEqualTo(Send(Sync))
+            a must be(Send(Parse(name, query, Nil)))
+            b must be(Send(Describe(name, DescriptionTarget.PreparedStatement)))
+            c must be(Send(Sync))
         }
     }
 
   def checkNoOp(name: String): StepSpec =
     checkResult(name) {
-      case Transition(_, NoOp) => ok
+      case Transition(_, NoOp) => succeed
     }
 
   def mkMachine(name: Name, q: String): PrepareMachine = new PrepareMachine(name, q)
@@ -51,7 +54,12 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
       }
     }
 
-    def nominalSpec(name: Name, query: String, parametersTypes: IndexedSeq[Oid], describeMessage: BackendMessage) =
+    def nominalSpec(
+      name: Name,
+      query: String,
+      parametersTypes: IndexedSeq[Oid],
+      describeMessage: BackendMessage
+    ) =
       machineSpec(mkMachine(name, query))(
         checkStartup(name, query),
         receive(ParseComplete),
@@ -63,8 +71,8 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
         receive(ReadyForQuery(NoTx)),
         checkResult("handles ReadyForQuery") {
           case Complete(_, Some(Return(Response.ParseComplete(prepared)))) =>
-            prepared.name must beEqualTo(name)
-            prepared.parameterTypes must beEqualTo(parametersTypes)
+            prepared.name must be(name)
+            prepared.parameterTypes must be(parametersTypes)
         }
       )
 
@@ -73,15 +81,16 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
         nominalSpec(name, query, parametersTypes, desc)
     }
 
-    "support NoData describe response" in prop { (name: Name, query: String, parametersTypes: IndexedSeq[Oid]) =>
-      nominalSpec(name, query, parametersTypes, NoData)
+    "support NoData describe response" in prop {
+      (name: Name, query: String, parametersTypes: IndexedSeq[Oid]) =>
+        nominalSpec(name, query, parametersTypes, NoData)
     }
 
     "fail when no transition exist" in {
       val machine = mkMachine(Name.Unnamed, "bogus")
-      machine.receive(machine.Parsing, BackendMessage.PortalSuspended) must throwA[PgSqlNoSuchTransition](
-        "PrepareMachine"
-      )
+      an[PgSqlNoSuchTransition] must be thrownBy machine.receive(
+        machine.Parsing,
+        BackendMessage.PortalSuspended)
     }
   }
 }

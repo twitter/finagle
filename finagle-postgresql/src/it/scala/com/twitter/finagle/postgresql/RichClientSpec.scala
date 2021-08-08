@@ -10,7 +10,8 @@ class RichClientSpec extends PgSqlIntegrationSpec {
   "Rich client" should {
 
     "support multi-line queries" in withRichClient() { client =>
-      Reader.toAsyncStream(client.multiQuery("select 1;select 2;"))
+      Reader
+        .toAsyncStream(client.multiQuery("select 1;select 2;"))
         .mapF(s => Client.Expect.ResultSet(s))
         .mapF(s => s.toSeq)
         .toSeq()
@@ -71,7 +72,7 @@ class RichClientSpec extends PgSqlIntegrationSpec {
         .read(Parameter(true) :: Parameter(Buf.ByteArray(0, 1, 2, 3, 4)) :: Nil)
         .map { rs =>
           rs.rows must haveSize(1)
-          rs.rows.head.get[Boolean](0) must beTrue
+          rs.rows.head.get[Boolean](0) must be(true)
           rs.rows.head.get[Buf](1) must_== Buf.ByteArray(0, 1, 2, 3, 4)
         }
     }

@@ -2,7 +2,6 @@ package com.twitter.finagle.postgresql.transport
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationCleartextPassword
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSS
 import com.twitter.finagle.postgresql.BackendMessage.AuthenticationGSSContinue
@@ -45,9 +44,9 @@ import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
-import org.specs2.mutable.Specification
+import org.scalatest.wordspec.AnyWordSpec
 
-class MessageDecoderSpec extends Specification with PropertiesSpec {
+class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
 
   def mkBuf(capacity: Int = 32768)(f: ByteBuffer => ByteBuffer): Buf = {
     val bb = ByteBuffer.allocate(capacity).order(ByteOrder.BIG_ENDIAN)
@@ -91,9 +90,10 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       Gen.const(AuthenticationKerberosV5),
       Gen.const(AuthenticationCleartextPassword),
       Gen.const(AuthenticationSCMCredential),
-      Gen.containerOfN[Array, Byte](4, Arbitrary.arbitrary[Byte]).map(Buf.ByteArray.Owned(_)).map(
-        AuthenticationMD5Password
-      ),
+      Gen
+        .containerOfN[Array, Byte](4, Arbitrary.arbitrary[Byte]).map(Buf.ByteArray.Owned(_)).map(
+          AuthenticationMD5Password
+        ),
       Gen.const(AuthenticationGSS),
       Gen.const(AuthenticationSSPI),
       genBuf.map(AuthenticationGSSContinue),
@@ -101,10 +101,12 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       genBuf.map(AuthenticationSASLContinue),
       genBuf.map(AuthenticationSASLFinal),
     )
-  implicit lazy val arbAuthenticationMessage: Arbitrary[AuthenticationMessage] = Arbitrary(genAuthenticationMessage)
+  implicit lazy val arbAuthenticationMessage: Arbitrary[AuthenticationMessage] = Arbitrary(
+    genAuthenticationMessage)
 
   lazy val genTxState: Gen[TxState] = Gen.oneOf(NoTx, InTx, FailedTx)
-  implicit lazy val arbReadyForQuery: Arbitrary[ReadyForQuery] = Arbitrary(genTxState.map(ReadyForQuery))
+  implicit lazy val arbReadyForQuery: Arbitrary[ReadyForQuery] = Arbitrary(
+    genTxState.map(ReadyForQuery))
 
   implicit lazy val arbParameterDescription: Arbitrary[ParameterDescription] =
     Arbitrary(Arbitrary.arbitrary[IndexedSeq[Oid]].map(ParameterDescription))
@@ -114,10 +116,16 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
     o <- arbitrary[Format]
     formats <- Gen.listOfN(nbCols, arbitrary[Format])
   } yield (o, formats.toIndexedSeq)
-  implicit lazy val arbCopyInResponse: Arbitrary[CopyInResponse] = Arbitrary(genCopyTuple.map(CopyInResponse.tupled))
-  implicit lazy val arbCopyOutResponse: Arbitrary[CopyOutResponse] = Arbitrary(genCopyTuple.map(CopyOutResponse.tupled))
+  implicit lazy val arbCopyInResponse: Arbitrary[CopyInResponse] = Arbitrary(
+    genCopyTuple.map(CopyInResponse.tupled))
+  implicit lazy val arbCopyOutResponse: Arbitrary[CopyOutResponse] = Arbitrary(
+    genCopyTuple.map(CopyOutResponse.tupled))
 
-  def decodeFragment[M <: BackendMessage: Arbitrary](dec: MessageDecoder[M])(toPacket: M => Packet) = {
+  def decodeFragment[M <: BackendMessage: Arbitrary](
+    dec: MessageDecoder[M]
+  )(
+    toPacket: M => Packet
+  ) = {
     "decode packet body correctly" in prop { msg: M =>
       dec.decode(PgBuf.reader(toPacket(msg).body)).asScala must beSuccessfulTry(msg)
     }
@@ -134,20 +142,21 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
   "MessageDecoder" should {
     "fail when packet is not identified" in {
       val decoded = MessageDecoder.fromPacket(Packet(None, Buf.Empty))
-      decoded.get() must throwA[IllegalStateException]("invalid backend packet, missing message type.")
+      an[IllegalStateException] must be thrownBy decoded.get()
     }
 
     "fail when decoder is not implemented" in {
       val decoded = MessageDecoder.fromPacket(Packet(Some(' '), Buf.Empty))
-      decoded.get() must throwA[PgSqlClientError](s"unimplemented message ' '")
+      an[PgSqlClientError] must be thrownBy decoded.get()
     }
 
     "ErrorResponse" should decodeFragment(MessageDecoder.errorResponseDecoder) { msg =>
       Packet(
         cmd = Some('E'),
         body = mkBuf() { bb =>
-          msg.values.foreach { case (field, value) =>
-            bb.put(fieldByte(field)).put(cstring(value))
+          msg.values.foreach {
+            case (field, value) =>
+              bb.put(fieldByte(field)).put(cstring(value))
           }
           bb.put(0.toByte)
         }
@@ -158,8 +167,9 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       Packet(
         cmd = Some('N'),
         body = mkBuf() { bb =>
-          msg.values.foreach { case (field, value) =>
-            bb.put(fieldByte(field)).put(cstring(value))
+          msg.values.foreach {
+            case (field, value) =>
+              bb.put(fieldByte(field)).put(cstring(value))
           }
           bb.put(0.toByte)
         }
@@ -178,7 +188,7 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
 
     "command tag" should {
       def assert(value: String, command: CommandTag.Command, rows: Int) =
-        MessageDecoder.commandTag(value) must_== CommandTag.AffectedRows(command, rows)
+        MessageDecoder.commandTag(value) must be(CommandTag.AffectedRows(command, rows))
 
       "parse insert" in {
         assert("INSERT 0 42", CommandTag.Insert, 42)
@@ -205,7 +215,7 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
         assert("FETCH 0", CommandTag.Fetch, 0)
       }
       "parse other" in prop { str: String =>
-        MessageDecoder.commandTag(str) must_== CommandTag.Other(str)
+        MessageDecoder.commandTag(str) must be(CommandTag.Other(str))
       }
     }
 
@@ -227,25 +237,30 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       )
     }
 
-    "AuthenticationMessage" should decodeFragment(MessageDecoder.authenticationMessageDecoder) { msg =>
-      Packet(
-        cmd = Some('R'),
-        body = mkBuf() { bb =>
-          msg match {
-            case AuthenticationOk => bb.putInt(0)
-            case AuthenticationKerberosV5 => bb.putInt(2)
-            case AuthenticationCleartextPassword => bb.putInt(3)
-            case AuthenticationMD5Password(buf) => bb.putInt(5).put(Buf.ByteBuffer.Shared.extract(buf))
-            case AuthenticationSCMCredential => bb.putInt(6)
-            case AuthenticationGSS => bb.putInt(7)
-            case AuthenticationGSSContinue(buf) => bb.putInt(8).put(Buf.ByteBuffer.Shared.extract(buf))
-            case AuthenticationSSPI => bb.putInt(9)
-            case AuthenticationSASL(m) => bb.putInt(10).put(cstring(m))
-            case AuthenticationSASLContinue(buf) => bb.putInt(11).put(Buf.ByteBuffer.Shared.extract(buf))
-            case AuthenticationSASLFinal(buf) => bb.putInt(12).put(Buf.ByteBuffer.Shared.extract(buf))
+    "AuthenticationMessage" should decodeFragment(MessageDecoder.authenticationMessageDecoder) {
+      msg =>
+        Packet(
+          cmd = Some('R'),
+          body = mkBuf() { bb =>
+            msg match {
+              case AuthenticationOk => bb.putInt(0)
+              case AuthenticationKerberosV5 => bb.putInt(2)
+              case AuthenticationCleartextPassword => bb.putInt(3)
+              case AuthenticationMD5Password(buf) =>
+                bb.putInt(5).put(Buf.ByteBuffer.Shared.extract(buf))
+              case AuthenticationSCMCredential => bb.putInt(6)
+              case AuthenticationGSS => bb.putInt(7)
+              case AuthenticationGSSContinue(buf) =>
+                bb.putInt(8).put(Buf.ByteBuffer.Shared.extract(buf))
+              case AuthenticationSSPI => bb.putInt(9)
+              case AuthenticationSASL(m) => bb.putInt(10).put(cstring(m))
+              case AuthenticationSASLContinue(buf) =>
+                bb.putInt(11).put(Buf.ByteBuffer.Shared.extract(buf))
+              case AuthenticationSASLFinal(buf) =>
+                bb.putInt(12).put(Buf.ByteBuffer.Shared.extract(buf))
+            }
           }
-        }
-      )
+        )
     }
 
     "ParameterStatus" should decodeFragment(MessageDecoder.parameterStatusDecoder) { msg =>
@@ -290,23 +305,24 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
         cmd = Some('T'),
         body = mkBuf() { bb =>
           bb.putShort(msg.rowFields.size.toShort)
-          msg.rowFields.foreach { f =>
-            bb.put(cstring(f.name))
-            f.tableOid match {
-              case None => bb.putInt(0)
-              case Some(oid) => bb.putInt(unsignedInt(oid.value))
-            }
-            f.tableAttributeId match {
-              case None => bb.putShort(0)
-              case Some(AttributeId(value)) => bb.putShort(value.toShort)
-            }
-            bb.putInt(unsignedInt(f.dataType.value))
-            bb.putShort(f.dataTypeSize)
-            bb.putInt(f.typeModifier)
-            f.format match {
-              case Format.Text => bb.putShort(0)
-              case Format.Binary => bb.putShort(1)
-            }
+          msg.rowFields.foreach {
+            f =>
+              bb.put(cstring(f.name))
+              f.tableOid match {
+                case None => bb.putInt(0)
+                case Some(oid) => bb.putInt(unsignedInt(oid.value))
+              }
+              f.tableAttributeId match {
+                case None => bb.putShort(0)
+                case Some(AttributeId(value)) => bb.putShort(value.toShort)
+              }
+              bb.putInt(unsignedInt(f.dataType.value))
+              bb.putShort(f.dataTypeSize)
+              bb.putInt(f.typeModifier)
+              f.format match {
+                case Format.Text => bb.putShort(0)
+                case Format.Binary => bb.putShort(1)
+              }
           }
           bb
         }
@@ -327,15 +343,16 @@ class MessageDecoderSpec extends Specification with PropertiesSpec {
       )
     }
 
-    "ParameterDescription" should decodeFragment(MessageDecoder.parameterDescriptionDecoder) { msg =>
-      Packet(
-        cmd = Some('t'),
-        body = mkBuf() { bb =>
-          bb.putShort(msg.parameters.size.toShort)
-          msg.parameters.foreach(oid => bb.putInt(unsignedInt(oid.value)))
-          bb
-        }
-      )
+    "ParameterDescription" should decodeFragment(MessageDecoder.parameterDescriptionDecoder) {
+      msg =>
+        Packet(
+          cmd = Some('t'),
+          body = mkBuf() { bb =>
+            bb.putShort(msg.parameters.size.toShort)
+            msg.parameters.foreach(oid => bb.putInt(unsignedInt(oid.value)))
+            bb
+          }
+        )
     }
 
     "ParseComplete" should singleton('1', ParseComplete)

@@ -9,8 +9,7 @@ import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
 import com.twitter.finagle.postgresql.PgSqlServerError
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Response
-import com.twitter.finagle.postgresql.Response.ConnectionParameters
-import com.twitter.finagle.postgresql.Response.Row
+import com.twitter.finagle.postgresql.Response.{ConnectionParameters, QueryResponse, Row}
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
@@ -21,27 +20,28 @@ import com.twitter.util.Future
 import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
-import org.specs2.matcher.MatchResult
+import org.scalatest.Assertion
 
 class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
-  def mkMachine(q: String): SimpleQueryMachine = new SimpleQueryMachine(q, ConnectionParameters.empty)
+  def mkMachine(q: String): SimpleQueryMachine =
+    new SimpleQueryMachine(q, ConnectionParameters.empty)
 
   val readyForQuery = BackendMessage.ReadyForQuery(BackendMessage.NoTx)
 
   def checkQuery(q: String) =
     checkResult("sends a query message") {
       case Transition(_, Send(FrontendMessage.Query(str))) =>
-        str must_== q
+        str must be(q)
     }
 
   def checkCompletes =
     checkResult("completes") {
       case Complete(ready, response) =>
-        ready must beEqualTo(readyForQuery)
-        response must beNone
+        ready must be(readyForQuery)
+        response mustBe empty
     }
-  type QueryResponseCheck = PartialFunction[Try[Response.QueryResponse], MatchResult[_]]
+  type QueryResponseCheck = PartialFunction[Try[Response.QueryResponse], Assertion]
 
   def checkSingleResponse(f: QueryResponseCheck) =
     checkResult("captures one response") {
@@ -71,7 +71,7 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
             beLike[Response] {
               case r: Response.SimpleQueryResponse =>
                 sqr = Some(r)
-                ok
+                succeed
             }
           }
       }
@@ -87,14 +87,16 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
     machineSpec(mkMachine(query))(steps: _*)
 
     sqr match {
-      case None => Future.value(ko :: Nil)
+      case None => Future.value(fail() :: Nil)
       case Some(s) =>
-        Reader.toAsyncStream(s.responses)
+        Reader
+          .toAsyncStream(s.responses)
           .toSeq()
           .map { actual =>
             (actual zip (firstCheck :: others.map(_._2).toList))
-              .map { case (a, check) =>
-                check(Return(a))
+              .map {
+                case (a, check) =>
+                  check(Return(a))
               }
           }
     }
@@ -103,7 +105,9 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
   def singleQuerySpec(
     query: String,
     msg: BackendMessage
-  )(f: PartialFunction[Try[Response.QueryResponse], MatchResult[_]]) =
+  )(
+    f: PartialFunction[Try[Response.QueryResponse], Assertion]
+  ) =
     multiQuerySpec(query, msg -> f)
 
   "SimpleQueryMachine" should {
@@ -122,11 +126,17 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
 
     "support commands" in prop { (command: String, commandTag: CommandTag) =>
       singleQuerySpec(command, BackendMessage.CommandComplete(commandTag)) {
-        case Return(value) => value must beEqualTo(Response.Command(commandTag))
+        case Return(value) => value must be(Response.Command(commandTag))
       }
     }
 
-    def resultSetSpec(query: String, rowDesc: RowDescription, rows: List[DataRow])(f: Seq[Row] => MatchResult[_]) = {
+    def resultSetSpec(
+      query: String,
+      rowDesc: RowDescription,
+      rows: List[DataRow]
+    )(
+      f: Seq[Row] => Assertion
+    ) = {
       var rowReader: Option[Response.ResultSet] = None
 
       val prep = List(
@@ -134,10 +144,10 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
         receive(rowDesc),
         checkSingleResponse {
           case Return(value) =>
-            value must beLike {
+            value must beLike[QueryResponse] {
               case rs @ Response.ResultSet(desc, _, _) =>
                 rowReader = Some(rs)
-                desc must beEqualTo(rowDesc.rowFields)
+                desc must be(rowDesc.rowFields)
             }
         }
       )
@@ -145,65 +155,73 @@ class SimpleQueryMachineSpec extends MachineSpec[Response] with PropertiesSpec {
       val sendRows = rows.map(receive(_))
 
       val post = List(
-        receive(BackendMessage.CommandComplete(CommandTag.AffectedRows(CommandTag.Select, rows.size))),
+        receive(
+          BackendMessage.CommandComplete(CommandTag.AffectedRows(CommandTag.Select, rows.size))),
         receive(readyForQuery),
         checkCompletes
       )
 
       oneMachineSpec(mkMachine(query))(prep ++ sendRows ++ post: _*)
-      rowReader must beSome
+      rowReader mustBe defined
       rowReader.get.toSeq.map(f)
 
       rowReader = None
       // NOTE: machineErrorSpec returns a Prop which we combine with another using &&
       //   It's kind of weird, but specs2 isn't really helping here.
-      machineErrorSpec(mkMachine(query))(prep ++ sendRows ++ post: _*) && {
-        // NOTE: the randomization of the error makes it possible that:
-        //   * we read no rows at all
-        //   * we read all rows (and the error isn't surfaced)
-        //   * we read partial rows and then an exception
-        rowReader match {
-          case None => ok
-          case Some(r) =>
-            rowReader = None // TODO: the statefulness of the test is pretty brittle
-            r.toSeq.liftToTry.map {
-              case Return(rows) => f(rows) // if we read all rows, then we should check that they're what we expect
-              case Throw(t) => t must beAnInstanceOf[PgSqlServerError] // the error should surface here
-            }
-        }
+      machineErrorSpec(mkMachine(query))(prep ++ sendRows ++ post: _*)
+
+      // NOTE: the randomization of the error makes it possible that:
+      //   * we read no rows at all
+      //   * we read all rows (and the error isn't surfaced)
+      //   * we read partial rows and then an exception
+      rowReader match {
+        case None => succeed
+        case Some(r) =>
+          rowReader = None // TODO: the statefulness of the test is pretty brittle
+          r.toSeq.liftToTry.map {
+            case Return(rows) =>
+              f(rows) // if we read all rows, then we should check that they're what we expect
+            case Throw(t) => t mustBe an[PgSqlServerError] // the error should surface here
+          }
       }
+
     }
 
     "support empty result sets" in prop { rowDesc: RowDescription =>
       resultSetSpec("select 1;", rowDesc, Nil) { rows =>
-        rows must beEmpty
+        rows mustBe empty
       }
     }
 
     "return rows in order" in prop { rs: TestResultSet =>
       resultSetSpec("select 1;", rs.desc, rs.rows) { rows =>
-        rows must beEqualTo(rs.rows.map(_.values))
+        rows must be(rs.rows.map(_.values))
       }
     }
 
-    "support multiline queries" in prop { (command: String, firstTag: CommandTag, secondTag: CommandTag) =>
-      multiQuerySpec(
-        command,
-        BackendMessage.CommandComplete(firstTag) -> { case Return(value) =>
-          value must beEqualTo(Response.Command(firstTag))
-        },
-        BackendMessage.EmptyQueryResponse -> { case Return(value) => value must beEqualTo(Response.Empty) },
-        BackendMessage.CommandComplete(secondTag) -> { case Return(value) =>
-          value must beEqualTo(Response.Command(secondTag))
-        }
-      )
+    "support multiline queries" in {
+      (command: String, firstTag: CommandTag, secondTag: CommandTag) =>
+        multiQuerySpec(
+          command,
+          BackendMessage.CommandComplete(firstTag) -> {
+            case Return(value) =>
+              value must be(Response.Command(firstTag))
+          },
+          BackendMessage.EmptyQueryResponse -> {
+            case Return(value) => value must be(Response.Empty)
+          },
+          BackendMessage.CommandComplete(secondTag) -> {
+            case Return(value) =>
+              value must be(Response.Command(secondTag))
+          }
+        )
     }
 
     "fail when no transition exist" in {
       val machine = mkMachine("bogus")
-      machine.receive(machine.Sent, BackendMessage.PortalSuspended) must throwA[PgSqlNoSuchTransition](
-        "SimpleQueryMachine"
-      )
+      an[PgSqlNoSuchTransition] shouldBe thrownBy {
+        machine.receive(machine.Sent, BackendMessage.PortalSuspended)
+      }
     }
   }
 }

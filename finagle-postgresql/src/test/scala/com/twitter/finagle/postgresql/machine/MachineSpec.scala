@@ -1,24 +1,22 @@
 package com.twitter.finagle.postgresql.machine
 
-import com.twitter.finagle.postgresql.PgSqlSpec
-import com.twitter.finagle.postgresql.BackendMessage
-import com.twitter.finagle.postgresql.PgSqlClientError
-import com.twitter.finagle.postgresql.PgSqlServerError
-import com.twitter.finagle.postgresql.PropertiesSpec
-import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql._
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.util.Throw
-import org.scalacheck.Arbitrary
-import org.scalacheck.Gen
-import org.scalacheck.Prop
-import org.specs2.matcher.MatchResult
+import org.scalacheck.{Arbitrary, Gen}
+import org.scalatest.Assertion
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSpec =>
+abstract class MachineSpec[R <: Response] extends PgSqlSpec {
+  self: PropertiesSpec with ScalaCheckDrivenPropertyChecks =>
 
   sealed trait StepSpec
-  case class checkResult(name: String)(val spec: PartialFunction[StateMachine.TransitionResult[_, R], MatchResult[_]])
+  case class checkResult(
+    name: String
+  )(
+    val spec: PartialFunction[StateMachine.TransitionResult[_, R], Assertion])
       extends StepSpec
-  case class checkFailure(name: String)(val spec: Throwable => MatchResult[_]) extends StepSpec
+  case class checkFailure(name: String)(val spec: Throwable => Assertion) extends StepSpec
   case class receive(msg: BackendMessage) extends StepSpec
 
   object receive {
@@ -28,18 +26,23 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
   def oneMachineSpec(
     machine: StateMachine[R],
     allowPreemptiveFailure: Boolean = false
-  )(checks: StepSpec*): MatchResult[_] = {
-    def step(previous: StateMachine.TransitionResult[machine.State, R], remains: List[StepSpec]): MatchResult[_] =
+  )(
+    checks: StepSpec*
+  ): Assertion = {
+    def step(
+      previous: StateMachine.TransitionResult[machine.State, R],
+      remains: List[StepSpec]
+    ): Assertion =
       remains match {
-        case Nil => ok
+        case Nil => succeed
         case (c @ checkResult(name)) :: tail =>
-          previous must beLike(c.spec).updateMessage(msg => s"$name: $msg")
+          previous must beLike(c.spec) //.updateMessage(msg => s"$name: $msg")
           step(previous, tail)
         case (c @ checkFailure(name)) :: tail =>
           previous must beLike[StateMachine.TransitionResult[machine.State, R]] {
             case StateMachine.Transition(_, Respond(Throw(ex))) => c.spec(ex)
             case StateMachine.Complete(_, Some(Throw(ex))) => c.spec(ex)
-          }.updateMessage(msg => s"$name: $msg")
+          } //.updateMessage(msg => s"$name: $msg")
 
           step(previous, tail)
         case receive(msg) :: tail =>
@@ -48,7 +51,9 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
               step(machine.receive(s, msg), tail)
             // This allows inejecting backend messages in random places, which can result in
             //   inserting in a place where the machine wouldn't actually read the message.
-            case StateMachine.Complete(_, Some(Throw(_: PgSqlClientError))) if allowPreemptiveFailure => ok
+            case StateMachine.Complete(_, Some(Throw(_: PgSqlClientError)))
+                if allowPreemptiveFailure =>
+              succeed
           }
       }
 
@@ -58,7 +63,7 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
   type ErrorHandler = BackendMessage.ErrorResponse => List[StepSpec]
   protected val defaultErrorHandler: ErrorHandler = (error: BackendMessage.ErrorResponse) =>
     checkFailure("handles injected failure") {
-      case PgSqlServerError(e) => e must beEqualTo(error)
+      case PgSqlServerError(e) => e must equal(error)
     } :: Nil
 
   // Given a list of steps, insert a ErrorResponse randomly and checks that the machine handled it
@@ -80,13 +85,24 @@ abstract class MachineSpec[R <: Response] extends PgSqlSpec { self: PropertiesSp
     }
   }
 
-  def machineErrorSpec(machine: StateMachine[R], errorHandler: ErrorHandler = defaultErrorHandler)(steps: StepSpec*) =
-    Prop.forAllNoShrink(genError(steps.toList, errorHandler)) { errorSteps =>
+  def machineErrorSpec(
+    machine: StateMachine[R],
+    errorHandler: ErrorHandler = defaultErrorHandler
+  )(
+    steps: StepSpec*
+  ) = {
+    forAll(genError(steps.toList, errorHandler)) { errorSteps =>
       oneMachineSpec(machine, allowPreemptiveFailure = true)(errorSteps: _*)
     }
+  }
 
   // TODO: ideally we generate fragments here, but not sure how to do that with scalacheck
-  def machineSpec(machine: StateMachine[R], errorHandler: ErrorHandler = defaultErrorHandler)(steps: StepSpec*) = {
+  def machineSpec(
+    machine: StateMachine[R],
+    errorHandler: ErrorHandler = defaultErrorHandler
+  )(
+    steps: StepSpec*
+  ) = {
     oneMachineSpec(machine)(steps: _*)
     machineErrorSpec(machine, errorHandler)(steps: _*)
   }

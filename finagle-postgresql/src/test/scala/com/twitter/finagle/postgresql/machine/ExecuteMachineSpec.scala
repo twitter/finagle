@@ -1,6 +1,6 @@
 package com.twitter.finagle.postgresql.machine
 
-import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql._
 import com.twitter.finagle.postgresql.BackendMessage.BindComplete
 import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
 import com.twitter.finagle.postgresql.BackendMessage.CommandTag
@@ -15,11 +15,6 @@ import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.FrontendMessage.Execute
 import com.twitter.finagle.postgresql.FrontendMessage.Flush
 import com.twitter.finagle.postgresql.FrontendMessage.Sync
-import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
-import com.twitter.finagle.postgresql.PgSqlServerError
-import com.twitter.finagle.postgresql.PropertiesSpec
-import com.twitter.finagle.postgresql.Request
-import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Response.Prepared
 import com.twitter.finagle.postgresql.Types.Format
@@ -31,32 +26,35 @@ import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.SendSeveral
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
-import com.twitter.util.Await
-import com.twitter.util.Return
-import com.twitter.util.Throw
+import com.twitter.util.{Await, Return, Throw, Try}
+import org.scalatestplus.scalacheck.Checkers
 
-class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with PropertiesSpec {
+class ExecuteMachineSpec
+    extends MachineSpec[Response.QueryResponse]
+    with PropertiesSpec
+    with Checkers {
 
   def checkStartup(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): StepSpec =
     checkResult("start is several messages") {
       case Transition(_, SendSeveral(msgs)) =>
-        msgs.toList must beLike {
+        msgs.toList must beLike[Seq[Send[_ <: FrontendMessage]]] {
           case a :: b :: c :: d :: Nil =>
-            a must beEqualTo(Send(Bind(portalName, name, Format.Binary :: Nil, parameters, Format.Binary :: Nil)))
-            b must beEqualTo(Send(Describe(portalName, DescriptionTarget.Portal)))
-            c must beEqualTo(Send(Execute(portalName, 0)))
-            d must beEqualTo(Send(Flush))
+            a must be(
+              Send(Bind(portalName, name, Format.Binary :: Nil, parameters, Format.Binary :: Nil)))
+            b must be(Send(Describe(portalName, DescriptionTarget.Portal)))
+            c must be(Send(Execute(portalName, 0)))
+            d must be(Send(Flush))
         }
     }
 
   def checkNoOp(name: String): StepSpec =
     checkResult(name) {
-      case Transition(_, NoOp) => ok
+      case Transition(_, NoOp) => succeed
     }
 
   val handleSync = List(
     checkResult("sends Sync") {
-      case Transition(_, Send(Sync)) => ok
+      case Transition(_, Send(Sync)) => succeed
     },
     receive(ReadyForQuery(NoTx))
   )
@@ -70,10 +68,11 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
     )
 
   "ExecuteMachine" should {
-    "send multiple messages on start" in prop { (name: Name, portalName: Name, parameters: IndexedSeq[WireValue]) =>
-      machineSpec(mkMachine(name, portalName, parameters), errorHandler) {
-        checkStartup(name, portalName, parameters)
-      }
+    "send multiple messages on start" in prop {
+      (name: Name, portalName: Name, parameters: IndexedSeq[WireValue]) =>
+        machineSpec(mkMachine(name, portalName, parameters), errorHandler) {
+          checkStartup(name, portalName, parameters)
+        }
     }
 
     def baseSpec(
@@ -81,7 +80,9 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
       portalName: Name,
       parameters: IndexedSeq[WireValue],
       describeMessage: BackendMessage
-    )(tail: StepSpec*) = {
+    )(
+      tail: StepSpec*
+    ) = {
       val head = List(
         checkStartup(name, portalName, parameters),
         receive(BindComplete),
@@ -104,12 +105,12 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
       baseSpec(name, portalName, parameters, describeMessage)(
         receive(executeMessage),
         checkResult("sends sync") {
-          case Transition(_, Send(Sync)) => ok
+          case Transition(_, Send(Sync)) => succeed
         },
         receive(ReadyForQuery(NoTx)),
         checkResult("completes with expected response") {
           case Complete(_, Some(Return(response))) =>
-            response must beEqualTo(expectedResponse)
+            response must be(expectedResponse)
         }
       )
 
@@ -120,12 +121,18 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
 
     "support commands" in prop {
       (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], commandTag: CommandTag) =>
-        nominalSpec(name, portalName, parameters, NoData, CommandComplete(commandTag), Response.Command(commandTag))
+        nominalSpec(
+          name,
+          portalName,
+          parameters,
+          NoData,
+          CommandComplete(commandTag),
+          Response.Command(commandTag))
     }
 
     "support result sets" in prop {
       (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], rs: TestResultSet) =>
-        rs.rows.nonEmpty ==> {
+        whenever(rs.rows.nonEmpty) {
           var rowReader: Option[Response.ResultSet] = None
           val steps = rs.rows match {
             case Nil => sys.error("unexpected result set")
@@ -135,7 +142,7 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
                 checkResult("responds") {
                   case Transition(_, Respond(Return(r @ Response.ResultSet(fields, _, _)))) =>
                     rowReader = Some(r)
-                    fields must beEqualTo(rs.desc.rowFields)
+                    fields must be(rs.desc.rowFields)
                 }
               ) ++ tail.map(receive(_))
           }
@@ -144,25 +151,24 @@ class ExecuteMachineSpec extends MachineSpec[Response.QueryResponse] with Proper
           )
           baseSpec(name, portalName, parameters, rs.desc)(
             steps ++ postSteps: _*
-          ) && {
-            rowReader must beSome
-            val rows = Await.result(rowReader.get.toSeq.liftToTry)
-            // NOTE: this isn't as strict as it could be.
-            //   Ideally we would only expect an error when one was injected
-            rows must beLike {
-              case Return(rows) => rows must beEqualTo(rs.rows.map(_.values))
-              case Throw(PgSqlServerError(_)) => ok // injected error case
-            }
+          )
+
+          rowReader mustBe defined
+          val rows = Await.result(rowReader.get.toSeq.liftToTry)
+          // NOTE: this isn't as strict as it could be.
+          //   Ideally we would only expect an error when one was injected
+          rows must beLike[Try[Seq[Response.Row]]] {
+            case Return(rows) => rows must be(rs.rows.map(_.values))
+            case Throw(PgSqlServerError(_)) => succeed // injected error case
           }
         }
     }
 
     "fail when no transition exist" in {
       val machine = mkMachine(Name.Unnamed, Name.Unnamed, IndexedSeq.empty)
-      machine.receive(machine.Binding, BackendMessage.PortalSuspended) must throwA[PgSqlNoSuchTransition](
-        "ExecuteMachine"
-      )
+      an[PgSqlNoSuchTransition] must be thrownBy machine.receive(
+        machine.Binding,
+        BackendMessage.PortalSuspended)
     }
-
   }
 }

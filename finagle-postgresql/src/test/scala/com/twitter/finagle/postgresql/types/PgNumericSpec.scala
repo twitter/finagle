@@ -17,12 +17,12 @@ class PgNumericSpec extends PgSqlSpec with PropertiesSpec {
       import PgNumeric.bigDecimalToNumeric
 
       def check(bd: String, w: Short, s: Short, digits: Seq[Short]) = {
-        bigDecimalToNumeric(BigDecimal(bd)) must_== num(w, s, digits, NumericSign.Positive)
-        bigDecimalToNumeric(BigDecimal(bd) * -1) must_== num(w, s, digits, NumericSign.Negative)
+        bigDecimalToNumeric(BigDecimal(bd)) must be(num(w, s, digits, NumericSign.Positive))
+        bigDecimalToNumeric(BigDecimal(bd) * -1) must be(num(w, s, digits, NumericSign.Negative))
       }
 
       "convert 0 to NumericZero" in {
-        bigDecimalToNumeric(BigDecimal(0)) must_== PgNumeric.NumericZero
+        bigDecimalToNumeric(BigDecimal(0)) must be(PgNumeric.NumericZero)
       }
 
       "convert decimals" in {
@@ -66,17 +66,18 @@ class PgNumericSpec extends PgSqlSpec with PropertiesSpec {
       import PgNumeric.numericToBigDecimal
 
       def check(bd: String, w: Short, s: Short, digits: Seq[Short]) = {
-        numericToBigDecimal(num(w, s, digits, NumericSign.Positive)) must_== BigDecimal(bd)
-        numericToBigDecimal(num(w, s, digits, NumericSign.Negative)) must_== BigDecimal(bd) * -1
+        numericToBigDecimal(num(w, s, digits, NumericSign.Positive)) must be(BigDecimal(bd))
+        numericToBigDecimal(num(w, s, digits, NumericSign.Negative)) must be(BigDecimal(bd) * -1)
       }
 
       "convert NumericZero to 0" in {
-        numericToBigDecimal(PgNumeric.NumericZero) must_== BigDecimal(0)
+        numericToBigDecimal(PgNumeric.NumericZero) must be(BigDecimal(0))
       }
 
       def failFor(s: NumericSign) =
         s"fail for $s" in {
-          numericToBigDecimal(Numeric(0, NumericSign.NaN, 0, Nil)) must throwAn[PgSqlClientError]
+          an[PgSqlClientError] must be thrownBy numericToBigDecimal(
+            Numeric(0, NumericSign.NaN, 0, Nil))
         }
       failFor(NumericSign.NaN)
       failFor(NumericSign.Infinity)
@@ -120,7 +121,7 @@ class PgNumericSpec extends PgSqlSpec with PropertiesSpec {
     }
 
     "round trip" in prop { bd: BigDecimal =>
-      PgNumeric.numericToBigDecimal(PgNumeric.bigDecimalToNumeric(bd)) must_== bd
+      PgNumeric.numericToBigDecimal(PgNumeric.bigDecimalToNumeric(bd)) must be(bd)
     }
   }
 }

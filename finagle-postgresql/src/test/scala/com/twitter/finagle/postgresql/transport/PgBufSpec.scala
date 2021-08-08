@@ -2,7 +2,6 @@ package com.twitter.finagle.postgresql.transport
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Inet
@@ -15,9 +14,9 @@ import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
-import org.specs2.mutable.Specification
+import org.scalatest.wordspec.AnyWordSpec
 
-class PgBufSpec extends Specification with PropertiesSpec {
+class PgBufSpec extends AnyWordSpec with PropertiesSpec {
 
   case class UInt(bits: Int)
   object UInt {
@@ -28,7 +27,12 @@ class PgBufSpec extends Specification with PropertiesSpec {
 
   "PgBuf" should {
 
-    def expectedBytes[T](value: T, capacity: Int)(expect: (ByteBuffer, T) => ByteBuffer): Array[Byte] = {
+    def expectedBytes[T](
+      value: T,
+      capacity: Int
+    )(
+      expect: (ByteBuffer, T) => ByteBuffer
+    ): Array[Byte] = {
       val bb = expect(ByteBuffer.allocate(capacity).order(ByteOrder.BIG_ENDIAN), value)
       bb.array().slice(bb.arrayOffset(), bb.position())
     }
@@ -36,29 +40,44 @@ class PgBufSpec extends Specification with PropertiesSpec {
     def writeFragment[T: Arbitrary](
       name: String,
       capacity: Int = 1024
-    )(write: (PgBuf.Writer, T) => PgBuf.Writer)(expect: (ByteBuffer, T) => ByteBuffer) =
+    )(
+      write: (PgBuf.Writer, T) => PgBuf.Writer
+    )(
+      expect: (ByteBuffer, T) => ByteBuffer
+    ) =
       s"write $name" in prop { value: T =>
         val bufWrite = write(PgBuf.writer, value).build
-        Buf.ByteArray.Owned.extract(bufWrite) must_== expectedBytes(value, capacity)(expect)
+        Buf.ByteArray.Owned.extract(bufWrite) must be(expectedBytes(value, capacity)(expect))
       }
 
     def readFragment[T: Arbitrary](
       name: String,
       capacity: Int
-    )(read: PgBuf.Reader => T)(expect: (ByteBuffer, T) => ByteBuffer) =
+    )(
+      read: PgBuf.Reader => T
+    )(
+      expect: (ByteBuffer, T) => ByteBuffer
+    ) =
       s"read $name" in prop { value: T =>
-        read(PgBuf.reader(Buf.ByteArray.Owned(expectedBytes(value, capacity)(expect)))) must_== value
+        read(PgBuf.reader(Buf.ByteArray.Owned(expectedBytes(value, capacity)(expect)))) must be(
+          value)
       }
 
     def fragments[T: Arbitrary](
       name: String,
       capacity: Int = 1024
-    )(write: (PgBuf.Writer, T) => PgBuf.Writer)(read: PgBuf.Reader => T)(expect: (ByteBuffer, T) => ByteBuffer) = {
+    )(
+      write: (PgBuf.Writer, T) => PgBuf.Writer
+    )(
+      read: PgBuf.Reader => T
+    )(
+      expect: (ByteBuffer, T) => ByteBuffer
+    ) = {
       writeFragment[T](name, capacity)(write)(expect)
       readFragment[T](name, capacity)(read)(expect)
 
       s"round trip $name" in prop { value: T =>
-        read(PgBuf.reader(write(PgBuf.writer, value).build)) must_== value
+        read(PgBuf.reader(write(PgBuf.writer, value).build)) must be(value)
       }
     }
 
@@ -102,11 +121,11 @@ class PgBufSpec extends Specification with PropertiesSpec {
       n.digits.foreach(d => bb.putShort(d))
       bb
     }
-    fragments[UInt]("unsigned int")((w, uint) => w.unsignedInt(uint.bits.toLong))(r => UInt(r.unsignedInt()))(
-      (b, uint) => b.putInt(uint.bits)
-    )
+    fragments[UInt]("unsigned int")((w, uint) => w.unsignedInt(uint.bits.toLong))(r =>
+      UInt(r.unsignedInt()))((b, uint) => b.putInt(uint.bits))
     // C-style strings only
-    fragments[AsciiString]("cstring")((w, str) => w.cstring(str.value))(r => AsciiString(r.cstring())) { (bb, str) =>
+    fragments[AsciiString]("cstring")((w, str) => w.cstring(str.value))(r =>
+      AsciiString(r.cstring())) { (bb, str) =>
       bb.put(str.value.getBytes("UTF8"))
       bb.put(0.toByte)
     }
@@ -135,7 +154,7 @@ class PgBufSpec extends Specification with PropertiesSpec {
     }
     "format" should {
       "fail when invalid" in {
-        PgBuf.reader(Buf.ByteArray(0, 3)).format() must throwA[RuntimeException]("unexpected format value 3")
+        an[RuntimeException] must be thrownBy PgBuf.reader(Buf.ByteArray(0, 3)).format()
       }
     }
     fragments[List[Int]]("foreach")(_.foreach(_)(_.int(_)))(_.collect(_.int()).toList) { (bb, xs) =>
@@ -167,10 +186,11 @@ class PgBufSpec extends Specification with PropertiesSpec {
     }
 
     "writer" should {
-      writeFragment[Buf]("framed")((w, buf) => w.framed(inner => inner.buf(buf).build)) { (bb, buf) =>
-        val value = Buf.ByteArray.Shared.extract(buf)
-        bb.putInt(value.length + 4)
-        bb.put(value)
+      writeFragment[Buf]("framed")((w, buf) => w.framed(inner => inner.buf(buf).build)) {
+        (bb, buf) =>
+          val value = Buf.ByteArray.Shared.extract(buf)
+          bb.putInt(value.length + 4)
+          bb.put(value)
       }
       writeFragment[Name]("name")(_.name(_)) { (bb, name) =>
         name match {
@@ -180,14 +200,15 @@ class PgBufSpec extends Specification with PropertiesSpec {
             bb.put(0.toByte)
         }
       }
-      writeFragment[List[Int]]("write foreachUnframed")(_.foreachUnframed(_)(_.int(_))) { (bb, xs) =>
-        xs.foreach(v => bb.putInt(v))
-        bb
+      writeFragment[List[Int]]("write foreachUnframed")(_.foreachUnframed(_)(_.int(_))) {
+        (bb, xs) =>
+          xs.foreach(v => bb.putInt(v))
+          bb
       }
 
       "opt" in {
-        PgBuf.writer.opt[Int](None)(_.int(_)).build.isEmpty must beTrue
-        PgBuf.writer.opt[Int](Some(1))(_.int(_)).build.isEmpty must beFalse
+        PgBuf.writer.opt[Int](None)(_.int(_)).build.isEmpty must be(true)
+        PgBuf.writer.opt[Int](Some(1))(_.int(_)).build.isEmpty must be(false)
       }
     }
   }

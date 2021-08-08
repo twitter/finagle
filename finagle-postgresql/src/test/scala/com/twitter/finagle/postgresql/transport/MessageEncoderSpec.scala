@@ -2,7 +2,6 @@ package com.twitter.finagle.postgresql.transport
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 import com.twitter.finagle.postgresql.FrontendMessage.Bind
 import com.twitter.finagle.postgresql.FrontendMessage.Describe
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
@@ -27,9 +26,9 @@ import com.twitter.finagle.postgresql.PropertiesSpec
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
-import org.specs2.mutable.Specification
+import org.scalatest.wordspec.AnyWordSpec
 
-class MessageEncoderSpec extends Specification with PropertiesSpec {
+class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
 
   def mkBuf(capacity: Int = 32768)(f: ByteBuffer => ByteBuffer): Buf = {
     val bb = ByteBuffer.allocate(capacity).order(ByteOrder.BIG_ENDIAN)
@@ -125,19 +124,24 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
     )
   implicit lazy val arbClose: Arbitrary[Close] = Arbitrary(genClose)
 
-  implicit lazy val arbCopyFail: Arbitrary[CopyFail] = Arbitrary(genAsciiString.map(s => CopyFail(s.value)))
+  implicit lazy val arbCopyFail: Arbitrary[CopyFail] = Arbitrary(
+    genAsciiString.map(s => CopyFail(s.value)))
 
-  def encodeFragment[M <: FrontendMessage: Arbitrary](enc: MessageEncoder[M])(toPacket: M => Packet) =
+  def encodeFragment[M <: FrontendMessage: Arbitrary](
+    enc: MessageEncoder[M]
+  )(
+    toPacket: M => Packet
+  ) =
     "encode correctly" in prop { msg: M =>
-      enc.toPacket(msg) must_== toPacket(msg)
+      enc.toPacket(msg) must be(toPacket(msg))
     }
 
   "MessageEncoder" should {
 
     "SslRequest" should {
       "encode correctly" in {
-        MessageEncoder.sslRequestEncoder.toPacket(SslRequest) must_==
-          Packet(None, Buf.ByteArray(0x04, 0xd2.toByte, 0x16, 0x2f))
+        MessageEncoder.sslRequestEncoder.toPacket(SslRequest) must be(
+          Packet(None, Buf.ByteArray(0x04, 0xd2.toByte, 0x16, 0x2f)))
       }
     }
 
@@ -145,15 +149,15 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
       Packet(
         cmd = None,
         body = mkBuf() { bb =>
-          bb
-            .putShort(msg.version.major)
+          bb.putShort(msg.version.major)
             .putShort(msg.version.minor)
             .put(cstring("user")).put(cstring(msg.user))
           msg.database.foreach { db =>
             bb.put(cstring("database")).put(cstring(db))
           }
-          msg.params.foreach { case (key, value) =>
-            bb.put(cstring(key)).put(cstring(value))
+          msg.params.foreach {
+            case (key, value) =>
+              bb.put(cstring(key)).put(cstring(value))
           }
           bb.put(0.toByte)
         }
@@ -176,19 +180,21 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
 
     "Sync" should {
       "encode correctly" in {
-        MessageEncoder.syncEncoder.toPacket(Sync) must_== Packet(
-          cmd = Some('S'),
-          body = Buf.Empty
-        )
+        MessageEncoder.syncEncoder.toPacket(Sync) must be(
+          Packet(
+            cmd = Some('S'),
+            body = Buf.Empty
+          ))
       }
     }
 
     "Flush" should {
       "encode correctly" in {
-        MessageEncoder.flushEncoder.toPacket(Flush) must_== Packet(
-          cmd = Some('H'),
-          body = Buf.Empty
-        )
+        MessageEncoder.flushEncoder.toPacket(Flush) must be(
+          Packet(
+            cmd = Some('H'),
+            body = Buf.Empty
+          ))
       }
     }
 
@@ -301,10 +307,11 @@ class MessageEncoderSpec extends Specification with PropertiesSpec {
 
     "CopyDone" should {
       "encode correctly" in {
-        MessageEncoder.copyDoneEncoder.toPacket(CopyDone) must_== Packet(
-          cmd = Some('c'),
-          body = Buf.Empty
-        )
+        MessageEncoder.copyDoneEncoder.toPacket(CopyDone) must be(
+          Packet(
+            cmd = Some('c'),
+            body = Buf.Empty
+          ))
       }
     }
 

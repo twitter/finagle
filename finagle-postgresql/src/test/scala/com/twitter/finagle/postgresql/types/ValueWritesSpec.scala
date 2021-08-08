@@ -17,8 +17,6 @@ import com.twitter.finagle.postgresql.transport.PgBuf
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
-import org.specs2.specification.core.Fragment
-import org.specs2.specification.core.Fragments
 
 class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
 
@@ -31,67 +29,76 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
     Buf.ByteBuffer.Owned(bb)
   }
 
-  def acceptFragments(writes: ValueWrites[_], accept: PgType, accepts: PgType*): Fragments = {
-    val typeFragments = (accept +: accepts).map { tpe =>
+  def acceptFragments(writes: ValueWrites[_], accept: PgType, accepts: PgType*): Unit = {
+    (accept +: accepts).foreach { tpe =>
       s"accept the ${tpe.name} type" in {
-        writes.accepts(accept) must beTrue
+        writes.accepts(accept) must be(true)
       }
     }
-
-    fragments(typeFragments)
   }
 
-  def writesFragment[T: Arbitrary](writes: ValueWrites[T], accept: PgType)(encode: T => Buf): Fragment =
-    s"write non-null value" in prop { value: T =>
+  def writesFragment[T: Arbitrary](writes: ValueWrites[T], accept: PgType)(encode: T => Buf): Unit =
+    s"write non-null value" in { value: T =>
       val ret = writes.writes(accept, value, utf8)
-      ret must_== WireValue.Value(encode(value))
+      ret must be(WireValue.Value(encode(value)))
     }
 
-  def arrayWritesFragment[T: Arbitrary](writes: ValueWrites[T], accept: PgType)(encode: T => Buf) = {
+  def arrayWritesFragment[T: Arbitrary](
+    writes: ValueWrites[T],
+    accept: PgType
+  )(
+    encode: T => Buf
+  ) = {
     val arrayWrites = ValueWrites.traversableWrites[List, T](writes)
-    s"write one-dimensional array of non-null values" in prop { values: List[T] =>
-      val data = values.map(v => encode(v)).map(WireValue.Value).toIndexedSeq
-      val pgArray = PgArray(
-        dimensions = 1,
-        dataOffset = 0,
-        elemType = accept.oid,
-        arrayDims = IndexedSeq(PgArrayDim(values.length, 1)),
-        data = data,
-      )
-      val arrayWire = WireValue.Value(PgBuf.writer.array(pgArray).build)
-      val arrayType = PgType.arrayOf(accept).getOrElse(sys.error(s"no array type for ${accept.name}"))
-      val ret = arrayWrites.writes(arrayType, values, utf8)
-      ret must_== arrayWire
-    }.setGen(Gen.listOfN(5, Arbitrary.arbitrary[T])) // limit to 5 elements to speed things up
+    s"write one-dimensional array of non-null values" in {
+      forAll(Gen.listOfN(5, Arbitrary.arbitrary[T])) { values: List[T] =>
+        val data = values.map(v => encode(v)).map(WireValue.Value).toIndexedSeq
+        val pgArray = PgArray(
+          dimensions = 1,
+          dataOffset = 0,
+          elemType = accept.oid,
+          arrayDims = IndexedSeq(PgArrayDim(values.length, 1)),
+          data = data,
+        )
+        val arrayWire = WireValue.Value(PgBuf.writer.array(pgArray).build)
+        val arrayType =
+          PgType.arrayOf(accept).getOrElse(sys.error(s"no array type for ${accept.name}"))
+        val ret = arrayWrites.writes(arrayType, values, utf8)
+        ret must be(arrayWire)
+      }
+    } // limit to 5 elements to speed things up
   }
 
-  def nullableFragment[T: Arbitrary](writes: ValueWrites[T], accept: PgType): Fragment =
+  def nullableFragment[T: Arbitrary](writes: ValueWrites[T], accept: PgType): Unit =
     "is nullable when wrapped in Option" in {
-      ValueWrites.optionWrites(writes).writes(accept, None, utf8) must_== WireValue.Null
+      ValueWrites.optionWrites(writes).writes(accept, None, utf8) must be(WireValue.Null)
     }
 
-  def simpleSpec[T: Arbitrary](writes: ValueWrites[T], accept: PgType, accepts: PgType*)(encode: T => Buf): Fragments =
+  def simpleSpec[T: Arbitrary](
+    writes: ValueWrites[T],
+    accept: PgType,
+    accepts: PgType*
+  )(
+    encode: T => Buf
+  ): Unit = {
     acceptFragments(writes, accept, accepts: _*)
-      .append(
-        Fragments(
-          writesFragment(writes, accept)(encode),
-          arrayWritesFragment(writes, accept)(encode),
-          nullableFragment(writes, accept),
-        )
-      )
+    writesFragment(writes, accept)(encode)
+    arrayWritesFragment(writes, accept)(encode)
+    nullableFragment(writes, accept)
+  }
 
   "ValueWrites" should {
 
     "by" should {
       "accept the underlying type" in {
         val intByLong = ValueWrites.by[Long, Int](_.toLong)
-        intByLong.accepts(PgType.Int4) must beFalse
-        intByLong.accepts(PgType.Int8) must beTrue
+        intByLong.accepts(PgType.Int4) must be(false)
+        intByLong.accepts(PgType.Int8) must be(true)
       }
-      "write the underlying value" in prop { value: Int =>
+      "write the underlying value" in { value: Int =>
         val intByLong = ValueWrites.by[Long, Int](_.toLong)
         val wrote = intByLong.writes(PgType.Int8, value, utf8)
-        wrote must_== WireValue.Value(Buf.U64BE(value.toLong))
+        wrote must be(WireValue.Value(Buf.U64BE(value.toLong)))
       }
     }
 
@@ -103,32 +110,32 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
 
       "accept both types" in {
         val or = ValueWrites.or(first, second)
-        or.accepts(PgType.Int4) must beTrue
-        or.accepts(PgType.Int2) must beTrue
-        or.accepts(PgType.Int8) must beFalse
+        or.accepts(PgType.Int4) must be(true)
+        or.accepts(PgType.Int2) must be(true)
+        or.accepts(PgType.Int8) must be(false)
 
         val orElse = first orElse second
-        orElse.accepts(PgType.Int4) must beTrue
-        orElse.accepts(PgType.Int2) must beTrue
-        orElse.accepts(PgType.Int8) must beFalse
+        orElse.accepts(PgType.Int4) must be(true)
+        orElse.accepts(PgType.Int2) must be(true)
+        orElse.accepts(PgType.Int8) must be(false)
       }
       "writes to both" in {
         val or = ValueWrites.or(first, second)
-        or.writes(PgType.Int4, 4, utf8) must_== firstValue
-        or.writes(PgType.Int2, 4, utf8) must_== secondValue
+        or.writes(PgType.Int4, 4, utf8) must be(firstValue)
+        or.writes(PgType.Int2, 4, utf8) must be(secondValue)
 
         val orElse = first orElse second
-        orElse.writes(PgType.Int4, 4, utf8) must_== firstValue
-        orElse.writes(PgType.Int2, 4, utf8) must_== secondValue
+        orElse.writes(PgType.Int4, 4, utf8) must be(firstValue)
+        orElse.writes(PgType.Int2, 4, utf8) must be(secondValue)
       }
       "writes to first in priority" in {
         val second = ValueWrites.simple[Int](PgType.Int4) { case (w, _) => w.byte(2) }
 
         val or = ValueWrites.or(first, second)
-        or.writes(PgType.Int4, 4, utf8) must_== firstValue
+        or.writes(PgType.Int4, 4, utf8) must be(firstValue)
 
         val orElse = first orElse second
-        orElse.writes(PgType.Int4, 4, utf8) must_== firstValue
+        orElse.writes(PgType.Int4, 4, utf8) must be(firstValue)
       }
     }
 
@@ -136,33 +143,35 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
       "delegate writes when Some" in {
         val optionalInt = ValueWrites.optionWrites(ValueWrites.writesInt)
         val wrote = optionalInt.writes(PgType.Int4, Some(0), utf8)
-        wrote must_== ValueWrites.writesInt.writes(PgType.Int4, 0, utf8)
+        wrote must be(ValueWrites.writesInt.writes(PgType.Int4, 0, utf8))
       }
       "accept the underlying type" in {
         val optionalInt = ValueWrites.optionWrites(ValueWrites.writesInt)
-        optionalInt.accepts(PgType.Int4) must beTrue
-        optionalInt.accepts(PgType.Text) must beFalse
+        optionalInt.accepts(PgType.Int4) must be(true)
+        optionalInt.accepts(PgType.Text) must be(false)
       }
       "write Null when None" in {
         val optionalInt = ValueWrites.optionWrites(ValueWrites.writesInt)
         val wrote = optionalInt.writes(PgType.Int4, None, utf8)
-        wrote must_== WireValue.Null
+        wrote must be(WireValue.Null)
       }
     }
 
     "traversableWrites" should {
       "accept the underlying type" in {
         val writesIntList = ValueWrites.traversableWrites[List, Int](ValueWrites.writesInt)
-        writesIntList.accepts(PgType.Int4Array) must beTrue
-        writesIntList.accepts(PgType.Int4) must beFalse
-        writesIntList.accepts(PgType.Int2Array) must beFalse
+        writesIntList.accepts(PgType.Int4Array) must be(true)
+        writesIntList.accepts(PgType.Int4) must be(false)
+        writesIntList.accepts(PgType.Int2Array) must be(false)
       }
 
       "reject non-array types when reading" in {
         val writesIntList = ValueWrites.traversableWrites[List, Int](ValueWrites.writesInt)
-        writesIntList.writes(PgType.Int4, Nil, utf8) must throwA[PgSqlClientError](
-          s"Type int4 is not an array type and cannot be written as such."
-        )
+        the[PgSqlClientError] thrownBy writesIntList.writes(
+          PgType.Int4,
+          Nil,
+          utf8) must have message
+          "Type int4 is not an array type and cannot be written as such. Note that this may be because you're trying to write a multi-dimensional array which isn't supported."
       }
 
       "support empty lists" in {
@@ -175,33 +184,36 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
           data = IndexedSeq.empty
         )
         val arrayBuf = PgBuf.writer.array(pgArray).build
-        writesIntList.writes(PgType.Int4Array, Nil, utf8) must_== WireValue.Value(arrayBuf)
+        writesIntList.writes(PgType.Int4Array, Nil, utf8) must be(WireValue.Value(arrayBuf))
       }
 
       "fail for multi-dimensional arrays" in {
         val writesIntList = ValueWrites.traversableWrites[List, Int](ValueWrites.writesInt)
         val arrayOfArray = ValueWrites.traversableWrites[List, List[Int]](writesIntList)
-        arrayOfArray.writes(PgType.Int4Array, List(List(1)), utf8) must throwA[PgSqlClientError](
+        the[PgSqlClientError] thrownBy arrayOfArray.writes(
+          PgType.Int4Array,
+          List(List(1)),
+          utf8) must have message
           "Type int4 is not an array type and cannot be written as such. Note that this may be because you're trying to write a multi-dimensional array which isn't supported."
-        )
       }
     }
 
-    "writesBigDecimal" should simpleSpec[BigDecimal](ValueWrites.writesBigDecimal, PgType.Numeric) { bd =>
-      mkBuf() { bb =>
-        // converting to numeric is non-trivial, so we don't re-write it here.
-        val numeric = PgNumeric.bigDecimalToNumeric(bd)
-        bb.putShort(numeric.digits.length.toShort)
-        bb.putShort(numeric.weight)
-        numeric.sign match {
-          case NumericSign.Positive => bb.putShort(0)
-          case NumericSign.Negative => bb.putShort(0x4000)
-          case _ => sys.error("unexpected sign")
+    "writesBigDecimal" should simpleSpec[BigDecimal](ValueWrites.writesBigDecimal, PgType.Numeric) {
+      bd =>
+        mkBuf() { bb =>
+          // converting to numeric is non-trivial, so we don't re-write it here.
+          val numeric = PgNumeric.bigDecimalToNumeric(bd)
+          bb.putShort(numeric.digits.length.toShort)
+          bb.putShort(numeric.weight)
+          numeric.sign match {
+            case NumericSign.Positive => bb.putShort(0)
+            case NumericSign.Negative => bb.putShort(0x4000)
+            case _ => sys.error("unexpected sign")
+          }
+          bb.putShort(numeric.displayScale.toShort)
+          numeric.digits.foreach(bb.putShort)
+          bb
         }
-        bb.putShort(numeric.displayScale.toShort)
-        numeric.digits.foreach(bb.putShort)
-        bb
-      }
     }
     "writesBoolean" should simpleSpec[Boolean](ValueWrites.writesBoolean, PgType.Bool) {
       case true => Buf.ByteArray(0x01)
@@ -251,15 +263,14 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
       ValueWrites.writesInstant,
       PgType.Timestamptz,
       PgType.Timestamp
-    ) {
-      ts =>
-        mkBuf() { bb =>
-          val sincePgEpoch = java.time.Duration.between(PgTime.Epoch, ts)
-          val secs = sincePgEpoch.getSeconds
-          val nanos = sincePgEpoch.getNano
-          val micros = secs * 1000000 + nanos / 1000
-          bb.putLong(micros)
-        }
+    ) { ts =>
+      mkBuf() { bb =>
+        val sincePgEpoch = java.time.Duration.between(PgTime.Epoch, ts)
+        val secs = sincePgEpoch.getSeconds
+        val nanos = sincePgEpoch.getNano
+        val micros = secs * 1000000 + nanos / 1000
+        bb.putLong(micros)
+      }
     }
     "writesInt" should {
       "write int4" should simpleSpec[Int](ValueWrites.writesInt, PgType.Int4) { int =>
@@ -269,17 +280,22 @@ class ValueWritesSpec extends PgSqlSpec with PropertiesSpec {
         mkBuf()(_.putLong(int.toLong))
       }
     }
+
     "writesJson" should simpleSpec[Json](ValueWrites.writesJson, PgType.Json) { json =>
       mkBuf(json.jsonByteArray.length) { bb =>
         bb.put(json.jsonByteBuffer)
       }
     }
-    "writesJson" should simpleSpec[Json](ValueWrites.writesJson, PgType.Jsonb) { json =>
+
+    "writesJsonb" should simpleSpec[Json](ValueWrites.writesJson, PgType.Jsonb) { json =>
       mkBuf(json.jsonByteArray.length + 1) { bb =>
         bb.put(1.toByte).put(json.jsonByteBuffer)
       }
     }
-    "writesLocalDate" should simpleSpec[java.time.LocalDate](ValueWrites.writesLocalDate, PgType.Date) { date =>
+
+    "writesLocalDate" should simpleSpec[java.time.LocalDate](
+      ValueWrites.writesLocalDate,
+      PgType.Date) { date =>
       mkBuf() { bb =>
         bb.putInt(ChronoUnit.DAYS.between(PgDate.Epoch, date).toInt)
       }
