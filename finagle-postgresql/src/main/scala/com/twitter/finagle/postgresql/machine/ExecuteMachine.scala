@@ -1,16 +1,19 @@
 package com.twitter.finagle.postgresql.machine
 
 import com.twitter.finagle.postgresql.BackendMessage
-import com.twitter.finagle.postgresql.BackendMessage.BindComplete
-import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
-import com.twitter.finagle.postgresql.BackendMessage.DataRow
-import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
-import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
-import com.twitter.finagle.postgresql.BackendMessage.InTx
-import com.twitter.finagle.postgresql.BackendMessage.NoData
-import com.twitter.finagle.postgresql.BackendMessage.PortalSuspended
-import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
-import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.BackendMessage.{
+  BindComplete,
+  CommandComplete,
+  CommandTag,
+  DataRow,
+  EmptyQueryResponse,
+  ErrorResponse,
+  InTx,
+  NoData,
+  PortalSuspended,
+  ReadyForQuery,
+  RowDescription
+}
 import com.twitter.finagle.postgresql.FrontendMessage.Bind
 import com.twitter.finagle.postgresql.FrontendMessage.Describe
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
@@ -58,7 +61,11 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters)
   case object Describing extends State
   case object ExecutingCommand extends State
   case class Executing(r: RowDescription) extends State
-  case class StreamResult(rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) extends State {
+  case class StreamResult(
+    rowDescription: RowDescription,
+    pipe: Pipe[DataRow],
+    lastWrite: Future[Unit])
+      extends State {
     def append(row: DataRow): StreamResult =
       StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
     def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values), parameters)
@@ -99,7 +106,10 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters)
 
   }
 
-  override def receive(state: State, msg: BackendMessage): TransitionResult[State, Response.QueryResponse] =
+  override def receive(
+    state: State,
+    msg: BackendMessage
+  ): TransitionResult[State, Response.QueryResponse] =
     (state, msg) match {
       case (Binding, BindComplete) =>
         Transition(Describing, NoOp)
@@ -108,6 +118,10 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters)
         Transition(ExecutingCommand, NoOp)
       case (ExecutingCommand, CommandComplete(tag)) =>
         Transition(Syncing(Some(Return(Response.Command(tag)))), Send(Sync))
+      case (
+            Executing(_),
+            CommandComplete(CommandTag.AffectedRows(BackendMessage.CommandTag.Select, 0))) =>
+        Transition(Syncing(Some(Return(Response.Empty))), Send(Sync))
 
       case (Describing, r: RowDescription) =>
         Transition(Executing(r), NoOp)

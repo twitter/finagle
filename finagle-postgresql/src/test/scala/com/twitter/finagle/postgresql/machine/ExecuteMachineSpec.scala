@@ -119,6 +119,17 @@ class ExecuteMachineSpec
         nominalSpec(name, portalName, parameters, desc, EmptyQueryResponse, Response.Empty)
     }
 
+    "support queries returning 0 rows" in prop {
+      (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], desc: RowDescription) =>
+        nominalSpec(
+          name,
+          portalName,
+          parameters,
+          desc,
+          CommandComplete(CommandTag.AffectedRows(BackendMessage.CommandTag.Select, 0)),
+          Response.Empty)
+    }
+
     "support commands" in prop {
       (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], commandTag: CommandTag) =>
         nominalSpec(
