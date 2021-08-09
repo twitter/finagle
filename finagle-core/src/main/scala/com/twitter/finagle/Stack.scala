@@ -744,6 +744,52 @@ object Stack {
       )
   }
 
+  /** A module of 9 parameters. */
+  abstract class Module9[
+    P1: Param,
+    P2: Param,
+    P3: Param,
+    P4: Param,
+    P5: Param,
+    P6: Param,
+    P7: Param,
+    P8: Param,
+    P9: Param,
+    T] extends Stackable[T] {
+    final val parameters: Seq[Stack.Param[_]] = Seq(
+      implicitly[Param[P1]],
+      implicitly[Param[P2]],
+      implicitly[Param[P3]],
+      implicitly[Param[P4]],
+      implicitly[Param[P5]],
+      implicitly[Param[P6]],
+      implicitly[Param[P7]],
+      implicitly[Param[P8]],
+      implicitly[Param[P9]]
+    )
+    def make(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, next: T): T
+    def toStack(next: Stack[T]): Stack[T] =
+      Node(
+        this,
+        (prms, next) =>
+          Leaf(
+            this,
+            make(
+              prms[P1],
+              prms[P2],
+              prms[P3],
+              prms[P4],
+              prms[P5],
+              prms[P6],
+              prms[P7],
+              prms[P8],
+              prms[P9],
+              next.make(prms))
+          ),
+        next
+      )
+  }
+
   /**
    * Add an element to the `Stack` that will transform the parameters at that
    * specific position.

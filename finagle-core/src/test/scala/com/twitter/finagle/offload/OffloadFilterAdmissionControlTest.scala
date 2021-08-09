@@ -47,16 +47,16 @@ class OffloadFilterAdmissionControlTest extends AnyFunSuite with OneInstancePerT
 
   // Admission control will kick in once the pending decrements grows past 1 task.
   private val strictParams =
-    OffloadFilterAdmissionControl.Enabled(maxQueueDelay = 1.milliseconds)
+    OffloadACConfig.Enabled(maxQueueDelay = 1.milliseconds)
 
   private def newAc(
-    params: OffloadFilterAdmissionControl.Enabled
+    params: OffloadACConfig.Enabled
   ): OffloadFilterAdmissionControl = {
     new OffloadFilterAdmissionControl(params, mockFuturePool, stats)
   }
 
   test("doesn't reject initially") {
-    val ac = newAc(OffloadFilterAdmissionControl.DefaultEnabledParams)
+    val ac = newAc(OffloadACConfig.DefaultEnabledParams)
     assert(!ac.shouldReject)
   }
 

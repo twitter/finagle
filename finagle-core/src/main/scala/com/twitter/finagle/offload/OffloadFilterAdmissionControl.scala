@@ -1,20 +1,19 @@
 package com.twitter.finagle.offload
 
-import com.twitter.conversions.DurationOps._
-import com.twitter.app.Flaggable
 import com.twitter.finagle.{Failure, Filter, Service, SimpleFilter, Stack}
 import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Future, FuturePool}
-import java.util.Locale
+import com.twitter.util.{Future, FuturePool}
 import java.util.concurrent.atomic.AtomicInteger
 
 // An admission control mechanism that is uses the OffloadFilters work queue
 // as it's source of knowledge as to whether things are backed up or not.
 // See the `sample()` method for the theory of operation
 private[finagle] object OffloadFilterAdmissionControl {
+
+  private val log = Logger.get()
 
   private val AcFilterName: String = "offload_ac"
 
@@ -36,40 +35,6 @@ private[finagle] object OffloadFilterAdmissionControl {
     }
   }
 
-  private val log = Logger.get()
-
-  sealed trait Params
-
-  object Params {
-    implicit val flaggable = new Flaggable[Params] {
-      def parse(s: String): Params = s.toLowerCase(Locale.US) match {
-        case "none" | "default" => Disabled
-        case "enabled" => DefaultEnabledParams
-        case other => parseParams(other)
-      }
-
-      // Expected format:
-      // 'failurePercentile:maxQueueDelay'
-      private[this] def parseParams(lowercaseFlag: String): Params = {
-        import com.twitter.finagle.util.parsers._
-        lowercaseFlag match {
-          case list(duration(maxQueueDelay)) =>
-            DefaultEnabledParams.copy(maxQueueDelay = maxQueueDelay)
-          case unknown =>
-            log.error(s"Unparsable OffloadFilterAdmissionControl value: $unknown")
-            Disabled
-        }
-      }
-    }
-  }
-
-  case class Enabled(maxQueueDelay: Duration) extends Params
-  case object Disabled extends Params
-
-  // These parameters have been derived empirically with a little bit of intuition for garnish.
-  // - maxQueueDelay: The acceptable delay for tasks in the worker pool before we start to reject work.
-  val DefaultEnabledParams: Enabled = Enabled(maxQueueDelay = 20.milliseconds)
-
   /**
    * This is where we inject admission control, if necessary. We only
    * inject admission control if it is generally enabled and we have
@@ -90,13 +55,13 @@ private[finagle] object OffloadFilterAdmissionControl {
 
   def apply(futurePool: FuturePool, stats: StatsReceiver): Option[OffloadFilterAdmissionControl] = {
     admissionControl() match {
-      case Disabled => None
-      case e: Enabled => Some(instance(e, futurePool, stats))
+      case OffloadACConfig.Disabled => None
+      case e: OffloadACConfig.Enabled => Some(instance(e, futurePool, stats))
     }
   }
 
   private[this] def instance(
-    params: Enabled,
+    params: OffloadACConfig.Enabled,
     futurePool: FuturePool,
     stats: StatsReceiver
   ): OffloadFilterAdmissionControl = {
@@ -109,7 +74,7 @@ private[finagle] object OffloadFilterAdmissionControl {
 }
 
 private[finagle] final class OffloadFilterAdmissionControl(
-  params: OffloadFilterAdmissionControl.Enabled,
+  params: OffloadACConfig.Enabled,
   futurePool: FuturePool,
   stats: StatsReceiver)
     extends Thread("offload-ac-thread") {
