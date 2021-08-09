@@ -75,7 +75,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
   object Client {
 
-    private val params: Stack.Params = StackClient.defaultParams +
+    private def params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("mysql") +
       DefaultPool.Param(
         low = 0,

@@ -31,8 +31,8 @@ object OffloadFilter {
   private[this] val ClientAnnotationKey = "clnt/finagle.offload_pool_size"
   private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"
 
-  private[finagle] sealed abstract class Param
-  private[finagle] object Param {
+  sealed abstract class Param
+  object Param {
 
     def apply(pool: FuturePool): Param = Enabled(pool)
     def apply(executor: ExecutorService): Param = Enabled(FuturePool(executor))

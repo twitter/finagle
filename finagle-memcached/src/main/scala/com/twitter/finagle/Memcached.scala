@@ -144,7 +144,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * load balancer to `p2cPeakEwma` as we have experience improved tail
      * latencies when coupled with the pipelining dispatcher.
      */
-    private val params: Stack.Params = StackClient.defaultParams +
+    private def params: Stack.Params = StackClient.defaultParams +
       FailureAccrualFactory.Param(defaultFailureAccrualPolicy) +
       FailFastFactory.FailFast(false) +
       LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +

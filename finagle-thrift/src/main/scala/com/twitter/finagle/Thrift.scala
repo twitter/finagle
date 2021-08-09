@@ -322,7 +322,7 @@ object Thrift
         .insertAfter(BindingFactory.role, ThriftPartitioningService.module(ThriftMarshallable))
     }
 
-    private val params: Stack.Params = StackClient.defaultParams +
+    private def params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary(protocolLibraryName)
   }
 

@@ -64,7 +64,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     /**
      * Default stack parameters used for redis client.
      */
-    private val params: Stack.Params = StackClient.defaultParams +
+    private def params: Stack.Params = StackClient.defaultParams +
       param.ProtocolLibrary("redis")
 
     /**
