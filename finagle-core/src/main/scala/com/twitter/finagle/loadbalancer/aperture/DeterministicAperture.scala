@@ -107,7 +107,7 @@ private final class DeterministicAperture[Req, Rep, NodeT <: ApertureNode[Req, R
   private[this] val labelForLogging = aperture.lbl
   private[this] val rng = aperture.rng
 
-  def eagerConnections = aperture.eagerConnections
+  def eagerConnections: Boolean = aperture.eagerConnections
 
   def dapertureActive: Boolean = aperture.dapertureActive
 
@@ -153,8 +153,8 @@ private final class DeterministicAperture[Req, Rep, NodeT <: ApertureNode[Req, R
 
   override val indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
 
-  private[this] def nodes: Set[(Int, Double, Address, Status)] = {
-    indices.map { i =>
+  private[this] def nodes: Seq[(Int, Double, Address, Status)] = {
+    indices.toSeq.sorted.map { i =>
       val factory = vector(i).factory
       val addr = factory.address
       val weight = ring.weight(i, coord.offset, apertureWidth)
