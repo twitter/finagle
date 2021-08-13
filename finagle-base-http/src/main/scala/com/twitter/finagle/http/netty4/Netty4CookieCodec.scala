@@ -52,7 +52,7 @@ private[finagle] object Netty4CookieCodec extends CookieCodec {
   }
 
   def decodeServer(header: String): Option[Iterable[Cookie]] = {
-    val cookies = serverDecoder.decode(header).asScala.map(cookieToFinagle)
+    val cookies = serverDecoder.decodeAll(header).asScala.map(cookieToFinagle)
     if (!cookies.isEmpty) Some(cookies)
     else None
   }

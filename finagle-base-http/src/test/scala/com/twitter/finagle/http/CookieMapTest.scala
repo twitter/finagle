@@ -86,14 +86,14 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyF
 
     test(
       s"$codec: Adding different cookie objects with the same name to a CookieMap on a " +
-        s"$messageType more than once results in a CookieMap with one cookie"
+        s"$messageType more than once, using +=, results in a CookieMap with one cookie"
     ) {
       val message = newMessage()
       val cookie = new Cookie("name", "value")
       val cookie2 = new Cookie("name", "value2")
       lazy val cookieMap = new CookieMap(message, codec)
-      cookieMap.add(cookie)
-      cookieMap.add(cookie2)
+      cookieMap += cookie
+      cookieMap += cookie2
 
       assert(cookieMap.size == 1)
       // We expect to see the recently added cookie
@@ -143,6 +143,24 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyF
   // Request tests
   testCookies(() => Request(), "Cookie", "Request")
 
+  test(
+    s"$codec: Adding different cookie objects with the same name to a CookieMap on a " +
+      s"Request more than once, using add, results in a CookieMap with more than one cookie"
+  ) {
+    val message = Request()
+    val cookie = new Cookie("name", "value")
+    val cookie2 = new Cookie("name", "value2")
+    lazy val cookieMap = new CookieMap(message, codec)
+    cookieMap.add(cookie)
+    cookieMap.add(cookie2)
+
+    assert(cookieMap.size == 2)
+    // We expect to see both cookies
+    assert(cookieMap.getAll("name").map(_.value) == Seq("value", "value2"))
+    val cookies = message.headerMap("Cookie")
+    assert(cookies == "name=value; name=value2")
+  }
+
   test("Setting multiple cookies on a Request in a single header adds all the cookies") {
     val request = Request()
     request.headerMap.set("Cookie", "name=value; name2=value2")
@@ -172,19 +190,51 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyF
     assert(cookieMap.values.toSet == Set(cookie, cookie2))
   }
 
-  test("Adding a cookie to a Request with an existing cookie adds it to the header and cookies") {
+  test("Adding a cookie to a Request with an existing cookie adds it to the header and cookies using +=") {
     val request = Request()
     request.headerMap.set("Cookie", "name=value")
     lazy val cookieMap = new CookieMap(request, codec)
 
-    val cookie = new Cookie("name2", "value2")
-    cookieMap += cookie
+    val cookie2 = new Cookie("name2", "value2")
+    val cookie2bis = new Cookie("name2", "value2bis")
+    cookieMap += cookie2
+    cookieMap += cookie2bis
     val cookies = request.headerMap("Cookie")
-    assert(cookies == "name=value; name2=value2" || cookies == "name2=value2; name=value")
+    assert(cookies == "name=value; name2=value2bis" || cookies == "name2=value2bis; name=value")
+  }
+
+  test("Adding a cookie to a Request with an existing cookie adds it to the header and cookies using add") {
+    val request = Request()
+    request.headerMap.set("Cookie", "name=value")
+    lazy val cookieMap = new CookieMap(request, codec)
+
+    val cookie2 = new Cookie("name2", "value2")
+    val cookie2bis = new Cookie("name2", "value2bis")
+    cookieMap.add(cookie2)
+    cookieMap.add(cookie2bis)
+    val cookies = request.headerMap("Cookie")
+    assert(cookies == "name=value; name2=value2; name2=value2bis" || cookies == "name2=value2; name2=value2bis; name=value")
   }
 
   // Response tests
   testCookies(() => Response(), "Set-Cookie", "Response")
+
+  test(
+    s"$codec: Adding different cookie objects with the same name to a CookieMap on a " +
+      s"Response more than once, using add, results in a CookieMap with one cookie"
+  ) {
+    val message = Response()
+    val cookie = new Cookie("name", "value")
+    val cookie2 = new Cookie("name", "value2")
+    lazy val cookieMap = new CookieMap(message, codec)
+    cookieMap.add(cookie)
+    cookieMap.add(cookie2)
+
+    assert(cookieMap.size == 1)
+    // We expect to see the recently added cookie
+    assert(cookieMap("name").value == "value2")
+    assert(message.headerMap("Set-Cookie") == "name=value2")
+  }
 
   test(s"$codec: Adding multiple Set-Cookie headers to a Response adds those cookies") {
     val response = Response()
