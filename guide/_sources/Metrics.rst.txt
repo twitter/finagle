@@ -143,8 +143,8 @@ These stats provide information on the state and behavior of
   A counter of the number of backup requests sent.
 
 **backups/backups_won**
-  A counter of the number of backup requests that completed before the original, regardless of
-  whether they succeeded.
+  A counter of the number of backup requests that completed successfully before the original
+  request.
 
 **backups/budget_exhausted**
   A counter of the number of times the backup request budget (computed using the current value

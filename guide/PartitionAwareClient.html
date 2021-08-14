@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ThriftMux Partition Aware Client &#8212; Finagle 21.6.0 documentation</title>
+    <title>ThriftMux Partition Aware Client &#8212; Finagle 21.8.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -199,11 +199,11 @@ below.</p>
 
 <span class="kd">service</span><span class="w"> </span><span class="nc">DeliveryService</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="c">// non-fanout message</span>
-<span class="w">  </span><span class="n">Box</span><span class="w"> </span><span class="nf">getBox</span><span class="o">(</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AddrInfo</span><span class="w"> </span><span class="n">addrInfo</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">:</span><span class="w"> </span><span class="n">i8</span><span class="w"> </span><span class="n">passcode</span><span class="p">)</span><span class="w"> </span><span class="k">throws</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="n">Box</span><span class="w"> </span><span class="nf">getBox</span><span class="o">(</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AddrInfo</span><span class="w"> </span><span class="n">addrInfo</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="n">i8</span><span class="w"> </span><span class="n">passcode</span><span class="p">)</span><span class="w"> </span><span class="k">throws</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
 <span class="w">    </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AException</span><span class="w"> </span><span class="n">ex</span><span class="w"></span>
 <span class="w">  </span><span class="p">)</span><span class="w"></span>
 <span class="w">  </span><span class="c">// fan-out message, easy to merge</span>
-<span class="w">  </span><span class="kt">list</span><span class="p">&lt;</span><span class="n">Box</span><span class="p">&gt;</span><span class="w"> </span><span class="nf">getBoxes</span><span class="o">(</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="kt">list</span><span class="p">&lt;</span><span class="n">AddrInfo</span><span class="p">&gt;</span><span class="w"> </span><span class="n">listAddrInfo</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">:</span><span class="w"> </span><span class="n">i8</span><span class="w"> </span><span class="n">passcode</span><span class="p">)</span><span class="w"> </span><span class="k">throws</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="kt">list</span><span class="p">&lt;</span><span class="n">Box</span><span class="p">&gt;</span><span class="w"> </span><span class="nf">getBoxes</span><span class="o">(</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="kt">list</span><span class="p">&lt;</span><span class="n">AddrInfo</span><span class="p">&gt;</span><span class="w"> </span><span class="n">listAddrInfo</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="n">i8</span><span class="w"> </span><span class="n">passcode</span><span class="p">)</span><span class="w"> </span><span class="k">throws</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
 <span class="w">    </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AException</span><span class="w"> </span><span class="n">ex</span><span class="w"></span>
 <span class="w">  </span><span class="p">)</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
@@ -222,8 +222,9 @@ below.</p>
 </div>
 <p id="mergeable">Note that this example has the <cite>getBoxes</cite> endpoint to demonstrate how to do messaging
 fan-out. Fan-out requests and responses should be in mergeable formats, which means
-they can be split and merge programmably, such as list&lt;&gt;. Users need to implement the
-request splitting and request/response merging functions, see fan-out sections for details.</p>
+they can be split and merge programmably, such as an array type variable. Users need to
+implement the request splitting and request/response merging functions, see fan-out
+sections for details.</p>
 <div class="section" id="clients-dont-fan-out">
 <h4>Clients don’t fan-out<a class="headerlink" href="#clients-dont-fan-out" title="Permalink to this headline">¶</a></h4>
 <p>Users need to implement a concrete <cite>getHashingKeyAndRequest</cite> method. It is a PartialFunction
@@ -231,8 +232,8 @@ that takes a Thrift request and returns a Map of hash keys to Thrift requests. T
 case is the simplified version of mapping requests, and it always returns a map of one
 user-specified hash key and the Thrift request.</p>
 <p>Turning the example into code:</p>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -267,8 +268,8 @@ function.</p>
 <h4>Clients do messaging fan-out<a class="headerlink" href="#clients-do-messaging-fan-out" title="Permalink to this headline">¶</a></h4>
 <p>Expanding from the example above, fan-out requests need to implement the <cite>getHashingKeyAndRequest</cite>
 with a map of hash keys to sub-requests. It needs to reconstruct the split Thrift requests:</p>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -300,8 +301,8 @@ Users need to instruct the Finagle partitioning layer to merge requests properly
 A <cite>RequestMerger</cite> helper function is for this purpose, which takes a sequence of Thrift
 requests and returns a single request, the Thrift requests should be
 in <a class="reference internal" href="#mergeable">mergeable</a> formats.</p>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">Set the request merging function</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">Set the request merging function</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
@@ -316,8 +317,8 @@ in <a class="reference internal" href="#mergeable">mergeable</a> formats.</p>
 A <cite>ResponseMerger</cite> also needs to be defined to handle batched successes and failures.
 <cite>ResponseMerger</cite> takes a sequence of success response and a sequence of failures then returns a
 <cite>Try[ResponseType]`</cite>:</p>
-<div class="literal-block-wrapper docutils container" id="id10">
-<div class="code-block-caption"><span class="caption-text">Set the response merging function</span><a class="headerlink" href="#id10" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">Set the response merging function</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
@@ -335,9 +336,9 @@ A <cite>ResponseMerger</cite> also needs to be defined to handle batched success
 <p>The last step is to register the defined <cite>RequestMerger</cite> and <cite>ResponseMerger</cite> with
 the <cite>ThriftMethod</cite> within the partitioning strategy by adding mergers
 through <cite>requestMergerRegistry</cite> and <cite>responseMergerRegistry</cite>.
-Note that multiple <a href="#id1"><span class="problematic" id="id2">`</span></a>ThriftMethod`s can be cascaded to the registries.</p>
-<div class="literal-block-wrapper docutils container" id="id11">
-<div class="code-block-caption"><span class="caption-text">Register the Merging functions</span><a class="headerlink" href="#id11" title="Permalink to this code">¶</a></div>
+Note that multiple <cite>ThriftMethod</cite> s can be cascaded to the registries.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">Register the Merging functions</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">hashingPartitioningStrategy</span><span class="o">.</span><span class="n">requestMergerRegistry</span><span class="o">.</span><span class="n">add</span><span class="o">(</span><span class="nc">GetBoxes</span><span class="o">,</span> <span class="n">getBoxesReqMerger</span><span class="o">)</span>
 <span class="n">hashingPartitioningStrategy</span><span class="o">.</span><span class="n">responseMergerRegistry</span><span class="o">.</span><span class="n">add</span><span class="o">(</span><span class="nc">GetBoxes</span><span class="o">,</span> <span class="n">getBoxesRepMerger</span><span class="o">)</span>
@@ -369,11 +370,16 @@ order to reshard. For example, if you want to be able to add or
 remove capacity safely.</li>
 </ul>
 <p>We will show examples of implementing a noResharding strategy, as it shares the fundamental
-ideas with the others. Please check the API scaladoc for the instruction of
-resharding/clusterResharding for more information. Taking the same example
-<a class="reference internal" href="#deliveryservice-thrift">deliveryService-thrift</a>:</p>
-<div class="section" id="id3">
-<h4>Clients don’t fan-out<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+ideas with the others. Taking the same example <a class="reference internal" href="#deliveryservice-thrift">deliveryService-thrift</a>:</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>For resharding strategy, check <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.scala#L445">API docs</a>
+and <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/test/scala/com/twitter/finagle/thrift/exp/partitioning/PartitionAwareClientEndtoEndTest.scala#L359">test example</a>.</p>
+<p class="last">For clusterResharding strategy, check <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.scala#L369">API docs</a>
+and <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/test/scala/com/twitter/finagle/thrift/exp/partitioning/PartitionAwareClientEndtoEndTest.scala#L422">test example</a>.</p>
+</div>
+<div class="section" id="id1">
+<h4>Clients don’t fan-out<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <p>Users need to implement a concrete <cite>getPartitionIdAndRequest</cite> method. It is a PartialFunction
 that takes a Thrift request and returns a Future of Map(partition Id -&gt; Thrift request).
 The non-fanout case is the simplified version of mapping requests, and it always returns a
@@ -383,8 +389,8 @@ by ZooKeeper, and if Aurora is used as the service scheduler, it is the same as 
 Id. The <cite>getPartitionIdAndRequest</cite> utilizes <cite>Future</cite> so that partitioning data can be
 fetched from an RPC call.</p>
 <p>Turning the example into code:</p>
-<div class="literal-block-wrapper docutils container" id="id12">
-<div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id12" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -432,8 +438,8 @@ throw <cite>PartitioningStrategyException</cite> exceptions. If the client is us
 which is per-endpoint, <cite>getPartitionIdAndRequest</cite> is a function.</p>
 <p>Besides, CustomPartitioningStrategy supports applications to use logical partitions,
 which groups a set of shards to one partition, and one shard performs in multiple partitions.</p>
-<div class="literal-block-wrapper docutils container" id="id13">
-<div class="code-block-caption"><span class="caption-text">Set up the logical partition mapping</span><a class="headerlink" href="#id13" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">Set up the logical partition mapping</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -457,13 +463,13 @@ val customPartitioningStrategy = ClientCustomStrategy.noResharding(getPartitionI
 </td></tr></table></div>
 </div>
 </div>
-<div class="section" id="id4">
-<h4>Clients do messaging fan-out<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id2">
+<h4>Clients do messaging fan-out<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
 <p>Expanding from non fan-out setup above, fan-out requests need to implement the
 <cite>getPartitionIdAndRequest</cite> with a Future Map of partition Ids to sub-requests. It needs to
 reconstruct the split Thrift requests:</p>
-<div class="literal-block-wrapper docutils container" id="id14">
-<div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id14" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id10" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
@@ -480,7 +486,7 @@ reconstruct the split Thrift requests:</p>
     <span class="o">})</span>
 <span class="o">}</span>
 
-<span class="k">val</span> <span class="n">customPartitioningStrategy</span> <span class="k">=</span>     <span class="nc">ClientCustomStrategy</span><span class="o">.</span><span class="n">noResharding</span><span class="o">(</span><span class="n">getPartitionIdAndRequest</span><span class="o">,</span> <span class="n">getLogicalPartition</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">customPartitioningStrategy</span> <span class="k">=</span> <span class="nc">ClientCustomStrategy</span><span class="o">.</span><span class="n">noResharding</span><span class="o">(</span><span class="n">getPartitionIdAndRequest</span><span class="o">,</span> <span class="n">getLogicalPartition</span><span class="o">)</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -490,9 +496,9 @@ A <cite>ResponseMerger</cite> also needs to be defined to handle successes and f
 <cite>Try[ResponseType]</cite>.</p>
 <p>The last step is to register the defined <cite>ResponseMerger</cite> with the <cite>ThriftMethod</cite> within the
 partitioning strategy by adding mergers through <cite>responseMergerRegistry</cite>. Note that multiple
-<a href="#id5"><span class="problematic" id="id6">`</span></a>ThriftMethod`s can be cascaded.</p>
-<div class="literal-block-wrapper docutils container" id="id15">
-<div class="code-block-caption"><span class="caption-text">Set the Response mergers and register the Merging functions</span><a class="headerlink" href="#id15" title="Permalink to this code">¶</a></div>
+<cite>ThriftMethod</cite> s can be cascaded.</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">Set the Response mergers and register the Merging functions</span><a class="headerlink" href="#id11" title="Permalink to this code">¶</a></div>
 <div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
@@ -641,8 +647,8 @@ ConsistentHashingFailureAccrual.</dd>
 </ul>
 </li>
 <li><a class="reference internal" href="#how-to-implement-a-custom-strategy">How to implement a custom strategy?</a><ul>
-<li><a class="reference internal" href="#id3">Clients don’t fan-out</a></li>
-<li><a class="reference internal" href="#id4">Clients do messaging fan-out</a></li>
+<li><a class="reference internal" href="#id1">Clients don’t fan-out</a></li>
+<li><a class="reference internal" href="#id2">Clients do messaging fan-out</a></li>
 </ul>
 </li>
 </ul>

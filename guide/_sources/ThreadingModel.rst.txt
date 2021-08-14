@@ -141,12 +141,41 @@ As well as per entire client or server:
     val client: Http.Client = Http.client
       .withExecutionOffloaded(FuturePool.unboundedPool)
 
-Or per entire application (JVM process), using command-line flags:
+Or per entire application (JVM process), using the command-line flag:
+
+.. code-block:: scala
+
+   -com.twitter.finagle.offload.auto=true
+
+Or to enable  with a manually tuned threading configuration:
 
 .. code-block:: scala
 
    -com.twitter.finagle.offload.numWorkers=14 -com.twitter.finagle.netty4.numWorkers=10
 
+Offload Admission Control
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning:: This is an experimental feature and may undergo rapid developmental changes.
+
+.. note:: This AC mechanism can only work if global offloading is enabled.
+
+Using system-wide offloading opens the door to an experimental form of admission control. This
+admission control mechanism, referred to as Offload AC, uses the behavior of the work queue to
+determine when to reject work. The default behavior is to reject work when there is a 20ms wait in
+the queue.
+
+This can be enabled using the flag:
+
+.. code-block:: scala
+
+   -com.twitter.finagle.offload.admissionControl=enabled
+
+Or to manually tune the allowable delay:
+
+.. code-block:: scala
+
+   -com.twitter.finagle.offload.admissionControl=50.milliseconds
 
 .. _ExecutorService: https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ExecutorService.html
 .. _jstack: https://docs.oracle.com/javase/7/docs/technotes/tools/share/jstack.html

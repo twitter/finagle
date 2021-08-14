@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 21.6.0 documentation</title>
+    <title>Metrics &#8212; Finagle 21.8.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -645,8 +645,8 @@ not yet completed.</dd>
 <dt><strong>backups/backups_sent</strong></dt>
 <dd>A counter of the number of backup requests sent.</dd>
 <dt><strong>backups/backups_won</strong></dt>
-<dd>A counter of the number of backup requests that completed before the original, regardless of
-whether they succeeded.</dd>
+<dd>A counter of the number of backup requests that completed successfully before the original
+request.</dd>
 <dt><strong>backups/budget_exhausted</strong></dt>
 <dd>A counter of the number of times the backup request budget (computed using the current value
 of the <cite>maxExtraLoad</cite> param) or client retry budget was exhausted, preventing a backup from being

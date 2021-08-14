@@ -131,11 +131,11 @@ Example thrift service: deliveryService.thrift
 
    service DeliveryService {
      // non-fanout message
-     Box getBox(1: AddrInfo addrInfo, 3: i8 passcode) throws (
+     Box getBox(1: AddrInfo addrInfo, 2: i8 passcode) throws (
        1: AException ex
      )
      // fan-out message, easy to merge
-     list<Box> getBoxes(1: list<AddrInfo> listAddrInfo, 3: i8 passcode) throws (
+     list<Box> getBoxes(1: list<AddrInfo> listAddrInfo, 2: i8 passcode) throws (
        1: AException ex
      )
    }
@@ -154,8 +154,9 @@ Example thrift service: deliveryService.thrift
 
 Note that this example has the `getBoxes` endpoint to demonstrate how to do messaging
 fan-out. Fan-out requests and responses should be in mergeable formats, which means
-they can be split and merge programmably, such as list<>. Users need to implement the
-request splitting and request/response merging functions, see fan-out sections for details.
+they can be split and merge programmably, such as an array type variable. Users need to
+implement the request splitting and request/response merging functions, see fan-out
+sections for details.
 
 Clients don’t fan-out
 """""""""""""""""""""
@@ -248,7 +249,7 @@ A `ResponseMerger` also needs to be defined to handle batched successes and fail
 The last step is to register the defined `RequestMerger` and `ResponseMerger` with
 the `ThriftMethod` within the partitioning strategy by adding mergers
 through `requestMergerRegistry` and `responseMergerRegistry`.
-Note that multiple `ThriftMethod`s can be cascaded to the registries.
+Note that multiple `ThriftMethod` s can be cascaded to the registries.
 
 .. code-block:: scala
   :caption: Register the Merging functions
@@ -282,11 +283,19 @@ There are three sets of APIs to use based on different resharding needs.
    order to reshard. For example, if you want to be able to add or
    remove capacity safely.
 
-
 We will show examples of implementing a noResharding strategy, as it shares the fundamental
-ideas with the others. Please check the API scaladoc for the instruction of
-resharding/clusterResharding for more information. Taking the same example
-deliveryService-thrift_:
+ideas with the others. Taking the same example deliveryService-thrift_:
+
+.. note::
+  For resharding strategy, check :finagle-thrift-src:`API docs
+  <com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.scala#L445>`
+  and :finagle-thrift-test:`test example
+  <com/twitter/finagle/thrift/exp/partitioning/PartitionAwareClientEndtoEndTest.scala#L359>`.
+
+  For clusterResharding strategy, check :finagle-thrift-src:`API docs
+  <com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.scala#L369>`
+  and :finagle-thrift-test:`test example
+  <com/twitter/finagle/thrift/exp/partitioning/PartitionAwareClientEndtoEndTest.scala#L422>`.
 
 Clients don’t fan-out
 """""""""""""""""""""
@@ -370,7 +379,7 @@ reconstruct the split Thrift requests:
       })
   }
 
-  val customPartitioningStrategy =     ClientCustomStrategy.noResharding(getPartitionIdAndRequest, getLogicalPartition)
+  val customPartitioningStrategy = ClientCustomStrategy.noResharding(getPartitionIdAndRequest, getLogicalPartition)
 
 Fan-out messages means the client receives responses from a set of partitions.
 A `ResponseMerger` also needs to be defined to handle successes and failures separately.
@@ -379,7 +388,7 @@ A `ResponseMerger` also needs to be defined to handle successes and failures sep
 
 The last step is to register the defined `ResponseMerger` with the `ThriftMethod` within the
 partitioning strategy by adding mergers through `responseMergerRegistry`. Note that multiple
-`ThriftMethod`s can be cascaded.
+`ThriftMethod` s can be cascaded.
 
 .. code-block:: scala
   :caption: Set the Response mergers and register the Merging functions

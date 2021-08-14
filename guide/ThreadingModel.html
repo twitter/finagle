@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Threading Model &#8212; Finagle 21.6.0 documentation</title>
+    <title>Threading Model &#8212; Finagle 21.8.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -179,9 +179,36 @@ threads in Finagle while preserving the first-class support to Twitter Futures (
   <span class="o">.</span><span class="n">withExecutionOffloaded</span><span class="o">(</span><span class="nc">FuturePool</span><span class="o">.</span><span class="n">unboundedPool</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>Or per entire application (JVM process), using command-line flags:</p>
+<p>Or per entire application (JVM process), using the command-line flag:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">auto</span><span class="k">=</span><span class="kc">true</span>
+</pre></div>
+</div>
+<p>Or to enable  with a manually tuned threading configuration:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">14</span> <span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">10</span>
 </pre></div>
+</div>
+<div class="section" id="offload-admission-control">
+<h3>Offload Admission Control<a class="headerlink" href="#offload-admission-control" title="Permalink to this headline">¶</a></h3>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is an experimental feature and may undergo rapid developmental changes.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This AC mechanism can only work if global offloading is enabled.</p>
+</div>
+<p>Using system-wide offloading opens the door to an experimental form of admission control. This
+admission control mechanism, referred to as Offload AC, uses the behavior of the work queue to
+determine when to reject work. The default behavior is to reject work when there is a 20ms wait in
+the queue.</p>
+<p>This can be enabled using the flag:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">admissionControl</span><span class="k">=</span><span class="n">enabled</span>
+</pre></div>
+</div>
+<p>Or to manually tune the allowable delay:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">admissionControl</span><span class="k">=</span><span class="mf">50.</span><span class="n">milliseconds</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -210,7 +237,10 @@ threads in Finagle while preserving the first-class support to Twitter Futures (
 <li><a class="reference internal" href="#i-o-threads-and-user-code">I/O Threads and User Code</a></li>
 <li><a class="reference internal" href="#blocking-examples">Blocking Examples</a></li>
 <li><a class="reference internal" href="#identifying-blocking">Identifying Blocking</a></li>
-<li><a class="reference internal" href="#offloading">Offloading</a></li>
+<li><a class="reference internal" href="#offloading">Offloading</a><ul>
+<li><a class="reference internal" href="#offload-admission-control">Offload Admission Control</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
