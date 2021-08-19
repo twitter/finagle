@@ -2,11 +2,12 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.Thrift.param.ServiceClass
-import com.twitter.finagle.thrift.thriftscala.{Echo => ScalaEcho}
-import com.twitter.finagle.thrift.thriftjava.{Echo => JavaEcho}
+import com.twitter.finagle.thrift.thriftscala.{Echo => ScalaEcho, ExtendedEcho => ScalaExtendedEcho}
+import com.twitter.finagle.thrift.thriftjava.{Echo => JavaEcho, ExtendedEcho => JavaExtendedEcho}
 import com.twitter.finagle.thrift.thriftscala.Echo.Echo
 import com.twitter.scrooge.{Request, Response}
 import com.twitter.util.Future
+import java.util.NoSuchElementException
 import org.scalatest.funsuite.AnyFunSuite
 import scala.reflect.{ClassTag, classTag}
 
@@ -37,8 +38,15 @@ object ServiceClassParamTest {
 
   class EchoService extends JavaEcho {}
 
+  class EchoExtService extends JavaExtendedEcho {}
+
   class EchoFuture extends ScalaEcho[Future] {
     override def echo(msg: String): Future[String] = ???
+  }
+
+  class EchoExtFuture extends ScalaExtendedEcho[Future] {
+    override def echo(msg: String): Future[String] = ???
+    override def getStatus(): Future[String] = ???
   }
 }
 
@@ -48,31 +56,47 @@ class ServiceClassParamTest extends AnyFunSuite {
   private def fqn[A: ClassTag]: String = ServiceClass(
     Some(classTag[A].runtimeClass)).fullyQualifiedName.get
 
-  test("extractServiceFqn for Scala clients") {
-    assert(fqn[ScalaEcho.MethodPerEndpoint] == "com.twitter.finagle.thrift.thriftscala.Echo")
-    assert(fqn[ScalaEcho.ServicePerEndpoint] == "com.twitter.finagle.thrift.thriftscala.Echo")
-    assert(fqn[ScalaEcho.ServiceIface] == "com.twitter.finagle.thrift.thriftscala.Echo")
-    assert(fqn[ScalaEcho.FutureIface] == "com.twitter.finagle.thrift.thriftscala.Echo")
-    assert(fqn[ScalaEcho[Future]] == "com.twitter.finagle.thrift.thriftscala.Echo")
+  val expectedScala = "com.twitter.finagle.thrift.thriftscala.Echo"
+  val expectedJava = "com.twitter.finagle.thrift.thriftjava.Echo"
+  val expectedExtendedScala = "com.twitter.finagle.thrift.thriftscala.ExtendedEcho"
+  val expectedExtendedJava = "com.twitter.finagle.thrift.thriftjava.ExtendedEcho"
+
+  test("extractServiceFqn for scala clients") {
+    assert(fqn[ScalaEcho.MethodPerEndpoint] == expectedScala)
+    assert(fqn[ScalaEcho.ServicePerEndpoint] == expectedScala)
+    assert(fqn[ScalaEcho.ServiceIface] == expectedScala)
+    assert(fqn[ScalaEcho.FutureIface] == expectedScala)
+    assert(fqn[ScalaEcho[Future]] == expectedScala)
+    assert(fqn[ScalaExtendedEcho[Future]] == expectedExtendedScala)
   }
 
-  test("extractServiceFqn for Java clients") {
-    assert(fqn[JavaEcho.ServiceIface] == "com.twitter.finagle.thrift.thriftjava.Echo")
-    assert(fqn[JavaEcho.Iface] == "com.twitter.finagle.thrift.thriftjava.Echo")
-    assert(fqn[JavaEcho] == "com.twitter.finagle.thrift.thriftjava.Echo")
+  test("extractServiceFqn for java clients") {
+    assert(fqn[JavaEcho.ServiceIface] == expectedJava)
+    assert(fqn[JavaEcho.Iface] == expectedJava)
+    assert(fqn[JavaEcho] == expectedJava)
+    assert(fqn[JavaExtendedEcho] == expectedExtendedJava)
   }
 
   test("extractServiceFqn for scala servers") {
-    assert(fqn[EchoMPE] == "com.twitter.finagle.thrift.thriftscala.Echo")
-    assert(fqn[EchoSPE] == "com.twitter.finagle.thrift.thriftscala.Echo")
-    assert(fqn[EchoReqRepSPE] == "com.twitter.finagle.thrift.thriftscala.Echo")
-    assert(fqn[EchoFutureIface] == "com.twitter.finagle.thrift.thriftscala.Echo")
-    assert(fqn[EchoFuture] == "com.twitter.finagle.thrift.thriftscala.Echo")
+    assert(fqn[EchoMPE] == expectedScala)
+    assert(fqn[EchoFutureIface] == expectedScala)
+    assert(fqn[EchoFuture] == expectedScala)
+    assert(fqn[EchoSPE] == expectedScala)
+    assert(fqn[EchoReqRepSPE] == expectedScala)
+    assert(fqn[EchoExtFuture] == expectedExtendedScala)
   }
 
   test("extractServiceFqn for java servers") {
-    assert(fqn[EchoServiceIface] == "com.twitter.finagle.thrift.thriftjava.Echo")
-    assert(fqn[EchoIface] == "com.twitter.finagle.thrift.thriftjava.Echo")
-    assert(fqn[EchoService] == "com.twitter.finagle.thrift.thriftjava.Echo")
+    assert(fqn[EchoServiceIface] == expectedJava)
+    assert(fqn[EchoIface] == expectedJava)
+    assert(fqn[EchoService] == expectedJava)
+    assert(fqn[EchoExtService] == expectedExtendedJava)
+  }
+
+  test("Invalid Finagle service class returns None") {
+    class NotAService
+    intercept[NoSuchElementException] {
+      fqn[NotAService]
+    }
   }
 }

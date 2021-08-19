@@ -6,7 +6,7 @@ import java.lang.reflect.Constructor
 import org.apache.thrift.protocol.TProtocolFactory
 
 private[twitter] object ThriftUtil {
-  private type BinaryService = Service[Array[Byte], Array[Byte]]
+  private[finagle] type BinaryService = Service[Array[Byte], Array[Byte]]
 
   private def findClass1(name: String): Option[Class[_]] =
     try Some(Class.forName(name))
@@ -14,7 +14,7 @@ private[twitter] object ThriftUtil {
       case _: ClassNotFoundException => None
     }
 
-  private def findClass[A](name: String): Option[Class[A]] =
+  private[finagle] def findClass[A](name: String): Option[Class[A]] =
     for {
       cls <- findClass1(name)
     } yield cls.asInstanceOf[Class[A]]
@@ -26,11 +26,36 @@ private[twitter] object ThriftUtil {
       case _: NoSuchMethodException => None
     }
 
-  private def findRootWithSuffix(str: String, suffix: String): Option[String] =
-    if (str.endsWith(suffix))
-      Some(str.stripSuffix(suffix))
-    else
-      None
+  // This is based on the generated stubs from Scrooge.
+  private val ScroogeGeneratedSuffixes = Seq(
+    "$Iface",
+    "$ServiceIface",
+    "$FutureIface",
+    "$MethodPerEndpoint",
+    "$ServicePerEndpoint",
+    // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
+    "$MethodIface",
+    // handles ServiceB extends ServiceA, then using ServiceB$MethodPerEndpoint$MethodPerEndpointImpl
+    "$MethodPerEndpoint$MethodPerEndpointImpl",
+    "$ReqRepServicePerEndpoint",
+    // handles ServiceB extends ServiceA, then using ServiceB$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl
+    "$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl"
+  )
+
+  /**
+   * Strip Scrooge generated suffix from Scala and Java clients.
+   * For service classes that are already Scrooge-generated type
+   */
+  private[finagle] def stripSuffix(iface: Class[_]): String = {
+    val ifaceName = iface.getName
+    ScroogeGeneratedSuffixes
+      .find(s => ifaceName.endsWith(s)).map(s => ifaceName.stripSuffix(s)).getOrElse(iface.getName)
+  }
+
+  private[finagle] val FinagledServerSuffixJava = s"$$Service"
+  private[finagle] val FinagledServerSuffixScala = "$FinagleService"
+  private[finagle] val FinagledClientSuffixJava = "$ServiceToClient"
+  private[finagle] val FinagledClientSuffixScala = "$FinagledClient"
 
   /**
    * Construct an `Iface` based on an underlying [[com.twitter.finagle.Service]]
@@ -44,10 +69,10 @@ private[twitter] object ThriftUtil {
     // This is used with Scrooge's Java generated code.
     // The class name passed in should be ServiceName$ServiceIface.
     // Will try to create a ServiceName$ServiceToClient instance.
-    def tryJavaServiceNameDotServiceIface(iface: Class[_]): Option[Iface] =
+    def tryJavaServiceNameDotServiceIface(iface: Class[_]): Option[Iface] = {
+      val baseName: String = stripSuffix(iface)
       for {
-        baseName <- findRootWithSuffix(iface.getName, "$ServiceIface")
-        clientCls <- findClass[Iface](baseName + "$ServiceToClient")
+        clientCls <- findClass[Iface](baseName + FinagledClientSuffixJava)
         cons <- findConstructor(
           clientCls,
           classOf[Service[_, _]],
@@ -56,23 +81,23 @@ private[twitter] object ThriftUtil {
       } yield {
         cons.newInstance(underlying, clientParam)
       }
+    }
 
     // This is used with Scrooge's Scala generated code.
     // The class name passed in should be ServiceName$MethodPerEndpoint
     // or the higher-kinded version, ServiceName[Future].
     // Will try to create a ServiceName$FinagledClient instance.
-    def tryScalaServiceNameIface(iface: Class[_]): Option[Iface] =
+    def tryScalaServiceNameIface(iface: Class[_]): Option[Iface] = {
+      val baseName: String = stripSuffix(iface)
       for {
-        baseName <- findRootWithSuffix(iface.getName, "$FutureIface")
-          .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint"))
-          .orElse(Some(cls.getName))
-        clientCls <- findClass[Iface](baseName + "$FinagledClient")
+        clientCls <- findClass[Iface](baseName + FinagledClientSuffixScala)
         cons <- findConstructor(
           clientCls,
           classOf[Service[_, _]],
           classOf[RichClientParam]
         )
       } yield cons.newInstance(underlying, clientParam)
+    }
 
     def tryClass(cls: Class[_]): Option[Iface] =
       tryJavaServiceNameDotServiceIface(cls)
@@ -99,37 +124,24 @@ private[twitter] object ThriftUtil {
     // This is used with Scrooge's Java generated code.
     // The class passed in should be ServiceName$ServiceIface.
     // Will try to create a ServiceName$Service instance.
-    def tryThriftFinagleService(iface: Class[_]): Option[BinaryService] =
+    def tryThriftFinagleService(iface: Class[_]): Option[BinaryService] = {
+      val baseName: String = stripSuffix(iface)
       for {
-        baseName <- findRootWithSuffix(iface.getName, "$ServiceIface")
-        serviceCls <- findClass[BinaryService](baseName + s"$$Service")
+        serviceCls <- findClass[BinaryService](baseName + FinagledServerSuffixJava)
         cons <- findConstructor(serviceCls, iface, classOf[RichServerParam])
       } yield {
         cons.newInstance(impl, serverParam)
       }
+    }
 
     // This is used with Scrooge's Scala generated code.
     // The class passed in should be ServiceName$MethodPerEndpoint,
     // or the higher-kinded version, ServiceName[Future].
     // Will try to create a ServiceName$FinagleService.
-    def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
+    def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] = {
+      val baseName: String = stripSuffix(iface)
       (for {
-        baseName <-
-          findRootWithSuffix(iface.getName, "$FutureIface")
-            .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint"))
-            // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
-            .orElse(findRootWithSuffix(iface.getName, "$MethodIface"))
-            // handles ServiceB extends ServiceA, then using ServiceB$MethodPerEndpoint$MethodPerEndpointImpl
-            .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint$MethodPerEndpointImpl"))
-            // handles ServiceB extends ServiceA, then using ServiceB$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl
-            .orElse(
-              findRootWithSuffix(
-                iface.getName,
-                "$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl"
-              )
-            )
-            .orElse(Some(iface.getName))
-        serviceCls <- findClass[BinaryService](baseName + "$FinagleService")
+        serviceCls <- findClass[BinaryService](baseName + FinagledServerSuffixScala)
         baseClass <- findClass1(baseName)
       } yield {
         findConstructor(
@@ -138,6 +150,7 @@ private[twitter] object ThriftUtil {
           classOf[RichServerParam]
         ).map { cons => cons.newInstance(impl, serverParam) }
       }).flatten
+    }
 
     def tryClass(cls: Class[_]): Option[BinaryService] =
       tryThriftFinagleService(cls)
