@@ -16,9 +16,9 @@ private class FinalizedSslContext(underlying: SslContext) extends SslContext {
 
   def cipherSuites(): JList[String] = underlying.cipherSuites()
 
-  def sessionCacheSize(): Long = underlying.sessionCacheSize()
+  override def sessionCacheSize(): Long = underlying.sessionCacheSize()
 
-  def sessionTimeout(): Long = underlying.sessionTimeout()
+  override def sessionTimeout(): Long = underlying.sessionTimeout()
 
   def applicationProtocolNegotiator(): ApplicationProtocolNegotiator =
     underlying.applicationProtocolNegotiator()

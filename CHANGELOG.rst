@@ -10,6 +10,8 @@ Unreleased
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Upgrade to Netty 4.1.67.Final and netty-tcnative 2.0.40.Final. ``PHAB_ID=D726343``
+
 * finagle: Bump version of Jackson to 2.11.4. ``PHAB_ID=D727879``
 
 21.8.0 (No 21.7.0 Release)

@@ -193,7 +193,7 @@ private[finagle] object Bijections {
           result.headers
             .add(NettyHttp.HttpHeaderNames.TRANSFER_ENCODING, NettyHttp.HttpHeaderValues.CHUNKED)
         } else {
-          // Make sure we don't have a `Transfer-Encooding: chunked` header and `Content-Length` headers
+          // Make sure we don't have a `Transfer-Encoding: chunked` header and `Content-Length` headers
           result.headers.remove(NettyHttp.HttpHeaderNames.TRANSFER_ENCODING)
         }
         result

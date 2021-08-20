@@ -40,6 +40,11 @@ class JsonpFilter[Req <: Request] extends SimpleFilter[Req, Response] {
           )
         )
         response.mediaType = MediaType.Javascript
+        response.contentLength match {
+          case Some(len: Long) =>
+            response.contentLength = len + callback.length + JsonpFilter.ExtraCharacters
+          case None => // Likely using Transfer-Encoding instead, no-op
+        }
       }
       response
     }
@@ -69,4 +74,5 @@ object JsonpFilter extends JsonpFilter[Request] {
   private val RightParenSemicolon = Buf.Utf8(");")
   // Prepended to address CVE-2014-4671
   private val Comment = Buf.Utf8("/**/")
+  private val ExtraCharacters = 7
 }
