@@ -7,6 +7,11 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Bump version of Jackson to 2.11.4. ``PHAB_ID=D727879``
+
 21.8.0 (No 21.7.0 Release)
 --------------------------
 
