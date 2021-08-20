@@ -8,6 +8,13 @@ import com.twitter.finagle.service.MetricBuilderRegistry.{
   RequestCounter,
   SuccessCounter
 }
+import com.twitter.finagle.service.StatsFilter.Descriptions.{
+  dispatch,
+  failures,
+  latency,
+  pending,
+  success
+}
 import com.twitter.finagle.service.StatsFilter.RPCMetrics
 import com.twitter.finagle.stats._
 import com.twitter.util._
@@ -157,6 +164,14 @@ object StatsFilter {
     latencyStat: Stat,
     responseClassifier: ResponseClassifier,
     statsReceiver: StatsReceiver)
+
+  object Descriptions {
+    val dispatch = Some("A counter of the total number of successes + failures.")
+    val success = Some("A counter of the total number of successes.")
+    val latency = Some("A histogram of the latency of requests in milliseconds.")
+    val pending = Some("A gauge of the current total number of outstanding requests.")
+    val failures = Some("A counter of the number of times any failure has been observed.")
+  }
 }
 
 /**
@@ -298,17 +313,17 @@ class StatsFilter[Req, Rep] private[service] (
 
   private[this] val outstandingRequestCount = new LongAdder()
   private[this] val outstandingRequestCountGauge =
-    statsReceiver.addGauge("pending") {
+    statsReceiver.addGauge(pending, "pending") {
       outstandingRequestCount.sum()
     }
 
   private[this] val configuredMetrics = RPCMetrics(
-    requestCount = statsReceiver.counter("requests"),
-    successCount = statsReceiver.counter("success"),
+    requestCount = statsReceiver.counter(dispatch, "requests"),
+    successCount = statsReceiver.counter(success, "success"),
     // ExceptionStatsHandler creates the failure counter lazily.
     // We need to eagerly register this counter in metrics for success rate expression.
-    failureCount = statsReceiver.counter(ExceptionStatsHandler.Failures),
-    latencyStat = statsReceiver.stat(s"request_latency_$latencyStatSuffix"),
+    failureCount = statsReceiver.counter(failures, ExceptionStatsHandler.Failures),
+    latencyStat = statsReceiver.stat(latency, s"request_latency_$latencyStatSuffix"),
     responseClassifier = responseClassifier,
     statsReceiver = statsReceiver
   )
