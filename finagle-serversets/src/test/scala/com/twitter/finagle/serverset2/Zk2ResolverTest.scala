@@ -7,31 +7,28 @@ import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.util.RandomSocket
 import java.net.InetSocketAddress
-import org.scalactic.source.Position
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.{Span, SpanSugar}
-import org.scalatest.{BeforeAndAfter, Tag}
+import org.scalatest.BeforeAndAfter
 import scala.jdk.CollectionConverters._
 import org.scalatest.funsuite.AnyFunSuite
 
-class Zk2ResolverTest
-    extends AnyFunSuite
-    with BeforeAndAfter
-    with Eventually
-    with PatienceConfiguration
-    with SpanSugar {
+class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually with SpanSugar {
   val zkTimeout: Span = 100.milliseconds
 
-  implicit val config = PatienceConfig(timeout = 45.seconds, interval = zkTimeout)
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = 45.seconds, interval = zkTimeout)
 
   // The Zk2 resolver has a hardcoded session timeout of 10 seconds and a stabilization epoch of
   // 40 seconds. We give these tests double that to observe nodes leaving a serverset.
   // Because this is so high, we don't check more than once every 5 seconds.
   @volatile var inst: ZkInstance = _
-  val stabilizationEpoch = 40.seconds
-  val stabilizationTimeout = PatienceConfiguration.Timeout(stabilizationEpoch * 2)
-  val stabilizationInterval = PatienceConfiguration.Interval(5.seconds)
+  val stabilizationEpoch: Span = 40.seconds
+  val stabilizationTimeout: PatienceConfiguration.Timeout =
+    PatienceConfiguration.Timeout(stabilizationEpoch * 2)
+  val stabilizationInterval: PatienceConfiguration.Interval =
+    PatienceConfiguration.Interval(5.seconds)
 
   val shardId = 42
   val emptyMetadata = Map.empty[String, String]

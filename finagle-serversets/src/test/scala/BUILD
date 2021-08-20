@@ -60,14 +60,10 @@ junit_tests(
     sources = [
         "com/twitter/*.scala",
         "com/twitter/finagle/serverset2/*.scala",
-        "com/twitter/finagle/serverset2/addr/*.scala",
         "com/twitter/finagle/serverset2/naming/*.scala",
         "com/twitter/finagle/zookeeper/*.scala",
     ],
-    tags = [
-        "bazel-compatible",
-        "known-to-fail-jira:CSL-11243",
-    ],
+    tags = ["bazel-compatible"],
     dependencies = [
         ":core",
         "3rdparty/jvm/com/google/inject:guice",

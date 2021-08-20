@@ -7,13 +7,13 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.io.Buf
 import com.twitter.util._
-import org.scalatest.concurrent.Eventually._
+import org.scalatest.concurrent.Eventually
 import org.scalatest.time._
 import org.scalatest.BeforeAndAfter
 import org.scalatest.funsuite.AnyFunSuite
 
-class ZkSessionEndToEndTest extends AnyFunSuite with BeforeAndAfter {
-  val zkTimeout = 100.milliseconds
+class ZkSessionEndToEndTest extends AnyFunSuite with BeforeAndAfter with Eventually {
+  val zkTimeout: Duration = 100.milliseconds
 
   // RetryStream doesn't work with MockTimer (yes, even after we tick it).
   // So, use zero back off to make test deterministic.
@@ -27,7 +27,7 @@ class ZkSessionEndToEndTest extends AnyFunSuite with BeforeAndAfter {
 
   def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
 
-  implicit val patienceConfig =
+  override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(timeout = toSpan(1.second), interval = toSpan(zkTimeout))
 
   /* This can be useful if you want to retain ZK logging output for debugging.
@@ -48,12 +48,12 @@ class ZkSessionEndToEndTest extends AnyFunSuite with BeforeAndAfter {
   }
 
   test("Session expiration 2") {
-    implicit val timer = new MockTimer
-    val connected: (WatchState => Boolean) = {
+    implicit val timer: MockTimer = new MockTimer
+    val connected: WatchState => Boolean = {
       case WatchState.SessionState(SessionState.SyncConnected) => true
       case _ => false
     }
-    val notConnected: (WatchState => Boolean) = w => !connected(w)
+    val notConnected: WatchState => Boolean = w => !connected(w)
     val session1 = ZkSession.retrying(
       retryStream,
       () => ZkSession(retryStream, inst.zookeeperConnectString, statsReceiver = NullStatsReceiver)
@@ -100,7 +100,7 @@ class ZkSessionEndToEndTest extends AnyFunSuite with BeforeAndAfter {
   }
 
   test("ZkSession.retrying") {
-    implicit val timer = new MockTimer
+    implicit val timer: MockTimer = new MockTimer
     val watch = Stopwatch.start()
     val varZkSession = ZkSession.retrying(
       retryStream,

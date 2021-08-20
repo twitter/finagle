@@ -7,17 +7,17 @@ import com.twitter.thrift.Status._
 import com.twitter.util.{Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
 import org.scalatest.BeforeAndAfter
-import org.scalatest.concurrent.Eventually._
+import org.scalatest.concurrent.Eventually
 import org.scalatest.time._
 import scala.jdk.CollectionConverters._
 import org.scalatest.funsuite.AnyFunSuite
 
-class ZkResolverTest extends AnyFunSuite with BeforeAndAfter {
-  val zkTimeout = 100.milliseconds
+class ZkResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually {
+  val zkTimeout: Duration = 100.milliseconds
   var inst: ZkInstance = _
   val factory = new ZkClientFactory(zkTimeout)
 
-  implicit val patienceConfig =
+  override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(timeout = toSpan(1.second), interval = toSpan(zkTimeout))
 
   before {
@@ -38,8 +38,8 @@ class ZkResolverTest extends AnyFunSuite with BeforeAndAfter {
       val clust = new ZkGroup(serverSet, "/foo/bar/baz")
       assert(clust().isEmpty)
 
-      val ephAddr1 = RandomSocket.nextAddress
-      val ephAddr2 = RandomSocket.nextAddress
+      val ephAddr1 = RandomSocket.nextAddress()
+      val ephAddr2 = RandomSocket.nextAddress()
 
       serverSet.join(ephAddr1, Map[String, InetSocketAddress]().asJava, ALIVE)
 
@@ -67,9 +67,9 @@ class ZkResolverTest extends AnyFunSuite with BeforeAndAfter {
       assert(clust().isEmpty)
 
       // assert that 3 hosts show up in an unfiltered cluster
-      val ephAddr1 = RandomSocket.nextAddress
-      val ephAddr2 = RandomSocket.nextAddress
-      val ephAddr3 = RandomSocket.nextAddress
+      val ephAddr1 = RandomSocket.nextAddress()
+      val ephAddr2 = RandomSocket.nextAddress()
+      val ephAddr3 = RandomSocket.nextAddress()
 
       Seq(ephAddr1, ephAddr2, ephAddr3).foreach { sockAddr =>
         serverSet
@@ -141,9 +141,9 @@ class ZkResolverTest extends AnyFunSuite with BeforeAndAfter {
       assert(clust().isEmpty)
 
       // assert that 3 hosts show up in an unfiltered cluster
-      val ephAddr1 = RandomSocket.nextAddress
-      val ephAddr2 = RandomSocket.nextAddress
-      val ephAddr3 = RandomSocket.nextAddress
+      val ephAddr1 = RandomSocket.nextAddress()
+      val ephAddr2 = RandomSocket.nextAddress()
+      val ephAddr3 = RandomSocket.nextAddress()
       Seq(ephAddr1, ephAddr2, ephAddr3).foreach { sockAddr =>
         serverSet
           .join(

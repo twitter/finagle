@@ -6,22 +6,17 @@ import com.twitter.finagle.{Addr, Address, Announcer, Name, Resolver}
 import com.twitter.util.{Await, Duration, Var}
 import java.io.{BufferedReader, InputStreamReader}
 import java.net.{InetSocketAddress, URL}
-import org.scalactic.source.Position
-import org.scalatest.concurrent.Eventually._
-import org.scalatest.concurrent.PatienceConfiguration
+import org.scalatest.concurrent.Eventually
 import org.scalatest.exceptions.TestFailedDueToTimeoutException
 import org.scalatest.time.{Span, SpanSugar}
-import org.scalatest.{BeforeAndAfter, Tag}
+import org.scalatest.BeforeAndAfter
 import org.scalatest.funsuite.AnyFunSuite
 
-class ZkAnnouncerTest
-    extends AnyFunSuite
-    with BeforeAndAfter
-    with SpanSugar
-    with PatienceConfiguration {
+class ZkAnnouncerTest extends AnyFunSuite with BeforeAndAfter with Eventually with SpanSugar {
 
   val zkTimeout: Span = 100.milliseconds
-  implicit val config = PatienceConfig(timeout = 45.seconds, interval = zkTimeout)
+  implicit override val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = 45.seconds, interval = zkTimeout)
 
   @volatile var inst: ZkInstance = _
   val port1 = 80
@@ -48,7 +43,7 @@ class ZkAnnouncerTest
   private[this] def zk2resolve(path: String, endpoint: String): Name =
     Resolver.eval("zk2!" + inst.zookeeperConnectString + "!" + path + "!" + endpoint)
 
-  def hostPath = "localhost:%d!%s".format(inst.zookeeperAddress.getPort, path)
+  def hostPath: String = "localhost:%d!%s".format(inst.zookeeperAddress.getPort, path)
 
   private[this] def zk2ResolvedAddress(
     ia: InetSocketAddress,
