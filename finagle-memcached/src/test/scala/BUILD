@@ -23,10 +23,7 @@ junit_tests(
     name = "scala",
     sources = ["**/*.scala"] + exclude_globs(EXTERNAL_SOURCES),
     compiler_option_sets = ["fatal_warnings"],
-    tags = [
-        "bazel-compatible",
-        "known-jdk11-failure:VM-4210",
-    ],
+    tags = ["bazel-compatible"],
     dependencies = [
         ":external",
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
