@@ -1,14 +1,17 @@
 package com.twitter.finagle.postgresql.machine
 
 import com.twitter.finagle.postgresql._
-import com.twitter.finagle.postgresql.BackendMessage.BindComplete
-import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
-import com.twitter.finagle.postgresql.BackendMessage.CommandTag
-import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
-import com.twitter.finagle.postgresql.BackendMessage.NoData
-import com.twitter.finagle.postgresql.BackendMessage.NoTx
-import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
-import com.twitter.finagle.postgresql.BackendMessage.RowDescription
+import com.twitter.finagle.postgresql.BackendMessage.{
+  BindComplete,
+  CommandComplete,
+  CommandTag,
+  EmptyQueryResponse,
+  NoData,
+  NoTx,
+  NoticeResponse,
+  ReadyForQuery,
+  RowDescription
+}
 import com.twitter.finagle.postgresql.FrontendMessage.Bind
 import com.twitter.finagle.postgresql.FrontendMessage.Describe
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
@@ -162,6 +165,45 @@ class ExecuteMachineSpec
           )
           baseSpec(name, portalName, parameters, rs.desc)(
             steps ++ postSteps: _*
+          )
+
+          rowReader mustBe defined
+          val rows = Await.result(rowReader.get.toSeq.liftToTry)
+          // NOTE: this isn't as strict as it could be.
+          //   Ideally we would only expect an error when one was injected
+          rows must beLike[Try[Seq[Response.Row]]] {
+            case Return(rows) => rows must be(rs.rows.map(_.values))
+            case Throw(PgSqlServerError(_)) => succeed // injected error case
+          }
+        }
+    }
+
+    "support result sets with notice messages" in prop {
+      (name: Name, portalName: Name, parameters: IndexedSeq[WireValue], rs: TestResultSet) =>
+        whenever(rs.rows.nonEmpty) {
+          var rowReader: Option[Response.ResultSet] = None
+          val steps = rs.rows match {
+            case Nil => sys.error("unexpected result set")
+            case head :: tail =>
+              List(
+                receive(head),
+                checkResult("responds") {
+                  case Transition(_, Respond(Return(r @ Response.ResultSet(fields, _, _)))) =>
+                    rowReader = Some(r)
+                    fields must be(rs.desc.rowFields)
+                },
+                receive(NoticeResponse(Map.empty)),
+              ) ++ tail.map(receive(_))
+          }
+          val postSteps = List(
+            receive(CommandComplete(CommandTag.AffectedRows(CommandTag.Select, rs.rows.size)))
+          )
+          val preSteps = List(
+            receive(NoticeResponse(Map.empty))
+          )
+
+          baseSpec(name, portalName, parameters, rs.desc)(
+            preSteps ++ steps ++ postSteps: _*
           )
 
           rowReader mustBe defined

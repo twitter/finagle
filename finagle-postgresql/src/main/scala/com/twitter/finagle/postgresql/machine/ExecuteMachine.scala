@@ -10,6 +10,7 @@ import com.twitter.finagle.postgresql.BackendMessage.{
   ErrorResponse,
   InTx,
   NoData,
+  NoticeResponse,
   PortalSuspended,
   ReadyForQuery,
   RowDescription
@@ -150,6 +151,13 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters)
 
       case (_, e: ErrorResponse) =>
         Transition(Syncing(Some(Throw(PgSqlServerError(e)))), Send(Sync))
+
+      case (state, _: NoticeResponse) => Transition(state, NoOp)
+
+      case (r: StreamResult, msg) =>
+        val err = PgSqlNoSuchTransition("ExecuteMachine", r, msg)
+        r.pipe.fail(err)
+        throw err
 
       case (state, msg) => throw PgSqlNoSuchTransition("ExecuteMachine", state, msg)
     }
