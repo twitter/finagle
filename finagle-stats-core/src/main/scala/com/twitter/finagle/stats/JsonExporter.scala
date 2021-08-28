@@ -13,6 +13,7 @@ import com.twitter.logging.Logger
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.tunable.Tunable
+import java.util.{Map => JMap}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.io.IOException
 import scala.collection.immutable
@@ -58,6 +59,20 @@ object JsonExporter {
       case regexes => mergedRegex(regexes)
     }
   }
+
+  private def denylistDebugSample[A](
+    sample: collection.Map[String, A],
+    verbose: Option[String => Boolean],
+    verbosityMap: JMap[String, Verbosity]
+  ): collection.Map[String, A] =
+    verbose match {
+      case Some(pattern) =>
+        sample
+          .filterKeys(name => verbosityMap.get(name) != Verbosity.Debug || pattern(name)).toMap
+
+      case None =>
+        sample.filterKeys(name => verbosityMap.get(name) != Verbosity.Debug).toMap
+    }
 }
 
 /**
@@ -193,10 +208,11 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
 
     // We have to denylist debug metrics before we apply formatting, which may change
     // the names.
+    val verbosityMap = metrics.verbosity
     val values = SampledValues(
-      denylistDebugSample(gauges, verbosePatten),
-      denylistDebugSample(counters, verbosePatten),
-      denylistDebugSample(histos, verbosePatten)
+      denylistDebugSample(gauges, verbosePatten, verbosityMap),
+      denylistDebugSample(counters, verbosePatten, verbosityMap),
+      denylistDebugSample(histos, verbosePatten, verbosityMap)
     )
 
     val formatted = StatsFormatter.default(values)
@@ -210,17 +226,5 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
     } else {
       writer.writeValueAsString(sampleFiltered)
     }
-  }
-
-  private final def denylistDebugSample[A](
-    sample: collection.Map[String, A],
-    verbose: Option[String => Boolean]
-  ): collection.Map[String, A] = verbose match {
-    case Some(pattern) =>
-      sample
-        .filterKeys(name => metrics.verbosity.get(name) != Verbosity.Debug || pattern(name)).toMap
-
-    case None =>
-      sample.filterKeys(name => metrics.verbosity.get(name) != Verbosity.Debug).toMap
   }
 }
