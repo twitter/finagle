@@ -91,13 +91,12 @@ Timer
 <<<<<
 
 **finagle/timer/pending_tasks** `verbosity:debug`
-  A stat of the number of pending tasks to run for
-  :src:`HashedWheelTimer.Default <com/twitter/finagle/util/HashedWheelTimer.scala>`.
+  A stat of the number of pending tasks to run for the
+  :src:`DefaultTimer <com/twitter/finagle/util/DefaultTimer.scala>`.
 
 **finagle/timer/deviation_ms** `verbosity:debug`
-  A stat of the deviation in milliseconds of tasks scheduled on
-  :src:`HashedWheelTimer.Default <com/twitter/finagle/util/HashedWheelTimer.scala>`
-  from their expected time.
+  A stat of the deviation in milliseconds of tasks scheduled on the
+  :src:`DefaultTimer <com/twitter/finagle/util/DefaultTimer.scala>` from their expected time.
 
 **finagle/timer/slow**
   A counter of the number of tasks found to be executing for longer
