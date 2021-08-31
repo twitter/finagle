@@ -14,6 +14,10 @@ Runtime Behavior Changes
 
 * finagle: Bump version of Jackson to 2.11.4. ``PHAB_ID=D727879``
 
+* finagle-core: OffloadFilter hands off work from Netty I/O thread to the offload CPU thread pool
+  right after we enter the Finagle stack by default. Previously this could be enabled via a toggle.
+  The `com.twitter.finagle.OffloadEarly` toggle has been removed. ``PHAB_ID=D733526``
+
 21.8.0 (No 21.7.0 Release)
 --------------------------
 

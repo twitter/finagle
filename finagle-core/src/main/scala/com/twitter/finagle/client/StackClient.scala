@@ -130,14 +130,7 @@ object StackClient {
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
    * @see [[com.twitter.finagle.client.LatencyCompensation]]
    */
-  def endpointStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] =
-    // temporary standard behaviour for those calling this API from outside
-    // of StackClient.scala
-    endpointStack(false)
-
-  private def endpointStack[Req, Rep](
-    shouldOffloadEarly: Boolean
-  ): Stack[ServiceFactory[Req, Rep]] = {
+  def endpointStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     // Ensure that we have performed global initialization.
     com.twitter.finagle.Init()
 
@@ -146,17 +139,14 @@ object StackClient {
      */
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](nilStack[Req, Rep])
 
-    if (shouldOffloadEarly) {
-
-      /**
-       * `OffloadFilter` shifts future continuations (callbacks and
-       * transformations) off of IO threads into a configured `FuturePool`.
-       * This module is intentionally placed at the top of the stack
-       * such that execution context shifts as client's response leaves
-       * the stack and enters the application code.
-       */
-      stk.push(OffloadFilter.client)
-    }
+    /**
+     * `OffloadFilter` shifts future continuations (callbacks and
+     * transformations) off of IO threads into a configured `FuturePool`.
+     * This module is intentionally placed at the top of the stack
+     * such that execution context shifts as client's response leaves
+     * the stack and enters the application code.
+     */
+    stk.push(OffloadFilter.client)
 
     /**
      * `prepConn` is the bottom of the stack by definition. This position represents
@@ -322,9 +312,7 @@ object StackClient {
      * as "module A is pushed after module B".
      */
 
-    val shouldOffloadEarly = offloadEarly() || com.twitter.finagle.offload.auto()
-
-    val stk = new StackBuilder(endpointStack[Req, Rep](shouldOffloadEarly))
+    val stk = new StackBuilder(endpointStack[Req, Rep])
 
     /*
      * These modules balance requests across cluster endpoints and
@@ -488,9 +476,6 @@ object StackClient {
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
     stk.push(ForwardAnnotation.module)
-    if (!shouldOffloadEarly) {
-      stk.push(OffloadFilter.client)
-    }
     stk.push(RegistryEntryLifecycle.module)
     stk.push(ClientExceptionTracingFilter.module())
     stk.push(TraceInitializerFilter.clientModule)

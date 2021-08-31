@@ -19,23 +19,11 @@ class OffloadEarlyTest extends AnyFunSuite {
     assert(total - offloadAt < offloadAt)
   }
 
-  test("offload early is off by default in clients") {
-    offloadAtTheBottom(StackClient.newStack[Unit, Unit])
+  test("offload early is on by default in clients") {
+    offloadAtTheTop(StackClient.newStack[Unit, Unit])
   }
 
-  test("offload early is off by default in servers") {
-    offloadAtTheTop(StackServer.newStack[Unit, Unit])
-  }
-
-  test("a toggle moves offload filter earlier in clients") {
-    com.twitter.finagle.toggle.flag.overrides.let("com.twitter.finagle.OffloadEarly", 1.0) {
-      offloadAtTheTop(StackClient.newStack[Unit, Unit])
-    }
-  }
-
-  test("a toggle moves offload filter earlier in servers") {
-    com.twitter.finagle.toggle.flag.overrides.let("com.twitter.finagle.OffloadEarly", 1.0) {
-      offloadAtTheBottom(StackServer.newStack[Unit, Unit])
-    }
+  test("offload early is on by default in servers") {
+    offloadAtTheBottom(StackServer.newStack[Unit, Unit])
   }
 }

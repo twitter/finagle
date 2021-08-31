@@ -112,15 +112,6 @@ object StackServer {
 
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
 
-    val shouldOffloadEarly = offloadEarly() || com.twitter.finagle.offload.auto()
-
-    if (!shouldOffloadEarly) {
-      // This module is placed at the bottom of the stack and shifts Future execution context
-      // from IO threads into a configured FuturePool right before user-defined Service.apply is
-      // being called.
-      stk.push(OffloadFilter.server)
-    }
-
     stk.push(ServerTracingFilter.module)
 
     // this goes near the bottom of the stack so it is close to where Service.apply happens.
@@ -165,12 +156,9 @@ object StackServer {
 
     // forks the execution if the current scheduler supports forking
     stk.push(ForkingSchedulerFilter.server)
-
-    if (shouldOffloadEarly) {
-      // This module is placed at the top of the stack and shifts Future execution context
-      // from IO threads into a configured FuturePool right after Netty.
-      stk.push(OffloadFilter.server)
-    }
+    // This module is placed at the top of the stack and shifts Future execution context
+    // from IO threads into a configured FuturePool right after Netty.
+    stk.push(OffloadFilter.server)
 
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate
