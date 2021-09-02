@@ -143,9 +143,9 @@ private object TrafficDistributorTest {
       val dist = new TrafficDistributor[Int, Int](
         dest = endpoints,
         newBalancer = newBalancer,
-        statsReceiver = statsReceiver,
-        rng = Rng("seed".hashCode)
-      )
+        reuseEndpoints = false,
+        rng = Rng("seed".hashCode),
+        statsReceiver = statsReceiver)
 
       if (autoPrime) {
         // Primes the distributor such that it creates its underlying
@@ -471,9 +471,9 @@ class TrafficDistributorTest extends AnyFunSuite {
     val dist = new TrafficDistributor[Int, Int](
       dest = endpoints,
       newBalancer = mkBalancer,
-      statsReceiver = NullStatsReceiver,
-      rng = Rng("seed".hashCode)
-    )
+      reuseEndpoints = false,
+      rng = Rng("seed".hashCode),
+      statsReceiver = NullStatsReceiver)
 
     assert(dist.status == Status.Open)
   })

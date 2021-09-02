@@ -5,6 +5,7 @@ import com.twitter.delivery.thriftscala.DeliveryService._
 import com.twitter.delivery.thriftscala._
 import com.twitter.finagle.Addr
 import com.twitter.finagle.addr.WeightedAddress
+import com.twitter.finagle.loadbalancer.BalancerRegistry
 import com.twitter.finagle.param.CommonParams
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.PartitionNodeManager.NoPartitionException
@@ -403,8 +404,12 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
         .strategy(dynamicStrategy)
         .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
 
+      val numBalancersBeforeRepartition = BalancerRegistry.get.allMetadata.size
       await(client.sendBox(Box(addrInfo0, "")))
       dynamic() += 1
+      // Ensure that the number of balancers remain the same after the repartition
+      assert(numBalancersBeforeRepartition == BalancerRegistry.get.allMetadata.size)
+
       await(client.sendBox(Box(addrInfo0, "")))
       val server0Request =
         if (sr0.counters.isDefinedAt(Seq("requests"))) sr0.counters(Seq("requests"))
@@ -476,8 +481,11 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
         if (sr.counters.isDefinedAt(Seq("requests"))) sr.counters(Seq("requests"))
         else sr.counters(Seq("thrift", "requests"))
 
+      val numBalancersBeforeRepartition = BalancerRegistry.get.allMetadata.size
       assert(server1Request == 1)
       dynamicAddresses() = Addr.Bound(addresses: _*)
+      // Ensure that the number of balancers remain the same after the repartition
+      assert(numBalancersBeforeRepartition == BalancerRegistry.get.allMetadata.size)
       await(client.sendBox(Box(addrInfo0, "")))
       assert(server1Request == 1)
 

@@ -139,13 +139,16 @@ private[finagle] class PartitionNodeManager[
     SnapPartitioner.uninitialized[Req, Rep, B]
   )
 
+  private[this] val addressedFactories: AtomicReference[Try[Set[AddressedFactory[Req, Rep]]]] =
+    new AtomicReference(Return(Set.empty))
+
   private[this] val partitionerMetrics =
     statsReceiver.addGauge("nodes") { partitionServiceNodes.get.partitionMapping.size }
 
   // Keep track of addresses in the current set that already have associate instances
   private[this] val destActivity = varAddrToActivity(params[LoadBalancerFactory.Dest].va, label)
 
-  private[this] val addressedEndpoints = {
+  private[this] val addressedEndpoints = Activity({
     val newEndpointStk =
       underlying.dropWhile(_.head.role != LoadBalancerFactory.role).tailOption.get
     weightEndpoints(
@@ -153,7 +156,7 @@ private[finagle] class PartitionNodeManager[
       LoadBalancerFactory.newEndpointFn(params, newEndpointStk),
       !params[LoadBalancerFactory.EnableProbation].enable
     )
-  }
+  })
 
   private[this] def getShardIdFromFactory(
     state: A,
@@ -188,7 +191,7 @@ private[finagle] class PartitionNodeManager[
     // the most complex layer of the stack we build here is the load balancer, which is pretty cheap
     // we can't just fix up the maps in-place because it leads to race conditions, so we recreate
     // them from scratch instead.
-    Activity(addressedEndpoints)
+    addressedEndpoints
       .join(observable).map {
         case (factory, state) =>
           (
@@ -203,12 +206,14 @@ private[finagle] class PartitionNodeManager[
                     LoadBalancerFactory.Endpoints(Var
                       .value(
                         Activity.Ok(endpoints.asInstanceOf[Set[AddressedFactory[_, _]]])).changes) +
-                    LoadBalancerFactory.Dest(Var.value(Addr.Bound(endpoints.map(_.address))))
+                    LoadBalancerFactory.Dest(Var.value(Addr.Bound(endpoints.map(_.address)))) +
+                    // This is so the loadbalancer knows that partitioning is enabled so that it
+                    // doesn't close endpoints when closing the balancers.
+                    LoadBalancerFactory.ReusableEndpoints(true)
 
                   key -> underlying.make(paramsWithLB)
               }
-            }
-          )
+            })
       }.stabilize
   }
 
@@ -218,10 +223,11 @@ private[finagle] class PartitionNodeManager[
     val init = SnapPartitioner.uninitialized[Req, Rep, B]
     partitionAddressChanges.states
       .foldLeft(init) {
-        case (_, Activity.Ok((partitionFn, partitions))) =>
-          // we purposefully don't close the old balancers because that would shut down the
-          // underlying endpoints.  however, that's fine because there's not a resource that we
-          // we need to clean up here.
+        case (old, Activity.Ok((partitionFn, partitions))) =>
+          // We close the old balancers because we otherwise leak gauges. We have set up
+          // plumbing via the ReusableEndpoints stack param so that the balancers do not
+          // close the endpoints when partitioning is enabled.
+          old.partitionMapping.values.foreach(_.close())
 
           // this could possibly be an empty update if getLogicalPartition returns all Throws
           SnapPartitioner(
@@ -235,6 +241,16 @@ private[finagle] class PartitionNodeManager[
 
   private[this] val nodeWatcher: Closable =
     partitionNodesChange.register(Witness(partitionServiceNodes))
+
+  private[this] val endpointWatcher: Closable =
+    addressedEndpoints.stabilize.values.register(Witness(addressedFactories))
+
+  private[this] def endpointsAsClosable(): Closable = {
+    addressedFactories.get match {
+      case Return(setOfEndpoints) => Closable.all(setOfEndpoints.map(_.factory).toSeq: _*)
+      case Throw(_) => Closable.nop
+    }
+  }
 
   /**
    * Returns a [[SnapPartitioner]] which describes how to partition requests.
@@ -251,7 +267,9 @@ private[finagle] class PartitionNodeManager[
     Closable
       .sequence(
         nodeWatcher,
-        Closable.all(partitionServiceNodes.get.partitionMapping.values.toSeq: _*)
+        endpointWatcher,
+        Closable.all(partitionServiceNodes.get.partitionMapping.values.toSeq: _*),
+        endpointsAsClosable()
       ).close(deadline)
   }
 }
