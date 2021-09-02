@@ -303,7 +303,8 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleThriftMux,
   finagleMySQL,
   finagleRedis,
-  finagleNetty4Http
+  finagleNetty4Http,
+  finaglePostgresql
 )
 
 lazy val finagle = Project(
@@ -723,6 +724,19 @@ lazy val finagleMySQL = Project(
       "EmbeddableMysql.scala" || "ClientTest.scala"
     }
   ).dependsOn(finagleCore, finagleNetty4, finagleToggle)
+
+lazy val finaglePostgresql = Project(
+  id = "finagle-postgresql",
+  base = file("finagle-postgresql")
+).settings(
+    sharedSettings
+  ).settings(
+    name := "finagle-postgresql",
+    libraryDependencies ++= Seq(
+      util("core"),
+      util("stats")
+    )
+  ).dependsOn(finagleCore, finagleNetty4)
 
 lazy val finagleExp = Project(
   id = "finagle-exp",
