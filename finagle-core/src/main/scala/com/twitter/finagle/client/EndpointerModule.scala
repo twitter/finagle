@@ -1,9 +1,9 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Stack, ServiceFactory, param, Address}
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Address, ServiceFactory, Stack, param}
 import java.net.SocketAddress
 
 /**

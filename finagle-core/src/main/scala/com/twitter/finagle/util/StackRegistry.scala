@@ -2,6 +2,7 @@ package com.twitter.finagle.util
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.param.{Label, ProtocolLibrary}
+import com.twitter.finagle.stack.nilStack
 import com.twitter.util.registry.GlobalRegistry
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -13,30 +14,36 @@ object StackRegistry {
   case class Entry(addr: String, stack: Stack[_], params: Stack.Params) {
 
     def modules: Seq[Module] =
-      stack.tails.map { node =>
-        val raw = node.head.parameters
-        val reflected = raw.foldLeft(Seq.empty[(String, () => String)]) {
-          case (seq, s) if s.show(params(s)).nonEmpty =>
-            seq ++ s.show(params(s))
+      stack.tails.flatMap { node =>
+        if (node.head.role == nilStack.head.role) {
+          // do not register `nilStack`
+          None
+        } else {
+          val raw = node.head.parameters
+          val reflected = raw.foldLeft(Seq.empty[(String, () => String)]) {
+            case (seq, s) if s.show(params(s)).nonEmpty =>
+              seq ++ s.show(params(s))
 
-          // If Stack.Param.show() returns an empty Seq, and the parameter is a case class, obtain the names
-          // and values via reflection.
-          case (seq, s) =>
-            params(s) match {
-              case p: Product =>
-                // TODO: many case classes have a $outer field because they close over an outside scope.
-                // this is not very useful, and it might make sense to filter them out in the future.
-                val fields = p.getClass.getDeclaredFields.map(_.getName)
-                val valueFunctions = p.productIterator.map(v => () => v.toString).toSeq
-                seq ++ fields.zipAll(valueFunctions, "<unknown>", () => "<unknown>")
-              case _ => seq
-            }
+            // If Stack.Param.show() returns an empty Seq, and the parameter is a case class, obtain the names
+            // and values via reflection.
+            case (seq, s) =>
+              params(s) match {
+                case p: Product =>
+                  // TODO: many case classes have a $outer field because they close over an outside scope.
+                  // this is not very useful, and it might make sense to filter them out in the future.
+                  val fields = p.getClass.getDeclaredFields.map(_.getName)
+                  val valueFunctions = p.productIterator.map(v => () => v.toString).toSeq
+                  seq ++ fields.zipAll(valueFunctions, "<unknown>", () => "<unknown>")
+                case _ => seq
+              }
+          }
+          Some(
+            Module(
+              node.head.role.name,
+              node.head.description,
+              reflected.map { case (n, v) => (n, v()) }
+            ))
         }
-        Module(
-          node.head.role.name,
-          node.head.description,
-          reflected.map { case (n, v) => (n, v()) }
-        )
       }.toSeq
 
     val name: String = params[Label].label

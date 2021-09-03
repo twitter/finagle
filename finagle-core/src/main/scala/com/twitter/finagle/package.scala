@@ -76,7 +76,7 @@ package object finagle {
      */
     def nilStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] =
       Stack.leaf(
-        Endpoint,
+        Stack.Role("nil"),
         new com.twitter.finagle.service.FailingFactory[Req, Rep](
           UnterminatedStackException
         )

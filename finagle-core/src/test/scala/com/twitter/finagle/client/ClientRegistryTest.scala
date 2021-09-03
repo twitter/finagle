@@ -2,8 +2,9 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.{TestParam, TestParam2}
+import com.twitter.finagle.util.{StackRegistry, TestParam, TestParam2}
 import com.twitter.util._
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import org.mockito.Matchers.anyObject
@@ -227,5 +228,13 @@ class ClientRegistryTest
     assert(ClientRegistry.registeredDuplicates.size == 1)
     assert(ClientRegistry.registeredDuplicates(0).name == "foo")
     assert(ClientRegistry.registeredDuplicates(0).addr == "/$/fail")
+  }
+
+  test("ClientRegistry does not register nilStack") {
+    val stk = newStack()
+    ClientRegistry.register("bar", stk, Stack.Params.empty)
+    val registrans: Set[StackRegistry.Entry] = ClientRegistry.registrants.toSet
+    val modules: Set[StackRegistry.Module] = registrans.flatMap(_.modules)
+    assert(!modules.exists(_.name == nilStack.head.role.name))
   }
 }
