@@ -1,7 +1,6 @@
 package com.twitter.finagle.postgresql.transport
 
 import java.nio.charset.StandardCharsets
-
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Inet
@@ -16,6 +15,7 @@ import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Buf
 import com.twitter.io.BufByteWriter
 import com.twitter.io.ByteReader
+import scala.reflect.ClassTag
 
 object PgBuf {
 
@@ -176,9 +176,14 @@ object PgBuf {
 
   def writer: Writer = new Writer(BufByteWriter.dynamic())
 
-  class Reader(b: Buf) {
-    private[this] val reader = ByteReader(b)
+  object Reader {
+    def apply(b: Buf): Reader = {
+      val reader = ByteReader(b)
+      new Reader(reader)
+    }
+  }
 
+  final class Reader(val reader: ByteReader) extends AnyVal {
     def byte(): Byte = reader.readByte()
     def unsignedByte(): Short = reader.readUnsignedByte()
     def short(): Short = reader.readShortBE()
@@ -201,23 +206,29 @@ object PgBuf {
       reader.skip(1) // skip the null-terminating byte
       str
     }
+
     def format(): Format = short() match {
       case 0 => Format.Text
       case 1 => Format.Binary
       case v => sys.error(s"unexpected format value $v")
     }
-    def collect[T](f: Reader => T): IndexedSeq[T] = {
+
+    def collect[T: ClassTag](f: Reader => T): IndexedSeq[T] = {
       val size = short().toInt
-      val builder = IndexedSeq.newBuilder[T]
-      builder.sizeHint(size)
-      for (_ <- 0 until size) builder += f(this)
-      builder.result()
-    }
-    def value(): WireValue =
-      int() match {
-        case -1 => WireValue.Null
-        case length => WireValue.Value(buf(length))
+      val builder = new Array[T](size)
+      var idx = 0
+      while (idx < size) {
+        builder(idx) = f(this)
+        idx += 1
       }
+      scala.collection.compat.immutable.ArraySeq.unsafeWrapArray(builder)
+    }
+
+    def value(): WireValue = int() match {
+      case -1 => WireValue.Null
+      case length => WireValue.Value(buf(length))
+    }
+
     def buf(length: Int): Buf = reader.readBytes(length)
     def framedBuf(): Buf = reader.readBytes(int())
     def remainingBuf(): Buf = reader.readAll()
@@ -232,7 +243,8 @@ object PgBuf {
       val arrayDims = for (_ <- 0 until dims) yield PgArrayDim(int(), int())
       val elements = arrayDims.map(_.size).sum
       val values = for (_ <- 0 until elements) yield value()
-      if (remaining > 0) sys.error(s"error decoding array, remaining bytes is non zero: $remaining")
+      if (remaining > 0)
+        throw new PgSqlClientError(s"error decoding array, remaining bytes is non zero: $remaining")
       PgArray(
         dimensions = dims,
         dataOffset = offset,
@@ -292,5 +304,5 @@ object PgBuf {
     }
   }
 
-  def reader(b: Buf): Reader = new Reader(b)
+  def reader(b: Buf): Reader = Reader(b)
 }

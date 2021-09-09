@@ -838,6 +838,7 @@ lazy val finagleBenchmark = Project(
     finagleMux,
     finagleMySQL,
     finagleNetty4,
+    finaglePostgresql,
     finagleStats,
     finagleThriftMux,
     finagleZipkinScribe

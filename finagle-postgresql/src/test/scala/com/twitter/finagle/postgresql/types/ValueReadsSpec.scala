@@ -45,8 +45,8 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     encode: A => Buf
   ): Unit =
     s"read non-null value" in prop { value: A =>
-      val ret = reads.reads(accept, WireValue.Value(encode(value)), utf8).asScala
-      ret must beSuccessfulTry(f(value))
+      val ret = reads.reads(accept, WireValue.Value(encode(value)), utf8)
+      ret must be(f(value))
     }
 
   def arrayReadsFragment[A: Arbitrary, T](
@@ -70,21 +70,21 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         val arrayWire = WireValue.Value(PgBuf.writer.array(pgArray).build)
         val arrayType =
           PgType.arrayOf(accept).getOrElse(sys.error(s"no array type for ${accept.name}"))
-        val ret = arrayReads.reads(arrayType, arrayWire, utf8).asScala
-        ret must beSuccessfulTry(values.map(f))
+        val ret = arrayReads.reads(arrayType, arrayWire, utf8)
+        ret must be(values.map(f))
       } // limit to 5 elements to speed things up
     }
   }
 
   def nonNullableFragment(reads: ValueReads[_], accept: PgType): Unit =
     s"fail to read a null value" in {
-      reads.reads(accept, WireValue.Null, utf8).asScala.isFailure must be(true)
+      a[IllegalArgumentException] must be thrownBy reads.reads(accept, WireValue.Null, utf8)
     }
 
   def nullableFragment(reads: ValueReads[_], accept: PgType): Unit =
     "is nullable when wrapped in Option" in {
       ValueReads
-        .optionReads(reads).reads(accept, WireValue.Null, utf8).asScala must beSuccessfulTry(None)
+        .optionReads(reads).reads(accept, WireValue.Null, utf8) must be(None)
     }
 
   def specs[A: Arbitrary, T](
@@ -116,16 +116,18 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     "simple" should {
       "fail when the value buffer is not consumed entirely" in {
         val invalid = ValueReads.simple(PgType.Int4)(_.short())
-        val read = invalid.reads(PgType.Int4, Buf.ByteArray(0, 0, 0, 0), utf8)
-
-        the[PgSqlClientError] thrownBy read
-          .get() must have message "Reading value of type int4 should have consumed the whole value's buffer, but 2 bytes remained."
+        the[PgSqlClientError] thrownBy
+          invalid.reads(
+            PgType.Int4,
+            Buf.ByteArray(0, 0, 0, 0),
+            utf8) must have message "Reading value of type int4 should have consumed the whole value's buffer, but 2 bytes remained."
       }
       "fail when the value is null" in {
         val valid = ValueReads.simple(PgType.Int4)(_.int())
-        val read = valid.reads(PgType.Int4, WireValue.Null, utf8)
-        the[IllegalArgumentException] thrownBy read
-          .get() must have message "Type int4 has no reasonable null value. If you intended to make this field nullable, you must read it as an Option[T]."
+        the[IllegalArgumentException] thrownBy valid.reads(
+          PgType.Int4,
+          WireValue.Null,
+          utf8) must have message "Type int4 has no reasonable null value. If you intended to make this field nullable, you must read it as an Option[T]."
       }
     }
 
@@ -137,8 +139,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       }
       "reads the underlying value" in prop { value: Int =>
         val longByInt = ValueReads.by[Int, Long](_.toLong)
-        val read = longByInt.reads(PgType.Int4, Buf.U32BE(value), utf8)
-        read.asScala must beSuccessfulTry(value.toLong)
+        longByInt.reads(PgType.Int4, Buf.U32BE(value), utf8) must be(value.toLong)
       }
     }
 
@@ -162,22 +163,22 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         val second = ValueReads.simple(PgType.Int2)(_ => 2)
 
         val or = ValueReads.or(first, second)
-        or.reads(PgType.Int4, Buf.Empty, utf8).get() must be(4)
-        or.reads(PgType.Int2, Buf.Empty, utf8).get() must be(2)
+        or.reads(PgType.Int4, Buf.Empty, utf8) must be(4)
+        or.reads(PgType.Int2, Buf.Empty, utf8) must be(2)
 
         val orElse = first orElse second
-        orElse.reads(PgType.Int4, Buf.Empty, utf8).get() must be(4)
-        orElse.reads(PgType.Int2, Buf.Empty, utf8).get() must be(2)
+        orElse.reads(PgType.Int4, Buf.Empty, utf8) must be(4)
+        orElse.reads(PgType.Int2, Buf.Empty, utf8) must be(2)
       }
       "reads from first in priority" in {
         val first = ValueReads.simple(PgType.Int4)(_ => 4)
         val second = ValueReads.simple(PgType.Int4)(_ => 2)
 
         val or = ValueReads.or(first, second)
-        or.reads(PgType.Int4, Buf.Empty, utf8).get() must be(4)
+        or.reads(PgType.Int4, Buf.Empty, utf8) must be(4)
 
         val orElse = first orElse second
-        orElse.reads(PgType.Int4, Buf.Empty, utf8).get() must be(4)
+        orElse.reads(PgType.Int4, Buf.Empty, utf8) must be(4)
       }
     }
 
@@ -185,7 +186,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       "delegate reads when non-null" in {
         val optionalInt = ValueReads.optionReads(ValueReads.readsInt)
         val read = optionalInt.reads(PgType.Int4, WireValue.Value(Buf.ByteArray(0, 0, 0, 0)), utf8)
-        read.asScala must beSuccessfulTry(Some(0))
+        read must be(Some(0))
       }
       "accept the underlying type" in {
         val optionalInt = ValueReads.optionReads(ValueReads.readsInt)
@@ -195,7 +196,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
       "return None when null" in {
         val optionalInt = ValueReads.optionReads(ValueReads.readsInt)
         val read = optionalInt.reads(PgType.Int4, WireValue.Null, utf8)
-        read.asScala must beSuccessfulTry(None)
+        read must be(None)
       }
     }
 
@@ -209,9 +210,10 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
 
       "reject nona=-array types when reading" in {
         val readsIntList = ValueReads.traversableReads[List, Int](ValueReads.readsInt, implicitly)
-        val read = readsIntList.reads(PgType.Int4, Buf.Empty, utf8)
-        the[PgSqlClientError] thrownBy read
-          .get() must have message s"Type int4 is not an array type and cannot be read as such."
+        the[PgSqlClientError] thrownBy readsIntList.reads(
+          PgType.Int4,
+          Buf.Empty,
+          utf8) must have message s"Type int4 is not an array type and cannot be read as such."
       }
 
       "support empty lists" in {
@@ -225,7 +227,7 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
         )
         val arrayBuf = PgBuf.writer.array(pgArray).build
         val read = readsIntList.reads(PgType.Int4Array, arrayBuf, utf8)
-        read.asScala must beSuccessfulTry(Nil)
+        read must be(Nil)
       }
 
       "fail for multi-dimensional arrays" in {
@@ -239,10 +241,11 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
           data = IndexedSeq.empty
         )
         val arrayBuf = PgBuf.writer.array(pgArray).build
-        val read = readsIntList.reads(PgType.Int4Array, arrayBuf, utf8)
 
-        the[PgSqlClientError] thrownBy read
-          .get() must have message "Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got 2"
+        the[PgSqlClientError] thrownBy readsIntList.reads(
+          PgType.Int4Array,
+          arrayBuf,
+          utf8) must have message "Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got 2"
       }
     }
 
@@ -280,8 +283,10 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     "readsByte" should {
       def failFor(value: Short) = {
         val buf = mkBuf()(bb => bb.putShort(value))
-        val read = ValueReads.readsByte.reads(PgType.Int2, WireValue.Value(buf), utf8)
-        the[PgSqlClientError] thrownBy { read.get() } must have message
+        the[PgSqlClientError] thrownBy ValueReads.readsByte.reads(
+          PgType.Int2,
+          WireValue.Value(buf),
+          utf8) must have message
           s"int2 value is out of range for reading as a Byte: $value is not within [-128,127]. Consider reading as Short instead."
       }
       "fail when int2 value is out of range" in {
@@ -335,8 +340,10 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
           val buf = mkBuf() { bb =>
             bb.putLong(value)
           }
-          val read = ValueReads.readsInstant.reads(PgType.Timestamptz, WireValue.Value(buf), utf8)
-          read.asScala.isFailure must be(true)
+          a[PgSqlClientError] must be thrownBy ValueReads.readsInstant.reads(
+            PgType.Timestamptz,
+            WireValue.Value(buf),
+            utf8)
         }
       failFor("-Infinity", 0x8000000000000000L)
       failFor("Infinity", 0x7fffffffffffffffL)
@@ -403,10 +410,8 @@ class ValueReadsSpec extends PgSqlSpec with PropertiesSpec {
     }
     "readsString" should {
       "fail for malformed utf8" in {
-        val read =
-          ValueReads.readsString.reads(PgType.Text, Buf.ByteArray(0xc3.toByte, 0x28.toByte), utf8)
-        read.isThrow must be(true)
-        read.throwable mustBe an[MalformedInputException]
+        a[MalformedInputException] shouldBe thrownBy(
+          ValueReads.readsString.reads(PgType.Text, Buf.ByteArray(0xc3.toByte, 0x28.toByte), utf8))
       }
     }
     "readsUuid" should simpleSpec[java.util.UUID](ValueReads.readsUuid, PgType.Uuid) { uuid =>

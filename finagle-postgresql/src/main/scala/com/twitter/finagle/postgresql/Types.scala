@@ -1,68 +1,69 @@
 package com.twitter.finagle.postgresql
 
+import com.twitter.finagle.postgresql.types.PgType
 import com.twitter.io.Buf
 
 object Types {
 
   sealed trait Format
   object Format {
-    case object Text extends Format
-    case object Binary extends Format
+    final case object Text extends Format
+    final case object Binary extends Format
   }
 
-  case class Oid(value: Long)
-  case class AttributeId(value: Short)
+  final case class Oid(value: Long)
+  final case class AttributeId(value: Short)
 
-  case class FieldDescription(
+  final case class FieldDescription(
     name: String,
     tableOid: Option[Oid],
     tableAttributeId: Option[AttributeId],
     dataType: Oid,
     dataTypeSize: Short, // negative means variable length
     typeModifier: Int, // meaning is type-specific
-    format: Format
-  )
+    format: Format) {
+    lazy val pgType: Option[PgType] = PgType.byOid(dataType)
+  }
 
   // portal and statement naming
   sealed trait Name
   object Name {
-    case object Unnamed extends Name
-    case class Named(value: String) extends Name {
-      require(value.length > 0, "named prepared statement cannot be empty")
+    final case object Unnamed extends Name
+    final case class Named(value: String) extends Name {
+      require(value.nonEmpty, "named prepared statement cannot be empty")
     }
   }
 
   sealed trait WireValue
   object WireValue {
-    case object Null extends WireValue
-    case class Value(buf: Buf) extends WireValue
+    final case object Null extends WireValue
+    final case class Value(buf: Buf) extends WireValue
   }
 
-  case class PgArrayDim(size: Int, lowerBound: Int)
-  case class PgArray(
+  final case class PgArrayDim(size: Int, lowerBound: Int)
+  final case class PgArray(
     dimensions: Int,
     dataOffset: Int, // 0 means no null values,
     elemType: Oid,
     arrayDims: IndexedSeq[PgArrayDim],
-    data: IndexedSeq[WireValue]
-  )
+    data: IndexedSeq[WireValue])
 
   sealed trait Timestamp
   object Timestamp {
-    case object NegInfinity extends Timestamp
-    case object Infinity extends Timestamp
-    case class Micros(offset: Long) extends Timestamp
+    final case object NegInfinity extends Timestamp
+    final case object Infinity extends Timestamp
+    final case class Micros(offset: Long) extends Timestamp
   }
 
   sealed trait NumericSign
   object NumericSign {
-    case object Positive extends NumericSign
-    case object Negative extends NumericSign
-    case object NaN extends NumericSign
-    case object Infinity extends NumericSign
-    case object NegInfinity extends NumericSign
+    final case object Positive extends NumericSign
+    final case object Negative extends NumericSign
+    final case object NaN extends NumericSign
+    final case object Infinity extends NumericSign
+    final case object NegInfinity extends NumericSign
   }
-  case class Numeric(
+  final case class Numeric(
     weight: Short, // unsigned?
     sign: NumericSign,
     displayScale: Int, // unsigned short
@@ -80,6 +81,6 @@ object Types {
    *                This is 0 to 32 for IPv4 and 0 to 128 for IPv6.
    *                This is an unsigned byte value, so using a `Short`.
    */
-  case class Inet(ipAddress: java.net.InetAddress, netmask: Short)
+  final case class Inet(ipAddress: java.net.InetAddress, netmask: Short)
 
 }

@@ -17,6 +17,7 @@ scala_library(
         "finagle/finagle-mux/src/main/scala",
         "finagle/finagle-mysql/src/main/scala",
         "finagle/finagle-netty4/src/main/scala",
+        "finagle/finagle-postgresql/src/main/scala/com/twitter/finagle",
         "finagle/finagle-serversets/src/main/scala",
         "finagle/finagle-stats/src/main/scala",
         "finagle/finagle-thrift/src/main/java",

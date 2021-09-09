@@ -1,8 +1,6 @@
 package com.twitter.finagle.postgresql.types
 
-import java.nio.charset.Charset
-import java.nio.charset.CodingErrorAction
-
+import java.nio.charset.{Charset, CharsetDecoder, CodingErrorAction}
 import com.twitter.finagle.postgresql.PgSqlClientError
 import com.twitter.finagle.postgresql.PgSqlUnsupportedError
 import com.twitter.finagle.postgresql.Types.Inet
@@ -10,10 +8,6 @@ import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.finagle.postgresql.transport.PgBuf
 import com.twitter.io.Buf
-import com.twitter.util.Return
-import com.twitter.util.Throw
-import com.twitter.util.Try
-
 import scala.collection.compat._
 
 /**
@@ -52,34 +46,34 @@ import scala.collection.compat._
  * @see [[ValueWrites]]
  * @see [[PgType]]
  */
-trait ValueReads[T] {
+trait ValueReads[@specialized T] {
 
   /**
-   * Decodes a non-null value from the wire.
+   * Decodes a non-null value from the wire, throwing an exception if the decoding fails.
    */
-  def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T]
+  def reads(tpe: PgType, buf: Buf, charset: Charset): T
 
   /**
    * Produce the value corresponding to the SQL NULL.
    * Note that typically, there is no sensical value (i.e.: there's no Int value to produce for a NULL), thus this
    * method has a default implementation of producing an error.
    */
-  def readsNull(tpe: PgType): Try[T] =
-    Throw(new IllegalArgumentException(
+  def readsNull(tpe: PgType): T =
+    throw new IllegalArgumentException(
       s"Type ${tpe.name} has no reasonable null value. If you intended to make this field nullable, you must read it as an Option[T]."
-    ))
+    )
 
   /**
    * Decode a potentially `NULL` wire value into the requested scala type.
    * Note that no further validation is done on the passed in `PgType`, the client is expected to have
-   * invoked [[accepts()]] first. Not respecting this may lead to successfully reading an invalid value.
+   * invoked [[accepts]] first. Not respecting this may lead to successfully reading an invalid value.
    *
    * @param tpe the postgres type to decode (used when the typeclass supports more than one).
    * @param value the value on the wire. This may be NULL.
    * @param charset the server's character set (necessary for decoding strings).
    * @return the decoded value or an exception
    */
-  def reads(tpe: PgType, value: WireValue, charset: Charset): Try[T] = value match {
+  def reads(tpe: PgType, value: WireValue, charset: Charset): T = value match {
     case WireValue.Null => readsNull(tpe)
     case WireValue.Value(buf) => reads(tpe, buf, charset)
   }
@@ -108,11 +102,27 @@ trait ValueReads[T] {
 
 object ValueReads {
 
-  def simple[T](expect: PgType*)(f: PgBuf.Reader => T): ValueReads[T] = new ValueReads[T] {
-    val accept: Set[PgType] = expect.toSet
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T] =
-      Try {
-        val reader = new PgBuf.Reader(buf)
+  def simpleBuf[@specialized T](expectByteSize: Int, expect: PgType*)(f: Buf => T): ValueReads[T] =
+    new ValueReads[T] {
+      private[this] final val accept: Set[PgType] = expect.toSet
+
+      override def reads(tpe: PgType, buf: Buf, charset: Charset): T = {
+        if (expectByteSize != -1 && buf.length != expectByteSize) {
+          throw new PgSqlClientError(
+            s"Reading value of type ${tpe.name} expected $expectByteSize but got a buffer of length ${buf.length}"
+          )
+        }
+        f(buf)
+      }
+
+      override def accepts(tpe: PgType): Boolean = accept(tpe)
+    }
+
+  def simple[@specialized T](expect: PgType*)(f: PgBuf.Reader => T): ValueReads[T] =
+    new ValueReads[T] {
+      val accept: Set[PgType] = expect.toSet
+      override def reads(tpe: PgType, buf: Buf, charset: Charset): T = {
+        val reader = PgBuf.Reader(buf)
         val value = f(reader)
         if (reader.remaining != 0) {
           throw new PgSqlClientError(
@@ -121,15 +131,16 @@ object ValueReads {
         }
         value
       }
-    override def accepts(tpe: PgType): Boolean = accept(tpe)
-  }
+      override def accepts(tpe: PgType): Boolean = accept(tpe)
+    }
 
   /**
    * Define a `ValueReads[B]` in terms of `ValueReads[A]` and `A => B`.
    */
   def by[A, B](f: A => B)(implicit readsA: ValueReads[A]): ValueReads[B] = new ValueReads[B] {
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[B] =
-      readsA.reads(tpe, buf, charset).map(f)
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): B = {
+      f(readsA.reads(tpe, buf, charset))
+    }
     override def accepts(tpe: PgType): Boolean = readsA.accepts(tpe)
   }
 
@@ -139,7 +150,7 @@ object ValueReads {
    * @return an instance of [[ValueReads[T]] that uses `first` if it accepts the [[PgType]], otherwise uses `second`.
    */
   def or[T](first: ValueReads[T], second: ValueReads[T]): ValueReads[T] = new ValueReads[T] {
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[T] = {
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): T = {
       val r = if (first.accepts(tpe)) first else second
       r.reads(tpe, buf, charset)
     }
@@ -152,41 +163,45 @@ object ValueReads {
    * Returns a `ValueReads[Option[T]]` that reads any `NULL` value as `None` and delegates non-`NULL` values
    * to the underlying `ValueReads` instance.
    */
-  implicit def optionReads[T](implicit treads: ValueReads[T]): ValueReads[Option[T]] = new ValueReads[Option[T]] {
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[Option[T]] =
-      treads.reads(tpe, buf, charset).map(Some(_))
-    override def readsNull(tpe: PgType): Try[Option[T]] = Return(None)
-    override def accepts(tpe: PgType): Boolean = treads.accepts(tpe)
-  }
+  implicit def optionReads[T](implicit treads: ValueReads[T]): ValueReads[Option[T]] =
+    new ValueReads[Option[T]] {
+
+      override def reads(tpe: PgType, buf: Buf, charset: Charset): Option[T] =
+        Some(treads.reads(tpe, buf, charset))
+      override def readsNull(tpe: PgType): Option[T] = None
+      override def accepts(tpe: PgType): Boolean = treads.accepts(tpe)
+    }
 
   /**
    * Returns a [[ValueReads]] for a collection of [T] from a Postgres array type.
    *
    * For example, this can produce [[ValueReads[List[Int]]] for the [[PgType.Int4Array]] type.
    */
-  implicit def traversableReads[F[_], T](implicit
+  implicit def traversableReads[F[_], T](
+    implicit
     treads: ValueReads[T],
     f: Factory[T, F[T]]
   ): ValueReads[F[T]] = new ValueReads[F[T]] {
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[F[T]] =
-      Try {
-        val underlying = tpe.kind match {
-          case Kind.Array(underlying) => underlying
-          case _ => throw new PgSqlClientError(s"Type ${tpe.name} is not an array type and cannot be read as such.")
-        }
-
-        val array = PgBuf.reader(buf).array()
-        if (array.dimensions > 1) {
-          throw PgSqlUnsupportedError(
-            s"Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got ${array.dimensions}"
-          )
-        }
-        val builder = f.newBuilder
-        array.data.foreach { value =>
-          builder += treads.reads(underlying, value, charset).get()
-        }
-        builder.result()
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): F[T] = {
+      val underlying = tpe.kind match {
+        case Kind.Array(underlying) => underlying
+        case _ =>
+          throw new PgSqlClientError(
+            s"Type ${tpe.name} is not an array type and cannot be read as such.")
       }
+
+      val array = PgBuf.reader(buf).array()
+      if (array.dimensions > 1) {
+        throw PgSqlUnsupportedError(
+          s"Multi dimensional arrays are not supported. Expected 0 or 1 dimensions, got ${array.dimensions}"
+        )
+      }
+      val builder = f.newBuilder
+      array.data.foreach { value =>
+        builder += treads.reads(underlying, value, charset)
+      }
+      builder.result()
+    }
 
     override def accepts(tpe: PgType): Boolean =
       tpe.kind match {
@@ -198,19 +213,19 @@ object ValueReads {
   /**
    * Reads [[BigDecimal]] from [[PgType.Numeric]].
    */
-  implicit lazy val readsBigDecimal: ValueReads[BigDecimal] = simple(PgType.Numeric) { reader =>
+  implicit val readsBigDecimal: ValueReads[BigDecimal] = simple(PgType.Numeric) { reader =>
     PgNumeric.numericToBigDecimal(reader.numeric())
   }
 
   /**
    * Reads [[Boolean]] from [[PgType.Bool]].
    */
-  implicit lazy val readsBoolean: ValueReads[Boolean] = simple(PgType.Bool)(_.byte() != 0)
+  implicit val readsBoolean: ValueReads[Boolean] = simpleBuf(1, PgType.Bool)(_.get(0) != 0)
 
   /**
    * Reads [[Buf]] from [[PgType.Bytea]].
    */
-  implicit lazy val readsBuf: ValueReads[Buf] = simple(PgType.Bytea)(_.remainingBuf())
+  implicit val readsBuf: ValueReads[Buf] = simpleBuf(-1, PgType.Bytea)(identity)
 
   /**
    * Reads [[Byte]] from [[PgType.Int2]].
@@ -222,38 +237,70 @@ object ValueReads {
    * @see https://www.postgresql.org/docs/current/datatype-numeric.html
    * @see https://dba.stackexchange.com/questions/159090/how-to-store-one-byte-integer-in-postgresql
    */
-  implicit lazy val readsByte: ValueReads[Byte] = simple(PgType.Int2) { reader =>
-    val shortVal = reader.short()
-    if (!shortVal.isValidByte) throw new PgSqlClientError(
-      s"int2 value is out of range for reading as a Byte: $shortVal is not within [${Byte.MinValue},${Byte.MaxValue}]. Consider reading as Short instead."
-    )
+  implicit val readsByte: ValueReads[Byte] = simpleBuf(java.lang.Short.BYTES, PgType.Int2) { buf =>
+    val shortVal = readShortBE(buf)
+    if (!shortVal.isValidByte)
+      throw new PgSqlClientError(
+        s"int2 value is out of range for reading as a Byte: $shortVal is not within [${Byte.MinValue},${Byte.MaxValue}]. Consider reading as Short instead."
+      )
     shortVal.toByte
+  }
+
+  private def readShortBE(buf: Buf): Short = {
+    ((buf.get(0) & 0xff) << 8 |
+      (buf.get(1) & 0xff)).toShort
+  }
+
+  private def readIntBE(buf: Buf): Int = {
+    (buf.get(0) & 0xff) << 24 |
+      (buf.get(1) & 0xff) << 16 |
+      (buf.get(2) & 0xff) << 8 |
+      (buf.get(3) & 0xff)
+  }
+
+  private def readLongBE(buf: Buf): Long = {
+    (buf.get(0) & 0xff).toLong << 56 |
+      (buf.get(1) & 0xff).toLong << 48 |
+      (buf.get(2) & 0xff).toLong << 40 |
+      (buf.get(3) & 0xff).toLong << 32 |
+      (buf.get(4) & 0xff).toLong << 24 |
+      (buf.get(5) & 0xff).toLong << 16 |
+      (buf.get(6) & 0xff).toLong << 8 |
+      (buf.get(7) & 0xff).toLong
+  }
+
+  /**
+   * Reads [[Float]] from [[PgType.Float4]].
+   */
+  implicit val readsFloat: ValueReads[Float] = simpleBuf(java.lang.Integer.BYTES, PgType.Float4) {
+    buf =>
+      val intValue = readIntBE(buf)
+      java.lang.Float.intBitsToFloat(intValue)
   }
 
   /**
    * Reads [[Double]] from [[PgType.Float8]].
    */
-  lazy val readsFloat8: ValueReads[Double] = simple(PgType.Float8)(_.double())
+  val readsFloat8: ValueReads[Double] = simpleBuf(java.lang.Long.BYTES, PgType.Float8) { buf =>
+    val longValue = readLongBE(buf)
+    java.lang.Double.longBitsToDouble(longValue)
+  }
 
   /**
    * Reads [[Double]] from [[PgType.Float8]] or [[PgType.Float4]].
    */
-  implicit lazy val readsDouble: ValueReads[Double] =
+  implicit val readsDouble: ValueReads[Double] =
     readsFloat8.orElse(by[Float, Double](_.toDouble)(readsFloat))
-
-  /**
-   * Reads [[Float]] from [[PgType.Float4]].
-   */
-  implicit lazy val readsFloat: ValueReads[Float] = simple(PgType.Float4)(_.float())
 
   /**
    * Reads [[java.time.Instant]] from [[PgType.Timestamptz]] or [[PgType.Timestamp]].
    */
-  implicit lazy val readsInstant: ValueReads[java.time.Instant] =
+  implicit val readsInstant: ValueReads[java.time.Instant] =
     simple(PgType.Timestamptz, PgType.Timestamp) { reader =>
       reader.timestamp() match {
         case Timestamp.NegInfinity | Timestamp.Infinity =>
-          throw PgSqlUnsupportedError("-Infinity and Infinity timestamps cannot be read as java.time.Instant.")
+          throw PgSqlUnsupportedError(
+            "-Infinity and Infinity timestamps cannot be read as java.time.Instant.")
         case Timestamp.Micros(offset) => PgTime.usecOffsetAsInstant(offset)
       }
     }
@@ -261,67 +308,70 @@ object ValueReads {
   /**
    * Reads [[Inet]] from [[PgType.Inet]].
    */
-  implicit lazy val readsInet: ValueReads[Inet] = simple(PgType.Inet)(_.inet())
-
-  /**
-   * Reads [[Int]] from [[PgType.Int4]].
-   */
-  lazy val readsInt4: ValueReads[Int] = simple(PgType.Int4)(_.int())
-
-  /**
-   * Reads [[Int]] from [[PgType.Int4]] or [[readsShort]].
-   */
-  implicit lazy val readsInt: ValueReads[Int] = or(readsInt4, by[Short, Int](_.toInt)(readsShort))
+  implicit val readsInet: ValueReads[Inet] = simple(PgType.Inet)(_.inet())
 
   /**
    * Reads [[Json]] from [[PgType.Json]] or [[PgType.Jsonb]].
    */
-  implicit lazy val readsJson: ValueReads[Json] = new ValueReads[Json] {
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[Json] =
+  implicit val readsJson: ValueReads[Json] = new ValueReads[Json] {
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): Json =
       tpe match {
-        case PgType.Json => Return(Json(buf, charset))
+        case PgType.Json => Json(buf, charset)
         case PgType.Jsonb =>
           buf.get(0) match {
-            case 1 => Return(Json(buf.slice(1, buf.length), charset))
-            case _ => Throw(PgSqlUnsupportedError("Only JSONB version 1 is supported"))
+            case 1 => Json(buf.slice(1, buf.length), charset)
+            case _ => throw PgSqlUnsupportedError("Only JSONB version 1 is supported")
           }
-        case _ => Throw(PgSqlUnsupportedError(s"readsJson does not support type ${tpe.name}"))
+        case _ => throw PgSqlUnsupportedError(s"readsJson does not support type ${tpe.name}")
       }
 
     override def accepts(tpe: PgType): Boolean =
       tpe == PgType.Jsonb || tpe == PgType.Json
   }
-  implicit lazy val readsLocalDate: ValueReads[java.time.LocalDate] = simple(PgType.Date) { buf =>
+
+  implicit val readsLocalDate: ValueReads[java.time.LocalDate] = simple(PgType.Date) { buf =>
     PgDate.dayOffsetAsLocalDate(buf.int())
   }
 
   /**
-   * Reads [[Long]] from [[PgType.Int8]].
+   * Reads [[Int]] from [[PgType.Int4]].
    */
-  lazy val readsInt8: ValueReads[Long] = simple(PgType.Int8)(_.long())
+  val readsInt4: ValueReads[Int] = simpleBuf(Integer.BYTES, PgType.Int4)(readIntBE)
 
   /**
-   * Reads [[Long]] from [[PgType.Int8]] or [[readsInt]].
+   * Reads [[Long]] from [[PgType.Int8]].
    */
-  implicit lazy val readsLong: ValueReads[Long] = or(readsInt8, by[Int, Long](_.toLong)(readsInt))
+  val readsInt8: ValueReads[Long] = simpleBuf(java.lang.Long.BYTES, PgType.Int8)(readLongBE)
 
   /**
    * Reads [[Short]] from [[PgType.Int2]].
    */
-  implicit lazy val readsShort: ValueReads[Short] = simple(PgType.Int2)(_.short())
+  implicit val readsShort: ValueReads[Short] =
+    simpleBuf(java.lang.Short.BYTES, PgType.Int2)(readShortBE)
+
+  /**
+   * Reads [[Int]] from [[PgType.Int4]] or [[readsShort]].
+   */
+  implicit val readsInt: ValueReads[Int] = or(readsInt4, by[Short, Int](_.toInt)(readsShort))
+
+  /**
+   * Reads [[Long]] from [[PgType.Int8]] or [[readsInt]].
+   */
+  implicit val readsLong: ValueReads[Long] = or(readsInt8, by[Int, Long](_.toLong)(readsInt))
 
   /**
    * Reads [[String]] from any of [[PgType.Text]], [[PgType.Json]],
    * [[PgType.Varchar]], [[PgType.Bpchar]], [[PgType.Name]], [[PgType.Unknown]].
    */
-  implicit lazy val readsString: ValueReads[String] = new ValueReads[String] {
-    def strictDecoder(charset: Charset) =
-      charset.newDecoder()
+  implicit val readsString: ValueReads[String] = new ValueReads[String] {
+    def strictDecoder(charset: Charset): CharsetDecoder =
+      charset
+        .newDecoder()
         .onMalformedInput(CodingErrorAction.REPORT)
         .onUnmappableCharacter(CodingErrorAction.REPORT)
 
-    override def reads(tpe: PgType, buf: Buf, charset: Charset): Try[String] =
-      Try(strictDecoder(charset).decode(Buf.ByteBuffer.Owned.extract(buf)).toString)
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): String =
+      strictDecoder(charset).decode(Buf.ByteBuffer.Owned.extract(buf)).toString
 
     override def accepts(tpe: PgType): Boolean =
       tpe == PgType.Text ||
@@ -333,9 +383,19 @@ object ValueReads {
   }
 
   /**
+   * Like [[readsString]] but is more permissive with encoding errors.
+   */
+  val readsStringPermissive: ValueReads[String] = new ValueReads[String] {
+    override def reads(tpe: PgType, buf: Buf, charset: Charset): String =
+      Buf.decodeString(buf, charset)
+
+    override def accepts(tpe: PgType): Boolean = readsString.accepts(tpe)
+  }
+
+  /**
    * Reads [[java.util.UUID]] from [[PgType.Uuid]].
    */
-  implicit lazy val readsUuid: ValueReads[java.util.UUID] = simple(PgType.Uuid) { reader =>
+  implicit val readsUuid: ValueReads[java.util.UUID] = simple(PgType.Uuid) { reader =>
     new java.util.UUID(reader.long(), reader.long())
   }
 
