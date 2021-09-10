@@ -148,7 +148,7 @@ private[finagle] final class MuxDowngradingNegotiator(
     // We install our new session and then send it the first thrift dispatch
     try {
       val nextSession =
-        new DowngradeNegotiatior(ttwitterHeader, params, sharedStats, service)
+        new DowngradeNegotiator(ttwitterHeader, params, sharedStats, service)
           .negotiate(handle, None)
       // Register the new session and then give it the message
       refSession.updateRef(nextSession)
@@ -193,7 +193,7 @@ private[finagle] final class MuxDowngradingNegotiator(
 private[finagle] object MuxDowngradingNegotiator {
   private val log = Logger.get
 
-  private final class DowngradeNegotiatior(
+  private final class DowngradeNegotiator(
     ttwitterHeader: Option[Buf],
     params: Stack.Params,
     sharedStats: SharedNegotiationStats,
