@@ -13,7 +13,7 @@ object ThriftServicePerEndpointExample {
     //#thriftserverapi
     val server: ListeningServer = Thrift.server.serveIface(
       "localhost:1234",
-      new LoggerService[Future] {
+      new LoggerService.MethodPerEndpoint {
         def log(message: String, logLevel: Int): Future[String] = {
           println(s"[$logLevel] Server received: '$message'")
           Future.value(s"You've sent: ('$message', $logLevel)")
@@ -99,7 +99,7 @@ object ThriftServicePerEndpointExample {
     //#thriftclientapi-methodiface
 
     //#thriftclientapi-method-adapter
-    val filteredMethodIface: LoggerService[Future] =
+    val filteredMethodIface: LoggerService.MethodPerEndpoint =
       Thrift.Client.methodPerEndpoint(clientServicePerEndpoint.withLog(filteredLog))
     Await.result(filteredMethodIface.log("ping", 3).map(println))
     //#thriftclientapi-method-adapter

@@ -46,7 +46,7 @@ class ContextAmplificationTest extends AnyFunSuite with OneInstancePerTest {
   )
 
   val proxyServer = {
-    val proxyClient: TestService[Future] = {
+    val proxyClient: TestService.MethodPerEndpoint = {
       val underlying = clientImpl.servicePerEndpoint[TestService.ServicePerEndpoint](
         Name.bound(Address(originServer.boundAddress.asInstanceOf[InetSocketAddress])),
         "ProxyClient"

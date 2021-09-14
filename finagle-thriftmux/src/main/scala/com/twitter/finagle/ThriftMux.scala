@@ -70,39 +70,39 @@ import org.apache.thrift.protocol.TProtocolFactory
  * }}}
  *
  * compiled with Scrooge, generates the interface
- * `TestService.FutureIface`. This is then passed
- * into `ThriftMux.Client.newIface`:
+ * `TestService.MethodPerEndpoint`. This is then passed
+ * into `ThriftMux.Client.build`:
  *
  * {{{
- * ThriftMux.client.newIface[TestService.FutureIface](
- *   addr, classOf[TestService.FutureIface])
+ * ThriftMux.client.build[TestService.MethodPerEndpoint](
+ *   addr, classOf[TestService.MethodPerEndpoint])
  * }}}
  *
  * However note that the Scala compiler can insert the latter
- * `Class` for us, for which another variant of `newIface` is
+ * `Class` for us, for which another variant of `build` is
  * provided:
  *
  * {{{
- * ThriftMux.client.newIface[TestService.FutureIface](addr)
+ * ThriftMux.client.build[TestService.MethodPerEndpoint](addr)
  * }}}
  *
  * In Java, we need to provide the class object:
  *
  * {{{
- * TestService.FutureIface client =
- *   ThriftMux.client.newIface(addr, TestService.FutureIface.class);
+ * TestService.MethodPerEndpoint client =
+ *   ThriftMux.client.build(addr, TestService.MethodPerEndpoint.class);
  * }}}
  *
  * == Servers ==
  *
  * Servers are also simple to expose:
  *
- * `TestService.FutureIface` must be implemented and passed
+ * `TestService.MethodPerEndpoint` must be implemented and passed
  * into `serveIface`:
  *
  * {{{
  * // An echo service
- * ThriftMux.server.serveIface(":*", new TestService.FutureIface {
+ * ThriftMux.server.serveIface(":*", new TestService.MethodPerEndpoint {
  *   def query(x: String): Future[String] = Future.value(x)
  * })
  * }}}
@@ -257,7 +257,7 @@ object ThriftMux
      * collect instrumentation metadata. This is not necessary to run a
      * service.
      *
-     * @note that when using the `.newIface` methods this is unnecessary.
+     * @note that when using the `.build` methods this is unnecessary.
      */
     def withServiceClass(clazz: Class[_]): Client =
       configured(Thrift.param.ServiceClass(Some(clazz)))

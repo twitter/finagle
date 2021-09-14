@@ -76,27 +76,27 @@ import org.apache.thrift.protocol.TProtocolFactory
  * }}}
  *
  * compiled with Scrooge, generates the interface
- * `TestService.FutureIface`. This is then passed
- * into `Thrift.Client.newIface`:
+ * `TestService.MethodPerEndpoint`. This is then passed
+ * into `Thrift.Client.build`:
  *
  * {{{
- * Thrift.client.newIface[TestService.FutureIface](
- *   addr, classOf[TestService.FutureIface])
+ * Thrift.client.build[TestService.MethodPerEndpoint](
+ *   addr, classOf[TestService.MethodPerEndpoint])
  * }}}
  *
  * However note that the Scala compiler can insert the latter
- * `Class` for us, for which another variant of `newIface` is
+ * `Class` for us, for which another variant of `build` is
  * provided:
  *
  * {{{
- * Thrift.client.newIface[TestService.FutureIface](addr)
+ * Thrift.client.build[TestService.MethodPerEndpoint](addr)
  * }}}
  *
  * In Java, we need to provide the class object:
  *
  * {{{
- * TestService.FutureIface client =
- *   Thrift.client.newIface(addr, TestService.FutureIface.class);
+ * TestService.MethodPerEndpoint client =
+ *   Thrift.client.build(addr, TestService.MethodPerEndpoint.class);
  * }}}
  *
  * The client uses the standard thrift protocols, with support for
@@ -117,12 +117,12 @@ import org.apache.thrift.protocol.TProtocolFactory
  *
  * == Servers ==
  *
- * `TestService.FutureIface` must be implemented and passed
+ * `TestService.MethodPerEndpoint` must be implemented and passed
  * into `serveIface`:
  *
  * {{{
  * // An echo service
- * ThriftMux.server.serveIface(":*", new TestService.FutureIface {
+ * ThriftMux.server.serveIface(":*", new TestService.MethodPerEndpoint {
  *   def query(x: String): Future[String] = Future.value(x)
  * })
  * }}}

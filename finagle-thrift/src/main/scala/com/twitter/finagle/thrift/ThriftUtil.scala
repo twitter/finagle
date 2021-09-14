@@ -85,7 +85,7 @@ private[twitter] object ThriftUtil {
 
     // This is used with Scrooge's Scala generated code.
     // The class name passed in should be ServiceName$MethodPerEndpoint
-    // or the higher-kinded version, ServiceName[Future].
+    // or the higher-kinded version, ServiceName.MethodPerEndpoint.
     // Will try to create a ServiceName$FinagledClient instance.
     def tryScalaServiceNameIface(iface: Class[_]): Option[Iface] = {
       val baseName: String = stripSuffix(iface)
@@ -110,7 +110,7 @@ private[twitter] object ThriftUtil {
       throw new IllegalArgumentException(
         s"Iface $cls is not a valid thrift iface. For Scala generated code, " +
           "try `YourServiceName$FutureIface`(deprecated), " +
-          "`YourServiceName$MethodPerEndpoint` or `YourServiceName[Future]` " +
+          "`YourServiceName$MethodPerEndpoint` or `YourServiceName.MethodPerEndpoint` " +
           "For Java generated code, try `YourServiceName$ServiceIface`."
       )
     }
@@ -136,7 +136,7 @@ private[twitter] object ThriftUtil {
 
     // This is used with Scrooge's Scala generated code.
     // The class passed in should be ServiceName$MethodPerEndpoint,
-    // or the higher-kinded version, ServiceName[Future].
+    // or the higher-kinded version, ServiceName.MethodPerEndpoint.
     // Will try to create a ServiceName$FinagleService.
     def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] = {
       val baseName: String = stripSuffix(iface)

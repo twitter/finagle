@@ -12,7 +12,7 @@ object HelloServer {
   def main(args: Array[String]): Unit = {
     val server = ThriftMux.server.serveIface(
       "localhost:1234",
-      new Hello[Future] {
+      new Hello.MethodPerEndpoint {
         def echo(m: String) = {
           Future.value(m)
         }

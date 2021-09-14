@@ -24,7 +24,7 @@ object ServiceClassParamTest {
     override def echo: Service[Request[Echo.Args], Response[String]] = ???
   }
 
-  class EchoFutureIface extends ScalaEcho.FutureIface {
+  class EchoFutureIface extends ScalaEcho.MethodPerEndpoint {
     override def echo(msg: String): Future[String] = ???
   }
 
@@ -40,11 +40,11 @@ object ServiceClassParamTest {
 
   class EchoExtService extends JavaExtendedEcho {}
 
-  class EchoFuture extends ScalaEcho[Future] {
+  class EchoFuture extends ScalaEcho.MethodPerEndpoint {
     override def echo(msg: String): Future[String] = ???
   }
 
-  class EchoExtFuture extends ScalaExtendedEcho[Future] {
+  class EchoExtFuture extends ScalaExtendedEcho.MethodPerEndpoint {
     override def echo(msg: String): Future[String] = ???
     override def getStatus(): Future[String] = ???
   }
@@ -65,9 +65,9 @@ class ServiceClassParamTest extends AnyFunSuite {
     assert(fqn[ScalaEcho.MethodPerEndpoint] == expectedScala)
     assert(fqn[ScalaEcho.ServicePerEndpoint] == expectedScala)
     assert(fqn[ScalaEcho.ServiceIface] == expectedScala)
-    assert(fqn[ScalaEcho.FutureIface] == expectedScala)
-    assert(fqn[ScalaEcho[Future]] == expectedScala)
-    assert(fqn[ScalaExtendedEcho[Future]] == expectedExtendedScala)
+    assert(fqn[ScalaEcho.MethodPerEndpoint] == expectedScala)
+    assert(fqn[ScalaEcho.MethodPerEndpoint] == expectedScala)
+    assert(fqn[ScalaExtendedEcho.MethodPerEndpoint] == expectedExtendedScala)
   }
 
   test("extractServiceFqn for java clients") {
