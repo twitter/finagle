@@ -1,19 +1,12 @@
 package com.twitter.finagle.postgresql
 
-import java.nio.charset.Charset
-
 import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.postgresql.Response.Command
-import com.twitter.finagle.postgresql.Response.QueryResponse
-import com.twitter.finagle.postgresql.Types.Name
-import com.twitter.finagle.postgresql.Types.WireValue
-import com.twitter.finagle.postgresql.types.PgType
-import com.twitter.finagle.postgresql.types.ValueWrites
+import com.twitter.finagle.postgresql.Response.{Command, QueryResponse}
+import com.twitter.finagle.postgresql.Types.{Name, WireValue}
+import com.twitter.finagle.postgresql.types.{PgType, ValueWrites}
 import com.twitter.io.Reader
-import com.twitter.util.Closable
-import com.twitter.util.Future
-import com.twitter.util.Time
-
+import com.twitter.util.{Closable, Future, Time}
+import java.nio.charset.Charset
 import scala.util.hashing.MurmurHash3
 
 trait QueryClient[Q] {
@@ -106,18 +99,20 @@ object Client {
             val params = svc(Request.ConnectionParameters).flatMap(Expect.ConnectionParameters)
             val prepare = svc(Request.Prepare(sql, name)).flatMap(Expect.ParseComplete)
 
-            (params join prepare)
-              .flatMap { case (params, prepared) =>
-                val values = (prepared.statement.parameterTypes zip parameters)
-                  .map { case (tpe, p) =>
-                    p.encode(PgType.pgTypeByOid(tpe), params.parsedParameters.clientEncoding)
-                  }
-                svc(Request.ExecutePortal(prepared.statement, values))
+            params
+              .join(prepare)
+              .flatMap {
+                case (params, prepared) =>
+                  val values = (prepared.statement.parameterTypes zip parameters)
+                    .map {
+                      case (tpe, p) =>
+                        p.encode(PgType.pgTypeByOid(tpe), params.parsedParameters.clientEncoding)
+                    }
+                  svc(Request.ExecutePortal(prepared.statement, values))
               }
               .flatMap(Expect.QueryResponse)
               .ensure {
-                // TODO: not sure this is correct
-                val _ = svc.close()
+                svc.close()
               }
           }
     }

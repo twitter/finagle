@@ -1,13 +1,10 @@
 package com.twitter.finagle.postgresql
 
-import java.nio.charset.Charset
-import java.time.ZoneId
-
-import com.twitter.finagle.postgresql.Types.FieldDescription
-import com.twitter.finagle.postgresql.Types.Name
-import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.Types.{FieldDescription, Name, WireValue}
 import com.twitter.io.Reader
 import com.twitter.util.Future
+import java.nio.charset.Charset
+import java.time.ZoneId
 
 sealed trait Response
 object Response {
@@ -34,7 +31,9 @@ object Response {
       // Ancient Postgres versions used double and made this a compilation option.
       // Since Postgres 10, this is "on" by default and cannot be changed.
       // We still check, since this would have dire consequences on timestamp values.
-      require(parameterMap(BackendMessage.Parameter.IntegerDateTimes) == "on", "integer_datetimes must be on.")
+      require(
+        parameterMap(BackendMessage.Parameter.IntegerDateTimes) == "on",
+        "integer_datetimes must be on.")
 
       ParsedParameters(
         serverEncoding = Charset.forName(parameterMap(BackendMessage.Parameter.ServerEncoding)),
@@ -49,10 +48,14 @@ object Response {
 
   sealed trait QueryResponse extends Response
   type Row = IndexedSeq[WireValue]
-  case class ResultSet(fields: IndexedSeq[FieldDescription], rows: Reader[Row], parameters: ConnectionParameters)
+  case class ResultSet(
+    fields: IndexedSeq[FieldDescription],
+    rows: Reader[Row],
+    parameters: ConnectionParameters)
       extends QueryResponse {
-    def toSeq: Future[Seq[Row]] = Reader.toAsyncStream(rows).toSeq()
-    def buffered: Future[ResultSet] = toSeq.map(rows => ResultSet(fields, Reader.fromSeq(rows), parameters))
+    def toSeq: Future[Seq[Row]] = Reader.readAllItems(rows)
+    def buffered: Future[ResultSet] =
+      toSeq.map(rows => ResultSet(fields, Reader.fromSeq(rows), parameters))
   }
   object Result {
     // def because Reader is stateful

@@ -1,37 +1,20 @@
 package com.twitter.finagle.postgresql
 
-import com.github.benmanes.caffeine.cache.Caffeine
-import com.github.benmanes.caffeine.cache.RemovalCause
-import com.github.benmanes.caffeine.cache.RemovalListener
+import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListener}
 import com.twitter.cache.FutureCache
 import com.twitter.cache.caffeine.CaffeineCache
-import com.twitter.finagle.Service
-import com.twitter.finagle.ServiceProxy
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Service, ServiceProxy, Stack}
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
-import com.twitter.finagle.postgresql.Params.Credentials
-import com.twitter.finagle.postgresql.Params.Database
-import com.twitter.finagle.postgresql.Params.MaxConcurrentPrepareStatements
+import com.twitter.finagle.postgresql.Params.{Credentials, Database, MaxConcurrentPrepareStatements}
 import com.twitter.finagle.postgresql.Types.Name
-import com.twitter.finagle.postgresql.machine.CloseMachine
-import com.twitter.finagle.postgresql.machine.Connection
-import com.twitter.finagle.postgresql.machine.ExecuteMachine
-import com.twitter.finagle.postgresql.machine.HandshakeMachine
-import com.twitter.finagle.postgresql.machine.PrepareMachine
-import com.twitter.finagle.postgresql.machine.Runner
-import com.twitter.finagle.postgresql.machine.SimpleQueryMachine
-import com.twitter.finagle.postgresql.machine.StateMachine
-import com.twitter.finagle.postgresql.transport.MessageDecoder
-import com.twitter.finagle.postgresql.transport.Packet
+import com.twitter.finagle.postgresql.machine._
+import com.twitter.finagle.postgresql.transport.{MessageDecoder, Packet}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.Future
-import com.twitter.util.Promise
-import com.twitter.util.Return
-import com.twitter.util.Throw
+import com.twitter.util.{Future, Promise, Return, Throw}
 
 /**
  * Handles transforming the Postgres protocol to an RPC style.
@@ -77,7 +60,8 @@ class ClientDispatcher(
 
   private[this] val machineRunner: Runner = new Runner(transportConnection)
   def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] =
-    machineRunner.dispatch(machine, promise)
+    machineRunner
+      .dispatch(machine, promise)
       .transform {
         case Return(_) => Future.Done
         case Throw(_) => close()
@@ -104,7 +88,9 @@ class ClientDispatcher(
 
   override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
     connectionParameters.poll match {
-      case None => Future.exception(new PgSqlClientError("Handshake result should be available at this point."))
+      case None =>
+        Future.exception(
+          new PgSqlClientError("Handshake result should be available at this point."))
       case Some(Throw(t)) =>
         // If handshaking failed, we cannot proceed with sending requests
         p.setException(t)
@@ -125,7 +111,10 @@ class ClientDispatcher(
 }
 
 object ClientDispatcher {
-  def cached(transport: Transport[Packet, Packet], params: Stack.Params): Service[Request, Response] =
+  def cached(
+    transport: Transport[Packet, Packet],
+    params: Stack.Params
+  ): Service[Request, Response] =
     PrepareCache(
       new ClientDispatcher(transport, params),
       params[MaxConcurrentPrepareStatements].num,
@@ -146,16 +135,21 @@ case class PrepareCache(
 ) extends ServiceProxy[Request, Response](svc) {
 
   private[this] val listener = new RemovalListener[Name.Named, Future[Response]] {
-    override def onRemoval(key: Name.Named, response: Future[Response], cause: RemovalCause): Unit = {
-      val _ = response.respond {
+    override def onRemoval(
+      key: Name.Named,
+      response: Future[Response],
+      cause: RemovalCause
+    ): Unit = {
+      response.respond {
         case Return(Response.ParseComplete(_)) =>
-          val _ = svc(Request.CloseStatement(key)).unit
+          svc(Request.CloseStatement(key))
         case _ =>
       }
     }
   }
 
-  private[this] val underlying = Caffeine.newBuilder().maximumSize(maxSize.toLong)
+  private[this] val underlying = Caffeine
+    .newBuilder().maximumSize(maxSize.toLong)
     .removalListener(listener)
     .build[Name.Named, Future[Response]]()
 
