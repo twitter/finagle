@@ -1,10 +1,16 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.client.StackBasedClient
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
+import com.twitter.finagle.stats.ClientStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.thrift.service.Filterable
+import com.twitter.finagle.thrift.service.ServicePerEndpointBuilder
 import com.twitter.finagle.util.Showable
-import com.twitter.finagle.{Name, Resolver, Service, Stack, Thrift}
+import com.twitter.finagle.Name
+import com.twitter.finagle.Resolver
+import com.twitter.finagle.Service
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Thrift
 import org.apache.thrift.protocol.TProtocolFactory
 import scala.reflect.ClassTag
 
@@ -17,7 +23,7 @@ import scala.reflect.ClassTag
  * by [[https://github.com/twitter/scrooge Scrooge]].
  *
  * For Scala generated code, the `Class` passed in should be
- * either `ServiceName$FutureIface` or `ServiceName[Future]`.
+ * either `ServiceName$MethodPerEndpoint` or `ServiceName[Future]`.
  *
  * For Java generated code, the `Class` passed in should be
  * `ServiceName$ServiceIface`.
@@ -102,7 +108,7 @@ import scala.reflect.ClassTag
  * {{{
  *   val client = Thrift.client.multiplex(address, "client") { client =>
  *     new {
- *       val echo = client.newIface[Echo.FutureIface]("echo")
+ *       val echo = client.newIface[Echo.MethodPerEndpoint]("echo")
  *       val extendedEcho = client.newServiceIface[ExtendedEcho.ServiceIface]("extendedEcho")
  *     }
  *   }

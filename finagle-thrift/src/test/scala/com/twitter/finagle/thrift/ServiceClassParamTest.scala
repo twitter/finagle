@@ -2,14 +2,18 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.Thrift.param.ServiceClass
-import com.twitter.finagle.thrift.thriftscala.{Echo => ScalaEcho, ExtendedEcho => ScalaExtendedEcho}
-import com.twitter.finagle.thrift.thriftjava.{Echo => JavaEcho, ExtendedEcho => JavaExtendedEcho}
+import com.twitter.finagle.thrift.thriftscala.{Echo => ScalaEcho}
+import com.twitter.finagle.thrift.thriftscala.{ExtendedEcho => ScalaExtendedEcho}
+import com.twitter.finagle.thrift.thriftjava.{Echo => JavaEcho}
+import com.twitter.finagle.thrift.thriftjava.{ExtendedEcho => JavaExtendedEcho}
 import com.twitter.finagle.thrift.thriftscala.Echo.Echo
-import com.twitter.scrooge.{Request, Response}
+import com.twitter.scrooge.Request
+import com.twitter.scrooge.Response
 import com.twitter.util.Future
 import java.util.NoSuchElementException
 import org.scalatest.funsuite.AnyFunSuite
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 object ServiceClassParamTest {
   class EchoMPE extends ScalaEcho.MethodPerEndpoint {
@@ -22,10 +26,6 @@ object ServiceClassParamTest {
 
   class EchoReqRepSPE extends ScalaEcho.ReqRepServicePerEndpoint {
     override def echo: Service[Request[Echo.Args], Response[String]] = ???
-  }
-
-  class EchoFutureIface extends ScalaEcho.MethodPerEndpoint {
-    override def echo(msg: String): Future[String] = ???
   }
 
   class EchoServiceIface extends JavaEcho.ServiceIface {
@@ -79,7 +79,6 @@ class ServiceClassParamTest extends AnyFunSuite {
 
   test("extractServiceFqn for scala servers") {
     assert(fqn[EchoMPE] == expectedScala)
-    assert(fqn[EchoFutureIface] == expectedScala)
     assert(fqn[EchoFuture] == expectedScala)
     assert(fqn[EchoSPE] == expectedScala)
     assert(fqn[EchoReqRepSPE] == expectedScala)

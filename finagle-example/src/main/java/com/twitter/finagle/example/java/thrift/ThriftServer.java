@@ -13,7 +13,7 @@ public final class ThriftServer {
 
   private ThriftServer() { }
 
-  public static class HelloImpl implements Hello.FutureIface {
+  public static class HelloImpl implements Hello.MethodPerEndpoint {
     public Future<String> hi() {
       return Future.value("hi");
     }
@@ -31,7 +31,7 @@ public final class ThriftServer {
    */
   public static void main(String[] args) throws TimeoutException, InterruptedException {
     //#thriftserverapi
-    Hello.FutureIface impl = new HelloImpl();
+    Hello.MethodPerEndpoint impl = new HelloImpl();
     ListeningServer server = Thrift.server().serveIface("localhost:8080", impl);
     Await.ready(server);
     //#thriftserverapi

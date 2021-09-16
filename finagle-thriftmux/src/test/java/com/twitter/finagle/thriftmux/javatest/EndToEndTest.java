@@ -266,11 +266,11 @@ public class EndToEndTest {
     ListeningServer server =
         ThriftMux.server().serveIface(address, new TestServiceImpl());
 
-    com.twitter.finagle.thriftmux.thriftscala.TestService.FutureIface scalaClient =
+    com.twitter.finagle.thriftmux.thriftscala.TestService.MethodPerEndpoint scalaClient =
         ThriftMux.client().filtered(filter).newIface(
             Names.bound(Addresses.newInetAddress((InetSocketAddress) server.boundAddress())),
             "a_client",
-            com.twitter.finagle.thriftmux.thriftscala.TestService.FutureIface.class);
+            com.twitter.finagle.thriftmux.thriftscala.TestService.MethodPerEndpoint.class);
 
     try {
       expectedEx.expectMessage("client unhappy");
