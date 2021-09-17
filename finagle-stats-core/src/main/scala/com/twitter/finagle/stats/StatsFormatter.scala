@@ -1,7 +1,8 @@
 package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
-import scala.collection.{Map, mutable}
+import scala.collection.Map
+import scala.collection.mutable
 import scala.util.matching.Regex
 
 object format
@@ -70,10 +71,10 @@ private[twitter] sealed trait StatsFormatter {
     s"${name}$histogramSeparator$component"
 
   /** Label applied for the number of times a histogram was reported */
-  private[twitter] final val labelCount: String = "count"
+  private[twitter] final val labelCount: String = HistogramFormatter.labelCount
 
   /** Label applied for sum of the reported values */
-  private[twitter] final val labelSum: String = "sum"
+  private[twitter] final val labelSum: String = HistogramFormatter.labelSum
 
   /** Label applied for a given percentile, `p`, of a histogram */
   private[twitter] def labelPercentile(p: Double): String
@@ -106,22 +107,10 @@ private[twitter] object StatsFormatter {
    * See Commons Metrics' `Metrics.sample()`.
    */
   object CommonsMetrics extends StatsFormatter {
-    def labelPercentile(p: Double): String = {
-      // this has a strange quirk that p999 gets formatted as p9990
-      // Round for precision issues; e.g. 0.9998999... converts to "p9998" with a direct int cast.
-      val gname: String = "p" + (p * 10000).round
-      if (3 < gname.length && ("00" == gname.substring(3))) {
-        gname.substring(0, 3)
-      } else {
-        gname
-      }
-    }
-
-    def labelMin: String = "min"
-
-    def labelMax: String = "max"
-
-    def labelAverage: String = "avg"
+    def labelPercentile(p: Double): String = HistogramFormatter.labelPercentile(p)
+    def labelMin: String = HistogramFormatter.labelMin
+    def labelMax: String = HistogramFormatter.labelMax
+    def labelAverage: String = HistogramFormatter.labelAverage
   }
 
   /**

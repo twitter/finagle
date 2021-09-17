@@ -1,17 +1,18 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.{
-  acRejectName,
-  deadlineRejectName,
-  latencyName,
-  successRateName,
-  throughputName
-}
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.acRejectName
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.deadlineRejectName
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.latencyName
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.successRateName
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.throughputName
 import com.twitter.finagle.service.MetricBuilderRegistry._
-import com.twitter.finagle.stats.MetricBuilder.{CounterType, HistogramType}
+import com.twitter.finagle.stats.MetricBuilder.CounterType
+import com.twitter.finagle.stats.MetricBuilder.HistogramType
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, Metadata, MetricBuilder}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.Metadata
+import com.twitter.finagle.stats.MetricBuilder
 import com.twitter.util.Future
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -47,8 +48,11 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
     )
   }
 
-  private[this] def nameToKey(name: String): ExpressionSchemaKey =
-    ExpressionSchemaKey(name, Map(), Seq())
+  private[this] def nameToKey(
+    name: String,
+    labels: Map[String, String] = Map()
+  ): ExpressionSchemaKey =
+    ExpressionSchemaKey(name, labels, Seq())
 
   test("Expression Factory generates all expressions when metrics are injected") {
     new Ctx {
@@ -70,7 +74,7 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
       assert(sr.expressions.size == 5)
       assert(sr.expressions.contains(nameToKey(successRateName)))
       assert(sr.expressions.contains(nameToKey(throughputName)))
-      assert(sr.expressions.contains(nameToKey(latencyName)))
+      assert(sr.expressions.contains(nameToKey(latencyName, Map("bucket" -> "p99"))))
       assert(sr.expressions.contains(nameToKey(deadlineRejectName)))
       assert(sr.expressions.contains(nameToKey(acRejectName)))
     }
@@ -93,7 +97,7 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
 
       assert(sr.expressions.size == 2)
       assert(sr.expressions.contains(nameToKey(successRateName)))
-      assert(sr.expressions.contains(nameToKey(latencyName)))
+      assert(sr.expressions.contains(nameToKey(latencyName, Map("bucket" -> "p99"))))
     }
   }
 }

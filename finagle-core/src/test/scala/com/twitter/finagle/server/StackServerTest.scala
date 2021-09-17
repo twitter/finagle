@@ -4,24 +4,33 @@ import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
-import com.twitter.finagle.context.{Contexts, Deadline}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.filter.RequestSemaphoreFilter
-import com.twitter.finagle.param.{Stats, Timer}
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.utils.StringServer
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.{
-  deadlineRejectName,
-  latencyName,
-  successRateName,
-  throughputName
-}
-import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
-import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.deadlineRejectName
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.latencyName
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.successRateName
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.throughputName
+import com.twitter.finagle.service.ExpiringService
+import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.ssl.session.NullSslSessionInfo
+import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.util.StackRegistry
-import com.twitter.util.{Await, Duration, Future, MockTimer, Promise, Time}
-import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.MockTimer
+import com.twitter.util.Promise
+import com.twitter.util.Time
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 import org.scalatest.concurrent.Eventually
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -251,8 +260,11 @@ class StackServerTest extends AnyFunSuite with Eventually {
     Await.ready(server.close(), 10.seconds)
   }
 
-  private[this] def nameToKey(name: String): ExpressionSchemaKey =
-    ExpressionSchemaKey(name, Map(), Seq())
+  private[this] def nameToKey(
+    name: String,
+    labels: Map[String, String] = Map()
+  ): ExpressionSchemaKey =
+    ExpressionSchemaKey(name, labels, Seq())
 
   test("StackServer has MetricBuilderRegistry configured instruments default expressions") {
     val sf = ServiceFactory.const(Service.mk[String, String](_ => Future.value("hi")))
@@ -266,7 +278,7 @@ class StackServerTest extends AnyFunSuite with Eventually {
     // We won't create acRejectName which uses that metric
     assert(sr.expressions.contains(nameToKey(successRateName)))
     assert(sr.expressions.contains(nameToKey(throughputName)))
-    assert(sr.expressions.contains(nameToKey(latencyName)))
+    assert(sr.expressions.contains(nameToKey(latencyName, Map("bucket" -> "p99"))))
     assert(sr.expressions.contains(nameToKey(deadlineRejectName)))
   }
 }
