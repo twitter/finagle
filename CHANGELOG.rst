@@ -18,6 +18,8 @@ Runtime Behavior Changes
 
 * finagle: Upgrade to Netty 4.1.67.Final and netty-tcnative 2.0.40.Final. ``PHAB_ID=D726343``
 
+* finagle: Downgrade to Netty 4.1.66.Final ``PHAB_ID=D746041``
+
 * finagle: Bump version of Jackson to 2.11.4. ``PHAB_ID=D727879``
 
 * finagle-core: OffloadFilter hands off work from Netty I/O thread to the offload CPU thread pool
