@@ -1,41 +1,44 @@
 package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.postgresql.Response.{Command, QueryResponse}
-import com.twitter.finagle.postgresql.Types.{Name, WireValue}
-import com.twitter.finagle.postgresql.types.{PgType, ValueWrites}
+import com.twitter.finagle.postgresql.Response.Command
+import com.twitter.finagle.postgresql.Response.QueryResponse
+import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.types.PgType
+import com.twitter.finagle.postgresql.types.ValueWrites
+import com.twitter.io.Pipe
 import com.twitter.io.Reader
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.Closable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.TimeoutException
+import com.twitter.util.Timer
 import java.nio.charset.Charset
 import scala.util.hashing.MurmurHash3
 
-trait QueryClient[Q] {
+abstract class QueryClient[Q] {
 
   def query(sql: Q): Future[QueryResponse]
 
-  def read(sql: Q): Future[ResultSet] =
-    query(sql)
-      .flatMap(Client.Expect.ResultSet)
-      .flatMap(ResultSet(_))
+  def read(sql: Q): Future[ResultSet] = query(sql)
+    .flatMap(Client.Expect.ResultSet)
+    .flatMap(ResultSet(_))
 
   def select[T](sql: Q)(f: Row => T): Future[Iterable[T]] =
-    read(sql)
-      .map(rs => rs.rows.map(f))
+    read(sql).map(rs => rs.rows.map(f))
 
-  def modify(sql: Q): Future[Command] =
-    query(sql).flatMap(Client.Expect.Command)
+  def modify(sql: Q): Future[Command] = query(sql).flatMap(Client.Expect.Command)
 }
 
-trait Client extends QueryClient[String] with Closable {
+abstract class Client extends QueryClient[String] with Closable {
 
   def multiQuery(sql: String): Reader[QueryResponse]
 
   def prepare(sql: String): PreparedStatement
 
   def prepare(name: Name, sql: String): PreparedStatement
-
-  def cursor(sql: String): CursoredStatement
-
 }
 
 object Client {
@@ -70,14 +73,38 @@ object Client {
     }
   }
 
-  def apply(factory: ServiceFactory[Request, Response]): Client = new Client {
+  def apply(
+    factory: ServiceFactory[Request, Response],
+    timeoutFn: () => Duration
+  )(
+    implicit timer: Timer
+  ): Client = new Client {
 
     private[this] val service = factory.toService
 
     override def multiQuery(sql: String): Reader[QueryResponse] = {
+      val startTime = Time.now
+      val timeout = timeoutFn()
+      val deadline = startTime + timeout
+
       val f = service(Request.Query(sql))
-        .flatMap(Expect.SimpleQueryResponse)
+        .flatMap {
+          case Response.SimpleQueryResponse(responses) =>
+            readAllWithin(responses, deadline)
+
+            val observedResponses = responses.map {
+              case r @ Response.ResultSet(_, reader, _) =>
+                readAllWithin(reader, deadline)
+                r
+              case r => r
+            }
+
+            Future.value(Response.SimpleQueryResponse(observedResponses))
+          case other =>
+            Future.exception(new IllegalStateException(s"invalid response $other"))
+        }
         .map(_.responses)
+        .raiseWithin(timeout)
 
       Reader.fromFuture(f).flatten
     }
@@ -93,7 +120,11 @@ object Client {
       // NOTE: this assumes that caching is done down the stack so that named statements aren't re-prepared on the same connection
       //   The rationale is that it allows releasing the connection earlier at the expense
       //   of re-preparing statements on each connection and potentially more than once (but not every time)
-      override def query(parameters: Seq[Parameter[_]]): Future[QueryResponse] =
+      override def query(parameters: Seq[Parameter[_]]): Future[QueryResponse] = {
+        val startTime = Time.now
+        val timeout = timeoutFn()
+        val deadline = startTime + timeout
+
         factory()
           .flatMap { svc =>
             val params = svc(Request.ConnectionParameters).flatMap(Expect.ConnectionParameters)
@@ -110,17 +141,36 @@ object Client {
                     }
                   svc(Request.ExecutePortal(prepared.statement, values))
               }
-              .flatMap(Expect.QueryResponse)
+              .flatMap {
+                case r @ Response.ResultSet(_, reader, _) =>
+                  readAllWithin(reader, deadline)
+                  Future.value(r)
+                case r: QueryResponse =>
+                  Future.value(r)
+                case other =>
+                  Future.exception(new IllegalStateException(s"invalid response $other"))
+              }
+              .raiseWithin(timeout)
               .ensure {
                 svc.close()
               }
           }
+      }
     }
-
-    override def cursor(sql: String): CursoredStatement = ???
 
     override def close(deadline: Time): Future[Unit] = factory.close(deadline)
   }
+
+  private def readAllWithin[A](r: Reader[A], deadline: Time)(implicit timer: Timer): Unit =
+    if (deadline != Time.Top) {
+      val tt = timer.schedule(deadline) {
+        r match {
+          case p: Pipe[_] => p.fail(new TimeoutException(deadline.toString))
+          case r => r.discard()
+        }
+      }
+      r.onClose.ensure(tt.cancel())
+    }
 }
 
 case class Parameter[T](value: T)(implicit val valueWrites: ValueWrites[T]) {
@@ -134,7 +184,4 @@ case class Parameter[T](value: T)(implicit val valueWrites: ValueWrites[T]) {
   }
 }
 
-trait PreparedStatement extends QueryClient[Seq[Parameter[_]]]
-
-// TODO
-trait CursoredStatement
+abstract class PreparedStatement extends QueryClient[Seq[Parameter[_]]]

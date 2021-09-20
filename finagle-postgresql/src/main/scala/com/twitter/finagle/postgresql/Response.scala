@@ -1,23 +1,26 @@
 package com.twitter.finagle.postgresql
 
-import com.twitter.finagle.postgresql.Types.{FieldDescription, Name, WireValue}
+import com.twitter.finagle.postgresql.Types.FieldDescription
+import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.WireValue
 import com.twitter.io.Reader
 import com.twitter.util.Future
 import java.nio.charset.Charset
 import java.time.ZoneId
 
-sealed trait Response
+sealed abstract class Response
 object Response {
 
   // For the Sync Query
-  case object Ready extends Response
+  final case object Ready extends Response
 
-  case class ParsedParameters(
+  final case class ParsedParameters(
     serverEncoding: Charset,
     clientEncoding: Charset,
     timeZone: ZoneId,
   )
-  case class ConnectionParameters(
+
+  final case class ConnectionParameters(
     parameters: List[BackendMessage.ParameterStatus],
     // Not implemented in CRDB: https://github.com/cockroachdb/cockroach/pull/13009
     backendData: Option[BackendMessage.BackendKeyData],
@@ -46,31 +49,38 @@ object Response {
     val empty: ConnectionParameters = ConnectionParameters(Nil, None)
   }
 
-  sealed trait QueryResponse extends Response
+  sealed abstract class QueryResponse extends Response
   type Row = IndexedSeq[WireValue]
-  case class ResultSet(
+
+  final case class ResultSet(
     fields: IndexedSeq[FieldDescription],
     rows: Reader[Row],
     parameters: ConnectionParameters)
       extends QueryResponse {
-    def toSeq: Future[Seq[Row]] = Reader.readAllItems(rows)
+
+    def toSeq: Future[Seq[Row]] = Reader.readAllItemsInterruptible(rows)
+
     def buffered: Future[ResultSet] =
       toSeq.map(rows => ResultSet(fields, Reader.fromSeq(rows), parameters))
   }
-  object Result {
-    // def because Reader is stateful
-    def empty: ResultSet = ResultSet(IndexedSeq.empty, Reader.empty, ConnectionParameters.empty)
-  }
-  case object Empty extends QueryResponse
-  case class Command(commandTag: BackendMessage.CommandTag) extends QueryResponse
 
-  case class SimpleQueryResponse(responses: Reader[QueryResponse]) extends Response {
+  final object Result {
+    // def because Reader is stateful
+    def empty: ResultSet =
+      ResultSet(IndexedSeq.empty, Reader.empty, ConnectionParameters.empty)
+  }
+
+  final case object Empty extends QueryResponse
+
+  final case class Command(commandTag: BackendMessage.CommandTag) extends QueryResponse
+
+  final case class SimpleQueryResponse(responses: Reader[QueryResponse]) extends Response {
     def next: Future[QueryResponse] =
       responses.read().map(_.getOrElse(sys.error("expected at least one response, got none")))
   }
 
   // Extended query
-  case class Prepared private[postgresql] (name: Name, parameterTypes: IndexedSeq[Types.Oid])
-  case class ParseComplete(statement: Prepared) extends Response
+  final case class Prepared private[postgresql] (name: Name, parameterTypes: IndexedSeq[Types.Oid])
 
+  final case class ParseComplete(statement: Prepared) extends Response
 }

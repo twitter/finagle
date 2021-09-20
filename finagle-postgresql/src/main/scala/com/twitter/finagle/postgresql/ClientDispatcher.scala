@@ -1,20 +1,30 @@
 package com.twitter.finagle.postgresql
 
-import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListener}
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.RemovalCause
+import com.github.benmanes.caffeine.cache.RemovalListener
 import com.twitter.cache.FutureCache
 import com.twitter.cache.caffeine.CaffeineCache
-import com.twitter.finagle.{Service, ServiceProxy, Stack}
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceProxy
+import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
-import com.twitter.finagle.postgresql.Params.{Credentials, Database, MaxConcurrentPrepareStatements}
+import com.twitter.finagle.postgresql.Params.Credentials
+import com.twitter.finagle.postgresql.Params.Database
+import com.twitter.finagle.postgresql.Params.MaxConcurrentPrepareStatements
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine._
-import com.twitter.finagle.postgresql.transport.{MessageDecoder, Packet}
+import com.twitter.finagle.postgresql.transport.MessageDecoder
+import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Promise, Return, Throw}
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Throw
 
 /**
  * Handles transforming the Postgres protocol to an RPC style.
@@ -56,9 +66,12 @@ class ClientDispatcher(
 
     def receive(): Future[BackendMessage] =
       transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry
+
+    def close(): Future[Unit] = transport.close()
   }
 
   private[this] val machineRunner: Runner = new Runner(transportConnection)
+
   def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] =
     machineRunner
       .dispatch(machine, promise)
@@ -103,7 +116,8 @@ class ClientDispatcher(
           case Request.Sync => machineDispatch(StateMachine.syncMachine, p)
           case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
           case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
-          case e: Request.Execute => machineDispatch(new ExecuteMachine(e, parameters), p)
+          case e: Request.Execute =>
+            machineDispatch(new ExecuteMachine(e, parameters, () => transport.close()), p)
           case Request.CloseStatement(name) =>
             machineDispatch(new CloseMachine(name, DescriptionTarget.PreparedStatement), p)
         }

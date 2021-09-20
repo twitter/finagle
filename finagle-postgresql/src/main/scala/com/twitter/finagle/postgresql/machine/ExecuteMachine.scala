@@ -1,20 +1,18 @@
 package com.twitter.finagle.postgresql.machine
 
 import com.twitter.finagle.postgresql.BackendMessage
-import com.twitter.finagle.postgresql.BackendMessage.{
-  BindComplete,
-  CommandComplete,
-  CommandTag,
-  DataRow,
-  EmptyQueryResponse,
-  ErrorResponse,
-  InTx,
-  NoData,
-  NoticeResponse,
-  PortalSuspended,
-  ReadyForQuery,
-  RowDescription
-}
+import com.twitter.finagle.postgresql.BackendMessage.BindComplete
+import com.twitter.finagle.postgresql.BackendMessage.CommandComplete
+import com.twitter.finagle.postgresql.BackendMessage.CommandTag
+import com.twitter.finagle.postgresql.BackendMessage.DataRow
+import com.twitter.finagle.postgresql.BackendMessage.EmptyQueryResponse
+import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
+import com.twitter.finagle.postgresql.BackendMessage.InTx
+import com.twitter.finagle.postgresql.BackendMessage.NoData
+import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
+import com.twitter.finagle.postgresql.BackendMessage.PortalSuspended
+import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
+import com.twitter.finagle.postgresql.BackendMessage.RowDescription
 import com.twitter.finagle.postgresql.FrontendMessage.Bind
 import com.twitter.finagle.postgresql.FrontendMessage.Describe
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
@@ -36,10 +34,38 @@ import com.twitter.finagle.postgresql.machine.StateMachine.SendSeveral
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.finagle.postgresql.machine.StateMachine.TransitionResult
 import com.twitter.io.Pipe
+import com.twitter.io.StreamTermination
 import com.twitter.util.Future
 import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
+
+object ExecuteMachine {
+  sealed trait State
+
+  final case object Binding extends State
+
+  final case object Describing extends State
+
+  final case object ExecutingCommand extends State
+
+  final case class Executing(r: RowDescription) extends State
+
+  final case class StreamResult(
+    rowDescription: RowDescription,
+    pipe: Pipe[DataRow],
+    lastWrite: Future[Unit])
+      extends State {
+
+    def append(row: DataRow): StreamResult =
+      StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
+
+    def resultSet(parameters: ConnectionParameters): ResultSet =
+      ResultSet(rowDescription.rowFields, pipe.map(_.values), parameters)
+  }
+
+  final case class Syncing(response: Option[Try[Response.QueryResponse]]) extends State
+}
 
 /**
  * Implements part of the "Extended Query" message flow described here https://www.postgresql.org/docs/current/protocol-flow.html#PROTOCOL-FLOW-EXT-QUERY.
@@ -54,24 +80,11 @@ import com.twitter.util.Try
  *
  * Also note that this machine is used for both executing a portal as well as resuming a previously executed one.
  */
-class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters)
+class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters, interrupt: () => Unit)
     extends StateMachine[Response.QueryResponse] {
+  import ExecuteMachine._
 
-  sealed trait State
-  case object Binding extends State
-  case object Describing extends State
-  case object ExecutingCommand extends State
-  case class Executing(r: RowDescription) extends State
-  case class StreamResult(
-    rowDescription: RowDescription,
-    pipe: Pipe[DataRow],
-    lastWrite: Future[Unit])
-      extends State {
-    def append(row: DataRow): StreamResult =
-      StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
-    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values), parameters)
-  }
-  case class Syncing(response: Option[Try[Response.QueryResponse]]) extends State
+  type State = ExecuteMachine.State
 
   override def start: TransitionResult[State, Response.QueryResponse] = req match {
     case Request.ExecutePortal(prepared, parameters, portalName, maxResults) =>
@@ -129,11 +142,22 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters)
 
       case (Executing(_), EmptyQueryResponse) =>
         Transition(Syncing(Some(Return(Response.Empty))), Send(Sync))
+
       case (Executing(r), row: DataRow) =>
         val stream = StreamResult(r, new Pipe, Future.Done).append(row)
-        Transition(stream, Respond(Return(stream.resultSet)))
 
-      case (r: StreamResult, dr: DataRow) => Transition(r.append(dr), NoOp)
+        stream.pipe.onClose.respond {
+          case Throw(_: PgSqlServerError) =>
+          // don't terminate the connection on expected exceptions
+          case Return(StreamTermination.Discarded) | Throw(_) =>
+            interrupt()
+          case _ =>
+          // noop
+        }
+        Transition(stream, Respond(Return(stream.resultSet(parameters))))
+
+      case (r: StreamResult, dr: DataRow) =>
+        Transition(r.append(dr), NoOp)
       case (r: StreamResult, PortalSuspended) =>
         r.lastWrite.liftToTry.unit before r.pipe.close()
         // TODO: the ReadyForQuery here is fake

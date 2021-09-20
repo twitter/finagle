@@ -69,7 +69,8 @@ object StateMachine {
   /**
    * Send the specified [[FrontendMessage]] after transitioning to the new sate.
    */
-  case class Send[M <: FrontendMessage](msg: M)(implicit val encoder: MessageEncoder[M]) extends Action[Nothing]
+  case class Send[M <: FrontendMessage](msg: M)(implicit val encoder: MessageEncoder[M])
+      extends Action[Nothing]
 
   /**
    * Send multiple messages to the backend after transitioning to the new sate.
@@ -77,23 +78,46 @@ object StateMachine {
    */
   case class SendSeveral(msgs: Seq[Send[_ <: FrontendMessage]]) extends Action[Nothing]
   object SendSeveral {
-    def apply[
-      A <: FrontendMessage: MessageEncoder,
-      B <: FrontendMessage: MessageEncoder
-    ](a: A, b: B): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Nil)
+    def apply[A <: FrontendMessage: MessageEncoder, B <: FrontendMessage: MessageEncoder](
+      a: A,
+      b: B
+    ): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Nil)
 
     def apply[
       A <: FrontendMessage: MessageEncoder,
       B <: FrontendMessage: MessageEncoder,
       C <: FrontendMessage: MessageEncoder,
-    ](a: A, b: B, c: C): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Nil)
+    ](
+      a: A,
+      b: B,
+      c: C
+    ): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Nil)
 
     def apply[
       A <: FrontendMessage: MessageEncoder,
       B <: FrontendMessage: MessageEncoder,
       C <: FrontendMessage: MessageEncoder,
       D <: FrontendMessage: MessageEncoder,
-    ](a: A, b: B, c: C, d: D): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Send(d) :: Nil)
+    ](
+      a: A,
+      b: B,
+      c: C,
+      d: D
+    ): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Send(d) :: Nil)
+
+    def apply[
+      A <: FrontendMessage: MessageEncoder,
+      B <: FrontendMessage: MessageEncoder,
+      C <: FrontendMessage: MessageEncoder,
+      D <: FrontendMessage: MessageEncoder,
+      E <: FrontendMessage: MessageEncoder,
+    ](
+      a: A,
+      b: B,
+      c: C,
+      d: D,
+      e: E
+    ): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Send(d) :: Send(e) :: Nil)
   }
 
   /**
@@ -109,7 +133,8 @@ object StateMachine {
    * This encapsulates the new state to transition to as well as possible side effects to produce.
    */
   sealed trait TransitionResult[+S, +R <: Response]
-  case class Transition[S, R <: Response](state: S, action: Action[R]) extends TransitionResult[S, R]
+  case class Transition[S, R <: Response](state: S, action: Action[R])
+      extends TransitionResult[S, R]
 
   /**
    * Indicates that the state machine is finished and the connection may be released.
@@ -132,14 +157,17 @@ object StateMachine {
   def singleMachine[M <: FrontendMessage: MessageEncoder, R <: Response](
     name: String,
     msg: M
-  )(f: BackendMessage.ReadyForQuery => R): StateMachine[R] = new StateMachine[R] {
+  )(
+    f: BackendMessage.ReadyForQuery => R
+  ): StateMachine[R] = new StateMachine[R] {
     override type State = Unit
     override def start: TransitionResult[State, R] = Transition((), Send(msg))
-    override def receive(state: State, msg: BackendMessage): TransitionResult[State, R] = msg match {
-      case r: BackendMessage.ReadyForQuery => Complete(r, Some(Return(f(r))))
-      case e: BackendMessage.ErrorResponse => Transition((), Respond(Throw(PgSqlServerError(e))))
-      case msg => throw PgSqlNoSuchTransition(name, (), msg)
-    }
+    override def receive(state: State, msg: BackendMessage): TransitionResult[State, R] =
+      msg match {
+        case r: BackendMessage.ReadyForQuery => Complete(r, Some(Return(f(r))))
+        case e: BackendMessage.ErrorResponse => Transition((), Respond(Throw(PgSqlServerError(e))))
+        case msg => throw PgSqlNoSuchTransition(name, (), msg)
+      }
   }
 
   // Simple machine for the Sync request which immediately responds with a "ReadyForQuery".

@@ -1,10 +1,17 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
+import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.client.StdStackClient
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.param.WithSessionPool
 import com.twitter.finagle.postgresql.transport.Packet
-import com.twitter.finagle.postgresql.{DelayedRelease, Params, Request, Response}
-import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.postgresql.DelayedRelease
+import com.twitter.finagle.postgresql.Params
+import com.twitter.finagle.postgresql.Request
+import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
 import java.net.SocketAddress
 
 object PostgreSql {
@@ -12,6 +19,8 @@ object PostgreSql {
   val defaultStack: Stack[ServiceFactory[Request, Response]] =
     StackClient
       .newStack[Request, Response]
+      // we'll handle timeouts on our own
+      .remove(TimeoutFilter.role)
       // We add a DelayedRelease module at the bottom of the stack to ensure
       // that the pooling levels above don't discard an active session.
       .replace(StackClient.Role.prepConn, DelayedRelease.module(StackClient.Role.prepConn))
@@ -39,8 +48,11 @@ object PostgreSql {
     def withDatabase(db: String): Client =
       configured(Params.Database(Some(db)))
 
-    def newRichClient(dest: String): postgresql.Client =
-      postgresql.Client(newClient(dest))
+    def newRichClient(dest: String): postgresql.Client = {
+      val timeoutFn = params[TimeoutFilter.Param].timeout _
+      val timer = params[com.twitter.finagle.param.Timer].timer
+      postgresql.Client(newClient(dest), timeoutFn)(timer)
+    }
 
     override protected def newTransporter(
       addr: SocketAddress

@@ -1,35 +1,18 @@
 package com.twitter.finagle.postgresql.machine
 
-import com.twitter.finagle.postgresql._
-import com.twitter.finagle.postgresql.BackendMessage.{
-  BindComplete,
-  CommandComplete,
-  CommandTag,
-  EmptyQueryResponse,
-  NoData,
-  NoTx,
-  NoticeResponse,
-  ReadyForQuery,
-  RowDescription
-}
-import com.twitter.finagle.postgresql.FrontendMessage.Bind
-import com.twitter.finagle.postgresql.FrontendMessage.Describe
-import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
-import com.twitter.finagle.postgresql.FrontendMessage.Execute
-import com.twitter.finagle.postgresql.FrontendMessage.Flush
-import com.twitter.finagle.postgresql.FrontendMessage.Sync
+import com.twitter.finagle.postgresql.BackendMessage._
+import com.twitter.finagle.postgresql.FrontendMessage._
 import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Response.Prepared
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.WireValue
-import com.twitter.finagle.postgresql.machine.StateMachine.Complete
-import com.twitter.finagle.postgresql.machine.StateMachine.NoOp
-import com.twitter.finagle.postgresql.machine.StateMachine.Respond
-import com.twitter.finagle.postgresql.machine.StateMachine.Send
-import com.twitter.finagle.postgresql.machine.StateMachine.SendSeveral
-import com.twitter.finagle.postgresql.machine.StateMachine.Transition
-import com.twitter.util.{Await, Return, Throw, Try}
+import com.twitter.finagle.postgresql._
+import com.twitter.finagle.postgresql.machine.StateMachine._
+import com.twitter.util.Await
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
 import org.scalatestplus.scalacheck.Checkers
 
 class ExecuteMachineSpec
@@ -68,6 +51,7 @@ class ExecuteMachineSpec
     new ExecuteMachine(
       req = Request.ExecutePortal(Prepared(name, IndexedSeq.empty), parameters, portalName),
       parameters = ConnectionParameters.empty,
+      () => ()
     )
 
   "ExecuteMachine" should {
@@ -220,7 +204,7 @@ class ExecuteMachineSpec
     "fail when no transition exist" in {
       val machine = mkMachine(Name.Unnamed, Name.Unnamed, IndexedSeq.empty)
       an[PgSqlNoSuchTransition] must be thrownBy machine.receive(
-        machine.Binding,
+        ExecuteMachine.Binding,
         BackendMessage.PortalSuspended)
     }
   }

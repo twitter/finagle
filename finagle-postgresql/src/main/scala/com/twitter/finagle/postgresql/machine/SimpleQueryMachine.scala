@@ -29,13 +29,15 @@ import com.twitter.util.Throw
  * For example, the client may send `CREATE TABLE (...); CREATE INDEX ...` in a single query. All types of queries
  * are supported.
  */
-class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extends StateMachine[SimpleQueryResponse] {
+class SimpleQueryMachine(query: String, parameters: ConnectionParameters)
+    extends StateMachine[SimpleQueryResponse] {
 
   import StateMachine._
 
   sealed trait State
   case object Sent extends State
-  case class StreamResponses(pipe: Pipe[Response.QueryResponse], lastWrite: Future[Unit]) extends State {
+  case class StreamResponses(pipe: Pipe[Response.QueryResponse], lastWrite: Future[Unit])
+      extends State {
     def append(response: Response.QueryResponse): StreamResponses =
       StreamResponses(pipe, lastWrite before pipe.write(response))
     def close(): Future[Unit] = lastWrite.liftToTry.unit before pipe.close()
@@ -44,15 +46,24 @@ class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extend
     def init: StreamResponses = StreamResponses(new Pipe, Future.Done)
   }
 
-  case class StreamResult(rowDescription: RowDescription, pipe: Pipe[DataRow], lastWrite: Future[Unit]) {
+  case class StreamResult(
+    rowDescription: RowDescription,
+    pipe: Pipe[DataRow],
+    lastWrite: Future[Unit]) {
+
     def append(row: DataRow): StreamResult =
       StreamResult(rowDescription, pipe, lastWrite before pipe.write(row))
-    def resultSet: ResultSet = ResultSet(rowDescription.rowFields, pipe.map(_.values), parameters)
+
+    def resultSet: ResultSet =
+      ResultSet(rowDescription.rowFields, pipe.map(_.values), parameters)
+
     def close(): Future[Unit] = lastWrite.liftToTry.unit before pipe.close()
   }
+
   object StreamResult {
     def init(rd: RowDescription): StreamResult = StreamResult(rd, new Pipe, Future.Done)
   }
+
   case class StreamResultState(responses: StreamResponses, result: StreamResult) extends State {
     def append(row: DataRow): StreamResultState = StreamResultState(responses, result.append(row))
     // closes the current result set stream and returns the response stream
@@ -75,11 +86,16 @@ class SimpleQueryMachine(query: String, parameters: ConnectionParameters) extend
     case _ => sys.error("") // TODO
   }
 
-  override def receive(state: State, msg: BackendMessage): StateMachine.TransitionResult[State, SimpleQueryResponse] =
+  override def receive(
+    state: State,
+    msg: BackendMessage
+  ): StateMachine.TransitionResult[State, SimpleQueryResponse] =
     (state, msg) match {
       case (Sent, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
         val response = StreamResponses.init
-        Transition(handleResponse(response, msg), Respond(Return(Response.SimpleQueryResponse(response.pipe))))
+        Transition(
+          handleResponse(response, msg),
+          Respond(Return(Response.SimpleQueryResponse(response.pipe))))
       case (s: StreamResponses, EmptyQueryResponse | _: CommandComplete | _: RowDescription) =>
         Transition(handleResponse(s, msg), NoOp)
 

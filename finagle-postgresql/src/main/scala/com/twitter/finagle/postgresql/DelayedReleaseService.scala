@@ -1,8 +1,8 @@
 package com.twitter.finagle.postgresql
 
-import com.twitter.finagle.{Service, ServiceFactory, ServiceProxy, Stack, Stackable}
+import com.twitter.finagle._
 import com.twitter.finagle.util.AsyncLatch
-import com.twitter.util.{Future, Promise, Return, Time}
+import com.twitter.util._
 
 private[finagle] object DelayedRelease {
   def module(r: Stack.Role): Stackable[ServiceFactory[Request, Response]] =
@@ -13,17 +13,18 @@ private[finagle] object DelayedRelease {
       final def make(
         next: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] =
-        next.map(new DelayedReleaseService(_))
+        next.map(svc => new DelayedReleaseService(svc))
     }
 }
 
 /**
- * Delay release of the connection until all chunks have been received.
+ * Delay the close() of streaming responses until the readers themselves have completed.
  */
-private[finagle] class DelayedReleaseService(service: Service[Request, Response])
+private[finagle] final class DelayedReleaseService(
+  service: Service[Request, Response])
     extends ServiceProxy[Request, Response](service) {
 
-  private val latch = new AsyncLatch
+  private[this] val latch = new AsyncLatch
 
   override def apply(req: Request): Future[Response] = {
     latch.incr()

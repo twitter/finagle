@@ -1,15 +1,19 @@
 package com.twitter.finagle.postgresql
 
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
 import com.twitter.finagle.postgresql.Client.Expect
-import com.twitter.finagle.{Service, Status}
 import com.twitter.io.Reader
-import com.twitter.util.{Await, CloseOnce, Future, Time}
+import com.twitter.util.Await
+import com.twitter.util.CloseOnce
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 object DelayedReleaseServiceSpec {
 
-  private class MockService(numRows: Int) extends Service[Request, Response] with CloseOnce {
+  class MockService(numRows: Int) extends Service[Request, Response] with CloseOnce {
     private def row(): Response.Row = IndexedSeq()
 
     private def rs(): Response.ResultSet = {
@@ -25,6 +29,10 @@ object DelayedReleaseServiceSpec {
       case Request.Query(_) =>
         val responseReader = Reader.fromSeq(Seq.fill(2)(rs()))
         Future(Response.SimpleQueryResponse(responseReader))
+      case Request.ConnectionParameters =>
+        Future(Response.ConnectionParameters.empty)
+      case Request.Prepare(_, name) =>
+        Future(Response.ParseComplete(Response.Prepared(name, IndexedSeq.empty)))
       case _ => ???
     }
 
