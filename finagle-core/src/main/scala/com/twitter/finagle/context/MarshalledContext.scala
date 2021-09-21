@@ -1,17 +1,17 @@
 package com.twitter.finagle.context
 
-import com.twitter.finagle.CoreToggles
-import com.twitter.finagle.server.ServerInfo
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
-import com.twitter.util.{Local, Return, Throw, Try}
-import java.security.{MessageDigest, NoSuchAlgorithmException}
+import com.twitter.util.Local
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import java.util.Locale
 
 private object MarshalledContext {
-  val toggle = CoreToggles("com.twitter.finagle.context.MarshalledContextLookupId")
-
-  def caseInsensitiveLookupId(id: String): String = id.toLowerCase(Locale.US)
+  def normalizeId(id: String): String = id.toLowerCase(Locale.US)
 }
 
 /**
@@ -24,10 +24,6 @@ private object MarshalledContext {
  */
 final class MarshalledContext private[context] extends Context {
   import MarshalledContext._
-
-  private[this] val useCaseInsensitiveLookup: Boolean =
-    if (toggle.isDefined) toggle(ServerInfo().id.hashCode)
-    else true
 
   private[this] val log = Logger.get()
 
@@ -72,7 +68,7 @@ final class MarshalledContext private[context] extends Context {
    * MarshalledContext when using two keys with the same key `id`
    * is undefined.
    *
-   * @Note the key's `id` is treated without case sensitivity.
+   * @note the key's `id` is treated without case sensitivity.
    */
   abstract class Key[A](val id: String) {
 
@@ -86,10 +82,7 @@ final class MarshalledContext private[context] extends Context {
     /**
      * The identifier used to lookup the key in the stored context.
      */
-    private[context] final val lookupId: String = {
-      if (useCaseInsensitiveLookup) MarshalledContext.caseInsensitiveLookupId(id)
-      else id
-    }
+    private[context] final val lookupId: String = normalizeId(id)
 
     /**
      * Marshal an A-typed value into a Buf.
@@ -173,9 +166,7 @@ final class MarshalledContext private[context] extends Context {
     contexts: Iterable[(Buf, Buf)]
   ): Map[String, Cell] = {
     contexts.foldLeft(env) {
-      case (env, (k @ Buf.Utf8(id), v)) =>
-        if (useCaseInsensitiveLookup) env.updated(caseInsensitiveLookupId(id), Translucent(k, v))
-        else env.updated(id, Translucent(k, v))
+      case (env, (k @ Buf.Utf8(id), v)) => env.updated(normalizeId(id), Translucent(k, v))
     }
   }
 
