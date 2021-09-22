@@ -1,13 +1,25 @@
 package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
-import com.twitter.finagle.http.{HttpMuxHandler, Route, RouteIndex}
-import com.twitter.finagle.stats.MetricBuilder.{CounterType, GaugeType, HistogramType}
-import com.twitter.finagle.stats.exp.{ExpressionSchema, ExpressionSchemaKey}
+import com.twitter.finagle.http.HttpMuxHandler
+import com.twitter.finagle.http.Route
+import com.twitter.finagle.http.RouteIndex
+import com.twitter.finagle.stats.MetricBuilder.CounterType
+import com.twitter.finagle.stats.MetricBuilder.GaugeType
+import com.twitter.finagle.stats.MetricBuilder.HistogramType
+import com.twitter.finagle.stats.exp.ExpressionSchema
+import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.logging.{Level, Logger}
-import com.twitter.util.lint.{Category, GlobalRules, Issue, Rule}
-import com.twitter.util.{Future, FuturePool, Time}
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
+import com.twitter.util.lint.Category
+import com.twitter.util.lint.GlobalRules
+import com.twitter.util.lint.Issue
+import com.twitter.util.lint.Rule
+import com.twitter.util.Future
+import com.twitter.util.FuturePool
+import com.twitter.util.Time
+import com.twitter.util.Try
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.LongAdder
 import scala.collection.JavaConverters._
@@ -156,9 +168,9 @@ class MetricsStatsReceiver(val registry: Metrics)
 
   override def metricsCollisionsLinterRule: Rule = registry.metricsCollisionsLinterRule
 
-  override protected[finagle] def registerExpression(expressionSchema: ExpressionSchema): Unit = {
-    registry.registerExpression(expressionSchema)
-  }
+  override protected[finagle] def registerExpression(
+    expressionSchema: ExpressionSchema
+  ): Try[Unit] = registry.registerExpression(expressionSchema)
 
 }
 

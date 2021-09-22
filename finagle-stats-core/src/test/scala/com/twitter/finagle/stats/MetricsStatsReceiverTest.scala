@@ -1,7 +1,11 @@
 package com.twitter.finagle.stats
 
-import com.twitter.finagle.stats.MetricBuilder.{CounterType, GaugeType, HistogramType}
-import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, ExpressionSchemaKey}
+import com.twitter.finagle.stats.MetricBuilder.CounterType
+import com.twitter.finagle.stats.MetricBuilder.GaugeType
+import com.twitter.finagle.stats.MetricBuilder.HistogramType
+import com.twitter.finagle.stats.exp.Expression
+import com.twitter.finagle.stats.exp.ExpressionSchema
+import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import org.scalatest.funsuite.AnyFunSuite
 
 object MetricsStatsReceiverTest {
@@ -279,7 +283,7 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
       "test_expression",
       Expression(aCounter.metadata).plus(Expression(bHisto.metadata, Left(Expression.Min))
         .plus(Expression(cGauge.metadata)))
-    ).register()
+    ).build()
 
     // what we expected as hydrated metric builders
     val aaSchema =
@@ -312,24 +316,49 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
       MetricBuilder(name = Seq("a"), metricType = CounterType, statsReceiver = sr)
 
     val expression = ExpressionSchema("test_expression", Expression(aCounter))
-      .register()
+      .build()
     assert(exporter.expressions.keySet.size == 1)
 
     val expressionWithServiceName = ExpressionSchema("test_expression", Expression(aCounter))
       .withServiceName("thrift")
-      .register()
+      .build()
     assert(exporter.expressions.keySet.size == 2)
 
     val expressionWithNamespace = ExpressionSchema("test_expression", Expression(aCounter))
       .withNamespace("a", "b")
-      .register()
+      .build()
     assert(exporter.expressions.keySet.size == 3)
 
     val expressionWithNamespaceAndServiceName =
       ExpressionSchema("test_expression", Expression(aCounter))
         .withNamespace("a", "b").withServiceName("thrift")
-        .register()
+        .build()
     assert(exporter.expressions.keySet.size == 4)
+  }
+
+  test("expressions with the key - name, labels and namespaces") {
+    val metrics = Metrics.createDetached()
+    val sr = new MetricsStatsReceiver(metrics)
+    val exporter = new MetricsExporter(metrics)
+    val aCounter =
+      MetricBuilder(name = Seq("a"), metricType = CounterType, statsReceiver = sr)
+
+    val bCounter =
+      MetricBuilder(name = Seq("b"), metricType = CounterType, statsReceiver = sr)
+
+    val expression1 = ExpressionSchema("test_expression", Expression(aCounter))
+      .withNamespace("a", "b")
+      .build()
+    assert(exporter.expressions.keySet.size == 1)
+
+    val expression2 = ExpressionSchema("test_expression", Expression(bCounter))
+      .withNamespace("a", "b")
+      .build()
+    assert(exporter.expressions.keySet.size == 1)
+
+    assert(exporter.expressions.values.head.expr == Expression(aCounter))
+    assert(expression1.isReturn)
+    assert(expression2.isThrow)
   }
 
 }

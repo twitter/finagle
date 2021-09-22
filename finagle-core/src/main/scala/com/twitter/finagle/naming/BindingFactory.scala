@@ -9,7 +9,8 @@ import com.twitter.finagle.param
 import com.twitter.finagle.stats._
 import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.util.{CachedHashCode, Showable}
+import com.twitter.finagle.util.CachedHashCode
+import com.twitter.finagle.util.Showable
 import com.twitter.logging.Logger
 import com.twitter.util._
 
@@ -266,7 +267,7 @@ object BindingFactory {
             stats.counter(metricBuilder.withIdentifier(Some(displayed)))
           override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge =
             stats.addGauge(metricBuilder.withIdentifier(Some(displayed)))(f)
-          override protected[finagle] def registerExpression(expr: ExpressionSchema): Unit =
+          override protected[finagle] def registerExpression(expr: ExpressionSchema): Try[Unit] =
             super.registerExpression(expr.withLabel(ExpressionSchema.ProcessPath, displayed))
         }
 

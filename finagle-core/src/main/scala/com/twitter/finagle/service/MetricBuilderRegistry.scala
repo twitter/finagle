@@ -4,7 +4,10 @@ import com.twitter.conversions.PercentOps._
 import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames._
 import com.twitter.finagle.service.MetricBuilderRegistry._
 import com.twitter.finagle.stats._
-import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, GreaterThan, MonotoneThresholds}
+import com.twitter.finagle.stats.exp.Expression
+import com.twitter.finagle.stats.exp.ExpressionSchema
+import com.twitter.finagle.stats.exp.GreaterThan
+import com.twitter.finagle.stats.exp.MonotoneThresholds
 import java.util.concurrent.atomic.AtomicReference
 
 private[twitter] object MetricBuilderRegistry {
@@ -76,7 +79,7 @@ private[twitter] class MetricBuilderRegistry {
           .withBounds(MonotoneThresholds(GreaterThan, 99.5, 99.97))
           .withUnit(Percentage)
           .withDescription(s"The success rate expression $descriptionSuffix.")
-          .register()
+          .build()
       case _ => // no-op if any wanted metric is not found or results in NoMetadata
     }
   }
@@ -87,7 +90,7 @@ private[twitter] class MetricBuilderRegistry {
         ExpressionSchema(throughputName, Expression(request))
           .withUnit(Requests)
           .withDescription(s"The total requests expression $descriptionSuffix.")
-          .register()
+          .build()
       case _ => // no-op
     }
   }
@@ -98,7 +101,7 @@ private[twitter] class MetricBuilderRegistry {
         ExpressionSchema(latencyName, Expression(latencyP99, Right(99.percent)))
           .withUnit(Milliseconds)
           .withDescription(s"The p99 latency of a request $descriptionSuffix.")
-          .register()
+          .build()
       case _ => // no-op
     }
   }
@@ -113,7 +116,7 @@ private[twitter] class MetricBuilderRegistry {
           Expression(100).multiply(Expression(reject).divide(Expression(request))))
           .withUnit(Percentage)
           .withDescription(s"Deadline Filter rejection rate $descriptionSuffix.")
-          .register()
+          .build()
       case _ => // no-op
     }
   }
@@ -128,7 +131,7 @@ private[twitter] class MetricBuilderRegistry {
           Expression(100).multiply(Expression(reject).divide(Expression(request))))
           .withUnit(Percentage)
           .withDescription(s"Admission Control rejection rate $descriptionSuffix.")
-          .register()
+          .build()
       case _ => // no-op
     }
   }

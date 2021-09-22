@@ -1,8 +1,14 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.exp.ExpressionSchema.ExpressionCollisionException
 import com.twitter.finagle.stats.exp._
 import com.twitter.logging.Logger
-import com.twitter.util.lint.{Category, Issue, Rule}
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
+import com.twitter.util.lint.Category
+import com.twitter.util.lint.Issue
+import com.twitter.util.lint.Rule
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.LongAdder
@@ -227,8 +233,15 @@ private[finagle] class Metrics private (
     }
   }
 
-  private[stats] def registerExpression(exprSchema: ExpressionSchema): Unit = {
-    expressionSchemas.putIfAbsent(exprSchema.schemaKey(), exprSchema)
+  private[stats] def registerExpression(exprSchema: ExpressionSchema): Try[Unit] = {
+    if (expressionSchemas.putIfAbsent(exprSchema.schemaKey(), exprSchema) == null) {
+      Return.Unit
+    } else {
+      Throw(
+        ExpressionCollisionException(
+          s"An expression with the key ${exprSchema.schemaKey()} had already been defined."))
+    }
+
   }
 
   def registerGauge(metricBuilder: MetricBuilder, f: => Float): Unit =
