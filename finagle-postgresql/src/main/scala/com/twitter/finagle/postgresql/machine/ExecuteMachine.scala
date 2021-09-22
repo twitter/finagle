@@ -162,10 +162,12 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters, int
         r.lastWrite.liftToTry.unit before r.pipe.close()
         // TODO: the ReadyForQuery here is fake
         Complete(ReadyForQuery(InTx), None)
+
       case (r: StreamResult, _: CommandComplete) =>
         // TODO: handle discard() to client can cancel the stream
         r.lastWrite.liftToTry.unit before r.pipe.close()
         Transition(Syncing(None), Send(Sync))
+
       case (r: StreamResult, e: ErrorResponse) =>
         val exception = PgSqlServerError(e)
         r.pipe.fail(exception)

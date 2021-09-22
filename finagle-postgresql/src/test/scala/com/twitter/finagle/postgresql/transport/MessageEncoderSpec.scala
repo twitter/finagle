@@ -29,6 +29,7 @@ import org.scalacheck.Gen
 import org.scalatest.wordspec.AnyWordSpec
 
 class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
+  import com.twitter.finagle.postgresql.transport.MessageDecoderSpec.toBuf
 
   def mkBuf(capacity: Int = 32768)(f: ByteBuffer => ByteBuffer): Buf = {
     val bb = ByteBuffer.allocate(capacity).order(ByteOrder.BIG_ENDIAN)
@@ -130,25 +131,24 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
   def encodeFragment[M <: FrontendMessage: Arbitrary](
     enc: MessageEncoder[M]
   )(
-    toPacket: M => Packet
+    toBuf: M => Buf
   ) =
     "encode correctly" in prop { msg: M =>
-      enc.toPacket(msg) must be(toPacket(msg))
+      enc.toBuf(msg) must be(toBuf(msg))
     }
 
   "MessageEncoder" should {
 
     "SslRequest" should {
       "encode correctly" in {
-        MessageEncoder.sslRequestEncoder.toPacket(SslRequest) must be(
-          Packet(None, Buf.ByteArray(0x04, 0xd2.toByte, 0x16, 0x2f)))
+        MessageEncoder.sslRequestEncoder.toBuf(SslRequest) must be(
+          Buf.ByteArray(0x00, 0x00, 0x00, 0x08, 0x04, 0xd2.toByte, 0x16, 0x2f))
       }
     }
 
     "StartupMessage" should encodeFragment(MessageEncoder.startupEncoder) { msg =>
-      Packet(
-        cmd = None,
-        body = mkBuf() { bb =>
+      mkBuf() { bb =>
+        val payload = mkBuf() { bb =>
           bb.putShort(msg.version.major)
             .putShort(msg.version.minor)
             .put(cstring("user")).put(cstring(msg.user))
@@ -161,28 +161,30 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
           }
           bb.put(0.toByte)
         }
-      )
+        bb.putInt(payload.length + 4)
+          .put(Buf.ByteBuffer.Owned.extract(payload))
+      }
     }
 
     "PasswordMessage" should encodeFragment(MessageEncoder.passwordEncoder) { msg =>
-      Packet(
-        cmd = Some('p'),
+      toBuf(
+        cmd = 'p',
         body = mkBuf()(bb => bb.put(cstring(msg.password)))
       )
     }
 
     "Query" should encodeFragment(MessageEncoder.queryEncoder) { msg =>
-      Packet(
-        cmd = Some('Q'),
+      toBuf(
+        cmd = 'Q',
         body = mkBuf()(bb => bb.put(cstring(msg.value)))
       )
     }
 
     "Sync" should {
       "encode correctly" in {
-        MessageEncoder.syncEncoder.toPacket(Sync) must be(
-          Packet(
-            cmd = Some('S'),
+        MessageEncoder.syncEncoder.toBuf(Sync) must be(
+          toBuf(
+            cmd = 'S',
             body = Buf.Empty
           ))
       }
@@ -190,17 +192,17 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
 
     "Flush" should {
       "encode correctly" in {
-        MessageEncoder.flushEncoder.toPacket(Flush) must be(
-          Packet(
-            cmd = Some('H'),
+        MessageEncoder.flushEncoder.toBuf(Flush) must be(
+          toBuf(
+            cmd = 'H',
             body = Buf.Empty
           ))
       }
     }
 
     "Parse" should encodeFragment(MessageEncoder.parseEncoder) { msg =>
-      Packet(
-        cmd = Some('P'),
+      toBuf(
+        cmd = 'P',
         body = mkBuf() { bb =>
           msg.name match {
             case Name.Named(name) => bb.put(cstring(name))
@@ -217,8 +219,8 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "Bind" should encodeFragment(MessageEncoder.bindEncoder) { msg =>
-      Packet(
-        cmd = Some('B'),
+      toBuf(
+        cmd = 'B',
         body = mkBuf() { bb =>
           msg.portal match {
             case Name.Named(name) => bb.put(cstring(name))
@@ -249,8 +251,8 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "Describe" should encodeFragment(MessageEncoder.describeEncoder) { msg =>
-      Packet(
-        cmd = Some('D'),
+      toBuf(
+        cmd = 'D',
         body = mkBuf() { bb =>
           msg.target match {
             case DescriptionTarget.Portal => bb.put('P'.toByte)
@@ -266,8 +268,8 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "Execute" should encodeFragment(MessageEncoder.executeEncoder) { msg =>
-      Packet(
-        cmd = Some('E'),
+      toBuf(
+        cmd = 'E',
         body = mkBuf() { bb =>
           msg.portal match {
             case Name.Named(name) => bb.put(cstring(name))
@@ -279,8 +281,8 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "Close" should encodeFragment(MessageEncoder.closeEncoder) { msg =>
-      Packet(
-        cmd = Some('C'),
+      toBuf(
+        cmd = 'C',
         body = mkBuf() { bb =>
           msg.target match {
             case DescriptionTarget.Portal => bb.put('P'.toByte)
@@ -296,8 +298,8 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "CopyData" should encodeFragment(MessageEncoder.copyDataEncoder) { msg =>
-      Packet(
-        cmd = Some('d'),
+      toBuf(
+        cmd = 'd',
         body = mkBuf() { bb =>
           bb.put(Buf.ByteBuffer.Owned.extract(msg.bytes))
           bb
@@ -307,17 +309,17 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
 
     "CopyDone" should {
       "encode correctly" in {
-        MessageEncoder.copyDoneEncoder.toPacket(CopyDone) must be(
-          Packet(
-            cmd = Some('c'),
+        MessageEncoder.copyDoneEncoder.toBuf(CopyDone) must be(
+          toBuf(
+            cmd = 'c',
             body = Buf.Empty
           ))
       }
     }
 
     "CopyFail" should encodeFragment(MessageEncoder.copyFailEncoder) { msg =>
-      Packet(
-        cmd = Some('f'),
+      toBuf(
+        cmd = 'f',
         body = mkBuf() { bb =>
           bb.put(cstring(msg.msg))
           bb
@@ -325,5 +327,4 @@ class MessageEncoderSpec extends AnyWordSpec with PropertiesSpec {
       )
     }
   }
-
 }

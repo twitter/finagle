@@ -1,42 +1,22 @@
 package com.twitter.finagle.postgresql.machine
 
 import com.twitter.finagle.postgresql.BackendMessage
-import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.PgSqlInvalidMachineStateError
 import com.twitter.finagle.postgresql.Response
+import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 import com.twitter.util.Promise
 import com.twitter.util.Return
 import com.twitter.util.Throw
 
 /**
- * An abstraction of a connection to a backend implementing the Postgres protocol.
- *
- * Although this isn't a particular goal of this client, it allows decoupling the protocol implementation
- * from finagle. It could, in theory, be used to implement the protocol on a different transport mechanism.
- */
-trait Connection {
-
-  /**
-   * Send a single message to the connection.
-   */
-  def send[M <: FrontendMessage](s: StateMachine.Send[M]): Future[Unit]
-
-  /**
-   * Read a single message from the connection.
-   */
-  def receive(): Future[BackendMessage]
-
-  def close(): Future[Unit]
-}
-
-/**
  * The runner connects state machines to a connection and allows dispatching machines on the connection.
  *
  * @param connection the connection to dispatch machines onto.
  */
-class Runner(connection: Connection) {
+class Runner(connection: Transport[FrontendMessage, BackendMessage]) {
 
   private[this] def run[R <: Response](
     machine: StateMachine[R],
@@ -52,11 +32,11 @@ class Runner(connection: Connection) {
           state = s
           val doAction = action match {
             case StateMachine.NoOp => Future.Done
-            case s @ StateMachine.Send(_) => connection.send(s)
-            case StateMachine.SendSeveral(msgs) =>
+            case StateMachine.Send(msg) => connection.write(msg)
+            case StateMachine.SendSeveral(msgs @ _*) =>
               Future
                 .traverseSequentially(msgs) { s =>
-                  connection.send(s)
+                  connection.write(s)
                 }.unit
             case StateMachine.Respond(r) =>
               serviceResponsePromise.updateIfEmpty(r)
@@ -80,7 +60,7 @@ class Runner(connection: Connection) {
       }
 
     def readAndStep: Future[ReadyForQuery] =
-      connection.receive().flatMap(msg => step(machine.receive(state, msg)))
+      connection.read().flatMap(msg => step(machine.receive(state, msg)))
 
     step(machine.start)
   }

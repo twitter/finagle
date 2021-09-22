@@ -4,9 +4,10 @@ import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.Types.WireValue
+import com.twitter.finagle.postgresql.transport.MessageDecoder
 import com.twitter.io.Buf
 
-sealed trait BackendMessage
+sealed abstract class BackendMessage
 object BackendMessage {
 
   sealed trait CommandTag
@@ -110,11 +111,13 @@ object BackendMessage {
   case class CopyFail(msg: String) extends BackendMessage
   case class CopyInResponse(
     overallFormat: Format,
-    columnsFormat: IndexedSeq[Format]
-  ) extends BackendMessage
+    columnsFormat: IndexedSeq[Format])
+      extends BackendMessage
 
   case class CopyOutResponse(
     overallFormat: Format,
-    columnsFormat: IndexedSeq[Format]
-  ) extends BackendMessage
+    columnsFormat: IndexedSeq[Format])
+      extends BackendMessage
+
+  def fromBuf(buf: Buf): BackendMessage = MessageDecoder.fromBuf(buf)
 }

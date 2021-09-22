@@ -46,7 +46,18 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatest.wordspec.AnyWordSpec
 
+object MessageDecoderSpec {
+  def toBuf(cmd: Byte, body: Buf): Buf = {
+    PgBuf.writer
+      .byte(cmd)
+      .int(body.length + 4)
+      .buf(body)
+      .build
+  }
+}
+
 class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
+  import MessageDecoderSpec._
 
   def mkBuf(capacity: Int = 32768)(f: ByteBuffer => ByteBuffer): Buf = {
     val bb = ByteBuffer.allocate(capacity).order(ByteOrder.BIG_ENDIAN)
@@ -124,35 +135,26 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
   def decodeFragment[M <: BackendMessage: Arbitrary](
     dec: MessageDecoder[M]
   )(
-    toPacket: M => Packet
+    toBuf: M => Buf
   ) = {
-    "decode packet body correctly" in prop { msg: M =>
-      dec.decode(PgBuf.reader(toPacket(msg).body)).asScala must beSuccessfulTry(msg)
-    }
     "decode packet correctly" in prop { msg: M =>
-      MessageDecoder.fromPacket(toPacket(msg)).asScala must beSuccessfulTry(msg)
+      MessageDecoder.fromBuf(toBuf(msg)) must be(msg)
     }
   }
 
   def singleton[M <: BackendMessage](key: Byte, msg: M) =
     "decode packet correctly" in {
-      MessageDecoder.fromPacket(Packet(Some(key), Buf.Empty)).asScala must beSuccessfulTry(msg)
+      MessageDecoder.fromBuf(toBuf(key, Buf.Empty)) must be(msg)
     }
 
   "MessageDecoder" should {
-    "fail when packet is not identified" in {
-      val decoded = MessageDecoder.fromPacket(Packet(None, Buf.Empty))
-      an[IllegalStateException] must be thrownBy decoded.get()
-    }
-
     "fail when decoder is not implemented" in {
-      val decoded = MessageDecoder.fromPacket(Packet(Some(' '), Buf.Empty))
-      an[PgSqlClientError] must be thrownBy decoded.get()
+      an[PgSqlClientError] must be thrownBy MessageDecoder.fromBuf(toBuf(' ', Buf.Empty))
     }
 
     "ErrorResponse" should decodeFragment(MessageDecoder.errorResponseDecoder) { msg =>
-      Packet(
-        cmd = Some('E'),
+      toBuf(
+        cmd = 'E',
         body = mkBuf() { bb =>
           msg.values.foreach {
             case (field, value) =>
@@ -164,8 +166,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "NoticeResponse" should decodeFragment(MessageDecoder.noticeResponseDecoder) { msg =>
-      Packet(
-        cmd = Some('N'),
+      toBuf(
+        cmd = 'N',
         body = mkBuf() { bb =>
           msg.values.foreach {
             case (field, value) =>
@@ -177,8 +179,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "BackendKeyData" should decodeFragment(MessageDecoder.backendKeyDataDecoder) { msg =>
-      Packet(
-        cmd = Some('K'),
+      toBuf(
+        cmd = 'K',
         body = mkBuf() { bb =>
           bb.putInt(msg.pid)
           bb.putInt(msg.secret)
@@ -220,8 +222,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "CommandComplete" should decodeFragment(MessageDecoder.commandCompleteDecoder) { msg =>
-      Packet(
-        cmd = Some('C'),
+      toBuf(
+        cmd = 'C',
         body = mkBuf() { bb =>
           val str = msg.commandTag match {
             case CommandTag.AffectedRows(CommandTag.Insert, rows) => s"INSERT 0 $rows"
@@ -239,8 +241,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
 
     "AuthenticationMessage" should decodeFragment(MessageDecoder.authenticationMessageDecoder) {
       msg =>
-        Packet(
-          cmd = Some('R'),
+        toBuf(
+          cmd = 'R',
           body = mkBuf() { bb =>
             msg match {
               case AuthenticationOk => bb.putInt(0)
@@ -264,8 +266,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "ParameterStatus" should decodeFragment(MessageDecoder.parameterStatusDecoder) { msg =>
-      Packet(
-        cmd = Some('S'),
+      toBuf(
+        cmd = 'S',
         body = mkBuf() { bb =>
           val name = msg.key match {
             case Parameter.ServerVersion => "server_version"
@@ -287,8 +289,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "ReaderForQuery" should decodeFragment(MessageDecoder.readyForQueryDecoder) { msg =>
-      Packet(
-        cmd = Some('Z'),
+      toBuf(
+        cmd = 'Z',
         body = mkBuf() { bb =>
           val tx = msg.state match {
             case NoTx => 'I'
@@ -301,8 +303,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "RowDescription" should decodeFragment(MessageDecoder.rowDescriptionDecoder) { msg =>
-      Packet(
-        cmd = Some('T'),
+      toBuf(
+        cmd = 'T',
         body = mkBuf() { bb =>
           bb.putShort(msg.rowFields.size.toShort)
           msg.rowFields.foreach {
@@ -330,8 +332,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
     }
 
     "DataRow" should decodeFragment(MessageDecoder.dataRowDecoder) { msg =>
-      Packet(
-        cmd = Some('D'),
+      toBuf(
+        cmd = 'D',
         body = mkBuf() { bb =>
           bb.putShort(msg.values.size.toShort)
           msg.values.foreach {
@@ -345,8 +347,8 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
 
     "ParameterDescription" should decodeFragment(MessageDecoder.parameterDescriptionDecoder) {
       msg =>
-        Packet(
-          cmd = Some('t'),
+        toBuf(
+          cmd = 't',
           body = mkBuf() { bb =>
             bb.putShort(msg.parameters.size.toShort)
             msg.parameters.foreach(oid => bb.putInt(unsignedInt(oid.value)))
@@ -378,20 +380,20 @@ class MessageDecoderSpec extends AnyWordSpec with PropertiesSpec {
       }
 
     "CopyInResponse" should decodeFragment(MessageDecoder.copyInResponseDecoder) { msg =>
-      Packet(
-        cmd = Some('G'),
+      toBuf(
+        cmd = 'G',
         body = copyInOutBody(msg.overallFormat, msg.columnsFormat)
       )
     }
     "CopyOutResponse" should decodeFragment(MessageDecoder.copyOutResponseDecoder) { msg =>
-      Packet(
-        cmd = Some('H'),
+      toBuf(
+        cmd = 'H',
         body = copyInOutBody(msg.overallFormat, msg.columnsFormat)
       )
     }
     "CopyData" should decodeFragment(MessageDecoder.copyDataDecoder) { msg =>
-      Packet(
-        cmd = Some('d'),
+      toBuf(
+        cmd = 'd',
         body = mkBuf() { bb =>
           bb.put(Buf.ByteBuffer.Owned.extract(msg.bytes))
           bb

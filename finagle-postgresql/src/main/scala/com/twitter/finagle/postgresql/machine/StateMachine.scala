@@ -69,56 +69,13 @@ object StateMachine {
   /**
    * Send the specified [[FrontendMessage]] after transitioning to the new sate.
    */
-  case class Send[M <: FrontendMessage](msg: M)(implicit val encoder: MessageEncoder[M])
-      extends Action[Nothing]
+  final case class Send[M <: FrontendMessage](msg: M) extends Action[Nothing]
 
   /**
    * Send multiple messages to the backend after transitioning to the new sate.
    * This allows sending multiple messages in a row without waiting for a message from the backend between each of them.
    */
-  case class SendSeveral(msgs: Seq[Send[_ <: FrontendMessage]]) extends Action[Nothing]
-  object SendSeveral {
-    def apply[A <: FrontendMessage: MessageEncoder, B <: FrontendMessage: MessageEncoder](
-      a: A,
-      b: B
-    ): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Nil)
-
-    def apply[
-      A <: FrontendMessage: MessageEncoder,
-      B <: FrontendMessage: MessageEncoder,
-      C <: FrontendMessage: MessageEncoder,
-    ](
-      a: A,
-      b: B,
-      c: C
-    ): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Nil)
-
-    def apply[
-      A <: FrontendMessage: MessageEncoder,
-      B <: FrontendMessage: MessageEncoder,
-      C <: FrontendMessage: MessageEncoder,
-      D <: FrontendMessage: MessageEncoder,
-    ](
-      a: A,
-      b: B,
-      c: C,
-      d: D
-    ): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Send(d) :: Nil)
-
-    def apply[
-      A <: FrontendMessage: MessageEncoder,
-      B <: FrontendMessage: MessageEncoder,
-      C <: FrontendMessage: MessageEncoder,
-      D <: FrontendMessage: MessageEncoder,
-      E <: FrontendMessage: MessageEncoder,
-    ](
-      a: A,
-      b: B,
-      c: C,
-      d: D,
-      e: E
-    ): SendSeveral = SendSeveral(Send(a) :: Send(b) :: Send(c) :: Send(d) :: Send(e) :: Nil)
-  }
+  final case class SendSeveral(msgs: FrontendMessage*) extends Action[Nothing]
 
   /**
    * Respond to the client's request. This effectively completes the client's request, but will

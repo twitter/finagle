@@ -43,10 +43,7 @@ import com.twitter.finagle.postgresql.Types.AttributeId
 import com.twitter.finagle.postgresql.Types.FieldDescription
 import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Oid
-import com.twitter.util.Return
-import com.twitter.util.Throw
-import com.twitter.util.Try
-
+import com.twitter.io.Buf
 import scala.annotation.tailrec
 
 /**
@@ -56,46 +53,53 @@ import scala.annotation.tailrec
  * @see [[PgBuf.Reader]]
  */
 trait MessageDecoder[M <: BackendMessage] {
-  def decode(b: PgBuf.Reader): Try[M]
+  def decode(b: PgBuf.Reader): M
 }
 
 object MessageDecoder {
 
-  def decode[M <: BackendMessage](reader: PgBuf.Reader)(implicit decoder: MessageDecoder[M]): Try[M] =
+  def decode[M <: BackendMessage](reader: PgBuf.Reader)(implicit decoder: MessageDecoder[M]): M =
     decoder.decode(reader)
 
-  def fromPacket(p: Packet): Try[BackendMessage] = {
-    lazy val reader = PgBuf.reader(p.body)
-    p.cmd match {
-      case None => Throw(new IllegalStateException("invalid backend packet, missing message type."))
-      case Some(cmd) =>
-        cmd match {
-          case '1' => Return(ParseComplete)
-          case '2' => Return(BindComplete)
-          case '3' => Return(CloseComplete)
-          case 'c' => Return(CopyDone)
-          case 'C' => decode[CommandComplete](reader)
-          case 'd' => decode[CopyData](reader)
-          case 'D' => decode[DataRow](reader)
-          case 'E' => decode[ErrorResponse](reader)
-          case 'G' => decode[CopyInResponse](reader)
-          case 'H' => decode[CopyOutResponse](reader)
-          case 'I' => Return(EmptyQueryResponse)
-          case 'K' => decode[BackendKeyData](reader)
-          case 'n' => Return(NoData)
-          case 'N' => decode[NoticeResponse](reader)
-          case 'R' => decode[AuthenticationMessage](reader)
-          case 's' => Return(PortalSuspended)
-          case 'S' => decode[ParameterStatus](reader)
-          case 't' => decode[ParameterDescription](reader)
-          case 'T' => decode[RowDescription](reader)
-          case 'Z' => decode[ReadyForQuery](reader)
-          case byte => Throw(new PgSqlClientError(s"unimplemented message '${byte.toChar}'"))
-        }
+  def fromBuf(buf: Buf): BackendMessage = {
+    val reader = PgBuf.reader(buf)
+    val cmd = reader.byte()
+
+    if (reader.remaining >= 4) {
+      // skip the 4 byte packet length
+      reader.skip(4)
     }
+
+    val ret = cmd match {
+      case '1' => ParseComplete
+      case '2' => BindComplete
+      case '3' => CloseComplete
+      case 'c' => CopyDone
+      case 'C' => decode[CommandComplete](reader)
+      case 'd' => decode[CopyData](reader)
+      case 'D' => decode[DataRow](reader)
+      case 'E' => decode[ErrorResponse](reader)
+      case 'G' => decode[CopyInResponse](reader)
+      case 'H' => decode[CopyOutResponse](reader)
+      case 'I' => EmptyQueryResponse
+      case 'K' => decode[BackendKeyData](reader)
+      case 'n' => NoData
+      case 'N' => decode[NoticeResponse](reader)
+      case 'R' => decode[AuthenticationMessage](reader)
+      case 's' => PortalSuspended
+      case 'S' => decode[ParameterStatus](reader)
+      case 't' => decode[ParameterDescription](reader)
+      case 'T' => decode[RowDescription](reader)
+      case 'Z' => decode[ReadyForQuery](reader)
+      case byte => throw new PgSqlClientError(s"unimplemented message '${byte.toChar}'")
+    }
+    if (reader.remaining != 0) {
+      throw new PgSqlClientError("message decoding did not consume the entire packet")
+    }
+    ret
   }
 
-  def apply[M <: BackendMessage](f: PgBuf.Reader => M): MessageDecoder[M] = reader => Try(f(reader))
+  def apply[M <: BackendMessage](f: PgBuf.Reader => M): MessageDecoder[M] = reader => f(reader)
 
   def readFields(reader: PgBuf.Reader): Map[Field, String] = {
     import Field._
@@ -139,12 +143,14 @@ object MessageDecoder {
     ErrorResponse(readFields(reader))
   }
 
-  implicit lazy val noticeResponseDecoder: MessageDecoder[NoticeResponse] = MessageDecoder { reader =>
-    NoticeResponse(readFields(reader))
+  implicit lazy val noticeResponseDecoder: MessageDecoder[NoticeResponse] = MessageDecoder {
+    reader =>
+      NoticeResponse(readFields(reader))
   }
 
-  implicit lazy val backendKeyDataDecoder: MessageDecoder[BackendKeyData] = MessageDecoder { reader =>
-    BackendKeyData(reader.int(), reader.int())
+  implicit lazy val backendKeyDataDecoder: MessageDecoder[BackendKeyData] = MessageDecoder {
+    reader =>
+      BackendKeyData(reader.int(), reader.int())
   }
 
   def commandTag(value: String): CommandTag =
@@ -158,42 +164,45 @@ object MessageDecoder {
       case _ => CommandTag.Other(value)
     }
 
-  implicit lazy val commandCompleteDecoder: MessageDecoder[CommandComplete] = MessageDecoder { reader =>
-    CommandComplete(commandTag(reader.cstring()))
+  implicit lazy val commandCompleteDecoder: MessageDecoder[CommandComplete] = MessageDecoder {
+    reader =>
+      CommandComplete(commandTag(reader.cstring()))
   }
 
-  implicit lazy val authenticationMessageDecoder: MessageDecoder[AuthenticationMessage] = MessageDecoder { reader =>
-    reader.int() match {
-      case 0 => AuthenticationOk
-      case 2 => AuthenticationKerberosV5
-      case 3 => AuthenticationCleartextPassword
-      case 5 => AuthenticationMD5Password(reader.buf(4))
-      case 6 => AuthenticationSCMCredential
-      case 7 => AuthenticationGSS
-      case 8 => AuthenticationGSSContinue(reader.remainingBuf())
-      case 9 => AuthenticationSSPI
-      case 10 => AuthenticationSASL(reader.cstring())
-      case 11 => AuthenticationSASLContinue(reader.remainingBuf())
-      case 12 => AuthenticationSASLFinal(reader.remainingBuf())
+  implicit lazy val authenticationMessageDecoder: MessageDecoder[AuthenticationMessage] =
+    MessageDecoder { reader =>
+      reader.int() match {
+        case 0 => AuthenticationOk
+        case 2 => AuthenticationKerberosV5
+        case 3 => AuthenticationCleartextPassword
+        case 5 => AuthenticationMD5Password(reader.buf(4))
+        case 6 => AuthenticationSCMCredential
+        case 7 => AuthenticationGSS
+        case 8 => AuthenticationGSSContinue(reader.remainingBuf())
+        case 9 => AuthenticationSSPI
+        case 10 => AuthenticationSASL(reader.cstring())
+        case 11 => AuthenticationSASLContinue(reader.remainingBuf())
+        case 12 => AuthenticationSASLFinal(reader.remainingBuf())
+      }
     }
-  }
 
-  implicit lazy val parameterStatusDecoder: MessageDecoder[ParameterStatus] = MessageDecoder { reader =>
-    val parameter = reader.cstring() match {
-      case "server_version" => Parameter.ServerVersion
-      case "server_encoding" => Parameter.ServerEncoding
-      case "client_encoding" => Parameter.ClientEncoding
-      case "application_name" => Parameter.ApplicationName
-      case "is_superuser" => Parameter.IsSuperUser
-      case "session_authorization" => Parameter.SessionAuthorization
-      case "DateStyle" => Parameter.DateStyle
-      case "IntervalStyle" => Parameter.IntervalStyle
-      case "TimeZone" => Parameter.TimeZone
-      case "integer_datetimes" => Parameter.IntegerDateTimes
-      case "standard_conforming_strings" => Parameter.StandardConformingStrings
-      case other => Parameter.Other(other)
-    }
-    ParameterStatus(parameter, reader.cstring())
+  implicit lazy val parameterStatusDecoder: MessageDecoder[ParameterStatus] = MessageDecoder {
+    reader =>
+      val parameter = reader.cstring() match {
+        case "server_version" => Parameter.ServerVersion
+        case "server_encoding" => Parameter.ServerEncoding
+        case "client_encoding" => Parameter.ClientEncoding
+        case "application_name" => Parameter.ApplicationName
+        case "is_superuser" => Parameter.IsSuperUser
+        case "session_authorization" => Parameter.SessionAuthorization
+        case "DateStyle" => Parameter.DateStyle
+        case "IntervalStyle" => Parameter.IntervalStyle
+        case "TimeZone" => Parameter.TimeZone
+        case "integer_datetimes" => Parameter.IntegerDateTimes
+        case "standard_conforming_strings" => Parameter.StandardConformingStrings
+        case other => Parameter.Other(other)
+      }
+      ParameterStatus(parameter, reader.cstring())
   }
 
   implicit lazy val readyForQueryDecoder: MessageDecoder[ReadyForQuery] = MessageDecoder { reader =>
@@ -205,26 +214,27 @@ object MessageDecoder {
     ReadyForQuery(state)
   }
 
-  implicit lazy val rowDescriptionDecoder: MessageDecoder[RowDescription] = MessageDecoder { reader =>
-    RowDescription(
-      reader.collect { r =>
-        FieldDescription(
-          name = r.cstring(),
-          tableOid = r.unsignedInt() match {
-            case 0 => None
-            case oid => Some(Oid(oid))
-          },
-          tableAttributeId = r.short() match {
-            case 0 => None
-            case attrId => Some(AttributeId(attrId))
-          },
-          dataType = Oid(r.unsignedInt()),
-          dataTypeSize = r.short(),
-          typeModifier = r.int(),
-          format = r.format()
-        )
-      }
-    )
+  implicit lazy val rowDescriptionDecoder: MessageDecoder[RowDescription] = MessageDecoder {
+    reader =>
+      RowDescription(
+        reader.collect { r =>
+          FieldDescription(
+            name = r.cstring(),
+            tableOid = r.unsignedInt() match {
+              case 0 => None
+              case oid => Some(Oid(oid))
+            },
+            tableAttributeId = r.short() match {
+              case 0 => None
+              case attrId => Some(AttributeId(attrId))
+            },
+            dataType = Oid(r.unsignedInt()),
+            dataTypeSize = r.short(),
+            typeModifier = r.int(),
+            format = r.format()
+          )
+        }
+      )
   }
 
   implicit lazy val dataRowDecoder: MessageDecoder[DataRow] = MessageDecoder { reader =>
@@ -233,30 +243,33 @@ object MessageDecoder {
     )
   }
 
-  implicit lazy val parameterDescriptionDecoder: MessageDecoder[ParameterDescription] = MessageDecoder { reader =>
-    ParameterDescription(
-      reader.collect(r => Oid(r.unsignedInt()))
-    )
+  implicit lazy val parameterDescriptionDecoder: MessageDecoder[ParameterDescription] =
+    MessageDecoder { reader =>
+      ParameterDescription(
+        reader.collect(r => Oid(r.unsignedInt()))
+      )
+    }
+
+  implicit lazy val copyInResponseDecoder: MessageDecoder[CopyInResponse] = MessageDecoder {
+    reader =>
+      CopyInResponse(
+        overallFormat = reader.byte() match {
+          case 0 => Format.Text
+          case 1 => Format.Binary
+        },
+        columnsFormat = reader.collect(_.format()),
+      )
   }
 
-  implicit lazy val copyInResponseDecoder: MessageDecoder[CopyInResponse] = MessageDecoder { reader =>
-    CopyInResponse(
-      overallFormat = reader.byte() match {
-        case 0 => Format.Text
-        case 1 => Format.Binary
-      },
-      columnsFormat = reader.collect(_.format()),
-    )
-  }
-
-  implicit lazy val copyOutResponseDecoder: MessageDecoder[CopyOutResponse] = MessageDecoder { reader =>
-    CopyOutResponse(
-      overallFormat = reader.byte() match {
-        case 0 => Format.Text
-        case 1 => Format.Binary
-      },
-      columnsFormat = reader.collect(_.format()),
-    )
+  implicit lazy val copyOutResponseDecoder: MessageDecoder[CopyOutResponse] = MessageDecoder {
+    reader =>
+      CopyOutResponse(
+        overallFormat = reader.byte() match {
+          case 0 => Format.Text
+          case 1 => Format.Binary
+        },
+        columnsFormat = reader.collect(_.format()),
+      )
   }
 
   implicit lazy val copyDataDecoder: MessageDecoder[CopyData] = MessageDecoder { reader =>

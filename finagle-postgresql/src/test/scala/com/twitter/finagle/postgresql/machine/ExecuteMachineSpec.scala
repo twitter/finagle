@@ -22,14 +22,14 @@ class ExecuteMachineSpec
 
   def checkStartup(name: Name, portalName: Name, parameters: IndexedSeq[WireValue]): StepSpec =
     checkResult("start is several messages") {
-      case Transition(_, SendSeveral(msgs)) =>
-        msgs.toList must beLike[Seq[Send[_ <: FrontendMessage]]] {
+      case Transition(_, SendSeveral(msgs @ _*)) =>
+        msgs.toList must beLike[Seq[FrontendMessage]] {
           case a :: b :: c :: d :: Nil =>
             a must be(
-              Send(Bind(portalName, name, Format.Binary :: Nil, parameters, Format.Binary :: Nil)))
-            b must be(Send(Describe(portalName, DescriptionTarget.Portal)))
-            c must be(Send(Execute(portalName, 0)))
-            d must be(Send(Flush))
+              Bind(portalName, name, Format.Binary :: Nil, parameters, Format.Binary :: Nil))
+            b must be(Describe(portalName, DescriptionTarget.Portal))
+            c must be(Execute(portalName, 0))
+            d must be(Flush)
         }
     }
 

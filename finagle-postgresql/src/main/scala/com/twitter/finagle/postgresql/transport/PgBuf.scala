@@ -29,7 +29,7 @@ object PgBuf {
    */
   private[postgresql] val Infinity: Long = 0x7fffffffffffffffL
 
-  class Writer(w: BufByteWriter) {
+  final class Writer(val w: BufByteWriter) extends AnyVal {
 
     def opt[T](o: Option[T])(f: (Writer, T) => Writer): Writer = o match {
       case Some(v) => f(this, v)
@@ -234,6 +234,8 @@ object PgBuf {
     def remainingBuf(): Buf = reader.readAll()
 
     def remaining: Int = reader.remaining
+
+    def skip(n: Int): Unit = reader.skip(n)
 
     // https://github.com/postgres/postgres/blob/master/src/include/utils/array.h
     def array(): PgArray = {

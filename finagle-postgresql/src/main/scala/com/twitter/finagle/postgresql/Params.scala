@@ -35,5 +35,4 @@ object Params {
     implicit val param: Stack.Param[MaxConcurrentPrepareStatements] =
       Stack.Param(MaxConcurrentPrepareStatements(20))
   }
-
 }

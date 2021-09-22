@@ -8,7 +8,6 @@ import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceProxy
 import com.twitter.finagle.Stack
-import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
@@ -17,8 +16,6 @@ import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Params.MaxConcurrentPrepareStatements
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine._
-import com.twitter.finagle.postgresql.transport.MessageDecoder
-import com.twitter.finagle.postgresql.transport.Packet
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
@@ -48,29 +45,14 @@ import com.twitter.util.Throw
  * @see [[StateMachine]]
  */
 class ClientDispatcher(
-  transport: Transport[Packet, Packet],
+  transport: Transport[FrontendMessage, BackendMessage],
   params: Stack.Params,
-) extends GenSerialClientDispatcher[Request, Response, Packet, Packet](
+) extends GenSerialClientDispatcher[Request, Response, FrontendMessage, BackendMessage](
       transport,
       params[Stats].statsReceiver
     ) {
 
-  // implements Connection on Transport
-  private[this] val transportConnection = new Connection {
-    def send[M <: FrontendMessage](s: StateMachine.Send[M]): Future[Unit] =
-      transport
-        .write(s.encoder.toPacket(s.msg))
-        .rescue {
-          case exc => wrapWriteException(exc)
-        }
-
-    def receive(): Future[BackendMessage] =
-      transport.read().map(rep => MessageDecoder.fromPacket(rep)).lowerFromTry
-
-    def close(): Future[Unit] = transport.close()
-  }
-
-  private[this] val machineRunner: Runner = new Runner(transportConnection)
+  private[this] val machineRunner: Runner = new Runner(transport)
 
   def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] =
     machineRunner
@@ -126,7 +108,7 @@ class ClientDispatcher(
 
 object ClientDispatcher {
   def cached(
-    transport: Transport[Packet, Packet],
+    transport: Transport[FrontendMessage, BackendMessage],
     params: Stack.Params
   ): Service[Request, Response] =
     PrepareCache(

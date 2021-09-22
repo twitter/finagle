@@ -48,12 +48,14 @@ class TlsHandshakeTransporter(
       params + Transport.ClientSsl(None) // ensure no Tls params
     )
 
-  override def apply(): Future[Transport[Buf, Buf] {
-    type Context <: TransportContext
-  }] =
+  override def apply(): Future[
+    Transport[Buf, Buf] {
+      type Context <: TransportContext
+    }
+  ] =
     netty4Transporter().flatMap { transport =>
       transport
-        .write(MessageEncoder.sslRequestEncoder.toPacket(FrontendMessage.SslRequest).toBuf)
+        .write(MessageEncoder.sslRequestEncoder.toBuf(FrontendMessage.SslRequest))
         .flatMap { _ =>
           transport.read()
         }
@@ -61,7 +63,9 @@ class TlsHandshakeTransporter(
           buf.get(0) match {
             case 'S' => negotiateTls(transport)
             case 'N' => Future.exception(PgSqlTlsUnsupportedError)
-            case b => Future.exception(new IllegalStateException(s"invalid server response to SslRequest: $b"))
+            case b =>
+              Future.exception(
+                new IllegalStateException(s"invalid server response to SslRequest: $b"))
           }
         }
         .map { _ =>
@@ -85,7 +89,8 @@ class TlsHandshakeTransporter(
         p
       case other =>
         Future.exception(
-          new IllegalStateException(s"TlsHandshake requires a channel to negotiate SSL/TLS. Found: $other")
+          new IllegalStateException(
+            s"TlsHandshake requires a channel to negotiate SSL/TLS. Found: $other")
         )
     }
   }

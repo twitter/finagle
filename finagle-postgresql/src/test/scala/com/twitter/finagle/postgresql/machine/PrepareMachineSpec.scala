@@ -1,12 +1,10 @@
 package com.twitter.finagle.postgresql.machine
 
-import com.twitter.finagle.postgresql.{
-  BackendMessage,
-  FrontendMessage,
-  PgSqlNoSuchTransition,
-  PropertiesSpec,
-  Response
-}
+import com.twitter.finagle.postgresql.BackendMessage
+import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.PgSqlNoSuchTransition
+import com.twitter.finagle.postgresql.PropertiesSpec
+import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.BackendMessage.NoData
 import com.twitter.finagle.postgresql.BackendMessage.NoTx
 import com.twitter.finagle.postgresql.BackendMessage.ParameterDescription
@@ -21,7 +19,6 @@ import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.Types.Oid
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.NoOp
-import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.SendSeveral
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.util.Return
@@ -30,12 +27,12 @@ class PrepareMachineSpec extends MachineSpec[Response.ParseComplete] with Proper
 
   def checkStartup(name: Name, query: String): StepSpec =
     checkResult("start is several messages") {
-      case Transition(_, SendSeveral(msgs)) =>
-        msgs.toList must beLike[List[Send[_ <: FrontendMessage]]] {
+      case Transition(_, SendSeveral(msgs @ _*)) =>
+        msgs.toList must beLike[List[FrontendMessage]] {
           case a :: b :: c :: Nil =>
-            a must be(Send(Parse(name, query, Nil)))
-            b must be(Send(Describe(name, DescriptionTarget.PreparedStatement)))
-            c must be(Send(Sync))
+            a must be(Parse(name, query, Nil))
+            b must be(Describe(name, DescriptionTarget.PreparedStatement))
+            c must be(Sync)
         }
     }
 

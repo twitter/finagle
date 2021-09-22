@@ -4,8 +4,9 @@ import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.StdStackClient
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.param.WithSessionPool
-import com.twitter.finagle.postgresql.transport.Packet
+import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.DelayedRelease
+import com.twitter.finagle.postgresql.FrontendMessage
 import com.twitter.finagle.postgresql.Params
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
@@ -36,8 +37,8 @@ object PostgreSql {
       extends StdStackClient[Request, Response, Client]
       with WithSessionPool[Client] {
 
-    override type In = Packet
-    override type Out = Packet
+    override type In = FrontendMessage
+    override type Out = BackendMessage
     override type Context = TransportContext
 
     type ClientTransport = Transport[In, Out] { type Context <: TransportContext }
@@ -56,7 +57,7 @@ object PostgreSql {
 
     override protected def newTransporter(
       addr: SocketAddress
-    ): Transporter[Packet, Packet, TransportContext] =
+    ): Transporter[FrontendMessage, BackendMessage, TransportContext] =
       new postgresql.PgSqlTransporter(addr, params)
 
     override protected def newDispatcher(transport: ClientTransport): Service[Request, Response] =

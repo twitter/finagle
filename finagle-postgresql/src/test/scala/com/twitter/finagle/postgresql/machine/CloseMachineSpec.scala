@@ -6,12 +6,13 @@ import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.FrontendMessage.Close
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.FrontendMessage.Flush
-import com.twitter.finagle.postgresql.{FrontendMessage, PropertiesSpec, Response}
+import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.PropertiesSpec
+import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine.StateMachine.Complete
 import com.twitter.finagle.postgresql.machine.StateMachine.NoOp
 import com.twitter.finagle.postgresql.machine.StateMachine.Respond
-import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.SendSeveral
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.util.Return
@@ -20,11 +21,11 @@ class CloseMachineSpec extends MachineSpec[Response.Ready.type] with PropertiesS
 
   def checkStartup(name: Name, target: DescriptionTarget): StepSpec =
     checkResult("start is several messages") {
-      case Transition(_, SendSeveral(msgs)) =>
-        msgs.toList must beLike[List[Send[_ <: FrontendMessage]]] {
+      case Transition(_, SendSeveral(msgs @ _*)) =>
+        msgs.toList must beLike[List[FrontendMessage]] {
           case a :: b :: Nil =>
-            a must equal(Send(Close(target, name)))
-            b must equal(Send(Flush))
+            a must equal(Close(target, name))
+            b must equal(Flush)
         }
     }
 
