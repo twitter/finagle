@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.loadbalancer.aperture.WeightedApertureToggle
+import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultLogger
@@ -87,11 +88,11 @@ object LoadBalancerFactory {
    * If this is configured, the [[Dest]] param will be ignored.
    */
   private[finagle] case class Endpoints(
-    va: Event[Activity.State[Set[EndpointFactory[_, _]]]])
+    va: Event[Activity.State[Set[AddressedFactory[_, _]]]])
 
   private[finagle] object Endpoints {
     implicit val param =
-      Stack.Param(Endpoints(Event[Activity.State[Set[EndpointFactory[_, _]]]]()))
+      Stack.Param(Endpoints(Event[Activity.State[Set[AddressedFactory[_, _]]]]()))
   }
 
   /**
@@ -374,7 +375,7 @@ object LoadBalancerFactory {
       // cluster to another, and crucially, to share data between endpoints
       val endpoints = if (params.contains[LoadBalancerFactory.Endpoints]) {
         params[LoadBalancerFactory.Endpoints].va
-          .asInstanceOf[Event[Activity.State[Set[EndpointFactory[Req, Rep]]]]]
+          .asInstanceOf[Event[Activity.State[Set[AddressedFactory[Req, Rep]]]]]
       } else {
         TrafficDistributor.weightEndpoints(
           AddrLifecycle.varAddrToActivity(dest, label),
@@ -387,10 +388,18 @@ object LoadBalancerFactory {
       // newBalancer in a TrafficDistributor.
       if (loadBalancerFactory.supportsWeighted && WeightedApertureToggle(label)) {
 
+        // Convert endpoints from AddressedFactories to EndpointFactories
+        val formattedEndpoints: Activity[Set[EndpointFactory[Req, Rep]]] = {
+          Activity(endpoints).map { set: Set[AddressedFactory[Req, Rep]] =>
+            set.map { af: AddressedFactory[Req, Rep] =>
+              af.factory
+            }
+          }
+        }
         // Add the newBalancer to the stack
         Stack.leaf(
           role,
-          newBalancer(Activity(endpoints), disableEagerConnections = false, manageWeights = true)
+          newBalancer(formattedEndpoints, disableEagerConnections = false, manageWeights = true)
         )
       } else {
         // Instead of simply creating a newBalancer here, we defer to the

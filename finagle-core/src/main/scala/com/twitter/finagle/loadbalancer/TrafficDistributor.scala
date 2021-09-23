@@ -3,6 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle._
+import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.loadbalancer.distributor.BalancerEndpoints
 import com.twitter.finagle.loadbalancer.distributor.CachedBalancer
 import com.twitter.finagle.loadbalancer.distributor.WeightClass
@@ -41,21 +42,9 @@ private[finagle] object TrafficDistributor {
   private[finagle] def weightEndpoints[Req, Rep](
     addrs: Activity[Set[Address]],
     newEndpoint: Address => ServiceFactory[Req, Rep],
-    eagerEviction: Boolean,
-  ): Event[Activity.State[Set[EndpointFactory[Req, Rep]]]] = {
-
-    final case class EndpointFactoryProxy(
-      factory: EndpointFactory[Req, Rep],
-      address: Address)
-        extends EndpointFactory[Req, Rep] {
-
-      override def status: Status = factory.status
-      override def remake(): Unit = factory.remake()
-      override def close(deadline: Time): Future[Unit] = factory.close(deadline)
-      override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = factory(conn)
-    }
-
-    val init = Map.empty[Address, EndpointFactoryProxy]
+    eagerEviction: Boolean
+  ): Event[Activity.State[Set[AddressedFactory[Req, Rep]]]] = {
+    val init = Map.empty[Address, AddressedFactory[Req, Rep]]
     safelyScanLeft(init, addrs.run.changes.dedup) {
       case (active, addrs) =>
         // Note, if an update contains multiple `Address` instances that are the same
@@ -67,12 +56,11 @@ private[finagle] object TrafficDistributor {
               // An update with an existing Address that has a new weight
               // results in the the weight being overwritten but the [[ServiceFactory]]
               // instance is maintained.
-              case Some(efp) if efp.weight != weight =>
-                cache.updated(addr, efp.copy(address = weightedAddr))
+              case Some(af @ AddressedFactory(_, WeightedAddress(_, w))) if w != weight =>
+                cache.updated(addr, af.copy(address = weightedAddr))
               case None =>
-                val endpoint: LazyEndpointFactory[Req, Rep] =
-                  new LazyEndpointFactory(() => newEndpoint(addr), addr)
-                cache.updated(addr, EndpointFactoryProxy(endpoint, weightedAddr))
+                val endpoint = new LazyEndpointFactory(() => newEndpoint(addr), addr)
+                cache.updated(addr, AddressedFactory(endpoint, weightedAddr))
               case _ => cache
             }
         }
@@ -85,31 +73,6 @@ private[finagle] object TrafficDistributor {
       case Activity.Ok(cache) => Activity.Ok(cache.values.toSet)
       case Activity.Pending => Activity.Pending
       case failed @ Activity.Failed(_) => failed
-    }
-  }
-
-  private def removeStaleAddresses[EFactoryT <: EndpointFactory[_, _]](
-    merged: Map[Address, EFactoryT],
-    addresses: Set[Address],
-    eagerEviction: Boolean
-  ): Map[Address, EFactoryT] = {
-    // Remove stale cache entries. When `eagerEviction` is false cache
-    // entries are only removed in subsequent stream updates.
-    val removed: Set[Address] = merged.keySet -- addresses.map {
-      case WeightedAddress(addr, _) => addr
-    }
-    removed.foldLeft(merged) {
-      case (cache, addr) =>
-        cache.get(addr) match {
-          case Some(f) if eagerEviction || f.status != Status.Open =>
-            try f.close()
-            catch {
-              case NonFatal(t) => log.warning(t, s"unable to close endpoint $addr")
-            }
-            cache - addr
-          case _ =>
-            cache
-        }
     }
   }
 
@@ -214,7 +177,7 @@ private[finagle] object TrafficDistributor {
  * [[c.t.f.loadbalancer.aperture.EagerConnections]] feature disabled.
  */
 private class TrafficDistributor[Req, Rep](
-  dest: Event[Activity.State[Set[EndpointFactory[Req, Rep]]]],
+  dest: Event[Activity.State[Set[AddressedFactory[Req, Rep]]]],
   newBalancer: (Activity[Set[EndpointFactory[Req, Rep]]], Boolean) => ServiceFactory[Req, Rep],
   reuseEndpoints: Boolean,
   rng: Rng = Rng.threadLocal,
@@ -227,14 +190,14 @@ private class TrafficDistributor[Req, Rep](
    * Because balancer instances are stateful, they need to be cached across updates.
    */
   private[this] def partition(
-    endpoints: Event[Activity.State[Set[EndpointFactory[Req, Rep]]]]
+    endpoints: Event[Activity.State[Set[AddressedFactory[Req, Rep]]]]
   ): Event[Activity.State[Iterable[WeightClass[Req, Rep]]]] = {
     // Cache entries are balancer instances together with their backing collection
     // which is updatable. The entries are keyed by weight class.
     val init = Map.empty[Double, CachedBalancer[Req, Rep]]
 
     val balancerDiffOps = new DiffOps[
-      EndpointFactory[Req, Rep],
+      AddressedFactory[Req, Rep],
       CachedBalancer[Req, Rep]
     ] {
       // Close balancers that don't correspond to new endpoints.
@@ -246,26 +209,28 @@ private class TrafficDistributor[Req, Rep](
 
       // Construct new balancers from new endpoints.
       def add(
-        factories: Set[EndpointFactory[Req, Rep]]
+        factories: Set[AddressedFactory[Req, Rep]]
       ): CachedBalancer[Req, Rep] = {
+        val group = factories.map(_.factory)
         val weight = if (factories.isEmpty) 1D else factories.head.weight
-        val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(factories))
+        val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(group))
 
         // we disable eager connections for non 1.0 weight class balancers. We assume the 1.0
         // weight balancer to be the main balancer and because sessions are managed independently
         // by each balancer, we avoid eagerly creating connections for balancers that may not be
         // long-lived.
         val bal = newBalancer(Activity(endpoints), weight != 1.0)
-        CachedBalancer(bal, endpoints, factories.size)
+        CachedBalancer(bal, endpoints, group.size)
       }
 
       // Update existing balancers with new endpoints.
       def update(
-        factories: Set[EndpointFactory[Req, Rep]],
+        factories: Set[AddressedFactory[Req, Rep]],
         cachedBalancer: CachedBalancer[Req, Rep]
       ): CachedBalancer[Req, Rep] = {
-        cachedBalancer.endpoints.update(Activity.Ok(factories))
-        cachedBalancer.copy(size = factories.size)
+        val group = factories.map(_.factory)
+        cachedBalancer.endpoints.update(Activity.Ok(group))
+        cachedBalancer.copy(size = group.size)
       }
     }
 
@@ -274,7 +239,7 @@ private class TrafficDistributor[Req, Rep](
       val result = updatePartitionMap(
         balancers,
         activeSet,
-        (addressedFactory: EndpointFactory[Req, Rep]) => Seq(addressedFactory.weight),
+        (addressedFactory: AddressedFactory[Req, Rep]) => Seq(addressedFactory.weight),
         balancerDiffOps)
 
       // Intercept the empty balancer set and replace it with a single balancer

@@ -21,7 +21,7 @@ trait EndpointFactory[Req, Rep] extends ServiceFactory[Req, Rep] {
    */
   def address: Address
 
-  private[loadbalancer] def weight: Double = WeightedAddress.extract(address)._2
+  private[loadbalancer] lazy val weight: Double = WeightedAddress.extract(address)._2
 
   /**
    * Signals to the endpoint that it should close and rebuild
