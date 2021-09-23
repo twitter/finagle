@@ -39,6 +39,10 @@ New Features
 * finagle-http, finagle-thriftmux: introduce client.withSni() API. Use this api to specify an
   SNI hostname for TLS clients. ``PHAB_ID=D712652`` 
 
+* finagle-postgresql: introduce `withStatementTimeout`, `withConnectionInitializationCommands`, 
+  and `withSessionDefaults` APIs to allow configuring sessions before they're used. 
+  ``PHAB_ID=D746525``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

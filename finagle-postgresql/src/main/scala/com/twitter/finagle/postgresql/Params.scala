@@ -1,6 +1,8 @@
 package com.twitter.finagle.postgresql
 
 import com.twitter.finagle.Stack
+import com.twitter.util.Duration
+import com.twitter.util.tunable.Tunable
 
 object Params {
   case class Credentials(username: String, password: Option[String])
@@ -35,4 +37,30 @@ object Params {
     implicit val param: Stack.Param[MaxConcurrentPrepareStatements] =
       Stack.Param(MaxConcurrentPrepareStatements(20))
   }
+
+  final case class StatementTimeout(timeout: Tunable[Duration]) {
+    def this(timeout: Duration) = this(Tunable.const("StatementTimeout", timeout))
+  }
+
+  object StatementTimeout {
+    def apply(timeout: Duration): StatementTimeout = new StatementTimeout(timeout)
+
+    implicit val param: Stack.Param[StatementTimeout] =
+      Stack.Param(StatementTimeout(Tunable.none[Duration]))
+  }
+
+  final case class ConnectionInitializationCommands(commands: Seq[String])
+
+  object ConnectionInitializationCommands {
+    implicit val param: Stack.Param[ConnectionInitializationCommands] =
+      Stack.Param(ConnectionInitializationCommands(Nil))
+  }
+
+  final case class SessionDefaults(defaults: Map[String, String])
+
+  object SessionDefaults {
+    implicit val param: Stack.Param[SessionDefaults] =
+      Stack.Param(SessionDefaults(Map.empty))
+  }
+
 }

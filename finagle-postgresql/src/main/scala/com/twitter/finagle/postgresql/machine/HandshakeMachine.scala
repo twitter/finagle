@@ -33,21 +33,35 @@ import com.twitter.util.Throw
  * A successful response [[Response.ConnectionParameters]] which includes the connection's parameters
  * such as character encoding and timezone.
  */
-case class HandshakeMachine(credentials: Params.Credentials, database: Params.Database)
+case class HandshakeMachine(
+  credentials: Params.Credentials,
+  database: Params.Database,
+  statementTimeout: Params.StatementTimeout,
+  sessionDefaults: Params.SessionDefaults)
     extends StateMachine[Response.ConnectionParameters] {
 
   import StateMachine._
 
   sealed trait State
   case object Authenticating extends State
-  case class BackendStarting(params: List[BackendMessage.ParameterStatus], bkd: Option[BackendMessage.BackendKeyData])
+  case class BackendStarting(
+    params: List[BackendMessage.ParameterStatus],
+    bkd: Option[BackendMessage.BackendKeyData])
       extends State
 
-  override def start: StateMachine.TransitionResult[State, Response.ConnectionParameters] =
+  override def start: StateMachine.TransitionResult[State, Response.ConnectionParameters] = {
+    val sessionParams = sessionDefaults.defaults ++
+      statementTimeout.timeout().map(timeout => "statement_timeout" -> timeout.inMillis.toString)
+
     Transition(
       Authenticating,
-      Send(FrontendMessage.StartupMessage(user = credentials.username, database = database.name))
+      Send(
+        FrontendMessage.StartupMessage(
+          user = credentials.username,
+          database = database.name,
+          params = sessionParams))
     )
+  }
 
   override def receive(
     state: State,
@@ -57,7 +71,9 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
       def hex(input: Array[Byte]) = input.map(s => f"$s%02x").mkString
       def bytes(str: String) = str.getBytes(StandardCharsets.UTF_8)
       def md5(input: Array[Byte]*): String =
-        hex(input.foldLeft(MessageDigest.getInstance("MD5")) { case (d, v) => d.update(v); d }.digest())
+        hex(
+          input
+            .foldLeft(MessageDigest.getInstance("MD5")) { case (d, v) => d.update(v); d }.digest())
 
       credentials.password match {
         case None => Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlPasswordRequired)))
@@ -74,10 +90,14 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
     case (Authenticating, AuthenticationCleartextPassword) =>
       credentials.password match {
         case None => Complete(ReadyForQuery(NoTx), Some(Throw(PgSqlPasswordRequired)))
-        case Some(password) => Transition(Authenticating, Send(FrontendMessage.PasswordMessage(password)))
+        case Some(password) =>
+          Transition(Authenticating, Send(FrontendMessage.PasswordMessage(password)))
       }
 
-    case (Authenticating, AuthenticationOk) => // This can happen at Startup when there's no password
+    case (
+          Authenticating,
+          AuthenticationOk
+        ) => // This can happen at Startup when there's no password
       Transition(BackendStarting(Nil, None), NoOp)
 
     case (BackendStarting(params, bkd), p: BackendMessage.ParameterStatus) =>
@@ -95,15 +115,14 @@ case class HandshakeMachine(credentials: Params.Credentials, database: Params.Da
 
     case (
           _,
-          AuthenticationGSS |
-          AuthenticationKerberosV5 |
-          AuthenticationSCMCredential |
-          AuthenticationSSPI |
-          AuthenticationSASL(_)
+          AuthenticationGSS | AuthenticationKerberosV5 | AuthenticationSCMCredential |
+          AuthenticationSSPI | AuthenticationSASL(_)
         ) =>
       Complete(
         ReadyForQuery(NoTx),
-        Some(Throw(PgSqlUnsupportedAuthenticationMechanism(msg.asInstanceOf[BackendMessage.AuthenticationMessage])))
+        Some(
+          Throw(PgSqlUnsupportedAuthenticationMechanism(
+            msg.asInstanceOf[BackendMessage.AuthenticationMessage])))
       )
 
     case (state, msg) => throw PgSqlNoSuchTransition("HandshakeMachine", state, msg)

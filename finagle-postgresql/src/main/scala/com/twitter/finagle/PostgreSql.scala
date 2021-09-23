@@ -13,6 +13,8 @@ import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.transport.TransportContext
+import com.twitter.util.Duration
+import com.twitter.util.tunable.Tunable
 import java.net.SocketAddress
 
 object PostgreSql {
@@ -54,6 +56,37 @@ object PostgreSql {
       val timer = params[com.twitter.finagle.param.Timer].timer
       postgresql.Client(newClient(dest), timeoutFn)(timer)
     }
+
+    /**
+     * Configure the client to set a server-side statement timeout.  This is the equivalent of
+     * `set session statement_timeout = N`
+     */
+    def withStatementTimeout(timeout: Duration): Client =
+      configured(Params.StatementTimeout(timeout))
+
+    /**
+     * Configure the client to set a dynamic server-side statement timeout. The input tunable is evaluated each time a
+     * new connection is established.  This is the equivalent of `set session statement_timeout = N`
+     */
+    def withStatementTimeout(timeout: Tunable[Duration]): Client =
+      configured(Params.StatementTimeout(timeout))
+
+    /**
+     * Configure the client to send `cmds` after a new connection is established.
+     *
+     * @note `cmds` must be commands, statements that return result sets will cause the connection establishment to
+     *       fail.
+     */
+    def withConnectionInitializationCommands(cmds: Seq[String]): Client =
+      configured(Params.ConnectionInitializationCommands(cmds))
+
+    /**
+     * Configure the client to set the session variables specified in `defaults`.
+     *
+     * @note Unknown session variables will be ignored by the server.
+     */
+    def withSessionDefaults(defaults: Map[String, String]): Client =
+      configured(Params.SessionDefaults(defaults))
 
     override protected def newTransporter(
       addr: SocketAddress

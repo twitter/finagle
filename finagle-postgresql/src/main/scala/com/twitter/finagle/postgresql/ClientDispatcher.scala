@@ -10,14 +10,19 @@ import com.twitter.finagle.ServiceProxy
 import com.twitter.finagle.Stack
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.postgresql.Client.Expect
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Params.MaxConcurrentPrepareStatements
+import com.twitter.finagle.postgresql.Params.SessionDefaults
+import com.twitter.finagle.postgresql.Params.StatementTimeout
+import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
+import com.twitter.io.Reader
 import com.twitter.util.Future
 import com.twitter.util.Promise
 import com.twitter.util.Return
@@ -70,13 +75,42 @@ class ClientDispatcher(
    */
   private[this] val connectionParameters: Promise[Response.ConnectionParameters] = new Promise()
 
+  private def runInitializationCommands(): Future[Unit] =
+    params[Params.ConnectionInitializationCommands].commands.toList match {
+      case Nil =>
+        Future.Done
+      case initCmds =>
+        val p = new Promise[Response]()
+
+        val machineComplete = machineRunner.dispatch(
+          new SimpleQueryMachine(initCmds.mkString(";\n"), ConnectionParameters.empty),
+          p
+        )
+
+        val queryResponses = p
+          .flatMap(Expect.SimpleQueryResponse)
+          .flatMap(resp => Reader.readAllItems(resp.responses.map(Expect.Command)))
+          .flatMap(l => Future.collect(l))
+
+        Future
+          .join(
+            machineComplete,
+            queryResponses
+          ).unit
+    }
+
   /**
    * Immediately start the handshaking upon connection establishment, before any client requests.
    */
-  private[this] val startup: Future[Unit] = machineRunner.dispatch(
-    HandshakeMachine(params[Credentials], params[Database]),
-    connectionParameters
-  )
+  private[this] val startup: Future[Unit] = machineRunner
+    .dispatch(
+      HandshakeMachine(
+        params[Credentials],
+        params[Database],
+        params[StatementTimeout],
+        params[SessionDefaults]),
+      connectionParameters
+    ).before { runInitializationCommands() }
 
   override def apply(req: Request): Future[Response] =
     startup before super.apply(req)

@@ -20,6 +20,7 @@ import com.twitter.finagle.postgresql.machine.StateMachine.Respond
 import com.twitter.finagle.postgresql.machine.StateMachine.Send
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.io.Buf
+import com.twitter.util.Duration
 import com.twitter.util.Return
 import org.scalatest.Assertion
 
@@ -36,7 +37,10 @@ class HandshakeMachineSpec extends MachineSpec[Response.ConnectionParameters] wi
   def mkMachine(username: String, password: Option[String], dbName: String): HandshakeMachine =
     HandshakeMachine(
       Params.Credentials(username = username, password = password),
-      Params.Database(Some(dbName)))
+      Params.Database(Some(dbName)),
+      Params.StatementTimeout(Duration.Top),
+      Params.SessionDefaults(Map.empty)
+    )
 
   def mkMachine: HandshakeMachine = mkMachine("username", None, "database")
 
