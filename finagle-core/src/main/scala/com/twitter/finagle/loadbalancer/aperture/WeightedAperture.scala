@@ -4,7 +4,8 @@ import com.twitter.finagle.loadbalancer.aperture.DeterministicAperture.MinDeterm
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
 import com.twitter.finagle.loadbalancer.exp.restrictZone
 import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.{CoreToggles, Status}
+import com.twitter.finagle.CoreToggles
+import com.twitter.finagle.Status
 import scala.util.hashing.MurmurHash3
 
 object WeightedApertureToggle {
@@ -158,9 +159,11 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     "nodes" -> idxs.toSeq.sorted.map { i =>
       Map[String, Any](
         "index" -> i,
+        "name_server_weight" -> endpoints(i).factory.weight,
         "weight" -> pdist.weight(i),
         "address" -> endpoints(i).factory.toString,
-        "status" -> endpoints(i).factory.status.toString)
+        "status" -> endpoints(i).factory.status.toString
+      )
     }
   )
 

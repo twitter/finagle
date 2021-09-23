@@ -1,12 +1,15 @@
 package com.twitter.finagle.loadbalancer.distributor
 
-import com.twitter.finagle.addr.WeightedAddress
-import com.twitter.finagle.{Addr, Address, Dtab, Status}
+import com.twitter.finagle.Addr
+import com.twitter.finagle.Address
+import com.twitter.finagle.Dtab
 import com.twitter.logging.Logger
-import com.twitter.util.{Activity, Event, Var}
+import com.twitter.util.Activity
+import com.twitter.util.Event
+import com.twitter.util.Var
 import scala.collection.mutable.Builder
-import scala.collection.{immutable, mutable}
-import scala.util.control.NonFatal
+import scala.collection.immutable
+import scala.collection.mutable
 
 /**
  * A collection of methods and traits used for managing Address lifecycles
@@ -126,29 +129,5 @@ private[finagle] object AddrLifecycle {
     for ((k, v) <- m)
       b += ((k, v.result))
     b.result
-  }
-
-  def removeStaleAddresses[Req, Rep](
-    merged: Map[Address, AddressedFactory[Req, Rep]],
-    addresses: Set[Address],
-    eagerEviction: Boolean
-  ): Map[Address, AddressedFactory[Req, Rep]] = {
-    // Remove stale cache entries. When `eagerEviction` is false cache
-    // entries are only removed in subsequent stream updates.
-    val removed: Set[Address] = merged.keySet -- addresses.map {
-      case WeightedAddress(addr, _) => addr
-    }
-    removed.foldLeft(merged) {
-      case (cache, addr) =>
-        cache.get(addr) match {
-          case Some(AddressedFactory(f, _)) if eagerEviction || f.status != Status.Open =>
-            try f.close()
-            catch {
-              case NonFatal(t) => log.warning(t, s"unable to close endpoint $addr")
-            }
-            cache - addr
-          case _ => cache
-        }
-    }
   }
 }

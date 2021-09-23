@@ -2,18 +2,30 @@ package com.twitter.finagle.naming
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.aperture.{EagerConnections, EagerConnectionsType}
-import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
-import com.twitter.finagle.loadbalancer.{Balancers, EndpointFactory, LoadBalancerFactory}
+import com.twitter.finagle.loadbalancer.aperture.EagerConnections
+import com.twitter.finagle.loadbalancer.aperture.EagerConnectionsType
+import com.twitter.finagle.loadbalancer.Balancers
+import com.twitter.finagle.loadbalancer.EndpointFactory
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats._
-import com.twitter.finagle.stats.exp.{Expression, ExpressionSchema, ExpressionSchemaKey}
-import com.twitter.finagle.tracing.{Annotation, NullTracer, Record, Trace, TraceId, Tracer}
+import com.twitter.finagle.stats.exp.Expression
+import com.twitter.finagle.stats.exp.ExpressionSchema
+import com.twitter.finagle.stats.exp.ExpressionSchemaKey
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.NullTracer
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.util._
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{atLeastOnce, spy, verify, when}
+import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.BeforeAndAfter
 import scala.collection.JavaConverters._
@@ -503,8 +515,8 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
     "If EagerConnectionsType.ForceWithDtab is set, eager connections are enabled regardless of Dtabs\"") {
     val endpoint = Factory(0)
     val endpointEvent = Activity
-      .value(Set(AddressedFactory(endpoint, endpoint.address))).states
-      .asInstanceOf[Event[Activity.State[Set[AddressedFactory[_, _]]]]]
+      .value(Set(endpoint)).states
+      .asInstanceOf[Event[Activity.State[Set[EndpointFactory[_, _]]]]]
 
     val unbound = Name.Path(Path.read("/foo"))
     val baseDtab = () => Dtab.base ++ Dtab.read("/foo=>/$/inet/1")
@@ -556,8 +568,8 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
     "If EagerConnectionsType.ForceWithDtab is not set, eager connections with dtab locals are disabled") {
     val endpoint = Factory(0)
     val endpointEvent = Activity
-      .value(Set(AddressedFactory(endpoint, endpoint.address))).states
-      .asInstanceOf[Event[Activity.State[Set[AddressedFactory[_, _]]]]]
+      .value(Set(endpoint)).states
+      .asInstanceOf[Event[Activity.State[Set[EndpointFactory[_, _]]]]]
 
     val unbound = Name.Path(Path.read("/foo"))
     val baseDtab = () => Dtab.base ++ Dtab.read("/foo=>/$/inet/1")

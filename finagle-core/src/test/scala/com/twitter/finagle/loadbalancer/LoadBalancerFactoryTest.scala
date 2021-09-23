@@ -1,21 +1,34 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.Address
 import com.twitter.finagle._
+import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
-import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.server.utils.StringServer
-import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
-import com.twitter.util.{Activity, Await, Event, Future, Time, Var}
-import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import com.twitter.finagle.stats.InMemoryHostStatsReceiver
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.util.Activity
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Event
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Time
+import com.twitter.util.Var
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funsuite.AnyFunSuite
 
 class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with IntegrationPatience {
   val echoService = Service.mk[String, String](Future.value(_))
+
+  private def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 
   trait PerHostFlagCtx extends App {
     val label = "myclient"
@@ -357,7 +370,7 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
         Activity.value(augmentedAddresses),
         addr => ???,
         false
-      ).asInstanceOf[Event[Activity.State[Set[AddressedFactory[_, _]]]]]
+      ).asInstanceOf[Event[Activity.State[Set[EndpointFactory[_, _]]]]]
 
     stack.make(
       Stack.Params.empty +
@@ -368,7 +381,9 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
 
     assert(augmentedAddresses == eps)
   }
-  test("does not wrap new Balancer in a Traffic Distributor when toggle is set") {
+
+  test(
+    "does not wrap new Balancer in a Traffic Distributor when toggle is set to enable WeightedAperture") {
     val serverInfo: ServerInfo = new ServerInfo {
       def environment: Option[String] = Some("staging")
       def id: String = "testing"
@@ -386,10 +401,7 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
             ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
           )
 
-        var eps: Set[Address] = Set.empty
-
         val mockBalancer = new LoadBalancerFactory {
-
           override def supportsWeighted: Boolean = true
 
           def newBalancer[Req, Rep](
@@ -397,7 +409,6 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
             emptyException: NoBrokersAvailableException,
             params: Stack.Params
           ): ServiceFactory[Req, Rep] = {
-            eps = endpoints.sample().toSet.map { ep: EndpointFactory[_, _] => ep.address }
             ServiceFactory.const(Service.mk(_ => ???))
           }
         }
@@ -411,6 +422,61 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
         val a: ServiceFactory[String, String] = stack.make(params)
 
         assert(!a.isInstanceOf[TrafficDistributor[String, String]])
+      }
+  }
+
+  test("WeightedAperture has weights available to it from address metadata") {
+    val serverInfo: ServerInfo = new ServerInfo {
+      def environment: Option[String] = Some("staging")
+      def id: String = "testing"
+      def instanceId: Option[Long] = None
+      def clusterId: String = id
+      def zone: Option[String] = Some("smf1")
+    }
+
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+
+        val endpoint: Stack[ServiceFactory[String, String]] =
+          Stack.leaf(
+            Stack.Role("endpoint"),
+            ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
+          )
+
+        val futureWeights = Promise[Set[Double]]()
+        val mockBalancer = new LoadBalancerFactory {
+          override def supportsWeighted: Boolean = true
+
+          def newBalancer[Req, Rep](
+            endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
+            emptyException: NoBrokersAvailableException,
+            params: Stack.Params
+          ): ServiceFactory[Req, Rep] = {
+            futureWeights.setValue(endpoints.sample().toSet.map { ep: EndpointFactory[_, _] =>
+              ep.weight
+            })
+            ServiceFactory.const(Service.mk(_ => ???))
+          }
+        }
+
+        val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
+
+        val addresses = Set(
+          WeightedAddress(Address.Inet(new InetSocketAddress(5435), Map.empty), 2.0),
+          Address.Inet(new InetSocketAddress(5434), Map.empty)
+        )
+
+        val params = Stack.Params.empty +
+          LoadBalancerFactory.Dest(Var(Addr.Bound(addresses))) +
+          LoadBalancerFactory.Param(mockBalancer) +
+          LoadBalancerFactory.ManageWeights(true)
+
+        val a: ServiceFactory[String, String] = stack.make(params)
+
+        assert(!a.isInstanceOf[TrafficDistributor[String, String]])
+
+        val weights = await(futureWeights)
+        assert(weights == Set(1.0, 2.0))
       }
   }
 }

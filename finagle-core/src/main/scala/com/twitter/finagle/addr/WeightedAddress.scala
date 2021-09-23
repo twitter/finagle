@@ -1,6 +1,8 @@
 package com.twitter.finagle.addr
 
-import com.twitter.finagle.{Addr, Address, ServiceFactory}
+import com.twitter.finagle.Addr
+import com.twitter.finagle.Address
+import com.twitter.finagle.ServiceFactory
 
 /**
  * This object contains utility functions for adding and removing

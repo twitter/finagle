@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Delete `c.t.f.loadbalancer.distributor.AddressedFactory`. Use 
+`c.t.f.loadbalancer.EndpointFactory` directly instead. ``PHAB_ID=D744910``
+
 Bug Fixes
 ~~~~~~~~~~
 
