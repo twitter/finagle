@@ -4,7 +4,9 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{JavaTimer, ProxyTimer, Timer}
+import com.twitter.util.JavaTimer
+import com.twitter.util.ProxyTimer
+import com.twitter.util.Timer
 
 /**
  * Configures whether to probe for slow tasks executing in the default `Timer`.
@@ -76,7 +78,8 @@ object DefaultTimer extends ProxyTimer {
   // - `JavaTimer`
   //
   // TODO: We might consider doing round-robin over the set of "default" timers in future.
-  protected val self: Timer = {
+  @volatile
+  protected var _self: Timer = {
     val baseTimer = LoadService[ServiceLoadedTimer]() match {
       case loaded +: _ => loaded
       case _ =>
@@ -85,6 +88,19 @@ object DefaultTimer extends ProxyTimer {
     }
     initializeDefaultTimer(baseTimer)
   }
+
+  protected def self: Timer = _self
+
+  /**
+   * Set the implementation of the underlying Timer.
+   * Use with caution for changing DefaultTimer after a Timer has
+   * been service loaded at runtime.
+   *
+   * @note This can be unsafe if the Timer is slow and fails to
+   * meet throughput/latency requirements for task creation and
+   * task cancelation.
+   */
+  def setUnsafe(timer: Timer): Unit = { _self = timer }
 
   /**
    * An implicit instance supplied for use in the Future.* methods.
@@ -108,7 +124,7 @@ object DefaultTimer extends ProxyTimer {
         s"Current stack trace: ${Thread.currentThread.getStackTrace.mkString("\n")}"
     )
 
-  override def toString: String = s"DefaultTimer(${self.toString})"
+  override def toString: String = s"DefaultTimer(${_self.toString})"
 
   private[this] def initializeDefaultTimer(timer: Timer): Timer = {
     if (!defaultTimerProbeSlowTasks()) timer
