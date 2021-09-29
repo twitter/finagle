@@ -7,6 +7,7 @@ java_library(
     ),
     tags = ["bazel-compatible"],
     dependencies = [
+        "3rdparty/jvm/javax/annotation:javax.annotation-api",
         "3rdparty/jvm/org/apache/thrift:libthrift",
     ],
 )
