@@ -1,7 +1,9 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.{Service, Thrift}
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.Service
+import com.twitter.finagle.Thrift
 import java.lang.reflect.Constructor
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -142,7 +144,7 @@ private[twitter] object ThriftUtil {
       val baseName: String = stripSuffix(iface)
       (for {
         serviceCls <- findClass[BinaryService](baseName + FinagledServerSuffixScala)
-        baseClass <- findClass1(baseName)
+        baseClass <- findClass1(baseName + "$MethodPerEndpoint")
       } yield {
         findConstructor(
           serviceCls,

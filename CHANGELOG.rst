@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-thrift: Removed c.t.finagle.thrift.ThriftClient#newMethodIface and
+  ThriftClient#thriftService, use c.t.f.thrift.ThriftClient#methodPerEndpoint. ``PHAB_ID=D747744``
+
 Bug Fixes
 ~~~~~~~~~~
 

@@ -2,7 +2,8 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
 import com.twitter.finagle.service.ResponseClassifier
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift.service.Filterable
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -56,20 +57,4 @@ trait ServiceIfaceBuilder[ServiceIface <: Filterable[ServiceIface]] {
     val clientParam = RichClientParam(pf, clientStats = stats)
     newServiceIface(thriftService, clientParam)
   }
-}
-
-/**
- * A typeclass to construct a MethodIface by wrapping a ServiceIface.
- * This is a compatibility constructor to replace an existing Future interface
- * with one built from a ServiceIface.
- *
- * Scrooge generates implementations of this builder.
- */
-@deprecated("Use com.twitter.finagle.thrift.service.MethodPerEndpointBuilder", "2017-11-13")
-trait MethodIfaceBuilder[ServiceIface, MethodIface] {
-
-  /**
-   * Build a FutureIface wrapping a ServiceIface.
-   */
-  def newMethodIface(serviceIface: ServiceIface): MethodIface
 }
