@@ -1,43 +1,8 @@
-# the stringprotocol target doesn't have an sbt analog so
-# don't depend on it in projects which need to support sbt.
-scala_library(
-    name = "stringprotocol",
-    sources = [
-        "com/twitter/finagle/client/utils/StringClient.scala",
-        "com/twitter/finagle/server/utils/StringServer.scala",
-    ],
-    compiler_option_sets = ["fatal_warnings"],
-    tags = ["bazel-compatible"],
-    dependencies = [
-        "finagle/finagle-core",
-        "finagle/finagle-netty4",
-        "util/util-core",
-        "util/util-stats",
-    ],
-)
-
-scala_library(
-    name = "pushsession-utils",
-    sources = [
-        "com/twitter/finagle/pushsession/utils/DeferredExecutor.scala",
-        "com/twitter/finagle/pushsession/utils/MockChannelHandle.scala",
-        "com/twitter/finagle/pushsession/utils/MockPushSession.scala",
-    ],
-    compiler_option_sets = ["fatal_warnings"],
-    tags = ["bazel-compatible"],
-    dependencies = [
-        "finagle/finagle-core/src/main",
-    ],
-)
-
+# Combine with the other BUILD file when DPB-13079 is resolved.
 junit_tests(
-    sources = [
-        "!com/twitter/finagle/InitTest.scala",
-        "**/*.scala",
-    ],
+    name = "init-test",
+    sources = ["com/twitter/finagle/InitTest.scala"],
     compiler_option_sets = ["fatal_warnings"],
-    # env_local is tag for bazel only, added due to DPB-14188
-    tags = ["bazel-compatible"],
     dependencies = [
         ":pushsession-utils",
         ":stringprotocol",
