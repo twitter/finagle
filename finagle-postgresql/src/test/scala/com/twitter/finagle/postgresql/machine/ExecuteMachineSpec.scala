@@ -51,7 +51,7 @@ class ExecuteMachineSpec
     new ExecuteMachine(
       req = Request.ExecutePortal(Prepared(name, IndexedSeq.empty), parameters, portalName),
       parameters = ConnectionParameters.empty,
-      () => ()
+      _ => ()
     )
 
   "ExecuteMachine" should {

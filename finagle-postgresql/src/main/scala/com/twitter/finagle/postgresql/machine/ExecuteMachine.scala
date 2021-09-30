@@ -34,6 +34,7 @@ import com.twitter.finagle.postgresql.machine.StateMachine.SendSeveral
 import com.twitter.finagle.postgresql.machine.StateMachine.Transition
 import com.twitter.finagle.postgresql.machine.StateMachine.TransitionResult
 import com.twitter.io.Pipe
+import com.twitter.io.ReaderDiscardedException
 import com.twitter.io.StreamTermination
 import com.twitter.util.Future
 import com.twitter.util.Return
@@ -80,7 +81,10 @@ object ExecuteMachine {
  *
  * Also note that this machine is used for both executing a portal as well as resuming a previously executed one.
  */
-class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters, interrupt: () => Unit)
+class ExecuteMachine(
+  req: Request.Execute,
+  parameters: ConnectionParameters,
+  interrupt: Throwable => Unit)
     extends StateMachine[Response.QueryResponse] {
   import ExecuteMachine._
 
@@ -149,11 +153,14 @@ class ExecuteMachine(req: Request.Execute, parameters: ConnectionParameters, int
         stream.pipe.onClose.respond {
           case Throw(_: PgSqlServerError) =>
           // don't terminate the connection on expected exceptions
-          case Return(StreamTermination.Discarded) | Throw(_) =>
-            interrupt()
-          case _ =>
+          case Return(StreamTermination.Discarded) =>
+            interrupt(new ReaderDiscardedException)
+          case Throw(reason) =>
+            interrupt(reason)
+          case Return(_) =>
           // noop
         }
+
         Transition(stream, Respond(Return(stream.resultSet(parameters))))
 
       case (r: StreamResult, dr: DataRow) =>

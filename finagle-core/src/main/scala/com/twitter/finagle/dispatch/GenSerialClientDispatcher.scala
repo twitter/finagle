@@ -1,22 +1,32 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.concurrent.AsyncSemaphore
-import com.twitter.finagle.{Failure, FailureFlags, Service, Status}
+import com.twitter.finagle.Failure
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Promise, Return, Throw, Time}
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Time
 import java.net.InetSocketAddress
 
 /**
  * Dispatches requests one at a time; concurrent requests are queued.
  *
  * @param statsReceiver typically scoped to `clientName/dispatcher`
+ * @param closeOnInterrupt whether the dispatcher should close the connection
+ *                         when the request is interrupted.
  */
 abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
   trans: Transport[In, Out],
-  statsReceiver: StatsReceiver)
-    extends Service[Req, Rep] {
+  statsReceiver: StatsReceiver,
+  closeOnInterrupt: Boolean = true,
+) extends Service[Req, Rep] {
 
   private[this] val semaphore = new AsyncSemaphore(1)
 
@@ -66,10 +76,12 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
           tracing.recordClientAddr(localAddress)
         }
 
-        p.setInterruptHandler {
-          case intr =>
-            if (p.updateIfEmpty(Throw(intr)))
-              trans.close()
+        if (closeOnInterrupt) {
+          p.setInterruptHandler {
+            case intr =>
+              if (p.updateIfEmpty(Throw(intr)))
+                trans.close()
+          }
         }
 
         dispatch(req, p)

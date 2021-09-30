@@ -12,6 +12,7 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.postgresql.Client.Expect
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
+import com.twitter.finagle.postgresql.Params.CancelGracePeriod
 import com.twitter.finagle.postgresql.Params.Credentials
 import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Params.MaxConcurrentPrepareStatements
@@ -23,10 +24,15 @@ import com.twitter.finagle.postgresql.machine._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Reader
+import com.twitter.util.Duration
 import com.twitter.util.Future
 import com.twitter.util.Promise
 import com.twitter.util.Return
 import com.twitter.util.Throw
+import com.twitter.util.TimeoutException
+import com.twitter.util.Time
+import com.twitter.util.Timer
+import com.twitter.util.tunable.Tunable
 
 /**
  * Handles transforming the Postgres protocol to an RPC style.
@@ -54,10 +60,19 @@ class ClientDispatcher(
   params: Stack.Params,
 ) extends GenSerialClientDispatcher[Request, Response, FrontendMessage, BackendMessage](
       transport,
-      params[Stats].statsReceiver
+      params[Stats].statsReceiver,
+      closeOnInterrupt = false
     ) {
+  private[this] val timer: Timer = params[com.twitter.finagle.param.Timer].timer
+  private[this] val statsReceiver = params[Stats].statsReceiver
+  private[this] val cancelGracePeriod: Tunable[Duration] = params[CancelGracePeriod].timeout
 
   private[this] val machineRunner: Runner = new Runner(transport)
+
+  private[this] val statsScope = statsReceiver.scope("psql", "serial")
+  private[this] val cancelLatencyMsStat = statsScope.stat("cancel_latency")
+  private[this] val cancelCounter = statsScope.counter("cancel")
+  private[this] val cancelTimeoutCounter = statsScope.counter("cancel_timeout")
 
   def machineDispatch[R <: Response](machine: StateMachine[R], promise: Promise[R]): Future[Unit] =
     machineRunner
@@ -125,19 +140,72 @@ class ClientDispatcher(
         p.setException(t)
         close() // TODO: is it okay to close the connection here?
       case Some(Return(parameters)) =>
-        req match {
-          case Request.ConnectionParameters =>
-            p.setValue(parameters)
-            Future.Done
-          case Request.Sync => machineDispatch(StateMachine.syncMachine, p)
-          case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
-          case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
-          case e: Request.Execute =>
-            machineDispatch(new ExecuteMachine(e, parameters, () => transport.close()), p)
-          case Request.CloseStatement(name) =>
-            machineDispatch(new CloseMachine(name, DescriptionTarget.PreparedStatement), p)
-        }
+        dispatchRequest(req, p, parameters)
     }
+
+  private def dispatchRequest(
+    req: Request,
+    p: Promise[Response],
+    parameters: Response.ConnectionParameters
+  ): Future[Unit] = {
+    val dispatchPromise = new Promise[Unit]
+
+    p.setInterruptHandler {
+      case intr => cancel(intr, p, dispatchPromise)
+    }
+
+    dispatchPromise.become(
+      req match {
+        case Request.ConnectionParameters =>
+          p.setValue(parameters)
+          Future.Done
+        case Request.Sync => machineDispatch(StateMachine.syncMachine, p)
+        case Request.Query(q) => machineDispatch(new SimpleQueryMachine(q, parameters), p)
+        case Request.Prepare(s, name) => machineDispatch(new PrepareMachine(name, s), p)
+        case e: Request.Execute =>
+          machineDispatch(
+            new ExecuteMachine(e, parameters, reason => cancel(reason, p, dispatchPromise)),
+            p)
+        case Request.CloseStatement(name) =>
+          machineDispatch(new CloseMachine(name, DescriptionTarget.PreparedStatement), p)
+      }
+    )
+
+    dispatchPromise
+  }
+
+  private def cancel(
+    reason: Throwable,
+    p: Promise[Response],
+    dispatchP: Promise[Unit]
+  ): Unit = {
+    cancelCounter.incr()
+    val timeout = cancelGracePeriod().getOrElse(Duration.Zero)
+    val cancelTime = Time.now
+
+    within(dispatchP, timeout, new TimeoutException(timeout.toString)).respond { _ =>
+      cancelLatencyMsStat.add((Time.now - cancelTime).inMillis)
+      p.updateIfEmpty(Throw(reason))
+
+      if (!dispatchP.isDefined) {
+        cancelTimeoutCounter.incr()
+        transport.close()
+      }
+    }
+  }
+
+  private def within[A](future: Future[A], timeout: Duration, exc: => Throwable): Future[A] = {
+    if (timeout.isZero) {
+      // Short-circuit timeout expiration to avoid scheduling on the actual timer.
+      if (future.isDefined) {
+        future
+      } else {
+        Future.exception(exc)
+      }
+    } else {
+      future.within(timer, timeout, exc)
+    }
+  }
 }
 
 object ClientDispatcher {

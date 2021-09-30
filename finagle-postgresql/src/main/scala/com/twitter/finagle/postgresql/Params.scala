@@ -63,4 +63,32 @@ object Params {
       Stack.Param(SessionDefaults(Map.empty))
   }
 
+  /**
+   * A class eligible for configuring the cancellation grace period of the dispatcher.
+   * When a request is interrupted, that the dispatcher will attempt to wait for the request
+   * completion before closing the connection.
+   * If the request completes before the grace period expires, the connection will be reused.
+   * If the request doesn't complete before the grace period expires, the connection will be closed.
+   *
+   * @param timeout A cancellation grace period duration.
+   *
+   * Note: The default value for this setting is zero, meaning that immediately after request
+   * interruption the connection is closed and the request completes.
+   *
+   * Increasing this value can reduce the connection churn resulting from request interrupts at
+   * a cost of longer wait for the request to be completed.
+   */
+  final case class CancelGracePeriod(timeout: Tunable[Duration]) {
+    def this(timeout: Duration) = this(Tunable.const("CancelTimeout", timeout))
+
+    def mk(): (CancelGracePeriod, Stack.Param[CancelGracePeriod]) =
+      (this, CancelGracePeriod.param)
+  }
+
+  object CancelGracePeriod {
+    def apply(timeout: Duration): CancelGracePeriod = new CancelGracePeriod(timeout)
+
+    implicit val param: Stack.Param[CancelGracePeriod] =
+      Stack.Param(CancelGracePeriod(Duration.Zero))
+  }
 }
