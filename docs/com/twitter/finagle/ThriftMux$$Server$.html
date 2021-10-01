@@ -40,14 +40,14 @@ generated from a <a href="https://thrift.apache.org/docs/idl" target="_blank">Th
 a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
 }</pre><p>compiled with Scrooge, generates the interface
-<code>TestService.FutureIface</code>. This is then passed
-into <code>ThriftMux.Client.newIface</code>:</p><pre>ThriftMux.client.newIface[TestService.FutureIface](
-  addr, classOf[TestService.FutureIface])</pre><p>However note that the Scala compiler can insert the latter
-<code>Class</code> for us, for which another variant of <code>newIface</code> is
-provided:</p><pre>ThriftMux.client.newIface[TestService.FutureIface](addr)</pre><p>In Java, we need to provide the class object:</p><pre>TestService.FutureIface client =
-  ThriftMux.client.newIface(addr, TestService.FutureIface.<span class="kw">class</span>);</pre><h4> Servers </h4><p>Servers are also simple to expose:</p><p><code>TestService.FutureIface</code> must be implemented and passed
+<code>TestService.MethodPerEndpoint</code>. This is then passed
+into <code>ThriftMux.Client.build</code>:</p><pre>ThriftMux.client.build[TestService.MethodPerEndpoint](
+  addr, classOf[TestService.MethodPerEndpoint])</pre><p>However note that the Scala compiler can insert the latter
+<code>Class</code> for us, for which another variant of <code>build</code> is
+provided:</p><pre>ThriftMux.client.build[TestService.MethodPerEndpoint](addr)</pre><p>In Java, we need to provide the class object:</p><pre>TestService.MethodPerEndpoint client =
+  ThriftMux.client.build(addr, TestService.MethodPerEndpoint.<span class="kw">class</span>);</pre><h4> Servers </h4><p>Servers are also simple to expose:</p><p><code>TestService.MethodPerEndpoint</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre><span class="cmt">// An echo service</span>
-ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.MethodPerEndpoint {
   <span class="kw">def</span> query(x: <span class="std">String</span>): Future[<span class="std">String</span>] = Future.value(x)
 })</pre><p>This object does not expose any configuration options. Both clients and servers
 are instantiated with sane defaults. Clients are labeled with the "clnt/thrift"

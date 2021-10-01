@@ -40,14 +40,14 @@ generated from a <a href="https://thrift.apache.org/docs/idl" target="_blank">Th
 a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
 }</pre><p>compiled with Scrooge, generates the interface
-<code>TestService.FutureIface</code>. This is then passed
-into <code>ThriftMux.Client.newIface</code>:</p><pre>ThriftMux.client.newIface[TestService.FutureIface](
-  addr, classOf[TestService.FutureIface])</pre><p>However note that the Scala compiler can insert the latter
-<code>Class</code> for us, for which another variant of <code>newIface</code> is
-provided:</p><pre>ThriftMux.client.newIface[TestService.FutureIface](addr)</pre><p>In Java, we need to provide the class object:</p><pre>TestService.FutureIface client =
-  ThriftMux.client.newIface(addr, TestService.FutureIface.<span class="kw">class</span>);</pre><h4> Servers </h4><p>Servers are also simple to expose:</p><p><code>TestService.FutureIface</code> must be implemented and passed
+<code>TestService.MethodPerEndpoint</code>. This is then passed
+into <code>ThriftMux.Client.build</code>:</p><pre>ThriftMux.client.build[TestService.MethodPerEndpoint](
+  addr, classOf[TestService.MethodPerEndpoint])</pre><p>However note that the Scala compiler can insert the latter
+<code>Class</code> for us, for which another variant of <code>build</code> is
+provided:</p><pre>ThriftMux.client.build[TestService.MethodPerEndpoint](addr)</pre><p>In Java, we need to provide the class object:</p><pre>TestService.MethodPerEndpoint client =
+  ThriftMux.client.build(addr, TestService.MethodPerEndpoint.<span class="kw">class</span>);</pre><h4> Servers </h4><p>Servers are also simple to expose:</p><p><code>TestService.MethodPerEndpoint</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre><span class="cmt">// An echo service</span>
-ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.MethodPerEndpoint {
   <span class="kw">def</span> query(x: <span class="std">String</span>): Future[<span class="std">String</span>] = Future.value(x)
 })</pre><p>This object does not expose any configuration options. Both clients and servers
 are instantiated with sane defaults. Clients are labeled with the "clnt/thrift"
@@ -83,10 +83,10 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
 by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
 <a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">thrift-finagle</a>.</p><p>Given the IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
-}</pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
-implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
+}</pre><p>Scrooge will generate an interface, <code>TestService.MethodPerEndpoint</code>,
+implementing the above IDL.</p><p><code>TestService.MethodPerEndpoint</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>ThriftMuxRichServer
-.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.MethodPerEndpoint {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })</pre><p>Note that this interface is discovered by reflection. Passing an
 invalid interface implementation will result in a runtime error.</p></div><dl class="attributes block"><dt>Definition Classes</dt><dd><a href="thrift/ThriftRichServer.html" name="com.twitter.finagle.thrift.ThriftRichServer" id="com.twitter.finagle.thrift.ThriftRichServer" class="extype">ThriftRichServer</a></dd></dl></div></li><li class="indented0 " name="com.twitter.finagle.thrift.ThriftRichServer#serveIface" group="Ungrouped" fullComment="yes" data-isabs="false" visbl="pub"><a id="serveIface(addr:String,iface:AnyRef):com.twitter.finagle.ListeningServer" class="anchorToMember"></a><a id="serveIface(String,AnyRef):ListeningServer" class="anchorToMember"></a> <span class="permalink"><a href="../../../com/twitter/finagle/ThriftMux$$Server.html#serveIface(addr:String,iface:AnyRef):com.twitter.finagle.ListeningServer" title="Permalink"><i class="material-icons"></i></a></span> <span class="modifier_kind"><span class="modifier"></span> <span class="kind">def</span></span> <span class="symbol"><span class="name">serveIface</span><span class="params">(<span name="addr">addr: <span name="scala.Predef.String" class="extype">String</span></span>, <span name="iface">iface: <a href="https://www.scala-lang.org/api/2.13.6/scala/AnyRef.html#scala.AnyRef" name="scala.AnyRef" id="scala.AnyRef" class="extype">AnyRef</a></span>)</span><span class="result">: <a href="ListeningServer.html" name="com.twitter.finagle.ListeningServer" id="com.twitter.finagle.ListeningServer" class="extype">ListeningServer</a></span></span><p class="shortcomment cmt">Serve the interface implementation <code>iface</code>, which must be generated
@@ -95,10 +95,10 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
 by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
 <a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">thrift-finagle</a>.</p><p>Given the IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
-}</pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
-implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
+}</pre><p>Scrooge will generate an interface, <code>TestService.MethodPerEndpoint</code>,
+implementing the above IDL.</p><p><code>TestService.MethodPerEndpoint</code> must be implemented and passed
 into <code>serveIface</code>:</p><pre>ThriftMuxRichServer
-.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.MethodPerEndpoint {
   <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
 })</pre><p>Note that this interface is discovered by reflection. Passing an
 invalid interface implementation will result in a runtime error.</p></div><dl class="attributes block"><dt>Definition Classes</dt><dd><a href="thrift/ThriftRichServer.html" name="com.twitter.finagle.thrift.ThriftRichServer" id="com.twitter.finagle.thrift.ThriftRichServer" class="extype">ThriftRichServer</a></dd></dl></div></li><li class="indented0 " name="com.twitter.finagle.thrift.ThriftRichServer#serveIfaces" group="Ungrouped" fullComment="yes" data-isabs="false" visbl="pub"><a id="serveIfaces(addr:java.net.SocketAddress,ifaces:Map[String,AnyRef],defaultService:Option[String]):com.twitter.finagle.ListeningServer" class="anchorToMember"></a><a id="serveIfaces(SocketAddress,Map[String,AnyRef],Option[String]):ListeningServer" class="anchorToMember"></a> <span class="permalink"><a href="../../../com/twitter/finagle/ThriftMux$$Server.html#serveIfaces(addr:java.net.SocketAddress,ifaces:Map[String,AnyRef],defaultService:Option[String]):com.twitter.finagle.ListeningServer" title="Permalink"><i class="material-icons"></i></a></span> <span class="modifier_kind"><span class="modifier"></span> <span class="kind">def</span></span> <span class="symbol"><span class="name">serveIfaces</span><span class="params">(<span name="addr">addr: <a href="https://docs.oracle.com/javase/8/docs/api/java/net/SocketAddress.html#java.net.SocketAddress" name="java.net.SocketAddress" id="java.net.SocketAddress" class="extype">SocketAddress</a></span>, <span name="ifaces">ifaces: <span name="scala.Predef.Map" class="extype">Map</span>[<span name="scala.Predef.String" class="extype">String</span>, <a href="https://www.scala-lang.org/api/2.13.6/scala/AnyRef.html#scala.AnyRef" name="scala.AnyRef" id="scala.AnyRef" class="extype">AnyRef</a>]</span>, <span name="defaultService">defaultService: <a href="https://www.scala-lang.org/api/2.13.6/scala/Option.html#scala.Option" name="scala.Option" id="scala.Option" class="extype">Option</a>[<span name="scala.Predef.String" class="extype">String</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" name="com.twitter.finagle.ListeningServer" id="com.twitter.finagle.ListeningServer" class="extype">ListeningServer</a></span></span><p class="shortcomment cmt">Serve multiple interfaces:</p><div class="fullcomment"><div class="comment cmt"><p>Serve multiple interfaces:</p><pre><span class="kw">val</span> serviceMap = <span class="std">Map</span>(

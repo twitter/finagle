@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 21.8.0 documentation</title>
+    <title>Metrics &#8212; Finagle 21.9.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -284,12 +284,11 @@ before it gets executed. For efficiency reasons, this stat is sampled each
 <h3>Timer<a class="headerlink" href="#timer" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>finagle/timer/pending_tasks</strong> <cite>verbosity:debug</cite></dt>
-<dd>A stat of the number of pending tasks to run for
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/HashedWheelTimer.scala">HashedWheelTimer.Default</a>.</dd>
+<dd>A stat of the number of pending tasks to run for the
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/DefaultTimer.scala">DefaultTimer</a>.</dd>
 <dt><strong>finagle/timer/deviation_ms</strong> <cite>verbosity:debug</cite></dt>
-<dd>A stat of the deviation in milliseconds of tasks scheduled on
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/HashedWheelTimer.scala">HashedWheelTimer.Default</a>
-from their expected time.</dd>
+<dd>A stat of the deviation in milliseconds of tasks scheduled on the
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/DefaultTimer.scala">DefaultTimer</a> from their expected time.</dd>
 <dt><strong>finagle/timer/slow</strong></dt>
 <dd>A counter of the number of tasks found to be executing for longer
 than 2 seconds.</dd>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Protocols &#8212; Finagle 21.8.0 documentation</title>
+    <title>Protocols &#8212; Finagle 21.9.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -107,7 +107,7 @@ following rich APIs:</p>
 <p id="finagle-thrift-server">Serving the IDL:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">ListeningServer</span> <span class="o">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">serveIface</span><span class="o">(</span>
   <span class="s">&quot;localhost:1234&quot;</span><span class="o">,</span>
-  <span class="k">new</span> <span class="nc">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">new</span> <span class="nc">LoggerService</span><span class="o">.</span><span class="nc">MethodPerEndpoint</span> <span class="o">{</span>
     <span class="k">def</span> <span class="n">log</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">logLevel</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
       <span class="n">println</span><span class="o">(</span><span class="s">s&quot;[</span><span class="si">$logLevel</span><span class="s">] Server received: &#39;</span><span class="si">$message</span><span class="s">&#39;&quot;</span><span class="o">)</span>
       <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="s">s&quot;You&#39;ve sent: (&#39;</span><span class="si">$message</span><span class="s">&#39;, </span><span class="si">$logLevel</span><span class="s">)&quot;</span><span class="o">)</span>
@@ -189,7 +189,7 @@ following rich APIs:</p>
 </pre></div>
 </div>
 <p>To convert the Service interface to the method interface use <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Thrift$">Thrift.Client.methodPerEndpoint</a>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">filteredMethodIface</span><span class="k">:</span> <span class="kt">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="k">=</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">filteredMethodIface</span><span class="k">:</span> <span class="kt">LoggerService.MethodPerEndpoint</span> <span class="o">=</span>
   <span class="nc">Thrift</span><span class="o">.</span><span class="nc">Client</span><span class="o">.</span><span class="n">methodPerEndpoint</span><span class="o">(</span><span class="n">clientServicePerEndpoint</span><span class="o">.</span><span class="n">withLog</span><span class="o">(</span><span class="n">filteredLog</span><span class="o">))</span>
 <span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">filteredMethodIface</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;ping&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="n">println</span><span class="o">))</span>
 </pre></div>
