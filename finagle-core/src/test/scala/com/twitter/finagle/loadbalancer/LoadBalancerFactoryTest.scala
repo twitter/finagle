@@ -25,7 +25,7 @@ import org.scalatest.funsuite.AnyFunSuite
 class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with IntegrationPatience {
   val echoService = Service.mk[String, String](Future.value(_))
 
-  trait PerHostFlagCtx extends App {
+  trait PerHostFlagCtx {
     val label = "myclient"
     val client = StringClient.client.configured(param.Label(label))
     val port = "localhost:8080"
@@ -40,14 +40,14 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
       perHostStats.let(true) {
         client
           .configured(LoadBalancerFactory.HostStats(sr))
-          .newService(port)
+          .newService(port)("test")
         eventually {
           assert(sr.self.gauges(perHostStatKey).apply == 1.0)
         }
 
         client
           .configured(LoadBalancerFactory.HostStats(sr1))
-          .newService(port)
+          .newService(port)("test")
         eventually {
           assert(sr1.gauges(perHostStatKey).apply == 1.0)
         }
@@ -63,13 +63,71 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
       perHostStats.let(false) {
         client
           .configured(LoadBalancerFactory.HostStats(sr))
-          .newService(port)
+          .newService(port)("test")
         assert(sr.self.gauges.contains(perHostStatKey) == false)
 
         client
           .configured(LoadBalancerFactory.HostStats(sr1))
-          .newService(port)
+          .newService(port)("test")
         assert(sr1.gauges.contains(perHostStatKey) == false)
+      }
+    }
+  }
+
+  test("reports with canonical name when flag is true") {
+    new PerHostFlagCtx {
+      val sr = new InMemoryHostStatsReceiver
+      val sr1 = new InMemoryStatsReceiver
+
+      val nonCanonicalPort: String = "github.com:443"
+      val canonicalName = InetAddress.getByName("github.com").getCanonicalHostName
+      val canonicalPerHostStatKey = Seq(label, s"${canonicalName}:443", "available")
+
+      perHostStats.let(true) {
+        useCanonicalHostname.let(true) {
+          client
+            .configured(LoadBalancerFactory.HostStats(sr))
+            .newService(nonCanonicalPort)("test")
+          eventually {
+            assert(sr.self.gauges(canonicalPerHostStatKey).apply == 1.0)
+          }
+
+          client
+            .configured(LoadBalancerFactory.HostStats(sr1))
+            .newService(nonCanonicalPort)("test")
+          eventually {
+            assert(sr1.gauges(canonicalPerHostStatKey).apply == 1.0)
+          }
+        }
+      }
+
+    }
+  }
+
+  test("reports with given name when flag is false") {
+    new PerHostFlagCtx {
+      val sr = new InMemoryHostStatsReceiver
+      val sr1 = new InMemoryStatsReceiver
+
+      val nonCanonicalPort: String = "github.com:443"
+      val canonicalPerHostStatKey = Seq(label, nonCanonicalPort, "available")
+
+      perHostStats.let(true) {
+        useCanonicalHostname.let(false) {
+          client
+            .configured(LoadBalancerFactory.HostStats(sr))
+            .newService(nonCanonicalPort)("test")
+          eventually {
+            assert(sr.self.gauges(canonicalPerHostStatKey).apply == 1.0)
+          }
+
+          client
+            .configured(LoadBalancerFactory.HostStats(sr1))
+            .newService(nonCanonicalPort)("test")
+          eventually {
+            assert(sr1.gauges(canonicalPerHostStatKey).apply == 1.0)
+          }
+        }
       }
     }
   }
