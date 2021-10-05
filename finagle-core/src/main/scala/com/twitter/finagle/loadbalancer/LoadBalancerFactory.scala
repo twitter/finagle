@@ -229,7 +229,11 @@ object LoadBalancerFactory {
         else {
           val scope = addr match {
             case Address.Inet(ia, _) =>
-              "%s:%d".format(ia.getHostName, ia.getPort)
+              if(useCanonicalHostname()) {
+                "%s:%d".format(ia.getAddress.getCanonicalHostName, ia.getPort)
+              } else {
+                "%s:%d".format(ia.getHostName, ia.getPort)
+              }
             case other => other.toString
           }
           val host = hostStatsReceiver.scope(label).scope(scope)
