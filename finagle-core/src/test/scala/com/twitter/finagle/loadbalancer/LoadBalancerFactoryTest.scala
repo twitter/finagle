@@ -110,7 +110,7 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
       val sr1 = new InMemoryStatsReceiver
 
       val nonCanonicalPort: String = "github.com:443"
-      val canonicalPerHostStatKey = Seq(label, nonCanonicalPort, "available")
+      val nonCanonicalPerHostStatKey = Seq(label, nonCanonicalPort, "available")
 
       perHostStats.let(true) {
         useCanonicalHostname.let(false) {
@@ -118,14 +118,14 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
             .configured(LoadBalancerFactory.HostStats(sr))
             .newService(nonCanonicalPort)("test")
           eventually {
-            assert(sr.self.gauges(canonicalPerHostStatKey).apply == 1.0)
+            assert(sr.self.gauges(nonCanonicalPerHostStatKey).apply == 1.0)
           }
 
           client
             .configured(LoadBalancerFactory.HostStats(sr1))
             .newService(nonCanonicalPort)("test")
           eventually {
-            assert(sr1.gauges(canonicalPerHostStatKey).apply == 1.0)
+            assert(sr1.gauges(nonCanonicalPerHostStatKey).apply == 1.0)
           }
         }
       }
