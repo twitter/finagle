@@ -398,6 +398,7 @@ private[serverset2] object ZkSession {
               logger.error(
                 s"Zookeeper session ${zkSession.sessionIdAsHex} has expired. Reconnecting in $jitter"
               )
+            case _ => throw new MatchError
           }
           Future.sleep(jitter)
         }
