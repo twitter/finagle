@@ -41,14 +41,6 @@ object perHostStats
         "\tor the NullStatsReceiver if none given."
     )
 
-object useCanonicalHostname
-  extends GlobalFlag[Boolean](
-    false,
-    "enable/default using canonical host name in stats.\n" +
-      "\tWhen enabled, canonical host name for endpoint will be used.\n" +
-      "\tWhen disabled, given hostname will be used."
-  )
-
 package exp {
 
   import com.twitter.finagle.loadbalancer.aperture.EagerConnectionsType

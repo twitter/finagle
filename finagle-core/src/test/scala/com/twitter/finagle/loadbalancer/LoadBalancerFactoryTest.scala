@@ -74,7 +74,7 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
     }
   }
 
-  test("reports with canonical name when flag is true") {
+  test("reports with canonical name when formatter is ByCanonicalHostName") {
     new PerHostFlagCtx {
       val sr = new InMemoryHostStatsReceiver
       val sr1 = new InMemoryStatsReceiver
@@ -84,27 +84,26 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
       val canonicalPerHostStatKey = Seq(label, s"${canonicalName}:443", "available")
 
       perHostStats.let(true) {
-        useCanonicalHostname.let(true) {
-          client
-            .configured(LoadBalancerFactory.HostStats(sr))
-            .newService(nonCanonicalPort)("test")
-          eventually {
-            assert(sr.self.gauges(canonicalPerHostStatKey).apply == 1.0)
-          }
+        client
+          .configured(LoadBalancerFactory.HostStats(sr))
+          .configured(LoadBalancerFactory.AddressFormatter.ByCanonicalHostName)
+          .newService(nonCanonicalPort)("test")
+        eventually {
+          assert(sr.self.gauges(canonicalPerHostStatKey).apply == 1.0)
+        }
 
-          client
-            .configured(LoadBalancerFactory.HostStats(sr1))
-            .newService(nonCanonicalPort)("test")
-          eventually {
-            assert(sr1.gauges(canonicalPerHostStatKey).apply == 1.0)
-          }
+        client
+          .configured(LoadBalancerFactory.HostStats(sr1))
+          .configured(LoadBalancerFactory.AddressFormatter.ByCanonicalHostName)
+          .newService(nonCanonicalPort)("test")
+        eventually {
+          assert(sr1.gauges(canonicalPerHostStatKey).apply == 1.0)
         }
       }
-
     }
   }
 
-  test("reports with given name when flag is false") {
+  test("reports with given host name with default formatter ByHostName") {
     new PerHostFlagCtx {
       val sr = new InMemoryHostStatsReceiver
       val sr1 = new InMemoryStatsReceiver
@@ -113,20 +112,18 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
       val nonCanonicalPerHostStatKey = Seq(label, nonCanonicalPort, "available")
 
       perHostStats.let(true) {
-        useCanonicalHostname.let(false) {
-          client
-            .configured(LoadBalancerFactory.HostStats(sr))
-            .newService(nonCanonicalPort)("test")
-          eventually {
-            assert(sr.self.gauges(nonCanonicalPerHostStatKey).apply == 1.0)
-          }
+        client
+          .configured(LoadBalancerFactory.HostStats(sr))
+          .newService(nonCanonicalPort)("test")
+        eventually {
+          assert(sr.self.gauges(nonCanonicalPerHostStatKey).apply == 1.0)
+        }
 
-          client
-            .configured(LoadBalancerFactory.HostStats(sr1))
-            .newService(nonCanonicalPort)("test")
-          eventually {
-            assert(sr1.gauges(nonCanonicalPerHostStatKey).apply == 1.0)
-          }
+        client
+          .configured(LoadBalancerFactory.HostStats(sr1))
+          .newService(nonCanonicalPort)("test")
+        eventually {
+          assert(sr1.gauges(nonCanonicalPerHostStatKey).apply == 1.0)
         }
       }
     }

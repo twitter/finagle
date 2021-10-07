@@ -68,6 +68,32 @@ object LoadBalancerFactory {
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] address formatter
+   * for per host [[com.twitter.finagle.stats.StatsReceiver]] scope.
+   * Default [[com.twitter.finagle.loadbalancer.LoadBalancerFactory.AddressFormatter.ByHostName]].
+   */
+  case class AddressFormatter(formatter: (Address) => String) {
+    def mk(): (AddressFormatter, Stack.Param[AddressFormatter]) =
+      (this, AddressFormatter.param)
+  }
+
+  object AddressFormatter {
+
+    val ByHostName: AddressFormatter = AddressFormatter({
+      case Address.Inet(ia, _) => "%s:%d".format(ia.getHostName, ia.getPort)
+      case other => other.toString
+    })
+
+    val ByCanonicalHostName: AddressFormatter = AddressFormatter({
+      case Address.Inet(ia, _) => "%s:%d".format(ia.getAddress.getCanonicalHostName, ia.getPort)
+      case other => other.toString
+    })
+
+    implicit val param = Stack.Param(ByHostName)
+  }
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a collection
    * of addrs to load balance.
    */
@@ -227,15 +253,8 @@ object LoadBalancerFactory {
       val stats =
         if (hostStatsReceiver.isNull) statsReceiver
         else {
-          val scope = addr match {
-            case Address.Inet(ia, _) =>
-              if(useCanonicalHostname()) {
-                "%s:%d".format(ia.getAddress.getCanonicalHostName, ia.getPort)
-              } else {
-                "%s:%d".format(ia.getHostName, ia.getPort)
-              }
-            case other => other.toString
-          }
+          val formatter = params[LoadBalancerFactory.AddressFormatter].formatter
+          val scope = formatter(addr)
           val host = hostStatsReceiver.scope(label).scope(scope)
           BroadcastStatsReceiver(Seq(host, statsReceiver))
         }
