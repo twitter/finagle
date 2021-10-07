@@ -4,8 +4,12 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Backoff.ExponentialJittered
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.util.{Await, Future, MockTimer, Time}
-import java.net.{InetAddress, UnknownHostException}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.MockTimer
+import com.twitter.util.Time
+import java.net.InetAddress
+import java.net.UnknownHostException
 import org.scalatest.funsuite.AnyFunSuite
 
 class FixedInetResolverTest extends AnyFunSuite {
@@ -131,7 +135,7 @@ class FixedInetResolverTest extends AnyFunSuite {
   test("Caching resolver can auto-retry failed DNS lookups") {
     new Ctx {
       val maxCacheSize = 1
-      shouldFailTimes = 10
+      shouldFailTimes = 3
       // since `ExponentialJittered` generates values randomly, we use the same
       // seed here in order to validate the values returned from `nBackoffs`.
       val nBackoffs: Backoff =
@@ -170,6 +174,55 @@ class FixedInetResolverTest extends AnyFunSuite {
       assertBoundWithBackoffs("example.com:100")
       assert(numLookups == shouldFailTimes + 1)
       assert(statsReceiver.counter("successes")() == 1)
+      assert(statsReceiver.gauges(Seq("cache", "size"))() == 1)
+      assert(statsReceiver.gauges(Seq("cache", "evicts"))() == 0)
+    }
+  }
+
+  test("Caching resolver stops after N retries to prevent infinite loops") {
+    new Ctx {
+      val maxCacheSize = 1
+      shouldFailTimes = 10000
+      val backoffDuration = 1.millisecond
+
+      val foreverBackoff: Backoff = Backoff.const(backoffDuration)
+      val mockTimer = new MockTimer
+      val cache = FixedInetResolver.cache(resolve, maxCacheSize, foreverBackoff, mockTimer)
+      val resolver2 = new FixedInetResolver(cache, statsReceiver)
+
+      // make the same request forever
+      def assertBoundWithBackoffs(hostname: String): Unit = {
+        val request = resolver2.bind(hostname).changes.filter(_ != Addr.Pending)
+
+        // Walk through backoffs with a synthetic timer
+        Time.withCurrentTimeFrozen { tc =>
+          val addrFuture = request.toFuture()
+          var iterations = 0
+
+          while (!addrFuture.isDefined) {
+            tc.advance(backoffDuration)
+            mockTimer.tick()
+
+            // should not hit 100 iterations
+            assert(iterations < 100)
+            iterations += 1
+          }
+
+          // Resolution should be successful without further delay
+          Await.result(addrFuture, 0.seconds) match {
+            case Addr.Neg =>
+            case _ => fail("Resolution should have succeeded")
+          }
+        }
+        cache.cleanUp()
+      }
+
+      // Should retry under the hood
+      assertBoundWithBackoffs("example.com:100")
+
+      // max is temporarily set to 5 in the inet internal cache
+      assert(numLookups == 1 + FixedInetResolver.MaxRetries)
+      assert(statsReceiver.counter("successes")() == 0)
       assert(statsReceiver.gauges(Seq("cache", "size"))() == 1)
       assert(statsReceiver.gauges(Seq("cache", "evicts"))() == 0)
     }

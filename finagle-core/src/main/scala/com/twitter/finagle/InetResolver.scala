@@ -1,14 +1,24 @@
 package com.twitter.finagle
 
-import com.github.benmanes.caffeine.cache.{CacheLoader, Caffeine, LoadingCache}
+import com.github.benmanes.caffeine.cache.CacheLoader
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.LoadingCache
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
-import com.twitter.finagle.util.{DefaultTimer, InetSocketAddressUtil, Updater}
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.util.InetSocketAddressUtil
+import com.twitter.finagle.util.Updater
 import com.twitter.logging.Logger
-import com.twitter.util.{Await, Closable, Var, _}
-import java.net.{InetAddress, InetSocketAddress, UnknownHostException}
+import com.twitter.util.Await
+import com.twitter.util.Closable
+import com.twitter.util.Var
+import com.twitter.util._
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.UnknownHostException
 
 private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: FuturePool)
     extends (String => Future[Seq[InetAddress]]) {
@@ -184,6 +194,10 @@ object FixedInetResolver {
 
   val scheme = "fixedinet"
 
+  // Temporarily cap max retries at a reasonable value until
+  // we can rework this to be more sensible.
+  val MaxRetries = 5
+
   def apply(): InetResolver =
     apply(DefaultStatsReceiver)
 
@@ -223,9 +237,13 @@ object FixedInetResolver {
   private[finagle] def cache(
     resolveHost: String => Future[Seq[InetAddress]],
     maxCacheSize: Long,
-    backoffs: Backoff = Backoff.empty,
+    originalBackoff: Backoff = Backoff.empty,
     timer: Timer = DefaultTimer
   ): LoadingCache[String, Future[Seq[InetAddress]]] = {
+
+    // ensure backoffs is not an infinite loop. For *now* try a maximum of 5 times to
+    // mitigate infinite loops seen in production. Redesign coming after the issue is mitigated
+    val backoffs = originalBackoff.take(MaxRetries)
 
     val cacheLoader = new CacheLoader[String, Future[Seq[InetAddress]]]() {
       def load(host: String): Future[Seq[InetAddress]] = {
@@ -234,6 +252,8 @@ object FixedInetResolver {
           resolveHost(host).rescue {
             case exc: UnknownHostException =>
               if (nextBackoffs.isExhausted) {
+                log.info(
+                  s"Caught UnknownHostException resolving host '$host'. No more retry budget")
                 Future.exception(exc)
               } else {
                 log.debug(
