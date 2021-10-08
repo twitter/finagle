@@ -10,6 +10,12 @@ Unreleased
 21.9.0
 ------
 
+New Features
+~~~~~~~~~~~~~~~~~~~~
+* finagle-core: Add method Tracing#recordCallSite to record callsite-specific annotations including
+  code.function, code.namespace, code.filepath and code.lineno. See details at 
+  [OpenTelemetry source code attributes](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/span-general.md#source-code-attributes) ``PHAB_ID=D753929``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

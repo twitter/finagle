@@ -4,10 +4,20 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
 import com.twitter.finagle.tracing.TraceTest.TraceIdException
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, MockTimer, Return, Throw, Time}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.MockTimer
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Time
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{atLeast, never, times, verify, when}
-import org.scalatest.{BeforeAndAfter, OneInstancePerTest}
+import org.mockito.Mockito.atLeast
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.scalatest.BeforeAndAfter
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
 import org.scalatest.funsuite.AnyFunSuite
@@ -222,6 +232,31 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         val rec1 = Record(id0, Time.now, Annotation.BinaryAnnotation("key", "test"))
         Trace.recordBinary("key", "test")
         verify(tracer1, times(1)).record(rec1)
+      }
+    }
+  }
+
+  test("Trace.record: record call site") {
+    Time.withCurrentTimeFrozen { tc =>
+      Trace.letTracerAndId(tracer1, id0) {
+        val function = "foo$1"
+        val namespace = "com.twitter.finagle.tracing.TraceTest"
+        val filepath =
+          getClass().getClassLoader().getResource(namespace.replace('.', '/') + ".class").toString
+        val line = Thread.currentThread().getStackTrace()(1).getLineNumber()
+        val lineno = line + 7
+        val functionAnn = Annotation.BinaryAnnotation("code.function", function)
+        val namespaceAnn = Annotation.BinaryAnnotation("code.namespace", namespace)
+        val filePathAnn = Annotation.BinaryAnnotation("code.filepath", filepath)
+        val lineNoAnn = Annotation.BinaryAnnotation("code.lineno", lineno)
+        def foo(): Unit = {
+          Trace.recordCallSite()
+        }
+        foo()
+        verify(tracer1, times(1)).record(Record(id0, Time.now, functionAnn))
+        verify(tracer1, times(1)).record(Record(id0, Time.now, namespaceAnn))
+        verify(tracer1, times(1)).record(Record(id0, Time.now, filePathAnn))
+        verify(tracer1, times(1)).record(Record(id0, Time.now, lineNoAnn))
       }
     }
   }

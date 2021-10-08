@@ -2,8 +2,13 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle.Init
 import com.twitter.finagle.stats.FinagleStatsReceiver
-import com.twitter.util.{Duration, Future, Stopwatch, Time}
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Stopwatch
+import com.twitter.util.Time
 import java.net.InetSocketAddress
+import java.lang.Thread
+import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.tailrec
 import scala.util.Random
 
@@ -246,6 +251,47 @@ abstract class Tracing {
     for ((key, value) <- annotations) {
       recordBinary(key, value)
     }
+  }
+
+  final def recordMethodName(methodName: String): Unit =
+    recordBinary("code.function", methodName)
+
+  final def recordNamespace(namespace: String): Unit =
+    recordBinary("code.namespace", namespace)
+
+  final def recordFilePath(filePath: String): Unit =
+    recordBinary("code.filepath", filePath)
+
+  final def recordLineNumber(lineNumber: Int): Unit =
+    recordBinary("code.lineno", lineNumber)
+
+  /**
+   * WARNING: This method call is expensive. It must be sampled.
+   * Record the method name, namespace, absolute filepath and line number.
+   */
+  final def recordCallSite(): Unit = {
+    Thread.currentThread().getStackTrace().lift(2) match {
+      case Some(stackElement) =>
+        val namespace = stackElement.getClassName()
+        val filePath = getFilePath(namespace)
+        recordMethodName(stackElement.getMethodName())
+        recordNamespace(namespace)
+        recordFilePath(filePath)
+        recordLineNumber(stackElement.getLineNumber())
+      case None =>
+    }
+  }
+
+  // getFilePath: look up the namespace in the cache, to avoid
+  // calling ClassLoader#getResource repeatedly
+  private val filePathCache = new ConcurrentHashMap[String, String]()
+  private def getFilePath(namespace: String): String = {
+    if (!filePathCache.containsKey(namespace))
+      filePathCache.put(
+        namespace,
+        getClass().getClassLoader().getResource(namespace.replace('.', '/') + ".class").toString)
+
+    filePathCache.get(namespace);
   }
 
   private[this] def serviceName: String = {
