@@ -74,6 +74,61 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
     }
   }
 
+  test("reports with canonical name when formatter is ByCanonicalHostName") {
+    new PerHostFlagCtx {
+      val sr = new InMemoryHostStatsReceiver
+      val sr1 = new InMemoryStatsReceiver
+
+      val nonCanonicalPort: String = "github.com:443"
+      val canonicalName = InetAddress.getByName("github.com").getCanonicalHostName
+      val canonicalPerHostStatKey = Seq(label, s"${canonicalName}:443", "available")
+
+      perHostStats.let(true) {
+        client
+          .configured(LoadBalancerFactory.HostStats(sr))
+          .configured(LoadBalancerFactory.AddressFormatter.ByCanonicalHostName)
+          .newService(nonCanonicalPort)
+        eventually {
+          assert(sr.self.gauges(canonicalPerHostStatKey).apply == 1.0)
+        }
+
+        client
+          .configured(LoadBalancerFactory.HostStats(sr1))
+          .configured(LoadBalancerFactory.AddressFormatter.ByCanonicalHostName)
+          .newService(nonCanonicalPort)
+        eventually {
+          assert(sr1.gauges(canonicalPerHostStatKey).apply == 1.0)
+        }
+      }
+    }
+  }
+
+  test("reports with given host name with default formatter ByHostName") {
+    new PerHostFlagCtx {
+      val sr = new InMemoryHostStatsReceiver
+      val sr1 = new InMemoryStatsReceiver
+
+      val nonCanonicalPort: String = "github.com:443"
+      val nonCanonicalPerHostStatKey = Seq(label, nonCanonicalPort, "available")
+
+      perHostStats.let(true) {
+        client
+          .configured(LoadBalancerFactory.HostStats(sr))
+          .newService(nonCanonicalPort)
+        eventually {
+          assert(sr.self.gauges(nonCanonicalPerHostStatKey).apply == 1.0)
+        }
+
+        client
+          .configured(LoadBalancerFactory.HostStats(sr1))
+          .newService(nonCanonicalPort)
+        eventually {
+          assert(sr1.gauges(nonCanonicalPerHostStatKey).apply == 1.0)
+        }
+      }
+    }
+  }
+
   test("make service factory stack") {
     val addr1 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server1 = StringServer.server.serve(addr1, echoService)
