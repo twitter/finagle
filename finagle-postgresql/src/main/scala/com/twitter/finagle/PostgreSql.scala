@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.StdStackClient
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.param.WithSessionPool
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.DelayedRelease
@@ -30,8 +31,18 @@ object PostgreSql {
       .replace(
         StackClient.Role.requestDraining,
         DelayedRelease.module(StackClient.Role.requestDraining))
+      // Since NackAdmissionFilter should operate on all requests sent over
+      // the wire including retries, it must be below `Retries`. Since it
+      // aggregates the status of the entire cluster, it must be above
+      // `LoadBalancerFactory` (not part of the endpoint stack).
+      .insertBefore(
+        StackClient.Role.prepFactory,
+        NackAdmissionFilter.module[Request, Response]
+      )
 
-  val defaultParams: Stack.Params = StackClient.defaultParams
+  val defaultParams: Stack.Params = StackClient.defaultParams +
+    // Keep NackAdmissionFilter disabled by default for backwards compatibility.
+    NackAdmissionFilter.Disabled
 
   case class Client(
     stack: Stack[ServiceFactory[Request, Response]] = defaultStack,
