@@ -4,7 +4,11 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.util.Rng
-import com.twitter.util.{Activity, Await, Future, Time, Var}
+import com.twitter.util.Activity
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.Var
 import org.scalatest.OneInstancePerTest
 import scala.util.Random
 import org.scalatest.funsuite.AnyFunSuite
@@ -17,7 +21,7 @@ object LoadDistributionTest {
 
   class Server extends EndpointFactory[Unit, Unit] {
     def remake() = {}
-    def address = Address.Failed(new Exception)
+    val address = Address.Failed(new Exception)
 
     var load: Int = 0
     var closed: Boolean = false

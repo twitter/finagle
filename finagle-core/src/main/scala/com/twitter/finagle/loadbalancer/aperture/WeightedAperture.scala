@@ -159,9 +159,11 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     "nodes" -> idxs.toSeq.sorted.map { i =>
       Map[String, Any](
         "index" -> i,
+        "name_server_weight" -> endpoints(i).factory.weight,
         "weight" -> pdist.weight(i),
         "address" -> endpoints(i).factory.toString,
-        "status" -> endpoints(i).factory.status.toString)
+        "status" -> endpoints(i).factory.status.toString
+      )
     }
   )
 

@@ -1,10 +1,14 @@
 package com.twitter.finagle.loadbalancer.p2c
 
 import com.twitter.finagle.loadbalancer.EndpointFactory
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{Address, NoBrokersAvailableException, ServiceFactory}
-import com.twitter.util.{Activity, Var}
+import com.twitter.finagle.Address
+import com.twitter.finagle.NoBrokersAvailableException
+import com.twitter.finagle.ServiceFactory
+import com.twitter.util.Activity
+import com.twitter.util.Var
 
 trait P2CSuite {
   // number of servers
@@ -22,7 +26,7 @@ trait P2CSuite {
 
   trait P2CServiceFactory extends EndpointFactory[Unit, Int] {
     def remake() = {}
-    def address = Address.Failed(new Exception)
+    val address = Address.Failed(new Exception)
     def meanLoad: Double
   }
 

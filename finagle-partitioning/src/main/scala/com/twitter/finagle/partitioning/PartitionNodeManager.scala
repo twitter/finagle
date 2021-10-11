@@ -2,10 +2,10 @@ package com.twitter.finagle.partitioning
 
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
+import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.loadbalancer.TrafficDistributor._
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle._
-import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.partitioning.zk.ZkMetadata
@@ -141,7 +141,7 @@ private[finagle] class PartitionNodeManager[
     SnapPartitioner.uninitialized[Req, Rep, B]
   )
 
-  private[this] val addressedFactories: AtomicReference[Try[Set[AddressedFactory[Req, Rep]]]] =
+  private[this] val addressedFactories: AtomicReference[Try[Set[EndpointFactory[Req, Rep]]]] =
     new AtomicReference(Return(Set.empty))
 
   private[this] val partitionerMetrics =
@@ -162,7 +162,7 @@ private[finagle] class PartitionNodeManager[
 
   private[this] def getShardIdFromFactory(
     state: A,
-    factory: AddressedFactory[Req, Rep]
+    factory: EndpointFactory[Req, Rep]
   ): Seq[Try[Int]] = {
     val metadata = factory.address match {
       case WeightedAddress(Address.Inet(_, metadata), _) => metadata
@@ -201,13 +201,13 @@ private[finagle] class PartitionNodeManager[
               // the raw grouping from updatePartitionMap, but without the update-in-place
               val grouped = groupBy(
                 factory,
-                { factory: AddressedFactory[Req, Rep] => getShardIdFromFactory(state, factory) })
+                { factory: EndpointFactory[Req, Rep] => getShardIdFromFactory(state, factory) })
               grouped.map {
                 case (key, endpoints) =>
                   val paramsWithLB = params +
                     LoadBalancerFactory.Endpoints(Var
                       .value(
-                        Activity.Ok(endpoints.asInstanceOf[Set[AddressedFactory[_, _]]])).changes) +
+                        Activity.Ok(endpoints.asInstanceOf[Set[EndpointFactory[_, _]]])).changes) +
                     LoadBalancerFactory.Dest(Var.value(Addr.Bound(endpoints.map(_.address)))) +
                     // This is so the loadbalancer knows that partitioning is enabled so that it
                     // doesn't close endpoints when closing the balancers.
@@ -249,7 +249,7 @@ private[finagle] class PartitionNodeManager[
 
   private[this] def endpointsAsClosable(): Closable = {
     addressedFactories.get match {
-      case Return(setOfEndpoints) => Closable.all(setOfEndpoints.map(_.factory).toSeq: _*)
+      case Return(setOfEndpoints) => Closable.all(setOfEndpoints.toSeq: _*)
       case Throw(_) => Closable.nop
     }
   }

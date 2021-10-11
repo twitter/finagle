@@ -4,7 +4,6 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.loadbalancer.aperture.EagerConnectionsType
-import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.loadbalancer.Balancers
 import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
@@ -43,7 +42,7 @@ object BindingFactoryTest {
 
 case class Factory(i: Int) extends EndpointFactory[String, String] {
   def remake(): Unit = {}
-  def address: Address = Address.Failed(new Exception)
+  val address: Address = Address.Failed(new Exception)
 
   var _total: Int = 0
   def total: Int = _total
@@ -516,8 +515,8 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
     "If EagerConnectionsType.ForceWithDtab is set, eager connections are enabled regardless of Dtabs\"") {
     val endpoint = Factory(0)
     val endpointEvent = Activity
-      .value(Set(AddressedFactory(endpoint, endpoint.address))).states
-      .asInstanceOf[Event[Activity.State[Set[AddressedFactory[_, _]]]]]
+      .value(Set(endpoint)).states
+      .asInstanceOf[Event[Activity.State[Set[EndpointFactory[_, _]]]]]
 
     val unbound = Name.Path(Path.read("/foo"))
     val baseDtab = () => Dtab.base ++ Dtab.read("/foo=>/$/inet/1")
@@ -569,8 +568,8 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
     "If EagerConnectionsType.ForceWithDtab is not set, eager connections with dtab locals are disabled") {
     val endpoint = Factory(0)
     val endpointEvent = Activity
-      .value(Set(AddressedFactory(endpoint, endpoint.address))).states
-      .asInstanceOf[Event[Activity.State[Set[AddressedFactory[_, _]]]]]
+      .value(Set(endpoint)).states
+      .asInstanceOf[Event[Activity.State[Set[EndpointFactory[_, _]]]]]
 
     val unbound = Name.Path(Path.read("/foo"))
     val baseDtab = () => Dtab.base ++ Dtab.read("/foo=>/$/inet/1")

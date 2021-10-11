@@ -19,7 +19,7 @@ trait EndpointFactory[Req, Rep] extends ServiceFactory[Req, Rep] {
   /**
    * Returns the address which this endpoint connects to.
    */
-  def address: Address
+  val address: Address
 
   private[loadbalancer] lazy val weight: Double = WeightedAddress.extract(address)._2
 

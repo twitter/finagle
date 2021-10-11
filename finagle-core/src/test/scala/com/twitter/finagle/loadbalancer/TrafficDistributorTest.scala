@@ -5,7 +5,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle.DiffOps
-import com.twitter.finagle.loadbalancer.distributor.AddressedFactory
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
@@ -20,6 +19,8 @@ private object TrafficDistributorTest {
 
   // The distributor is not privy to this wrapped socket address and
   // it allows us to retrieve the weight class.
+  // By including the weight in the Address, we also force TrafficDistributor.weightEndpoints
+  // to treat two addresses with the same port as unique if their weights are unique.
   object WeightedTestAddr {
     val key = "test_weight"
 
@@ -49,7 +50,7 @@ private object TrafficDistributorTest {
   }
 
   private case class Balancer(
-    endpoints: Activity[Iterable[AddressFactory]],
+    endpoints: Activity[Iterable[EndpointFactory[Int, Int]]],
     val disableEagerConnections: Boolean,
     onClose: scala.Function0[Unit] = () => ())
       extends ServiceFactory[Int, Int] {
@@ -75,7 +76,7 @@ private object TrafficDistributorTest {
     override def status: Status = {
       queriedStatus += 1
 
-      val addressStatus: AddressFactory => Status = a => a.status
+      val addressStatus: EndpointFactory[_, _] => Status = a => a.status
       Status.bestOf(endpoints.sample().toSeq, addressStatus)
     }
 
@@ -89,9 +90,8 @@ private object TrafficDistributorTest {
   def distribution(balancers: Set[Balancer]): Set[(Double, Int, Int)] = {
     balancers.flatMap { b =>
       val endpoints = b.endpoints.sample()
-      endpoints.map {
-        case AddressFactory(WeightedTestAddr(_, w)) =>
-          (w * endpoints.size, endpoints.size, b.offeredLoad)
+      endpoints.map { ef =>
+        (ef.weight * endpoints.size, endpoints.size, b.offeredLoad)
       }
     }
   }
@@ -109,21 +109,21 @@ private object TrafficDistributorTest {
     var closeBalancerCalls = 0
     var newBalancerCalls = 0
     var balancers: Set[Balancer] = Set.empty
+
+    def headBalancerAddresses: Set[Address] =
+      balancers.head.endpoints.sample().map(_.address).toSet
+
     def newBalancer(
       eps: Activity[Set[EndpointFactory[Int, Int]]],
       disableEagerConnections: Boolean
     ): ServiceFactory[Int, Int] = {
 
       newBalancerCalls += 1
-      // eagerly establish the lazy endpoints and extract the
-      // underlying `AddressFactory`
-      val addressFactories = eps.map { set =>
-        set.map { epsf =>
-          await(epsf())
-          epsf.asInstanceOf[LazyEndpointFactory[Int, Int]].self.get.asInstanceOf[AddressFactory]
-        }
+
+      eps.sample().foreach { epsf =>
+        await(epsf())
       }
-      val b = Balancer(addressFactories, disableEagerConnections, () => closeBalancerCalls += 1)
+      val b = Balancer(eps, disableEagerConnections, () => closeBalancerCalls += 1)
       balancers += b
       b
     }
@@ -191,10 +191,35 @@ private object TrafficDistributorTest {
 class TrafficDistributorTest extends AnyFunSuite {
   import TrafficDistributorTest._
 
+  test("weightEndpoints does not strip weights from the EndpointFactory") {
+    val v: Var[Activity.State[Set[Address]]] with Updatable[Activity.State[Set[Address]]] =
+      Var(Activity.Pending)
+
+    val addressedEndpoints = TrafficDistributor.weightEndpoints(
+      Activity(v),
+      AddressFactory(_),
+      true
+    )
+
+    val p = Promise[EndpointFactory[Int, Int]]()
+    val c = addressedEndpoints.respond {
+      case Activity.Ok(v) => p.updateIfEmpty(Return(v.head))
+      case _ => // nop
+    }
+    p.ensure { c.close() }
+
+    val address = WeightedAddress(Address.Inet(new InetSocketAddress(0), Map.empty), 0.5)
+    v.update(Activity.Ok(Set(address)))
+
+    val addressedFactory = await(p)
+    assert(addressedFactory.weight == 0.5)
+  }
+
   test("repicks against a busy balancer")(new Ctx {
     // weight 2.0 is the "Busy" Balancer
     val init: Set[Address] = Seq((1.0, 10), (busyWeight, 10))
       .flatMap(weightClass.tupled).toSet
+
     val dest = Var(Activity.Ok(init))
     val sr = new InMemoryStatsReceiver
     val dist = newDist(dest, statsReceiver = sr)
@@ -203,7 +228,8 @@ class TrafficDistributorTest extends AnyFunSuite {
     for (_ <- 0 until R) dist()
     assert(numWeightClasses(sr) == 2)
 
-    val busyBalancer = balancers.find(_.status == Status.Busy).get
+    val busyBalancer = balancers
+      .find(_.status == Status.Busy).get
     assert(busyBalancer.offeredLoad == 0)
     assert(busyBalancer.queriedStatus > 0)
 
@@ -297,14 +323,14 @@ class TrafficDistributorTest extends AnyFunSuite {
     assert(newEndpointCalls == init.size)
     assert(newBalancerCalls == 1)
     assert(numWeightClasses(sr) == 1)
-    assert(balancers.head.endpoints.sample() == init.map(AddressFactory))
+    assert(headBalancerAddresses == init)
 
     val update: Set[Address] = (3 to 10).map(Address(_)).toSet
     dest() = Activity.Ok(update)
     assert(newEndpointCalls != init.size + update.size)
     assert(newEndpointCalls == (init ++ update).size)
     assert(newBalancerCalls == 1)
-    assert(balancers.head.endpoints.sample() == update.map(AddressFactory))
+    assert(headBalancerAddresses == update)
   })
 
   test("partition endpoints into weight classes")(new Ctx {
@@ -329,10 +355,9 @@ class TrafficDistributorTest extends AnyFunSuite {
     dest() = Activity.Ok(update)
     assert(newEndpointCalls == newAddrs.size)
     assert(newBalancerCalls == 0)
-    val expected = newAddrs.map {
-      case WeightedAddress(addr, _) => AddressFactory(addr)
-    } + AddressFactory(Address(existingWeight.toInt))
-    assert(balancers.count { _.endpoints.sample() == expected } == 1)
+
+    val expected = newAddrs + WeightedAddress(Address(existingWeight.toInt), existingWeight)
+    assert(balancers.count { _.endpoints.sample().map(_.address).toSet == expected } == 1)
 
     // change weight class for an existing endpoint
     resetCounters()
@@ -343,7 +368,7 @@ class TrafficDistributorTest extends AnyFunSuite {
     assert(newBalancerCalls == 1)
     assert(newEndpointCalls == 0)
     assert(balancers.count {
-      _.endpoints.sample() == updated.map { case WeightedAddress(addr, _) => AddressFactory(addr) }
+      _.endpoints.sample().map(_.address).toSet == updated
     } == 1)
   })
 
@@ -370,15 +395,15 @@ class TrafficDistributorTest extends AnyFunSuite {
     dest() = Activity.Ok(update)
     assert(newEndpointCalls == update.size)
     assert(newBalancerCalls == 0)
-    val stale = (init ++ update).map(AddressFactory)
-    assert(balancers.head.endpoints.sample() == stale)
+    val stale = init ++ update
+    assert(headBalancerAddresses == stale)
 
     for (_ <- 0 until 100) {
       resetCounters()
       dest() = Activity.Ok(update)
       assert(newEndpointCalls == 0)
       assert(newBalancerCalls == 0)
-      assert(balancers.head.endpoints.sample() == stale)
+      assert(headBalancerAddresses == stale)
     }
 
     // We add an endpoint as the TrafficDistributor dedups
@@ -388,7 +413,7 @@ class TrafficDistributorTest extends AnyFunSuite {
     dest() = Activity.Ok(nextUpdate)
     assert(newEndpointCalls == 1)
     assert(newBalancerCalls == 0)
-    assert(balancers.head.endpoints.sample() == nextUpdate.map(AddressFactory))
+    assert(headBalancerAddresses == nextUpdate)
   })
 
   test("transitions between activity states")(new Ctx {
@@ -403,8 +428,7 @@ class TrafficDistributorTest extends AnyFunSuite {
     val (first, _) = await(q)
     assert(first.isReturn)
     assert(
-      balancers.head.endpoints.sample() ==
-        Set(1).map(Address(_)).map(AddressFactory)
+      headBalancerAddresses == Set(Address(1))
     )
 
     // initial resolution
@@ -412,20 +436,20 @@ class TrafficDistributorTest extends AnyFunSuite {
     dest() = Activity.Ok(resolved)
     val bal0 = await(dist())
     assert(await(bal0(10)) == 10)
-    assert(balancers.head.endpoints.sample() == resolved.map(AddressFactory))
+    assert(headBalancerAddresses == resolved)
 
     // subsequent `Pending` will propagate stale state
     dest() = Activity.Pending
     val bal1 = await(dist())
     assert(await(bal1(10)) == 10)
-    assert(balancers.head.endpoints.sample() == resolved.map(AddressFactory))
+    assert(headBalancerAddresses == resolved)
 
     // subsequent `Failed` will propagate stale state
     val exc = new Exception("failed activity")
     dest() = Activity.Failed(exc)
     val bal2 = await(dist())
     assert(await(bal2(10)) == 10)
-    assert(balancers.head.endpoints.sample() == resolved.map(AddressFactory))
+    assert(headBalancerAddresses == resolved)
   })
 
   test("transitions to failure if failure comes first")(new Ctx {
@@ -772,7 +796,7 @@ class TrafficDistributorTest extends AnyFunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
       val ref =
-        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[EndpointFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -795,7 +819,7 @@ class TrafficDistributorTest extends AnyFunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
       val ref =
-        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[EndpointFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -829,7 +853,7 @@ class TrafficDistributorTest extends AnyFunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
       val ref =
-        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[EndpointFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -841,7 +865,7 @@ class TrafficDistributorTest extends AnyFunSuite {
           // their statuses. weightEndpoints will only close factories that do not have
           // status `Open`, unless you enable eagerEvictions
           await(Future.join(set.map {
-            case AddressedFactory(factory, _) =>
+            case factory: EndpointFactory[Int, Int] =>
               factory().flatMap(_.close())
           }.toSeq))
         case _ => fail
@@ -870,7 +894,7 @@ class TrafficDistributorTest extends AnyFunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, false)
       val ref =
-        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[EndpointFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -905,7 +929,7 @@ class TrafficDistributorTest extends AnyFunSuite {
 
       val evt = TrafficDistributor.weightEndpoints(Activity(dest), newEndpoint, true)
       val ref =
-        new AtomicReference[Activity.State[Set[AddressedFactory[Int, Int]]]]()
+        new AtomicReference[Activity.State[Set[EndpointFactory[Int, Int]]]]()
       val closable = evt.register(Witness(ref))
 
       ref.get match {
@@ -944,6 +968,73 @@ class TrafficDistributorTest extends AnyFunSuite {
 
       val normalBal = balancers.find(_.numOfEndpoints == 1)
       assert(normalBal.get.disableEagerConnections == false)
+    }
+  }
+
+  test("weightEndpoints cache.get(addr) match options work") {
+    new Ctx {
+      val init: Set[Address] = (1 to 2).map { i => WeightedAddress(Address(i), i) }.toSet
+      val dest = Var(Activity.Ok(init))
+
+      // First we call weighted endpoints with completely empty cache.
+      // cache.get(addr) will hit none and create a new LazyEndpointFactory for each
+      val endpoints = TrafficDistributor.weightEndpoints(Activity(dest), AddressFactory(_), true)
+
+      def addresses: Set[Address] = Activity(endpoints).sample().map(_.address)
+      def weights: Set[Double] = Activity(endpoints).sample().map(_.weight)
+
+      assert(addresses.size == 2)
+      assert(weights == Set(1.0, 2.0))
+
+      // We now want to update one of those WeightedAddresses with a new weight s.t. we hit the
+      // Some() after hitting the None case
+
+      val existingAddress = Address(2)
+      val newWeight = 4.0
+      val newinit = init + WeightedAddress(existingAddress, newWeight)
+
+      dest.update(Activity.Ok(newinit))
+
+      assert(addresses.size == 2)
+      assert(weights == Set(1.0, 4.0))
+    }
+  }
+
+  test("weightEndpoints cache.get(addr) match options work with subscription") {
+    new Ctx {
+      val init: Set[Address] = (1 to 2).map { i => WeightedAddress(Address(i), i) }.toSet
+      val dest = Var(Activity.Ok(init))
+
+      // First we call weighted endpoints with completely empty cache.
+      // cache.get(addr) will hit none and create a new LazyEndpointFactory for each
+      val evt = TrafficDistributor.weightEndpoints(Activity(dest), AddressFactory(_), true)
+      val ref = new AtomicReference[Activity.State[Set[EndpointFactory[Int, Int]]]]()
+      val closable = evt.register(Witness(ref))
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 2)
+          assert(set.count(_.weight == 1.0) == 1)
+          assert(set.count(_.weight == 2.0) == 1)
+          assert(set.count(_.weight == 4.0) == 0)
+        case _ => fail
+      }
+
+      // adds a new address with a weight we've seen before
+      val existingAddress = Address(2)
+      val newWeight = 4.0
+      dest() = Activity.Ok(init + WeightedAddress(existingAddress, newWeight))
+
+      ref.get match {
+        case Activity.Ok(set) =>
+          assert(set.size == 2)
+          assert(set.count(_.weight == 1.0) == 1)
+          assert(set.count(_.weight == 2.0) == 0)
+          assert(set.count(_.weight == 4.0) == 1)
+        case _ => fail
+      }
+
+      closable.close()
     }
   }
 }

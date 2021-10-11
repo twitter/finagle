@@ -3,10 +3,17 @@ package com.twitter.finagle.loadbalancer.aperture
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.{EndpointFactory, NodeT}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.loadbalancer.EndpointFactory
+import com.twitter.finagle.loadbalancer.NodeT
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.util.{Activity, Await, Duration, NullTimer, Var}
+import com.twitter.util.Activity
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.NullTimer
+import com.twitter.util.Var
 import java.net.InetSocketAddress
 import org.scalactic.source.Position
 import org.scalatest.Tag
@@ -634,7 +641,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
   test("vectorHash") {
 
     class WithAddressFactory(i: Int, addr: InetSocketAddress) extends Factory(i) {
-      override def address: Address = Inet(addr, Addr.Metadata.empty)
+      override val address: Address = Inet(addr, Addr.Metadata.empty)
     }
 
     val sr = new InMemoryStatsReceiver

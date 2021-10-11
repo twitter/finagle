@@ -2,8 +2,11 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{Counter, InMemoryStatsReceiver}
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.finagle.stats.Counter
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalacheck.Gen
 import org.scalatest.concurrent.Conductors
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -68,7 +71,7 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
   }
 
   def newFac(_status: Status = Status.Open) = new EndpointFactory[Unit, Unit] {
-    def address: Address = Address.Failed(new Exception)
+    val address: Address = Address.Failed(new Exception)
     def remake(): Unit = ()
 
     def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
