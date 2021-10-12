@@ -57,6 +57,17 @@ object Tracing {
         ts.tail.record(r)
       }
   }
+
+  // getFilePath: look up the namespace in the cache, to avoid
+  // calling ClassLoader#getResource repeatedly
+  private val filePathCache = new ConcurrentHashMap[String, String]()
+  private def getFilePath(namespace: String): String = {
+    filePathCache.computeIfAbsent(
+      namespace,
+      namespace =>
+        getClass().getClassLoader().getResource(namespace.replace('.', '/') + ".class").toString
+    )
+  }
 }
 
 /**
@@ -280,18 +291,6 @@ abstract class Tracing {
         recordLineNumber(stackElement.getLineNumber())
       case None =>
     }
-  }
-
-  // getFilePath: look up the namespace in the cache, to avoid
-  // calling ClassLoader#getResource repeatedly
-  private val filePathCache = new ConcurrentHashMap[String, String]()
-  private def getFilePath(namespace: String): String = {
-    if (!filePathCache.containsKey(namespace))
-      filePathCache.put(
-        namespace,
-        getClass().getClassLoader().getResource(namespace.replace('.', '/') + ".class").toString)
-
-    filePathCache.get(namespace);
   }
 
   private[this] def serviceName: String = {
