@@ -1,7 +1,10 @@
 junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
-    tags = ["bazel-compatible"],
+    tags = [
+        "bazel-compatible",
+        "known-to-fail-jira:CSL-11408",
+    ],
     dependencies = [
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/scalatest",
