@@ -7,5 +7,7 @@ scala_library(
         repo = artifactory,
     ),
     tags = ["bazel-compatible"],
-    dependencies = [],
+    dependencies = [
+        "util/util-stats/src/main/scala",
+    ],
 )

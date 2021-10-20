@@ -6,7 +6,7 @@ package com.twitter.finagle
  * exactly once and they run before any `Finagle` clients or servers within the
  * process connect to a remote peer or accept connections, respectively.
  *
- * @note There are *no* relative ordering guarantees if multiple `FinagleInit`
+ * @note There are *no* relative ordering guarantees if multiple `FinagleInit` or `MetricsInit`
  *       instances are registered.
  */
 trait FinagleInit extends (() => Unit) {

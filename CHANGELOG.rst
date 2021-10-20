@@ -13,11 +13,14 @@ Breaking API Changes
 * finagle-core: `c.t.f.loadbalancer.distributor.AddressedFactory` has been removed. Use
 `c.t.f.loadbalancer.EndpointFactory` directly instead. ``PHAB_ID=D751145``
 
+* finagle-core: Moved `c.t.finagle.stats.LoadedStatsReceiver` and `c.t.finagle.stats.DefaultStatsReceiver`
+  from the finagle-core module to util-stats.  ``PHAB_ID=D763497``
+
 21.9.0
 ------
 
 New Features
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 * finagle-core: Add method Tracing#recordCallSite to record callsite-specific annotations including
   code.function, code.namespace, code.filepath and code.lineno. See details at 
   [OpenTelemetry source code attributes](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/span-general.md#source-code-attributes) ``PHAB_ID=D753929``
