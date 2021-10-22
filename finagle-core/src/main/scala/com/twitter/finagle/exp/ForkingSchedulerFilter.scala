@@ -1,7 +1,12 @@
 package com.twitter.finagle.exp
 
 import com.twitter.concurrent.ForkingScheduler
-import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
+import com.twitter.finagle.Failure
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.SimpleFilter
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Stackable
 import com.twitter.util._
 
 /**
@@ -58,7 +63,13 @@ object ForkingSchedulerFilter {
 
   final class Server[Req, Rep](scheduler: ForkingScheduler) extends SimpleFilter[Req, Rep] {
 
+    private[this] final val overloadedFailure =
+      Future.exception(Failure.rejected("Forking scheduler overloaded"))
+
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
-      scheduler.fork(service(request))
+      scheduler.tryFork(service(request)).flatMap {
+        case Some(v) => Future.value(v)
+        case None => overloadedFailure
+      }
   }
 }
