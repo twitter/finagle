@@ -34,6 +34,15 @@ object LoadBalancerFactory {
     implicit val param = Stack.Param(ManageWeights(false))
   }
 
+  /** A temporary stack param that allows you to override the [[WeightedApertureToggle]]
+   * for clients without modifying their flags directly.
+   */
+  private[twitter] case class UseWeightedBalancers(enabled: Boolean)
+
+  private[twitter] implicit object UseWeightedBalancers extends Stack.Param[UseWeightedBalancers] {
+    val default = UseWeightedBalancers(false)
+  }
+
   /**
    * A class eligible for configuring a client's load balancer probation setting.
    * When enabled, the balancer treats removals as advisory and flags them. If a
@@ -406,10 +415,13 @@ object LoadBalancerFactory {
         )
       }
 
+      def shouldUseWeighted: Boolean =
+        if (params.contains[UseWeightedBalancers]) params[UseWeightedBalancers].enabled
+        else WeightedApertureToggle(label)
+
       // If weight-aware aperture load balancers are enabled, we do not wrap the
       // newBalancer in a TrafficDistributor.
-      if (loadBalancerFactory.supportsWeighted && WeightedApertureToggle(label)) {
-
+      if (loadBalancerFactory.supportsWeighted && shouldUseWeighted) {
         // Add the newBalancer to the stack
         Stack.leaf(
           role,

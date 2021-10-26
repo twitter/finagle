@@ -481,14 +481,6 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
   }
 
   test("WeightedAperture has weights available to it from address metadata") {
-    val serverInfo: ServerInfo = new ServerInfo {
-      def environment: Option[String] = Some("staging")
-      def id: String = "testing"
-      def instanceId: Option[Long] = None
-      def clusterId: String = id
-      def zone: Option[String] = Some("smf1")
-    }
-
     com.twitter.finagle.toggle.flag.overrides
       .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
 
@@ -532,6 +524,41 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
 
         val weights = await(futureWeights)
         assert(weights == Set(1.0, 2.0))
+      }
+  }
+
+  test("can override WeightedApertureToggle with UseWeightedBalancers Stack.Param") {
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 0.0) {
+
+        val endpoint: Stack[ServiceFactory[String, String]] =
+          Stack.leaf(
+            Stack.Role("endpoint"),
+            ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
+          )
+
+        val mockBalancer = new LoadBalancerFactory {
+          override def supportsWeighted: Boolean = true
+
+          def newBalancer[Req, Rep](
+            endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
+            emptyException: NoBrokersAvailableException,
+            params: Stack.Params
+          ): ServiceFactory[Req, Rep] = {
+            ServiceFactory.const(Service.mk(_ => ???))
+          }
+        }
+
+        val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
+
+        val params = Stack.Params.empty +
+          LoadBalancerFactory.Param(mockBalancer) +
+          LoadBalancerFactory.ManageWeights(true) +
+          LoadBalancerFactory.UseWeightedBalancers(true)
+
+        val a: ServiceFactory[String, String] = stack.make(params)
+
+        assert(!a.isInstanceOf[TrafficDistributor[String, String]])
       }
   }
 }
