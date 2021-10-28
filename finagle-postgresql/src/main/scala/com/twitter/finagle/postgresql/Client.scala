@@ -150,11 +150,11 @@ object Client {
                 case other =>
                   Future.exception(new IllegalStateException(s"invalid response $other"))
               }
-              .raiseWithin(timeout)
               .ensure {
                 svc.close()
               }
           }
+          .raiseWithin(timeout)
       }
     }
 

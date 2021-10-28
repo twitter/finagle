@@ -8,8 +8,9 @@ import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceProxy
 import com.twitter.finagle.Stack
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param
 import com.twitter.finagle.postgresql.Client.Expect
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.Params.CancelGracePeriod
@@ -31,8 +32,6 @@ import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.TimeoutException
 import com.twitter.util.Time
-import com.twitter.util.Timer
-import com.twitter.util.tunable.Tunable
 
 /**
  * Handles transforming the Postgres protocol to an RPC style.
@@ -60,12 +59,13 @@ class ClientDispatcher(
   params: Stack.Params,
 ) extends GenSerialClientDispatcher[Request, Response, FrontendMessage, BackendMessage](
       transport,
-      params[Stats].statsReceiver,
+      params[param.Stats].statsReceiver,
       closeOnInterrupt = false
     ) {
-  private[this] val timer: Timer = params[com.twitter.finagle.param.Timer].timer
-  private[this] val statsReceiver = params[Stats].statsReceiver
-  private[this] val cancelGracePeriod: Tunable[Duration] = params[CancelGracePeriod].timeout
+  private[this] val param.Timer(timer) = params[com.twitter.finagle.param.Timer]
+  private[this] val param.Stats(statsReceiver) = params[param.Stats]
+  private[this] val CancelGracePeriod(cancelGracePeriod) = params[CancelGracePeriod]
+  private[this] val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
 
   private[this] val machineRunner: Runner = new Runner(transport)
 
@@ -117,15 +117,20 @@ class ClientDispatcher(
   /**
    * Immediately start the handshaking upon connection establishment, before any client requests.
    */
-  private[this] val startup: Future[Unit] = machineRunner
-    .dispatch(
-      HandshakeMachine(
-        params[Credentials],
-        params[Database],
-        params[StatementTimeout],
-        params[SessionDefaults]),
-      connectionParameters
-    ).before { runInitializationCommands() }
+  private[this] val startup: Future[Unit] =
+    machineRunner
+      .dispatch(
+        HandshakeMachine(
+          params[Credentials],
+          params[Database],
+          params[StatementTimeout],
+          params[SessionDefaults]),
+        connectionParameters)
+      .before { runInitializationCommands() }
+      .raiseWithin(connectTimeout)(timer)
+      .onFailure { _ =>
+        close()
+      }
 
   override def apply(req: Request): Future[Response] =
     startup before super.apply(req)
@@ -216,7 +221,7 @@ object ClientDispatcher {
     PrepareCache(
       new ClientDispatcher(transport, params),
       params[MaxConcurrentPrepareStatements].num,
-      params[Stats].statsReceiver
+      params[param.Stats].statsReceiver
     )
 }
 

@@ -1,8 +1,8 @@
 package com.twitter.finagle.postgresql
 
 import java.net.SocketAddress
-
 import com.twitter.finagle.Stack
+import com.twitter.finagle.param
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.decoder.Framer
 import com.twitter.finagle.netty4.Netty4Transporter
@@ -17,6 +17,8 @@ import com.twitter.finagle.transport.TransportContext
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Throw
 import io.netty.channel.Channel
 
 /**
@@ -52,26 +54,34 @@ class TlsHandshakeTransporter(
     Transport[Buf, Buf] {
       type Context <: TransportContext
     }
-  ] =
-    netty4Transporter().flatMap { transport =>
-      transport
-        .write(MessageEncoder.sslRequestEncoder.toBuf(FrontendMessage.SslRequest))
-        .flatMap { _ =>
-          transport.read()
-        }
-        .flatMap { buf =>
-          buf.get(0) match {
-            case 'S' => negotiateTls(transport)
-            case 'N' => Future.exception(PgSqlTlsUnsupportedError)
-            case b =>
-              Future.exception(
-                new IllegalStateException(s"invalid server response to SslRequest: $b"))
+  ] = {
+    val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
+    val param.Timer(timer) = params[param.Timer]
+
+    netty4Transporter()
+      .flatMap { transport =>
+        transport
+          .write(MessageEncoder.sslRequestEncoder.toBuf(FrontendMessage.SslRequest))
+          .flatMap { _ =>
+            transport.read()
           }
-        }
-        .map { _ =>
-          transport
-        }
-    }
+          .flatMap { buf =>
+            buf.get(0) match {
+              case 'S' => negotiateTls(transport)
+              case 'N' => Future.exception(PgSqlTlsUnsupportedError)
+              case b =>
+                Future.exception(
+                  new IllegalStateException(s"invalid server response to SslRequest: $b"))
+            }
+          }.transform {
+            case Return(_) => Future.value(transport)
+            case Throw(t) =>
+              transport.close()
+              Future.exception(t)
+          }
+      }
+      .raiseWithin(connectTimeout)(timer)
+  }
 
   private[this] def negotiateTls(transport: Transport[Buf, Buf]): Future[Unit] = {
     val p = new Promise[Unit]
