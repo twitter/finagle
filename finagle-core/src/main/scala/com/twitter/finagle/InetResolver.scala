@@ -10,14 +10,15 @@ import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.util.InetSocketAddressUtil
+import com.twitter.finagle.util.Updater
 import com.twitter.logging.Logger
+import com.twitter.util.Await
 import com.twitter.util.Closable
 import com.twitter.util.Var
 import com.twitter.util._
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.UnknownHostException
-import java.util.concurrent.atomic.AtomicBoolean
 
 private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: FuturePool)
     extends (String => Future[Seq[InetAddress]]) {
@@ -76,7 +77,8 @@ object InetResolver {
     new InetResolver(
       new DnsResolver(statsReceiver, resolvePool),
       statsReceiver,
-      pollIntervalOpt
+      pollIntervalOpt,
+      resolvePool
     )
   }
 }
@@ -84,7 +86,8 @@ object InetResolver {
 private[finagle] class InetResolver(
   resolveHost: String => Future[Seq[InetAddress]],
   statsReceiver: StatsReceiver,
-  pollIntervalOpt: Option[Duration])
+  pollIntervalOpt: Option[Duration],
+  resolvePool: FuturePool)
     extends Resolver {
   import InetSocketAddressUtil._
 
@@ -144,45 +147,23 @@ private[finagle] class InetResolver(
 
   def bindHostPortsToAddr(hosts: Seq[HostPortMetadata]): Var[Addr] = {
     Var.async(Addr.Pending: Addr) { u =>
-      def onResult(r: Try[Addr]): Unit = r match {
-        case Return(v) => u() = v
-        case Throw(t) => log.debug(t, "Resolution failed")
-      }
-
+      toAddr(hosts) onSuccess { u() = _ }
       pollIntervalOpt match {
         case Some(pollInterval) =>
-          val closed = new AtomicBoolean(false)
-          def poll(): Future[Unit] = {
-            val start = Time.now
-            toAddr(hosts)
-              .transform { v =>
-                onResult(v)
-                if (closed.get) Future.Done
-                else {
-                  val elapsed = Time.now - start
-                  Future
-                    .sleep(pollInterval - elapsed)(timer)
-                    .before(poll())
-                }
-              }
+          val updater = new Updater[Unit] {
+            val one = Seq(())
+            // Just perform one update at a time.
+            protected def preprocess(elems: Seq[Unit]) = one
+            protected def handle(unit: Unit): Unit = {
+              // This always runs in a thread pool; it's okay to block.
+              u() = Await.result(toAddr(hosts))
+            }
           }
-
-          val f = poll()
-          Closable.make { _ =>
-            closed.set(true)
-            f.raise(new InterruptedException("Resolution discarded"))
-            Future.Done
+          timer.schedule(pollInterval.fromNow, pollInterval) {
+            resolvePool(updater(()))
           }
-
         case None =>
-          val f = toAddr(hosts)
-          f.respond(onResult)
-          // We need to close our resolution just in case it's a "forever"
-          // resolution due to infinite backoffs.
-          Closable.make { _ =>
-            if (!f.isDefined) f.raise(new InterruptedException("Resolution discarded"))
-            Future.Done
-          }
+          Closable.nop
       }
     }
   }
@@ -308,7 +289,8 @@ private[finagle] class FixedInetResolver(
     extends InetResolver(
       CaffeineCache.fromLoadingCache(cache),
       statsReceiver,
-      None
+      None,
+      FuturePool.unboundedPool
     ) {
 
   override val scheme = FixedInetResolver.scheme
