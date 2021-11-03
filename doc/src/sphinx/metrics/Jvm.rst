@@ -44,6 +44,10 @@ and tenuring threshold (`jvm/tenuring_threshold`).
 **jvm/uptime**
   A gauge of the uptime of the Java virtual machine in milliseconds.
 
+**jvm/spec_version**
+  A gauge of the running Java virtual machine's specification version. Generally maps to the
+  VM's major version.
+
 **jvm/start_time**
   A gauge of the start time of the Java virtual machine in milliseconds since the epoch.
 
