@@ -1,10 +1,12 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{Counter, StatsReceiver}
-import com.twitter.util.{Future, Time}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.util.Future
+import com.twitter.util.Time
 import scala.annotation.tailrec
-import scala.collection.{immutable, mutable}
+import scala.collection.immutable
+import scala.collection.mutable
 
 /**
  * A [[BalancerNode]] allows implementors to refine the node type-alias
@@ -131,11 +133,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   def size: Int =
     dist.vector.size
 
-  // A counter that should be named "max_effort_exhausted".
-  // Due to a scalac compile/runtime problem we were unable
-  // to store it as a member variable on this trait.
-  protected[this] def maxEffortExhausted: Counter
-
   private[this] val gauges = Seq(
     statsReceiver.addGauge("available") { numAvailable },
     statsReceiver.addGauge("busy") { numBusy },
@@ -144,6 +141,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     statsReceiver.addGauge("size") { size }
   )
 
+  private[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
   private[this] val adds = statsReceiver.counter("adds")
   private[this] val removes = statsReceiver.counter("removes")
   private[this] val rebuilds = statsReceiver.counter("rebuilds")

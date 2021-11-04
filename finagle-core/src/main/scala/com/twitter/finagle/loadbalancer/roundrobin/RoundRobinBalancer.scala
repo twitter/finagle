@@ -2,8 +2,10 @@ package com.twitter.finagle.loadbalancer.roundrobin
 
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer._
-import com.twitter.finagle.stats.{Counter, StatsReceiver}
-import com.twitter.util.{Activity, Future, Time}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.util.Activity
+import com.twitter.util.Future
+import com.twitter.util.Time
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -19,9 +21,6 @@ private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
     extends ServiceFactory[Req, Rep]
     with Balancer[Req, Rep]
     with Updating[Req, Rep] {
-
-  protected[this] val maxEffortExhausted: Counter =
-    statsReceiver.counter("max_effort_exhausted")
 
   protected class Node(val factory: EndpointFactory[Req, Rep])
       extends ServiceFactoryProxy[Req, Rep](factory)

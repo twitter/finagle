@@ -1,11 +1,17 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.{EndpointFactory, PeakEwma, Updating}
-import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactoryProxy}
-import com.twitter.finagle.stats.{Counter, StatsReceiver}
+import com.twitter.finagle.loadbalancer.EndpointFactory
+import com.twitter.finagle.loadbalancer.PeakEwma
+import com.twitter.finagle.loadbalancer.Updating
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactoryProxy}
-import com.twitter.util.{Activity, Duration, Future, Timer, Time}
+import com.twitter.finagle.NoBrokersAvailableException
+import com.twitter.finagle.ServiceFactoryProxy
+import com.twitter.util.Activity
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Timer
+import com.twitter.util.Time
 
 /**
  * Aperture (which is backed by the theory behind p2c) along with the [[PeakEwma]]
@@ -34,7 +40,6 @@ private[loadbalancer] final class AperturePeakEwma[Req, Rep](
     with Expiration[Req, Rep]
     with Updating[Req, Rep] {
   require(minAperture > 0, s"minAperture must be > 0, but was $minAperture")
-  protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
 
   // We set the idle time as a function of the aperture's smooth window.
   // The aperture growth is dampened by this window so after X windows

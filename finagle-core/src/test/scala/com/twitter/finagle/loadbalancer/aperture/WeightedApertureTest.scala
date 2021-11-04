@@ -1,18 +1,19 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.{
-  Address,
-  ClientConnection,
-  NoBrokersAvailableException,
-  Service,
-  ServiceFactoryProxy,
-  Status
-}
+import com.twitter.finagle.Address
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.NoBrokersAvailableException
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactoryProxy
+import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
-import com.twitter.finagle.stats.{Counter, InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalacheck.Gen
 import org.scalactic.TolerantNumerics
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -85,8 +86,6 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     override protected def statsReceiver: StatsReceiver = new InMemoryStatsReceiver
     override protected def newNode(factory: EndpointFactory[Unit, Unit]): TestNode = TestNode(
       newFactory())
-    override protected[this] def maxEffortExhausted: Counter =
-      statsReceiver.counter("max_effort_exhausted")
   }
 
   test("WeightedAperture.normalize correctly normalizes a seq of doubles") {

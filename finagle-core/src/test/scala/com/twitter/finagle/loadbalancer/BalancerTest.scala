@@ -2,7 +2,6 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.Counter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.Await
 import com.twitter.util.Future
@@ -26,7 +25,6 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
     def additionalMetadata: Map[String, Any] = Map.empty
 
     def stats: InMemoryStatsReceiver = statsReceiver
-    protected[this] val maxEffortExhausted: Counter = stats.counter("max_effort_exhausted")
 
     def nodes: Vector[Node] = dist.vector
     def factories: Set[ServiceFactory[Unit, Unit]] = nodes.map(_.factory).toSet

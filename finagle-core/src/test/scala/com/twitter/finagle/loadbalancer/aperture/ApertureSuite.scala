@@ -22,8 +22,6 @@ private[loadbalancer] trait ApertureSuite {
     protected val useDeterministicOrdering: Option[Boolean] = None
     protected def label = ""
 
-    protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
-
     def applyn(n: Int): Unit = {
       val factories = Await.result(Future.collect(Seq.fill(n)(apply())))
       Await.result(Closable.all(factories: _*).close())
