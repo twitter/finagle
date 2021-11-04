@@ -81,7 +81,7 @@ public class StackParamCompilationTest {
         .configured(new RequestSemaphoreFilter.Param(
           new Some<>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
         .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
-        .configured(new LoadBalancerFactory.Param(Balancers.p2c(5, Rngs.threadLocal())).mk())
+        .configured(new LoadBalancerFactory.Param(Balancers.p2c(Rngs.threadLocal())).mk())
         .configured(new LoadBalancerFactory.WhenNoNodesOpenParam(
             WhenNoNodesOpens.FAIL_FAST).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())

@@ -1,19 +1,25 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.loadbalancer.aperture.{
-  ApertureLeastLoaded,
-  AperturePeakEwma,
-  EagerConnections
-}
+import com.twitter.finagle.loadbalancer.aperture.ApertureLeastLoaded
+import com.twitter.finagle.loadbalancer.aperture.AperturePeakEwma
+import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.loadbalancer.heap.HeapLeastLoaded
-import com.twitter.finagle.loadbalancer.p2c.{P2CLeastLoaded, P2CPeakEwma}
+import com.twitter.finagle.loadbalancer.p2c.P2CLeastLoaded
+import com.twitter.finagle.loadbalancer.p2c.P2CPeakEwma
 import com.twitter.finagle.loadbalancer.roundrobin.RoundRobinBalancer
-import com.twitter.finagle.{Stack, param}
+import com.twitter.finagle.Stack
+import com.twitter.finagle.param
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy}
-import com.twitter.util.{Activity, Duration, Future, Stopwatch, Time}
+import com.twitter.finagle.NoBrokersAvailableException
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.ServiceFactoryProxy
+import com.twitter.util.Activity
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Stopwatch
+import com.twitter.util.Time
 import scala.util.Random
 
 /**
@@ -50,7 +56,7 @@ object Balancers {
    * by P2C operating on a half-dead cluster since Finagle clients have additional
    * layers of requeues above the load balancer.
    */
-  val MaxEffort: Int = 5
+  private val maxEffort = 5
 
   /**
    * Creates a [[ServiceFactory]] proxy to `bal` with the `lbType` exported
@@ -82,10 +88,6 @@ object Balancers {
    * An O(1), concurrent, least-loaded fair load balancer. This uses the ideas
    * behind "power of 2 choices" [1].
    *
-   * @param maxEffort This is the fixed number of retries the LB is willing to make
-   * if an unavailable node (Status != Open) is returned from the underlying pick.
-   * See the constant [[MaxEffort]] for more details on how we pick the default.
-   *
    * @param rng The PRNG used for flipping coins. Override for
    * deterministic tests.
    *
@@ -93,7 +95,7 @@ object Balancers {
    * Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
    * 10 (October 2001), 1094-1104.
    */
-  def p2c(maxEffort: Int = MaxEffort, rng: Rng = Rng.threadLocal): LoadBalancerFactory =
+  def p2c(rng: Rng = Rng.threadLocal): LoadBalancerFactory =
     new LoadBalancerFactory {
       override def toString: String = "P2CLeastLoaded"
 
@@ -129,10 +131,6 @@ object Balancers {
    *
    * @param decayTime The window of latency observations.
    *
-   * @param maxEffort This is the fixed number of retries the LB is willing to make
-   * if an unavailable node (Status != Open) is returned from the underlying pick.
-   * See the constant [[MaxEffort]] for more details on how we pick the default.
-   *
    * @param rng The PRNG used for flipping coins. Override for
    * deterministic tests.
    *
@@ -141,7 +139,6 @@ object Balancers {
    */
   def p2cPeakEwma(
     decayTime: Duration = 10.seconds,
-    maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "P2CPeakEwma"
@@ -233,10 +230,6 @@ object Balancers {
    * @param minAperture The minimum aperture allowed. Note, this value is checked to
    * ensure that it is not larger than the number of endpoints.
    *
-   * @param maxEffort This is the fixed number of retries the LB is willing to make
-   * if an unavailable node (Status != Open) is returned from the underlying pick.
-   * See the constant [[MaxEffort]] for more details on how we pick the default.
-   *
    * @param rng The PRNG used for flipping coins. Override for
    * deterministic tests.
    *
@@ -253,7 +246,6 @@ object Balancers {
     lowLoad: Double = 0.875,
     highLoad: Double = 1.125,
     minAperture: Int = 1,
-    maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal,
     useDeterministicOrdering: Option[Boolean] = None
   ): LoadBalancerFactory = new LoadBalancerFactory {
@@ -333,10 +325,6 @@ object Balancers {
    * @param minAperture The minimum aperture allowed. Note, this value is checked to
    * ensure that it is not larger than the number of endpoints.
    *
-   * @param maxEffort This is the fixed number of retries the LB is willing to make
-   * if an unavailable node (Status != Open) is returned from the underlying pick.
-   * See the constant [[MaxEffort]] for more details on how we pick the default.
-   *
    * @param rng The PRNG used for flipping coins. Override for
    * deterministic tests.
    *
@@ -353,7 +341,6 @@ object Balancers {
     lowLoad: Double = 0.875,
     highLoad: Double = 1.125,
     minAperture: Int = 1,
-    maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal,
     useDeterministicOrdering: Option[Boolean] = None
   ): LoadBalancerFactory = new LoadBalancerFactory {
@@ -408,12 +395,8 @@ object Balancers {
    * not take latency into account and will happily direct load to
    * slow or oversubscribed services. We recommend using one of the
    * other load balancers for typical production use.
-   *
-   * @param maxEffort This is the fixed number of retries the LB is willing to make
-   * if an unavailable node (Status != Open) is returned from the underlying pick.
-   * See the constant [[MaxEffort]] for more details on how we pick the default.
    */
-  def roundRobin(maxEffort: Int = MaxEffort): LoadBalancerFactory = new LoadBalancerFactory {
+  def roundRobin(): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "RoundRobin"
 
     def newBalancer[Req, Rep](
@@ -422,7 +405,7 @@ object Balancers {
       params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
-      val balancer = new RoundRobinBalancer(endpoints, sr, exc, maxEffort)
+      val balancer = new RoundRobinBalancer(endpoints, sr, exc)
       newScopedBal(params[param.Label].label, sr, "round_robin", balancer, manageWeights = false)
     }
   }

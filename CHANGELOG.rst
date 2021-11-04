@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Remove `c.t.f.loadbalancer.Balancer.maxEffort`. Remove the `maxEffort`
+  argument from Balancers.{p2c, p2cPeakEwma, aperture, aperturePeakEwmaUse, roundRobin}`.
+  ``PHAB_ID=D772863``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

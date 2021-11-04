@@ -29,11 +29,11 @@ public class BalancersCompilationTest {
     Stack.Params emptyParams = StackParams.empty();
 
     Balancers
-      .p2c(5, Rngs.threadLocal())
+      .p2c(Rngs.threadLocal())
       .newBalancer(Activity.value(vec), noBrokers, emptyParams);
 
     Balancers
-      .p2cPeakEwma(Duration.fromSeconds(60), 5, Rngs.threadLocal())
+      .p2cPeakEwma(Duration.fromSeconds(60), Rngs.threadLocal())
       .newBalancer(Activity.value(vec), noBrokers, emptyParams);
 
     Balancers
@@ -41,7 +41,7 @@ public class BalancersCompilationTest {
       .newBalancer(Activity.value(vec), noBrokers, emptyParams);
 
     Balancers
-      .aperture(Duration.fromSeconds(5), 0.5, 2, 1, 5, Rngs.threadLocal(), Option.empty())
+      .aperture(Duration.fromSeconds(5), 0.5, 2, 1,  Rngs.threadLocal(), Option.empty())
       .newBalancer(Activity.value(vec), noBrokers, emptyParams);
   }
 }
