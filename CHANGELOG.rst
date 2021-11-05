@@ -14,6 +14,9 @@ Breaking API Changes
   argument from Balancers.{p2c, p2cPeakEwma, aperture, aperturePeakEwmaUse, roundRobin}`.
   ``PHAB_ID=D772863``
 
+* finagle-core: `c.t.f.tracing.ClientRequestTracingFilter` has been removed.
+Record relevant tracing information in your service or client directly. ``PHAB_ID=D777298``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
