@@ -39,7 +39,9 @@ import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.EventType;
+import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Stat;
 
 import com.twitter.finagle.common.base.ExceptionalSupplier;
 import com.twitter.finagle.common.base.MorePreconditions;
@@ -493,8 +495,21 @@ public class Group {
         return false;
       }
 
-      // We already joined if we still have the zNode; otherwise, session expired.
-      return zkClient.get().exists(nodePath, null) != null;
+      // We already joined if we still have the zNode; otherwise, the session expired.
+      ZooKeeper rawZkClient = zkClient.get();
+      Stat znodeInfo = rawZkClient.exists(nodePath, null);
+      if (znodeInfo == null) {
+        return false;
+      }
+
+      // This handles the case where the znode associated with an expired session is deleted
+      // from our view of the ZK data tree _after_ we receive the session expiry event.
+      if (znodeInfo.getEphemeralOwner() != rawZkClient.getSessionId()) {
+        LOG.info("Re-joining group, " + nodePath + " owned by expired session: "
+            + znodeInfo.getEphemeralOwner());
+        return false;
+      }
+      return true;
     }
 
     private final ExceptionalSupplier<Boolean, InterruptedException> tryJoin =
