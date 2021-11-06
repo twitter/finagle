@@ -19,15 +19,21 @@ import com.twitter.finagle.postgresql.Types.PgArray
 import com.twitter.finagle.postgresql.Types.PgArrayDim
 import com.twitter.finagle.postgresql.Types.Timestamp
 import com.twitter.finagle.postgresql.Types.WireValue
-import com.twitter.finagle.postgresql.types.{Json, PgDate, PgNumeric, PgTime}
+import com.twitter.finagle.postgresql.types.Json
+import com.twitter.finagle.postgresql.types.PgDate
+import com.twitter.finagle.postgresql.types.PgNumeric
+import com.twitter.finagle.postgresql.types.PgTime
 import com.twitter.io.Buf
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import org.scalatest.Assertion
-import org.scalatest.matchers.{MatchResult, Matcher}
+import org.scalatest.matchers.MatchResult
+import org.scalatest.matchers.Matcher
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import java.nio.charset.StandardCharsets
-import scala.util.{Failure, Success, Try}
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 
 trait PropertiesSpec extends ScalaCheckPropertyChecks with org.scalatest.matchers.must.Matchers {
 
@@ -63,7 +69,7 @@ trait PropertiesSpec extends ScalaCheckPropertyChecks with org.scalatest.matcher
   implicit lazy val arbParam: Arbitrary[BackendMessage.ParameterStatus] = Arbitrary {
     for {
       param <- genParameter
-      value <- Gen.alphaLowerStr.suchThat(_.nonEmpty)
+      value <- genNonEmptyLowerStr
     } yield BackendMessage.ParameterStatus(param, value)
   }
   implicit lazy val arbBackendKeyData: Arbitrary[BackendMessage.BackendKeyData] = Arbitrary {
@@ -91,17 +97,18 @@ trait PropertiesSpec extends ScalaCheckPropertyChecks with org.scalatest.matcher
     } yield tag
   implicit lazy val arbCommandTag: Arbitrary[CommandTag] = Arbitrary(genCommandTag)
 
+  lazy val genNonEmptyStr = for { h <- Gen.alphaChar; t <- Gen.alphaStr } yield h + t
   implicit lazy val arbFieldDescription: Arbitrary[FieldDescription] = Arbitrary {
     for {
-      name <- Gen.alphaStr.suchThat(_.nonEmpty)
+      name <- genNonEmptyStr
       dataType <- Arbitrary.arbitrary[Oid]
       dataTypeSize <- Gen.oneOf(1, 2, 4, 8, 16).map(_.toShort)
       format <- Gen.oneOf(Format.Text, Format.Binary)
     } yield FieldDescription(name, None, None, dataType, dataTypeSize, 0, format)
   }
 
-  implicit lazy val arbNamed: Arbitrary[Name.Named] = Arbitrary(
-    Gen.alphaLowerStr.suchThat(_.nonEmpty).map(Name.Named))
+  lazy val genNonEmptyLowerStr = for { h <- Gen.alphaLowerChar; t <- Gen.alphaLowerStr } yield h + t
+  implicit lazy val arbNamed: Arbitrary[Name.Named] = Arbitrary(genNonEmptyLowerStr.map(Name.Named))
   implicit lazy val arbName: Arbitrary[Name] =
     Arbitrary(Gen.oneOf(Gen.const(Name.Unnamed), Arbitrary.arbitrary[Name.Named]))
 
@@ -140,6 +147,13 @@ trait PropertiesSpec extends ScalaCheckPropertyChecks with org.scalatest.matcher
     for {
       desc <- arbRowDescription.arbitrary
       rows <- Gen.listOf(genRowData(desc))
+    } yield TestResultSet(desc, rows)
+  }
+
+  lazy val nonEmptyTestResultSet: Arbitrary[TestResultSet] = Arbitrary {
+    for {
+      desc <- arbRowDescription.arbitrary
+      rows <- Gen.nonEmptyListOf(genRowData(desc))
     } yield TestResultSet(desc, rows)
   }
 

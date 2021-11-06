@@ -6,9 +6,12 @@ import com.twitter.finagle.FailureFlags
 import com.twitter.finagle.PostgreSql
 import com.twitter.finagle.Status
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
+import com.twitter.finagle.postgresql.Response.Prepared
 import com.twitter.finagle.postgresql.Response.QueryResponse
 import com.twitter.finagle.postgresql.Response.SimpleQueryResponse
+import com.twitter.finagle.postgresql.Types.Format
 import com.twitter.finagle.postgresql.Types.Name
+import com.twitter.finagle.postgresql.Types.Name.Unnamed
 import com.twitter.finagle.postgresql.mock.MockPgTransport
 import com.twitter.io.Reader
 import com.twitter.io.ReaderDiscardedException
@@ -81,7 +84,7 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
     }
 
     "returns simple query result" in {
-      forAll(arbTestResultSet.arbitrary, minSuccessful(1)) { arb =>
+      forAll(arbTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val stackParams = PostgreSql.defaultParams
         val expects = Seq(
           expect(
@@ -107,6 +110,7 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
 
         val fut = dispatcher.apply(Request.Query("QUERY 1")).flatMap { response =>
           foreachQueryResponse(response) {
+            case Response.Empty => Future.value(Seq())
             case r: Response.ResultSet =>
               assert(r.fields == arb.desc.rowFields)
               assert(Await.result(Reader.readAllItems(r.rows)) == getRows(arb.rows))
@@ -121,7 +125,7 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
     }
 
     "returns simple query result, and recovers transport when discarded" in {
-      forAll(arbTestResultSet.arbitrary, minSuccessful(1)) { arb =>
+      forAll(arbTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val stackParams = PostgreSql.defaultParams + Params.CancelGracePeriod(Duration.Top)
         val expects = Seq(
           expect(
@@ -132,12 +136,16 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
           expect(
             FrontendMessage.Query("QUERY 1"),
             arb.desc +: arb.rows :+
-              BackendMessage.CommandComplete(BackendMessage.CommandTag.Other("QUERY 1")) :+
+              BackendMessage.CommandComplete(
+                BackendMessage.CommandTag.AffectedRows(BackendMessage.CommandTag.Select, 0)
+              ) :+
               BackendMessage.ReadyForQuery(BackendMessage.NoTx): _*
           ),
           expect(
             FrontendMessage.Query("QUERY 2"),
-            BackendMessage.CommandComplete(BackendMessage.CommandTag.Other("QUERY 2")),
+            BackendMessage.CommandComplete(
+              BackendMessage.CommandTag.AffectedRows(BackendMessage.CommandTag.Select, 0)
+            ),
             BackendMessage.ReadyForQuery(BackendMessage.NoTx)
           )
         )
@@ -162,7 +170,7 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
     }
 
     "execute returns query result" in {
-      forAll(arbTestResultSet.arbitrary, minSuccessful(1)) { arb =>
+      forAll(arbTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val stackParams = PostgreSql.defaultParams
         val expects = Seq(
           expect(
@@ -172,17 +180,26 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
           ),
           expect(
             Seq(
-              FrontendMessage.Describe(Name.Named("QUERY 1"), DescriptionTarget.Portal),
-              FrontendMessage.Execute(Name.Named("QUERY 1"), 100),
+              FrontendMessage.Bind(
+                Unnamed,
+                Name.Named("QUERY 1"),
+                Seq(Format.Binary),
+                Seq(),
+                Seq(Format.Binary)),
+              FrontendMessage.Describe(Unnamed, DescriptionTarget.Portal),
+              FrontendMessage.Execute(Unnamed, 0),
               FrontendMessage.Flush
             ),
-            arb.desc +: arb.rows :+
-              BackendMessage.CommandComplete(BackendMessage.CommandTag.Other("QUERY"))
+            Seq(BackendMessage.BindComplete, arb.desc) ++ arb.rows :+
+              BackendMessage.CommandComplete(
+                BackendMessage.CommandTag.AffectedRows(BackendMessage.CommandTag.Select, 0))
           ),
           expect(FrontendMessage.Sync, BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
           expect(
             FrontendMessage.Query("QUERY 2"),
-            BackendMessage.CommandComplete(BackendMessage.CommandTag.Other("QUERY 2")),
+            BackendMessage.CommandComplete(
+              BackendMessage.CommandTag.AffectedRows(BackendMessage.CommandTag.Select, 0)
+            ),
             BackendMessage.ReadyForQuery(BackendMessage.NoTx)
           )
         )
@@ -192,8 +209,9 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
 
         val fut = dispatcher
           .apply(
-            Request.ResumePortal(Name.Named("QUERY 1"), 100)
+            Request.ExecutePortal(Prepared(Name.Named("QUERY 1"), IndexedSeq()), Seq())
           ).flatMap {
+            case Response.Empty => Future.value(Seq())
             case r: Response.ResultSet =>
               assert(r.fields == arb.desc.rowFields)
               assert(Await.result(Reader.readAllItems(r.rows)) == getRows(arb.rows))
@@ -207,7 +225,7 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
     }
 
     "execute returns query result, and recovers transport when interrupted" in {
-      forAll(arbTestResultSet.arbitrary, minSuccessful(1)) { arb =>
+      forAll(nonEmptyTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val mockTimer = new MockTimer
         val stackParams = PostgreSql.defaultParams +
           Params.CancelGracePeriod(1.second) + com.twitter.finagle.param.Timer(mockTimer)
@@ -219,21 +237,30 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
           ),
           expect(
             Seq(
-              FrontendMessage.Describe(Name.Named("QUERY 1"), DescriptionTarget.Portal),
-              FrontendMessage.Execute(Name.Named("QUERY 1"), 100),
+              FrontendMessage.Bind(
+                Unnamed,
+                Name.Named("QUERY 1"),
+                Seq(Format.Binary),
+                Seq(),
+                Seq(Format.Binary)),
+              FrontendMessage.Describe(Unnamed, DescriptionTarget.Portal),
+              FrontendMessage.Execute(Unnamed, 0),
               FrontendMessage.Flush
             ),
-            Seq(arb.desc)
+            Seq(BackendMessage.BindComplete, arb.desc)
           ),
           suspend("QUERY 1"),
           read(
             arb.rows :+
-              BackendMessage.CommandComplete(BackendMessage.CommandTag.Other("QUERY")): _*
+              BackendMessage.CommandComplete(
+                BackendMessage.CommandTag.AffectedRows(BackendMessage.CommandTag.Select, 0)): _*
           ),
           expect(FrontendMessage.Sync, BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
           expect(
             FrontendMessage.Query("QUERY 2"),
-            BackendMessage.CommandComplete(BackendMessage.CommandTag.Other("QUERY 2")),
+            BackendMessage.CommandComplete(
+              BackendMessage.CommandTag.AffectedRows(BackendMessage.CommandTag.Select, 0)
+            ),
             BackendMessage.ReadyForQuery(BackendMessage.NoTx)
           )
         )
@@ -244,8 +271,9 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
         Time.withCurrentTimeFrozen { timeCtl =>
           val fut = dispatcher
             .apply(
-              Request.ResumePortal(Name.Named("QUERY 1"), 100)
+              Request.ExecutePortal(Prepared(Name.Named("QUERY 1"), IndexedSeq()), Seq())
             ).flatMap {
+              case Response.Empty => Future.value(Seq())
               case r: Response.ResultSet =>
                 assert(r.fields == arb.desc.rowFields)
                 Reader.readAllItemsInterruptible(r.rows)
@@ -270,7 +298,7 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
     }
 
     "execute returns query result, and closes transport when timeout expires" in {
-      forAll(arbTestResultSet.arbitrary, minSuccessful(1)) { arb =>
+      forAll(arbTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val mockTimer = new MockTimer
         val stackParams = PostgreSql.defaultParams +
           Params.CancelGracePeriod(1.second) + com.twitter.finagle.param.Timer(mockTimer)
@@ -282,11 +310,17 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
           ),
           expect(
             Seq(
-              FrontendMessage.Describe(Name.Named("QUERY 1"), DescriptionTarget.Portal),
-              FrontendMessage.Execute(Name.Named("QUERY 1"), 100),
+              FrontendMessage.Bind(
+                Unnamed,
+                Name.Named("QUERY 1"),
+                Seq(Format.Binary),
+                Seq(),
+                Seq(Format.Binary)),
+              FrontendMessage.Describe(Unnamed, DescriptionTarget.Portal),
+              FrontendMessage.Execute(Unnamed, 0),
               FrontendMessage.Flush
             ),
-            arb.desc +: arb.rows,
+            Seq(BackendMessage.BindComplete, arb.desc) ++ arb.rows,
           ),
           suspend("QUERY 1"),
         )
@@ -297,8 +331,9 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
         Time.withCurrentTimeFrozen { timeCtl =>
           val fut = dispatcher
             .apply(
-              Request.ResumePortal(Name.Named("QUERY 1"), 100)
+              Request.ExecutePortal(Prepared(Name.Named("QUERY 1"), IndexedSeq()), Seq())
             ).flatMap {
+              case Response.Empty => Future.value(Seq())
               case r: Response.ResultSet =>
                 assert(r.fields == arb.desc.rowFields)
                 Reader.readAllItemsInterruptible(r.rows)
@@ -311,9 +346,13 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
           timeCtl.advance(1.second)
           mockTimer.tick()
 
-          intercept[ReaderDiscardedException] {
+          val ex = intercept[Exception] {
             Await.result(fut)
           }
+          assert(
+            ex.isInstanceOf[ReaderDiscardedException] ||
+              ex.isInstanceOf[FutureCancelledException]
+          )
 
           assert(transport.status == Status.Closed)
         }
@@ -321,7 +360,7 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
     }
 
     "execute returns query result, and closes transport when timeout is zero" in {
-      forAll(arbTestResultSet.arbitrary, minSuccessful(1)) { arb =>
+      forAll(arbTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val stackParams = PostgreSql.defaultParams
         val expects = Seq(
           expect(
@@ -331,11 +370,17 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
           ),
           expect(
             Seq(
-              FrontendMessage.Describe(Name.Named("QUERY 1"), DescriptionTarget.Portal),
-              FrontendMessage.Execute(Name.Named("QUERY 1"), 100),
+              FrontendMessage.Bind(
+                Unnamed,
+                Name.Named("QUERY 1"),
+                Seq(Format.Binary),
+                Seq(),
+                Seq(Format.Binary)),
+              FrontendMessage.Describe(Unnamed, DescriptionTarget.Portal),
+              FrontendMessage.Execute(Unnamed, 0),
               FrontendMessage.Flush
             ),
-            arb.desc +: arb.rows,
+            Seq(BackendMessage.BindComplete, arb.desc) ++ arb.rows,
           ),
           suspend("QUERY 1"),
         )
@@ -345,8 +390,9 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
 
         val fut = dispatcher
           .apply(
-            Request.ResumePortal(Name.Named("QUERY 1"), 100)
+            Request.ExecutePortal(Prepared(Name.Named("QUERY 1"), IndexedSeq()), Seq())
           ).flatMap {
+            case Response.Empty => Future.value(Seq())
             case r: Response.ResultSet =>
               assert(r.fields == arb.desc.rowFields)
               Reader.readAllItemsInterruptible(r.rows)
@@ -355,9 +401,13 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
 
         fut.raise(new FutureCancelledException)
 
-        intercept[ReaderDiscardedException] {
+        val ex = intercept[Exception] {
           Await.result(fut)
         }
+        assert(
+          ex.isInstanceOf[ReaderDiscardedException] ||
+            ex.isInstanceOf[FutureCancelledException]
+        )
 
         assert(transport.status == Status.Closed)
       }
