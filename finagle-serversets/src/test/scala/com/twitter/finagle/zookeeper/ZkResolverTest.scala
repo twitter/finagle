@@ -1,10 +1,17 @@
 package com.twitter.finagle.zookeeper
 
+import com.twitter.finagle.common.zookeeper.ServerSet
 import com.twitter.finagle.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Addr, Address, Resolver}
+import com.twitter.finagle.Addr
+import com.twitter.finagle.Address
+import com.twitter.finagle.Resolver
+import com.twitter.finagle.common.net.pool.DynamicHostSet
+import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status._
-import com.twitter.util.{Duration, RandomSocket, Var}
+import com.twitter.util.Duration
+import com.twitter.util.RandomSocket
+import com.twitter.util.Var
 import java.net.InetSocketAddress
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.Eventually
@@ -13,6 +20,24 @@ import scala.jdk.CollectionConverters._
 import org.scalatest.funsuite.AnyFunSuite
 
 class ZkResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually {
+  private class ZkGroup(serverSet: ServerSet, path: String)
+      extends Thread("ZkGroup(%s)".format(path)) {
+    setDaemon(true)
+    start()
+
+    protected[finagle] val set = Var(Set[ServiceInstance]())
+
+    def apply(): Set[ServiceInstance] = set()
+
+    override def run(): Unit = {
+      serverSet.watch(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
+        def onChange(newSet: java.util.Set[ServiceInstance]): Unit = synchronized {
+          set() = newSet.asScala.toSet
+        }
+      })
+    }
+  }
+
   val zkTimeout: Duration = 100.milliseconds
   var inst: ZkInstance = _
   val factory = new ZkClientFactory(zkTimeout)

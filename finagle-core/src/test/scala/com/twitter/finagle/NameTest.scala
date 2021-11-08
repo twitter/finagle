@@ -1,29 +1,10 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Future, Var, Witness}
-import java.net.{InetSocketAddress, SocketAddress}
+import com.twitter.util.Future
+import com.twitter.util.Var
 import org.scalatest.funsuite.AnyFunSuite
 
 class NameTest extends AnyFunSuite {
-  test("Name.fromGroup") {
-    val g = Group.mutable[SocketAddress]()
-    val n = Name.fromGroup(g)
-
-    var addr: Addr = Addr.Pending
-    n.addr.changes.register(Witness({ addr = _: Addr }))
-    assert(addr == Addr.Pending)
-    val set = Set[SocketAddress](new InetSocketAddress(0), new InetSocketAddress(1))
-    g() = set
-
-    val Addr.Bound(s2, r) = addr
-    assert(s2.collect { case Address.Inet(ia, _) => ia } == set)
-    assert(r.isEmpty)
-
-    g() = Set(new SocketAddress {})
-    val Addr.Failed(e) = addr
-    assert(e.isInstanceOf[IllegalArgumentException])
-  }
-
   test("Name.Bound maintains equality as per 'id'") {
     val id1, id2 = new {}
     val a1, a2 = Var(Addr.Pending)

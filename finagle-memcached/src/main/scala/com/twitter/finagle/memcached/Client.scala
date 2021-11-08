@@ -1,19 +1,14 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import _root_.java.nio.charset.StandardCharsets
 import com.twitter.bijection.Bijection
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.Bufs.{
   RichBuf,
   nonEmptyStringToBuf,
   seqOfNonEmptyStringToBuf
 }
-import com.twitter.finagle.partitioning.PartitionNode
-
-import com.twitter.hashing._
 import com.twitter.io.Buf
 import com.twitter.util.{Command => _, Function => _, _}
 import com.twitter.finagle.memcached.util.{NotFound => muNotFound}
@@ -899,113 +894,4 @@ trait PartitionedClient extends Client {
 
   def stats(args: Option[String]): Future[Seq[String]] =
     throw new UnsupportedOperationException("No logical way to perform stats without a key")
-}
-
-/**
- * Ruby memcache-client (MemCache) compatible client.
- */
-class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
-  protected[memcached] def clientOf(key: String): Client = {
-    val bytes = key.getBytes(StandardCharsets.UTF_8)
-    val hash = (KeyHasher.CRC32_ITU.hashKey(bytes) >> 16) & 0x7fff
-    val index = hash % clients.size
-    clients(index.toInt)
-  }
-
-  def close(deadline: Time): Future[Unit] =
-    Closables.all(clients: _*).close(deadline)
-
-}
-
-/**
- * Builder for memcache-client (MemCache) compatible client.
- */
-case class RubyMemCacheClientBuilder(
-  _nodes: Seq[(String, Int, Int)],
-  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
-
-  def this() = this(
-    Nil, // nodes
-    None // clientBuilder
-  )
-
-  def nodes(nodes: Seq[(String, Int, Int)]): RubyMemCacheClientBuilder =
-    copy(_nodes = nodes)
-
-  def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: PartitionNode =>
-      (node.host, node.port, node.weight)
-    }.toSeq)
-
-  def clientBuilder(
-    clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]
-  ): RubyMemCacheClientBuilder =
-    copy(_clientBuilder = Some(clientBuilder))
-
-  def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
-    val clients = _nodes.map {
-      case (hostname, port, weight) =>
-        require(weight == 1, "Ruby memcache node weight must be 1")
-        Client(Memcached.client.newService(hostname + ":" + port))
-    }
-    new RubyMemCacheClient(clients)
-  }
-}
-
-/**
- * PHP memcache-client (memcache.so) compatible client.
- */
-class PHPMemCacheClient(clients: Array[Client], keyHasher: KeyHasher) extends PartitionedClient {
-  protected[memcached] def clientOf(key: String): Client = {
-    // See mmc_hash() in memcache_standard_hash.c
-    val hash = (keyHasher.hashKey(key.getBytes) >> 16) & 0x7fff
-    val index = hash % clients.length
-    clients(index.toInt)
-  }
-
-  def close(deadline: Time): Future[Unit] =
-    Closable.all(clients: _*).close(deadline)
-
-}
-
-/**
- * Builder for memcache-client (memcache.so) compatible client.
- */
-case class PHPMemCacheClientBuilder(
-  _nodes: Seq[(String, Int, Int)],
-  _hashName: Option[String],
-  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
-
-  def nodes(nodes: Seq[(String, Int, Int)]): PHPMemCacheClientBuilder =
-    copy(_nodes = nodes)
-
-  def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members.iterator.map { node: PartitionNode =>
-      (node.host, node.port, node.weight)
-    }.toSeq)
-
-  def hashName(hashName: String): PHPMemCacheClientBuilder =
-    copy(_hashName = Some(hashName))
-
-  def clientBuilder(
-    clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]
-  ): PHPMemCacheClientBuilder =
-    copy(_clientBuilder = Some(clientBuilder))
-
-  def build(): PartitionedClient = {
-    val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
-    val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
-    val clients = _nodes.flatMap {
-      case (hostname, port, weight) =>
-        val client = Client(Memcached.client.newService(hostname + ":" + port))
-        for (i <- (1 to weight)) yield client
-    }.toArray
-    new PHPMemCacheClient(clients, keyHasher)
-  }
-}
-
-object PHPMemCacheClientBuilder {
-  def apply(): PHPMemCacheClientBuilder = PHPMemCacheClientBuilder(Nil, Some("crc32-itu"), None)
-  def get(): PHPMemCacheClientBuilder = apply()
 }

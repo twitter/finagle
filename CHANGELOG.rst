@@ -15,7 +15,12 @@ Breaking API Changes
   ``PHAB_ID=D772863``
 
 * finagle-core: `c.t.f.tracing.ClientRequestTracingFilter` has been removed.
-Record relevant tracing information in your service or client directly. ``PHAB_ID=D777298``
+  Record relevant tracing information in your service or client directly. ``PHAB_ID=D777298``
+
+* finagle: Remove `com.twitter.finagle.Group`, and other rarely used and deprecated pieces that depend on it
+  `com.twitter.finagle.memcached.TwitterCacheResolver`, `com.twitter.finagle.memcached.CacheNodeGroup`,
+  `com.twitter.finagle.memcached.RubyMemCacheClient`, and `com.twitter.finagle.memcached.PHPMemCacheClient`.
+  Instead of `Group`, please use `Var[Set[T]]` or `Activity[Set[T]]` directly instead. ``PHAB_ID=D776745``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

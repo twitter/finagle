@@ -2,7 +2,6 @@ package com.twitter.finagle
 
 import com.twitter.finagle.util.{CachedHashCode, Showable}
 import com.twitter.util.Var
-import java.net.{InetSocketAddress, SocketAddress}
 import scala.annotation.varargs
 
 /**
@@ -141,45 +140,6 @@ object Name {
    * @see [[Names.empty]] for Java compatibility.
    */
   val empty: Name.Bound = bound()
-
-  /**
-   * Create a name from a group.
-   *
-   * @note Full Addr semantics cannot be recovered from Group. We
-   * take a conservative approach here: we will only provide bound
-   * and failed addresses. Empty sets could indicate either pending or
-   * negative resolutions. A failed address is only returned if the Group
-   * contains a [[SocketAddress]] that is not an [[InetSocketAddress]].
-   */
-  def fromGroup(g: Group[SocketAddress]): Name.Bound = g match {
-    case NameGroup(name) => name
-    case group =>
-      Name.Bound(
-        {
-          // Group doesn't support the abstraction of "not yet bound" so
-          // this is a bit of a hack
-          @volatile var first = true
-
-          group.set map {
-            case newSet if first && newSet.isEmpty => Addr.Pending
-            case newSet =>
-              first = false
-              newSet.foldLeft[Addr](Addr.Bound()) {
-                case (Addr.Bound(set, metadata), ia: InetSocketAddress) =>
-                  Addr.Bound(set + Address(ia), metadata)
-                case (Addr.Bound(_, _), sa) =>
-                  Addr.Failed(
-                    new IllegalArgumentException(
-                      s"Unsupported SocketAddress of type '${sa.getClass.getName}': $sa"
-                    )
-                  )
-                case (addr, _) => addr
-              }
-          }
-        },
-        group
-      )
-  }
 
   /**
    * Create a path-based Name which is interpreted vis-à-vis

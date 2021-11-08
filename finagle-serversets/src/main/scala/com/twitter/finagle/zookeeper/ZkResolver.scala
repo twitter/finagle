@@ -1,16 +1,22 @@
 package com.twitter.finagle.zookeeper
 
-import com.twitter.concurrent.{Broker, Offer}
+import com.twitter.concurrent.Broker
+import com.twitter.concurrent.Offer
 import com.twitter.finagle.addr.StabilizingAddr
 import com.twitter.finagle.common.net.pool.DynamicHostSet
 import com.twitter.finagle.common.net.pool.DynamicHostSet.MonitorException
-import com.twitter.finagle.common.zookeeper.{ServerSet, ServerSetImpl}
+import com.twitter.finagle.common.zookeeper.ServerSet
+import com.twitter.finagle.common.zookeeper.ServerSetImpl
 import com.twitter.finagle.stats.DefaultStatsReceiver
-import com.twitter.finagle.{Addr, Address, Group, Resolver}
-import com.twitter.thrift.{Endpoint, ServiceInstance}
+import com.twitter.finagle.Addr
+import com.twitter.finagle.Address
+import com.twitter.finagle.Resolver
+import com.twitter.thrift.Endpoint
+import com.twitter.thrift.ServiceInstance
 import com.twitter.util.Var
 import java.net.InetSocketAddress
-import java.util.logging.{Level, Logger}
+import java.util.logging.Level
+import java.util.logging.Logger
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
 
@@ -20,24 +26,6 @@ import scala.jdk.CollectionConverters._
  */
 @deprecated("Prefer com.twitter.finagle.serverset2.Zk2Resolver", "2019-02-13")
 class ZkResolverException(msg: String) extends Exception(msg)
-
-// Note: this is still used by finagle-memcached.
-private[finagle] class ZkGroup(serverSet: ServerSet, path: String)
-    extends Thread("ZkGroup(%s)".format(path))
-    with Group[ServiceInstance] {
-  setDaemon(true)
-  start()
-
-  protected[finagle] val set = Var(Set[ServiceInstance]())
-
-  override def run(): Unit = {
-    serverSet.watch(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
-      def onChange(newSet: java.util.Set[ServiceInstance]): Unit = synchronized {
-        set() = newSet.asScala.toSet
-      }
-    })
-  }
-}
 
 private class ZkOffer(serverSet: ServerSet, path: String)
     extends Thread("ZkOffer(%s)".format(path))
