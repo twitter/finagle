@@ -111,6 +111,7 @@ jobs:
           no-test: true
           publish-m2: true
           verbose: true
+          clean-files: true
       - name: set up netty snapshot
         run: source ./netty-snapshot-env.sh
       - name: test
