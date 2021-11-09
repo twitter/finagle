@@ -36,11 +36,6 @@ Breaking API Changes
 * finagle-core: `c.t.f.loadbalancer.distributor.AddressedFactory` has been removed. Use
 `c.t.f.loadbalancer.EndpointFactory` directly instead. ``PHAB_ID=D751145``
 
-Runtime Behavior Changes
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-* finagle: Bump version of Jackson to 2.13.0. ``PHAB_ID=D744627``
-
 * finagle-core: Moved `c.t.finagle.stats.LoadedStatsReceiver` and `c.t.finagle.stats.DefaultStatsReceiver`
   from the finagle-core module to util-stats.  ``PHAB_ID=D763497``
 
