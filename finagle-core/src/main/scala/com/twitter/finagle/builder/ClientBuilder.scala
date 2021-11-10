@@ -1,9 +1,13 @@
 package com.twitter.finagle.builder
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Backoff, _}
+import com.twitter.finagle.Backoff
+import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.client.{DefaultPool, StackBasedClient, StackClient, Transporter}
+import com.twitter.finagle.client.DefaultPool
+import com.twitter.finagle.client.StackBasedClient
+import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.liveness.FailureAccrualFactory
@@ -12,28 +16,30 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.TrustCredentials
-import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration,
-  SslClientEngineFactory,
-  SslClientSessionVerifier,
-  SslContextClientEngineFactory
-}
-import com.twitter.finagle.stats.{
-  NullStatsReceiver,
-  RelativeNameMarkingStatsReceiver,
-  RoleConfiguredStatsReceiver,
-  StatsReceiver,
-  Client => ClientRole
-}
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.ssl.client.SslClientEngineFactory
+import com.twitter.finagle.ssl.client.SslClientSessionVerifier
+import com.twitter.finagle.ssl.client.SslContextClientEngineFactory
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.RelativeNameMarkingStatsReceiver
+import com.twitter.finagle.stats.RoleConfiguredStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{Client => ClientRole}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util
-import com.twitter.util.{Duration, Future, NullMonitor, Time, Try}
-import java.net.{InetSocketAddress, SocketAddress}
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.NullMonitor
+import com.twitter.util.Time
+import com.twitter.util.Try
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
 import javax.net.ssl.SSLContext
-import scala.annotation.{implicitNotFound, varargs}
+import scala.annotation.implicitNotFound
+import scala.annotation.varargs
 
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
@@ -1233,7 +1239,12 @@ private[finagle] object ClientBuilderClient {
   }
 
   private[builder] class GlobalTimeoutModule[Req, Rep]
-      extends Stack.Module2[TimeoutFilter.TotalTimeout, Timer, ServiceFactory[Req, Rep]] {
+      extends Stack.Module3[
+        TimeoutFilter.TotalTimeout,
+        Timer,
+        param.Stats,
+        ServiceFactory[Req, Rep]
+      ] {
 
     /** See [[TimeoutFilter.totalTimeoutRole]]. */
     val role: Stack.Role = Stack.Role("ClientBuilder GlobalTimeoutFilter")
@@ -1242,15 +1253,18 @@ private[finagle] object ClientBuilderClient {
     def make(
       totalTimeout: TimeoutFilter.TotalTimeout,
       timerParam: Timer,
+      stats: Stats,
       next: ServiceFactory[Req, Rep]
     ): ServiceFactory[Req, Rep] =
       TimeoutFilter.make(
         totalTimeout.tunableTimeout,
         TimeoutFilter.TotalTimeout.Default,
         TimeoutFilter.PropagateDeadlines.Default,
+        TimeoutFilter.PreferDeadlineOverTimeout.Default,
         Duration.Zero,
         timeout => new GlobalRequestTimeoutException(timeout),
         timerParam.timer,
+        stats.statsReceiver,
         next
       )
   }

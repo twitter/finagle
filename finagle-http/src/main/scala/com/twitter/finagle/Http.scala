@@ -7,18 +7,29 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.HttpServerDispatcher
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter._
-import com.twitter.finagle.http.param.{ClientKerberosConfiguration, ServerKerberosConfiguration}
+import com.twitter.finagle.http.param.ClientKerberosConfiguration
+import com.twitter.finagle.http.param.ServerKerberosConfiguration
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.Http2Listener
-import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4ServerStreamTransport}
+import com.twitter.finagle.netty4.http.Netty4HttpListener
+import com.twitter.finagle.netty4.http.Netty4ServerStreamTransport
 import com.twitter.finagle.param.StandardStats
 import com.twitter.finagle.server._
-import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
+import com.twitter.finagle.service.TimeoutFilter.PreferDeadlineOverTimeout
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.ssl.ApplicationProtocols
-import com.twitter.finagle.stats.{ExceptionStatsHandler, StandardStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.ExceptionStatsHandler
+import com.twitter.finagle.stats.StandardStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Duration, Future, FuturePool, Monitor, StorageUnit}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.FuturePool
+import com.twitter.util.Monitor
+import com.twitter.util.StorageUnit
 import java.net.SocketAddress
 import java.util.concurrent.ExecutorService
 
@@ -152,7 +163,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     private def params: Stack.Params =
       StackClient.defaultParams +
         protocolLibrary +
-        responseClassifierParam
+        responseClassifierParam +
+        PreferDeadlineOverTimeout(enabled = true)
   }
 
   case class Client(
@@ -399,7 +411,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       StandardStats(
         stats.StatsAndClassifier(
           StandardStatsReceiver(stats.Server, protocolLibrary.name),
-          HttpResponseClassifier.ServerErrorsAsFailures))
+          HttpResponseClassifier.ServerErrorsAsFailures)) +
+      PreferDeadlineOverTimeout(enabled = true)
   }
 
   case class Server(

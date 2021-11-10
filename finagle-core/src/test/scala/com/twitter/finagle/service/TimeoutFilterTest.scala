@@ -1,17 +1,26 @@
 package com.twitter.finagle.service
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.context.{Contexts, Deadline}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.service.TimeoutFilterTest.TunableTimeoutHelper
-import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.toggle.flag
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.BufferingTracer
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.SpanId
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.TraceId
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicReference
-import org.scalatestplus.mockito.MockitoSugar
-import scala.language.reflectiveCalls
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
+import scala.language.reflectiveCalls
 
 private object TimeoutFilterTest {
 
@@ -451,4 +460,101 @@ class TimeoutFilterTest extends AnyFunSuite with Matchers with MockitoSugar {
 
     assert(Await.result(propagationEnabledService("bar")) == true)
   }
+
+  private def toggleOnCtx(fn: => Unit): Unit = {
+    // condition:
+    // 1. service zone == atla
+    // 2. _traceId exist
+    // 3. toggled up
+    DeadlineOnlyToggle.setEnabledZone(true)
+
+    flag.overrides.let("com.twitter.finagle.service.DeadlineOnly", 1.0) {
+      val traceContext1 = TraceId(Some(SpanId(0xabc)), None, SpanId(0x123), None)
+      Trace.letId(traceContext1) {
+        fn
+      }
+    }
+  }
+
+  private def fakeTraceRecord(deadline: Deadline): Annotation.BinaryAnnotation = {
+    val deadlineRecord = s"timestamp:${deadline.timestamp}:deadline:${deadline.deadline}"
+    Annotation.BinaryAnnotation("finagle.deadline", s"deadline_enabled:$deadlineRecord")
+  }
+
+  test("only honor deadlines when DeadlineOnly toggled up") {
+    val h = new TimeoutFilterHelper
+    import h._
+
+    val sr = new InMemoryStatsReceiver()
+    // the 1.millis timeout should be suppressed by deadline
+    val timeoutFilterWithPreferDeadline =
+      new TimeoutFilter[String, String](() => 1.millisecond, _ => exception, timer, true, true, sr)
+    val deadline = Deadline.ofTimeout(2.seconds)
+    val tracer = new BufferingTracer
+
+    Trace.letTracer(tracer) {
+      toggleOnCtx {
+        Time.withCurrentTimeFrozen { tc =>
+          Contexts.broadcast.let(Deadline, deadline) {
+            val result = timeoutFilterWithPreferDeadline.andThen(service)("foo")
+            tc.advance(1.second)
+            timer.tick()
+            promise.setValue("done")
+            assert(Await.result(result, 2.seconds) == "done")
+          }
+
+          assert(sr.stat("current_deadline")().size == 1)
+          assert(sr.counter("deadline_only")() == 1)
+          assert(sr.counter("deadline_lt_timeout_experiment")() == 0)
+
+          assert(
+            tracer.toSeq == Seq(
+              Record(Trace.id, Time.now - 1.second, fakeTraceRecord(deadline), None)))
+        }
+      }
+    }
+  }
+
+  test("strict setting suppress permissive setting") {
+    val timer = new MockTimer
+    val service = new Service[String, String] {
+      def apply(request: String): Future[String] = Future.value("done")
+    }
+    val exceptionFn = { timeout: Duration =>
+      new IndividualRequestTimeoutException(timeout)
+    }
+
+    val sr = new InMemoryStatsReceiver()
+    val timeoutFilter =
+      new TimeoutFilter[String, String](() => 1.second, exceptionFn, timer, true, false, sr)
+    val deadline1 = Deadline.ofTimeout(2.seconds)
+    val deadline2 = Deadline.ofTimeout(50.millis)
+
+    val tracer = new BufferingTracer
+
+    Time.withCurrentTimeFrozen { _ =>
+      Trace.letTracer(tracer) {
+        val traceContext1 = TraceId(Some(SpanId(0xabc)), None, SpanId(0x123), None)
+        Trace.letId(traceContext1) {
+          Contexts.broadcast.let(Deadline, deadline1) {
+            assert(Await.result(timeoutFilter.andThen(service)("foo"), 2.seconds) == "done")
+          }
+
+          assert(sr.stat("current_deadline")().size == 1)
+          assert(sr.counter("deadline_only")() == 0)
+          assert(sr.counter("deadline_lt_timeout")() == 0)
+
+          Contexts.broadcast.let(Deadline, deadline2) {
+            assert(Await.result(timeoutFilter.andThen(service)("foo"), 2.seconds) == "done")
+          }
+
+          assert(sr.stat("current_deadline")().size == 2)
+          assert(sr.counter("deadline_only")() == 0)
+          assert(sr.counter("deadline_lt_timeout")() == 1)
+        }
+      }
+    }
+
+  }
+
 }

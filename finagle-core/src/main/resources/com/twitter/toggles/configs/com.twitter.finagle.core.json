@@ -4,6 +4,11 @@
       "id": "com.twitter.finagle.loadbalancer.WeightedAperture",
       "description": "Enable weight-aware aperture loadbalancers",
       "fraction": 0.0
+    },
+    {
+      "id": "com.twitter.finagle.service.DeadlineOnly",
+      "description": "Ignore the user configured timeouts, only respect the deadline propagation in ATLA",
+      "fraction": 0.0
     }
   ]
 }

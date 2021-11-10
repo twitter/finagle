@@ -1,16 +1,15 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{
-  ClientRegistry,
-  ExceptionRemoteInfoFactory,
-  StackBasedClient,
-  StackClient
-}
+import com.twitter.finagle.client.ClientRegistry
+import com.twitter.finagle.client.ExceptionRemoteInfoFactory
+import com.twitter.finagle.client.StackBasedClient
+import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.filter.{ClientExceptionTracingFilter => ExceptionTracingFilter}
+import com.twitter.finagle.mux.OpportunisticTlsParams
+import com.twitter.finagle.mux.WithCompressionPreferences
 import com.twitter.finagle.mux.transport.MuxFailure
-import com.twitter.finagle.mux.{OpportunisticTlsParams, WithCompressionPreferences}
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
@@ -19,27 +18,28 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
-import com.twitter.finagle.server.{BackupRequest, StackBasedServer, StackServer}
+import com.twitter.finagle.server.BackupRequest
+import com.twitter.finagle.server.StackBasedServer
+import com.twitter.finagle.server.StackServer
+import com.twitter.finagle.service.TimeoutFilter.PreferDeadlineOverTimeout
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.OpportunisticTls
-import com.twitter.finagle.stats.{
-  ClientStatsReceiver,
-  ExceptionStatsHandler,
-  ServerStatsReceiver,
-  StandardStatsReceiver,
-  StatsReceiver
-}
+import com.twitter.finagle.stats.ClientStatsReceiver
+import com.twitter.finagle.stats.ExceptionStatsHandler
+import com.twitter.finagle.stats.ServerStatsReceiver
+import com.twitter.finagle.stats.StandardStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift._
+import com.twitter.finagle.thrift.exp.partitioning.PartitioningParams
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
-import com.twitter.finagle.thrift.exp.partitioning.{
-  PartitioningParams,
-  ThriftPartitioningService,
-  WithThriftPartitioningStrategy
-}
-import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
+import com.twitter.finagle.thrift.exp.partitioning.WithThriftPartitioningStrategy
+import com.twitter.finagle.thrift.service.Filterable
+import com.twitter.finagle.thrift.service.ServicePerEndpointBuilder
 import com.twitter.finagle.thriftmux.pushsession.MuxDowngradingNegotiator
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
-import com.twitter.finagle.tracing.{TraceInitializerFilter, Tracer}
+import com.twitter.finagle.tracing.TraceInitializerFilter
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.io.Buf
 import com.twitter.scrooge.TReusableBuffer
 import com.twitter.util._
@@ -212,7 +212,7 @@ object ThriftMux
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       muxer.stack
 
-    def params: Stack.Params = muxer.params
+    def params: Stack.Params = muxer.params + PreferDeadlineOverTimeout(enabled = true)
 
     protected lazy val Label(defaultClientName) = params[Label]
 
@@ -581,7 +581,7 @@ object ThriftMux
       perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
-    def params: Stack.Params = muxer.params
+    def params: Stack.Params = muxer.params + PreferDeadlineOverTimeout(enabled = true)
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided

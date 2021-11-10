@@ -3,17 +3,22 @@ package com.twitter.finagle.thriftmux
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle._
-import com.twitter.finagle.mux.{Request, Response}
-import com.twitter.finagle.service.{ReqRep, ResponseClass}
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
+import com.twitter.finagle.service.ReqRep
+import com.twitter.finagle.service.ResponseClass
 import com.twitter.finagle.stats._
-import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestService}
+import com.twitter.finagle.thriftmux.thriftscala.InvalidQueryException
+import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.scrooge
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
-import java.net.{InetAddress, InetSocketAddress}
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import org.scalatest.concurrent.Eventually
 import scala.collection.JavaConverters._
 import org.scalatest.funsuite.AnyFunSuite

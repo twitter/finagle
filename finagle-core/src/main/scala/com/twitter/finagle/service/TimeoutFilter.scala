@@ -3,13 +3,38 @@ package com.twitter.finagle.service
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.client.LatencyCompensation
-import com.twitter.finagle.context.{Contexts, Deadline}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Deadline
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.server.ServerInfo
+import com.twitter.finagle.service.TimeoutFilter.DeadlineEnabledKey
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.Tracing
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Timer
 import com.twitter.util.tunable.Tunable
-import com.twitter.util.{Duration, Future, Timer}
+
+private[service] object DeadlineOnlyToggle {
+  private val enableToggle = CoreToggles("com.twitter.finagle.service.DeadlineOnly")
+  private var zoneEnabled = ServerInfo().zone.getOrElse("") == "atla"
+
+  //exposed for testing
+  def setEnabledZone(enabled: Boolean): Unit = zoneEnabled = enabled
+
+  def apply(trace: Tracing): Boolean = zoneEnabled && {
+    trace.idOption.flatMap(_._traceId) match {
+      case Some(spanId) => enableToggle(spanId.toLong.hashCode())
+      case None => false
+    }
+  }
+}
 
 object TimeoutFilter {
   val TimeoutAnnotation: String = "finagle.timeout"
+  private val DeadlineEnabledKey: String = "finagle.deadline"
 
   /**
    * Used for a per request timeout.
@@ -109,15 +134,30 @@ object TimeoutFilter {
   }
 
   /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.service.TimeoutFilter]] module that respects propagated deadline
+   * for request cancellation. The default behavior is respecting configured timeouts.
+   * @note this is for the toggle to apply to targeted protocols, eg: http/thriftmux
+   */
+  private[finagle] case class PreferDeadlineOverTimeout(enabled: Boolean)
+  private[finagle] object PreferDeadlineOverTimeout {
+    val Default: Boolean = false
+    implicit val param: Stack.Param[PreferDeadlineOverTimeout] =
+      Stack.Param(PreferDeadlineOverTimeout(Default))
+  }
+
+  /**
    * Used for adding, or not, a `TimeoutFilter` for `Stack.Module.make`.
    */
   private[finagle] def make[Req, Rep](
     tunable: Tunable[Duration],
     defaultTimeout: Duration,
     propagateDeadlines: Boolean,
+    preferDeadlineOverTimeout: Boolean,
     compensation: Duration,
     exceptionFn: Duration => RequestTimeoutException,
     timer: Timer,
+    statsReceiver: StatsReceiver,
     next: ServiceFactory[Req, Rep]
   ): ServiceFactory[Req, Rep] = {
     def hasNoTimeout(duration: Duration, compensation: Duration): Boolean = {
@@ -140,7 +180,9 @@ object TimeoutFilter {
           timeoutFn,
           exceptionFn,
           timer,
-          propagateDeadlines
+          propagateDeadlines,
+          preferDeadlineOverTimeout,
+          statsReceiver
         ).andThen(next)
     }
   }
@@ -150,11 +192,13 @@ object TimeoutFilter {
    * for use in clients.
    */
   def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module4[
+    new Stack.Module6[
       TimeoutFilter.Param,
       param.Timer,
       PropagateDeadlines,
+      PreferDeadlineOverTimeout,
       LatencyCompensation.Compensation,
+      param.Stats,
       ServiceFactory[Req, Rep]
     ] {
       val role: Stack.Role = TimeoutFilter.role
@@ -165,16 +209,20 @@ object TimeoutFilter {
         param: Param,
         timerParam: com.twitter.finagle.param.Timer,
         propagateDeadlines: PropagateDeadlines,
+        preferDeadlineOverTimeout: PreferDeadlineOverTimeout,
         compensation: LatencyCompensation.Compensation,
+        stats: Stats,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] =
         TimeoutFilter.make(
           param.tunableTimeout,
           TimeoutFilter.Param.Default,
           propagateDeadlines.enabled,
+          preferDeadlineOverTimeout.enabled,
           compensation.howlong,
           timeout => new IndividualRequestTimeoutException(timeout),
           timerParam.timer,
+          stats.statsReceiver,
           next
         )
     }
@@ -184,22 +232,32 @@ object TimeoutFilter {
    * for use in servers.
    */
   def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module2[TimeoutFilter.Param, param.Timer, ServiceFactory[Req, Rep]] {
+    new Stack.Module4[
+      TimeoutFilter.Param,
+      param.Timer,
+      PreferDeadlineOverTimeout,
+      param.Stats,
+      ServiceFactory[Req, Rep]
+    ] {
       val role: Stack.Role = TimeoutFilter.role
       val description: String =
         "Apply a timeout-derived deadline to requests; adjust existing deadlines."
       def make(
         param: Param,
         timerParam: com.twitter.finagle.param.Timer,
+        preferDeadlineOverTimeout: PreferDeadlineOverTimeout,
+        stats: Stats,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] =
         TimeoutFilter.make(
           param.tunableTimeout,
           TimeoutFilter.Param.Default,
           PropagateDeadlines.Default,
+          preferDeadlineOverTimeout.enabled,
           Duration.Zero,
           timeout => new IndividualRequestTimeoutException(timeout),
           timerParam.timer,
+          stats.statsReceiver,
           next
         )
     }
@@ -227,10 +285,16 @@ object TimeoutFilter {
   private[twitter] def typeAgnostic(
     timeoutFn: () => Duration,
     exceptionFn: Duration => RequestTimeoutException,
-    timer: Timer
+    timer: Timer,
+    preferDeadlineOverTimeout: Boolean = false
   ): TypeAgnostic = new TypeAgnostic {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-      new TimeoutFilter[Req, Rep](timeoutFn, exceptionFn, timer, PropagateDeadlines.Default)
+      new TimeoutFilter[Req, Rep](
+        timeoutFn,
+        exceptionFn,
+        timer,
+        PropagateDeadlines.Default,
+        preferDeadlineOverTimeout)
   }
 
 }
@@ -254,7 +318,9 @@ class TimeoutFilter[Req, Rep](
   timeoutFn: () => Duration,
   exceptionFn: Duration => RequestTimeoutException,
   timer: Timer,
-  propagateDeadlines: Boolean)
+  propagateDeadlines: Boolean,
+  preferDeadlineOverTimeout: Boolean = false,
+  statsReceiver: StatsReceiver = NullStatsReceiver)
     extends SimpleFilter[Req, Rep] {
 
   def this(
@@ -262,7 +328,12 @@ class TimeoutFilter[Req, Rep](
     exceptionFn: Duration => RequestTimeoutException,
     timer: Timer
   ) =
-    this(timeoutFn, exceptionFn, timer, TimeoutFilter.PropagateDeadlines.Default)
+    this(
+      timeoutFn,
+      exceptionFn,
+      timer,
+      TimeoutFilter.PropagateDeadlines.Default,
+      TimeoutFilter.PreferDeadlineOverTimeout.Default)
 
   def this(
     timeout: Tunable[Duration],
@@ -273,7 +344,8 @@ class TimeoutFilter[Req, Rep](
       () => timeout().getOrElse(TimeoutFilter.Param.Default),
       exceptionFn,
       timer,
-      TimeoutFilter.PropagateDeadlines.Default
+      TimeoutFilter.PropagateDeadlines.Default,
+      TimeoutFilter.PreferDeadlineOverTimeout.Default
     )
 
   def this(timeout: Duration, exception: RequestTimeoutException, timer: Timer) =
@@ -282,24 +354,66 @@ class TimeoutFilter[Req, Rep](
   def this(timeout: Duration, timer: Timer) =
     this(timeout, new IndividualRequestTimeoutException(timeout), timer)
 
+  private[this] val deadlineStat = statsReceiver.stat(
+    Some("A histogram of propagated deadlines of requests in milliseconds"),
+    "current_deadline")
+  private[this] val inExperimentDeadlineCounter =
+    statsReceiver.counter(Some("A counter of requests that enabled deadlineOnly"), "deadline_only")
+  private[this] val inExperimentDeadlineLtTimeout = statsReceiver.counter(
+    Some("Indicates that deadline is stricter than timeout for requests in experiment"),
+    "deadline_lt_timeout_experiment")
+  private[this] val deadlineLtTimeout = statsReceiver.counter(
+    Some("Indicates that deadline is stricter than timeout"),
+    "deadline_lt_timeout")
+
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val timeout = timeoutFn()
     val timeoutDeadline = Deadline.ofTimeout(timeout)
+    var trace: Tracing = null
+    val deadlineOnly = preferDeadlineOverTimeout && {
+      trace = Trace()
+      DeadlineOnlyToggle(trace)
+    }
 
     if (propagateDeadlines) {
-      // If there's a current deadline, we combine it with the one derived from our timeout.
       val deadline = Deadline.current match {
-        case Some(current) => Deadline.combined(timeoutDeadline, current)
+        case Some(current) => determineExperiment(trace, deadlineOnly, timeoutDeadline, current)
         case None => timeoutDeadline
       }
-
+      val finalTimeout = if (deadlineOnly) deadline.remaining else timeout
       Contexts.broadcast.let(Deadline, deadline) {
-        applyTimeout(request, service, timeout)
+        applyTimeout(request, service, finalTimeout)
       }
     } else {
       Contexts.broadcast.letClear(Deadline) {
         applyTimeout(request, service, timeout)
       }
+    }
+  }
+
+  // count requests in experiments, record deadline in trace
+  // count when deadline is stricter in and out experiment
+  private[this] def determineExperiment(
+    trace: Tracing,
+    deadlineOnly: Boolean,
+    timeoutDeadline: Deadline,
+    current: Deadline
+  ): Deadline = {
+    val combined = Deadline.combined(timeoutDeadline, current)
+    deadlineStat.add(current.remaining.inMilliseconds)
+    if (deadlineOnly) {
+      inExperimentDeadlineCounter.incr()
+      if (combined == current) inExperimentDeadlineLtTimeout.incr()
+      if (trace.isActivelyTracing) {
+        val deadlineRecord = s"timestamp:${current.timestamp}:deadline:${current.deadline}"
+        trace.recordBinary(DeadlineEnabledKey, s"deadline_enabled:$deadlineRecord")
+      }
+      current
+    } else if (combined == current) {
+      deadlineLtTimeout.incr()
+      combined
+    } else {
+      combined
     }
   }
 
@@ -320,5 +434,4 @@ class TimeoutFilter[Req, Rep](
       }
     }
   }
-
 }

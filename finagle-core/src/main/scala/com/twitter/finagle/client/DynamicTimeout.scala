@@ -147,7 +147,8 @@ object DynamicTimeout {
     val timer = params[param.Timer].timer
     val timeoutFunc = timeoutFn(TotalKey, tunableTimeout, defaultTimeout, compensation)
     val exceptionFn = { d: Duration => new GlobalRequestTimeoutException(d) }
-    TimeoutFilter.typeAgnostic(timeoutFunc, exceptionFn, timer)
+    val preferDeadlineOverTimeout = params[TimeoutFilter.PreferDeadlineOverTimeout].enabled
+    TimeoutFilter.typeAgnostic(timeoutFunc, exceptionFn, timer, preferDeadlineOverTimeout)
   }
 
 }
