@@ -37,10 +37,7 @@ junit_tests(
     ],
     compiler_option_sets = ["fatal_warnings"],
     # env_local is tag for bazel only, added due to DPB-14188
-    tags = [
-        "bazel-compatible",
-        "known-to-fail-jira:CSL-11462",
-    ],
+    tags = ["bazel-compatible"],
     dependencies = [
         ":pushsession-utils",
         ":stringprotocol",

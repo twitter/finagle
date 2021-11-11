@@ -8,6 +8,7 @@ import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service.TimeoutFilter.DeadlineEnabledKey
+import com.twitter.finagle.stats.Counter
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Trace
@@ -403,17 +404,25 @@ class TimeoutFilter[Req, Rep](
     deadlineStat.add(current.remaining.inMilliseconds)
     if (deadlineOnly) {
       inExperimentDeadlineCounter.incr()
-      if (combined == current) inExperimentDeadlineLtTimeout.incr()
+      deadlineCompareTimeout(combined, current, inExperimentDeadlineLtTimeout)
       if (trace.isActivelyTracing) {
         val deadlineRecord = s"timestamp:${current.timestamp}:deadline:${current.deadline}"
         trace.recordBinary(DeadlineEnabledKey, s"deadline_enabled:$deadlineRecord")
       }
       current
-    } else if (combined == current) {
-      deadlineLtTimeout.incr()
-      combined
     } else {
+      deadlineCompareTimeout(combined, current, deadlineLtTimeout)
       combined
+    }
+  }
+
+  private[this] def deadlineCompareTimeout(
+    combined: Deadline,
+    deadline: Deadline,
+    deadlineLtTimeoutCounter: Counter
+  ): Unit = {
+    if (combined.compare(deadline) == 0) {
+      deadlineLtTimeoutCounter.incr()
     }
   }
 
