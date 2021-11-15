@@ -8,6 +8,7 @@ owners:
   - mnakamura
   - roanta
   - vkostyukov
+  - yufang
 watchers:
   - csl-team:ldap
   - cache-team@twitter.com

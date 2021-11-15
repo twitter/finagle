@@ -1,10 +1,12 @@
 # See go/project-docs. Generated using ./pants run src/python/twitter/phabricator:owners_to_project -- --dirs=a/owned/path,b/owned/path
 
 owners:
+  - banderson
   - koliver
   - mnakamura
   - roanta
   - sniemitz
   - vkostyukov
+  - yufang
 watchers:
   - csl-team:ldap
