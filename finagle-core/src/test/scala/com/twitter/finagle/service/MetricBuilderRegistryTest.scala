@@ -3,6 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.finagle.Service
 import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.acRejectName
 import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.deadlineRejectName
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.failuresName
 import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.latencyName
 import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.successRateName
 import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.throughputName
@@ -70,13 +71,15 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
       mbr.latencyP99
       mbr.deadlineRejection
       mbr.acRejection
+      mbr.failures
 
-      assert(sr.expressions.size == 5)
+      assert(sr.expressions.size == 6)
       assert(sr.expressions.contains(nameToKey(successRateName)))
       assert(sr.expressions.contains(nameToKey(throughputName)))
       assert(sr.expressions.contains(nameToKey(latencyName, Map("bucket" -> "p99"))))
       assert(sr.expressions.contains(nameToKey(deadlineRejectName)))
       assert(sr.expressions.contains(nameToKey(acRejectName)))
+      assert(sr.expressions.contains(nameToKey(failuresName)))
     }
   }
 

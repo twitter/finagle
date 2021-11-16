@@ -2,19 +2,15 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.service.MetricBuilderRegistry.{
-  FailureCounter,
-  LatencyP99Histogram,
-  RequestCounter,
-  SuccessCounter
-}
-import com.twitter.finagle.service.StatsFilter.Descriptions.{
-  dispatch,
-  failures,
-  latency,
-  pending,
-  success
-}
+import com.twitter.finagle.service.MetricBuilderRegistry.FailureCounter
+import com.twitter.finagle.service.MetricBuilderRegistry.LatencyP99Histogram
+import com.twitter.finagle.service.MetricBuilderRegistry.RequestCounter
+import com.twitter.finagle.service.MetricBuilderRegistry.SuccessCounter
+import com.twitter.finagle.service.StatsFilter.Descriptions.dispatch
+import com.twitter.finagle.service.StatsFilter.Descriptions.failures
+import com.twitter.finagle.service.StatsFilter.Descriptions.latency
+import com.twitter.finagle.service.StatsFilter.Descriptions.pending
+import com.twitter.finagle.service.StatsFilter.Descriptions.success
 import com.twitter.finagle.service.StatsFilter.RPCMetrics
 import com.twitter.finagle.stats._
 import com.twitter.util._
@@ -340,6 +336,7 @@ class StatsFilter[Req, Rep] private[service] (
     registry.latencyP99
     registry.throughput
     registry.acRejection
+    registry.failures
   }
 
   private[this] def isIgnorableResponse(rep: Try[Rep]): Boolean = rep match {

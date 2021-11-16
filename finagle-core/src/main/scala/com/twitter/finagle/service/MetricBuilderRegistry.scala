@@ -18,6 +18,7 @@ private[twitter] object MetricBuilderRegistry {
     val latencyName = "latency"
     val deadlineRejectName = "deadline_rejection_rate"
     val acRejectName = "throttling_ac_rejection_rate"
+    val failuresName = "failures"
   }
 
   private val descriptionSuffix = "constructed by MetricBuilderRegistry"
@@ -133,6 +134,17 @@ private[twitter] class MetricBuilderRegistry {
           .withDescription(s"Admission Control rejection rate $descriptionSuffix.")
           .build()
       case _ => // no-op
+    }
+  }
+
+  lazy val failures: Unit = {
+    failureCounter.get().toMetricBuilder match {
+      case Some(failures) =>
+        ExpressionSchema(failuresName, Expression(failures, true))
+          .withUnit(Requests)
+          .withDescription(s"All failures $descriptionSuffix")
+          .build()
+      case None => //no-op
     }
   }
 
