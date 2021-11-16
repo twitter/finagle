@@ -65,6 +65,167 @@ Java:
       func0(() -> someIO());
     );
 
+Synchronized work
+-----------------
+
+Synchronization is different from synchronous behavior. Synchronous 
+calls wait on some work to complete before executing the next statement 
+within the same thread. Synchronized sections, in contrast, allow one
+thread to execute statements and block all other callers until the
+initial thread is finished with the enclosed statements.
+
+An example that could fail without synchronization would be:
+
+.. code-block:: scala
+
+  def incrementAndReturn(): Integer = {
+        counter += 1;
+        counter
+  }
+ 
+If two threads are executing the `incrementAndReturn` function concurrently
+on the same object, it is possible that both execute the statement `counter += 1`
+before either executes the return statement. If that happens, both threads would
+get the same value (e.g. if `counter` was 45 before either thread ran, 47 would
+be returned to both threads).
+
+A simple way to guarantee that each thread sees a unique counter value without
+skipping would be to enclose the critical statements in a synchonized block.
+Syntactially it looks like this:
+
+.. code-block:: scala
+
+  def incrementAndReturn(): Integer = {
+      this.synchronized {
+        counter += 1;
+        counter
+      }
+  }
+
+Scoping synchronization
+-----------------------
+
+In the previous section a simple introduction and example were given for
+synchronization wherein multiple threads have a handle to an object and
+can experience unexpected behavior when executing concurrently. The simple
+remedy was to add a `synchronized` block on the `this` object within
+the function body. What does that mean though?
+
+The syntax for creating a synchronized block requires the user to define a lock
+object which grants access to the block that follows. Only one thread at a time
+can be in control of a lock object. In the example the `this` object was the
+lock, meaning that within the class anywhere a `this.synchronized {...}` block
+occurs, it is tied to the same object, `this`. For example:
+
+.. code-block:: scala
+
+  def incrementAndReturn(): Integer = {
+      this.synchronized {
+        counter += 1;
+        counter
+      }
+  }
+
+  def decrementAndReturn(): Integer = {
+      this.synchronized {
+        counter -= 1;
+        counter
+      }
+  }
+
+Both functions above are now gated on the same object, `this`, so not only
+will multiple threads with the same object handle serially execute
+`incrementAndReturn`, they will also be waiting in line for `this` when calling
+`decrementAndReturn`.
+
+Other methods within the class could be free to execute without waiting by
+omitting the synchronized block
+
+.. code-block:: scala
+
+  def incrementAndReturn(): Integer = {
+      this.synchronized {
+        counter += 1;
+        counter
+      }
+  }
+
+  def decrementAndReturn(): Integer = {
+      this.synchronized {
+        counter -= 1;
+        counter
+      }
+  }
+
+  def readCounter(): Integer = {
+    counter
+  }
+
+Here, any thread may call `readCounter` without waiting to control `this`.
+
+Furthermore, it may be useful for readability and segmenting logic to define
+objects whose only purpose is as a synchronization lock rather than blocking
+at the granularity of the whole instance. For example:
+
+.. code-block:: scala
+
+  private[this] var counter: Integer = 0
+  private[this] val lock: Object = counter
+
+  def incrementAndReturn(): Integer = {
+      lock.synchronized {
+        counter += 1;
+        counter
+      }
+  }
+
+  def decrementAndReturn(): Integer = {
+      lock.synchronized {
+        counter -= 1;
+        counter
+      }
+  }
+
+  def readCounter(): Integer = {
+    counter
+  }
+
+This gives us flexibility as we evolve the class to discover new operations
+that need synchronization that can be covered under the umbrella of the `lock`
+object. At the moment, the `lock` object is synonymous with the counter itself,
+but we may discover some other useful member to use as the `lock` in the future,
+or have separate locks for different sets of entangled state.
+
+Synchronization risks
+-----------------------
+
+Synchronzation is a very useful language feature to define critical sections
+and let the runtime manage blocking, scheduling, and handing off control
+between threads. It can be a very efficient technique to ensure predictable
+mutation of internal state (like 'counter' above) or other simple actions.
+
+However, synchronization can also expose a developer to a new class of bugs
+wherein threads are indefinitely waiting on a data change or on acquiring
+the lock object. Two common types of locking problems are livelocks and deadlocks.
+
+A livelock occurs when threads are alive, but the code is waiting for some data
+change in order to proceed. The system will wake up a thread, the thread checks
+if the data is in the correct state, and then goes back to sleep when it sees no
+changes have occurred. If the responsible process or thread is unable to make its
+update, the system is in livelock.
+
+A deadlock occurs when two or more threads are mutually blocked/halted on a
+statement that is synchronized on a lock object held by the other thread. For
+example, imagine a process exists where a thread acquires exclusive access to a
+Person, then queries the system for their siblings in order to update them
+together. If two threads are each tasked with doing this work for a pair of
+siblings, a deadlock can occur. Thread A acquires the lock for Person A. Thread B
+acquires the lock for Person B, sibling to Person A. Each now wishes to query
+and lock the siblings of their person. Thread A will be waiting for Thread B to
+be "finished" with Person B, and Thread B is likewise waiting for Thread A to be
+"finished" with Person A. Deadlock. A detailed example of a deadlock_ will follow
+below.
+
 Futures as containers
 ---------------------
 
@@ -196,6 +357,132 @@ It is also simple to write your own combinators that operate over
 Futures. This is quite useful, and gives rise to a great amount of
 modularity in distributed systems as common patterns can be cleanly
 abstracted.
+
+Synchronization within composition
+----------------------------------
+
+.. _deadlock:
+
+As teased above, synchronization can introduce a new class of bugs in
+a concurrent environment. A real world example of a deadlock can be found here:
+`https://github.com/twitter/util/commit/b3b6... <https://github.com/twitter/util/commit/b3b66cf8df6dd5fb4d97131b110150d5403dfb68>`__
+
+Before the patch, the methods `fail(..)`, `release()`, and the interrupt handler
+are all synchronized on `this` while completing a Promise. This can result in
+deadlocks if we have two threads interacting with two separate AsyncSemaphores.
+Here is a toy example that sets up cross-semaphore interaction. It will look a
+bit too obviously-broken to really happen, but isolates the misbehavior that could
+reasonably happen by accident:
+
+.. code-block:: scala
+
+  val semaphore1, semaphore2 = new AsyncSemaphore(1)
+  // The semaphores have already been taken:
+  val permitForSemaphore1 = await(semaphore1.acquire())
+  val permitForSemaphore2 = await(semaphore2.acquire())
+
+  // The semaphores have had continuations attached as follows:
+  semaphore1.acquire().flatMap { permit =>
+    val otherWaiters = semaphore2.numWaiters // synchronizing method
+    permit.release()
+    otherWaiters
+  }
+
+  semaphore2.acquire().flatMap { permit =>
+    val otherWaiters = semaphore1.numWaiters // synchronizing method
+    permit.release()
+    otherWaiters
+  }
+
+Now we can trigger a deadlock.
+
+.. code-block:: scala
+
+  val threadOne = new Thread {
+    override def run() {
+      permitForSemaphore1.release()
+    }
+  }
+
+  val threadTwo = new Thread {
+    override def run() {
+      permitForSemaphore2.release()
+    }
+  }
+
+  threadOne.start
+  threadTwo.start
+
+In this situation threadOne and threadTwo may potentially deadlock. It isn’t
+obvious from the `release()` calls that this is possible. The reason is the
+`acquire()` method returns a Promise and we’ve loaded continuations on them.
+When the threads call the `Permit.release()` method the AsyncSemaphore
+implementation synchronizes on the lock object (this), and gives the permit to the
+next waiting Promise before exiting the synchronized block. That executes the
+continuation which calls a method on the other AsyncSemaphore which attempts to
+synchronize. This is akin to the descriptive siblings program example above. The
+instances `semaphore1` and `semaphore2` aggressively locks their AsyncSemaphore
+then block until they can acquire the lock on the other semaphore.
+
+The resolution is presented in the patch linked above, but presented here is a
+succinct description of the resolution. Promises provide some methods which, used
+together, are similar to `compareAndSet` semantics (a well known, safe pattern).
+The new structure of the `release()` method on the Permit:
+
+.. code-block:: scala
+
+  // old implementation
+  // def release(): Unit = self.synchronized {
+  //  val next = waitq.pollFirst()
+  //  if (next != null) next.setValue(this) // <- nogo: still synchronized
+  //  else availablePermits += 1
+  // }
+
+  // new implementation
+
+  // Here we define a specific lock object, rather than use the `self` of `this`
+  // reference. It is synonymous with the internal Queue as that is what is
+  // driving our need for synchronization, but using this special-purpose reference
+  // gives us an opportunity in the future to refactor more easily.
+  private[this] final def lock: Object = waitq
+
+  @tailrec def release(): Unit = {
+  // we pass the Promise outside of the lock
+  val waiter = lock.synchronized {
+    val next = waitq.pollFirst()
+    if (next == null) {
+      availablePermits += 1
+    }
+    next
+  }
+
+  if (waiter != null) {
+    // since we are no longer synchronized with the interrupt handler
+    // we leverage the atomic state of the Promise to do the right
+    // thing if we race.
+    if (!waiter.updateIfEmpty(Return(this))) {
+      release()
+    }
+  }
+  
+The new implementation is more complex and no longer synchronizes on the interrupt
+handler. This exposes the developer to a new consideration; any race between
+interrupting the Promise and giving it the Permit.
+
+Using synchronization and Promises together requires a significant amount of care
+ensure a program is not at risk of deadlock. Some low risk uses of synchronization are:
+
+* Mutate or access a field.
+
+* Push or pop an element from a private ArrayDeque.
+
+Some examples of risky actions to take in a synchronized block are:
+
+* Calling a function injected by a caller; the function could block, acquire locks of its own, compute pi to a billion digits, etc.
+
+* Calling methods on a trait of unknown origin: this is essentially the same thing as calling a user-injected function.
+
+* Completing a Promise: an example above with dangerous continuations.
 
 .. _future_failure:
 
