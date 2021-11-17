@@ -2,8 +2,10 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.{Status => CoreStatus}
 import com.twitter.finagle.http.codec.Http1ConnectionManager
-import com.twitter.finagle.http.exp.{Multi, StreamTransport, StreamTransportProxy}
-import com.twitter.util.{Future, Promise, Return, Try}
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Try
 import scala.util.control.NonFatal
 
 /**

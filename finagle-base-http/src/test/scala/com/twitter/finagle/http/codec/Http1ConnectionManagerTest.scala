@@ -1,13 +1,17 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.exp.IdentityStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Future, Promise, Return, Time}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Time
 import org.mockito.Matchers._
 import org.mockito.Mockito
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls

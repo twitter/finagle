@@ -3,17 +3,22 @@ package com.twitter.finagle.integration
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
-import com.twitter.finagle.pushsession.{PipeliningClientPushSession, PushChannelHandle}
+import com.twitter.finagle.pushsession.PipeliningClientPushSession
+import com.twitter.finagle.pushsession.PushChannelHandle
 import com.twitter.finagle.http
 import com.twitter.finagle.memcached.{protocol => memcached}
 import com.twitter.finagle.http.codec.HttpClientDispatcher
-import com.twitter.finagle.http.exp.IdentityStreamTransport
+import com.twitter.finagle.http.IdentityStreamTransport
 import com.twitter.finagle.liveness.FailureDetector
-import com.twitter.finagle.mux.pushsession.{MessageWriter, MuxMessageDecoder}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.transport.{QueueTransport, Transport}
+import com.twitter.finagle.mux.pushsession.MessageWriter
+import com.twitter.finagle.mux.pushsession.MuxMessageDecoder
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.{Buf, ByteReader}
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
 import com.twitter.util._
 import com.twitter.conversions.DurationOps._
 import org.mockito.Mockito.when

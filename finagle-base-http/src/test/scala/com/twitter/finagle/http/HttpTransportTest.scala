@@ -3,11 +3,15 @@ package com.twitter.finagle.http
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.codec.Http1ConnectionManager
-import com.twitter.finagle.http.exp.{IdentityStreamTransport, Multi, StreamTransportProxy}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Status => CoreStatus}
-import com.twitter.io.{Buf, Pipe}
-import com.twitter.util.{Await, Future, Promise, Throw, Time}
+import com.twitter.io.Buf
+import com.twitter.io.Pipe
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Throw
+import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
 class HttpTransportTest extends AnyFunSuite {

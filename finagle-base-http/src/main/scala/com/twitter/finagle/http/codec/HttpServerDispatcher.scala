@@ -2,10 +2,12 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.exp.{GenStreamingSerialServerDispatcher, StreamTransport}
-import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.stats.CategorizingExceptionStatsHandler
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.finagle.http.GenStreamingSerialServerDispatcher
 
 private[http] object HttpServerDispatcher {
   val handleHttp10: PartialFunction[Throwable, Response] = {

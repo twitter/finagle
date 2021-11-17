@@ -5,7 +5,7 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.HttpServerDispatcher
-import com.twitter.finagle.http.exp.StreamTransport
+import com.twitter.finagle.http.StreamTransport
 import com.twitter.finagle.http.filter._
 import com.twitter.finagle.http.param.ClientKerberosConfiguration
 import com.twitter.finagle.http.param.ServerKerberosConfiguration

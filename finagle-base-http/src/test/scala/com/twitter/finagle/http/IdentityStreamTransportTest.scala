@@ -1,9 +1,10 @@
-package com.twitter.finagle.http.exp
+package com.twitter.finagle.http
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.util.{Await, Future}
+import com.twitter.util.Await
+import com.twitter.util.Future
 import org.scalatest.funsuite.AnyFunSuite
 
 class IdentityStreamTransportTest extends AnyFunSuite {

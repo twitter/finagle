@@ -1,10 +1,13 @@
-package com.twitter.finagle.http.exp
+package com.twitter.finagle.http
 
-import com.twitter.finagle.{CancelledRequestException, Failure}
-import com.twitter.finagle.context.{Contexts, RemoteInfo}
+import com.twitter.finagle.CancelledRequestException
+import com.twitter.finagle.Failure
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.logging.{Level, Logger}
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 
@@ -137,10 +140,10 @@ private[finagle] abstract class GenStreamingSerialServerDispatcher[Req, Rep, In,
   }
 
   /** Exposed for testing */
-  protected[exp] def isClosing: Boolean = state.get() == Closing
+  protected[http] def isClosing: Boolean = state.get() == Closing
 
   /** Exposed for testing */
-  private[exp] def timer: Timer = DefaultTimer
+  private[http] def timer: Timer = DefaultTimer
 
   // Note: this is racy, but that's inherent in draining (without
   // protocol support). Presumably, half-closing a TCP connection is

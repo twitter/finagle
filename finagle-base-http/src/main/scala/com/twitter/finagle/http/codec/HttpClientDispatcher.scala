@@ -1,11 +1,16 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.exp.{Multi, StreamTransport}
-import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.http.Multi
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.StreamTransport
+import com.twitter.finagle.stats.CategorizingExceptionStatsHandler
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
 
 private[finagle] object HttpClientDispatcher {
   private[this] val logger = Logger.get(getClass())

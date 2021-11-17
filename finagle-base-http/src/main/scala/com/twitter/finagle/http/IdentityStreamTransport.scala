@@ -1,4 +1,4 @@
-package com.twitter.finagle.http.exp
+package com.twitter.finagle.http
 
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future

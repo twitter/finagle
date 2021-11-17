@@ -2,23 +2,34 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Service, Status}
-import com.twitter.finagle.http.{Fields, Request, Response, Version, Status => HttpStatus}
-import com.twitter.finagle.http.exp.StreamTransport
-import com.twitter.finagle.netty4.http.{Bijections, Netty4ServerStreamTransport}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.io.{Buf, Reader, ReaderDiscardedException}
-import com.twitter.util.{Await, Awaitable, Future, Promise}
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
+import com.twitter.finagle.http.Fields
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.Version
+import com.twitter.finagle.http.{Status => HttpStatus}
+import com.twitter.finagle.http.StreamTransport
+import com.twitter.finagle.netty4.http.Bijections
+import com.twitter.finagle.netty4.http.Netty4ServerStreamTransport
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.transport.Transport
+import com.twitter.io.Buf
+import com.twitter.io.Reader
+import com.twitter.io.ReaderDiscardedException
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
+import com.twitter.util.Promise
 import io.netty.buffer.Unpooled
-import io.netty.handler.codec.http.{
-  DefaultHttpContent,
-  HttpContent,
-  HttpRequest,
-  HttpResponse,
-  HttpResponseStatus,
-  LastHttpContent
-}
+import io.netty.handler.codec.http.DefaultHttpContent
+import io.netty.handler.codec.http.HttpContent
+import io.netty.handler.codec.http.HttpRequest
+import io.netty.handler.codec.http.HttpResponse
+import io.netty.handler.codec.http.HttpResponseStatus
+import io.netty.handler.codec.http.LastHttpContent
 import java.nio.charset.StandardCharsets
 import org.scalatest.funsuite.AnyFunSuite
 

@@ -2,10 +2,12 @@ package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Pipe, Reader, ReaderDiscardedException, StreamTermination}
+import com.twitter.io.Pipe
+import com.twitter.io.Reader
+import com.twitter.io.ReaderDiscardedException
+import com.twitter.io.StreamTermination
 import com.twitter.util._
 import io.netty.handler.codec.http._
 import java.net.InetSocketAddress

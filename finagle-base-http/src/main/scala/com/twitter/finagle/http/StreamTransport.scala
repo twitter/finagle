@@ -1,8 +1,8 @@
-package com.twitter.finagle.http.exp
+package com.twitter.finagle.http
 
-import com.twitter.finagle.Status
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Time}
+import com.twitter.util.Future
+import com.twitter.util.Time
 
 /**
  * A multi-part object with a single read handle, and a future that is satisfied
@@ -37,7 +37,7 @@ private[finagle] abstract class StreamTransportProxy[In, Out](val self: Transpor
     extends StreamTransport[In, Out] {
   type Context = self.Context
 
-  def status: Status = self.status
+  def status: com.twitter.finagle.Status = self.status
   val onClose: Future[Throwable] = self.onClose
   def close(deadline: Time): Future[Unit] = self.close(deadline)
   def context: Context = self.context

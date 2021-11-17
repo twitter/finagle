@@ -3,8 +3,12 @@ package com.twitter.finagle.http2.transport.client
 import com.twitter.finagle.Status
 import com.twitter.finagle.Status.Closed
 import com.twitter.finagle.http.Message
-import com.twitter.finagle.http.exp.{Multi, StreamTransport, StreamTransportProxy}
-import com.twitter.util.{Future, Return, Try}
+import com.twitter.finagle.http.Multi
+import com.twitter.finagle.http.StreamTransport
+import com.twitter.finagle.http.StreamTransportProxy
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Try
 import scala.util.control.NonFatal
 
 /**

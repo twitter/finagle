@@ -4,10 +4,17 @@ import org.mockito.Mockito._
 import org.mockito.Matchers._
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Status
-import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.exp.{Multi, StreamTransport}
+import com.twitter.finagle.http.Multi
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.StreamTransport
 import com.twitter.finagle.http2.transport.client.Http2Transport
-import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Time
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.OneInstancePerTest
 import org.scalatest.funsuite.AnyFunSuite

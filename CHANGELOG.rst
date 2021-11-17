@@ -7,6 +7,10 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+* finagle-base-http: Promote several classes out of `exp` experimental package:
+  `c.t.f.http.{GenStreamingSerialServerDispatcher, IdentityStreamTransport, StreamTransport}` along
+  with internal support classes. ``PHAB_ID=D782933``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

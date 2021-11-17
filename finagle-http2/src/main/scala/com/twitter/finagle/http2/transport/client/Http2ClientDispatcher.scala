@@ -2,10 +2,13 @@ package com.twitter.finagle.http2.transport.client
 
 import com.twitter.finagle.dispatch.ClientDispatcher
 import com.twitter.finagle.http.codec.HttpClientDispatcher
-import com.twitter.finagle.http.exp.{Multi, StreamTransport}
-import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http.Multi
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.StreamTransport
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.Future
+import com.twitter.util.Promise
 
 /**
  * Client dispatcher for HTTP/2.
