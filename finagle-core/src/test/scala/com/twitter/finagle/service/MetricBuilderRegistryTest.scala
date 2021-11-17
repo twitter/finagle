@@ -10,16 +10,18 @@ import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.through
 import com.twitter.finagle.service.MetricBuilderRegistry._
 import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.HistogramType
-import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.Metadata
 import com.twitter.finagle.stats.MetricBuilder
+import com.twitter.util.testing.ExpressionTestMixin
 import com.twitter.util.Future
 import org.scalatest.funsuite.AnyFunSuite
 
-class MetricBuilderRegistryTest extends AnyFunSuite {
+class MetricBuilderRegistryTest extends AnyFunSuite with ExpressionTestMixin {
+  val sr = new InMemoryStatsReceiver
+  val downstreamLabel = Map()
+
   class Ctx {
-    val sr = new InMemoryStatsReceiver
     val svc = Service.mk { _: String => Future.value("hi") }
     val metricBuilders = Map[MetricName, Metadata](
       DeadlineRejectedCounter -> MetricBuilder(
@@ -49,12 +51,6 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
     )
   }
 
-  private[this] def nameToKey(
-    name: String,
-    labels: Map[String, String] = Map()
-  ): ExpressionSchemaKey =
-    ExpressionSchemaKey(name, labels, Seq())
-
   test("Expression Factory generates all expressions when metrics are injected") {
     new Ctx {
       val mbr = new MetricBuilderRegistry()
@@ -74,12 +70,12 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
       mbr.failures
 
       assert(sr.expressions.size == 6)
-      assert(sr.expressions.contains(nameToKey(successRateName)))
-      assert(sr.expressions.contains(nameToKey(throughputName)))
-      assert(sr.expressions.contains(nameToKey(latencyName, Map("bucket" -> "p99"))))
-      assert(sr.expressions.contains(nameToKey(deadlineRejectName)))
-      assert(sr.expressions.contains(nameToKey(acRejectName)))
-      assert(sr.expressions.contains(nameToKey(failuresName)))
+      assertExpressionIsRegistered(successRateName)
+      assertExpressionIsRegistered(throughputName)
+      assertExpressionIsRegistered(latencyName, Map("bucket" -> "p99"))
+      assertExpressionIsRegistered(deadlineRejectName)
+      assertExpressionIsRegistered(acRejectName)
+      assertExpressionIsRegistered(failuresName)
     }
   }
 
@@ -92,6 +88,8 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
           mbr.setMetricBuilder(name, metricBuilder)
       }
 
+      assert(sr.expressions.isEmpty)
+
       mbr.successRate
       mbr.throughput
       mbr.latencyP99
@@ -99,8 +97,8 @@ class MetricBuilderRegistryTest extends AnyFunSuite {
       mbr.acRejection
 
       assert(sr.expressions.size == 2)
-      assert(sr.expressions.contains(nameToKey(successRateName)))
-      assert(sr.expressions.contains(nameToKey(latencyName, Map("bucket" -> "p99"))))
+      assertExpressionsAsExpected(
+        Set(nameToKey(successRateName), nameToKey(latencyName, Map("bucket" -> "p99"))))
     }
   }
 }

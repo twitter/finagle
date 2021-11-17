@@ -400,6 +400,10 @@ lazy val finagleCore = Project(
       util("routing"),
       util("security"),
       util("stats"),
+      "com.twitter" %% "util-test" % releaseVersion % "test" excludeAll (ExclusionRule(organization =
+    "junit"),
+  ExclusionRule(organization = "org.scala-tools.testing"),
+  ExclusionRule(organization = "org.mockito")),
       util("tunable"),
       caffeineLib,
       hdrHistogramLib,
