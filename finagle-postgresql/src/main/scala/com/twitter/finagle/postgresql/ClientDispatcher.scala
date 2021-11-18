@@ -22,6 +22,7 @@ import com.twitter.finagle.postgresql.Params.StatementTimeout
 import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine._
+import com.twitter.finagle.stats.LazyStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Reader
@@ -231,11 +232,21 @@ object ClientDispatcher {
  * the chances of leaking prepared statements and can simplify the
  * implementation of prepared statements in the presence of a connection pool.
  */
-case class PrepareCache(
+final case class PrepareCache(
   svc: Service[Request, Response],
   maxSize: Int,
-  statsReceiver: StatsReceiver, // TODO: export same metrics as finagle-mysql
+  statsReceiver: StatsReceiver,
 ) extends ServiceProxy[Request, Response](svc) {
+
+  private[this] val scopedStatsReceiver = new LazyStatsReceiver(
+    statsReceiver.scope("pstmt-cache")
+  )
+  private[this] val calls = scopedStatsReceiver.counter("calls")
+  private[this] val misses = scopedStatsReceiver.counter("misses")
+  private[this] val evictionCounters =
+    RemovalCause.values().map { rc =>
+      scopedStatsReceiver.counter(s"evicted_${rc.name().toLowerCase}")
+    }
 
   private[this] val listener = new RemovalListener[Name.Named, Future[Response]] {
     override def onRemoval(
@@ -243,6 +254,7 @@ case class PrepareCache(
       response: Future[Response],
       cause: RemovalCause
     ): Unit = {
+      evictionCounters(cause.ordinal()).incr()
       response.respond {
         case Return(Response.ParseComplete(_)) =>
           svc(Request.CloseStatement(key))
@@ -252,9 +264,18 @@ case class PrepareCache(
   }
 
   private[this] val underlying = Caffeine
-    .newBuilder().maximumSize(maxSize.toLong)
+    .newBuilder()
+    .maximumSize(maxSize.toLong)
     .removalListener(listener)
     .build[Name.Named, Future[Response]]()
+
+  private[this] val cacheSize = scopedStatsReceiver.addGauge("num_items") {
+    underlying.estimatedSize()
+  }
+
+  private[this] val maxSizeGauge = scopedStatsReceiver.addGauge("max_size") {
+    maxSize
+  }
 
   // we only cache Named portals, the unnamed portal is destroyed automatically upon reuse.
   private[this] val extractPortalName: Request.Prepare => Name.Named = {
@@ -266,13 +287,25 @@ case class PrepareCache(
   }
 
   private[this] val fn = FutureCache.default(
-    fn = svc,
+    fn = { req: Request =>
+      misses.incr()
+      svc(req)
+    },
     cache = FutureCache.keyEncoded(extractPortalName, new CaffeineCache(underlying))
   )
 
   override def apply(request: Request): Future[Response] =
     request match {
-      case r @ Request.Prepare(_, Name.Named(_)) => fn(r)
+      case r @ Request.Prepare(_, Name.Named(_)) =>
+        calls.incr()
+        fn(r)
       case _ => super.apply(request)
     }
+
+  override def close(deadline: Time): Future[Unit] = {
+    maxSizeGauge.remove()
+    cacheSize.remove()
+
+    super.close(deadline)
+  }
 }
