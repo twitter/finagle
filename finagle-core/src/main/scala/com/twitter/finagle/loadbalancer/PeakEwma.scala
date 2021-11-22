@@ -1,7 +1,12 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.util.{Duration, Future, Return, Time, Throw}
+import com.twitter.finagle.util.Ema
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Time
 
 /**
  * Provides a Node that is hyper-sensitive to latent endpoints.
@@ -26,16 +31,18 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
   protected val nanoTime: () => Long
 
   private class Metric {
-    private[this] val epoch = nanoTime()
     private[this] val Penalty: Double = Long.MaxValue >> 16
-    // The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
-    private[this] val Tau: Double = decayTime.inNanoseconds.toDouble
-    require(Tau > 0)
-
     // these are all guarded by synchronization on `this`
-    private[this] var stamp: Long = epoch // last timestamp in nanos we observed an rtt
+    private[this] var stamp: Long = nanoTime() // last timestamp in nanos we observed an rtt
     private[this] var pending: Int = 0 // instantaneous rate
-    private[this] var cost: Double = 0.0 // ewma of rtt, sensitive to peaks.
+    // ewma of rtt, sensitive to peaks
+    private[this] val cost: Ema = {
+      // The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
+      val tau = decayTime.inNanoseconds
+      require(tau > 0)
+
+      new Ema(tau)
+    }
 
     def rate(): Int = synchronized { pending }
 
@@ -48,11 +55,17 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
     // [1] http://www.eckner.com/papers/Algorithms%20for%20Unevenly%20Spaced%20Time%20Series.pdf
     private[this] def observe(rtt: Double): Unit = {
       val t = nanoTime()
-      val td = math.max(t - stamp, 0)
-      val w = math.exp(-td / Tau)
-      if (rtt > cost) cost = rtt
-      else cost = cost * w + rtt * (1.0 - w)
-      stamp = t
+      // Enforce monotonicity
+      if (t - stamp > 0) {
+        stamp = t
+      }
+
+      // Be sensitive to peaks
+      if (rtt > cost.last) {
+        cost.reset()
+      }
+
+      cost.update(stamp, rtt)
     }
 
     def get(): Double = synchronized {
@@ -62,8 +75,9 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
       // If we don't have any latency history, we penalize the host on
       // the first probe. Otherwise, we factor in our current rate
       // assuming we were to schedule an additional request.
-      if (cost == 0.0 && pending != 0) Penalty + pending
-      else cost * (pending + 1)
+      val lcost = cost.last
+      if (lcost == 0.0 && pending != 0) Penalty + pending
+      else lcost * (pending + 1)
     }
 
     def start(): Long = synchronized {
