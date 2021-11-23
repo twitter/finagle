@@ -5,5 +5,5 @@ version := "1.0"
 scalaVersion := "2.12.13"
 
 libraryDependencies ++= Seq(
-  "com.twitter" %% "finagle-mysql" % "21.10.0"
+  "com.twitter" %% "finagle-mysql" % "21.11.0"
 )
