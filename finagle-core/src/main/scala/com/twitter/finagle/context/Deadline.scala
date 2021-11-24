@@ -1,8 +1,14 @@
 package com.twitter.finagle.context
 
+import com.twitter.finagle.service.DeadlineOnlyToggle
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
-import com.twitter.util.{Duration, Return, Throw, Time, Try}
+import com.twitter.util.Duration
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Time
+import com.twitter.util.Try
 
 /**
  * A deadline is the time by which some action (e.g., a request) must
@@ -32,6 +38,17 @@ object Deadline extends Contexts.broadcast.Key[Deadline]("com.twitter.finagle.De
    */
   def current: Option[Deadline] =
     Contexts.broadcast.get(Deadline)
+
+  /**
+   * Same as [[current]] but would return `None` if the current request isn't toggled. This is
+   * useful as a temporary API for those willing to transition to deadlines outside of regular
+   * Finagle stack (clients and servers).
+   *
+   * Note: this method would eventually be removed and replaced with just [[current]].
+   */
+  private[twitter] def currentToggled: Option[Deadline] =
+    if (DeadlineOnlyToggle(Trace())) current
+    else None
 
   /**
    * Construct a deadline from a timeout.

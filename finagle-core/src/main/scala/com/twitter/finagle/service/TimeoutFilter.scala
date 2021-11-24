@@ -18,7 +18,7 @@ import com.twitter.util.Future
 import com.twitter.util.Timer
 import com.twitter.util.tunable.Tunable
 
-private[service] object DeadlineOnlyToggle {
+private[finagle] object DeadlineOnlyToggle {
   private val enableToggle = CoreToggles("com.twitter.finagle.service.DeadlineOnly")
   private var zoneEnabled = ServerInfo().zone.getOrElse("") == "atla"
 
