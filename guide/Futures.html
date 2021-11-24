@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Concurrent Programming with Futures &#8212; Finagle 21.10.0 documentation</title>
+    <title>Concurrent Programming with Futures &#8212; Finagle 21.11.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -112,6 +112,147 @@ operation with other Futures in a safe way.</p>
 <span class="o">);</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="synchronized-work">
+<h2>Synchronized work<a class="headerlink" href="#synchronized-work" title="Permalink to this headline">¶</a></h2>
+<p>Synchronization is different from synchronous behavior. Synchronous
+calls wait on some work to complete before executing the next statement
+within the same thread. Synchronized sections, in contrast, allow one
+thread to execute statements and block all other callers until the
+initial thread is finished with the enclosed statements.</p>
+<p>An example that could fail without synchronization would be:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+      <span class="n">counter</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>If two threads are executing the <cite>incrementAndReturn</cite> function concurrently
+on the same object, it is possible that both execute the statement <cite>counter += 1</cite>
+before either executes the return statement. If that happens, both threads would
+get the same value (e.g. if <cite>counter</cite> was 45 before either thread ran, 47 would
+be returned to both threads).</p>
+<p>A simple way to guarantee that each thread sees a unique counter value without
+skipping would be to enclose the critical statements in a synchonized block.
+Syntactially it looks like this:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+      <span class="n">counter</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scoping-synchronization">
+<h2>Scoping synchronization<a class="headerlink" href="#scoping-synchronization" title="Permalink to this headline">¶</a></h2>
+<p>In the previous section a simple introduction and example were given for
+synchronization wherein multiple threads have a handle to an object and
+can experience unexpected behavior when executing concurrently. The simple
+remedy was to add a <cite>synchronized</cite> block on the <cite>this</cite> object within
+the function body. What does that mean though?</p>
+<p>The syntax for creating a synchronized block requires the user to define a lock
+object which grants access to the block that follows. Only one thread at a time
+can be in control of a lock object. In the example the <cite>this</cite> object was the
+lock, meaning that within the class anywhere a <cite>this.synchronized {…}</cite> block
+occurs, it is tied to the same object, <cite>this</cite>. For example:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+      <span class="n">counter</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+      <span class="n">counter</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Both functions above are now gated on the same object, <cite>this</cite>, so not only
+will multiple threads with the same object handle serially execute
+<cite>incrementAndReturn</cite>, they will also be waiting in line for <cite>this</cite> when calling
+<cite>decrementAndReturn</cite>.</p>
+<p>Other methods within the class could be free to execute without waiting by
+omitting the synchronized block</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+      <span class="n">counter</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+      <span class="n">counter</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">def</span> <span class="n">readCounter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">counter</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Here, any thread may call <cite>readCounter</cite> without waiting to control <cite>this</cite>.</p>
+<p>Furthermore, it may be useful for readability and segmenting logic to define
+objects whose only purpose is as a synchronization lock rather than blocking
+at the granularity of the whole instance. For example:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">var</span> <span class="n">counter</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">lock</span><span class="k">:</span> <span class="kt">Object</span> <span class="o">=</span> <span class="n">counter</span>
+
+<span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+      <span class="n">counter</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+      <span class="n">counter</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">def</span> <span class="n">readCounter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">counter</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>This gives us flexibility as we evolve the class to discover new operations
+that need synchronization that can be covered under the umbrella of the <cite>lock</cite>
+object. At the moment, the <cite>lock</cite> object is synonymous with the counter itself,
+but we may discover some other useful member to use as the <cite>lock</cite> in the future,
+or have separate locks for different sets of entangled state.</p>
+</div>
+<div class="section" id="synchronization-risks">
+<h2>Synchronization risks<a class="headerlink" href="#synchronization-risks" title="Permalink to this headline">¶</a></h2>
+<p>Synchronzation is a very useful language feature to define critical sections
+and let the runtime manage blocking, scheduling, and handing off control
+between threads. It can be a very efficient technique to ensure predictable
+mutation of internal state (like ‘counter’ above) or other simple actions.</p>
+<p>However, synchronization can also expose a developer to a new class of bugs
+wherein threads are indefinitely waiting on a data change or on acquiring
+the lock object. Two common types of locking problems are livelocks and deadlocks.</p>
+<p>A livelock occurs when threads are alive, but the code is waiting for some data
+change in order to proceed. The system will wake up a thread, the thread checks
+if the data is in the correct state, and then goes back to sleep when it sees no
+changes have occurred. If the responsible process or thread is unable to make its
+update, the system is in livelock.</p>
+<p>A deadlock occurs when two or more threads are mutually blocked/halted on a
+statement that is synchronized on a lock object held by the other thread. For
+example, imagine a process exists where a thread acquires exclusive access to a
+Person, then queries the system for their siblings in order to update them
+together. If two threads are each tasked with doing this work for a pair of
+siblings, a deadlock can occur. Thread A acquires the lock for Person A. Thread B
+acquires the lock for Person B, sibling to Person A. Each now wishes to query
+and lock the siblings of their person. Thread A will be waiting for Thread B to
+be “finished” with Person B, and Thread B is likewise waiting for Thread A to be
+“finished” with Person A. Deadlock. A detailed example of a <a class="reference internal" href="#deadlock">deadlock</a> will follow
+below.</p>
 </div>
 <div class="section" id="futures-as-containers">
 <h2>Futures as containers<a class="headerlink" href="#futures-as-containers" title="Permalink to this headline">¶</a></h2>
@@ -231,6 +372,118 @@ Futures. This is quite useful, and gives rise to a great amount of
 modularity in distributed systems as common patterns can be cleanly
 abstracted.</p>
 </div>
+<div class="section" id="synchronization-within-composition">
+<h2>Synchronization within composition<a class="headerlink" href="#synchronization-within-composition" title="Permalink to this headline">¶</a></h2>
+<p id="deadlock">As teased above, synchronization can introduce a new class of bugs in
+a concurrent environment. A real world example of a deadlock can be found here:
+<a class="reference external" href="https://github.com/twitter/util/commit/b3b66cf8df6dd5fb4d97131b110150d5403dfb68">https://github.com/twitter/util/commit/b3b6…</a></p>
+<p>Before the patch, the methods <cite>fail(..)</cite>, <cite>release()</cite>, and the interrupt handler
+are all synchronized on <cite>this</cite> while completing a Promise. This can result in
+deadlocks if we have two threads interacting with two separate AsyncSemaphores.
+Here is a toy example that sets up cross-semaphore interaction. It will look a
+bit too obviously-broken to really happen, but isolates the misbehavior that could
+reasonably happen by accident:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">semaphore1</span><span class="o">,</span> <span class="n">semaphore2</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">AsyncSemaphore</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+<span class="c1">// The semaphores have already been taken:</span>
+<span class="k">val</span> <span class="n">permitForSemaphore1</span> <span class="k">=</span> <span class="n">await</span><span class="o">(</span><span class="n">semaphore1</span><span class="o">.</span><span class="n">acquire</span><span class="o">())</span>
+<span class="k">val</span> <span class="n">permitForSemaphore2</span> <span class="k">=</span> <span class="n">await</span><span class="o">(</span><span class="n">semaphore2</span><span class="o">.</span><span class="n">acquire</span><span class="o">())</span>
+
+<span class="c1">// The semaphores have had continuations attached as follows:</span>
+<span class="n">semaphore1</span><span class="o">.</span><span class="n">acquire</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">permit</span> <span class="k">=&gt;</span>
+  <span class="k">val</span> <span class="n">otherWaiters</span> <span class="k">=</span> <span class="n">semaphore2</span><span class="o">.</span><span class="n">numWaiters</span> <span class="c1">// synchronizing method</span>
+  <span class="n">permit</span><span class="o">.</span><span class="n">release</span><span class="o">()</span>
+  <span class="n">otherWaiters</span>
+<span class="o">}</span>
+
+<span class="n">semaphore2</span><span class="o">.</span><span class="n">acquire</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">permit</span> <span class="k">=&gt;</span>
+  <span class="k">val</span> <span class="n">otherWaiters</span> <span class="k">=</span> <span class="n">semaphore1</span><span class="o">.</span><span class="n">numWaiters</span> <span class="c1">// synchronizing method</span>
+  <span class="n">permit</span><span class="o">.</span><span class="n">release</span><span class="o">()</span>
+  <span class="n">otherWaiters</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Now we can trigger a deadlock.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">threadOne</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Thread</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">permitForSemaphore1</span><span class="o">.</span><span class="n">release</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">val</span> <span class="n">threadTwo</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Thread</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">permitForSemaphore2</span><span class="o">.</span><span class="n">release</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="n">threadOne</span><span class="o">.</span><span class="n">start</span>
+<span class="n">threadTwo</span><span class="o">.</span><span class="n">start</span>
+</pre></div>
+</div>
+<p>In this situation threadOne and threadTwo may potentially deadlock. It isn’t
+obvious from the <cite>release()</cite> calls that this is possible. The reason is the
+<cite>acquire()</cite> method returns a Promise and we’ve loaded continuations on them.
+When the threads call the <cite>Permit.release()</cite> method the AsyncSemaphore
+implementation synchronizes on the lock object (this), and gives the permit to the
+next waiting Promise before exiting the synchronized block. That executes the
+continuation which calls a method on the other AsyncSemaphore which attempts to
+synchronize. This is akin to the descriptive siblings program example above. The
+instances <cite>semaphore1</cite> and <cite>semaphore2</cite> aggressively locks their AsyncSemaphore
+then block until they can acquire the lock on the other semaphore.</p>
+<p>The resolution is presented in the patch linked above, but presented here is a
+succinct description of the resolution. Promises provide some methods which, used
+together, are similar to <cite>compareAndSet</cite> semantics (a well known, safe pattern).
+The new structure of the <cite>release()</cite> method on the Permit:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="c1">// old implementation</span>
+<span class="c1">// def release(): Unit = self.synchronized {</span>
+<span class="c1">//  val next = waitq.pollFirst()</span>
+<span class="c1">//  if (next != null) next.setValue(this) // &lt;- nogo: still synchronized</span>
+<span class="c1">//  else availablePermits += 1</span>
+<span class="c1">// }</span>
+
+<span class="c1">// new implementation</span>
+
+<span class="c1">// Here we define a specific lock object, rather than use the `self` of `this`</span>
+<span class="c1">// reference. It is synonymous with the internal Queue as that is what is</span>
+<span class="c1">// driving our need for synchronization, but using this special-purpose reference</span>
+<span class="c1">// gives us an opportunity in the future to refactor more easily.</span>
+<span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">final</span> <span class="k">def</span> <span class="n">lock</span><span class="k">:</span> <span class="kt">Object</span> <span class="o">=</span> <span class="n">waitq</span>
+
+<span class="nd">@tailrec</span> <span class="k">def</span> <span class="n">release</span><span class="o">()</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+<span class="c1">// we pass the Promise outside of the lock</span>
+<span class="k">val</span> <span class="n">waiter</span> <span class="k">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">next</span> <span class="k">=</span> <span class="n">waitq</span><span class="o">.</span><span class="n">pollFirst</span><span class="o">()</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">next</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">availablePermits</span> <span class="o">+=</span> <span class="mi">1</span>
+  <span class="o">}</span>
+  <span class="n">next</span>
+<span class="o">}</span>
+
+<span class="k">if</span> <span class="o">(</span><span class="n">waiter</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+  <span class="c1">// since we are no longer synchronized with the interrupt handler</span>
+  <span class="c1">// we leverage the atomic state of the Promise to do the right</span>
+  <span class="c1">// thing if we race.</span>
+  <span class="k">if</span> <span class="o">(!</span><span class="n">waiter</span><span class="o">.</span><span class="n">updateIfEmpty</span><span class="o">(</span><span class="nc">Return</span><span class="o">(</span><span class="k">this</span><span class="o">)))</span> <span class="o">{</span>
+    <span class="n">release</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>The new implementation is more complex and no longer synchronizes on the interrupt
+handler. This exposes the developer to a new consideration; any race between
+interrupting the Promise and giving it the Permit.</p>
+<p>Using synchronization and Promises together requires a significant amount of care
+ensure a program is not at risk of deadlock. Some low risk uses of synchronization are:</p>
+<ul class="simple">
+<li>Mutate or access a field.</li>
+<li>Push or pop an element from a private ArrayDeque.</li>
+</ul>
+<p>Some examples of risky actions to take in a synchronized block are:</p>
+<ul class="simple">
+<li>Calling a function injected by a caller; the function could block, acquire locks of its own, compute pi to a billion digits, etc.</li>
+<li>Calling methods on a trait of unknown origin: this is essentially the same thing as calling a user-injected function.</li>
+<li>Completing a Promise: an example above with dangerous continuations.</li>
+</ul>
+</div>
 <div class="section" id="recovering-from-failure">
 <span id="future-failure"></span><h2>Recovering from failure<a class="headerlink" href="#recovering-from-failure" title="Permalink to this headline">¶</a></h2>
 <p>Composed futures fail whenever any of their constituent futures
@@ -324,9 +577,13 @@ composition we can perform over collections. See the <a class="reference externa
   <ul>
 <li><a class="reference internal" href="#">Concurrent Programming with Futures</a><ul>
 <li><a class="reference internal" href="#blocking-or-synchronous-work">Blocking or synchronous work</a></li>
+<li><a class="reference internal" href="#synchronized-work">Synchronized work</a></li>
+<li><a class="reference internal" href="#scoping-synchronization">Scoping synchronization</a></li>
+<li><a class="reference internal" href="#synchronization-risks">Synchronization risks</a></li>
 <li><a class="reference internal" href="#futures-as-containers">Futures as containers</a></li>
 <li><a class="reference internal" href="#sequential-composition">Sequential composition</a></li>
 <li><a class="reference internal" href="#concurrent-composition">Concurrent composition</a></li>
+<li><a class="reference internal" href="#synchronization-within-composition">Synchronization within composition</a></li>
 <li><a class="reference internal" href="#recovering-from-failure">Recovering from failure</a></li>
 <li><a class="reference internal" href="#other-resources">Other resources</a></li>
 </ul>

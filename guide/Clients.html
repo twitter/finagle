@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Clients &#8212; Finagle 21.10.0 documentation</title>
+    <title>Clients &#8212; Finagle 21.11.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -670,15 +670,9 @@ weighted nodes <a class="footnote-reference" href="#weights-api" id="id14">[8]</
 <p>Use <code class="docutils literal notranslate"><span class="pre">Balancers.p2c</span></code> to construct an instance of <code class="docutils literal notranslate"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id15">[3]</a>.</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
 
-<span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span> <span class="nc">Balancers</span><span class="o">.</span><span class="n">p2c</span><span class="o">(</span><span class="n">maxEffort</span> <span class="k">=</span> <span class="mi">100</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span> <span class="nc">Balancers</span><span class="o">.</span><span class="n">p2c</span><span class="o">()</span>
 </pre></div>
 </div>
-<p id="max-effort">The <code class="docutils literal notranslate"><span class="pre">maxEffort</span></code> param (default value is 5) from the example above is the maximum amount of “effort”
-we’re willing to expend on a load balancing decision without rebuilding its internal state. Simply
-speaking this is the number of times a load balancer is able to retry because the previously picked
-node was <em>marked unavailable</em> (i.e., an underlying circuit breaker is activated). If the <code class="docutils literal notranslate"><span class="pre">maxEffort</span></code>
-is exhausted and the <em>alive</em> node still hasn’t been found, the load balancer will send a request to
-the last picked one.</p>
 </div>
 <div class="section" id="power-of-two-choices-p2c-peak-ewma">
 <h4>Power of Two Choices (P2C) + Peak EWMA <a class="footnote-reference" href="#experimental" id="id16">[2]</a><a class="headerlink" href="#power-of-two-choices-p2c-peak-ewma" title="Permalink to this headline">¶</a></h4>
@@ -694,12 +688,11 @@ presence of long polling clients.</p>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span>
-  <span class="nc">Balancers</span><span class="o">.</span><span class="n">p2cPeakEwma</span><span class="o">(</span><span class="n">maxEffort</span> <span class="k">=</span> <span class="mi">100</span><span class="o">,</span> <span class="n">decayTime</span> <span class="k">=</span> <span class="mf">100.</span><span class="n">seconds</span><span class="o">)</span>
+  <span class="nc">Balancers</span><span class="o">.</span><span class="n">p2cPeakEwma</span><span class="o">(</span><span class="n">decayTime</span> <span class="k">=</span> <span class="mf">100.</span><span class="n">seconds</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">p2cPeakEwma</span></code> factory method takes two arguments:</p>
 <ol class="arabic simple">
-<li><cite>maxEffort</cite> (default: 5) - see <a class="reference internal" href="#max-effort"><span class="std std-ref">P2C’s max effort</span></a></li>
 <li><cite>decayTime</cite> (default: 10 seconds) - the window of latency observations</li>
 </ol>
 </div>
@@ -734,7 +727,6 @@ work well, requires concurrent load.</li>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span>
   <span class="nc">Balancers</span><span class="o">.</span><span class="n">aperture</span><span class="o">(</span>
-    <span class="n">maxEffort</span> <span class="k">=</span> <span class="mi">10</span>
     <span class="n">smoothWin</span> <span class="k">=</span> <span class="mf">32.</span><span class="n">seconds</span><span class="o">,</span>
     <span class="n">lowLoad</span> <span class="k">=</span> <span class="mf">1.0</span><span class="o">,</span>
     <span class="n">highLoad</span> <span class="k">=</span> <span class="mf">2.0</span><span class="o">,</span>
@@ -744,7 +736,6 @@ work well, requires concurrent load.</li>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">aperture</span></code> factory method takes five arguments:</p>
 <ol class="arabic simple">
-<li><cite>maxEffort</cite> (default: 5) - see <a class="reference internal" href="#max-effort"><span class="std std-ref">P2C’s max effort</span></a></li>
 <li><cite>smoothWin</cite> (default: 5 seconds) - the window of concurrent load observation</li>
 <li>[<cite>lowLoad</cite>, <cite>highLoad</cite>] (default: [0.5, 2]) - the load band used to adjust an aperture size
 such that a concurrent load for each endpoint stays within the given interval</li>

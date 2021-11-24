@@ -560,16 +560,7 @@ Use ``Balancers.p2c`` to construct an instance of ``LoadBalancerFactory`` [#exam
 
   import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 
-  val balancer: LoadBalancerFactory = Balancers.p2c(maxEffort = 100)
-
-.. _max_effort:
-
-The ``maxEffort`` param (default value is 5) from the example above is the maximum amount of "effort"
-we're willing to expend on a load balancing decision without rebuilding its internal state. Simply
-speaking this is the number of times a load balancer is able to retry because the previously picked
-node was *marked unavailable* (i.e., an underlying circuit breaker is activated). If the ``maxEffort``
-is exhausted and the *alive* node still hasn't been found, the load balancer will send a request to
-the last picked one.
+  val balancer: LoadBalancerFactory = Balancers.p2c()
 
 Power of Two Choices (P2C) + Peak EWMA [#experimental]_
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -589,12 +580,11 @@ Use ``Balancers.p2cPeakEwma`` to construct an instance of ``LoadBalancerFactory`
   import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 
   val balancer: LoadBalancerFactory =
-    Balancers.p2cPeakEwma(maxEffort = 100, decayTime = 100.seconds)
+    Balancers.p2cPeakEwma(decayTime = 100.seconds)
 
 The ``p2cPeakEwma`` factory method takes two arguments:
 
-1. `maxEffort` (default: 5) - see :ref:`P2C's max effort <max_effort>`
-2. `decayTime` (default: 10 seconds) - the window of latency observations
+1. `decayTime` (default: 10 seconds) - the window of latency observations
 
 Aperture + Least Loaded [#experimental]_
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -632,7 +622,6 @@ Use ``Balancers.aperture`` to construct an instance of ``LoadBalancerFactory`` [
 
   val balancer: LoadBalancerFactory =
     Balancers.aperture(
-      maxEffort = 10
       smoothWin = 32.seconds,
       lowLoad = 1.0,
       highLoad = 2.0,
@@ -641,11 +630,10 @@ Use ``Balancers.aperture`` to construct an instance of ``LoadBalancerFactory`` [
 
 The ``aperture`` factory method takes five arguments:
 
-1. `maxEffort` (default: 5) - see :ref:`P2C's max effort <max_effort>`
-2. `smoothWin` (default: 5 seconds) - the window of concurrent load observation
-3. [`lowLoad`, `highLoad`] (default: [0.5, 2]) - the load band used to adjust an aperture size
+1. `smoothWin` (default: 5 seconds) - the window of concurrent load observation
+2. [`lowLoad`, `highLoad`] (default: [0.5, 2]) - the load band used to adjust an aperture size
    such that a concurrent load for each endpoint stays within the given interval
-4. `minAperture` (default: 1) - the minimum size of the aperture
+3. `minAperture` (default: 1) - the minimum size of the aperture
 
 .. note::
 
