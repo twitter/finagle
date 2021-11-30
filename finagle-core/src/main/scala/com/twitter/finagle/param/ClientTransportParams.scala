@@ -3,13 +3,12 @@ package com.twitter.finagle.param
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.ssl.TrustCredentials
-import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration,
-  SslClientEngineFactory,
-  SslClientSessionVerifier,
-  SslContextClientEngineFactory
-}
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.ssl.client.SslClientEngineFactory
+import com.twitter.finagle.ssl.client.SslClientSessionVerifier
+import com.twitter.finagle.ssl.client.SslContextClientEngineFactory
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.Transport.ClientSsl
 import com.twitter.util.Duration
 import javax.net.ssl.SSLContext
 
@@ -130,8 +129,11 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    */
 
   def sni(hostname: String): A = {
-    self
-      .configured(Transport.ClientSsl(Some(SslClientConfiguration(sniHostName = Some(hostname)))))
+    val config = self.params[ClientSsl].sslClientConfiguration match {
+      case Some(config) => config.copy(sniHostName = Some(hostname))
+      case None => SslClientConfiguration(sniHostName = Some(hostname))
+    }
+    self.configured(Transport.ClientSsl(Some(config)))
   }
 
   /**

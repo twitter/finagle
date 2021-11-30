@@ -1,12 +1,20 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.filter.NackAdmissionFilter
-import com.twitter.finagle.http.{ClientEndpointer, Request, Response, serverErrorsAsFailures}
-import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
+import com.twitter.finagle.http.ClientEndpointer
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.serverErrorsAsFailures
+import com.twitter.finagle.service.ReqRep
+import com.twitter.finagle.service.ResponseClass
+import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.transport.Transport.ClientSsl
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Duration, Future, Return}
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Return
 import java.net.InetSocketAddress
 import org.scalatest.concurrent.Eventually
 import org.scalatest.funsuite.AnyFunSuite
@@ -143,12 +151,15 @@ class HttpTest extends AnyFunSuite with Eventually {
   }
 
   test("If sniHostNames are included, MtlsClientParams should use them") {
-    val hostname = "somehost:1234"
-    val client = Http.client.withSni(hostname)
+    val sniHostname = "somehost:1234"
+    val client = Http.client.withTransport
+      .tls(SslClientConfiguration(hostname = Some("foo")))
+      .withSni(sniHostname)
     val ssl = client.params[ClientSsl].sslClientConfiguration
     ssl match {
       case Some(s: SslClientConfiguration) =>
-        assert(s.sniHostName.get == hostname)
+        assert(s.hostname.get == "foo")
+        assert(s.sniHostName.get == sniHostname)
       case _ => // no-op
     }
   }
