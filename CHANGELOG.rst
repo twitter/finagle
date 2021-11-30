@@ -14,6 +14,12 @@ Unreleased
   `c.t.f.http.{GenStreamingSerialServerDispatcher, IdentityStreamTransport, StreamTransport}` along
   with internal support classes. ``PHAB_ID=D782933``
 
+New Features
+~~~~~~~~~~~~
+* finagle-memcached: Add public object `c.t.f.memcached.KeyValidation` with a
+  `validKey` method to allow validation of keys before passing them to various
+  methods where invalid ones will cause exceptions to be thrown. ``PHAB_ID=D782660``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

@@ -1,5 +1,6 @@
 package com.twitter.finagle.memcached.protocol
 
+import com.twitter.finagle.memcached.KeyValidation
 import com.twitter.io.Buf
 import com.twitter.util.Time
 import scala.collection.immutable
