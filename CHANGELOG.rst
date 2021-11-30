@@ -24,7 +24,7 @@ Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
 * finagle-core: Remove `c.t.f.loadbalancer.Balancer.maxEffort`. Remove the `maxEffort`
-  argument from Balancers.{p2c, p2cPeakEwma, aperture, aperturePeakEwmaUse, roundRobin}`.
+  argument from `Balancers.{p2c, p2cPeakEwma, aperture, aperturePeakEwmaUse, roundRobin}`.
   ``PHAB_ID=D772863``
 
 * finagle-core: `c.t.f.tracing.ClientRequestTracingFilter` has been removed.
