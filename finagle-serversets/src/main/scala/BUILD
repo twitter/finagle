@@ -7,7 +7,10 @@ scala_library(
     ),
     # Exposes a service-loaded class.
     scope = "forced",
-    tags = ["bazel-compatible"],
+    tags = [
+        "bazel-compatible",
+        "known-jdk11-failure:CSL-11503",
+    ],
     dependencies = [
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
         "3rdparty/jvm/com/github/ben-manes/caffeine",
