@@ -4,6 +4,7 @@ env:
   JAVA_OPTS: "-Dsbt.log.noformat=true"
   TRAVIS: "true" # pretend we're TravisCI
   SBT_VERSION: 1.5.5
+  BUILD_VERSION: "v1" # bump this if builds are failing due to a bad cache
 
 defaults:
   run:
@@ -43,7 +44,7 @@ jobs:
             ~/.ivy2/cache
             ~/.ivy2/local/com.twitter
             ~/.sbt
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.SBT_VERSION }}-${{ matrix.scala }}-${{ matrix.java }}
+          key: ${{ runner.os }}-build-${{ env.BUILD_VERSION }}-${{ env.cache-name }}-${{ env.SBT_VERSION }}-${{ matrix.scala }}-${{ matrix.java }}
       - name: update cache
         run: |
           if [ -f ~/.ivy2/cache ]; then
