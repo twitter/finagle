@@ -3,7 +3,7 @@ name: continuous integration
 env:
   JAVA_OPTS: "-Dsbt.log.noformat=true"
   TRAVIS: "true" # pretend we're TravisCI
-  SBT_VERSION: 1.5.3
+  SBT_VERSION: 1.5.5
 
 defaults:
   run:
