@@ -4,22 +4,25 @@ import com.twitter.concurrent.Once
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql.harness.EmbeddedInstance.SetupTeardownTimeout
 import com.twitter.finagle.mysql.harness.config.DatabaseConfig
-import com.twitter.util.{Await, Future}
+import com.twitter.util.Await
+import com.twitter.util.Future
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Function
 
 object EmbeddedDatabase {
-  // EmbeddedDatabase instances are cached by database name.
+  // EmbeddedDatabase instances are cached by instance destination and database name.
   // This allows tests to share schemas if need be.
   //
   // Note, we don't evict entries from here and they live for the life of
   // the associated instances (which live for the life of the jvm).
-  private val dbCache: ConcurrentHashMap[String, EmbeddedDatabase] =
-    new ConcurrentHashMap[String, EmbeddedDatabase]()
+  private val dbCache: ConcurrentHashMap[CacheKey, EmbeddedDatabase] =
+    new ConcurrentHashMap[CacheKey, EmbeddedDatabase]()
+
+  private case class CacheKey(instanceDest: String, databaseName: String)
 
   /**
-   * Get or create a new EmbeddedDatabase for the given database name in `config`.
-   * This database will be created using `instance`.
+   * Get or create a new EmbeddedDatabase for the given instance destination and database name in
+   * `config`. This database will be created using `instance`.
    *
    * @param instance The mysql instance that will contain this database.
    * @param config The configuration used to configure the database.
@@ -31,9 +34,9 @@ object EmbeddedDatabase {
     instance: EmbeddedInstance
   ): EmbeddedDatabase = {
     dbCache.computeIfAbsent(
-      config.databaseName,
-      new Function[String, EmbeddedDatabase] {
-        override def apply(t: String): EmbeddedDatabase = {
+      CacheKey(instance.dest, config.databaseName),
+      new Function[CacheKey, EmbeddedDatabase] {
+        override def apply(t: CacheKey): EmbeddedDatabase = {
           new EmbeddedDatabase(config, instance)
         }
       }

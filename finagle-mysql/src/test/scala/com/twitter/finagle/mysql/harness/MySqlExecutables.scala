@@ -1,10 +1,13 @@
 package com.twitter.finagle.mysql.harness
 
+import com.twitter.finagle.mysql.harness.MySqlExecutables.mysqldPath
 import com.twitter.logging.Logger
 import com.twitter.util.Try
 import java.io.File
 import java.nio.file.Path
-import scala.sys.process.{BasicIO, Process}
+import java.nio.file.Paths
+import scala.sys.process.BasicIO
+import scala.sys.process.Process
 
 sealed trait MySqlExecutable {
   val absolutePath: String
@@ -63,6 +66,14 @@ case class MySqlExecutables(mysqld: Mysqld, mysqlAdmin: MysqlAdmin) {
     s"""
        |mysqld: ${mysqld.absolutePath}
        |mysqlAdmin: ${mysqlAdmin.absolutePath}""".stripMargin
+  }
+
+  /**
+   * Compute the base dir from the mysql distribution. The home directory of /bin/mysqld
+   * @return the base dir of the mysql distribution
+   */
+  def getBaseDir: Path = {
+    Paths.get(mysqld.absolutePath.replace(mysqldPath, ""))
   }
 
   /**

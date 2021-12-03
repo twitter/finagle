@@ -3,12 +3,20 @@ package com.twitter.finagle.mysql.harness
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql.Client
-import com.twitter.finagle.mysql.harness.config.{InstanceConfig, User}
+import com.twitter.finagle.mysql.harness.config.InstanceConfig
+import com.twitter.finagle.mysql.harness.config.User
 import com.twitter.logging.Logger
-import com.twitter.util.{Await, Duration, Future, Return, Throw, Try}
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
 import java.io.IOException
-import java.net.{InetAddress, ServerSocket}
-import java.nio.file.{Files, Path}
+import java.net.InetAddress
+import java.net.ServerSocket
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -31,14 +39,16 @@ object EmbeddedInstance {
 
   private def getServerParameters(
     config: InstanceConfig,
+    baseDir: Path,
     dataDirectory: Path,
-    port: Int
+    port: Int,
+    socketFile: Path
   ): Seq[String] = {
     val derivedServerParameters: Seq[String] = Seq(
-      s"--basedir=${config.extractedMySqlPath}",
+      s"--basedir=$baseDir",
       s"--datadir=$dataDirectory",
       s"--port=$port",
-      s"--socket=${Files.createTempFile(null, ".sock")}"
+      s"--socket=$socketFile"
     )
     config.startServerParameters ++ derivedServerParameters
   }
@@ -55,15 +65,18 @@ object EmbeddedInstance {
             val dataDirectory: Path = createDataDirectory(config)
             val port = openPort()
             val dest = s"${InetAddress.getLoopbackAddress.getHostAddress}:$port"
-            val serverParameters: Seq[String] = getServerParameters(config, dataDirectory, port)
+            val socketFile = Files.createTempFile(config.extractedMySqlPath, null, ".sock")
+            val serverParameters: Seq[String] =
+              getServerParameters(config, executables.getBaseDir, dataDirectory, port, socketFile)
 
-            initializeDataDir(dataDirectory, config.extractedMySqlPath, executables)
+            initializeDataDir(dataDirectory, executables.getBaseDir, executables)
 
             val instance = new EmbeddedInstance(executables, serverParameters, port, dest)
             instance.startInstance()
 
             sys.addShutdownHook {
               instance.stopInstance()
+              socketFile.toFile.delete()
               new Directory(dataDirectory.toFile).deleteRecursively()
             }
             instance

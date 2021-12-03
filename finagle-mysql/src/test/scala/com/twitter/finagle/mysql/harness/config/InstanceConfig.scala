@@ -1,6 +1,7 @@
 package com.twitter.finagle.mysql.harness.config
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.Path
+import java.nio.file.Paths
 
 object InstanceConfig {
 
