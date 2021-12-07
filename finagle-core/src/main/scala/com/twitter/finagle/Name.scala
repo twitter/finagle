@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.util.{CachedHashCode, Showable}
+import com.twitter.finagle.util.CachedHashCode
+import com.twitter.finagle.util.Showable
 import com.twitter.util.Var
 import scala.annotation.varargs
 
@@ -163,13 +164,13 @@ object Name {
     if (names.isEmpty) empty
     else if (names.size == 1) names.head
     else {
-      val va = Var.collect(names map (_.addr)) map {
+      val va = Var.collect(names.view.map(_.addr).toSeq) map {
         case addrs if addrs.exists({ case Addr.Bound(_, _) => true; case _ => false }) =>
-          val endpointAddrs = addrs.flatMap {
+          val endpointAddrs = addrs.view.flatMap {
             case Addr.Bound(as, _) => as
-            case _ => Set.empty[Address]
+            case _ => Seq.empty[Address]
           }
-          Addr.Bound(endpointAddrs, Addr.Metadata.empty)
+          Addr.Bound(endpointAddrs.toSet, Addr.Metadata.empty)
 
         case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
         case addrs if addrs.forall({ case Addr.Failed(_) => true; case _ => false }) =>
