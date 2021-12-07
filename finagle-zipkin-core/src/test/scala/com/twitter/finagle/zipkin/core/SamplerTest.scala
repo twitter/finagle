@@ -1,7 +1,10 @@
 package com.twitter.finagle.zipkin.core
 
 import org.scalatestplus.mockito.MockitoSugar
-import com.twitter.finagle.tracing.{Annotation, Record, SpanId, TraceId}
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.SpanId
+import com.twitter.finagle.tracing.TraceId
 import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -75,5 +78,16 @@ class SamplerTest extends AnyFunSuite with MockitoSugar {
     val sampler = new Sampler()
     sampler.setSampleRate(1f)
     assert(sampler.sampleRecord(Record(traceId, Time.now, Annotation.ClientSend)))
+  }
+
+  test("Sampler should sample at its minimum precise rate") {
+    val sampler = new Sampler(1f / (1 << 24))
+    var sampled = 0
+    for (i <- 0 until (1 << 24)) {
+      if (sampler.sampleTrace(TraceId(None, None, SpanId(i), None)).contains(true)) {
+        sampled = sampled + 1
+      }
+    }
+    assert(sampled == 1)
   }
 }

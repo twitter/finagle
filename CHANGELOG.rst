@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~~
+
+* finagle-zipkin-core: `c.t.f.zipkin.core.Sampler` would sample at 1/10,000
+  rate when configured with a lower (but non-zero) rate. It can now sample
+  at rates as low as 1/16,777,216. ``PHAB_ID=D792693``
+
 21.11.0
 -------
 

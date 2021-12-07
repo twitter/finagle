@@ -1,19 +1,26 @@
 package com.twitter.finagle.zipkin.core
 
-import com.twitter.finagle.tracing.{Record, TraceId}
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.TraceId
 import com.twitter.logging.Logger
+import java.lang.{Long => JLong}
 import scala.util.Random
 
 object Sampler {
   // Default is 0.001 = 0.1% (let one in a 1000nd pass)
   val DefaultSampleRate = 0.001f
 
+  // Maximum of the range of int values that are continuously
+  // representable in a float without loss of precision.
+  private val Multiplier = (1 << 24).toFloat
+  private val BitMask = (Multiplier - 1).toInt
+
   /**
    * This salt is used to prevent traceId collisions between machines.
    * By giving each system a random salt, it is less likely that two
    * processes will sample the same subset of trace ids.
    */
-  private val salt = new Random().nextLong()
+  private val salt = new Random().nextInt()
 
   private val SomeTrue = Some(true)
   private val SomeFalse = Some(false)
@@ -70,7 +77,16 @@ class Sampler(private var sr: Float) {
   def sampleTrace(traceId: TraceId, sampleRate: Float): Option[Boolean] = {
     traceId.sampled match {
       case None =>
-        if (math.abs(traceId.traceId.toLong ^ Sampler.salt) % 10000 < sampleRate * 10000)
+        // Notes:
+        // - JLong.hashCode will fold the two 32-bit halves of the 64-bit trace ID, and we
+        //   subsequently use low 24 bits of the result. This way, we actually use 48 bits of the
+        //   ID for randomization. The theory is that trace IDs have a uniform distribution of bits,
+        //   so this shouldn't matter, but it's a cheap way to ensure better randomization even in
+        //   the case the uniformity does not hold.
+        // - Since Multiplier is a power of 2, we can use `x & Sampler.BitMask` as a more efficient
+        //   equivalent to `math.abs(x) % Sampler.Multiplier`.
+        if (((JLong.hashCode(
+            traceId.traceId.toLong) ^ Sampler.salt) & Sampler.BitMask) < sampleRate * Sampler.Multiplier)
           Sampler.SomeTrue
         else
           Sampler.SomeFalse
