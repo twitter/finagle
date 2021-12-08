@@ -2,6 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.util.Duration
 import com.twitter.util.tunable.Tunable
@@ -148,7 +149,14 @@ object DynamicTimeout {
     val timeoutFunc = timeoutFn(TotalKey, tunableTimeout, defaultTimeout, compensation)
     val exceptionFn = { d: Duration => new GlobalRequestTimeoutException(d) }
     val preferDeadlineOverTimeout = params[TimeoutFilter.PreferDeadlineOverTimeout].enabled
-    TimeoutFilter.typeAgnostic(timeoutFunc, exceptionFn, timer, preferDeadlineOverTimeout)
+    val statsReceiver = params[Stats].statsReceiver
+    TimeoutFilter.typeAgnostic(
+      timeoutFunc,
+      exceptionFn,
+      timer,
+      preferDeadlineOverTimeout,
+      statsReceiver,
+      TimeoutFilter.clientKey)
   }
 
 }

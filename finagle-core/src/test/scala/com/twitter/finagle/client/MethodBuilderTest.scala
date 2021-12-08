@@ -2,15 +2,21 @@ package com.twitter.finagle.client
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.PercentOps._
-import com.twitter.finagle.Stack.{NoOpModule, Params}
+import com.twitter.finagle.Stack.NoOpModule
+import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
-import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
+import com.twitter.util.registry.Entry
+import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.registry.SimpleRegistry
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -94,6 +100,28 @@ class MethodBuilderTest
     // while we have a RetryFilter, the underlying service returns `Future.never`
     // and as such, the stats are never updated.
     assert(stats.stat("retry_it", "a_client", "retries")() == Seq.empty)
+  }
+
+  test("deadline stats are retrievable from timeout filter") {
+    val stats = new InMemoryStatsReceiver()
+    val params =
+      Stack.Params.empty +
+        param.Stats(stats)
+    val stackClient = TestStackClient(totalTimeoutStack, params)
+    val methodBuilder = MethodBuilder.from("timeout", stackClient)
+
+    val deadline = Deadline.ofTimeout(10.milliseconds)
+
+    val client = methodBuilder.withTimeout
+      .total(2.seconds)
+      .newService("a_client")
+
+    Contexts.broadcast.let(Deadline, deadline) {
+      intercept[GlobalRequestTimeoutException] {
+        awaitResult(client(1))
+      }
+      assert(stats.stat("current_deadline")().size > 0)
+    }
   }
 
   test("per-request, retries, and total timeouts") {

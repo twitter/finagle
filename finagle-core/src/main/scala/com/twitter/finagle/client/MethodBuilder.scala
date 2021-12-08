@@ -2,19 +2,27 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
-import com.twitter.finagle.service.{
-  Filterable,
-  ResponseClass,
-  ResponseClassifier,
-  Retries,
-  TimeoutFilter
-}
-import com.twitter.finagle.stats.{LazyStatsReceiver, StatsReceiver}
+import com.twitter.finagle.service.Filterable
+import com.twitter.finagle.service.ResponseClass
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service.Retries
+import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.stats.LazyStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
-import com.twitter.finagle.util.{Showable, StackRegistry}
-import com.twitter.finagle.{Filter, Name, Service, ServiceFactory, Stack, param, _}
+import com.twitter.finagle.util.Showable
+import com.twitter.finagle.util.StackRegistry
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Name
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.finagle.param
+import com.twitter.finagle._
 import com.twitter.util.tunable.Tunable
-import com.twitter.util.{CloseOnce, Future, Time}
+import com.twitter.util.CloseOnce
+import com.twitter.util.Future
+import com.twitter.util.Time
 
 object MethodBuilder {
 

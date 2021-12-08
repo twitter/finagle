@@ -1265,6 +1265,7 @@ private[finagle] object ClientBuilderClient {
         timeout => new GlobalRequestTimeoutException(timeout),
         timerParam.timer,
         stats.statsReceiver,
+        TimeoutFilter.clientKey,
         next
       )
   }

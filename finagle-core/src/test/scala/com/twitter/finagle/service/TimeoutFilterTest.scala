@@ -478,7 +478,9 @@ class TimeoutFilterTest extends AnyFunSuite with Matchers with MockitoSugar {
 
   private def fakeTraceRecord(deadline: Deadline): Annotation.BinaryAnnotation = {
     val deadlineRecord = s"timestamp:${deadline.timestamp}:deadline:${deadline.deadline}"
-    Annotation.BinaryAnnotation("finagle.deadline", s"deadline_enabled:$deadlineRecord")
+    Annotation.BinaryAnnotation(
+      TimeoutFilter.clientKey + TimeoutFilter.DeadlineAnnotation,
+      s"deadline_enabled:$deadlineRecord")
   }
 
   test("only honor deadlines when DeadlineOnly toggled up") {
@@ -488,7 +490,14 @@ class TimeoutFilterTest extends AnyFunSuite with Matchers with MockitoSugar {
     val sr = new InMemoryStatsReceiver()
     // the 1.millis timeout should be suppressed by deadline
     val timeoutFilterWithPreferDeadline =
-      new TimeoutFilter[String, String](() => 1.millisecond, _ => exception, timer, true, true, sr)
+      new TimeoutFilter[String, String](
+        () => 1.millisecond,
+        _ => exception,
+        timer,
+        true,
+        true,
+        sr,
+        TimeoutFilter.clientKey)
     val deadline = Deadline.ofTimeout(2.seconds)
     val tracer = new BufferingTracer
 

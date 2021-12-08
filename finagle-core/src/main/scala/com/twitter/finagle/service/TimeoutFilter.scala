@@ -7,7 +7,8 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.service.TimeoutFilter.DeadlineEnabledKey
+import com.twitter.finagle.service.TimeoutFilter.DeadlineAnnotation
+import com.twitter.finagle.service.TimeoutFilter.TimeoutAnnotation
 import com.twitter.finagle.stats.Counter
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
@@ -34,8 +35,10 @@ private[finagle] object DeadlineOnlyToggle {
 }
 
 object TimeoutFilter {
-  val TimeoutAnnotation: String = "finagle.timeout"
-  private val DeadlineEnabledKey: String = "finagle.deadline"
+  private[finagle] val serverKey = "srv/"
+  private[finagle] val clientKey = "clnt/"
+  val TimeoutAnnotation: String = "finagle_timeout_ms"
+  private[finagle] val DeadlineAnnotation: String = "finagle_deadline_ms"
 
   /**
    * Used for a per request timeout.
@@ -159,6 +162,7 @@ object TimeoutFilter {
     exceptionFn: Duration => RequestTimeoutException,
     timer: Timer,
     statsReceiver: StatsReceiver,
+    rolePrefix: String,
     next: ServiceFactory[Req, Rep]
   ): ServiceFactory[Req, Rep] = {
     def hasNoTimeout(duration: Duration, compensation: Duration): Boolean = {
@@ -183,7 +187,8 @@ object TimeoutFilter {
           timer,
           propagateDeadlines,
           preferDeadlineOverTimeout,
-          statsReceiver
+          statsReceiver,
+          rolePrefix
         ).andThen(next)
     }
   }
@@ -224,6 +229,7 @@ object TimeoutFilter {
           timeout => new IndividualRequestTimeoutException(timeout),
           timerParam.timer,
           stats.statsReceiver,
+          clientKey,
           next
         )
     }
@@ -259,6 +265,7 @@ object TimeoutFilter {
           timeout => new IndividualRequestTimeoutException(timeout),
           timerParam.timer,
           stats.statsReceiver,
+          serverKey,
           next
         )
     }
@@ -287,7 +294,9 @@ object TimeoutFilter {
     timeoutFn: () => Duration,
     exceptionFn: Duration => RequestTimeoutException,
     timer: Timer,
-    preferDeadlineOverTimeout: Boolean = false
+    preferDeadlineOverTimeout: Boolean = false,
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    rolePrefix: String = ""
   ): TypeAgnostic = new TypeAgnostic {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
       new TimeoutFilter[Req, Rep](
@@ -295,7 +304,9 @@ object TimeoutFilter {
         exceptionFn,
         timer,
         PropagateDeadlines.Default,
-        preferDeadlineOverTimeout)
+        preferDeadlineOverTimeout,
+        statsReceiver,
+        rolePrefix)
   }
 
 }
@@ -321,9 +332,9 @@ class TimeoutFilter[Req, Rep](
   timer: Timer,
   propagateDeadlines: Boolean,
   preferDeadlineOverTimeout: Boolean = false,
-  statsReceiver: StatsReceiver = NullStatsReceiver)
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  rolePrefix: String = "")
     extends SimpleFilter[Req, Rep] {
-
   def this(
     timeoutFn: () => Duration,
     exceptionFn: Duration => RequestTimeoutException,
@@ -367,6 +378,9 @@ class TimeoutFilter[Req, Rep](
     Some("Indicates that deadline is stricter than timeout"),
     "deadline_lt_timeout")
 
+  private[this] val deadlineAnnotation = rolePrefix + DeadlineAnnotation
+  private[this] val timeoutAnnotation = rolePrefix + TimeoutAnnotation
+
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val timeout = timeoutFn()
     val timeoutDeadline = Deadline.ofTimeout(timeout)
@@ -407,7 +421,7 @@ class TimeoutFilter[Req, Rep](
       deadlineCompareTimeout(combined, current, inExperimentDeadlineLtTimeout)
       if (trace.isActivelyTracing) {
         val deadlineRecord = s"timestamp:${current.timestamp}:deadline:${current.deadline}"
-        trace.recordBinary(DeadlineEnabledKey, s"deadline_enabled:$deadlineRecord")
+        trace.recordBinary(deadlineAnnotation, s"deadline_enabled:$deadlineRecord")
       }
       current
     } else {
@@ -438,7 +452,7 @@ class TimeoutFilter[Req, Rep](
       res.within(timer, timeout).rescue {
         case exc: java.util.concurrent.TimeoutException =>
           res.raise(exc)
-          Trace.record(TimeoutFilter.TimeoutAnnotation)
+          Trace.record(timeoutAnnotation)
           Future.exception(exceptionFn(timeout))
       }
     }
