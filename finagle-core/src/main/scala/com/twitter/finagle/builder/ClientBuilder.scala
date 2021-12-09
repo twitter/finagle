@@ -955,7 +955,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Make connections via the given HTTP proxy.
-   * If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
+   * If this is defined concurrently with socksProxy, socksProxy comes first. This
+   * means you may go through a SOCKS proxy and then an HTTP proxy, but not the
+   * other way around.
    */
   def httpProxy(httpProxy: SocketAddress): This =
     configured(params[Transporter.HttpProxy].copy(sa = Some(httpProxy)))
@@ -968,7 +970,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Make connections via the given SOCKS proxy.
-   * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
+   * If this is defined concurrently with httpProxy, socksProxy comes first. This
+   * means you may go through a SOCKS proxy and then an HTTP proxy, but not the
+   * other way around.
    *
    * To migrate to the Stack-based APIs, use `ClientTransportParams.socksProxy`.
    * For example:

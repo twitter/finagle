@@ -2,15 +2,20 @@ package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.proxy.{HttpProxyConnectHandler, Netty4ProxyConnectHandler}
+import com.twitter.finagle.netty4.proxy.HttpProxyConnectHandler
+import com.twitter.finagle.netty4.proxy.Netty4ProxyConnectHandler
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
-import com.twitter.finagle.param.{Label, Stats}
+import com.twitter.finagle.param.Label
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.Duration
-import io.netty.channel.{Channel, ChannelInitializer}
-import io.netty.handler.proxy.{HttpProxyHandler, Socks5ProxyHandler}
-import io.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
+import io.netty.channel.Channel
+import io.netty.channel.ChannelInitializer
+import io.netty.handler.proxy.HttpProxyHandler
+import io.netty.handler.proxy.Socks5ProxyHandler
+import io.netty.handler.timeout.ReadTimeoutHandler
+import io.netty.handler.timeout.WriteTimeoutHandler
 import java.util.logging.Level
 
 /**
@@ -87,24 +92,6 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
     // Add SSL/TLS Channel Initializer to the pipeline.
     pipe.addFirst("sslInit", new Netty4ClientSslChannelInitializer(params))
 
-    // SOCKS5 proxy via `Netty4ProxyConnectHandler`.
-    socksAddress.foreach { sa =>
-      val proxyHandler = socksCredentials match {
-        case None => new Socks5ProxyHandler(sa)
-        case Some((u, p)) => new Socks5ProxyHandler(sa, u, p)
-      }
-
-      // Use only Finagle's session acquisition timeout
-      proxyHandler.setConnectTimeoutMillis(0)
-
-      pipe.addFirst(
-        "socksProxyConnect",
-        new Netty4ProxyConnectHandler(
-          proxyHandler,
-          bypassLocalhostConnections = socksBypassLocalhost)
-      )
-    }
-
     // HTTP proxy via `Netty4ProxyConnectHandler`.
     httpAddress.foreach { sa =>
       val proxyHandler = httpCredentials match {
@@ -124,6 +111,28 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
     httpHostAndCredentials.foreach {
       case (host, credentials) =>
         pipe.addFirst("httpProxyConnect", new HttpProxyConnectHandler(host, credentials))
+    }
+
+    // SOCKS5 proxy via `Netty4ProxyConnectHandler`.
+    // We ensure the SOCKS5 proxy is the closest to the edge because we
+    // typically see SOCKS5 proxies as ingress proxies and HTTP proxies
+    // as egress proxies.  This allows us to simultaneously use a SOCKS5 proxy
+    // for ingress followed by an HTTP proxy for egress.
+    socksAddress.foreach { sa =>
+      val proxyHandler = socksCredentials match {
+        case None => new Socks5ProxyHandler(sa)
+        case Some((u, p)) => new Socks5ProxyHandler(sa, u, p)
+      }
+
+      // Use only Finagle's session acquisition timeout
+      proxyHandler.setConnectTimeoutMillis(0)
+
+      pipe.addFirst(
+        "socksProxyConnect",
+        new Netty4ProxyConnectHandler(
+          proxyHandler,
+          bypassLocalhostConnections = socksBypassLocalhost)
+      )
     }
   }
 }

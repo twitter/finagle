@@ -47,6 +47,11 @@ Runtime Behavior Changes
 
 * finagle: Update Caffeine cache library to version 2.9.2 ``PHAB_ID=D771893``
 
+* finagle-netty4: The current SOCKS and HTTP proxies support going through an HTTP proxy first,
+  and then a SOCKS proxy. It seems more common to do the other way around, so we're going to
+  instead support going through a SOCKS proxy and then an HTTP proxy, and drop support for the
+  reverse. ``PHAB_ID=D713485``
+
 21.10.0
 -------
 
