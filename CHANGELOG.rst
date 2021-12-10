@@ -7,12 +7,28 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-zipkin-core: `c.t.f.zipkin.core.Sampler.DefaultSampleRate` is deprecated in
+  favor of `c.t.f.zipkin.core.DefaultSampler.sampleRate`. ``PHAB_ID=D795303``
+
 Bug Fixes
 ~~~~~~~~~~
 
 * finagle-zipkin-core: `c.t.f.zipkin.core.Sampler` would sample at 1/10,000
   rate when configured with a lower (but non-zero) rate. It can now sample
   at rates as low as 1/16,777,216. ``PHAB_ID=D792693``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-zipkin-scribe: `c.t.f.zipkin.thrift.ZipkinTracer` uses
+  `c.t.f.zipkin.core.DefaultSampler.sampleRate` as the default sample rate instead of
+  deprecated `c.t.f.zipkin.core.Sampler.DefaultSampleRate`. This allows it to correctly
+  observe user-configured overrides to the default sample rate. When a `ZipkinTracer` is
+  constructed with default parameters and there are no user-configured overrides, the
+  behavior is unchanged. ``PHAB_ID=D795303``
 
 21.11.0
 -------

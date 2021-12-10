@@ -1,6 +1,8 @@
 package com.twitter.finagle.zipkin.core
 
-import com.twitter.finagle.tracing.{SpanId, TraceId, Tracer}
+import com.twitter.finagle.tracing.SpanId
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.zipkin.initialSampleRate
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
@@ -49,7 +51,7 @@ class DefaultSamplerTest extends AnyFunSuite with MockitoSugar {
     }
 
     assert(DefaultSampler.sampleRate != 1.0f)
-    assert(DefaultSampler.sampleRate == Sampler.DefaultSampleRate)
+    assert(DefaultSampler.sampleRate == Sampler.DefaultSampleRateInternal)
     DefaultSampler.setSampleRate(1.0f)
     assert(samplingTracer.getSampleRate == 1.0f)
     assert(samplingTracer.sampleTrace(traceId).contains(true))
@@ -70,7 +72,7 @@ class DefaultSamplerTest extends AnyFunSuite with MockitoSugar {
     }
 
     assert(DefaultSampler.sampleRate != 0.0f)
-    assert(DefaultSampler.sampleRate == Sampler.DefaultSampleRate)
+    assert(DefaultSampler.sampleRate == Sampler.DefaultSampleRateInternal)
     DefaultSampler.setSampleRate(0.0f)
     assert(samplingTracer.getSampleRate == 0.0f)
     assert(samplingTracer.sampleTrace(traceId).contains(false))

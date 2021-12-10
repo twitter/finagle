@@ -1,6 +1,7 @@
 package com.twitter.finagle.zipkin
 
-import com.twitter.app.{Flaggable, GlobalFlag}
+import com.twitter.app.Flaggable
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle.zipkin.core.Sampler
 
 /**
@@ -21,5 +22,5 @@ private object InitialSampleRateFlaggable extends Flaggable[Float] {
 }
 
 object initialSampleRate
-    extends GlobalFlag[Float](Sampler.DefaultSampleRate, "Initial sample rate")(
+    extends GlobalFlag[Float](Sampler.DefaultSampleRateInternal, "Initial sample rate")(
       InitialSampleRateFlaggable)

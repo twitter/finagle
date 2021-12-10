@@ -7,8 +7,11 @@ import java.lang.{Long => JLong}
 import scala.util.Random
 
 object Sampler {
-  // Default is 0.001 = 0.1% (let one in a 1000nd pass)
-  val DefaultSampleRate = 0.001f
+  // Default is 0.001 = 0.1% (let one in a 1000nd pass).
+  private[zipkin] val DefaultSampleRateInternal = 0.001f
+
+  @deprecated(message = "Use DefaultSampler.sampleRate instead", since = "21.12.0")
+  val DefaultSampleRate = DefaultSampleRateInternal
 
   // Maximum of the range of int values that are continuously
   // representable in a float without loss of precision.
@@ -32,7 +35,7 @@ object Sampler {
 class Sampler(private var sr: Float) {
   private[this] val log = Logger(getClass.getName)
 
-  def this() = this(Sampler.DefaultSampleRate)
+  def this() = this(Sampler.DefaultSampleRateInternal)
 
   /**
    * Set the sample rate.
