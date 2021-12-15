@@ -1,8 +1,11 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Filter, Service, SimpleFilter}
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Service
+import com.twitter.finagle.SimpleFilter
 import com.twitter.util.tunable.Tunable
-import com.twitter.util.{Duration, Future}
+import com.twitter.util.Duration
+import com.twitter.util.Future
 import scala.collection.mutable
 
 /**

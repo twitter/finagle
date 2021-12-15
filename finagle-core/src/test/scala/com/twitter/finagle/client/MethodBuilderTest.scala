@@ -120,7 +120,7 @@ class MethodBuilderTest
       intercept[GlobalRequestTimeoutException] {
         awaitResult(client(1))
       }
-      assert(stats.stat("current_deadline")().size > 0)
+      assert(stats.stat("timeout", "a_client", "current_deadline")().size > 0)
     }
   }
 

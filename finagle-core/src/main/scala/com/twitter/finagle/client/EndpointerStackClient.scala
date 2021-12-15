@@ -5,11 +5,9 @@ import com.twitter.finagle.filter.RequestLogger
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param._
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{
-  Client,
-  RelativeNameMarkingStatsReceiver,
-  RoleConfiguredStatsReceiver
-}
+import com.twitter.finagle.stats.Client
+import com.twitter.finagle.stats.RelativeNameMarkingStatsReceiver
+import com.twitter.finagle.stats.RoleConfiguredStatsReceiver
 import com.twitter.finagle.util.Showable
 
 /**

@@ -19,17 +19,27 @@ import com.twitter.util.Future
 import com.twitter.util.Timer
 import com.twitter.util.tunable.Tunable
 
-private[finagle] object DeadlineOnlyToggle {
+private[twitter] object DeadlineOnlyToggle {
   private val enableToggle = CoreToggles("com.twitter.finagle.service.DeadlineOnly")
-  private var zoneEnabled = ServerInfo().zone.getOrElse("") == "atla"
+  private val zoneEnabled = ServerInfo().zone.contains("atla")
+  @volatile private var overridden: Option[Boolean] = None
 
-  //exposed for testing
-  def setEnabledZone(enabled: Boolean): Unit = zoneEnabled = enabled
+  /**
+   * This is exposed only to be used in selected tests. If you found this method by accident,
+   * there is a VERY high change you won't want to call it.
+   */
+  def unsafeOverride(enabled: Option[Boolean]): Unit = overridden = enabled
 
-  def apply(trace: Tracing): Boolean = zoneEnabled && {
-    trace.idOption.flatMap(_._traceId) match {
-      case Some(spanId) => enableToggle(spanId.toLong.hashCode())
-      case None => false
+  def apply(trace: Tracing): Boolean = {
+    overridden match {
+      case Some(o) => o
+      case None =>
+        zoneEnabled && {
+          trace.idOption.flatMap(_._traceId) match {
+            case Some(spanId) => enableToggle(spanId.toLong.hashCode())
+            case None => false
+          }
+        }
     }
   }
 }

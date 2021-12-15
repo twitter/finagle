@@ -1,10 +1,17 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Filter, Service, param}
-import com.twitter.finagle.service.{RequeueFilter, _}
-import com.twitter.finagle.stats.{DenylistStatsReceiver, StatsReceiver}
-import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Future, Stopwatch, Throw, Try}
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Service
+import com.twitter.finagle.param
+import com.twitter.finagle.service.RequeueFilter
+import com.twitter.finagle.service._
+import com.twitter.finagle.stats.DenylistStatsReceiver
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
+import com.twitter.util.Future
+import com.twitter.util.Stopwatch
+import com.twitter.util.Throw
+import com.twitter.util.Try
 
 /**
  * @see [[BaseMethodBuilder]]
@@ -32,7 +39,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
   def disabled: MethodBuilder[Req, Rep] =
     forClassifier(Disabled)
 
-  private[client] def filter(scopedStats: StatsReceiver): Filter.TypeAgnostic = {
+  private[client] def filter: Filter.TypeAgnostic = {
     val classifier = mb.config.retry.responseClassifier
     val maxRetries = mb.config.retry.maxRetries
     if (classifier eq Disabled)
@@ -46,7 +53,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
           new RetryFilter[Req1, Rep1](
             withoutRequeues,
             mb.params[param.HighResTimer].timer,
-            scopedStats,
+            mb.params[param.Stats].statsReceiver,
             mb.params[Retries.Budget].retryBudget
           )
         }
@@ -54,7 +61,8 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
     }
   }
 
-  private[client] def logicalStatsFilter(stats: StatsReceiver): Filter.TypeAgnostic = {
+  private[client] def logicalStatsFilter: Filter.TypeAgnostic = {
+    val stats = mb.params[param.Stats].statsReceiver
     val timeUnit = mb.params[StatsFilter.Param].unit
     StatsFilter.typeAgnostic(
       new DenylistStatsReceiver(stats.scope(LogicalScope), LogicalStatsDenylistFn),

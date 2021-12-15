@@ -7,7 +7,6 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.service.TimeoutFilterTest.TunableTimeoutHelper
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.tracing.Annotation
 import com.twitter.finagle.tracing.BufferingTracer
 import com.twitter.finagle.tracing.Record
@@ -462,18 +461,9 @@ class TimeoutFilterTest extends AnyFunSuite with Matchers with MockitoSugar {
   }
 
   private def toggleOnCtx(fn: => Unit): Unit = {
-    // condition:
-    // 1. service zone == atla
-    // 2. _traceId exist
-    // 3. toggled up
-    DeadlineOnlyToggle.setEnabledZone(true)
-
-    flag.overrides.let("com.twitter.finagle.service.DeadlineOnly", 1.0) {
-      val traceContext1 = TraceId(Some(SpanId(0xabc)), None, SpanId(0x123), None)
-      Trace.letId(traceContext1) {
-        fn
-      }
-    }
+    DeadlineOnlyToggle.unsafeOverride(Some(true))
+    try fn
+    finally DeadlineOnlyToggle.unsafeOverride(None)
   }
 
   private def fakeTraceRecord(deadline: Deadline): Annotation.BinaryAnnotation = {

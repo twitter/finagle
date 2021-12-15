@@ -303,11 +303,6 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     brfParam: BackupRequestFilter.Param,
     classifier: service.ResponseClassifier
   ): MethodBuilder[Req, Rep] = {
-    val stackClassifier =
-      if (!params.contains[param.ResponseClassifier]) None
-      else Some(params[param.ResponseClassifier].responseClassifier)
-    val idempotentedStackClassifier = idempotentify(stackClassifier, classifier)
-
     val configClassifier = config.retry.underlyingClassifier
     val idempotentedConfigClassifier = idempotentify(configClassifier, classifier)
 
@@ -386,7 +381,8 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   //
   private[this] def newService(methodName: Option[String]): Service[Req, Rep] = {
     materialize()
-    filters(methodName).andThen(wrappedService(methodName))
+    val withStats = configured(param.Stats(statsReceiver(methodName)))
+    withStats.filters(methodName).andThen(withStats.wrappedService(methodName))
   }
 
   /**
@@ -422,9 +418,11 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   ): ServicePerEndpoint = {
     materialize()
 
+    val withStats = configured(param.Stats(statsReceiver(methodName)))
+
     builder
-      .servicePerEndpoint(wrappedService(methodName))
-      .filtered(filters(methodName))
+      .servicePerEndpoint(withStats.wrappedService(methodName))
+      .filtered(withStats.filters(methodName))
   }
 
   //
@@ -458,7 +456,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     methodPool.materialize(params)
   }
 
-  private[this] def filters(methodName: Option[String]): Filter.TypeAgnostic = {
+  private def filters(methodName: Option[String]): Filter.TypeAgnostic = {
     // Ordering of filters:
     // Requests start at the top and traverse down.
     // Responses flow back from the bottom up.
@@ -477,7 +475,6 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     // - Backup Requests
     // - Service (Finagle client's stack, including Per Request Timeout)
 
-    val stats = statsReceiver(methodName)
     val retries = withRetry
     val timeouts = withTimeout
 
@@ -488,11 +485,11 @@ final class MethodBuilder[Req, Rep] private[finagle] (
 
     config.traceInitializer
       .andThen(config.filter)
-      .andThen(retries.logicalStatsFilter(stats))
+      .andThen(retries.logicalStatsFilter)
       .andThen(retries.logFailuresFilter(clientName, methodName))
       .andThen(failureSource)
       .andThen(timeouts.totalFilter)
-      .andThen(retries.filter(stats))
+      .andThen(retries.filter)
       .andThen(timeouts.perRequestFilter)
   }
 
@@ -531,7 +528,11 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   private[this] def addToRegistry(name: Option[String]): Unit = {
     val entry = registryEntry()
     val keyPrefix = registryKeyPrefix(name)
-    ClientRegistry.register(entry, keyPrefix :+ "statsReceiver", statsReceiver(name).toString)
+
+    ClientRegistry.register(
+      entry,
+      keyPrefix :+ "statsReceiver",
+      params[param.Stats].statsReceiver.toString)
 
     withTimeout.registryEntries.foreach {
       case (suffix, value) =>
@@ -543,12 +544,11 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     }
   }
 
-  private[this] def wrappedService(name: Option[String]): Service[Req, Rep] = {
+  private def wrappedService(name: Option[String]): Service[Req, Rep] = {
     addToRegistry(name)
     methodPool.open()
 
     val backupRequestParams = params +
-      param.Stats(statsReceiver(name)) +
       param.ResponseClassifier(config.retry.responseClassifier)
 
     // register BackupRequestFilter under the same prefixes as other method entries

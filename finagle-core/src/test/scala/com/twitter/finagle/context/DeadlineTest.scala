@@ -1,10 +1,6 @@
 package com.twitter.finagle.context
 
 import com.twitter.finagle.service.DeadlineOnlyToggle
-import com.twitter.finagle.tracing.Flags
-import com.twitter.finagle.tracing.SpanId
-import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.tracing.TraceId
 import com.twitter.util.Time
 import com.twitter.util.Duration
 import com.twitter.util.Return
@@ -34,15 +30,9 @@ class DeadlineTest extends AnyFunSuite with AssertionsForJUnit with ScalaCheckDr
       assert(Deadline.current == Some(sampled))
       assert(Deadline.currentToggled == None)
 
-      com.twitter.finagle.toggle.flag.overrides
-        .let("com.twitter.finagle.service.DeadlineOnly", 1.0) {
-          val traceId = TraceId(Some(SpanId(42)), Some(SpanId(32)), SpanId(22), None, Flags(12))
-
-          Trace.letId(traceId) {
-            DeadlineOnlyToggle.setEnabledZone(true)
-            assert(Deadline.currentToggled == Some(sampled))
-          }
-        }
+      DeadlineOnlyToggle.unsafeOverride(Some(true))
+      try assert(Deadline.currentToggled == Some(sampled))
+      finally DeadlineOnlyToggle.unsafeOverride(None)
     }
   }
 

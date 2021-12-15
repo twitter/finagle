@@ -3,8 +3,11 @@ package com.twitter.finagle.thriftmux
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.mux.Request
 import com.twitter.finagle.mux.Response
+import com.twitter.finagle.service.DeadlineOnlyToggle
 import com.twitter.finagle.service.ReqRep
 import com.twitter.finagle.service.ResponseClass
 import com.twitter.finagle.stats._
@@ -24,6 +27,18 @@ import scala.collection.JavaConverters._
 import org.scalatest.funsuite.AnyFunSuite
 
 class MethodBuilderTest extends AnyFunSuite with Eventually {
+
+  private class SlowTestService(implicit val timer: Timer) extends TestService.MethodPerEndpoint {
+    def query(x: String): Future[String] = {
+      Future.sleep(50.millis).before { Future.value(x) }
+    }
+    def question(y: String): Future[String] = {
+      Future.sleep(50.millis).before { Future.value(y) }
+    }
+    def inquiry(z: String): Future[String] = {
+      Future.sleep(50.millis).before { Future.value(z) }
+    }
+  }
 
   def await[T](a: Awaitable[T], d: Duration = 5.seconds): T =
     Await.result(a, d)
@@ -106,17 +121,7 @@ class MethodBuilderTest extends AnyFunSuite with Eventually {
 
   test("methodBuilder timeouts from Stack") {
     implicit val timer: Timer = DefaultTimer
-    val service = new TestService.MethodPerEndpoint {
-      def query(x: String): Future[String] = {
-        Future.sleep(50.millis).before { Future.value(x) }
-      }
-      def question(y: String): Future[String] = {
-        Future.sleep(50.millis).before { Future.value(y) }
-      }
-      def inquiry(z: String): Future[String] = {
-        Future.sleep(50.millis).before { Future.value(z) }
-      }
-    }
+    val service = new SlowTestService
     val server =
       serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
 
@@ -133,17 +138,7 @@ class MethodBuilderTest extends AnyFunSuite with Eventually {
 
   test("methodBuilder timeouts from ClientBuilder") {
     implicit val timer: Timer = DefaultTimer
-    val service = new TestService.MethodPerEndpoint {
-      def query(x: String): Future[String] = {
-        Future.sleep(50.millis).before { Future.value(x) }
-      }
-      def question(y: String): Future[String] = {
-        Future.sleep(50.millis).before { Future.value(y) }
-      }
-      def inquiry(z: String): Future[String] = {
-        Future.sleep(50.millis).before { Future.value(z) }
-      }
-    }
+    val service = new SlowTestService
     val server =
       serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
 
@@ -159,6 +154,46 @@ class MethodBuilderTest extends AnyFunSuite with Eventually {
     val mb = MethodBuilder.from(clientBuilder)
 
     testMethodBuilderTimeouts(stats, server, mb)
+  }
+
+  private def toggleOnCtx(fn: => Unit): Unit = {
+    DeadlineOnlyToggle.unsafeOverride(Some(true))
+    try fn
+    finally DeadlineOnlyToggle.unsafeOverride(None)
+  }
+
+  test("methodBuilder prefers deadlines when they are in the context") {
+    implicit val timer: Timer = DefaultTimer
+    val service = new SlowTestService
+    val server =
+      serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+
+    val stats = new InMemoryStatsReceiver()
+    val client = clientImpl
+      .withStatsReceiver(stats)
+      .configured(param.Timer(timer))
+
+    val mb = client
+      .withLabel("a_label")
+      .methodBuilder(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+
+    val shortTimeoutSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      mb.withTimeoutTotal(1000.millis) // very large timeout that should never fire
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("fast")
+        .query
+
+    toggleOnCtx {
+      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(5.millis)) {
+        // short deadline should fire
+        intercept[GlobalRequestTimeoutException] {
+          await(shortTimeoutSvcPerEndpoint(TestService.Query.Args("shorty")))
+        }
+      }
+    }
+
+    eventually {
+      assert(stats.counter("a_label", "fast", "deadline_only")() == 1)
+    }
   }
 
   test("methodBuilder timeouts from configured ClientBuilder") {
