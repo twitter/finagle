@@ -4,16 +4,15 @@ import com.twitter.finagle._
 import com.twitter.finagle.exp.ForkingSchedulerFilter
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{
-  DeadlineFilter,
-  ExpiringService,
-  MetricBuilderRegistry,
-  StatsFilter,
-  TimeoutFilter
-}
+import com.twitter.finagle.service.DeadlineFilter
+import com.twitter.finagle.service.ExpiringService
+import com.twitter.finagle.service.MetricBuilderRegistry
+import com.twitter.finagle.service.StatsFilter
+import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.{Stack, _}
+import com.twitter.finagle.Stack
+import com.twitter.finagle._
 import com.twitter.jvm.Jvm
 
 object StackServer {
@@ -138,7 +137,6 @@ object StackServer {
     // to exclude Nack response from latency stats, CSL-2306.
     stk.push(ServerAdmissionControl.module)
     stk.push(ConcurrentRequestFilter.module)
-    stk.push(StatsFilter.module)
     stk.push(MaskCancelFilter.module)
     stk.push(ExceptionSourceFilter.module)
     stk.push(new JvmTracing)
@@ -152,13 +150,16 @@ object StackServer {
     // allowing us to provide a complimentary annotation to the Client WR/WS as well
     // as measure queueing within the server via ConcurrentRequestFilter.
     stk.push(WireTracingFilter.serverModule)
-    stk.push(Preparer.module)
 
     // forks the execution if the current scheduler supports forking
     stk.push(ForkingSchedulerFilter.server)
     // This module is placed at the top of the stack and shifts Future execution context
     // from IO threads into a configured FuturePool right after Netty.
     stk.push(OffloadFilter.server)
+    // The StatsFilter needs to be above the OffloadFilter so that we can
+    // calculate latency metric changes when there's an offload delay.
+    stk.push(StatsFilter.module)
+    stk.push(Preparer.module)
 
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate
