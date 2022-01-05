@@ -28,7 +28,7 @@ import scala.reflect.io.Directory
  * Manages lifecycle of the embedded mysql instance.
  */
 object EmbeddedInstance {
-  val SocketParamName = "--socket"
+  val SocketParamName = "--socket="
   val SetupTeardownTimeout: Duration = 5.seconds
 
   val log: Logger = Logger.get()
