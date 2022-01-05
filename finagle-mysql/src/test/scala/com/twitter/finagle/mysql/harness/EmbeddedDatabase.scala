@@ -2,12 +2,16 @@ package com.twitter.finagle.mysql.harness
 
 import com.twitter.concurrent.Once
 import com.twitter.finagle.Mysql
+import com.twitter.finagle.mysql.harness.EmbeddedDatabase.UserNameForInstance
+import com.twitter.finagle.mysql.harness.EmbeddedDatabase.checkUserCache
+import com.twitter.finagle.mysql.harness.EmbeddedDatabase.userCache
 import com.twitter.finagle.mysql.harness.EmbeddedInstance.SetupTeardownTimeout
 import com.twitter.finagle.mysql.harness.config.DatabaseConfig
+import com.twitter.finagle.mysql.harness.config.User
 import com.twitter.util.Await
 import com.twitter.util.Future
 import java.util.concurrent.ConcurrentHashMap
-import java.util.function.Function
+import java.util.function.BiFunction
 
 object EmbeddedDatabase {
   // EmbeddedDatabase instances are cached by instance destination and database name.
@@ -15,10 +19,13 @@ object EmbeddedDatabase {
   //
   // Note, we don't evict entries from here and they live for the life of
   // the associated instances (which live for the life of the jvm).
-  private val dbCache: ConcurrentHashMap[CacheKey, EmbeddedDatabase] =
-    new ConcurrentHashMap[CacheKey, EmbeddedDatabase]()
-
+  private val dbCache: ConcurrentHashMap[CacheKey, CacheValue] =
+    new ConcurrentHashMap[CacheKey, CacheValue]()
+  private val userCache: ConcurrentHashMap[UserNameForInstance, User] =
+    new ConcurrentHashMap[UserNameForInstance, User]()
   private case class CacheKey(instanceDest: String, databaseName: String)
+  private case class CacheValue(databaseConfig: DatabaseConfig, embeddedDatabase: EmbeddedDatabase)
+  private case class UserNameForInstance(userName: String, instanceDest: String)
 
   /**
    * Get or create a new EmbeddedDatabase for the given instance destination and database name in
@@ -33,14 +40,59 @@ object EmbeddedDatabase {
     config: DatabaseConfig,
     instance: EmbeddedInstance
   ): EmbeddedDatabase = {
-    dbCache.computeIfAbsent(
-      CacheKey(instance.dest, config.databaseName),
-      new Function[CacheKey, EmbeddedDatabase] {
-        override def apply(t: CacheKey): EmbeddedDatabase = {
-          new EmbeddedDatabase(config, instance)
-        }
-      }
-    )
+    val newCacheValue = CacheKey(instance.dest, config.databaseName)
+    dbCache
+      .compute(
+        newCacheValue,
+        checkDatabaseCache(config, instance)
+      ).embeddedDatabase
+  }
+
+  /**
+   * This function is meant to be called as part of the ConcurrentHashMap compute checks only.
+   *
+   * This function ensures the passed in user hasn't already been created on an instance with a
+   * different password
+   * @param newUser The user to check
+   * @return the user to add to the cache
+   */
+  private def checkUserCache(newUser: User): BiFunction[UserNameForInstance, User, User] = {
+    case (_, null) => newUser
+    case (_, oldUser) if newUser == oldUser => newUser
+    case (userNameForInstance, oldUser) =>
+      throw new Exception(s"""
+          |User ${userNameForInstance.userName} on ${userNameForInstance.instanceDest} has already been configured
+          |Old configuration: $oldUser
+          |New configuration: $newUser
+          |""".stripMargin)
+  }
+
+  /**
+   * This function is meant to be called as part of the ConcurrentHashMap compute checks only.
+   *
+   * This function ensures a database hasn't previously been configured with different users nor
+   * different setup queries.
+   * @param databaseConfig The configuration of the database being checked
+   * @param instance The instance being checked against
+   * @return the CacheValue to add to the database cache
+   */
+  private def checkDatabaseCache(
+    databaseConfig: DatabaseConfig,
+    instance: EmbeddedInstance
+  ): BiFunction[CacheKey, CacheValue, CacheValue] = {
+    case (_, null) =>
+      databaseConfig.users.foreach(user => {
+        val userNameForInstance = UserNameForInstance(user.name, instance.dest)
+        userCache.compute(userNameForInstance, checkUserCache(user))
+      })
+      CacheValue(databaseConfig, new EmbeddedDatabase(databaseConfig, instance))
+    case (_, oldCacheValue) if databaseConfig == oldCacheValue.databaseConfig =>
+      oldCacheValue
+    case (_, oldCacheValue) =>
+      throw new Exception(s"""
+        |Database ${oldCacheValue.databaseConfig.databaseName} has already been configured on ${instance.dest}
+        |Old Configuration: ${oldCacheValue.databaseConfig}
+        |New Configuration: $databaseConfig""".stripMargin)
   }
 }
 
@@ -61,7 +113,13 @@ final class EmbeddedDatabase(
   val init: () => Unit = Once {
     val createDbSql = Seq(s"CREATE DATABASE `${config.databaseName}`;")
     val createUsersSql = config.users.flatMap { user =>
-      val createUserPrefix = s"CREATE USER '${user.name}'@'%%'"
+      val userNameForInstance = UserNameForInstance(user.name, instance.dest)
+      userCache.compute(
+        userNameForInstance,
+        checkUserCache(user)
+      ) //Ensures user hasn't been previously created with a different password
+
+      val createUserPrefix = s"CREATE USER IF NOT EXISTS'${user.name}'@'%%'"
       val createUserSuffix = user.password match {
         case Some(pwd) => s"IDENTIFIED BY '$pwd';"
         case None => ";"
