@@ -1,43 +1,47 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.StorageUnitOps._
-import com.twitter.finagle.Mux.param.{CompressionPreferences, MaxFrameSize}
+import com.twitter.finagle.Mux.param.CompressionPreferences
+import com.twitter.finagle.Mux.param.MaxFrameSize
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
+import com.twitter.finagle.filter.NackAdmissionFilter
+import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.pushsession._
 import com.twitter.finagle.mux.transport.{OpportunisticTls => MuxOpportunisticTls, _}
-import com.twitter.finagle.mux.{
-  ExportCompressionUsage,
-  Handshake,
-  OpportunisticTlsParams,
-  Request,
-  Response,
-  WithCompressionPreferences
-}
-import com.twitter.finagle.netty4.pushsession.{Netty4PushListener, Netty4PushTransporter}
+import com.twitter.finagle.mux.ExportCompressionUsage
+import com.twitter.finagle.mux.Handshake
+import com.twitter.finagle.mux.OpportunisticTlsParams
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
+import com.twitter.finagle.mux.WithCompressionPreferences
+import com.twitter.finagle.netty4.pushsession.Netty4PushListener
+import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslChannelInitializer
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
-import com.twitter.finagle.param.{
-  Label,
-  OppTls,
-  ProtocolLibrary,
-  Stats,
-  Timer,
-  WithDefaultLoadBalancer
-}
+import com.twitter.finagle.param.Label
+import com.twitter.finagle.param.OppTls
+import com.twitter.finagle.param.ProtocolLibrary
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.Timer
+import com.twitter.finagle.param.WithDefaultLoadBalancer
 import com.twitter.finagle.pool.BalancingPool
 import com.twitter.finagle.pushsession._
 import com.twitter.finagle.server._
-import com.twitter.finagle.ssl.{OpportunisticTls, SnoopingLevelInterpreter}
+import com.twitter.finagle.ssl.OpportunisticTls
+import com.twitter.finagle.ssl.SnoopingLevelInterpreter
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport.{ClientSsl, ServerSsl}
+import com.twitter.finagle.transport.Transport.ClientSsl
+import com.twitter.finagle.transport.Transport.ServerSsl
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Buf, ByteReader}
-import com.twitter.util.{Future, StorageUnit}
-import io.netty.channel.{Channel, ChannelPipeline}
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
+import com.twitter.util.Future
+import com.twitter.util.StorageUnit
+import io.netty.channel.Channel
+import io.netty.channel.ChannelPipeline
 import java.net.SocketAddress
 import java.util.concurrent.Executor
 import scala.collection.mutable.ArrayBuffer
@@ -245,9 +249,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       with OpportunisticTlsParams[Client]
       with WithCompressionPreferences[Client] {
 
-    private[this] val statsReceiver = params[Stats].statsReceiver
-    private[this] val sessionStats = new SharedNegotiationStats(statsReceiver)
-    private[this] val sessionParams = params + Stats(statsReceiver.scope("mux"))
+    // These are lazy because the stats receiver is not appropriately scoped
+    // until after the `.newService` call (or equivalent). If they're not lazy
+    // we'll end up with dead stats scoped to `mux/...` instead of `client_name/mux/...`.
+    private[this] lazy val statsReceiver = params[Stats].statsReceiver
+    private[this] lazy val sessionStats = new SharedNegotiationStats(statsReceiver)
+    private[this] lazy val sessionParams = params + Stats(statsReceiver.scope("mux"))
 
     protected type SessionT = MuxClientNegotiatingSession
     protected type In = ByteReader
@@ -444,7 +451,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected type PipelineReq = ByteReader
     protected type PipelineRep = Buf
 
-    private[this] val sessionStats = new SharedNegotiationStats(params[Stats].statsReceiver)
+    // Lazy so we don't accidentally instantiate stats before we have the appropriately
+    // scoped stats receiver. See the Client shard stats for more detail.
+    private[this] lazy val sessionStats = new SharedNegotiationStats(params[Stats].statsReceiver)
 
     protected def newListener(): PushListener[ByteReader, Buf] = {
       Mux.Server.validateTlsParamConsistency(params)

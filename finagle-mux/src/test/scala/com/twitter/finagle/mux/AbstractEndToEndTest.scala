@@ -2,25 +2,34 @@ package com.twitter.finagle.mux
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.client.{BackupRequestFilter, EndpointerStackClient}
+import com.twitter.finagle.client.BackupRequestFilter
+import com.twitter.finagle.client.EndpointerStackClient
 import com.twitter.finagle.context.RemoteInfo
-import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
-import com.twitter.finagle.mux.transport.{BadMessageException, Message}
+import com.twitter.finagle.mux.lease.exp.Lessee
+import com.twitter.finagle.mux.lease.exp.Lessor
+import com.twitter.finagle.mux.transport.BadMessageException
+import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.server.ListeningStackServer
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.io.{Buf, BufByteWriter, ByteReader}
+import com.twitter.io.Buf
+import com.twitter.io.BufByteWriter
+import com.twitter.io.ByteReader
 import com.twitter.util._
-import java.io.{PrintWriter, StringWriter}
-import java.net.{InetSocketAddress, Socket}
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalactic.source.Position
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.junit.AssertionsForJUnit
-import org.scalatest.{BeforeAndAfter, Tag}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.Tag
 import scala.language.reflectiveCalls
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -61,6 +70,48 @@ abstract class AbstractEndToEndTest
       super.test(testName, testTags: _*) {
         liveness.sessionFailureDetector.let("none") { f }
       }
+  }
+
+  test("Shared metrics are scoped to the client and server names") {
+    val sr = new InMemoryStatsReceiver
+
+    val server = serverImpl
+      .withStatsReceiver(sr)
+      .withLabel("srv")
+      .serve(
+        "localhost:*",
+        Service.const[Response](Future.value(Response(Nil, Buf.Utf8("foo"))))
+      )
+
+    val client = clientImpl
+      .withStatsReceiver(sr)
+      .newService(getName(server), "client")
+
+    await(client(Request(Path.empty, Nil, Buf.Empty)), 30.seconds)
+
+    withClue(sr.counters) {
+      val clientUnscopedStatsExists = sr.counters.keySet.exists {
+        case Seq("mux", _*) => true
+        case _ => false
+      }
+      assert(!clientUnscopedStatsExists)
+
+      val clientScopedStatsExist = sr.counters.keySet.exists {
+        case Seq("client", "mux", _*) => true
+        case _ => false
+      }
+      assert(clientScopedStatsExist)
+
+      // Servers turn
+      val serverScopedStatsExist = sr.counters.keySet.exists {
+        case Seq("srv", "mux", _*) => true
+        case _ => false
+      }
+      assert(serverScopedStatsExist)
+    }
+
+    await(server.close())
+    await(client.close())
   }
 
   test(s"$implName: Dtab propagation") {
