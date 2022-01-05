@@ -12,6 +12,7 @@ import com.twitter.util.Future
 import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Try
+import java.io.File
 import java.io.IOException
 import java.net.InetAddress
 import java.net.ServerSocket
@@ -27,6 +28,7 @@ import scala.reflect.io.Directory
  * Manages lifecycle of the embedded mysql instance.
  */
 object EmbeddedInstance {
+  val SocketParamName = "--socket"
   val SetupTeardownTimeout: Duration = 5.seconds
 
   val log: Logger = Logger.get()
@@ -42,13 +44,11 @@ object EmbeddedInstance {
     baseDir: Path,
     dataDirectory: Path,
     port: Int,
-    socketFile: Path
   ): Seq[String] = {
     val derivedServerParameters: Seq[String] = Seq(
       s"--basedir=$baseDir",
       s"--datadir=$dataDirectory",
-      s"--port=$port",
-      s"--socket=$socketFile"
+      s"--port=$port"
     )
     config.startServerParameters ++ derivedServerParameters
   }
@@ -65,9 +65,32 @@ object EmbeddedInstance {
             val dataDirectory: Path = createDataDirectory(config)
             val port = openPort()
             val dest = s"${InetAddress.getLoopbackAddress.getHostAddress}:$port"
-            val socketFile = Files.createTempFile(config.extractedMySqlPath, null, ".sock")
+
+            // Will be empty if the socketParam is already present in order to ensure no duplicates
+            val socketParamToAdd: Seq[String] =
+              config.startServerParameters.find(_.toLowerCase.startsWith(SocketParamName)) match {
+                case Some(param) =>
+                  val socketFileName = param.substring(SocketParamName.length)
+                  // Files.createTempFile throws if the file already exists. If the user defines
+                  // the socket file in that manner, we want to ensure the file is deleted on exit
+                  // which is why the file is created with createNewFile which does not throw
+                  val socketFile = new File(socketFileName)
+                  socketFile.createNewFile()
+                  socketFile.deleteOnExit()
+                  Seq.empty[String]
+                case _ =>
+                  val socketFile: Path =
+                    Files.createTempFile(config.extractedMySqlPath, null, ".sock")
+                  socketFile.toFile.deleteOnExit()
+                  Seq(s"--socket=$socketFile")
+              }
+
             val serverParameters: Seq[String] =
-              getServerParameters(config, executables.getBaseDir, dataDirectory, port, socketFile)
+              getServerParameters(
+                config,
+                executables.getBaseDir,
+                dataDirectory,
+                port) ++ socketParamToAdd
 
             initializeDataDir(dataDirectory, executables.getBaseDir, executables)
 
@@ -76,7 +99,6 @@ object EmbeddedInstance {
 
             sys.addShutdownHook {
               instance.stopInstance()
-              socketFile.toFile.delete()
               new Directory(dataDirectory.toFile).deleteRecursively()
             }
             instance

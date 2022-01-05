@@ -53,10 +53,10 @@ object InstanceConfig {
    * The following values are derived at runtime:
    * - An open port is found for --port
    * - A directory is created within the extraction directory for --datadir
-   * - A temporary file is created for --socket
+   * - A temporary file is created for --socket if it hasn't already been provided 
    *
-   * Thus, we throw a [[RuntimeException]] if the parameters include port,
-   * datadir, or socket.
+   * Thus, we throw a [[RuntimeException]] if the parameters include port or
+   * datadir.
    *
    * @param mySqlVersion the version to retrieve parameters from.
 
@@ -73,8 +73,6 @@ object InstanceConfig {
       throw new RuntimeException("--port is not allowed in startServerParameters")
     } else if (serverParameters.exists(_.startsWith("--datadir"))) {
       throw new RuntimeException("--datadir is not allowed in startServerParameters")
-    } else if (serverParameters.exists(_.startsWith("--socket"))) {
-      throw new RuntimeException("--socket is not allowed in startServerParameters")
     }
     serverParameters
   }

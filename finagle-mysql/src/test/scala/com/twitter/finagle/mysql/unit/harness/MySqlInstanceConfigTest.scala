@@ -1,7 +1,9 @@
 package com.twitter.finagle.mysql.unit.harness
 
-import com.twitter.finagle.mysql.harness.config.{InstanceConfig, MySqlVersion}
-import java.nio.file.{Path, Paths}
+import com.twitter.finagle.mysql.harness.config.InstanceConfig
+import com.twitter.finagle.mysql.harness.config.MySqlVersion
+import java.nio.file.Path
+import java.nio.file.Paths
 import org.scalatest.funsuite.AnyFunSuite
 
 class InstanceConfigTest extends AnyFunSuite {
@@ -33,8 +35,7 @@ class InstanceConfigTest extends AnyFunSuite {
 
   Seq(
     "--port",
-    "--datadir",
-    "--socket"
+    "--datadir"
   ).foreach { forbiddenParam =>
     test(s"should throw if $forbiddenParam is in start parameters") {
       val testVersion = MySqlVersion(
