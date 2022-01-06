@@ -15,7 +15,9 @@ import scala.util.Random
 object Tracing {
 
   private val Rng = new Random
-  private[tracing] val sampled = FinagleStatsReceiver.counter("tracing", "sampled")
+  private[this] val tracingStats = FinagleStatsReceiver.scope("tracing")
+  private[tracing] val sampled = tracingStats.counter("sampled")
+  private val localSpans = tracingStats.counter("local_spans")
 
   private val DefaultId = TraceId(
     None,
@@ -344,7 +346,7 @@ abstract class Tracing {
         try f
         finally {
           val duration = Time.nowNanoPrecision - timestamp
-          recordSpan(name, timestamp, duration)
+          recordLocalSpan(name, timestamp, duration)
         }
       } else f
     }
@@ -362,7 +364,7 @@ abstract class Tracing {
         val timestamp = Time.nowNanoPrecision
         f.ensure {
           val duration = Time.nowNanoPrecision - timestamp
-          recordSpan(name, timestamp, duration)
+          recordLocalSpan(name, timestamp, duration)
         }
       } else f
     }
@@ -374,7 +376,7 @@ abstract class Tracing {
   def traceLocalSpan(name: String, duration: Duration): Unit = {
     Trace.letId(nextId) {
       if (isActivelyTracing) {
-        recordSpan(name, Time.nowNanoPrecision - duration, duration)
+        recordLocalSpan(name, Time.nowNanoPrecision - duration, duration)
       }
     }
   }
@@ -387,15 +389,16 @@ abstract class Tracing {
   def traceLocalSpan(name: String, timestamp: Time, duration: Duration): Unit = {
     Trace.letId(nextId) {
       if (isActivelyTracing) {
-        recordSpan(name, timestamp, duration)
+        recordLocalSpan(name, timestamp, duration)
       }
     }
   }
 
-  private[this] def recordSpan(name: String, timestamp: Time, duration: Duration): Unit = {
+  private[this] def recordLocalSpan(name: String, timestamp: Time, duration: Duration): Unit = {
     if (isActivelyTracing) {
       // these annotations are necessary to get the
       // zipkin ui to properly display the span.
+      localSpans.incr()
       record(Record(id, timestamp, Annotation.Rpc(name)))
       record(Record(id, timestamp, Annotation.ServiceName(serviceName)))
       record(Record(id, timestamp, Annotation.BinaryAnnotation("lc", name)))
