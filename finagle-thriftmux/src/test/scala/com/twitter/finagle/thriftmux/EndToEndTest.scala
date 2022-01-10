@@ -8,34 +8,42 @@ import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.liveness.FailureAccrualFactory
-import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
+import com.twitter.finagle.loadbalancer.Balancers
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.param.Label
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{Tracer => PTracer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.stats._
-import com.twitter.finagle.thrift.{
-  ClientId,
-  MethodMetadata,
-  Protocols,
-  RichServerParam,
-  ThriftClientRequest
-}
+import com.twitter.finagle.thrift.ClientId
+import com.twitter.finagle.thrift.MethodMetadata
+import com.twitter.finagle.thrift.Protocols
+import com.twitter.finagle.thrift.RichServerParam
+import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
-import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
+import com.twitter.finagle.tracing.Annotation.ClientSend
+import com.twitter.finagle.tracing.Annotation.ServerRecv
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport.ClientSsl
-import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.scrooge
 import com.twitter.scrooge.ThriftMethod
 import com.twitter.util._
-import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.SocketAddress
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol._
 import org.scalactic.source.Position
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.Tag
 import org.scalatestplus.junit.AssertionsForJUnit
 import scala.language.reflectiveCalls
@@ -177,6 +185,45 @@ class EndToEndTest
       assert(sr.counter("standard-service-metric-v1", "srv", "requests")() == 1)
       assert(
         sr.counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "requests")() == 1)
+
+      await(server.close())
+    }
+  }
+
+  test("end-to-end thriftmux aperture_least_loaded_weighted client") {
+    val sr = new InMemoryStatsReceiver()
+    LoadedStatsReceiver.self = sr
+    StandardStatsReceiver.serverCount.set(0)
+    new ThriftMuxTestServer {
+      val client = clientImpl
+        .withLoadBalancer(Balancers.aperture())
+        .configured(LoadBalancerFactory.UseWeightedBalancers(true))
+        .build[TestService.MethodPerEndpoint](
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "client"
+        )
+      assert(
+        sr.gauges(
+          Seq(
+            "clnt",
+            "client",
+            "loadbalancer",
+            "algorithm",
+            "aperture_least_loaded_weighted",
+          )
+        )() == 1
+      )
+
+      assert(await(client.query("ok")) == "okok")
+
+      assert(sr.counter("standard-service-metric-v1", "srv", "requests")() == 1)
+      assert(
+        sr.counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "requests")() == 1
+      )
+
+      assert(sr.gauges(Seq("clnt", "client", "connections"))() == 1)
+      await(client.asClosable.close())
+      assert(sr.gauges(Seq("clnt", "client", "connections"))() == 0)
 
       await(server.close())
     }

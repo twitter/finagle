@@ -5,7 +5,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.Balancer
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Time}
+import com.twitter.util.Closable
+import com.twitter.util.Future
+import com.twitter.util.Time
 import scala.util.hashing.MurmurHash3
 
 private object Aperture {
@@ -223,7 +225,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   override def close(deadline: Time): Future[Unit] = {
     gauges.foreach(_.remove())
-    coordObservation.close(deadline).before { super.close(deadline) }
+    // If manageWeights is true, the Balancer is not wrapped in a TrafficDistributor and therefore
+    // needs to manage its own lifecycle.
+    val closeNodes = if (!manageWeights) Closable.nop else Closable.all(dist.vector: _*)
+    coordObservation
+      .close(deadline)
+      .before { closeNodes.close(deadline) }
+      .before { super.close(deadline) }
   }
 
   override def status: Status = dist.status
