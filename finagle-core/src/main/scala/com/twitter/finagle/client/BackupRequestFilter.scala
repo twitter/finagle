@@ -5,11 +5,20 @@ import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.context.BackupRequest
 import com.twitter.finagle.naming.BindingFactory.Dest
-import com.twitter.finagle.param.{Label, ProtocolLibrary}
-import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, Retries, RetryBudget}
+import com.twitter.finagle.param.Label
+import com.twitter.finagle.param.ProtocolLibrary
+import com.twitter.finagle.service.ReqRep
+import com.twitter.finagle.service.ResponseClass
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service.Retries
+import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.tracing.{Annotation, Trace, TraceId, Tracing}
-import com.twitter.finagle.util.{Showable, WindowedPercentileHistogram}
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.finagle.tracing.Tracing
+import com.twitter.finagle.util.Showable
+import com.twitter.finagle.util.WindowedPercentileHistogram
 import com.twitter.logging.Logger
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
@@ -473,7 +482,9 @@ private[finagle] class BackupRequestFilter[Req, Rep](
             if (canIssueBackup()) {
               backupsSent.incr()
               val tracing = Trace()
-              val backupTraceId = tracing.nextId
+              val backupTraceId = // the backup request should be a sibling to the original
+                tracing.nextId.copy(_parentId = tracing.idOption.map(_.parentId))
+
               val backup = issueBackup(req, service, tracing, backupTraceId)
               orig.select(backup).transform { _ => pickWinner(req, orig, backup, tracing) }
             } else {
