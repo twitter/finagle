@@ -1,35 +1,47 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Address, _}
+import com.twitter.finagle.Address
+import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
-import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
+import com.twitter.finagle.service.ReqRep
+import com.twitter.finagle.service.ResponseClass
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.ssl.ClientAuth
+import com.twitter.finagle.ssl.KeyCredentials
+import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
-import com.twitter.finagle.stats.{
-  InMemoryStatsReceiver,
-  LoadedStatsReceiver,
-  NullStatsReceiver,
-  Server,
-  StatsReceiver
-}
-import com.twitter.finagle.stats.exp.{ExpressionSchema, ExpressionSchemaKey}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.LoadedStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.Server
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.exp.ExpressionSchema
+import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.thrift.{ClientId => FinagleClientId}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
-import com.twitter.finagle.tracing.{Annotation, Record, Trace}
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.TempFile
 import com.twitter.scrooge
 import com.twitter.test._
 import com.twitter.util._
-import java.io.{PrintWriter, StringWriter}
-import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.{List => JList}
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocol, TProtocolFactory}
+import org.apache.thrift.protocol.TBinaryProtocol
+import org.apache.thrift.protocol.TCompactProtocol
+import org.apache.thrift.protocol.TProtocol
+import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.transport.TTransport
 import org.scalatest.BeforeAndAfter
 import scala.reflect.ClassTag
@@ -224,65 +236,74 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
     assert(dtabSize == 0)
   }
 
-  testThrift("end-to-end tracing potpourri") { (client, tracer) =>
-    val id = Trace.nextId
-    Trace.letId(id) {
-      assert(await(client.multiply(10, 30), 10.seconds) == 300)
+  testThrift("end-to-end tracing potpourri", Some(FinagleClientId("foo_client"))) {
+    (client, tracer) =>
+      val id = Trace.nextId
+      Trace.letId(id) {
+        assert(await(client.multiply(10, 30), 10.seconds) == 300)
 
-      assert(tracer.nonEmpty)
-      val idSet = tracer.map(_.traceId).toSet
+        assert(tracer.nonEmpty)
+        val idSet = tracer.map(_.traceId).toSet
 
-      val ids = idSet.filter(_.traceId == id.traceId)
-      assert(ids.size == 1)
-      val theId = ids.head
+        val ids = idSet.filter(_.traceId == id.traceId)
+        assert(ids.size == 1)
+        val theId = ids.head
 
-      val traces: Seq[Record] = tracer
-        .filter(_.traceId == theId)
-        .filter {
-          // Skip spurious GC messages
-          case Record(_, _, Annotation.Message(msg), _) => !(msg == "GC Start" || msg == "GC End")
-          case Record(_, _, Annotation.BinaryAnnotation(k, _), _) => !k.contains("payload")
-          case _ => true
+        val traces: Seq[Record] = tracer
+          .filter(_.traceId == theId)
+          .filter {
+            // Skip spurious GC messages
+            case Record(_, _, Annotation.Message(msg), _) => !(msg == "GC Start" || msg == "GC End")
+            case Record(_, _, Annotation.BinaryAnnotation(k, _), _) => !k.contains("payload")
+            case _ => true
+          }
+          .toSeq
+
+        // Verify the count of the annotations. Order may change.
+        // These are set twice - by client and server
+        assert(
+          traces.collect {
+            case r @ Record(_, _, Annotation.BinaryAnnotation(_, _), _) => r
+          }.size == 12
+        )
+        assert(traces.collect { case Record(_, _, Annotation.ServerAddr(_), _) => () }.size == 2)
+        // With Stack, we get an extra ClientAddr because of the
+        // TTwitter upgrade request (ThriftTracing.CanTraceMethodName)
+        assert(traces.collect { case Record(_, _, Annotation.ClientAddr(_), _) => () }.size >= 2)
+        // LocalAddr is set on the server side only.
+        assert(traces.collect { case Record(_, _, Annotation.LocalAddr(_), _) => () }.size == 1)
+        // These are set by one side only.
+        assert(
+          traces.collect {
+            case Record(_, _, Annotation.ServiceName("thriftclient"), _) => ()
+          }.size == 1
+        )
+        assert(
+          traces.collect {
+            case Record(_, _, Annotation.ServiceName("thriftserver"), _) => ()
+          }.size == 1
+        )
+        assert(traces.collect { case Record(_, _, Annotation.ClientSend, _) => () }.size == 1)
+        assert(traces.collect { case Record(_, _, Annotation.ServerRecv, _) => () }.size == 1)
+        assert(traces.collect { case Record(_, _, Annotation.ServerSend, _) => () }.size == 1)
+        assert(traces.collect { case Record(_, _, Annotation.ClientRecv, _) => () }.size == 1)
+
+        assert(traces.collectFirst {
+          case Record(_, _, Annotation.BinaryAnnotation("srv/clientId", name: String), _) =>
+            name
         }
-        .toSeq
+          == Some("foo_client"))
 
-      // Verify the count of the annotations. Order may change.
-      // These are set twice - by client and server
-      assert(
-        traces.collect { case Record(_, _, Annotation.BinaryAnnotation(_, _), _) => () }.size == 10
-      )
-      assert(traces.collect { case Record(_, _, Annotation.ServerAddr(_), _) => () }.size == 2)
-      // With Stack, we get an extra ClientAddr because of the
-      // TTwitter upgrade request (ThriftTracing.CanTraceMethodName)
-      assert(traces.collect { case Record(_, _, Annotation.ClientAddr(_), _) => () }.size >= 2)
-      // LocalAddr is set on the server side only.
-      assert(traces.collect { case Record(_, _, Annotation.LocalAddr(_), _) => () }.size == 1)
-      // These are set by one side only.
-      assert(
-        traces.collect {
-          case Record(_, _, Annotation.ServiceName("thriftclient"), _) => ()
-        }.size == 1
-      )
-      assert(
-        traces.collect {
-          case Record(_, _, Annotation.ServiceName("thriftserver"), _) => ()
-        }.size == 1
-      )
-      assert(traces.collect { case Record(_, _, Annotation.ClientSend, _) => () }.size == 1)
-      assert(traces.collect { case Record(_, _, Annotation.ServerRecv, _) => () }.size == 1)
-      assert(traces.collect { case Record(_, _, Annotation.ServerSend, _) => () }.size == 1)
-      assert(traces.collect { case Record(_, _, Annotation.ClientRecv, _) => () }.size == 1)
+        assert(
+          await(client.complex_return("a string"), 10.seconds).arg_two
+            == "%s".format(Trace.id.spanId.toString)
+        )
 
-      assert(
-        await(client.complex_return("a string"), 10.seconds).arg_two
-          == "%s".format(Trace.id.spanId.toString)
-      )
+        intercept[AnException] { await(client.add(1, 2), 10.seconds) }
+        await(client.add_one(1, 2), 10.seconds) // don't block!
 
-      intercept[AnException] { await(client.add(1, 2), 10.seconds) }
-      await(client.add_one(1, 2), 10.seconds) // don't block!
-
-      assert(await(client.someway(), 10.seconds) == null) // don't block!
-    }
+        assert(await(client.someway(), 10.seconds) == null) // don't block!
+      }
   }
 
   test("Configuring SSL over stack param") {

@@ -665,6 +665,47 @@ class EndToEndTest
     await(server.close())
   }
 
+  test("server: ClientId should be included in trace") {
+
+    @volatile
+    var observedClientId: Option[String] = None
+
+    val serverTracer: Tracer = new Tracer {
+      def record(record: Record): Unit = {
+        record match {
+          case Record(_, _, Annotation.BinaryAnnotation("srv/clientId", name: String), _) =>
+            observedClientId = Some(name)
+          case _ =>
+        }
+      }
+      def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+    }
+    val server = serverImpl
+      .withTracer(serverTracer)
+      .serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.MethodPerEndpoint {
+          def query(x: String): Future[String] = Future.value(x)
+          def question(y: String): Future[String] = ???
+          def inquiry(z: String): Future[String] = ???
+        }
+      )
+
+    val client = clientImpl
+      .withClientId(ClientId("foo_client"))
+      .build[TestService.MethodPerEndpoint](
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    await(client.query("ok"))
+
+    eventually {
+      assert(observedClientId == Some("foo_client"))
+    }
+    await(server.close())
+  }
+
   test(
     "thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
     val server = serverImpl.serveIface(
