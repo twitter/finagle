@@ -11,7 +11,6 @@ import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.{param => _, _}
 import com.twitter.hashing._
 import com.twitter.util._
-import java.net.InetSocketAddress
 import scala.collection.mutable
 
 /**
@@ -105,17 +104,11 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
       address -> (address match {
         case WeightedAddress(addr @ Address.Inet(ia, metadata), w) =>
           val (shardIdOpt: Option[String], boundAddress: Addr) =
-            metadata match {
-              case PartitionNodeMetadata(_, shardId) =>
-                // This means the destination was resolved by TwitterCacheResolver.
-                twcacheConversion(shardId, ia)
+            ZkMetadata.fromAddrMetadata(metadata) match {
+              case Some(ZkMetadata(Some(shardId), _)) =>
+                (Some(shardId.toString), Addr.Bound(addr))
               case _ =>
-                ZkMetadata.fromAddrMetadata(metadata) match {
-                  case Some(ZkMetadata(Some(shardId), _)) =>
-                    (Some(shardId.toString), Addr.Bound(addr))
-                  case _ =>
-                    (None, Addr.Bound(addr))
-                }
+                (None, Addr.Bound(addr))
             }
           val node = PartitionNode(ia.getHostName, ia.getPort, w.toInt, shardIdOpt)
           val key = HashNodeKey.fromPartitionNode(node)
@@ -166,29 +159,6 @@ private[partitioning] class HashRingNodeManager[Req, Rep, Key](
       }
     }
     nodes.changes.filter(_.nonEmpty)
-  }
-
-  /**
-   * This code is needed to support the old "twcache" scheme. The TwitterCacheResolver uses
-   * PartitionNodeMetadata instead of ZkMetadata for shardId. Also address is unresolved. Therefore
-   * doing the necessary conversions here.
-   */
-  private[this] def twcacheConversion(
-    shardId: Option[String],
-    ia: InetSocketAddress
-  ): (Option[String], Addr) = {
-    val resolved = if (ia.isUnresolved) {
-      new InetSocketAddress(ia.getHostName, ia.getPort)
-    } else {
-      ia
-    }
-    // Convert PartitionNodeMetadata to ZkMetadata
-    (
-      shardId,
-      Addr.Bound(
-        Address.Inet(resolved, ZkMetadata.toAddrMetadata(ZkMetadata(shardId.map(_.toInt))))
-      )
-    )
   }
 
   // We listen for changes to the set of nodes to update the cache ring.
