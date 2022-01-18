@@ -35,10 +35,11 @@ trait P2CSuite {
   def newBal(
     fs: Var[Vector[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
-    clock: (() => Long) = System.nanoTime _
+    clock: (() => Long) = System.nanoTime _,
+    maxEffort: Int = 5
   ): ServiceFactory[Unit, Int] = new P2CLeastLoaded(
     Activity(fs.map(Activity.Ok(_))),
-    maxEffort = 5,
+    maxEffort = maxEffort,
     rng = Rng(12345L),
     statsReceiver = sr,
     emptyException = noBrokers

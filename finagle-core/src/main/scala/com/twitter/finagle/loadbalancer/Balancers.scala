@@ -41,24 +41,6 @@ import scala.util.Random
 object Balancers {
 
   /**
-   * This is the default for the fixed number of retries an LB implementation is willing
-   * to make if an unavailable (Status != Open) node is returned from the underlying pick.
-   *
-   * For randomized LBs (P2C* and Aperture*) this can be interpreted as a probability.
-   * For example, imagine that half of the replica set is down, the probability of
-   * picking two unavailable nodes is 0.25. If we repeat that process for 5 times,
-   * the total probability of seeing 5 unavailable nodes in a row, will be
-   * (0.25 ^ 5) = 0.1%. This means that if half of the cluster is down, the
-   * LB will be making a bad choice (when better choice may have been available)
-   * for 0.1% of requests.
-   *
-   * Please, note that this doesn't mean that 0.1% of requests will be failed
-   * by P2C operating on a half-dead cluster since Finagle clients have additional
-   * layers of requeues above the load balancer.
-   */
-  private val maxEffort = 5
-
-  /**
    * Creates a [[ServiceFactory]] proxy to `bal` with the `lbType` exported
    * to a gauge.
    */
@@ -105,6 +87,7 @@ object Balancers {
         params: Stack.Params
       ): ServiceFactory[Req, Rep] = {
         val sr = params[param.Stats].statsReceiver
+        val maxEffort = params[LoadBalancerFactory.PanicMode].maxEffort
         val balancer = new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc)
         newScopedBal(
           params[param.Label].label,
@@ -149,6 +132,7 @@ object Balancers {
       params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
+      val maxEffort = params[LoadBalancerFactory.PanicMode].maxEffort
       val balancer =
         new P2CPeakEwma(endpoints, decayTime, Stopwatch.systemNanos, maxEffort, rng, sr, exc)
       newScopedBal(
@@ -263,6 +247,7 @@ object Balancers {
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
       val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
+      val maxEffort = params[LoadBalancerFactory.PanicMode].maxEffort
 
       val balancer = new ApertureLeastLoaded(
         endpoints,
@@ -358,6 +343,7 @@ object Balancers {
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
       val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
+      val maxEffort = params[LoadBalancerFactory.PanicMode].maxEffort
 
       val balancer = new AperturePeakEwma(
         endpoints,

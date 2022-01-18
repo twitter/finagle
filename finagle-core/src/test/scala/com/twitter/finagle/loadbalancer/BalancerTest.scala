@@ -61,6 +61,9 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
         Future.Done
       }
       override def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
+
+      override def toString: String =
+        f"Node(load=NotImplemented, pending=NotImplemented, factory=$factory)"
     }
 
     protected def newNode(factory: EndpointFactory[Unit, Unit]): Node = new Node(factory)

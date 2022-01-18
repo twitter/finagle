@@ -42,4 +42,19 @@ class DefaultLoadBalancingParams[A <: Stack.Parameterized[A]](self: Stack.Parame
    */
   def probation: A =
     self.configured(LoadBalancerFactory.EnableProbation(enable = true))
+
+  /**
+   * Configures load balancer to "panic" when the percentage of unhealthy nodes
+   * reaches the panicThreshold. Load balancer will send some load to unhealthy
+   * nodes. Panic mode is probabilistic and per-request. Disabled for heap load
+   * balancer. Default is PanicMode.MajorityUnhealthy
+   * @param panicThreshold a threshold percent of unhealthy nodes tolerated.
+   * When threshold is reached, the lB panics for that request. The higher the
+   * threshold, the more attempts the load balancer will retry. Note that these
+   * percents are estimates. They are calculated for P2C* and Aperture* LBs.
+   * For round robin, these percents do not apply because it is not a pick two
+   * based algorithm.
+   */
+  private[twitter] def panicMode(panicThreshold: LoadBalancerFactory.PanicMode): A =
+    self.configured(panicThreshold)
 }

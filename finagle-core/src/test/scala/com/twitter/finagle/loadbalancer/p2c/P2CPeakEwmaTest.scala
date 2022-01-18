@@ -1,10 +1,19 @@
 package com.twitter.finagle.loadbalancer.p2c
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Status}
-import com.twitter.util.{Activity, Await, Closable, Future, Time, Var}
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Status
+import com.twitter.util.Activity
+import com.twitter.util.Await
+import com.twitter.util.Closable
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.Var
 import scala.annotation.tailrec
 import scala.collection.immutable.SortedMap
 import org.scalatest.funsuite.AnyFunSuite
@@ -15,10 +24,11 @@ class P2CPeakEwmaTest extends AnyFunSuite with P2CSuite {
   override def newBal(
     fs: Var[Vector[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
-    clock: (() => Long) = System.nanoTime _
+    clock: (() => Long) = System.nanoTime _,
+    maxEffort: Int = 5
   ): ServiceFactory[Unit, Int] = new P2CPeakEwma(
     Activity(fs.map(Activity.Ok(_))),
-    maxEffort = 5,
+    maxEffort = maxEffort,
     decayTime = 150.nanoseconds,
     nanoTime = clock,
     rng = Rng(12345L),
