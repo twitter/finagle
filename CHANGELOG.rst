@@ -13,6 +13,12 @@ Bug Fixes
 * finagle-postgres: Fixed a bug where a single framer instance was shared across all
   connections to a host when using TLS. ``PHAB_ID=D768581``
 
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Bump version of Caffeine to 2.9.3. ``PHAB_ID=D815761``
+
 22.1.0
 ------
 
