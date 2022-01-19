@@ -5,34 +5,20 @@ import com.github.benmanes.caffeine.cache.RemovalCause
 import com.github.benmanes.caffeine.cache.RemovalListener
 import com.twitter.cache.FutureCache
 import com.twitter.cache.caffeine.CaffeineCache
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceProxy
 import com.twitter.finagle.Stack
-import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param
-import com.twitter.finagle.postgresql.Client.Expect
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
 import com.twitter.finagle.postgresql.Params.CancelGracePeriod
-import com.twitter.finagle.postgresql.Params.Credentials
-import com.twitter.finagle.postgresql.Params.Database
 import com.twitter.finagle.postgresql.Params.MaxConcurrentPrepareStatements
-import com.twitter.finagle.postgresql.Params.SessionDefaults
-import com.twitter.finagle.postgresql.Params.StatementTimeout
-import com.twitter.finagle.postgresql.Response.ConnectionParameters
 import com.twitter.finagle.postgresql.Types.Name
 import com.twitter.finagle.postgresql.machine._
 import com.twitter.finagle.stats.LazyStatsReceiver
+import com.twitter.finagle.postgresql.transport.ClientTransport
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.Transport
-import com.twitter.io.Reader
-import com.twitter.util.Duration
-import com.twitter.util.Future
-import com.twitter.util.Promise
-import com.twitter.util.Return
-import com.twitter.util.Throw
-import com.twitter.util.TimeoutException
-import com.twitter.util.Time
+import com.twitter.util.{StateMachine => _, _}
 
 /**
  * Handles transforming the Postgres protocol to an RPC style.
@@ -56,9 +42,9 @@ import com.twitter.util.Time
  * @see [[StateMachine]]
  */
 class ClientDispatcher(
-  transport: Transport[FrontendMessage, BackendMessage],
-  params: Stack.Params,
-) extends GenSerialClientDispatcher[Request, Response, FrontendMessage, BackendMessage](
+  transport: ClientTransport,
+  params: Stack.Params)
+    extends GenSerialClientDispatcher[Request, Response, FrontendMessage, BackendMessage](
       transport,
       params[param.Stats].statsReceiver,
       closeOnInterrupt = false
@@ -66,7 +52,7 @@ class ClientDispatcher(
   private[this] val param.Timer(timer) = params[com.twitter.finagle.param.Timer]
   private[this] val param.Stats(statsReceiver) = params[param.Stats]
   private[this] val CancelGracePeriod(cancelGracePeriod) = params[CancelGracePeriod]
-  private[this] val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
+  private[this] val connectionParameters = transport.context.connectionParameters
 
   private[this] val machineRunner: Runner = new Runner(transport)
 
@@ -83,71 +69,8 @@ class ClientDispatcher(
         case Throw(_) => close()
       }
 
-  /**
-   * This is used to keep the result of the startup sequence.
-   *
-   * The startup sequence is initiated when the connection is established, so there's no client response to fulfill.
-   * Instead, we fulfill this promise to keep the data available subsequently.
-   */
-  private[this] val connectionParameters: Promise[Response.ConnectionParameters] = new Promise()
-
-  private def runInitializationCommands(): Future[Unit] =
-    params[Params.ConnectionInitializationCommands].commands.toList match {
-      case Nil =>
-        Future.Done
-      case initCmds =>
-        val p = new Promise[Response]()
-
-        val machineComplete = machineRunner.dispatch(
-          new SimpleQueryMachine(initCmds.mkString(";\n"), ConnectionParameters.empty),
-          p
-        )
-
-        val queryResponses = p
-          .flatMap(Expect.SimpleQueryResponse)
-          .flatMap(resp => Reader.readAllItems(resp.responses.map(Expect.Command)))
-          .flatMap(l => Future.collect(l))
-
-        Future
-          .join(
-            machineComplete,
-            queryResponses
-          ).unit
-    }
-
-  /**
-   * Immediately start the handshaking upon connection establishment, before any client requests.
-   */
-  private[this] val startup: Future[Unit] =
-    machineRunner
-      .dispatch(
-        HandshakeMachine(
-          params[Credentials],
-          params[Database],
-          params[StatementTimeout],
-          params[SessionDefaults]),
-        connectionParameters)
-      .before { runInitializationCommands() }
-      .raiseWithin(connectTimeout)(timer)
-      .onFailure { _ =>
-        close()
-      }
-
-  override def apply(req: Request): Future[Response] =
-    startup before super.apply(req)
-
   override protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
-    connectionParameters.poll match {
-      case None =>
-        Future.exception(
-          new PgSqlClientError("Handshake result should be available at this point."))
-      case Some(Throw(t)) =>
-        // If handshaking failed, we cannot proceed with sending requests
-        p.setException(t)
-        close() // TODO: is it okay to close the connection here?
-      case Some(Return(parameters)) =>
-        dispatchRequest(req, p, parameters)
-    }
+    dispatchRequest(req, p, connectionParameters)
 
   private def dispatchRequest(
     req: Request,
@@ -216,7 +139,7 @@ class ClientDispatcher(
 
 object ClientDispatcher {
   def cached(
-    transport: Transport[FrontendMessage, BackendMessage],
+    transport: ClientTransport,
     params: Stack.Params
   ): Service[Request, Response] =
     PrepareCache(

@@ -40,7 +40,7 @@ import io.netty.channel.Channel
 class TlsHandshakeTransporter(
   val remoteAddress: SocketAddress,
   params: Stack.Params,
-  framer: Framer,
+  framerFactory: () => Framer,
 ) extends Transporter[Buf, Buf, TransportContext] {
 
   private[this] val netty4Transporter =
@@ -95,7 +95,7 @@ class TlsHandshakeTransporter(
         channel.pipeline.addFirst("pgSqlSslInit", new Netty4ClientSslChannelInitializer(sslParams))
 
         // Manually add the framer in the pipeline where [[Netty4ClientChannelInitializer]] would have inserted it
-        ctContext.ch.pipeline.addAfter(BufCodec.Key, "decoder", new DecoderHandler(framer))
+        ctContext.ch.pipeline.addAfter(BufCodec.Key, "decoder", new DecoderHandler(framerFactory()))
         p
       case other =>
         Future.exception(

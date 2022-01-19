@@ -2,11 +2,18 @@ package com.twitter.finagle.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.{Stack, Status}
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Status
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
-import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
-import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer, StreamTermination}
+import com.twitter.finagle.ssl.session.NullSslSessionInfo
+import com.twitter.finagle.ssl.session.SslSessionInfo
+import com.twitter.io.Buf
+import com.twitter.io.Pipe
+import com.twitter.io.Reader
+import com.twitter.io.ReaderDiscardedException
+import com.twitter.io.Writer
+import com.twitter.io.StreamTermination
 import com.twitter.util._
 import java.net.SocketAddress
 import java.security.cert.Certificate
@@ -85,6 +92,23 @@ trait Transport[In, Out] extends Closable { self =>
       def context: Context = self.context
       override def toString: String = self.toString
     }
+
+  /**
+   * Maps the context of this transport to a new context.
+   * @param f A function to provide a new context
+   */
+  def mapContext[Ctx1 <: TransportContext](f: self.Context => Ctx1): Transport[In, Out] {
+    type Context <: Ctx1
+  } = {
+    val newCtx = f(self.context)
+    new TransportProxyWithoutContext[In, Out](self) {
+      type Context = Ctx1
+
+      override def write(req: In): Future[Unit] = self.write(req)
+      override def read(): Future[Out] = self.read()
+      override def context: Context = newCtx
+    }
+  }
 
   /**
    * The control panel for the Transport.
@@ -364,18 +388,28 @@ trait TransportFactory {
 
 /**
  * A [[Transport]] that defers all methods except `read` and `write`
- * to `self`.
+ * to `self`. The context is unspecified and must be provided by the
+ * implementor.
  */
-abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transport[In, Out] {
+abstract class TransportProxyWithoutContext[In, Out](_self: Transport[In, Out])
+    extends Transport[In, Out] {
+  def status: Status = _self.status
+  def onClose: Future[Throwable] = _self.onClose
+  def close(deadline: Time): Future[Unit] = _self.close(deadline)
+  override def toString: String = _self.toString
+}
+
+/**
+ * A [[Transport]] that defers all methods except `read` and `write`
+ * to `self`. The context is copied from `self`.
+ */
+abstract class TransportProxy[In, Out](_self: Transport[In, Out])
+    extends TransportProxyWithoutContext[In, Out](_self) {
+  val self: Transport[In, Out] = _self
 
   type Context = self.Context
 
-  val self: Transport[In, Out] = _self
-  def status: Status = self.status
-  def onClose: Future[Throwable] = self.onClose
-  def close(deadline: Time): Future[Unit] = self.close(deadline)
   def context: Context = self.context
-  override def toString: String = self.toString
 }
 
 /**

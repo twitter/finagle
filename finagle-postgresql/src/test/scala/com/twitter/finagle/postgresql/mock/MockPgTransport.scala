@@ -3,11 +3,12 @@ package com.twitter.finagle.postgresql.mock
 import com.twitter.finagle.Status
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.FrontendMessage
+import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.postgresql.mock.MockPgTransport.Step
+import com.twitter.finagle.postgresql.transport.PgTransportContext
 import com.twitter.finagle.ssl.session.NullSslSessionInfo
 import com.twitter.finagle.transport.SimpleTransportContext
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.transport.TransportContext
 import com.twitter.util.Future
 import com.twitter.util.Promise
 import com.twitter.util.Return
@@ -19,13 +20,16 @@ final class MockPgTransport(
   steps: Seq[MockPgTransport.Step],
 ) extends Transport[FrontendMessage, BackendMessage]
     with org.scalatest.Assertions {
-  override type Context = TransportContext
+  override type Context = PgTransportContext
 
   private[this] val closep = new Promise[Throwable]
 
   val onClose: Future[Throwable] = closep
-  val context: TransportContext =
-    new SimpleTransportContext(new SocketAddress {}, new SocketAddress {}, NullSslSessionInfo)
+  val context: PgTransportContext =
+    new PgTransportContext(
+      Response.ConnectionParameters.empty,
+      new SimpleTransportContext(new SocketAddress {}, new SocketAddress {}, NullSslSessionInfo)
+    )
 
   private[this] val states: Seq[State] = steps.flatMap(mkStates(_))
   private[this] val iter: Iterator[State] = states.iterator

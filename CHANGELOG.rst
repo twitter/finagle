@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~~
+
+* finagle-postgres: Fixed a bug where a single framer instance was shared across all
+  connections to a host when using TLS. ``PHAB_ID=D768581``
+
 22.1.0
 ------
 

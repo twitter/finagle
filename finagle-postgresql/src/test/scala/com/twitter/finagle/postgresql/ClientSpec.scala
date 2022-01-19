@@ -1,10 +1,10 @@
 package com.twitter.finagle.postgresql
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.postgresql.Client.Expect
-import com.twitter.finagle.postgresql.DelayedReleaseServiceSpec.MockService
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.postgresql.Client.Expect
+import com.twitter.finagle.postgresql.DelayedReleaseServiceSpec.MockService
 import com.twitter.io.Reader
 import com.twitter.io.ReaderDiscardedException
 import com.twitter.util._

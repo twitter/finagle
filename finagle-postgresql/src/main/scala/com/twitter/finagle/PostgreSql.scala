@@ -5,6 +5,8 @@ import com.twitter.finagle.client.StdStackClient
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.param.WithSessionPool
+import com.twitter.finagle.postgresql.transport.ClientTransport
+import com.twitter.finagle.postgresql.transport.PgTransportContext
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.DelayedRelease
 import com.twitter.finagle.postgresql.FrontendMessage
@@ -12,8 +14,6 @@ import com.twitter.finagle.postgresql.Params
 import com.twitter.finagle.postgresql.Request
 import com.twitter.finagle.postgresql.Response
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.transport.TransportContext
 import com.twitter.util.Duration
 import com.twitter.util.tunable.Tunable
 import java.net.SocketAddress
@@ -52,9 +52,7 @@ object PostgreSql {
 
     override type In = FrontendMessage
     override type Out = BackendMessage
-    override type Context = TransportContext
-
-    type ClientTransport = Transport[In, Out] { type Context <: TransportContext }
+    override type Context = PgTransportContext
 
     def withCredentials(u: String, p: Option[String]): Client =
       configured(Params.Credentials(u, p))
@@ -101,7 +99,7 @@ object PostgreSql {
 
     override protected def newTransporter(
       addr: SocketAddress
-    ): Transporter[FrontendMessage, BackendMessage, TransportContext] =
+    ): Transporter[FrontendMessage, BackendMessage, PgTransportContext] =
       new postgresql.PgSqlTransporter(addr, params)
 
     override protected def newDispatcher(transport: ClientTransport): Service[Request, Response] =
@@ -110,7 +108,9 @@ object PostgreSql {
     override protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
       params: Stack.Params = this.params
-    ): Client = copy(stack, params)
+    ): Client = {
+      copy(stack, params)
+    }
   }
 
   def client: Client = Client()

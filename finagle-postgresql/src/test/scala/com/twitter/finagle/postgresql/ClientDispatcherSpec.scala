@@ -23,75 +23,10 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
   import MockPgTransport._
 
   "ClientDispatcher" should {
-    "send a statement timeout when set" in {
-      val stackParams = PostgreSql.defaultParams + Params.StatementTimeout(1.second)
-      val expects = Seq(
-        expect(
-          FrontendMessage
-            .StartupMessage(user = "postgres", params = Map("statement_timeout" -> "1000")),
-          BackendMessage.AuthenticationOk,
-          BackendMessage.ReadyForQuery(BackendMessage.NoTx)
-        ),
-        expect(FrontendMessage.Sync, BackendMessage.ReadyForQuery(BackendMessage.NoTx))
-      )
-
-      val transport = new MockPgTransport(expects)
-      val dispatcher = new ClientDispatcher(transport, stackParams)
-
-      val fut = dispatcher.apply(Request.Sync)
-      Await.result(fut)
-    }
-
-    "send a session defaults when set" in {
-      val params = Map("a" -> "b", "c" -> "d")
-      val stackParams = PostgreSql.defaultParams + Params.SessionDefaults(params)
-      val expects = Seq(
-        expect(
-          FrontendMessage.StartupMessage(user = "postgres", params = params),
-          BackendMessage.AuthenticationOk,
-          BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
-        expect(FrontendMessage.Sync, BackendMessage.ReadyForQuery(BackendMessage.NoTx))
-      )
-
-      val transport = new MockPgTransport(expects)
-      val dispatcher = new ClientDispatcher(transport, stackParams)
-
-      val fut = dispatcher.apply(Request.Sync)
-      Await.result(fut)
-    }
-
-    "send connection initialization sql when set" in {
-      val stackParams = PostgreSql.defaultParams + Params.ConnectionInitializationCommands(
-        Seq("set x = y", "set a = b"))
-      val expects = Seq(
-        expect(
-          FrontendMessage.StartupMessage(user = "postgres"),
-          BackendMessage.AuthenticationOk,
-          BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
-        expect(
-          FrontendMessage.Query("set x = y;\nset a = b"),
-          BackendMessage.CommandComplete(BackendMessage.CommandTag.Other("SET")),
-          BackendMessage.ReadyForQuery(BackendMessage.NoTx)
-        ),
-        expect(FrontendMessage.Sync, BackendMessage.ReadyForQuery(BackendMessage.NoTx))
-      )
-
-      val transport = new MockPgTransport(expects)
-      val dispatcher = new ClientDispatcher(transport, stackParams)
-
-      val fut = dispatcher.apply(Request.Sync)
-      Await.result(fut)
-    }
-
     "returns simple query result" in {
       forAll(arbTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val stackParams = PostgreSql.defaultParams
         val expects = Seq(
-          expect(
-            FrontendMessage.StartupMessage(user = "postgres"),
-            BackendMessage.AuthenticationOk,
-            BackendMessage.ReadyForQuery(BackendMessage.NoTx)
-          ),
           expect(
             FrontendMessage.Query("QUERY 1"),
             arb.desc +: arb.rows :+
@@ -128,11 +63,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
       forAll(arbTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val stackParams = PostgreSql.defaultParams + Params.CancelGracePeriod(Duration.Top)
         val expects = Seq(
-          expect(
-            FrontendMessage.StartupMessage(user = "postgres"),
-            BackendMessage.AuthenticationOk,
-            BackendMessage.ReadyForQuery(BackendMessage.NoTx)
-          ),
           expect(
             FrontendMessage.Query("QUERY 1"),
             arb.desc +: arb.rows :+
@@ -173,11 +103,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
       forAll(arbTestResultSet.arbitrary, minSuccessful(8)) { arb =>
         val stackParams = PostgreSql.defaultParams
         val expects = Seq(
-          expect(
-            FrontendMessage.StartupMessage(user = "postgres"),
-            BackendMessage.AuthenticationOk,
-            BackendMessage.ReadyForQuery(BackendMessage.NoTx)
-          ),
           expect(
             Seq(
               FrontendMessage.Bind(
@@ -230,11 +155,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
         val stackParams = PostgreSql.defaultParams +
           Params.CancelGracePeriod(1.second) + com.twitter.finagle.param.Timer(mockTimer)
         val expects = Seq(
-          expect(
-            FrontendMessage.StartupMessage(user = "postgres"),
-            BackendMessage.AuthenticationOk,
-            BackendMessage.ReadyForQuery(BackendMessage.NoTx)
-          ),
           expect(
             Seq(
               FrontendMessage.Bind(
@@ -304,11 +224,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
           Params.CancelGracePeriod(1.second) + com.twitter.finagle.param.Timer(mockTimer)
         val expects = Seq(
           expect(
-            FrontendMessage.StartupMessage(user = "postgres"),
-            BackendMessage.AuthenticationOk,
-            BackendMessage.ReadyForQuery(BackendMessage.NoTx)
-          ),
-          expect(
             Seq(
               FrontendMessage.Bind(
                 Unnamed,
@@ -364,11 +279,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
         val stackParams = PostgreSql.defaultParams
         val expects = Seq(
           expect(
-            FrontendMessage.StartupMessage(user = "postgres"),
-            BackendMessage.AuthenticationOk,
-            BackendMessage.ReadyForQuery(BackendMessage.NoTx)
-          ),
-          expect(
             Seq(
               FrontendMessage.Bind(
                 Unnamed,
@@ -417,10 +327,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
       val stackParams = PostgreSql.defaultParams
 
       val expects = Seq(
-        expect(
-          FrontendMessage.StartupMessage(user = "postgres"),
-          BackendMessage.AuthenticationOk,
-          BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
         write(
           FrontendMessage.Query("TEST"),
         ),
@@ -448,10 +354,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
         Params.CancelGracePeriod(1.second) + com.twitter.finagle.param.Timer(mockTimer)
 
       val expects = Seq(
-        expect(
-          FrontendMessage.StartupMessage(user = "postgres"),
-          BackendMessage.AuthenticationOk,
-          BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
         write(FrontendMessage.Query("TEST")),
         suspend("TEST"),
       )
@@ -481,10 +383,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
         Params.CancelGracePeriod(1.second) + com.twitter.finagle.param.Timer(mockTimer)
 
       val expects = Seq(
-        expect(
-          FrontendMessage.StartupMessage(user = "postgres"),
-          BackendMessage.AuthenticationOk,
-          BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
         write(FrontendMessage.Query("TEST")),
         suspend("TEST"),
         read(
@@ -517,10 +415,6 @@ class ClientDispatcherSpec extends AnyWordSpec with Matchers with PropertiesSpec
       val stackParams = PostgreSql.defaultParams
 
       val expects = Seq(
-        expect(
-          FrontendMessage.StartupMessage(user = "postgres"),
-          BackendMessage.AuthenticationOk,
-          BackendMessage.ReadyForQuery(BackendMessage.NoTx)),
         write(FrontendMessage.Query("TEST 1")),
         suspend("TEST 1"),
         read(
