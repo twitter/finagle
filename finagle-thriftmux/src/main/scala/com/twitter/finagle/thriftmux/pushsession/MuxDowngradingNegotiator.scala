@@ -1,24 +1,32 @@
 package com.twitter.finagle.thriftmux.pushsession
 
-import com.twitter.finagle.mux.pushsession.{
-  MessageWriter,
-  MuxChannelHandle,
-  MuxMessageDecoder,
-  Negotiation,
-  SharedNegotiationStats
-}
+import com.twitter.finagle.mux.pushsession.MessageWriter
+import com.twitter.finagle.mux.pushsession.MuxChannelHandle
+import com.twitter.finagle.mux.pushsession.MuxMessageDecoder
+import com.twitter.finagle.mux.pushsession.Negotiation
+import com.twitter.finagle.mux.pushsession.SharedNegotiationStats
 import com.twitter.finagle._
-import com.twitter.finagle.mux.{Request, Response}
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
 import com.twitter.finagle.mux.Handshake.Headers
-import com.twitter.finagle.mux.transport.{BadMessageException, Message}
+import com.twitter.finagle.mux.transport.BadMessageException
+import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, RefPushSession}
-import com.twitter.finagle.thrift.thrift.{ResponseHeader, UpgradeReply}
-import com.twitter.finagle.thrift.{InputBuffer, OutputBuffer, ThriftTracing}
-import com.twitter.io.{Buf, ByteReader}
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.PushSession
+import com.twitter.finagle.pushsession.RefPushSession
+import com.twitter.finagle.thrift.thrift.ResponseHeader
+import com.twitter.finagle.thrift.thrift.UpgradeReply
+import com.twitter.finagle.thrift.InputBuffer
+import com.twitter.finagle.thrift.OutputBuffer
+import com.twitter.finagle.thrift.ThriftTracing
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
 import com.twitter.logging.Logger
 import com.twitter.util._
-import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
+import org.apache.thrift.protocol.TMessage
+import org.apache.thrift.protocol.TMessageType
+import org.apache.thrift.protocol.TProtocolFactory
 import scala.util.control.NonFatal
 
 /**
@@ -198,7 +206,7 @@ private[finagle] object MuxDowngradingNegotiator {
     params: Stack.Params,
     sharedStats: SharedNegotiationStats,
     service: Service[Request, Response])
-      extends Negotiation(params, sharedStats) {
+      extends Negotiation(params, sharedStats, isServer = true) {
 
     override type SessionT = VanillaThriftSession
 

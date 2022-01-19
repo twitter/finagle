@@ -1,34 +1,51 @@
 package com.twitter.finagle.mux.pushsession
 
 import com.twitter.finagle.Mux.param.CompressionPreferences
-import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.PushSession
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
-import com.twitter.finagle.mux.transport.{
-  Compression,
-  CompressionNegotiation,
-  IncompatibleNegotiationException,
-  MuxFramer,
-  OpportunisticTls => MuxOpportunisticTls
-}
-import com.twitter.finagle.mux.{Handshake, Request, Response}
+import com.twitter.finagle.mux.transport.Compression
+import com.twitter.finagle.mux.transport.CompressionNegotiation
+import com.twitter.finagle.mux.transport.IncompatibleNegotiationException
+import com.twitter.finagle.mux.transport.MuxFramer
+import com.twitter.finagle.mux.transport.{OpportunisticTls => MuxOpportunisticTls}
+import com.twitter.finagle.mux.Handshake
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
+import com.twitter.finagle.param.Label
 import com.twitter.finagle.param.OppTls
 import com.twitter.finagle.ssl.OpportunisticTls
-import com.twitter.finagle.{Service, Stack, param}
-import com.twitter.io.{Buf, ByteReader}
-import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Future, Promise, Return, Throw, Try}
+import com.twitter.finagle.Service
+import com.twitter.finagle.Stack
+import com.twitter.finagle.param
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
 
 /**
  * Abstraction of negotiation logic for push-based mux clients and servers
  */
 private[finagle] abstract class Negotiation(
   params: Stack.Params,
-  sharedStats: SharedNegotiationStats) {
+  sharedStats: SharedNegotiationStats,
+  isServer: Boolean) {
 
   type SessionT <: PushSession[ByteReader, Buf]
 
   private[this] val log = Logger.get
+
+  private[this] val myName: String = {
+    val label = params[Label].label
+    if (isServer) s"Server($label)"
+    else s"Client($label)"
+  }
 
   /**
    * Negotiates which compression formats will be used for the request and
@@ -70,7 +87,7 @@ private[finagle] abstract class Negotiation(
   ): Unit =
     if (handle.sslSessionInfo.usingSsl) {
       // If we're already encrypted this is already decided and we're at max security.
-      log.debug("Session already encrypted. Skipping OppTls header check.")
+      log.debug(s"$myName: Session already encrypted. Skipping OppTls header check.")
       onTlsHandshakeComplete(Try.Unit)
     } else {
       negotiateOppTlsViaHeaders(handle, peerHeaders, onTlsHandshakeComplete)
@@ -87,9 +104,9 @@ private[finagle] abstract class Negotiation(
       case Some(buf) => MuxOpportunisticTls.Header.decodeLevel(buf)
       case None =>
         log.debug(
-          "Peer either didn't negotiate or didn't send an Opportunistic Tls preference: " +
-            s"defaulting to remote encryption level of Off. ${remoteAddressString(handle)}"
-        )
+          s"$myName: " +
+            "Peer either didn't negotiate or didn't send an Opportunistic Tls preference: " +
+            s"defaulting to remote encryption level of Off. ${remoteAddressString(handle)}")
         OpportunisticTls.Off
     }
 
@@ -97,7 +114,8 @@ private[finagle] abstract class Negotiation(
       val useTls = MuxOpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
       if (log.isLoggable(Level.DEBUG)) {
         log.debug(
-          s"Successfully negotiated TLS with remote peer. Using TLS: $useTls local level: " +
+          s"$myName: Successfully negotiated TLS with remote peer. " +
+            s"Using TLS: $useTls local level: " +
             s"$localEncryptLevel, remote level: $remoteEncryptLevel. ${remoteAddressString(handle)}"
         )
       }
@@ -113,7 +131,7 @@ private[finagle] abstract class Negotiation(
         sharedStats.tlsFailures.incr()
         log.fatal(
           exn,
-          s"The local peer wanted $localEncryptLevel and the remote peer wanted" +
+          s"$myName: The local peer wanted $localEncryptLevel and the remote peer wanted" +
             s" $remoteEncryptLevel which are incompatible. ${remoteAddressString(handle)}"
         )
         throw exn
@@ -149,18 +167,18 @@ private[finagle] abstract class Negotiation(
     handle: PushChannelHandle[ByteReader, Buf],
     peerHeaders: Option[Headers]
   ): SessionT = {
-    val onHandshakeComplete: Try[Unit] => Unit = {
-      case Return(_) =>
-        log.trace("Successfully negotiated oppTls handshake")
-      case Throw(t) =>
-        log.trace("OppTls handshake failed")
-    }
+    negotiateOppTls(
+      handle,
+      peerHeaders,
+      _ match {
+        case _ if !log.isLoggable(Level.TRACE) => // nop, no logging
+        case Return(_) =>
+          log.trace(s"$myName: Successfully negotiated oppTls handshake")
+        case Throw(t) =>
+          log.trace(t, s"$myName: OppTls handshake failed")
+      }
+    )
 
-    if (log.isLoggable(Level.TRACE)) {
-      negotiateOppTls(handle, peerHeaders, onHandshakeComplete)
-    } else {
-      negotiateOppTls(handle, peerHeaders, _ => ())
-    }
     negotiateCompression(handle, peerHeaders)
     negotiateMuxSession(handle, peerHeaders)
   }
@@ -179,21 +197,18 @@ private[finagle] abstract class Negotiation(
     // interrupts by closing the underlying channel. This is what
     // `MuxClientNegotiatingSession` does.
     val p = Promise[Unit]
-    val onHandshakeComplete: Try[Unit] => Unit = { result =>
-      result match {
-        case Return(_) => {
-          if (log.isLoggable(Level.TRACE))
-            log.trace("Client side successfully negotiated oppTls handshake")
-          p.setDone
-        }
+    val onHandshakeComplete: Try[Unit] => Unit = _ match {
+      case Return(_) =>
+        if (log.isLoggable(Level.TRACE))
+          log.trace(s"$myName: successfully negotiated oppTls handshake")
+        p.setDone
 
-        case Throw(t) => {
-          if (log.isLoggable(Level.TRACE))
-            log.trace("Client side failed to negotiate oppTls handshake")
-          p.setException(t)
-        }
-      }
+      case Throw(t) =>
+        if (log.isLoggable(Level.TRACE))
+          log.trace(t, s"$myName: side failed to negotiate oppTls handshake")
+        p.setException(t)
     }
+
     Try(negotiateOppTls(handle, peerHeaders, onHandshakeComplete)) match {
       case Return(_) =>
         p.map { _ =>
@@ -208,7 +223,7 @@ private[finagle] abstract class Negotiation(
 private[finagle] object Negotiation {
 
   final class Client(params: Stack.Params, sharedStats: SharedNegotiationStats)
-      extends Negotiation(params, sharedStats) {
+      extends Negotiation(params, sharedStats, isServer = false) {
 
     override type SessionT = MuxClientSession
 
@@ -260,7 +275,7 @@ private[finagle] object Negotiation {
     params: Stack.Params,
     sharedStats: SharedNegotiationStats,
     service: Service[Request, Response])
-      extends Negotiation(params, sharedStats) {
+      extends Negotiation(params, sharedStats, isServer = true) {
 
     override type SessionT = MuxServerSession
 
