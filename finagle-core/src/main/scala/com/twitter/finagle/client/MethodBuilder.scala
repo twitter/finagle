@@ -229,6 +229,9 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    *                       is returned and the result of the outstanding request is superseded. For
    *                       protocols without a control plane, where the connection is cut on
    *                       interrupts, this should be "false" to avoid connection churn.
+   * @param minSendBackupAfterMs Use a minimum non-zero delay to prevent sending unnecessary backup requests
+   *                             immediately for services where the latency at the percentile where a
+   *                             backup will be sent is ~0ms.
    * @param classifier [[ResponseClassifier]] (combined (via [[ResponseClassifier.orElse]])
    *                   with any existing classifier in the stack params), used for determining
    *                   whether or not requests have succeeded and should be retried.
@@ -237,6 +240,18 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    *
    * @note See `idempotent` below for a version that takes a [[Tunable[Double]]] for `maxExtraLoad`.
    */
+  def idempotent(
+    maxExtraLoad: Double,
+    sendInterrupts: Boolean,
+    minSendBackupAfterMs: Int,
+    classifier: service.ResponseClassifier
+  ): MethodBuilder[Req, Rep] = {
+    val brfParam =
+      if (maxExtraLoad == 0) BackupRequestFilter.Disabled
+      else BackupRequestFilter.Configured(maxExtraLoad, sendInterrupts, minSendBackupAfterMs)
+    addBackupRequestFilterParamAndClassifier(brfParam, classifier)
+  }
+
   def idempotent(
     maxExtraLoad: Double,
     sendInterrupts: Boolean,
@@ -266,12 +281,27 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    *                       is returned and the result of the outstanding request is superseded. For
    *                       protocols without a control plane, where the connection is cut on
    *                       interrupts, this should be "false" to avoid connection churn.
+   * @param minSendBackupAfterMs Use a minimum non-zero delay to prevent sending unnecessary backup requests
+   *                             immediately for services where the latency at the percentile where a
+   *                             backup will be sent is ~0ms.
    * @param classifier [[ResponseClassifier]] (combined (via [[ResponseClassifier.orElse]])
    *                   with any existing classifier in the stack params), used for determining
    *                   whether or not requests have succeeded and should be retried.
    *                   These determinations are also reflected in stats, and used by
    *                   [[FailureAccrualFactory]].
    */
+  def idempotent(
+    maxExtraLoad: Tunable[Double],
+    sendInterrupts: Boolean,
+    minSendBackupAfterMs: Int,
+    classifier: service.ResponseClassifier
+  ): MethodBuilder[Req, Rep] = {
+    addBackupRequestFilterParamAndClassifier(
+      BackupRequestFilter.Configured(maxExtraLoad, sendInterrupts, minSendBackupAfterMs),
+      classifier
+    )
+  }
+
   def idempotent(
     maxExtraLoad: Tunable[Double],
     sendInterrupts: Boolean,

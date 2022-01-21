@@ -61,6 +61,21 @@ class BackupRequestFilterTest
     new BackupRequestFilter[String, String](
       maxExtraLoadTunable,
       true,
+      1,
+      classifier,
+      newBackupRequestRetryBudget,
+      clientRetryBudget,
+      Stopwatch.timeMillis,
+      statsReceiver,
+      timer,
+      () => wp
+    )
+
+  private[this] def newBrfWithSendBackup10ms: BackupRequestFilter[String, String] =
+    new BackupRequestFilter[String, String](
+      maxExtraLoadTunable,
+      true,
+      10,
       classifier,
       newBackupRequestRetryBudget,
       clientRetryBudget,
@@ -115,6 +130,7 @@ class BackupRequestFilterTest
     val filter = new BackupRequestFilter[String, String](
       maxExtraLoad,
       false,
+      1,
       ResponseClassifier.Default,
       newRetryBudget,
       RetryBudget.Infinite,
@@ -135,6 +151,7 @@ class BackupRequestFilterTest
       val filter = new BackupRequestFilter[String, String](
         tunable,
         false,
+        1,
         ResponseClassifier.Default,
         newRetryBudget,
         RetryBudget.Infinite,
@@ -310,6 +327,7 @@ class BackupRequestFilterTest
     val brf = (new BackupRequestFilter[String, String](
       Tunable.const("brfTunable", 50.percent),
       sendInterrupts,
+      1,
       classifier,
       newBackupRequestRetryBudget,
       clientRetryBudget,
@@ -627,6 +645,7 @@ class BackupRequestFilterTest
       val brf = new BackupRequestFilter[String, String](
         maxExtraLoadTunable,
         true,
+        1,
         classifier,
         newRetryBudget,
         clientRetryBudget,
@@ -677,6 +696,7 @@ class BackupRequestFilterTest
       val brf = new BackupRequestFilter[String, String](
         maxExtraLoadTunable,
         true,
+        1,
         classifier,
         newRetryBudget,
         clientRetryBudget,
@@ -710,6 +730,7 @@ class BackupRequestFilterTest
       val brf = new BackupRequestFilter[String, String](
         maxExtraLoadTunable,
         true,
+        1,
         classifier,
         newRetryBudget,
         clientRetryBudget,
@@ -777,6 +798,28 @@ class BackupRequestFilterTest
       assert(statsReceiver.counters(Seq("backups_sent")) == 0)
       assert(brf.sendBackupAfterDuration == 1.millisecond)
       assert(statsReceiver.stats(Seq("send_backup_after_ms")) == Seq(1))
+    }
+  }
+
+  test("Minimum sendBackupAfter can be overwritten") {
+    Time.withCurrentTimeFrozen { tc =>
+      val brf = newBrfWithSendBackup10ms
+      val service = newService(brf)
+
+      (0 until 100).foreach { _ =>
+        val p = new Promise[String]
+        when(underlying("ok")).thenReturn(p)
+        val f = service("ok")
+        p.setValue("ok")
+      }
+
+      // flush
+      tc.advance(3.seconds)
+      timer.tick()
+      assert(numBackupTimerTasks == 0)
+      assert(statsReceiver.counters(Seq("backups_sent")) == 0)
+      assert(brf.sendBackupAfterDuration == 10.millisecond)
+      assert(statsReceiver.stats(Seq("send_backup_after_ms")) == Seq(10))
     }
   }
 

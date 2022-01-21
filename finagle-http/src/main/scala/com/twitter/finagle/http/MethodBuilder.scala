@@ -241,6 +241,16 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
       )
     )
 
+  def idempotent(maxExtraLoad: Double, minSendBackupAfterMs: Int): MethodBuilder =
+    new MethodBuilder(
+      mb.idempotent(
+        maxExtraLoad,
+        sendInterrupts = false,
+        minSendBackupAfterMs,
+        HttpResponseClassifier.ServerErrorsAsFailures
+      )
+    )
+
   /**
    * @inheritdoc
    *
@@ -251,6 +261,16 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
       mb.idempotent(
         maxExtraLoad,
         sendInterrupts = false,
+        HttpResponseClassifier.ServerErrorsAsFailures
+      )
+    )
+
+  def idempotent(maxExtraLoad: Tunable[Double], minSendBackupAfterMs: Int): MethodBuilder =
+    new MethodBuilder(
+      mb.idempotent(
+        maxExtraLoad,
+        sendInterrupts = false,
+        minSendBackupAfterMs,
         HttpResponseClassifier.ServerErrorsAsFailures
       )
     )
