@@ -2,6 +2,7 @@ package com.twitter.finagle.postgresql.machine
 
 import com.twitter.finagle.postgresql.BackendMessage
 import com.twitter.finagle.postgresql.BackendMessage.ErrorResponse
+import com.twitter.finagle.postgresql.BackendMessage.NoticeResponse
 import com.twitter.finagle.postgresql.BackendMessage.ReadyForQuery
 import com.twitter.finagle.postgresql.FrontendMessage.Describe
 import com.twitter.finagle.postgresql.FrontendMessage.DescriptionTarget
@@ -46,7 +47,10 @@ class PrepareMachine(name: Name, statement: String) extends StateMachine[Respons
       )
     )
 
-  override def receive(state: State, msg: BackendMessage): TransitionResult[State, Response.ParseComplete] =
+  override def receive(
+    state: State,
+    msg: BackendMessage
+  ): TransitionResult[State, Response.ParseComplete] =
     (state, msg) match {
       case (Parsing, BackendMessage.ParseComplete) => Transition(Parsing, NoOp)
       case (Parsing, d: BackendMessage.ParameterDescription) => Transition(Parsed(d), NoOp)
@@ -62,7 +66,7 @@ class PrepareMachine(name: Name, statement: String) extends StateMachine[Respons
 
       case (Syncing, r: ReadyForQuery) => Complete(r, None)
       case (_, e: ErrorResponse) => Transition(Syncing, Respond(Throw(PgSqlServerError(e))))
-
+      case (state, _: NoticeResponse) => Transition(state, NoOp)
       case (state, msg) => throw PgSqlNoSuchTransition("PrepareMachine", state, msg)
     }
 
