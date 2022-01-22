@@ -1,6 +1,7 @@
 package com.twitter.finagle.serverset2.client
 
-import com.twitter.finagle.stats.{StatsReceiver, Stat}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.Stat
 import com.twitter.io.Buf
 import com.twitter.util._
 
@@ -12,7 +13,7 @@ private[serverset2] trait StatsClient extends ZooKeeperClient {
 
     def apply[T](result: Future[T]): Future[T] = {
       Stat
-        .timeFuture(stats.stat("name_latency_ms"))(result)
+        .timeFuture(stats.stat(s"${name}_latency_ms"))(result)
         .respond {
           case Return(_) =>
             success.incr()
