@@ -26,7 +26,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -754,7 +753,6 @@ public class Group {
    */
   public static class DefaultScheme implements NodeScheme {
     private final String namePrefix;
-    private final Pattern namePattern;
 
     /**
      * Creates a sequential node scheme based on the given node name prefix.
@@ -763,12 +761,11 @@ public class Group {
      */
     public DefaultScheme(String namePrefix) {
       this.namePrefix = MorePreconditions.checkNotBlank(namePrefix);
-      namePattern = Pattern.compile("^" + Pattern.quote(namePrefix) + "-?[0-9]+$");
     }
 
     @Override
     public boolean isMember(String nodeName) {
-      return namePattern.matcher(nodeName).matches();
+      return nodeName.startsWith(namePrefix);
     }
 
     @Override
