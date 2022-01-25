@@ -1,11 +1,9 @@
 # Combine with the other BUILD file when DPB-13079 is resolved.
 junit_tests(
     name = "init-test",
-    sources = ["com/twitter/finagle/InitTest.scala"],
+    sources = ["*.scala"],
     compiler_option_sets = ["fatal_warnings"],
     dependencies = [
-        ":pushsession-utils",
-        ":stringprotocol",
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/junit",
@@ -18,6 +16,8 @@ junit_tests(
         "3rdparty/jvm/org/scalatestplus:scalacheck",
         "finagle/finagle-core/src/main",
         "finagle/finagle-core/src/test/resources",
+        "finagle/finagle-core/src/test/scala:pushsession-utils",
+        "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-netty4",
         "finagle/finagle-toggle/src/main/scala",
         "util/util-app/src/main/scala",

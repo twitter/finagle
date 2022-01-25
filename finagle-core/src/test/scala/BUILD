@@ -32,7 +32,7 @@ scala_library(
 
 junit_tests(
     sources = [
-        "!com/twitter/finagle/InitTest.scala",
+        "!com/twitter/finagle/init/*",
         "**/*.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
