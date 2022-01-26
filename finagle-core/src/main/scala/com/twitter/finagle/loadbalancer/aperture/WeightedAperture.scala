@@ -130,10 +130,18 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     val weights =
       WeightedAperture.adjustWeights(endpoints.map(_.factory.weight), coord)
 
-    val indexes = weights.iterator.zipWithIndex.collect {
-      case (weight, i) if weight > 0.0 => i
-    }.toSet
-    (indexes, new Alias(weights, rng, endpoints))
+    val indexes = Set.newBuilder[Int]
+    val nonZeroWeights = IndexedSeq.newBuilder[Double]
+    val nonZeroEndpoints = IndexedSeq.newBuilder[NodeT]
+
+    (weights.indices).foreach { i =>
+      if (weights(i) > 0.0) {
+        indexes += i
+        nonZeroWeights += weights(i)
+        nonZeroEndpoints += endpoints(i)
+      }
+    }
+    (indexes.result(), new Alias(nonZeroWeights.result(), rng, nonZeroEndpoints.result()))
   }
 
   def indices: Set[Int] = idxs
@@ -153,17 +161,27 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     status
   }
 
+  override def rebuild(newVector: Vector[NodeT]): This =
+    // Although `needsRebuild` is set to false, the Balancer will trigger a rebuild
+    // when it exhausts picking busy nodes. Let's explicitly return the same distributor
+    // if the coordinates and serverset have not changed.
+    ProcessCoordinate() match {
+      case Some(newCoord) if (newCoord == coord && newVector == vector) => this
+      case _ => super.rebuild(newVector)
+    }
+
   def additionalMetadata: Map[String, Any] = Map(
     "peer_offset" -> coord.offset,
     "peer_unit_width" -> coord.unitWidth,
-    "nodes" -> idxs.toSeq.sorted.map { i =>
-      Map[String, Any](
-        "index" -> i,
-        "name_server_weight" -> endpoints(i).factory.weight,
-        "weight" -> pdist.weight(i),
-        "address" -> endpoints(i).factory.toString,
-        "status" -> endpoints(i).factory.status.toString
-      )
+    "nodes" -> idxs.toSeq.sorted.zipWithIndex.collect {
+      case (realIndex, virtualIndex) =>
+        Map[String, Any](
+          "index" -> realIndex,
+          "name_server_weight" -> pdist.get(virtualIndex).factory.weight,
+          "weight" -> pdist.weight(virtualIndex),
+          "address" -> pdist.get(virtualIndex).factory.toString,
+          "status" -> pdist.get(virtualIndex).factory.status.toString
+        )
     }
   )
 

@@ -595,4 +595,53 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
         assert(svc.status == Status.Open)
       }
   }
+
+  test("discards weights outside the aperture when building pdist") {
+    val endpoints = Vector.fill(20)(TestNode(newFactory(equalWeight = true)))
+
+    val wap = new WeightedAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture(),
+      endpoints = endpoints,
+      initAperture = 12,
+      coord = FromInstanceId(0, 20)
+    )
+
+    assert(
+      WeightedAperture
+        .adjustWeights(endpoints.map(_.factory.weight), FromInstanceId(0, 20)).length == 20)
+    // Aperture size is 12 and we start at index 0, meaning some index above 11 should be out of bounds
+    // iff zero-weighted endpoints are dropped
+    // Note that values close to 0 are not dropped (ie 1.1102230246251565E-16 still exists)
+    // Note also that the aperture size is a measure of distance around the ring, not a specific
+    // measure of how many endpoints will exist within that distance.
+    intercept[IndexOutOfBoundsException](wap.pdist.get(14))
+
+    // Weights should match
+    intercept[IndexOutOfBoundsException](wap.pdist.weight(14))
+  }
+
+  test("virtual and real indices are correct") {
+    val endpoints = Vector.fill(20)(TestNode(newFactory()))
+
+    /* (0.09084713883660764, 0.05707320625655246, 0.05191939293783741, 0.013512879529774336,
+        0.04186708950372823, 0.09180929070805424, 0.03335293566905299, 0.07946745385422554,
+        0.04845152320510951, 0.06780292137281362, 0.07678011606416385, 0.09919958030931081,
+        0.03214768344925607, 0.07485085813565524, 0.08189691430133035, 0.04869905588129095,
+        0.028634371001983995, 0.04515619438216435, 0.05404313245456054, 0.08595316840483351) */
+
+    val wap = new WeightedAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture(),
+      endpoints = endpoints,
+      initAperture = 12,
+      coord = FromInstanceId(4, 20)
+    )
+
+    /* (0.0, 0.0, 0.0, 0.0, 0.012070751492043036, 0.07628746815185382, 0.02771409078537291,
+     0.06603221534834605, 0.040260021670054505, 0.05633975782777061, 0.06379921480459368,
+     0.0824283116137822, 0.026712605645649007, 0.06219612865021061, 0.06805093682038153,
+     0.04046570500564178, 0.023793274613225866, 0.0038495175710744345, 0.0, 0.0) */
+
+    assert(wap.pdist.get(0) == endpoints(4))
+    assert(wap.pdist.get(13) == endpoints(17))
+  }
 }
