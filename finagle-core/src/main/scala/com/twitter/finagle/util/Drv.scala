@@ -60,18 +60,17 @@ object Drv {
    * (September 1991), 972-975. DOI=10.1109/32.92917
    * https://dx.doi.org/10.1109/32.92917
    *
-   * Package private for testing.
+   * Package private for testing. Note that the provided array is mutated
+   * but is not used after this method call in the generated `Drv`.
    */
-  private[util] def newVose(dist: Seq[Double]): Drv = {
-    val N = dist.size
+  private[util] def newVose(p: Array[Double]): Drv = {
+    val N = p.length
 
     val alias = new Array[Int](N)
     val prob = new Array[Double](N)
 
     val small = mutable.Queue[Int]()
     val large = mutable.Queue[Int]()
-    val p = new Array[Double](N)
-    dist.copyToArray(p, 0, N)
 
     @tailrec
     def fillQueues(i: Int): Unit = if (i < N) {
@@ -112,7 +111,7 @@ object Drv {
     val sum = dist.sum
     if (!isNormalized(sum))
       throw new AssertionError("Bad sum %.001f".format(sum))
-    newVose(dist)
+    newVose(dist.toArray)
   }
 
   /**
@@ -124,9 +123,20 @@ object Drv {
     val sum = weights.sum
 
     newVose(
-      if (sum == 0d) Seq.fill(weights.size) { 1d / weights.size }
-      else if (isNormalized(sum)) weights
-      else weights.map(_ / sum)
+      if (sum == 0d) {
+        val size = weights.size
+        Array.fill(size) { 1d / size }
+      } else {
+        val arr = weights.toArray
+        if (!isNormalized(sum)) {
+          var i = 0
+          while (i < arr.length) {
+            arr(i) /= sum
+            i += 1
+          }
+        }
+        arr
+      }
     )
   }
 }
