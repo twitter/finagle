@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Function
 import scala.reflect.io.Directory
+import scala.sys.process.Process
 
 /**
  * Manages lifecycle of the embedded mysql instance.
@@ -98,7 +99,13 @@ object EmbeddedInstance {
             instance.startInstance()
 
             sys.addShutdownHook {
-              instance.stopInstance()
+              instanceCache.values().forEach { instance =>
+                Try(instance.stopInstance()).handle {
+                  case e =>
+                    log.error(s"instance shutdown error: ${e.getMessage}")
+                    instance.destroy()
+                }
+              }
               new Directory(dataDirectory.toFile).deleteRecursively()
             }
             instance
@@ -184,6 +191,16 @@ final class EmbeddedInstance(
 
   private val running = new AtomicBoolean(false)
   private val log: Logger = Logger.get()
+  private var process: Process = _
+
+  private def destroy(): Unit = {
+    if (process.isAlive()) {
+      log.info(s"mysql process still alive, destroying process")
+      Try(process.destroy()).handle {
+        case e => log.error(s"process destroy returned: ${e.getMessage}")
+      }
+    }
+  }
 
   /**
    * Creates a new mysql.Client connected to the instance via the root account.
@@ -199,7 +216,7 @@ final class EmbeddedInstance(
   def startInstance(): Unit = {
     if (!running.getAndSet(true)) {
       log.info(s"Starting mysql instance on port $port")
-      mySqlExecutables.startDatabase(serverParameters)
+      process = mySqlExecutables.startDatabase(serverParameters)
       waitForDatabase()
     }
   }
