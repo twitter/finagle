@@ -49,6 +49,7 @@ class ForkingSchedulerFilterTest extends AnyFunSuite {
     }
     override def fork[T](f: => Future[T]) = ???
     override def fork[T](executor: Executor)(f: => Future[T]) = ???
+    override def withMaxSyncConcurrency(concurrency: Int, maxWaiters: Int) = ???
     override def asExecutorService(): ExecutorService = ???
     override def redirectFuturePools(): Boolean = ???
     override def submit(r: Runnable): Unit = ???
