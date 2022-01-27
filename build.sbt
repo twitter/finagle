@@ -593,6 +593,20 @@ lazy val finagleBaseHttp = Project(
     ) ++ netty4Libs
   ).dependsOn(finagleCore, finagleToggle)
 
+lazy val finagleLogging = Project(
+  id = "finagle-logging",
+  base = file("finagle-logging")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-logging",
+  libraryDependencies ++= Seq(
+    hdrHistogramLib,
+    util("core"),
+    util("slf4j-api"),
+  )
+).dependsOn(finagleCore)
+
 lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
   base = file("finagle-netty4-http")

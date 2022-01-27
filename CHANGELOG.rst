@@ -6,6 +6,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+New Features
+~~~~~~~~~~~~
+* finagle-logging: Introduced finagle-logging, a new module for SLF4J-integrated
+  filters. ``PHAB_ID=D813291``
+
+* finagle-logging: Introduced SlowTracesFilter, which observes your requests and
+  logs the slowest ones that are also sampled for tracing. ``PHAB_ID=D813291``
 
 Bug Fixes
 ~~~~~~~~~~
