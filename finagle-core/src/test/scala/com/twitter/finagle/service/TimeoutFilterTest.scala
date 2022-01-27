@@ -16,6 +16,7 @@ import com.twitter.finagle.tracing.TraceId
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.TimeoutException
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -81,13 +82,28 @@ class TimeoutFilterTest extends AnyFunSuite with Matchers with MockitoSugar {
       timer.tick()
       assert(res.isDefined)
       val t = promise.interrupted
-      intercept[java.util.concurrent.TimeoutException] {
+      intercept[RequestTimeoutException] {
         throw t.get
       }
       intercept[IndividualRequestTimeoutException] {
         Await.result(res)
       }
     }
+  }
+
+  test("TimeoutFilter should not transform a TimeoutException") {
+    val timeoutException = new TimeoutException("timeout exception")
+    val service = new Service[Unit, Unit] {
+      def apply(req: Unit) = throw timeoutException
+    }
+
+    val timeoutFilter = new TimeoutFilter[Unit, Unit](1.second, new MockTimer)
+    val timeoutService = timeoutFilter.andThen(service)
+
+    val exc = intercept[TimeoutException] {
+      Await.result(timeoutService())
+    }
+    assert(exc == timeoutException)
   }
 
   class DeadlineCtx(val timeout: Duration) {

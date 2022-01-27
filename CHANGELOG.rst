@@ -19,6 +19,10 @@ Runtime Behavior Changes
 
 * finagle: Bump version of Caffeine to 2.9.3. ``PHAB_ID=D815761``
 
+* finagle-core: in TimeoutFilter, only transform a timeout exception caused by TimeoutFilter. This also
+  changes the type of exception raised by the TimeoutFilter from a java.util.concurrent.TimeoutException
+  to a com.twitter.finagle.RequestTimeoutException. ``PHAB_ID=D814094``
+
 22.1.0
 ------
 

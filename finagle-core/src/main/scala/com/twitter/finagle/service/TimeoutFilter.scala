@@ -18,6 +18,7 @@ import com.twitter.util.Duration
 import com.twitter.util.Future
 import com.twitter.util.Timer
 import com.twitter.util.tunable.Tunable
+import scala.util.control.NoStackTrace
 
 private[twitter] object DeadlineOnlyToggle {
   private val enableToggle = CoreToggles("com.twitter.finagle.service.DeadlineOnly")
@@ -391,6 +392,9 @@ class TimeoutFilter[Req, Rep](
   private[this] val deadlineAnnotation = rolePrefix + DeadlineAnnotation
   private[this] val timeoutAnnotation = rolePrefix + TimeoutAnnotation
 
+  private[this] class InternalTimeoutException extends Exception with NoStackTrace
+  private[this] val internalTimeoutEx = new InternalTimeoutException
+
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val timeout = timeoutFn()
     val timeoutDeadline = Deadline.ofTimeout(timeout)
@@ -459,11 +463,12 @@ class TimeoutFilter[Req, Rep](
     if (!timeout.isFinite) {
       res
     } else {
-      res.within(timer, timeout).rescue {
-        case exc: java.util.concurrent.TimeoutException =>
-          res.raise(exc)
+      res.within(timer, timeout, internalTimeoutEx).rescue {
+        case exc if exc eq internalTimeoutEx =>
+          val timeoutEx = exceptionFn(timeout)
+          res.raise(timeoutEx)
           Trace.record(timeoutAnnotation)
-          Future.exception(exceptionFn(timeout))
+          Future.exception(timeoutEx)
       }
     }
   }

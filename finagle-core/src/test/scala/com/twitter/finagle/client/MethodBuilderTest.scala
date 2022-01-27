@@ -135,7 +135,11 @@ class MethodBuilderTest
 
     val perReqTimeout = 50.milliseconds
     val totalTimeout = perReqTimeout * 2 + 20.milliseconds
+
+    // keep track of the number of requests initiated
+    var tries = 0
     val svc: Service[Int, Int] = Service.mk { i =>
+      tries += 1
       Future.sleep(perReqTimeout + 1.millis)(timer).map(_ => i)
     }
 
@@ -169,10 +173,20 @@ class MethodBuilderTest
       timer.tick()
       assert(!rep.isDefined)
 
+      eventually {
+        // wait for the first request to time out and trigger a retry (2 tries initiated)
+        assert(tries == 2)
+      }
+
       // hit the 2nd per-req timeout.
       tc.advance(perReqTimeout)
       timer.tick()
       assert(!rep.isDefined)
+
+      eventually {
+        // wait for the second request (first retry) to time out and trigger another retry
+        assert(tries == 3)
+      }
 
       // hit the total timeout
       tc.advance(20.milliseconds)
@@ -803,7 +817,11 @@ class MethodBuilderTest
       case ReqRep(_, Throw(_: IndividualRequestTimeoutException)) =>
         ResponseClass.RetryableFailure
     }
+
+    // keep track of the number of requests initiated
+    var tries = 0;
     val svc: Service[Int, Int] = Service.mk { i =>
+      tries += 1
       Future.sleep(perReqTimeout + 1.millis)(timer).map(_ => i)
     }
 
@@ -840,10 +858,20 @@ class MethodBuilderTest
       timer.tick()
       assert(!rep.isDefined)
 
+      eventually {
+        // wait for the first request to time out and trigger a retry (2 tries initiated)
+        assert(tries == 2)
+      }
+
       // hit the 2nd per-req timeout.
       tc.advance(perReqTimeout)
       timer.tick()
       assert(!rep.isDefined)
+
+      eventually {
+        // wait for the second request (first retry) to time out and trigger another retry
+        assert(tries == 3)
+      }
 
       // hit the total timeout
       tc.advance(20.milliseconds)
