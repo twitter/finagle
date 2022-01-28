@@ -1,14 +1,23 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Status}
-import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
+import com.twitter.finagle.ChannelClosedException
+import com.twitter.finagle.Failure
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.Status
+import com.twitter.finagle.mux.Handshake.CanTinitMsg
+import com.twitter.finagle.mux.Handshake.Headers
+import com.twitter.finagle.mux.Handshake.TinitTag
 import com.twitter.finagle.mux.pushsession.MuxClientNegotiatingSession._
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.PushSession
 import com.twitter.finagle.mux.Handshake
-import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
-import com.twitter.io.{Buf, ByteReader}
-import com.twitter.logging.{Level, Logger}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.Verbosity
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.util.control.NonFatal
@@ -188,7 +197,9 @@ private[finagle] final class MuxClientNegotiatingSession(
             }
 
           case Throw(exc) =>
-            log.warning(exc, "Mux negotiation failed.")
+            val message = s"Mux negotiation failed. Remote address: ${handle.remoteAddress}"
+            if (log.isLoggable(Level.DEBUG)) log.debug(exc, message)
+            else log.warning(message)
             q.drainAndClose()
             failHandshake(exc)
         }

@@ -30,6 +30,12 @@ Runtime Behavior Changes
   changes the type of exception raised by the TimeoutFilter from a java.util.concurrent.TimeoutException
   to a com.twitter.finagle.RequestTimeoutException. ``PHAB_ID=D814094``
 
+* finagle-mux: Exceptions raised when Mux negotiation has failed have been
+  moved to a `Debug` log level as the stack trace is generally long and not
+  necessarily helpful. The logged message now includes the remote address and
+  that is logged at both the `Debug` level (with the exception and stack trace)
+  and `Warning` level (without). ``PHAB_ID=D821661``
+
 22.1.0
 ------
 
