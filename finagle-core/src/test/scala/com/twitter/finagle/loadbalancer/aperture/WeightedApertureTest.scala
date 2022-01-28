@@ -16,6 +16,7 @@ import com.twitter.util.Future
 import com.twitter.util.Time
 import org.scalacheck.Gen
 import org.scalactic.TolerantNumerics
+import org.scalatest.OneInstancePerTest
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.math.abs
 
@@ -23,7 +24,8 @@ class WeightedApertureTest extends BaseWeightedApertureTest(manageWeights = true
 
 abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     extends BaseApertureTools(manageWeights)
-    with ScalaCheckDrivenPropertyChecks {
+    with ScalaCheckDrivenPropertyChecks
+    with OneInstancePerTest {
 
   private val rng = Rng(123)
 
@@ -105,7 +107,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("WeightedAperture.adjustWeightsWithCoord can wrap around") {
     // Only add 10 nodes so that we are forced to use the MinDeterministicAperture, 12
-    val nodes: Vector[TestNode] = Vector.fill(10)(new TestNode(newFactory()))
+    val nodes: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory()))
 
     // This is a deterministic test, the values below identify the expected raw node weights
     // as well as their normalized values. These values can be useful for debugging.
@@ -121,7 +123,6 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
       WeightedAperture.adjustWeights(nodes.map(_.factory.weight), FromInstanceId(1, 4))
     val indices = wts.zipWithIndex.collect { case (weight, i) if weight > 0.0 => i }
     assert(indices.size == 10)
-    // Note that node 1 is the first node in the aperture, despite this ordering.
     assert(indices == IndexedSeq(0, 1, 2, 3, 4, 5, 6, 7, 8, 9))
 
     assert(approxEqual(wts.sum, 1.0))
@@ -129,21 +130,21 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("WeightedAperture.adjustWeights creates reasonable subsets (no wraparound)") {
     // Lets create more than MinDeterministicAperture nodes
-    val nodes: Vector[TestNode] = Vector.fill(15)(new TestNode(newFactory()))
+    val nodes: Vector[TestNode] = Vector.fill(15)(TestNode(newFactory()))
 
     // This is a deterministic test, the values below identify the expected raw node weights
     // as well as their normalized values. These values can be useful for debugging.
-    /** val nodes = Vector(0.07847762772691541, 0.0014420992718648718, 0.023449486809082966,
-     * 0.04768796803684853, 0.014210005154397954, 0.043948778046512794,
-     * 0.011201817816663974, 0.08489001106509408, 0.01566735349119557,
-     * 0.04004197185766193, 0.09392759754332235, 0.04163639795243517,
-     * 0.08285576943871914, 0.06629799243018646, 0.003081362527566656) */
+    /** val nodes = Vector(0.06818127601781632, 0.02676535334991952, 0.024259669941850928,
+     * 0.060227644665411986, 0.021662557088166313, 0.04581934074401264, 0.008902600511190118,
+     * 0.012225295738506748, 0.03381119880745816, 0.09320068787692642, 0.06778865989313106,
+     * 1.8821268751749722E-4, 0.04998637327300792, 0.09808325343250059, 0.08018058428232361)
+     */
 
-    /** val normalizedNodes = Vector(0.1209550917, 0.002222662111, 0.03614195421,
-     * 0.07349996063, 0.02190143263, 0.06773686506,
-     * 0.0172650084, 0.1308382959, 0.02414759765,
-     * 0.06171542794, 0.1447676428, 0.06417286658,
-     * 0.1277029834, 0.1021830041, 0.00474920685) */
+    /** val normalizedNodes = Vector(0.0986300904076233, 0.0387183897820382, 0.035093702837104696,
+     * 0.08712447735409877, 0.03133675532132662, 0.06628162428081825, 0.012878378706966257,
+     * 0.017684943643967176, 0.048910812321821505, 0.13482282538906853, 0.09806213735460213,
+     * 2.722658693108315E-4, 0.07230959587464579, 0.14188587715773285, 0.11598812369887528)
+     */
 
     val wts =
       WeightedAperture.adjustWeights(nodes.map(_.factory.weight), FromInstanceId(1, 5))
@@ -158,9 +159,9 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     val is2 = wts2.zipWithIndex.collect { case (weight, i) if weight > 0.0 => i }
 
     // This will include an additional node due to dApertureWidth = 0.8 ...
-    // The cumulative sum to node 11 is only 0.76, so we need to include a small portion of node 12
-    assert(is2.size == 13)
-    assert(is2 == IndexedSeq(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12))
+    // The cumulative sum to node 12 is only 0.74, so we need to include a small portion of node 13
+    assert(is2.size == 14)
+    assert(is2 == IndexedSeq(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13))
 
     assert(approxEqual(wts2.sum, 0.8))
   }
@@ -481,7 +482,6 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     com.twitter.finagle.toggle.flag.overrides
       .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
         val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory()))
-        val sum: Double = endpoints.map(_.factory.weight).sum
         val rap = new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
             override val manageWeights = true
@@ -490,20 +490,20 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
           initAperture = 12,
         )
 
-        val cumulativeProbability = Seq(0.015237645043305353, 0.031365087942818656,
-          0.0630951250697316, 0.11666610907349896, 0.17493368334189416, 0.23250412378175594,
-          0.2664395912672639, 0.36513496562276027, 0.46545611292466704, 0.5566089839530769,
-          0.6104686494845901, 0.6462222968878701, 0.6693704100586275, 0.6850570324997741,
-          0.7273997490787484, 0.7600717754383199, 0.8376813232943813, 0.880604996241379,
-          0.975629885236866, 1.0000000000000002)
+        val cumulativeProbability = Seq(0.10897957345898437, 0.1268500607086572,
+          0.24388128008462095, 0.2517531287369932, 0.26009561906137796, 0.2709863439395602,
+          0.32192445432616834, 0.4268557117936775, 0.49587102482185114, 0.5434526136090619,
+          0.5744517234237482, 0.5927875387629006, 0.6240404207108955, 0.6794445417803858,
+          0.7321388121574698, 0.757508511564142, 0.8312170117679757, 0.8352321269266164,
+          0.9179030745947724, 1.0)
 
         val pdist = rap.pdist.get
         assert(cumulativeProbability == pdist.cumulativeProbability.toSeq)
         val physicalAperture = 12d / 20d
         assert(pdist.scaledAperture == physicalAperture)
 
-        // Because the physical Aperture is 0.6, nodes 0 through 10 should exist within the aperture
-        assert(rap.indices == (0 to 10).toSet)
+        // Because the physical Aperture is 0.6, nodes 0 through 12 should exist within the aperture
+        assert(rap.indices == (0 to 12).toSet)
       }
   }
 
@@ -623,11 +623,11 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
   test("virtual and real indices are correct") {
     val endpoints = Vector.fill(20)(TestNode(newFactory()))
 
-    /* (0.09084713883660764, 0.05707320625655246, 0.05191939293783741, 0.013512879529774336,
-        0.04186708950372823, 0.09180929070805424, 0.03335293566905299, 0.07946745385422554,
-        0.04845152320510951, 0.06780292137281362, 0.07678011606416385, 0.09919958030931081,
-        0.03214768344925607, 0.07485085813565524, 0.08189691430133035, 0.04869905588129095,
-        0.028634371001983995, 0.04515619438216435, 0.05404313245456054, 0.08595316840483351) */
+    /* (0.09081256181340881, 0.014891457880475457, 0.0975219897302887, 0.006559603048899776,
+        0.0069517882499888, 0.009075229373741134, 0.042446672815094705, 0.08743910443467884,
+        0.057510386410179914, 0.03964968696216305, 0.025831524999190184, 0.015279215278932223,
+        0.026042993046009957, 0.0461681947326973, 0.04391007905378173, 0.02114054333698702,
+        0.06142121425583968, 0.003345791160297063, 0.06888961212637748, 0.06841127998963015) */
 
     val wap = new WeightedAperture[Unit, Unit, TestNode](
       aperture = new TestAperture(),
@@ -636,12 +636,10 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
       coord = FromInstanceId(4, 20)
     )
 
-    /* (0.0, 0.0, 0.0, 0.0, 0.012070751492043036, 0.07628746815185382, 0.02771409078537291,
-     0.06603221534834605, 0.040260021670054505, 0.05633975782777061, 0.06379921480459368,
-     0.0824283116137822, 0.026712605645649007, 0.06219612865021061, 0.06805093682038153,
-     0.04046570500564178, 0.023793274613225866, 0.0038495175710744345, 0.0, 0.0) */
+    // wap.indices.toSeq.sorted:
+    // Vector(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
 
-    assert(wap.pdist.get(0) == endpoints(4))
-    assert(wap.pdist.get(13) == endpoints(17))
+    assert(wap.pdist.get(0) == endpoints(2))
+    assert(wap.pdist.get(16) == endpoints(18))
   }
 }
