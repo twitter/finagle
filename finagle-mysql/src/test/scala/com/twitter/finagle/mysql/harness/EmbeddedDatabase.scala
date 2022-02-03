@@ -2,6 +2,8 @@ package com.twitter.finagle.mysql.harness
 
 import com.twitter.concurrent.Once
 import com.twitter.finagle.Mysql
+import com.twitter.finagle.mysql.Client
+import com.twitter.finagle.mysql.Result
 import com.twitter.finagle.mysql.harness.EmbeddedDatabase.UserNameForInstance
 import com.twitter.finagle.mysql.harness.EmbeddedDatabase.checkUserCache
 import com.twitter.finagle.mysql.harness.EmbeddedDatabase.userCache
@@ -106,35 +108,62 @@ final class EmbeddedDatabase(
   val config: DatabaseConfig,
   instance: EmbeddedInstance) {
 
+  private case class UserSql(user: User) {
+    private val checkUserExists: String =
+      s"""select `user` from mysql.user where user = "${user.name}""""
+
+    private val createUser: String = {
+      val createUserPrefix = s"CREATE USER '${user.name}'@'%%'"
+      val createUserSuffix = user.password match {
+        case Some(pwd) => s"IDENTIFIED BY '$pwd';"
+        case None => ";"
+      }
+      s"$createUserPrefix $createUserSuffix"
+    }
+
+    private val grantUser: String =
+      s"GRANT ${user.permission.value} ON `${config.databaseName}`.* TO '${user.name}'@'%%';"
+
+    /**
+     * Check if the user exists before attempting to create the user. This will prevent the warning
+     * generated from "CREATE USER IF NOT EXISTS" from spamming the test output.
+     * @param rootClient the client to the instance to create the users on
+     */
+    def executeUserSql(rootClient: Client): Future[Result] = {
+      for {
+        check <- rootClient.read(checkUserExists)
+        _ <-
+          if (check.rows.isEmpty) {
+            rootClient.query(createUser)
+          } else {
+            Future.Done
+          }
+        grantResult <- rootClient.query(grantUser)
+      } yield { grantResult }
+    }
+  }
+
   /**
    * Initializes the database via `instance`. This is guaranteed
    * to only happen once – even if called multiple times.
    */
   val init: () => Unit = Once {
-    val createDbSql = Seq(s"CREATE DATABASE `${config.databaseName}`;")
-    val createUsersSql = config.users.flatMap { user =>
+    val createDbSql = s"CREATE DATABASE `${config.databaseName}`;"
+    val createUsersSql: Seq[UserSql] = config.users.map { user =>
       val userNameForInstance = UserNameForInstance(user.name, instance.dest)
       userCache.compute(
         userNameForInstance,
         checkUserCache(user)
       ) //Ensures user hasn't been previously created with a different password
-
-      val createUserPrefix = s"CREATE USER IF NOT EXISTS'${user.name}'@'%%'"
-      val createUserSuffix = user.password match {
-        case Some(pwd) => s"IDENTIFIED BY '$pwd';"
-        case None => ";"
-      }
-      val createUser = s"$createUserPrefix $createUserSuffix"
-      val grantPerm =
-        s"GRANT ${user.permission.value} ON `${config.databaseName}`.* TO '${user.name}'@'%%';"
-      Seq(createUser, grantPerm)
+      new UserSql(user)
     }
-    val rootClient = instance.newRootUserClient()
-    Await.result(
-      Future
-        .traverseSequentially(createDbSql ++ createUsersSql)(rootClient.query)
-        .unit
-        .before(rootClient.close(SetupTeardownTimeout)))
+    val rootClient: Client = instance.newRootUserClient()
+
+    val future: Future[Unit] = for {
+      _ <- rootClient.query(createDbSql)
+      _ <- Future.collect(createUsersSql.map(_.executeUserSql(rootClient)))
+    } yield {}
+    Await.result(future.before(rootClient.close(SetupTeardownTimeout)))
 
     //  run user defined setup queries
     if (config.setupQueries.nonEmpty) {
