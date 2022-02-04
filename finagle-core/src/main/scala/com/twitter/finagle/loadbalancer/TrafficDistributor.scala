@@ -55,6 +55,7 @@ private[finagle] object TrafficDistributor {
       override def remake(): Unit = factory.remake()
       override def close(deadline: Time): Future[Unit] = factory.close(deadline)
       override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = factory(conn)
+      override def toString: String = address.toString
     }
 
     val init = Map.empty[Address, EndpointFactoryProxy]
