@@ -7,10 +7,10 @@ import com.twitter.util.Future
 import com.twitter.util.Stopwatch
 import com.twitter.util.Time
 import java.net.InetSocketAddress
-import java.lang.Thread
 import java.util.concurrent.ConcurrentHashMap
+import java.util.Random
+import java.util.concurrent.ThreadLocalRandom
 import scala.annotation.tailrec
-import scala.util.Random
 
 object Tracing {
 
@@ -19,14 +19,23 @@ object Tracing {
   private[tracing] val sampled = tracingStats.counter("sampled")
   private val localSpans = tracingStats.counter("local_spans")
 
-  private val DefaultId = TraceId(
-    None,
-    None,
-    SpanId(Rng.nextLong()),
-    None,
-    Flags(),
-    if (traceId128Bit()) Some(nextTraceIdHigh()) else None
-  )
+  @tailrec private[tracing] def nextSpanId(r: Random): SpanId = {
+    val nextLong = r.nextLong()
+    if (nextLong != 0L) {
+      SpanId(nextLong)
+    } else {
+      // NOTE: spanId of 0 is invalid, so guard against that here.
+      nextSpanId(r)
+    }
+  }
+
+  private[tracing] def newId: TraceId = {
+    val r = ThreadLocalRandom.current()
+    val traceIdHigh = if (traceId128Bit()) Some(nextTraceIdHigh(r)) else None
+    TraceId(None, None, nextSpanId(r), None, Flags(), traceIdHigh)
+  }
+
+  private val DefaultId = newId
 
   /**
    * Some tracing systems such as Amazon X-Ray encode the original timestamp in
@@ -37,10 +46,10 @@ object Tracing {
    * The 128-bit trace ID (composed of high/low) composes to the following:
    * |---- 32 bits for epoch seconds --- | ---- 96 bits for random number --- |
    */
-  private[tracing] def nextTraceIdHigh(): SpanId = {
-    val epochSeconds = Time.now.sinceEpoch.inSeconds
-    val random = Rng.nextInt()
-    SpanId((epochSeconds & 0xffffffffL) << 32 | (random & 0xffffffffL))
+  private[tracing] def nextTraceIdHigh(r: Random): SpanId = {
+    val epochSeconds = Time.now.sinceEpoch.inLongSeconds
+    val random = r.nextInt()
+    SpanId((epochSeconds << 32) | (random & 0xffffffffL))
   }
 
   // A collection of methods to work with tracers stored in the local context.
@@ -137,20 +146,16 @@ abstract class Tracing {
    * Create a derived id from the current [[TraceId]].
    */
   final def nextId: TraceId = {
-    var nextLong = 0L
-    while (nextLong == 0L) {
-      // NOTE: spanId of 0 is invalid, so guard against that here.
-      nextLong = Rng.nextLong()
-    }
-
-    val spanId = SpanId(nextLong)
-
     idOption match {
       case Some(id) =>
-        TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags, id.traceIdHigh)
-      case None =>
-        val traceIdHigh = if (traceId128Bit()) Some(nextTraceIdHigh()) else None
-        TraceId(None, None, spanId, None, Flags(), traceIdHigh)
+        TraceId(
+          Some(id.traceId),
+          Some(id.spanId),
+          nextSpanId(ThreadLocalRandom.current()),
+          id.sampled,
+          id.flags,
+          id.traceIdHigh)
+      case None => newId
     }
   }
 
@@ -396,14 +401,15 @@ abstract class Tracing {
 
   private[this] def recordLocalSpan(name: String, timestamp: Time, duration: Duration): Unit = {
     if (isActivelyTracing) {
+      val lid = id
       // these annotations are necessary to get the
       // zipkin ui to properly display the span.
       localSpans.incr()
-      record(Record(id, timestamp, Annotation.Rpc(name)))
-      record(Record(id, timestamp, Annotation.ServiceName(serviceName)))
-      record(Record(id, timestamp, Annotation.BinaryAnnotation("lc", name)))
-      record(Record(id, timestamp, Annotation.Message(LocalBeginAnnotation)))
-      record(Record(id, timestamp + duration, Annotation.Message(LocalEndAnnotation)))
+      record(Record(lid, timestamp, Annotation.Rpc(name)))
+      record(Record(lid, timestamp, Annotation.ServiceName(serviceName)))
+      record(Record(lid, timestamp, Annotation.BinaryAnnotation("lc", name)))
+      record(Record(lid, timestamp, Annotation.Message(LocalBeginAnnotation)))
+      record(Record(lid, timestamp + duration, Annotation.Message(LocalEndAnnotation)))
     }
   }
 

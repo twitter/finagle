@@ -32,7 +32,7 @@ class SamplingTracer(underlyingTracer: Tracer, sampler: Sampler) extends Tracer 
    */
   def sampleTrace(traceId: TraceId): Option[Boolean] = {
     val st = sampler.sampleTrace(traceId)
-    if (traceId.sampled != Some(true) && st == Some(true)) {
+    if (!traceId.sampled.contains(true) && st.contains(true)) {
       record(samplingRecord(traceId))
     }
     st

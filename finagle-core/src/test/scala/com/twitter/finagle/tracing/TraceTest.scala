@@ -5,6 +5,7 @@ import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
 import com.twitter.finagle.tracing.TraceTest.TraceIdException
 import com.twitter.io.Buf
 import com.twitter.util.Await
+import com.twitter.util.Duration
 import com.twitter.util.Future
 import com.twitter.util.MockTimer
 import com.twitter.util.Return
@@ -456,8 +457,15 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
   // example from X-Amzn-Trace-Id: Root=1-5759e988-bd862e3fe1be46a994272793;Sampled=1
   test("Trace.nextTraceIdHigh: encodes epoch seconds") {
     Time.withTimeAt(Time.fromSeconds(1465510280)) { tc => // Thursday, June 9, 2016 10:11:20 PM
-      val traceIdHigh = Tracing.nextTraceIdHigh()
+      val traceIdHigh = Tracing.nextTraceIdHigh(new java.util.Random)
       assert(traceIdHigh.toString.startsWith("5759e988"))
+    }
+  }
+
+  test("Trace.nextTraceIdHigh: high 32 bits change after 2038-01-19 03:14:07Z") {
+    Time.withTimeAt(Time.fromSeconds(Int.MaxValue) + Duration.fromSeconds(2)) { tc =>
+      val traceIdHigh = Tracing.nextTraceIdHigh(new java.util.Random)
+      assert(traceIdHigh.toString.startsWith("80000001"))
     }
   }
 
