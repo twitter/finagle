@@ -448,7 +448,7 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
     }
     ServerInfo.initialize(serverInfo)
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
 
         val endpoint: Stack[ServiceFactory[String, String]] =
           Stack.leaf(
@@ -482,7 +482,7 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
 
   test("WeightedAperture has weights available to it from address metadata") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
 
         val endpoint: Stack[ServiceFactory[String, String]] =
           Stack.leaf(
@@ -529,7 +529,7 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
 
   test("can override WeightedApertureToggle with UseWeightedBalancers Stack.Param") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 0.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 0.0) {
 
         val endpoint: Stack[ServiceFactory[String, String]] =
           Stack.leaf(

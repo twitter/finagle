@@ -1,7 +1,7 @@
 {
   "toggles": [
     {
-      "id": "com.twitter.finagle.loadbalancer.WeightedAperture",
+      "id": "com.twitter.finagle.loadbalancer.WeightedAperture.v2",
       "description": "Enable weight-aware aperture loadbalancers",
       "fraction": 0.0
     },

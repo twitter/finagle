@@ -9,7 +9,7 @@ import com.twitter.finagle.Status
 import scala.util.hashing.MurmurHash3
 
 object WeightedApertureToggle {
-  private val toggle = CoreToggles("com.twitter.finagle.loadbalancer.WeightedAperture")
+  private val toggle = CoreToggles("com.twitter.finagle.loadbalancer.WeightedAperture.v2")
   private val zoneAllowed =
     if (restrictZone()) ServerInfo().zone.getOrElse("") == "smf1" else true
 

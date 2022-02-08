@@ -251,7 +251,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("weighted aperture doesn't unduly bias") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val counts = new Counts
         val bal = new Bal {
           override val minAperture = 1
@@ -283,7 +283,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     assert(bal.isDeterministicAperture)
 
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         bal.update(Vector.tabulate(20)(Factory))
         bal.rebuildx()
         assert(bal.isDeterministicAperture)
@@ -293,7 +293,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("weighted aperture avoids unavailable hosts") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val counts = new Counts
         val bal = new Bal
 
@@ -332,7 +332,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("ignore minaperture") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val bal = new Bal {
           override val minAperture = 150
         }
@@ -353,7 +353,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("Empty vectors") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val bal = new Bal
         intercept[Empty] {
           Await.result(bal.apply())
@@ -379,7 +379,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
    */
   test("weighted RandomAperture") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory()))
         val sum: Double = endpoints.map(_.factory.weight).sum
 
@@ -412,7 +412,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("weighted RandomAperture with evenly weighted endpoints") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory(true)))
         val sum: Double = endpoints.map(_.factory.weight).sum
 
@@ -445,7 +445,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("weighted RandomAperture with aperture subset") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
         val sum: Double = endpoints.map(_.factory.weight).sum
         val apertureSum: Double = 1 / 20d * 12d
@@ -480,7 +480,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("RandomAperture.indices works as expected") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory()))
         val rap = new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
@@ -510,7 +510,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
   test("weighted and unweighted pathway parity") {
     val endpoints: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory(true)))
     val wrap = com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
             override val manageWeights = true
@@ -547,7 +547,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
   test("logical aperture can change") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val endpoints: Vector[TestNode] = Vector.fill(20)(TestNode(newFactory(true)))
         val rap = new RandomAperture[Unit, Unit, TestNode](
           aperture = new TestAperture() {
@@ -572,7 +572,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
   // copied from ApertureTest - can remove test when we remove toggle.
   test("weighted RandomAperture doesn't unduly bias") {
     com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.WeightedAperture", 1.0) {
+      .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", 1.0) {
         val counts = new Counts
         val bal = new Bal {
           override protected val useDeterministicOrdering = Some(false)
