@@ -2,7 +2,8 @@ package com.twitter.finagle.netty4
 
 import com.twitter.finagle.FinagleInit
 import com.twitter.finagle.stats.FinagleStatsReceiver
-import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
+import io.netty.util.ResourceLeakDetector
+import io.netty.util.ResourceLeakDetectorFactory
 
 /**
  * Runs prior initialization of any client/server in order to set Netty 4 system properties
@@ -31,16 +32,21 @@ private final class Netty4Init extends FinagleInit {
     // this will be equal to the number of logical cores * 2.
     //
     // NOTE: Before overriding it, we check whether or not it was set before. This way users
-    // will have a chance to tune it.
+    // will have a chance to tune it. Also set the "-overridden" suffixed property in order to
+    // signal that the property was overridden here and not by the user.
     //
     // NOTE: Only applicable when pooling is enabled (see `UsePooling`).
     if (System.getProperty("io.netty.allocator.numDirectArenas") == null) {
       System.setProperty("io.netty.allocator.numDirectArenas", numWorkers().toString)
+      System.setProperty("io.netty.allocator.numDirectArenas-overridden", "true")
     }
 
-    // Set the number of heap arenas the number of logical cores * 2.
+    // Set the number of heap arenas the number of logical cores * 2. Also set the "-overridden"
+    // suffixed property in order to signal that the property was overridden here and not by the
+    // user.
     if (System.getProperty("io.netty.allocator.numHeapArenas") == null) {
       System.setProperty("io.netty.allocator.numHeapArenas", numWorkers().toString)
+      System.setProperty("io.netty.allocator.numHeapArenas-overridden", "true")
     }
 
     // This determines the size of the memory chunks we allocate in arenas. Netty's default
