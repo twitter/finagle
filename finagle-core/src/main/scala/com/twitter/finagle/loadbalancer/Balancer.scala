@@ -147,9 +147,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   private[this] val rebuilds = statsReceiver.counter("rebuilds")
   private[this] val updates = statsReceiver.counter("updates")
 
-  private[this] val factoryToNode: Node => (EndpointFactory[Req, Rep], Node) =
-    n => n.factory -> n
-
   /**
    * Update the load balancer's service list. After the update, which
    * may run asynchronously, is completed, the load balancer balances
@@ -168,8 +165,8 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     val transferred: immutable.VectorBuilder[Node] = new immutable.VectorBuilder[Node]
 
     // These nodes are currently maintained by `Distributor`.
-    val oldFactories: mutable.HashMap[EndpointFactory[Req, Rep], Node] =
-      mutable.HashMap(dist.vector.map(factoryToNode): _*)
+    val oldFactories = mutable.HashMap.empty[EndpointFactory[Req, Rep], Node]
+    dist.vector.foreach { node => oldFactories.update(node.factory, node) }
 
     var numAdded: Int = 0
     for (factory <- newFactories) {
