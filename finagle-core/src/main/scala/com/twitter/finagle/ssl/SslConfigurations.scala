@@ -1,9 +1,14 @@
 package com.twitter.finagle.ssl
 
-import com.twitter.util.security.{Pkcs8KeyManagerFactory, X509TrustManagerFactory}
-import com.twitter.util.{Return, Throw}
+import com.twitter.util.security.Pkcs8KeyManagerFactory
+import com.twitter.util.security.X509TrustManagerFactory
+import com.twitter.util.Return
+import com.twitter.util.Throw
 import java.io.File
-import javax.net.ssl.{KeyManager, SSLContext, SSLEngine, TrustManager}
+import javax.net.ssl.KeyManager
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLEngine
+import javax.net.ssl.TrustManager
 
 private[ssl] object SslConfigurations {
 
@@ -82,11 +87,11 @@ private[ssl] object SslConfigurations {
    * `javax.net.ssl.TrustManager` based on the passed in [[KeyCredentials]] and
    * [[TrustCredentials]].
    *
-   * @note TLSv1.2 is specified as the protocol here, because it's the latest one
-   * which Java 8 supports. Specifying TLSv1.2 here though does not mean that "only"
-   * TLSv1.2 will be supported by the created engine. Calling `getSupportedProtocols`
+   * @note TLSv1.3 is specified as the protocol here, because it's the latest one
+   * which Java 8 supports. Specifying TLSv1.3 here though does not mean that "only"
+   * TLSv1.3 will be supported by the created engine. Calling `getSupportedProtocols`
    * on the created `javax.net.ssl.SSLEngine` will return
-   * Array(SSLv2Hello, SSLv3, TLSv1, TLSv1.1, TLSv1.2).
+   * Array(SSLv2Hello, SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3).
    *
    * See https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#SSLContext
    * for more information.
@@ -95,7 +100,7 @@ private[ssl] object SslConfigurations {
     keyCredentials: KeyCredentials,
     trustCredentials: TrustCredentials
   ): SSLContext = {
-    val sslContext = SSLContext.getInstance("TLSv1.2")
+    val sslContext = SSLContext.getInstance("TLSv1.3")
     sslContext.init(
       getKeyManagers(keyCredentials).orNull,
       getTrustManagers(trustCredentials).orNull,

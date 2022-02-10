@@ -36,6 +36,8 @@ Runtime Behavior Changes
   that is logged at both the `Debug` level (with the exception and stack trace)
   and `Warning` level (without). ``PHAB_ID=D821661``
 
+* finagle-core: `c.t.f.ssl.SslConfigurations.initializeSslContext` now creates an engine which includes TLSv1.3 as a supported protocol. ``PHAB_ID=D814211``
+
 22.1.0
 ------
 

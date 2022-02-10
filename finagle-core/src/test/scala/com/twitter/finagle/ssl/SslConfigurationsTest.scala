@@ -1,6 +1,7 @@
 package com.twitter.finagle.ssl
 
-import javax.net.ssl.{SSLContext, SSLEngine}
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLEngine
 import org.scalatest.funsuite.AnyFunSuite
 
 class SslConfigurationsTest extends AnyFunSuite {
@@ -17,7 +18,7 @@ class SslConfigurationsTest extends AnyFunSuite {
       TrustCredentials.Unspecified
     )
     assert(sslContext != null)
-    assert(sslContext.getProtocol == "TLSv1.2")
+    assert(sslContext.getProtocol == "TLSv1.3")
   }
 
   test("configureCipherSuites succeeds with good suites") {
