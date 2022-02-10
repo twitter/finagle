@@ -231,11 +231,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     /**
      * Check the opportunistic TLS configuration to ensure it's in a consistent state
      */
-    private[finagle] def validateTlsParamConsistency(params: Stack.Params): Unit = {
+    private def validateTlsParamConsistency(dest: Name, params: Stack.Params): Unit = {
       if (OppTls.enabled(params) && params[ClientSsl].sslClientConfiguration.isEmpty) {
         val level = params[OppTls].level
+        val label = params[Label].label
         throw new IllegalStateException(
-          s"Client desired opportunistic TLS ($level) but ClientSsl param is empty."
+          s"Client($label) with destination ${Name.showable.show(dest)} and desired opportunistic " +
+            s"TLS ($level) is missing the SSL configuration. Make sure that your TLS settings " +
+            s"are properly configured."
         )
       }
     }
@@ -286,7 +289,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     override def newClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
       // We want to fail fast if the client's TLS configuration is inconsistent
-      Mux.Client.validateTlsParamConsistency(params)
+      Mux.Client.validateTlsParamConsistency(dest, params)
       super.newClient(dest, label0)
     }
 
@@ -429,12 +432,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     /**
      * Check the opportunistic TLS configuration to ensure it's in a consistent state
      */
-    private[finagle] def validateTlsParamConsistency(params: Stack.Params): Unit = {
+    private def validateTlsParamConsistency(params: Stack.Params): Unit = {
       // We need to make sure
       if (OppTls.enabled(params) && params[ServerSsl].sslServerConfiguration.isEmpty) {
         val level = params[OppTls].level
+        val label = params[Label].label
         throw new IllegalStateException(
-          s"Server desired opportunistic TLS ($level) but ServerSsl param is empty."
+          s"Server($label) desired opportunistic TLS ($level) but ServerSsl param is empty. Make" +
+            s"sure your TLS configuration is properly loaded."
         )
       }
     }
