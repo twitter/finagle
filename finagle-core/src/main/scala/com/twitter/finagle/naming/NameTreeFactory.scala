@@ -1,9 +1,22 @@
 package com.twitter.finagle.naming
 
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.factory.ServiceFactoryCache
-import com.twitter.finagle.util.{Drv, Rng}
-import com.twitter.util.{Future, Time}
+import com.twitter.finagle.util.Drv
+import com.twitter.finagle.util.Rng
+import com.twitter.util.Future
+import com.twitter.util.Time
+
+/**
+ * A finagle context key that can be used to attach a custom id to a request
+ * This id will be used to ensure that all requests with the same id are directed to the
+ * same branch of a weighted [[NameTree.Union]]
+ *
+ *  @note Using this custom routing may violate the expected overall distribution of your requests.
+ *       Use with caution.
+ */
+private[twitter] object CustomNameTreeFactoryKey extends Contexts.local.Key[Long]
 
 /**
  * Builds a factory from a [[com.twitter.finagle.NameTree]]. Leaves
@@ -38,7 +51,12 @@ private object NameTreeFactory {
 
     case class Weighted(drv: Drv, factories: Seq[ServiceFactory[Req, Rep]])
         extends ServiceFactory[Req, Rep] {
-      def apply(conn: ClientConnection) = factories(drv(rng)).apply(conn)
+      def apply(conn: ClientConnection) = {
+        Contexts.local.get(CustomNameTreeFactoryKey) match {
+          case None => factories(drv(rng)).apply(conn)
+          case Some(l: Long) => factories(drv(Rng(l))).apply(conn)
+        }
+      }
 
       override def status = Status.worstOf[ServiceFactory[Req, Rep]](factories, _.status)
       def close(deadline: Time) = Future.Done
