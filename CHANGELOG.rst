@@ -38,6 +38,8 @@ Runtime Behavior Changes
 
 * finagle-core: `c.t.f.ssl.SslConfigurations.initializeSslContext` now creates an engine which includes TLSv1.3 as a supported protocol. ``PHAB_ID=D814211``
 
+* finagle-netty4: `c.t.f.n.ssl.client.Netty4ClientSslConfigurations.createClientContext` and `c.t.f.n.ssl.server.Netty4ServerSslConfigurations.createServerContext` now create contexts using the provided cipher suites. ``PHAB_ID=D732258``
+
 22.1.0
 ------
 

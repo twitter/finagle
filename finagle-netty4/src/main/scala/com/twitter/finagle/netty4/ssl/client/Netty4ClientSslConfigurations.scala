@@ -1,14 +1,22 @@
 package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.Address
-import com.twitter.finagle.netty4.ssl.{FinalizedSslContext, Netty4SslConfigurations}
-import com.twitter.finagle.ssl.{ApplicationProtocols, Engine, KeyCredentials}
-import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
+import com.twitter.finagle.netty4.ssl.FinalizedSslContext
+import com.twitter.finagle.netty4.ssl.Netty4SslConfigurations
+import com.twitter.finagle.ssl.CipherSuites
+import com.twitter.finagle.ssl.ApplicationProtocols
+import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.ssl.KeyCredentials
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.ssl.client.SslClientEngineFactory
 import com.twitter.util.Return
-import com.twitter.util.security.{PrivateKeyFile, X509CertificateFile}
+import com.twitter.util.security.PrivateKeyFile
+import com.twitter.util.security.X509CertificateFile
 import io.netty.buffer.ByteBufAllocator
-import io.netty.handler.ssl.{SslContext, SslContextBuilder}
+import io.netty.handler.ssl.SslContext
+import io.netty.handler.ssl.SslContextBuilder
 import io.netty.handler.ssl.ApplicationProtocolConfig.Protocol
+import scala.collection.JavaConverters._
 
 /**
  * Convenience functions for setting values on a Netty `SslContextBuilder`
@@ -80,15 +88,19 @@ private[finagle] object Netty4ClientSslConfigurations {
 
   /**
    * Creates an `SslContext` based on the supplied `SslClientConfiguration`. This method uses
-   * the `KeyCredentials`, `TrustCredentials`, and `ApplicationProtocols` from the provided
+   * the `KeyCredentials`, `TrustCredentials`, `CipherSuites`, and `ApplicationProtocols` from the provided
    * configuration, and forces the JDK provider if forceJdk is true.
    */
   def createClientContext(config: SslClientConfiguration, forceJdk: Boolean): SslContext = {
     val builder = startClientWithKey(config.keyCredentials)
     val withProvider = Netty4SslConfigurations.configureProvider(builder, forceJdk)
     val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
+    val withCiphers = config.cipherSuites match {
+      case CipherSuites.Enabled(s) => withTrust.ciphers(s.asJava)
+      case _ => withTrust
+    }
     val withAppProtocols =
-      configureClientApplicationProtocols(withTrust, config.applicationProtocols)
+      configureClientApplicationProtocols(withCiphers, config.applicationProtocols)
 
     // We only want to use the `FinalizedSslContext` if we're using the non-JDK implementation.
     if (!forceJdk) new FinalizedSslContext(withAppProtocols.build())
