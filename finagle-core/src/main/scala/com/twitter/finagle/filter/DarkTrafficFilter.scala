@@ -5,7 +5,9 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
 import com.twitter.finagle.tracing.ForwardAnnotation
 import com.twitter.finagle.util.Rng
-import com.twitter.logging.{HasLogLevel, Level, Logger}
+import com.twitter.logging.HasLogLevel
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
 import com.twitter.util.Future
 
 /**
@@ -34,15 +36,19 @@ class DarkTrafficFilter[Req, Rep](
   ) = this(darkService, enableSampling, statsReceiver, false)
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    // Set an identifier so we can later determine which two requests
-    // match, as well as which request is the dark one.
-    ForwardAnnotation.let(newKeyAnnotation()) {
+    val invokeDarkTraffic = enableSampling(request)
+    val isDarkRequestAnnotation = if (invokeDarkTraffic) DarkRequestTrue else DarkRequestFalse
+    // Set an identifier so both light service and dark service can
+    // query the annotation from tracing or from Finagle Local
+    // context, the same request going through both services should
+    // have the same dark request key.
+    ForwardAnnotation.let(Seq(newKeyAnnotation(), isDarkRequestAnnotation)) {
       if (forwardAfterService) {
         service(request).ensure {
-          sendDarkRequest(request)(enableSampling, darkService)
+          sendDarkRequest(request)(invokeDarkTraffic, darkService)
         }
       } else {
-        serviceConcurrently(service, request)(enableSampling, darkService)
+        serviceConcurrently(service, request)(invokeDarkTraffic, darkService)
       }
     }
   }
@@ -59,7 +65,11 @@ class DarkTrafficFilter[Req, Rep](
 object DarkTrafficFilter {
   val log: Logger = Logger.get("DarkTrafficFilter")
 
-  val DarkRequestAnnotation = BinaryAnnotation("clnt/dark_request", true)
+  // the presence of clnt/is_dark_request indicates that the span is associated with a dark request
+  val DarkRequestAnnotation = BinaryAnnotation("clnt/is_dark_request", true)
+  // the value of clnt/has_dark_request indicates whether or not the request contains a span that is forwarded to dark service
+  def DarkRequestTrue = BinaryAnnotation("clnt/has_dark_request", true)
+  def DarkRequestFalse = BinaryAnnotation("clnt/has_dark_request", false)
   def newKeyAnnotation() =
     BinaryAnnotation("clnt/dark_request_key", Rng.threadLocal.nextLong(Long.MaxValue))
 }

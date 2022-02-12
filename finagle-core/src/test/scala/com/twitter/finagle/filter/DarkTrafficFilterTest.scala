@@ -3,11 +3,22 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.DurationOps.RichDuration
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
-import com.twitter.finagle.tracing.{BufferingTracer, Record}
-import com.twitter.finagle.{Address, Name, Service}
-import com.twitter.util.{Await, Future, FutureCancelledException, Promise, Time}
+import com.twitter.finagle.tracing.BufferingTracer
+import com.twitter.finagle.tracing.ForwardAnnotation
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.Address
+import com.twitter.finagle.Name
+import com.twitter.finagle.Service
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
+import com.twitter.util.FutureCancelledException
+import com.twitter.util.Promise
+import com.twitter.util.Time
+
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import org.mockito.Matchers._
@@ -16,6 +27,8 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
 class DarkTrafficFilterTest extends AnyFunSuite with MockitoSugar {
+
+  def await[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 5.seconds)
 
   trait Fixture {
     val request = "annyang"
@@ -151,21 +164,60 @@ class DarkTrafficFilterTest extends AnyFunSuite with MockitoSugar {
         false
       )
 
-      val service = darkTrafficFilter andThen lightService
+      val service = darkTrafficFilter.andThen(lightService)
 
-      Await.result(service("hi"), 5.seconds)
+      await(service("hi"))
 
       assert(getAnnotation(lightTracer, "clnt/dark_request_key").isDefined)
-      assert(getAnnotation(lightTracer, "clnt/dark_request").isEmpty)
+      assert(getAnnotation(lightTracer, "clnt/is_dark_request").isEmpty)
+      assert(getAnnotation(lightTracer, "clnt/has_dark_request").isDefined)
 
       val lightSpanId = getAnnotation(lightTracer, "clnt/dark_request_key").get.traceId.spanId
 
       assert(getAnnotation(darkTracer, "clnt/dark_request_key").isDefined)
-      assert(getAnnotation(darkTracer, "clnt/dark_request").isDefined)
+      assert(getAnnotation(darkTracer, "clnt/is_dark_request").isDefined)
+      assert(getAnnotation(darkTracer, "clnt/has_dark_request").isDefined)
 
       val darkSpanId = getAnnotation(darkTracer, "clnt/dark_request_key").get.traceId.spanId
 
       assert(lightSpanId != darkSpanId)
+      await(service.close())
+    }
+  }
+
+  for (shouldInvokeDarkTraffic <- Seq(true, false)) {
+    test(
+      s"dark traffic annotation `clnt/has_dark_request` is populated as $shouldInvokeDarkTraffic in light service withOUT over the wire call") {
+
+      var darkTrafficInvoked: Any = false
+
+      val svcDark = new Service[String, String] {
+        def apply(request: String): Future[String] = {
+          Future.value(request)
+        }
+      }
+
+      val svcLight = new Service[String, String] {
+        private def getContextAnnotation(name: String): Option[BinaryAnnotation] =
+          ForwardAnnotation.current.getOrElse(Seq[BinaryAnnotation]()).find(_.key == name)
+
+        def apply(request: String): Future[String] = {
+          darkTrafficInvoked = getContextAnnotation("clnt/has_dark_request").get.value
+          Future.value(request)
+        }
+      }
+
+      val darkTrafficFilter = new DarkTrafficFilter[String, String](
+        svcDark,
+        _ => shouldInvokeDarkTraffic,
+        NullStatsReceiver,
+        false
+      )
+
+      val service = darkTrafficFilter.andThen(svcLight)
+      await(service("hi"))
+      assert(darkTrafficInvoked == shouldInvokeDarkTraffic)
+      await(service.close())
     }
   }
 }

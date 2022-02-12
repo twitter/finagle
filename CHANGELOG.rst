@@ -14,12 +14,25 @@ New Features
 * finagle-logging: Introduced SlowTracesFilter, which observes your requests and
   logs the slowest ones that are also sampled for tracing. ``PHAB_ID=D813291``
 
+* finagle-core: Added a new annotation `clnt/has_dark_request` in tracing and Finagle
+  Local context. The new annotation can be used to indicate whether or not the request
+  has a span that is sent to dark service. ``PHAB_ID=D825317``
+
 Bug Fixes
 ~~~~~~~~~~
 
 * finagle-postgres: Fixed a bug where a single framer instance was shared across all
   connections to a host when using TLS. ``PHAB_ID=D768581``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Changed the `shouldInvoke` parameter in method `serviceConcurrently`
+  and `sendDarkRequest` in AbstractDarkRequestFilter to be a Boolean instead of a
+  function of (Req => Boolean). ``PHAB_ID=D825317``
+
+* finagle-core: Renamed the existing `clnt/dark_request` to `clnt/is_dark_request` in
+  c.t.finagle.filter.DarkTrafficFilter``PHAB_ID=D825317``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

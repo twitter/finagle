@@ -2,7 +2,11 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
-import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.SimpleFilter
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Stackable
 import com.twitter.util.Future
 
 /**
@@ -54,6 +58,13 @@ object ForwardAnnotation {
     val annotations = Contexts.local.get(ChildAnnotationsKey).getOrElse(Seq())
     Contexts.local.let(ChildAnnotationsKey, annotations ++ annotation)(fn)
   }
+
+  /**
+   * Return a list of [[BinaryAnnotation]]s applied by [[ForwardAnnotationFilter]].
+   * If no [[BinaryAnnotation]]s are found, return None.
+   */
+  private[twitter] def current: Option[Seq[BinaryAnnotation]] =
+    Contexts.local.get(ChildAnnotationsKey)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = {
     new Stack.Module0[ServiceFactory[Req, Rep]] {

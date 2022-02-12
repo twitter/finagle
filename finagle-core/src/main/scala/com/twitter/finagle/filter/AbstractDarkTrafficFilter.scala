@@ -4,7 +4,8 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.filter.DarkTrafficFilter.DarkRequestAnnotation
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.ForwardAnnotation
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.Future
+import com.twitter.util.Promise
 import scala.util.control.NonFatal
 
 object AbstractDarkTrafficFilter {
@@ -39,7 +40,7 @@ trait AbstractDarkTrafficFilter {
     service: Service[Req, Rep],
     request: Req
   )(
-    shouldInvoke: Req => Boolean,
+    shouldInvoke: Boolean,
     invokeDarkService: Req => Future[_]
   ): Future[Rep] = {
 
@@ -59,11 +60,11 @@ trait AbstractDarkTrafficFilter {
   protected def sendDarkRequest[Req](
     request: Req
   )(
-    shouldInvoke: Req => Boolean,
+    shouldInvoke: Boolean,
     invokeDarkService: Req => Future[_]
   ): Future[_] = {
     ForwardAnnotation.let(DarkRequestAnnotation) {
-      if (shouldInvoke(request)) {
+      if (shouldInvoke) {
         requestsForwardedCounter.incr()
         invokeDarkService(request)
           .onFailure(handleFailure(request, _))
