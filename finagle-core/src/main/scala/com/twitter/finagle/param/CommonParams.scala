@@ -2,9 +2,13 @@ package com.twitter.finagle.param
 
 import com.twitter.finagle.filter.OffloadFilter
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.{Stack, service, stats, tracing}
+import com.twitter.finagle.Stack
+import com.twitter.finagle.service
+import com.twitter.finagle.stats
+import com.twitter.finagle.tracing
 import com.twitter.util
-import com.twitter.util.{Duration, FuturePool}
+import com.twitter.util.Duration
+import com.twitter.util.FuturePool
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.ExecutorService
 
@@ -58,11 +62,12 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
 
   /**
    * Configures this server or client with given [[util.Monitor]]
-   * (default: [[com.twitter.finagle.util.DefaultMonitor]]).
+   * (default: [[com.twitter.finagle.util.NullMonitor]]).
    *
    * Monitors are Finagle's out-of-band exception reporters. Whenever an exception is thrown
-   * on a request path, it's reported to the monitor. The default monitor implementation,
-   * [[com.twitter.finagle.util.DefaultMonitor]], logs these exceptions.
+   * on a request path, it's reported to the monitor. The configured `Monitor` is composed
+   * (see below for how composition works) with the default monitor implementation,
+   * [[com.twitter.finagle.util.DefaultMonitor]], which logs these exceptions.
    *
    * Monitors are wired into the server or client stacks via
    * [[com.twitter.finagle.filter.MonitorFilter]] and are applied to the following kinds
