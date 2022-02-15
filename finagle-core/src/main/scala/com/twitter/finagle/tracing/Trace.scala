@@ -159,12 +159,16 @@ object Trace extends Tracing {
     else {
       val oldId = if (terminal) traceId.copy(terminal = terminal) else traceId
       val newId = oldId.sampled match {
-        case Some(_) => oldId
+        case Some(_) => {
+          Tracing.active.incr()
+          oldId
+        }
         case None =>
           val sampledOption = tracer.sampleTrace(oldId)
           sampledOption match {
             case Some(true) => Tracing.sampled.incr()
-            case _ => //no-op
+            case Some(false) => Tracing.notSampled.incr()
+            case _ => Tracing.deferred.incr()
           }
 
           oldId.copy(_sampled = sampledOption)

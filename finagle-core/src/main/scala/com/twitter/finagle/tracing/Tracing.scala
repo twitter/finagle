@@ -17,6 +17,9 @@ object Tracing {
   private val Rng = new Random
   private[this] val tracingStats = FinagleStatsReceiver.scope("tracing")
   private[tracing] val sampled = tracingStats.counter("sampled")
+  private[tracing] val active = tracingStats.counter("active")
+  private[tracing] val notSampled = tracingStats.counter("not_sampled")
+  private[tracing] val deferred = tracingStats.counter("deferred")
   private val localSpans = tracingStats.counter("local_spans")
 
   @tailrec private[tracing] def nextSpanId(r: Random): SpanId = {
