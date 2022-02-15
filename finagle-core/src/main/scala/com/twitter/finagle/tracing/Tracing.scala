@@ -399,18 +399,21 @@ abstract class Tracing {
     }
   }
 
-  private[this] def recordLocalSpan(name: String, timestamp: Time, duration: Duration): Unit = {
-    if (isActivelyTracing) {
-      val lid = id
-      // these annotations are necessary to get the
-      // zipkin ui to properly display the span.
-      localSpans.incr()
-      record(Record(lid, timestamp, Annotation.Rpc(name)))
-      record(Record(lid, timestamp, Annotation.ServiceName(serviceName)))
-      record(Record(lid, timestamp, Annotation.BinaryAnnotation("lc", name)))
-      record(Record(lid, timestamp, Annotation.Message(LocalBeginAnnotation)))
-      record(Record(lid, timestamp + duration, Annotation.Message(LocalEndAnnotation)))
-    }
+  /**
+   * Adds an annotation such that the zipkin UI can properly display it
+   *
+   * @note This method does *not* check `isActivelyTracing` -- the onus is on the user to include this check.
+   */
+  final protected def recordLocalSpan(name: String, timestamp: Time, duration: Duration): Unit = {
+    val lid = id
+    // these annotations are necessary to get the
+    // zipkin ui to properly display the span.
+    localSpans.incr()
+    record(Record(lid, timestamp, Annotation.Rpc(name)))
+    record(Record(lid, timestamp, Annotation.ServiceName(serviceName)))
+    record(Record(lid, timestamp, Annotation.BinaryAnnotation("lc", name)))
+    record(Record(lid, timestamp, Annotation.Message(LocalBeginAnnotation)))
+    record(Record(lid, timestamp + duration, Annotation.Message(LocalEndAnnotation)))
   }
 
   /**
