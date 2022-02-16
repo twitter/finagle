@@ -1,14 +1,21 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.{client, _}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
+import com.twitter.finagle.client
+import com.twitter.finagle._
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.builder.ClientConfig
 import com.twitter.finagle.client.MethodPool
 import com.twitter.finagle.service.ResponseClassifier
-import com.twitter.finagle.thrift.exp.partitioning.{PartitioningStrategy, ThriftPartitioningService}
-import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
-import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest}
+import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService
+import com.twitter.finagle.thrift.service.Filterable
+import com.twitter.finagle.thrift.service.ServicePerEndpointBuilder
+import com.twitter.finagle.thrift.ServiceIfaceBuilder
+import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.finagle.thriftmux.exp.partitioning.DynamicPartitioningService
-import com.twitter.util.{Duration, Future, Time}
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Time
 import com.twitter.util.tunable.Tunable
 
 object MethodBuilder {
@@ -386,6 +393,22 @@ class MethodBuilder(
     mb.configured(Thrift.param.ServiceClass(Option(builder.serviceClass)))
       .newServicePerEndpoint(clientBuilder).getServicePerEndpoint
   }
+
+  /**
+   * Create a [[Service]] from the current configuration.
+   *
+   * @note It's very likely that you wanted/needed to use {{servicePerEndpoint}} instead.
+   */
+  def newService(methodName: String): Service[ThriftClientRequest, Array[Byte]] =
+    mb.newService(methodName)
+
+  /**
+   * Create a [[Service]] from the current configuration.
+   *
+   * @note It's very likely that you wanted/needed to use {{servicePerEndpoint}} instead.
+   */
+  def newService: Service[ThriftClientRequest, Array[Byte]] =
+    mb.newService
 
   final private class ClientServiceIfaceBuilder[ServiceIface <: Filterable[ServiceIface]](
     builder: ServiceIfaceBuilder[ServiceIface])
