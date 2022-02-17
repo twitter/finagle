@@ -109,28 +109,60 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
 
   /**
    * Adds the given `cookie` (which is a tuple of cookie `name`
-   * and Cookie` itself) into this map. If there are already cookies
-   * with the given `name` in the map, they will be removed.
+   * and `Cookie` itself) into this map.
+   *
+   * '''On a Response:''' existing cookies with this name but different
+   * domain/path will be kept. If there is already an identical cookie
+   * (different value but name/path/domain is the same) in the map, it will be
+   * replaced within a new version.
+   *
+   * '''On a Request:''' existing cookies with this name will be kept, as
+   * request cookies do not have a domain/path to distinguish them, yet the same
+   * cookie name can be repeated in a request. If there are already cookies
+   * with the given `name` and `value`, they will be removed.
    */
   protected def addCookie(cookie: (String, Cookie)): this.type = {
     val (n, c) = cookie
-    setNoRewrite(n, c)
+    addNoRewrite(n, c)
     rewriteCookieHeaders()
     this
   }
 
   /**
-   * Adds the given `cookie` into this map. If there are already cookies
-   * with the given `name` in the map, they will be removed.
+   * Adds the given `cookie` into this map.
+   *
+   * '''On a Response:''' existing cookies with this name but different
+   * domain/path will be kept. If there is already an identical cookie
+   * (different value but name/path/domain is the same) in the map, it will be
+   * replaced within a new version.
+   *
+   * '''On a Request:''' existing cookies with this name will be kept, as
+   * request cookies do not have a domain/path to distinguish them, yet the same
+   * cookie name can be repeated in a request. If there are already cookies
+   * with the given `name` and `value`, they will be removed.
    */
   def +=(cookie: Cookie): CookieMap = {
     this += ((cookie.name, cookie))
   }
 
+  /**
+   * Adds the given `cookies` (which are tuples of cookie `name`
+   * and `Cookie` itself) into this map.
+   *
+   * '''On a Response:''' existing cookies with this name but different
+   * domain/path will be kept. If there is already an identical cookie
+   * (different value but name/path/domain is the same) in the map, it will be
+   * replaced within a new version.
+   *
+   * '''On a Request:''' existing cookies with this name will be kept, as
+   * request cookies do not have a domain/path to distinguish them, yet the same
+   * cookie name can be repeated in a request. If there are already cookies
+   * with the given `name` and `value`, they will be removed.
+   */
   protected def addCookies(
     cookies: scala.collection.TraversableOnce[(String, Cookie)]
   ): this.type = {
-    cookies.foreach { case (n, c) => setNoRewrite(n, c) }
+    cookies.foreach { case (n, c) => addNoRewrite(n, c) }
     rewriteCookieHeaders()
     this
   }
@@ -150,24 +182,32 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     this
   }
 
-  private[this] def setNoRewrite(name: String, cookie: Cookie): Unit = {
-    underlying(name) = cookie :: Nil
-  }
-
   private[this] def addNoRewrite(name: String, cookie: Cookie): Unit = {
-    val prev = underlying(name)
+    // two request cookies are equal if name and value are the same
+    def nameValueEquals(left: Cookie, right: Cookie): Boolean =
+      left.name.equalsIgnoreCase(right.name) && left.value.equals(right.value)
+
+    val prev: List[Cookie] = underlying(name)
     val next =
-      if (prev.contains(cookie)) cookie :: prev.filter(c => c != cookie)
+      if (message.isResponse && prev.contains(cookie)) cookie :: prev.filter(c => c != cookie)
+      else if (message.isRequest) cookie :: prev.filter(c => !nameValueEquals(c, cookie))
       else cookie :: prev
 
     underlying(name) = next
   }
 
   /**
-   * Adds the given `cookie` with `name` into this map. Existing cookies
-   * with this name but different domain/path will be kept. If there is already
-   * an identical cookie (different value but name/path/domain is the same) in the
-   * map, it will be replaced within a new version.
+   * Adds the given `cookie` with `name` into this map.
+   *
+   * '''On a Response:''' existing cookies with this name but different
+   * domain/path will be kept. If there is already an identical cookie
+   * (different value but name/path/domain is the same) in the map, it will be
+   * replaced within a new version.
+   *
+   * '''On a Request:''' existing cookies with this name will be kept, as
+   * request cookies do not have a domain/path to distinguish them, yet the same
+   * cookie name can be repeated in a request. If there are already cookies
+   * with the given `name` and `value`, they will be removed.
    *
    * @see [[addAll]] for adding cookies in bulk
    */
@@ -177,10 +217,17 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   }
 
   /**
-   * Adds the given `cookie` into this map. Existing cookies with this name
-   * but different domain/path will be kept. If there is already an identical
-   * cookie (different value but name/path/domain is the same) in the map,
-   * it will be replaced within a new version.
+   * Adds the given `cookie` into this map.
+   *
+   * '''On a Response:''' existing cookies with this name but different
+   * domain/path will be kept. If there is already an identical cookie
+   * (different value but name/path/domain is the same) in the map, it will be
+   * replaced within a new version.
+   *
+   * '''On a Request:''' existing cookies with this name will be kept, as
+   * request cookies do not have a domain/path to distinguish them, yet the same
+   * cookie name can be repeated in a request. If there are already cookies
+   * with the given `name` and `value`, they will be removed.
    *
    * @see [[addAll]] for adding cookies in bulk
    */
@@ -189,10 +236,17 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   }
 
   /**
-   * Adds multiple `cookies` into this map. Existing cookies with this name
-   * but different domain/path will be kept. If there is already an identical
-   * cookie (different value but name/path/domain is the same) in the map,
-   * it will be replaced within a new version.
+   * Adds multiple `cookies` into this map.
+   *
+   * '''On a Response:''' existing cookies with this name but different
+   * domain/path will be kept. If there is already an identical cookie
+   * (different value but name/path/domain is the same) in the map, it will be
+   * replaced within a new version.
+   *
+   * '''On a Request:''' existing cookies with this name will be kept, as
+   * request cookies do not have a domain/path to distinguish them, yet the same
+   * cookie name can be repeated in a request. If there are already cookies
+   * with the given `name` and `value`, they will be removed.
    */
   def addAll(cookies: TraversableOnce[Cookie]): Unit = {
     cookies.foreach(c => addNoRewrite(c.name, c))

@@ -1,16 +1,16 @@
 package com.twitter.finagle.http.netty4
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.http.{Cookie, CookieCodec, CookieMap}
+import com.twitter.finagle.http.Cookie
+import com.twitter.finagle.http.CookieCodec
+import com.twitter.finagle.http.CookieMap
 import com.twitter.finagle.http.cookie.SameSiteCodec
-import io.netty.handler.codec.http.cookie.{
-  ClientCookieDecoder => NettyClientCookieDecoder,
-  ClientCookieEncoder => NettyClientCookieEncoder,
-  Cookie => NettyCookie,
-  DefaultCookie => NettyDefaultCookie,
-  ServerCookieDecoder => NettyServerCookieDecoder,
-  ServerCookieEncoder => NettyServerCookieEncoder
-}
+import io.netty.handler.codec.http.cookie.{ClientCookieDecoder => NettyClientCookieDecoder}
+import io.netty.handler.codec.http.cookie.{ClientCookieEncoder => NettyClientCookieEncoder}
+import io.netty.handler.codec.http.cookie.{Cookie => NettyCookie}
+import io.netty.handler.codec.http.cookie.{DefaultCookie => NettyDefaultCookie}
+import io.netty.handler.codec.http.cookie.{ServerCookieDecoder => NettyServerCookieDecoder}
+import io.netty.handler.codec.http.cookie.{ServerCookieEncoder => NettyServerCookieEncoder}
 import java.util.{BitSet => JBitSet}
 import scala.collection.JavaConverters._
 
@@ -52,7 +52,7 @@ private[finagle] object Netty4CookieCodec extends CookieCodec {
   }
 
   def decodeServer(header: String): Option[Iterable[Cookie]] = {
-    val cookies = serverDecoder.decode(header).asScala.map(cookieToFinagle)
+    val cookies = serverDecoder.decodeAll(header).asScala.map(cookieToFinagle)
     if (!cookies.isEmpty) Some(cookies)
     else None
   }

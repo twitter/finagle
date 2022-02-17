@@ -21,6 +21,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~~
 
+* finagle-netty4-http: On a Request, adding multiple cookies with the same name
+  to a CookieMap preserves all of them. Only cookies on Responses are
+  deduplicated. Previously, adding a Request cookie with the same name would
+  overwrite the old value with the new value. ``PHAB_ID=D801466``
+
 * finagle-postgres: Fixed a bug where a single framer instance was shared across all
   connections to a host when using TLS. ``PHAB_ID=D768581``
 

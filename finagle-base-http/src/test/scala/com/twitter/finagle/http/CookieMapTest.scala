@@ -5,6 +5,12 @@ import org.scalatest.funsuite.AnyFunSuite
 
 abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyFunSuite {
 
+  // convert cookies to a set so test does not depend on order
+  private def toSet(cookies: String): Set[String] = {
+    val delimiter = "; "
+    cookies.split(delimiter).toSet
+  }
+
   private[this] def testCookies(
     newMessage: () => Message,
     headerName: String,
@@ -85,23 +91,6 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyF
     }
 
     test(
-      s"$codec: Adding different cookie objects with the same name to a CookieMap on a " +
-        s"$messageType more than once results in a CookieMap with one cookie"
-    ) {
-      val message = newMessage()
-      val cookie = new Cookie("name", "value")
-      val cookie2 = new Cookie("name", "value2")
-      lazy val cookieMap = new CookieMap(message, codec)
-      cookieMap.add(cookie)
-      cookieMap.add(cookie2)
-
-      assert(cookieMap.size == 1)
-      // We expect to see the recently added cookie
-      assert(cookieMap("name").value == "value2")
-      assert(message.headerMap(headerName) == "name=value2")
-    }
-
-    test(
       s"$codec Adding two cookies with the same name but different domain to a $messageType " +
         "adds both cookies"
     ) {
@@ -138,10 +127,54 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyF
 
       assert(!message.headerMap.contains(headerName))
     }
+
+    test(
+      s"$codec: RemoveAll removes all cookies with same name but different value from $messageType") {
+      val message = newMessage()
+      val cookie = new Cookie("name", "value")
+      val cookie2 = new Cookie("name", "value2")
+      val cookie3 = new Cookie("foo", "bar")
+      val cookie4 = new Cookie("foo", "bar2")
+      lazy val cookieMap = new CookieMap(message, codec)
+      cookieMap.add(cookie)
+      cookieMap.add(cookie2)
+      cookieMap.add(cookie3)
+      cookieMap.add(cookie4)
+
+      if (messageType == "Response") {
+        // name=value2; foo=bar2
+        assert(cookieMap.size == 2)
+      } else {
+        // name=value; name=value2; foo=bar; foo=bar2
+        assert(cookieMap.size == 4)
+      }
+
+      // remove all the cookies
+      cookieMap.removeAll(Seq("name", "foo"))
+      assert(cookieMap.isEmpty)
+      assert(message.headerMap.get(headerName).isEmpty || message.headerMap(headerName) == "")
+    }
   }
 
   // Request tests
   testCookies(() => Request(), "Cookie", "Request")
+
+  test(
+    s"$codec: Using add, Request keeps multiple cookies in CookieMap with same name but different value") {
+    val message = Request()
+    val cookie = new Cookie("name", "value")
+    // cookie equality is case sensitive to the cookie value
+    val cookie2 = new Cookie("name", "VALUE")
+    lazy val cookieMap = new CookieMap(message, codec)
+    cookieMap.add(cookie)
+    cookieMap.add(cookie2)
+
+    assert(cookieMap.size == 2)
+    // We expect to see both cookies
+    assert(cookieMap.getAll("name").map(_.value).toSet == Set("value", "VALUE"))
+    val cookies = message.headerMap("Cookie")
+    assert(toSet(cookies) == Set("name=value", "name=VALUE"))
+  }
 
   test("Setting multiple cookies on a Request in a single header adds all the cookies") {
     val request = Request()
@@ -152,10 +185,7 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyF
     assert(cookieMap.isValid == true)
 
     val cookies = request.headerMap("Cookie")
-
-    // This is inelegant but we also want to make sure there's a ; between the cookies,
-    // so this is easiest since ordering is not deterministic.
-    assert(cookies == "name=value; name2=value2" || cookies == "name2=value2; name=value")
+    assert(toSet(cookies) == Set("name=value", "name2=value2"))
   }
 
   test(
@@ -172,19 +202,64 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends AnyF
     assert(cookieMap.values.toSet == Set(cookie, cookie2))
   }
 
-  test("Adding a cookie to a Request with an existing cookie adds it to the header and cookies") {
+  test(
+    s"Using +=, a cookie is added to the header" +
+      "The Request has existing cookie with same name but different value") {
     val request = Request()
     request.headerMap.set("Cookie", "name=value")
     lazy val cookieMap = new CookieMap(request, codec)
 
-    val cookie = new Cookie("name2", "value2")
+    val cookie = new Cookie("name", "foo")
     cookieMap += cookie
     val cookies = request.headerMap("Cookie")
-    assert(cookies == "name=value; name2=value2" || cookies == "name2=value2; name=value")
+    assert(toSet(cookies) == Set("name=value", "name=foo"))
+  }
+
+  test(
+    s"Using add, a cookie is added to the header" +
+      "The Request has existing cookie with same name but different value") {
+    val request = Request()
+    request.headerMap.set("Cookie", "name=value")
+    lazy val cookieMap = new CookieMap(request, codec)
+
+    val cookie = new Cookie("name", "foo")
+    cookieMap.add(cookie)
+    val cookies = request.headerMap("Cookie")
+    assert(toSet(cookies) == Set("name=value", "name=foo"))
   }
 
   // Response tests
   testCookies(() => Response(), "Set-Cookie", "Response")
+
+  test(
+    s"$codec: Using add, Response deduplicates cookies with same name in CookieMap and keeps the last one") {
+    val message = Response()
+    val cookie = new Cookie("name", "value")
+    val cookie2 = new Cookie("name", "value2")
+    lazy val cookieMap = new CookieMap(message, codec)
+    cookieMap.add(cookie)
+    cookieMap.add(cookie2)
+
+    assert(cookieMap.size == 1)
+    // We expect to see the recently added cookie
+    assert(cookieMap("name").value == "value2")
+    assert(message.headerMap("Set-Cookie") == "name=value2")
+  }
+
+  test(
+    s"$codec: Using +=, Response deduplicates cookies with same name in CookieMap and keeps the last one") {
+    val message = Response()
+    val cookie = new Cookie("name", "value")
+    val cookie2 = new Cookie("name", "value2")
+    lazy val cookieMap = new CookieMap(message, codec)
+    cookieMap += cookie
+    cookieMap += cookie2
+
+    assert(cookieMap.size == 1)
+    // We expect to see the recently added cookie
+    assert(cookieMap("name").value == "value2")
+    assert(message.headerMap("Set-Cookie") == "name=value2")
+  }
 
   test(s"$codec: Adding multiple Set-Cookie headers to a Response adds those cookies") {
     val response = Response()
