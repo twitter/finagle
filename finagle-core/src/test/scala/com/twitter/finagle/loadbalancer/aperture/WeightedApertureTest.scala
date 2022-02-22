@@ -404,8 +404,8 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
           // the number of times key is selected over total node selections
           val a = histo0(key) / (numRuns * 2d)
           // the normalized weight of that key
-          val b = (pdist.weight(key) / sum)
-          assert(math.abs(a - b) / math.max(a, b) < 1e-1)
+          val b = pdist.weight(key) / sum
+          assert(math.abs(a - b) / math.max(a, b) < 1.2e-1)
         }
       }
   }

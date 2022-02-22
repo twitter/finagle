@@ -1,7 +1,6 @@
 package com.twitter.finagle.util
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 trait Drv extends (Rng => Int)
 
@@ -68,34 +67,32 @@ object Drv {
 
     val alias = new Array[Int](N)
     val prob = new Array[Double](N)
-
-    val small = mutable.Queue[Int]()
-    val large = mutable.Queue[Int]()
+    val storage = new DrvSmallLargeSets(N)
 
     @tailrec
     def fillQueues(i: Int): Unit = if (i < N) {
       p(i) *= N
-      if (p(i) < 1d) small.enqueue(i)
-      else large.enqueue(i)
+      if (p(i) < 1d) storage.smallPush(i)
+      else storage.largePush(i)
       fillQueues(i + 1)
     }
     fillQueues(0)
 
-    while (large.nonEmpty && small.nonEmpty) {
-      val s = small.dequeue()
-      val l = large.dequeue()
+    while (!storage.smallIsEmpty && !storage.largeIsEmpty) {
+      val s = storage.smallPop()
+      val l = storage.largePop()
 
       prob(s) = p(s)
       alias(s) = l
 
       p(l) = (p(s) + p(l)) - 1d // Same as p(l)-(1-p(s)), but more stable
-      if (p(l) < 1) small.enqueue(l)
-      else large.enqueue(l)
+      if (p(l) < 1) storage.smallPush(l)
+      else storage.largePush(l)
     }
 
-    while (large.nonEmpty) prob(large.dequeue()) = 1d
+    while (!storage.largeIsEmpty) prob(storage.largePop()) = 1d
 
-    while (small.nonEmpty) prob(small.dequeue()) = 1d
+    while (!storage.smallIsEmpty) prob(storage.smallPop()) = 1d
 
     Aliased(alias, prob)
   }

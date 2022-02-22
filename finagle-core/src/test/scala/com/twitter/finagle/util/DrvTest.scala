@@ -9,16 +9,21 @@ class DrvTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("Drv.newVose(weights)") {
     val rng = Rng(87654321L)
-    val weights = Seq.range(1, 11) map (_.toDouble)
+    val weights = (0 until 10).map(_.toDouble)
     val drv = Drv.fromWeights(weights)
+
     val histo = new Array[Int](10)
     for (_ <- 0 until N)
       histo(drv(rng)) += 1
 
-    for (i <- 1 to 9) {
-      val a = histo(i - 1) / i
-      val b = histo(i) / (i + 1)
-      assert(math.abs(a - b).toDouble / histo(i) < 0.005)
+    // now check that each bucket has roughly the right number of counts
+    // to match the weights
+    val totalWeight = weights.sum
+    for (i <- weights.indices) {
+      // scale N by the relative weight of this bucket
+      val expected = N * (weights(i) / totalWeight)
+      // Allow for a 1% deviation in the result to allow for randomness
+      assert(math.abs(expected - histo(i)) <= expected * 0.01)
     }
   }
 
