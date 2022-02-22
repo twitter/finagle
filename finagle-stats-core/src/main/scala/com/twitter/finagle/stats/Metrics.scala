@@ -247,7 +247,7 @@ private[finagle] class Metrics private (
 
   private def validateStringExpression(expr: Expression): Unit = {
     expr match {
-      case StringExpression(expr) if !metricSchemas.containsKey(expr) =>
+      case StringExpression(expr, _) if !metricSchemas.containsKey(expr) =>
         log.debug(s"StringExpression $expr may not exist in metrics")
       case FunctionExpression(_, exprs) =>
         exprs.map(validateStringExpression(_))
