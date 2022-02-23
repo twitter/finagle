@@ -838,8 +838,10 @@ class MethodBuilderTest
       .idempotent(1.percent, sendInterrupts = true, classifier)
 
     mb.params[BackupRequestFilter.Param] match {
-      case BackupRequestFilter.Param.Configured(maxExtraLoadTunable, sendInterrupts) =>
-        assert(maxExtraLoadTunable().get == 1.percent && sendInterrupts)
+      case BackupRequestFilter.Param
+            .Configured(maxExtraLoadTunable, sendInterrupts, minSendBackupAfterMs) =>
+        assert(
+          maxExtraLoadTunable().get == 1.percent && sendInterrupts && minSendBackupAfterMs == 1)
       case _ => fail("BackupRequestFilter not configured")
     }
     assert(mb.config.retry.responseClassifier.toString == s"Idempotent($classifier)")

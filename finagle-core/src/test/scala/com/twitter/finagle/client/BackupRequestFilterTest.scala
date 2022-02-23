@@ -4,16 +4,24 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.PercentOps._
 import com.twitter.finagle._
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, RetryBudget}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{MockWindowedPercentileHistogram, WindowedPercentileHistogram}
+import com.twitter.finagle.service.ReqRep
+import com.twitter.finagle.service.ResponseClass
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service.RetryBudget
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.util.MockWindowedPercentileHistogram
+import com.twitter.finagle.util.WindowedPercentileHistogram
 import com.twitter.util._
-import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
+import com.twitter.util.registry.Entry
+import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.registry.SimpleRegistry
 import com.twitter.util.tunable.Tunable
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.OneInstancePerTest
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -61,6 +69,21 @@ class BackupRequestFilterTest
     new BackupRequestFilter[String, String](
       maxExtraLoadTunable,
       true,
+      1,
+      classifier,
+      newBackupRequestRetryBudget,
+      clientRetryBudget,
+      Stopwatch.timeMillis,
+      statsReceiver,
+      timer,
+      () => wp
+    )
+
+  private[this] def newBrfWithSendBackup10ms: BackupRequestFilter[String, String] =
+    new BackupRequestFilter[String, String](
+      maxExtraLoadTunable,
+      true,
+      10,
       classifier,
       newBackupRequestRetryBudget,
       clientRetryBudget,
@@ -115,6 +138,7 @@ class BackupRequestFilterTest
     val filter = new BackupRequestFilter[String, String](
       maxExtraLoad,
       false,
+      1,
       ResponseClassifier.Default,
       newRetryBudget,
       RetryBudget.Infinite,
@@ -135,6 +159,7 @@ class BackupRequestFilterTest
       val filter = new BackupRequestFilter[String, String](
         tunable,
         false,
+        1,
         ResponseClassifier.Default,
         newRetryBudget,
         RetryBudget.Infinite,
@@ -310,6 +335,7 @@ class BackupRequestFilterTest
     val brf = (new BackupRequestFilter[String, String](
       Tunable.const("brfTunable", 50.percent),
       sendInterrupts,
+      1,
       classifier,
       newBackupRequestRetryBudget,
       clientRetryBudget,
@@ -627,6 +653,7 @@ class BackupRequestFilterTest
       val brf = new BackupRequestFilter[String, String](
         maxExtraLoadTunable,
         true,
+        1,
         classifier,
         newRetryBudget,
         clientRetryBudget,
@@ -677,6 +704,7 @@ class BackupRequestFilterTest
       val brf = new BackupRequestFilter[String, String](
         maxExtraLoadTunable,
         true,
+        1,
         classifier,
         newRetryBudget,
         clientRetryBudget,
@@ -710,6 +738,7 @@ class BackupRequestFilterTest
       val brf = new BackupRequestFilter[String, String](
         maxExtraLoadTunable,
         true,
+        1,
         classifier,
         newRetryBudget,
         clientRetryBudget,
@@ -777,6 +806,28 @@ class BackupRequestFilterTest
       assert(statsReceiver.counters(Seq("backups_sent")) == 0)
       assert(brf.sendBackupAfterDuration == 1.millisecond)
       assert(statsReceiver.stats(Seq("send_backup_after_ms")) == Seq(1))
+    }
+  }
+
+  test("Minimum sendBackupAfter can be overwritten") {
+    Time.withCurrentTimeFrozen { tc =>
+      val brf = newBrfWithSendBackup10ms
+      val service = newService(brf)
+
+      (0 until 100).foreach { _ =>
+        val p = new Promise[String]
+        when(underlying("ok")).thenReturn(p)
+        val f = service("ok")
+        p.setValue("ok")
+      }
+
+      // flush
+      tc.advance(3.seconds)
+      timer.tick()
+      assert(numBackupTimerTasks == 0)
+      assert(statsReceiver.counters(Seq("backups_sent")) == 0)
+      assert(brf.sendBackupAfterDuration == 10.millisecond)
+      assert(statsReceiver.stats(Seq("send_backup_after_ms")) == Seq(10))
     }
   }
 

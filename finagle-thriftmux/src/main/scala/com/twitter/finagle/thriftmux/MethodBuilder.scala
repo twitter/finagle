@@ -340,10 +340,40 @@ class MethodBuilder(
    *
    * This additionally causes Thrift Exceptions to be retried.
    */
+  def idempotent(maxExtraLoad: Double, minSendBackupAfterMs: Int): MethodBuilder =
+    new MethodBuilder(
+      thriftMuxClient,
+      mb.idempotent(
+        maxExtraLoad,
+        sendInterrupts = true,
+        minSendBackupAfterMs,
+        ResponseClassifier.RetryOnThrows)
+    )
+
+  /**
+   * @inheritdoc
+   *
+   * This additionally causes Thrift Exceptions to be retried.
+   */
   def idempotent(maxExtraLoad: Tunable[Double]): MethodBuilder =
     new MethodBuilder(
       thriftMuxClient,
       mb.idempotent(maxExtraLoad, sendInterrupts = true, ResponseClassifier.RetryOnThrows)
+    )
+
+  /**
+   * @inheritdoc
+   *
+   * This additionally causes Thrift Exceptions to be retried.
+   */
+  def idempotent(maxExtraLoad: Tunable[Double], minSendBackupAfterMs: Int): MethodBuilder =
+    new MethodBuilder(
+      thriftMuxClient,
+      mb.idempotent(
+        maxExtraLoad,
+        sendInterrupts = true,
+        minSendBackupAfterMs,
+        ResponseClassifier.RetryOnThrows)
     )
 
   def nonIdempotent: MethodBuilder =

@@ -14,6 +14,11 @@ New Features
 * finagle-logging: Introduced SlowTracesFilter, which observes your requests and
   logs the slowest ones that are also sampled for tracing. ``PHAB_ID=D813291``
 
+* finagle-core: Introduced MinSendBackupAfterMs to the stack param Configured in
+  BackupRequestFilter and propagated changes to MethodBuilder by adding new versions of idempotent
+  function. When traffic load is low, this is useful to increase the delay when backup requests are
+  sent and prevent the client from sending unnecessary backup requests. ``PHAB_ID=D825503``
+
 * finagle-core: Added a new annotation `clnt/has_dark_request` in tracing and Finagle
   Local context. The new annotation can be used to indicate whether or not the request
   has a span that is sent to dark service. ``PHAB_ID=D825317``

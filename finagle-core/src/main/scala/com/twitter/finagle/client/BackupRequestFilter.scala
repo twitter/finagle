@@ -86,7 +86,10 @@ object BackupRequestFilter {
 
   object Param {
 
-    private[client] case class Configured(maxExtraLoad: Tunable[Double], sendInterrupts: Boolean)
+    private[client] case class Configured(
+      maxExtraLoad: Tunable[Double],
+      sendInterrupts: Boolean,
+      minSendBackupAfterMs: Int = MinSendBackupAfterMs)
         extends Param
     case object Disabled extends Param
     implicit val param: Stack.Param[BackupRequestFilter.Param] = Stack.Param(Disabled)
@@ -127,6 +130,37 @@ object BackupRequestFilter {
    *                       is returned and the result of the outstanding request is superseded. For
    *                       protocols without a control plane, where the connection is cut on
    *                       interrupts, this should be "false" to avoid connection churn.
+   *
+   * @param minSendBackupAfterMs Use a minimum non-zero delay to prevent sending unnecessary backup requests
+   *                             immediately for services where the latency at the percentile where a
+   *                             backup will be sent is ~0ms.
+   */
+  def Configured(
+    maxExtraLoad: Double,
+    sendInterrupts: Boolean,
+    minSendBackupAfterMs: Int
+  ): Param = {
+    require(
+      maxExtraLoad >= 0 && maxExtraLoad < 1.0,
+      s"maxExtraLoad must be between 0.0 and 1.0, was $maxExtraLoad"
+    )
+    require(
+      minSendBackupAfterMs >= 1,
+      s"minSendBackupAfterMs must be greater or equal to 1ms, was $minSendBackupAfterMs"
+    )
+    Param.Configured(Tunable.const(role.name, maxExtraLoad), sendInterrupts, minSendBackupAfterMs)
+  }
+
+  /**
+   * Configure [[BackupRequestFilter]].
+   *
+   * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
+   *                  Must be between 0.0 and 1.0.
+   *
+   * @param sendInterrupts Whether or not to interrupt the original or backup request when a response
+   *                       is returned and the result of the outstanding request is superseded. For
+   *                       protocols without a control plane, where the connection is cut on
+   *                       interrupts, this should be "false" to avoid connection churn
    */
   def Configured(maxExtraLoad: Double, sendInterrupts: Boolean): Param = {
     require(
@@ -136,17 +170,41 @@ object BackupRequestFilter {
     Param.Configured(Tunable.const(role.name, maxExtraLoad), sendInterrupts)
   }
 
+  /**
+   * Configure [[BackupRequestFilter]].
+   *
+   * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
+   *                  Must be between 0.0 and 1.0.
+   *
+   * @param sendInterrupts Whether or not to interrupt the original or backup request when a response
+   *                       is returned and the result of the outstanding request is superseded. For
+   *                       protocols without a control plane, where the connection is cut on
+   *                       interrupts, this should be "false" to avoid connection churn.
+   *
+   * @param minSendBackupAfterMs Use a minimum non-zero delay to prevent sending unnecessary backup
+   *                             requests immediately for services where the latency at the percentile
+   *                             where a backup will be sent is ~0ms.
+   */
+  def Configured(
+    maxExtraLoad: Tunable[Double],
+    sendInterrupts: Boolean,
+    minSendBackupAfterMs: Int
+  ): Param =
+    Param.Configured(maxExtraLoad, sendInterrupts, minSendBackupAfterMs)
+
   def Configured(maxExtraLoad: Tunable[Double], sendInterrupts: Boolean): Param =
     Param.Configured(maxExtraLoad, sendInterrupts)
 
   private[this] def mkFilterFromParams[Req, Rep](
     maxExtraLoad: Tunable[Double],
     sendInterrupts: Boolean,
+    minSendBackupAfterMs: Int,
     params: Stack.Params
   ): BackupRequestFilter[Req, Rep] =
     new BackupRequestFilter[Req, Rep](
       maxExtraLoad,
       sendInterrupts,
+      minSendBackupAfterMs,
       params[param.ResponseClassifier].responseClassifier,
       params[Retries.Budget].retryBudget,
       params[Histogram].lowestDiscernibleMsValue,
@@ -188,7 +246,8 @@ object BackupRequestFilter {
     keyPrefixes: Seq[String]
   ): Service[Req, Rep] =
     params[BackupRequestFilter.Param] match {
-      case BackupRequestFilter.Param.Configured(maxExtraLoad, sendInterrupts) =>
+      case BackupRequestFilter.Param
+            .Configured(maxExtraLoad, sendInterrupts, minSendBackupAfterMs) =>
         // register BRF when registry prefixes are provided
         if (keyPrefixes.nonEmpty) {
           val value =
@@ -196,7 +255,8 @@ object BackupRequestFilter {
           val prefixes = keyPrefixes ++ Seq(BackupRequestFilter.role.name, value)
           ClientRegistry.export(params, prefixes: _*)
         }
-        val brf = mkFilterFromParams[Req, Rep](maxExtraLoad, sendInterrupts, params)
+        val brf =
+          mkFilterFromParams[Req, Rep](maxExtraLoad, sendInterrupts, minSendBackupAfterMs, params)
         new ServiceProxy[Req, Rep](brf.andThen(service)) {
           override def close(deadline: Time): Future[Unit] =
             service.close(deadline).before(brf.close(deadline))
@@ -220,10 +280,10 @@ object BackupRequestFilter {
 
       def make(params: Params, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         params[BackupRequestFilter.Param] match {
-          case Param.Configured(maxExtraLoad, sendInterrupts) =>
+          case Param.Configured(maxExtraLoad, sendInterrupts, minSendBackupAfterMs) =>
             new BackupRequestFactory[Req, Rep](
               next,
-              mkFilterFromParams(maxExtraLoad, sendInterrupts, params)
+              mkFilterFromParams(maxExtraLoad, sendInterrupts, minSendBackupAfterMs, params)
             )
           case Param.Disabled =>
             next
@@ -271,6 +331,13 @@ private[client] class BackupRequestFactory[Req, Rep](
  *                       protocols without a control plane, where the connection is cut on
  *                       interrupts, this should be "false" to avoid connection churn.
  *
+ * @param minSendBackupAfterMs Use a minimum non-zero delay to prevent sending unnecessary backup requests
+ *                             immediately for services where the latency at the percentile where a backup will be sent is
+ *                             ~0ms. This is preferable to not sending any backups in the aforementioned case; by sending
+ *                             a backup after 1ms we can still reduce the higher latencies at greater latency percentiles.
+ *                             For example, if p99 latency is 0 and we are configured to send backups at the p99 latency,
+ *                             we can a reduce p999 latency of 10 ms to close to 1ms.
+ *
  * @note If `sendInterrupts` is set to false, and for clients that mask interrupts (e.g. the
  *       Finagle Memcached client), both the original request and backup will be counted in stats,
  *       so tail latency improvements as a result of this filter will not be reflected in the
@@ -279,6 +346,7 @@ private[client] class BackupRequestFactory[Req, Rep](
 private[finagle] class BackupRequestFilter[Req, Rep](
   maxExtraLoadTunable: Tunable[Double],
   sendInterrupts: Boolean,
+  minSendBackupAfterMs: Int,
   responseClassifier: ResponseClassifier,
   newRetryBudget: (Double, () => Long) => RetryBudget,
   clientRetryBudget: RetryBudget,
@@ -293,6 +361,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
   def this(
     maxExtraLoadTunable: Tunable[Double],
     sendInterrupts: Boolean,
+    minSendBackupAfterMs: Int,
     responseClassifier: ResponseClassifier,
     clientRetryBudget: RetryBudget,
     statsReceiver: StatsReceiver,
@@ -301,6 +370,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     this(
       maxExtraLoadTunable,
       sendInterrupts,
+      minSendBackupAfterMs,
       responseClassifier,
       newRetryBudget = BackupRequestFilter.newRetryBudget,
       clientRetryBudget = clientRetryBudget,
@@ -313,6 +383,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
   def this(
     maxExtraLoadTunable: Tunable[Double],
     sendInterrupts: Boolean,
+    minSendBackupAfterMs: Int,
     responseClassifier: ResponseClassifier,
     clientRetryBudget: RetryBudget,
     lowestDiscernibleMsValue: Int,
@@ -323,6 +394,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     this(
       maxExtraLoadTunable,
       sendInterrupts,
+      minSendBackupAfterMs,
       responseClassifier,
       newRetryBudget = BackupRequestFilter.newRetryBudget,
       clientRetryBudget = clientRetryBudget,
@@ -375,7 +447,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
         backupRequestRetryBudget = newRetryBudget(curMaxExtraLoad, nowMs)
       }
       sendBackupAfterMillis =
-        Math.max(MinSendBackupAfterMs, windowedPercentile.percentile(percentile))
+        Math.max(minSendBackupAfterMs, windowedPercentile.percentile(percentile))
       sendAfterStat.add(sendBackupAfterMillis)
     }
   }

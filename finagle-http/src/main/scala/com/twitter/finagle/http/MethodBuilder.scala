@@ -1,11 +1,16 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.builder.ClientConfig
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.param.{Tracer => TracerParam}
 import com.twitter.finagle.service.ResponseClassifier
-import com.twitter.finagle.{Filter, Name, Resolver, Service, client}
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Name
+import com.twitter.finagle.Resolver
+import com.twitter.finagle.Service
+import com.twitter.finagle.client
 import com.twitter.util.Duration
 import com.twitter.util.tunable.Tunable
 import com.twitter.{finagle => ctf}
@@ -246,11 +251,41 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
    *
    * This additionally causes any server error HTTP status codes (500s) to be retried.
    */
+  def idempotent(maxExtraLoad: Double, minSendBackupAfterMs: Int): MethodBuilder =
+    new MethodBuilder(
+      mb.idempotent(
+        maxExtraLoad,
+        sendInterrupts = false,
+        minSendBackupAfterMs,
+        HttpResponseClassifier.ServerErrorsAsFailures
+      )
+    )
+
+  /**
+   * @inheritdoc
+   *
+   * This additionally causes any server error HTTP status codes (500s) to be retried.
+   */
   def idempotent(maxExtraLoad: Tunable[Double]): MethodBuilder =
     new MethodBuilder(
       mb.idempotent(
         maxExtraLoad,
         sendInterrupts = false,
+        HttpResponseClassifier.ServerErrorsAsFailures
+      )
+    )
+
+  /**
+   * @inheritdoc
+   *
+   * This additionally causes any server error HTTP status codes (500s) to be retried.
+   */
+  def idempotent(maxExtraLoad: Tunable[Double], minSendBackupAfterMs: Int): MethodBuilder =
+    new MethodBuilder(
+      mb.idempotent(
+        maxExtraLoad,
+        sendInterrupts = false,
+        minSendBackupAfterMs,
         HttpResponseClassifier.ServerErrorsAsFailures
       )
     )

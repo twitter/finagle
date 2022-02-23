@@ -2,9 +2,13 @@ package com.twitter.finagle.mux
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.PercentOps._
-import com.twitter.finagle.{Filter, Service}
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Service
 import com.twitter.finagle.client.BackupRequestFilter
-import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, RetryBudget}
+import com.twitter.finagle.service.ReqRep
+import com.twitter.finagle.service.ResponseClass
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.MockWindowedPercentileHistogram
 import com.twitter.util._
@@ -29,6 +33,7 @@ object BackupRequests {
     val classifier: ResponseClassifier = {
       case ReqRep(_, Return(_)) => ResponseClass.Success
     }
+    val minSendBackupAfterMs: Int = 1
     val retryBudget = RetryBudget.Infinite
     val wp = new MockWindowedPercentileHistogram(timer)
     wp.add(1.second.inMillis.toInt)
@@ -36,6 +41,7 @@ object BackupRequests {
     new BackupRequestFilter[Request, Response](
       tunable,
       true,
+      minSendBackupAfterMs,
       classifier,
       (_, _) => retryBudget,
       retryBudget,
