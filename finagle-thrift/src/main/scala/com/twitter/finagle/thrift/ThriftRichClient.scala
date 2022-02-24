@@ -9,7 +9,6 @@ import com.twitter.finagle.util.Showable
 import com.twitter.finagle.Name
 import com.twitter.finagle.Resolver
 import com.twitter.finagle.Service
-import com.twitter.finagle.Stack
 import com.twitter.finagle.Thrift
 import org.apache.thrift.protocol.TProtocolFactory
 import scala.reflect.ClassTag
@@ -125,14 +124,6 @@ trait ThriftRichClient { self: StackBasedClient[ThriftClientRequest, Array[Byte]
   /** The client name used when group isn't named. */
   protected val defaultClientName: String
   protected def stats: StatsReceiver = ClientStatsReceiver
-
-  /**
-   * The `Stack.Params` to be used by this client.
-   *
-   * Both [[defaultClientName]] and [[stats]] predate [[Stack.Params]]
-   * and as such are implemented separately.
-   */
-  protected def params: Stack.Params
 
   /**
    * $clientUse
