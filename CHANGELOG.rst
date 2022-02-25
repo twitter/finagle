@@ -6,6 +6,9 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+
+22.2.0
+------
 New Features
 ~~~~~~~~~~~~
 * finagle-logging: Introduced finagle-logging, a new module for SLF4J-integrated
