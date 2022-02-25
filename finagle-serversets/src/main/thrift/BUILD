@@ -27,7 +27,7 @@ create_thrift_libraries(
 
 python_thrift_library(
     name = "thrift-python",
-    sources = ["com/twitter/thrift/endpoint.thrift"],
+    sources = [],
     tags = ["bazel-compatible"],
 )
 
