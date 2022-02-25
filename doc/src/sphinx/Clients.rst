@@ -284,7 +284,10 @@ when creating retry filters of their own.
 The `Retries` module is configured with two parameters:
 
 1. ``RetryBudget`` - determines whether there is available budget to retry a request
-2. ``Stream[Duration]`` - the backoff [#backoff]_ policy used to requeue the failed request
+2. ``Backoff`` - the backoff [#backoff]_ policy used to requeue the failed request
+
+It's highly recommended to use :src:`Backoff<com/twitter/finagle/Backoff.scala>` instead of using the
+error-prone ``Stream`` API directly.
 
 By default, the ``RetryBudget`` allows for about 20% of the total requests to be immediately (no backoff)
 retried on top of 10 retries per second in order to accommodate clients that have just started issuing
@@ -782,8 +785,11 @@ The ``successRate`` factory method takes three arguments:
 1. `requiredSuccessRate` - the minimally required success rate below which an endpoint marked dead
 2. `window` - the window of *requests* to measure success rate on; measured using an exponentially
    weighted moving average
-3. `markDeadFor` - the backoff policy (an instance of ``Stream[Duration]``) used to mark an endpoint
-   dead for
+3. `markDeadFor` - the backoff [#backoff]_ policy (an instance of :src:`Backoff<com/twitter/finagle/Backoff.scala>`)
+   used to mark an endpoint dead for a certain amount of time
+
+It's highly recommended to use :src:`Backoff<com/twitter/finagle/Backoff.scala>` instead of using the
+error-prone ``Stream`` API directly.
 
 .. code-block:: scala
 
@@ -805,7 +811,7 @@ The ``successRateWithinDuration`` factory method takes four arguments:
 
 1. `requiredSuccessRate` - the minimally required success rate below which an endpoint is marked dead
 2. `window` - duration over which the success rate is tracked over.
-3. `markDeadFor` - the backoff policy (an instance of ``Stream[Duration]``) used to mark an endpoint
+3. `markDeadFor` - the backoff policy (an instance of :src:`Backoff<com/twitter/finagle/Backoff.scala>`) used to mark an endpoint
    dead for
 4. `minRequestThreshold` - the minimum number of requests required within the past ``window`` before considering
    the measured success rate
@@ -830,7 +836,7 @@ following snippet [#example]_.
 The ``consecutiveFailures`` factory method takes two arguments:
 
 1. `consecutiveFailures` - the number of failures after which an endpoint is marked dead
-2. `markDeadFor` - the backoff policy (an instance of ``Stream[Duration]``) used to mark an endpoint
+2. `markDeadFor` - the backoff policy (an instance of :src:`Backoff<com/twitter/finagle/Backoff.scala>`) used to mark an endpoint
    dead for
 
 FailureAccrualPolicys can also be composed together via the ``orElse`` method. If multiple policies return a duration on `markDeadOnFailure()`,
