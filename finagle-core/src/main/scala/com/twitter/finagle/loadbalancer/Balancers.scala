@@ -87,8 +87,8 @@ object Balancers {
         params: Stack.Params
       ): ServiceFactory[Req, Rep] = {
         val sr = params[param.Stats].statsReceiver
-        val maxEffort = params[LoadBalancerFactory.PanicMode].maxEffort
-        val balancer = new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc)
+        val panicMode = params[LoadBalancerFactory.PanicMode]
+        val balancer = new P2CLeastLoaded(endpoints, panicMode, rng, sr, exc)
         newScopedBal(
           params[param.Label].label,
           sr,
@@ -132,9 +132,9 @@ object Balancers {
       params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
-      val maxEffort = params[LoadBalancerFactory.PanicMode].maxEffort
+      val panicMode = params[LoadBalancerFactory.PanicMode]
       val balancer =
-        new P2CPeakEwma(endpoints, decayTime, Stopwatch.systemNanos, maxEffort, rng, sr, exc)
+        new P2CPeakEwma(endpoints, decayTime, Stopwatch.systemNanos, panicMode, rng, sr, exc)
       newScopedBal(
         params[param.Label].label,
         sr,
@@ -247,7 +247,7 @@ object Balancers {
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
       val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
-      val maxEffort = params[LoadBalancerFactory.PanicMode].maxEffort
+      val panicMode = params[LoadBalancerFactory.PanicMode]
 
       val balancer = new ApertureLeastLoaded(
         endpoints,
@@ -255,7 +255,7 @@ object Balancers {
         lowLoad,
         highLoad,
         minAperture,
-        maxEffort,
+        panicMode,
         rng,
         sr,
         label,
@@ -343,7 +343,7 @@ object Balancers {
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
       val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
-      val maxEffort = params[LoadBalancerFactory.PanicMode].maxEffort
+      val panicMode = params[LoadBalancerFactory.PanicMode]
 
       val balancer = new AperturePeakEwma(
         endpoints,
@@ -353,7 +353,7 @@ object Balancers {
         lowLoad,
         highLoad,
         minAperture,
-        maxEffort,
+        panicMode,
         rng,
         sr,
         label,

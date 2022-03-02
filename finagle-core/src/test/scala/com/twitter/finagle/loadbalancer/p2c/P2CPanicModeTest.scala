@@ -17,11 +17,11 @@ class P2CPanicModeTest extends AnyFunSuite with P2CSuite {
     fs: Var[Vector[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
     clock: (() => Long) = System.nanoTime _,
-    maxEffort: Int = 5
+    panicMode: PanicMode = PanicMode.MajorityUnhealthy
   ): ServiceFactory[Unit, Int] = {
     new P2CLeastLoaded(
       Activity(fs.map(Activity.Ok(_))),
-      maxEffort = maxEffort,
+      panicMode = panicMode,
       rng = Rng(12345L),
       statsReceiver = sr,
       emptyException = noBrokers
@@ -67,7 +67,7 @@ class P2CPanicModeTest extends AnyFunSuite with P2CSuite {
     private val stats = statsDict(statsReceiver)
     private val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     private val bal =
-      newBal(fs = Var.value(init), sr = statsReceiver, maxEffort = threshold.maxEffort)
+      newBal(fs = Var.value(init), sr = statsReceiver, panicMode = threshold)
 
     // Simulate R requests under different replica set health conditions. 10% to 100% unhealthy
     def runSim(): ListBuffer[Long] = {

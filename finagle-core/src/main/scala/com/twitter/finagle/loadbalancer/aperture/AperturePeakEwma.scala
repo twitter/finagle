@@ -7,6 +7,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.ServiceFactoryProxy
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.util.Activity
 import com.twitter.util.Duration
 import com.twitter.util.Future
@@ -25,7 +26,7 @@ private[loadbalancer] final class AperturePeakEwma[Req, Rep](
   protected val lowLoad: Double,
   protected val highLoad: Double,
   private[aperture] val minAperture: Int,
-  protected val maxEffort: Int,
+  private[loadbalancer] val panicMode: PanicMode,
   private[aperture] val rng: Rng,
   protected val statsReceiver: StatsReceiver,
   protected val label: String,

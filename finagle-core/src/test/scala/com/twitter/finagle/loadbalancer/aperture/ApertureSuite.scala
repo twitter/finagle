@@ -2,6 +2,7 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.EndpointFactory
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
 import scala.collection.mutable
@@ -17,7 +18,7 @@ private[loadbalancer] trait ApertureSuite {
     private[aperture] val rng = Rng(12345L)
     protected def emptyException = new Empty
     private[aperture] def eagerConnections = false
-    protected def maxEffort = 5
+    private[loadbalancer] val panicMode: PanicMode = PanicMode.MajorityUnhealthy
     private[aperture] def minAperture = 1
     protected val useDeterministicOrdering: Option[Boolean] = None
     protected def label = ""

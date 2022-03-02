@@ -6,6 +6,7 @@ import com.twitter.finagle.loadbalancer.LeastLoaded
 import com.twitter.finagle.loadbalancer.Updating
 import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.ServiceFactoryProxy
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Activity
@@ -32,7 +33,7 @@ import com.twitter.util.Activity
  */
 private[loadbalancer] final class P2CLeastLoaded[Req, Rep](
   protected val endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-  protected val maxEffort: Int,
+  private[loadbalancer] val panicMode: PanicMode,
   protected val rng: Rng,
   protected val statsReceiver: StatsReceiver,
   protected val emptyException: NoBrokersAvailableException)

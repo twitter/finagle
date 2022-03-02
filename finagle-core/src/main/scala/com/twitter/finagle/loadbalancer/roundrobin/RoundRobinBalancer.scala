@@ -1,6 +1,7 @@
 package com.twitter.finagle.loadbalancer.roundrobin
 
 import com.twitter.finagle._
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.loadbalancer._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.Activity
@@ -17,7 +18,7 @@ private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
   protected val endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
   protected val statsReceiver: StatsReceiver,
   protected val emptyException: NoBrokersAvailableException,
-  protected val maxEffort: Int = 5)
+  private[loadbalancer] val panicMode: PanicMode = PanicMode.MajorityUnhealthy)
     extends ServiceFactory[Req, Rep]
     with Balancer[Req, Rep]
     with Updating[Req, Rep] {

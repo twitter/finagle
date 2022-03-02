@@ -2,6 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.Await
 import com.twitter.util.Future
@@ -19,7 +20,7 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
     singletonDistributor: Boolean = false)
       extends Balancer[Unit, Unit] {
 
-    def maxEffort: Int = 5
+    def panicMode: PanicMode = PanicMode.MajorityUnhealthy
     def emptyException: Throwable = ???
 
     def additionalMetadata: Map[String, Any] = Map.empty

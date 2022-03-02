@@ -2,8 +2,15 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.stats.{Counter, NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{Activity, Await, Future, Time, Var}
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.stats.Counter
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.util.Activity
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.Var
 import java.util.concurrent.TimeUnit
 import org.openjdk.jmh.annotations._
 import scala.collection.mutable.ArrayBuffer
@@ -46,7 +53,7 @@ object BalancerBench {
   }
 
   private class NullBalancer extends Balancer[Unit, Unit] {
-    protected def maxEffort: Int = 0
+    private[loadbalancer] val panicMode: PanicMode = new PanicMode(0)
 
     protected def emptyException: Throwable = new Exception()
     protected def statsReceiver: StatsReceiver = NullStatsReceiver

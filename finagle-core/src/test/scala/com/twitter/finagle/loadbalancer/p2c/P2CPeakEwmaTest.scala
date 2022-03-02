@@ -8,6 +8,7 @@ import com.twitter.finagle.ClientConnection
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.Status
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.util.Activity
 import com.twitter.util.Await
 import com.twitter.util.Closable
@@ -25,10 +26,10 @@ class P2CPeakEwmaTest extends AnyFunSuite with P2CSuite {
     fs: Var[Vector[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
     clock: (() => Long) = System.nanoTime _,
-    maxEffort: Int = 5
+    panicMode: PanicMode = PanicMode.MajorityUnhealthy
   ): ServiceFactory[Unit, Int] = new P2CPeakEwma(
     Activity(fs.map(Activity.Ok(_))),
-    maxEffort = maxEffort,
+    panicMode = panicMode,
     decayTime = 150.nanoseconds,
     nanoTime = clock,
     rng = Rng(12345L),

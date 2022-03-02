@@ -7,6 +7,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceFactoryProxy
 import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.EndpointFactory
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
@@ -83,7 +84,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     override private[aperture] val manageWeights: Boolean =
       BaseWeightedApertureTest.this.manageWeights
     override protected def label: String = ""
-    override protected def maxEffort: Int = 0
+    override private[loadbalancer] def panicMode: PanicMode = new PanicMode(0)
     override protected def emptyException: Throwable = new NoBrokersAvailableException
     override protected def statsReceiver: StatsReceiver = new InMemoryStatsReceiver
     override protected def newNode(factory: EndpointFactory[Unit, Unit]): TestNode = TestNode(

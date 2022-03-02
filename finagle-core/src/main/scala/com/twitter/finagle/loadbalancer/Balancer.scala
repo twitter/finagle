@@ -1,6 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.Future
 import com.twitter.util.Time
@@ -42,7 +43,14 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
    * The maximum number of balancing tries (yielding unavailable
    * factories) until we give up.
    */
-  protected def maxEffort: Int
+  private def maxEffort: Int = panicMode.maxEffort
+
+  /**
+   * The "mode" when the load balancer when the LB gives up trying to find a
+   * healthy node. The LB sends the request to the last pick even if the node
+   * is unhealthy.
+   */
+  private[loadbalancer] def panicMode: PanicMode
 
   /**
    * The throwable to use when the load balancer is empty.

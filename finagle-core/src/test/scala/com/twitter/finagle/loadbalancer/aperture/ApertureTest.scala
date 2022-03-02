@@ -4,6 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.EndpointFactory
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.loadbalancer.NodeT
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.NullStatsReceiver
@@ -94,7 +95,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
         lowLoad = 0,
         highLoad = 0,
         minAperture = 0,
-        maxEffort = 0,
+        panicMode = new PanicMode(0),
         rng = Rng.threadLocal,
         statsReceiver = NullStatsReceiver,
         label = "",
@@ -117,7 +118,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       lowLoad = 0,
       highLoad = 0,
       minAperture = 10,
-      maxEffort = 0,
+      panicMode = new PanicMode(0),
       rng = Rng.threadLocal,
       statsReceiver = stats,
       label = "",
@@ -142,7 +143,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       lowLoad = 0,
       highLoad = 0,
       minAperture = 10,
-      maxEffort = 0,
+      panicMode = new PanicMode(0),
       rng = Rng.threadLocal,
       statsReceiver = stats,
       label = "",
@@ -168,7 +169,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       lowLoad = 0,
       highLoad = 0,
       minAperture = 10,
-      maxEffort = 0,
+      panicMode = new PanicMode(0),
       rng = Rng.threadLocal,
       statsReceiver = stats,
       label = "",
@@ -195,7 +196,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       lowLoad = 0,
       highLoad = 0,
       minAperture = 10,
-      maxEffort = 0,
+      panicMode = new PanicMode(0),
       rng = Rng.threadLocal,
       statsReceiver = NullStatsReceiver,
       label = "",
@@ -226,7 +227,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
         lowLoad = 0,
         highLoad = 0,
         minAperture = 10,
-        maxEffort = 0,
+        panicMode = new PanicMode(0),
         rng = Rng.threadLocal,
         statsReceiver = stats,
         label = "",
@@ -262,7 +263,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
         lowLoad = 0,
         highLoad = 0,
         minAperture = 10,
-        maxEffort = 0,
+        panicMode = new PanicMode(0),
         rng = Rng.threadLocal,
         statsReceiver = stats,
         label = "",

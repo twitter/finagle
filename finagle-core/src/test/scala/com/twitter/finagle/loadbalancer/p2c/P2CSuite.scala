@@ -7,6 +7,7 @@ import com.twitter.finagle.util.Rng
 import com.twitter.finagle.Address
 import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.util.Activity
 import com.twitter.util.Var
 
@@ -36,10 +37,10 @@ trait P2CSuite {
     fs: Var[Vector[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
     clock: (() => Long) = System.nanoTime _,
-    maxEffort: Int = 5
+    panicMode: PanicMode = PanicMode.MajorityUnhealthy
   ): ServiceFactory[Unit, Int] = new P2CLeastLoaded(
     Activity(fs.map(Activity.Ok(_))),
-    maxEffort = maxEffort,
+    panicMode = panicMode,
     rng = Rng(12345L),
     statsReceiver = sr,
     emptyException = noBrokers

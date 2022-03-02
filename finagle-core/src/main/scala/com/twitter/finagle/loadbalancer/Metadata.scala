@@ -56,4 +56,9 @@ final class Metadata private[loadbalancer] (val label: String, balancer: Balance
   def size: Int =
     balancer.size
 
+  /**
+   * What percent of nodes (in the aperture) can be unhealthy
+   * before panic mode is enabled for a request
+   */
+  def panicMode: String = balancer.panicMode.toString
 }

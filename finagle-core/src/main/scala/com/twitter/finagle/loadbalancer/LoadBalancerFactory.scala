@@ -243,7 +243,17 @@ object LoadBalancerFactory {
   // maxEffort is the fixed number of retries an LB implementation is willing
   // to make if the distributor's pick returns an unavailable (Status.Busy or
   // Status.Closed) node
-  private[twitter] final class PanicMode(val maxEffort: Int)
+  final class PanicMode private[loadbalancer] (val maxEffort: Int) {
+    override def toString: String = maxEffort match {
+      case 0 => "Always panic (for testing). PanicMode(0)"
+      case 1 => "TenPercentUnhealthy"
+      case 2 => "ThirtyPercentUnhealthy"
+      case 3 => "FortyPercentUnhealthy"
+      case 4 => "FiftyPercentUnhealthy"
+      case 5 => "MajorityUnhealthy"
+      case _ => s"Invalid value: PanicMode($maxEffort)"
+    }
+  }
 
   /**
    * Panic mode is when the LB gives up trying to find a healthy node. The LB
