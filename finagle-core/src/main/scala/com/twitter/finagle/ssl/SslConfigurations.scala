@@ -10,7 +10,17 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLEngine
 import javax.net.ssl.TrustManager
 
-private[ssl] object SslConfigurations {
+private[finagle] object SslConfigurations {
+
+  val TLSV13Supported: Boolean = {
+    val context = SSLContext.getInstance("TLS")
+    context.init(null, Array(new IgnorantTrustManager), null)
+
+    context
+      .getSupportedSSLParameters()
+      .getProtocols()
+      .contains("TLSv1.3")
+  }
 
   private def filesToKeyManagers(certsFile: File, keyFile: File): Array[KeyManager] = {
     val factory = new Pkcs8KeyManagerFactory(certsFile, keyFile)
@@ -33,7 +43,7 @@ private[ssl] object SslConfigurations {
    * See the `init` method of https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/SSLContext.html
    * for more information.
    */
-  def getKeyManagers(keyCredentials: KeyCredentials): Option[Array[KeyManager]] =
+  private[ssl] def getKeyManagers(keyCredentials: KeyCredentials): Option[Array[KeyManager]] =
     keyCredentials match {
       case KeyCredentials.Unspecified => None
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
@@ -61,7 +71,7 @@ private[ssl] object SslConfigurations {
    * See the `init` method of https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/SSLContext.html
    * for more information.
    */
-  def getTrustManagers(trustCredentials: TrustCredentials): Option[Array[TrustManager]] =
+  private[ssl] def getTrustManagers(trustCredentials: TrustCredentials): Option[Array[TrustManager]] =
     trustCredentials match {
       case TrustCredentials.Unspecified => None
       case TrustCredentials.Insecure => Some(Array(new IgnorantTrustManager))
@@ -96,11 +106,14 @@ private[ssl] object SslConfigurations {
    * See https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#SSLContext
    * for more information.
    */
-  def initializeSslContext(
+  private[ssl] def initializeSslContext(
     keyCredentials: KeyCredentials,
     trustCredentials: TrustCredentials
   ): SSLContext = {
-    val sslContext = SSLContext.getInstance("TLSv1.3")
+    val sslContext =
+      if (TLSV13Supported) SSLContext.getInstance("TLSv1.3")
+      else SSLContext.getInstance("TLSv1.2")
+
     sslContext.init(
       getKeyManagers(keyCredentials).orNull,
       getTrustManagers(trustCredentials).orNull,
@@ -113,7 +126,7 @@ private[ssl] object SslConfigurations {
    * Sets the enabled cipher suites of the supplied
    * `javax.net.ssl.SSLEngine`.
    */
-  def configureCipherSuites(sslEngine: SSLEngine, cipherSuites: CipherSuites): Unit =
+  private[ssl] def configureCipherSuites(sslEngine: SSLEngine, cipherSuites: CipherSuites): Unit =
     cipherSuites match {
       case CipherSuites.Unspecified => // Do Nothing
       case CipherSuites.Enabled(ciphers) =>
@@ -124,7 +137,7 @@ private[ssl] object SslConfigurations {
    * Sets the enabled protocols of the supplied
    * `javax.net.ssl.SSLEngine`.
    */
-  def configureProtocols(sslEngine: SSLEngine, protocols: Protocols): Unit =
+  private[ssl] def configureProtocols(sslEngine: SSLEngine, protocols: Protocols): Unit =
     protocols match {
       case Protocols.Unspecified => // Do Nothing
       case Protocols.Enabled(protocols) =>
@@ -139,7 +152,7 @@ private[ssl] object SslConfigurations {
    * https://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
    * for more details.
    */
-  def configureHostnameVerification(sslEngine: SSLEngine, hostname: Option[String]): Unit =
+  private[ssl] def configureHostnameVerification(sslEngine: SSLEngine, hostname: Option[String]): Unit =
     hostname match {
       case Some(_) =>
         val sslParameters = sslEngine.getSSLParameters()
@@ -152,7 +165,7 @@ private[ssl] object SslConfigurations {
    * Guard method for failing fast inside of a factory's apply method when
    * [[KeyCredentials]] are not supported.
    */
-  def checkKeyCredentialsNotSupported(
+  private[ssl] def checkKeyCredentialsNotSupported(
     engineFactoryName: String,
     keyCredentials: KeyCredentials
   ): Unit =
@@ -181,7 +194,7 @@ private[ssl] object SslConfigurations {
    * Guard method for failing fast inside of a factory's apply method when
    * [[TrustCredentials]] are not supported.
    */
-  def checkTrustCredentialsNotSupported(
+  private[ssl] def checkTrustCredentialsNotSupported(
     engineFactoryName: String,
     trustCredentials: TrustCredentials
   ): Unit =
@@ -210,7 +223,7 @@ private[ssl] object SslConfigurations {
    * Guard method for failing fast inside of a factory's apply method when
    * [[Protocols]] are not supported.
    */
-  def checkProtocolsNotSupported(engineFactoryName: String, protocols: Protocols): Unit =
+  private[ssl] def checkProtocolsNotSupported(engineFactoryName: String, protocols: Protocols): Unit =
     protocols match {
       case Protocols.Unspecified => // Do Nothing
       case Protocols.Enabled(_) =>
@@ -221,7 +234,7 @@ private[ssl] object SslConfigurations {
    * Guard method for failing fast inside of a factory's apply method when
    * [[ApplicationProtocols]] are not supported.
    */
-  def checkApplicationProtocolsNotSupported(
+  private[ssl] def checkApplicationProtocolsNotSupported(
     engineFactoryName: String,
     applicationProtocols: ApplicationProtocols
   ): Unit =
@@ -238,7 +251,7 @@ private[ssl] object SslConfigurations {
    * Guard method for failing fast inside of a server factory's apply method when
    * [[ClientAuth]] is not supported.
    */
-  def checkClientAuthNotSupported(engineFactoryName: String, clientAuth: ClientAuth): Unit =
+  private[ssl] def checkClientAuthNotSupported(engineFactoryName: String, clientAuth: ClientAuth): Unit =
     clientAuth match {
       case ClientAuth.Unspecified => // Do Nothing
       case ClientAuth.Off =>
@@ -248,5 +261,4 @@ private[ssl] object SslConfigurations {
       case ClientAuth.Needed =>
         throw SslConfigurationException.notSupported("ClientAuth.Needed", engineFactoryName)
     }
-
 }

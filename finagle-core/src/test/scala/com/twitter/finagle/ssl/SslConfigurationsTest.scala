@@ -13,12 +13,16 @@ class SslConfigurationsTest extends AnyFunSuite {
   }
 
   test("initializeSslContext succeeds for defaults") {
+    val protocol =
+      if (SslConfigurations.TLSV13Supported) "TLSv1.3"
+      else "TLSv1.2"
+
     val sslContext = SslConfigurations.initializeSslContext(
       KeyCredentials.Unspecified,
       TrustCredentials.Unspecified
     )
     assert(sslContext != null)
-    assert(sslContext.getProtocol == "TLSv1.3")
+    assert(sslContext.getProtocol == protocol)
   }
 
   test("configureCipherSuites succeeds with good suites") {
