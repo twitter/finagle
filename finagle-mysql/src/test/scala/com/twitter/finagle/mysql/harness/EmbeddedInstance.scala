@@ -236,7 +236,12 @@ final class EmbeddedInstance(
    * Ping the database until it is up
    */
   private def waitForDatabase(): Unit = {
-    val rootClient = newRootUserClient()
+    // This client is configured without failure accrual nor fail fast in order to quickly
+    // react to the Mysql server being available. Without these options, there are rare
+    // scenarios where the client would be marked as dead even though the server comes up
+    // which would cause test suites to fail.
+    val rootClient = newRootUserClient(
+      Mysql.client.withSessionQualifier.noFailureAccrual.withSessionQualifier.noFailFast)
     val wait = waitForPing(rootClient)
       .before(rootClient.close(SetupTeardownTimeout))
     Await.result(wait, SetupTeardownTimeout)
