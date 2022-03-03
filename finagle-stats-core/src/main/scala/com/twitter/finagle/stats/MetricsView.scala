@@ -1,5 +1,6 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats
 import java.util.{Map => JMap}
 import scala.collection.JavaConverters._
 
@@ -33,6 +34,44 @@ private[stats] trait MetricsView {
 
 private[stats] object MetricsView {
 
+  /** A snapshot of a metric */
+  sealed trait Snapshot {
+
+    /**
+     * The name used to present this metric in its hierarchical form.
+     *
+     * @note currently this exists for performance reasons: it is useful to
+     *       form the hierarchical name once on metric creation and use it
+     *       on every emission. It also currently serves as the way to determine
+     *       if a metric is unique.
+     * */
+    val hierarchicalName: String
+
+    /** The `MetricBuilder` that created this metric. */
+    val builder: MetricBuilder
+  }
+
+  /** Snapshot representation of a gauge */
+  final case class GaugeSnapshot(
+    hierarchicalName: String,
+    builder: MetricBuilder,
+    value: Double)
+      extends Snapshot
+
+  /** Snapshot representation of a counter */
+  final case class CounterSnapshot(
+    hierarchicalName: String,
+    builder: MetricBuilder,
+    value: Long)
+      extends Snapshot
+
+  /** Snapshot representation of a histogram */
+  final case class HistogramSnapshot(
+    hierarchicalName: String,
+    builder: MetricBuilder,
+    value: stats.Snapshot)
+      extends Snapshot
+
   private def merge[T](map1: JMap[String, T], map2: JMap[String, T]): JMap[String, T] = {
     val merged = new java.util.HashMap[String, T](map1)
     map2.asScala.foreach {
@@ -54,7 +93,7 @@ private[stats] object MetricsView {
     def counters: JMap[String, Number] =
       merge(view1.counters, view2.counters)
 
-    def histograms: JMap[String, Snapshot] =
+    def histograms: JMap[String, stats.Snapshot] =
       merge(view1.histograms, view2.histograms)
 
     def verbosity: JMap[String, Verbosity] =
