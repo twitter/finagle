@@ -30,6 +30,7 @@ private[twitter] object ThriftUtil {
 
   // This is based on the generated stubs from Scrooge.
   private val ScroogeGeneratedSuffixes = Seq(
+    "$ServerValidationMixin",
     "$Iface",
     "$ServiceIface",
     "$FutureIface",
