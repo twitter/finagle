@@ -41,7 +41,9 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     }
 
   val numRuns = 100000
+
   def run(mk: => Seq[Int]): Map[Int, Int] = histo(Seq.fill(numRuns)(mk).flatten)
+
   def noderun(mk: => TestNode): Map[TestNode, Int] = nodehisto(Seq.fill(numRuns)(mk))
 
   def approxEqual(a: Double, b: Double, eps: Double = 0.0001): Boolean = {
@@ -71,7 +73,9 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
       extends ServiceFactoryProxy(factory)
       with ApertureNode[Unit, Unit] {
     def tokenRng: Rng = rng
+
     def load: Double = 0.0
+
     def pending: Int = 0
   }
 
@@ -83,6 +87,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     override private[aperture] def eagerConnections = true
     override private[aperture] val manageWeights: Boolean =
       BaseWeightedApertureTest.this.manageWeights
+    override private[aperture] val minApertureOverride: Int = 0
     override protected def label: String = ""
     override private[loadbalancer] def panicMode: PanicMode = new PanicMode(0)
     override protected def emptyException: Throwable = new NoBrokersAvailableException
@@ -256,7 +261,9 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
         val counts = new Counts
         val bal = new Bal {
           override val minAperture = 1
+
           override protected def nodeLoad: Double = 1.0
+
           override val useDeterministicOrdering: Option[Boolean] = Some(true)
         }
 
@@ -642,5 +649,34 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
     assert(wap.pdist.get(0) == endpoints(2))
     assert(wap.pdist.get(16) == endpoints(18))
+  }
+
+  test("minApertureOverride limits aperture size to be lower than traditional min") {
+    for (fraction <- Seq(0.0, 1.0)) {
+      com.twitter.finagle.toggle.flag.overrides
+        .let("com.twitter.finagle.loadbalancer.WeightedAperture.v2", fraction) {
+          // With 100 clients and only 4 servers, we'd expect 100 connections to each server
+          // (each client will have an aperture of 4 and will connect to all 4 servers).
+          // The maxConnection change should limit that to only 75 connections each.
+          ProcessCoordinate.setCoordinate(1, 100)
+          val bal = new Bal {
+            override val minAperture = 12
+            override val manageWeights = false
+            override val minApertureOverride: Int = 3
+          }
+          val factories = Vector.tabulate(4)(i => Factory(i))
+
+          bal.update(factories)
+          bal.rebuildx()
+          assert(bal.aperturex == 3)
+
+          bal.applyn(20)
+          factories.zipWithIndex.collect {
+            case (factory: Factory, i: Int) =>
+              // the last factory should not get any traffic since it's outside the aperture
+              if (i == 3) assert(factory.total == 0)
+          }
+        }
+    }
   }
 }

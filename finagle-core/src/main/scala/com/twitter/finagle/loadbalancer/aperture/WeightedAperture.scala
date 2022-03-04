@@ -48,17 +48,24 @@ private object WeightedAperture {
    */
   def adjustWeights(
     weights: IndexedSeq[Double],
-    coord: Coord
+    coord: Coord,
+    logicalAperture: Int
   ): IndexedSeq[Double] = {
 
     val numNodes = weights.size
-    val logicalAperture = math.min(MinDeterministicAperture, numNodes)
     // The remote width (1 / numNodes) represents the average width of numNodes nodes of variable
     // size. Because the nodes are all normalized, this is a true average. For example, 3 nodes
     // of normalized weights (0.1, 0.1, 0.8) have an average weight of (0.1, 0.1, 0.8) / 3 or 1 / 3
     val apertureWidth =
       DeterministicAperture.dApertureWidth(coord.unitWidth, 1.0 / numNodes, logicalAperture)
     adjustWeights(weights, coord.offset, apertureWidth)
+  }
+
+  def adjustWeights(
+    weights: IndexedSeq[Double],
+    coord: Coord
+  ): IndexedSeq[Double] = {
+    adjustWeights(weights, coord, math.min(MinDeterministicAperture, weights.size))
   }
 
   def adjustWeights(
@@ -120,6 +127,8 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
 
   // We don't use aperture.minAperture directly for parity with DeterministicAperture
   override def min: Int = math.min(MinDeterministicAperture, endpoints.size)
+  override def logicalAperture =
+    if (aperture.minApertureOverride >= 1) aperture.minApertureOverride else min
   def eagerConnections: Boolean = aperture.eagerConnections
   def dapertureActive: Boolean = aperture.dapertureActive
 
@@ -128,7 +137,7 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
   //exposed for testing
   private[aperture] val (idxs, pdist) = {
     val weights =
-      WeightedAperture.adjustWeights(endpoints.map(_.factory.weight), coord)
+      WeightedAperture.adjustWeights(endpoints.map(_.factory.weight), coord, logicalAperture)
 
     val indexes = Set.newBuilder[Int]
     val nonZeroWeights = IndexedSeq.newBuilder[Double]
