@@ -1,25 +1,8 @@
 package com.twitter.finagle.stats
 
 import com.twitter.finagle.stats.MetricBuilder.MetricType
-
-// MetricFamilySample is a class that is subject to change as additional metric
-// types are supported.
-
-/**
- * A sample of a metric. This class is subject to change as additional metric
- * types are supported.
- * @param name name of metric
- * @param metricType counter, gauge, or histogram
- * @param metricUnit the units the metric is measured in
- * @param value the value of the metric at this sample
- * @param labels key-value pair of label name and value
- */
-private[stats] final case class MetricFamilySample(
-  name: String,
-  metricType: MetricType,
-  metricUnit: Option[MetricUnit],
-  value: Double,
-  labels: Iterable[(String, String)])
+import com.twitter.finagle.stats.MetricsView.CounterSnapshot
+import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
 
 /**
  * Exports metrics in a text according to Prometheus format.
@@ -48,20 +31,20 @@ private[stats] object PrometheusExporter {
   /**
    * Convert a double to its string representation with positive and negative infinity.
    */
-  private def intToString(i: Int): String = {
-    if (i == Int.MaxValue)
+  private def longToString(l: Long): String = {
+    if (l == Long.MaxValue)
       "+Inf"
-    else if (i == Int.MinValue)
+    else if (l == Long.MinValue)
       "-Inf"
     else
-      i.toString
+      l.toString
   }
 
   /**
-   * Write the value of the metric as Int for counter
+   * Write the value of the metric as Long for counter
    */
-  private def writeValueAsInt(writer: StringBuilder, value: Double): Unit = {
-    writer.append(intToString(value.toInt))
+  private def writeValueAsLong(writer: StringBuilder, value: Double): Unit = {
+    writer.append(longToString(value.toLong))
   }
 
   /**
@@ -89,17 +72,19 @@ private[stats] object PrometheusExporter {
   private def writeUnit(
     writer: StringBuilder,
     name: String,
-    metricUnit: Option[MetricUnit]
+    metricUnit: MetricUnit
   ): Unit = {
+    def writeComment(unit: String): Unit = {
+      writer.append("# UNIT ");
+      writer.append(name);
+      writer.append(' ')
+      writer.append(unit)
+      writer.append('\n')
+    }
     metricUnit match {
-      case Some(unit) => {
-        writer.append("# UNIT ");
-        writer.append(name);
-        writer.append(' ')
-        writer.append(unit.toString);
-        writer.append('\n')
-      }
-      case _ =>
+      case Unspecified => // no units
+      case CustomUnit(unit) => writeComment(unit)
+      case _ => writeComment(metricUnit.toString)
     }
   }
 
@@ -133,17 +118,40 @@ private[stats] object PrometheusExporter {
     }
   }
 
-  private def writeCounter(
+  /**
+   * Write each metric
+   * @param writer StringBuilder
+   * @param snapshot instantaneous view of the metric
+   * @param exportMetadata true if TYPE, UNIT are exported
+   */
+  private def writeMetric(
+    writer: StringBuilder,
+    snapshot: MetricsView.Snapshot,
+    exportMetadata: Boolean
+  ): Unit = {
+    val metricName = snapshot.builder.name.last
+    if (exportMetadata) {
+      writeMetadata(writer, metricName, snapshot.builder.metricType, snapshot.builder.units)
+    }
+    writeNameAndLabels(writer, metricName, snapshot.builder.labels)
+    snapshot match {
+      case gaugeSnap: GaugeSnapshot =>
+        writeValueAsDouble(writer, gaugeSnap.value)
+      case counterSnap: CounterSnapshot =>
+        writeValueAsLong(writer, counterSnap.value)
+      case _ => throw new Exception("Unsupported snapshot type")
+    }
+    writer.append('\n')
+  }
+
+  private def writeNameAndLabels(
     writer: StringBuilder,
     name: String,
-    labels: Iterable[(String, String)],
-    value: Double
+    labels: Iterable[(String, String)]
   ): Unit = {
     writer.append(name)
     writeLabels(writer, labels)
     writer.append(' ')
-    writeValueAsInt(writer, value)
-    writer.append('\n')
   }
 
   /**
@@ -153,26 +161,25 @@ private[stats] object PrometheusExporter {
     writer: StringBuilder,
     name: String,
     metricType: MetricType,
-    metricUnit: Option[MetricUnit]
+    metricUnit: MetricUnit
   ): Unit = {
     writeType(writer, name, metricType)
     writeUnit(writer, name, metricUnit)
   }
 
   /**
-   * Write counters to a StringBuilder
+   * Write metrics to a StringBuilder
    * @param writer writer
-   * @param mfs Iterable of MetricFamilySample
+   * @param counters Iterable of CounterSnapshot
+   * @param gauges Iterable of GaugeSnapshot
    */
-  def writeCounters(writer: StringBuilder, mfs: Iterable[MetricFamilySample]): Unit = {
-    // if true, exports metadata about the metric
-    val exportMetadata: Boolean = true
-
-    mfs.foreach { counter: MetricFamilySample =>
-      if (exportMetadata) {
-        writeMetadata(writer, counter.name, counter.metricType, counter.metricUnit)
-      }
-      writeCounter(writer, counter.name, counter.labels, counter.value)
-    }
+  def writeMetrics(
+    writer: StringBuilder,
+    counters: Iterable[CounterSnapshot],
+    gauges: Iterable[GaugeSnapshot],
+    exportMetadata: Boolean = true
+  ): Unit = {
+    counters.foreach(c => writeMetric(writer, c, exportMetadata))
+    gauges.foreach(g => writeMetric(writer, g, exportMetadata))
   }
 }
