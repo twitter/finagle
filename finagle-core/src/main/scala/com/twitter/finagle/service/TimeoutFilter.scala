@@ -459,16 +459,21 @@ class TimeoutFilter[Req, Rep](
     service: Service[Req, Rep],
     timeout: Duration
   ): Future[Rep] = {
-    val res = service(request)
-    if (!timeout.isFinite) {
-      res
+    // stop sending the request if timeout is negative - could be an expired deadline
+    if (timeout.isNegative) {
+      Future.exception(exceptionFn(timeout))
     } else {
-      res.within(timer, timeout, internalTimeoutEx).rescue {
-        case exc if exc eq internalTimeoutEx =>
-          val timeoutEx = exceptionFn(timeout)
-          res.raise(timeoutEx)
-          Trace.record(timeoutAnnotation)
-          Future.exception(timeoutEx)
+      val res = service(request)
+      if (!timeout.isFinite) {
+        res
+      } else {
+        res.within(timer, timeout, internalTimeoutEx).rescue {
+          case exc if exc eq internalTimeoutEx =>
+            val timeoutEx = exceptionFn(timeout)
+            res.raise(timeoutEx)
+            Trace.record(timeoutAnnotation)
+            Future.exception(timeoutEx)
+        }
       }
     }
   }
