@@ -19,7 +19,6 @@ import com.twitter.finagle.liveness.FailureAccrualFactory;
 import com.twitter.finagle.liveness.FailureAccrualPolicy;
 import com.twitter.finagle.loadbalancer.Balancers;
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory;
-import com.twitter.finagle.loadbalancer.WhenNoNodesOpens;
 import com.twitter.finagle.naming.BindingFactory;
 import com.twitter.finagle.param.ExceptionStatsHandler;
 import com.twitter.finagle.param.Label;
@@ -82,8 +81,6 @@ public class StackParamCompilationTest {
           new Some<>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
         .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
         .configured(new LoadBalancerFactory.Param(Balancers.p2c(Rngs.threadLocal())).mk())
-        .configured(new LoadBalancerFactory.WhenNoNodesOpenParam(
-            WhenNoNodesOpens.FAIL_FAST).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
           .configured(new FailFastFactory.FailFast(true).mk())

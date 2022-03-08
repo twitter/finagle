@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Removed the stack param `WhenNoNodesOpenParam` from LoadBalancerFactory.
+  Removed NoNodesOpenServiceFactory and NoNodesOpenException. When the majority of nodes
+  are busy or closed (approx 60%), the load balancer will probabilistically fail open and
+  pick a node at random. ``PHAB_ID=D843176``
+
 22.2.0
 ------
 New Features

@@ -206,25 +206,6 @@ object LoadBalancerFactory {
   }
 
   /**
-   * A class eligible for configuring the [[LoadBalancerFactory]] behavior
-   * when the balancer does not find a node with `Status.Open`.
-   *
-   * The default is to "fail open" and pick a node at random.
-   *
-   * @see [[WhenNoNodesOpen]]
-   */
-  case class WhenNoNodesOpenParam(whenNoNodesOpen: WhenNoNodesOpen) {
-    def mk(): (WhenNoNodesOpenParam, Stack.Param[WhenNoNodesOpenParam]) =
-      (this, WhenNoNodesOpenParam.param)
-  }
-
-  object WhenNoNodesOpenParam {
-    implicit val param = new Stack.Param[WhenNoNodesOpenParam] {
-      def default: WhenNoNodesOpenParam = WhenNoNodesOpenParam(WhenNoNodesOpen.PickOne)
-    }
-  }
-
-  /**
    * A class eligible for configuring the way endpoints are created for
    * a load balancer. In particular, each endpoint that is resolved is replicated
    * by the given parameter. This increases concurrency for each identical endpoint
@@ -410,7 +391,6 @@ object LoadBalancerFactory {
     val role: Stack.Role = LoadBalancerFactory.role
     val parameters = Seq(
       implicitly[Stack.Param[ErrorLabel]],
-      implicitly[Stack.Param[WhenNoNodesOpenParam]],
       implicitly[Stack.Param[Dest]],
       implicitly[Stack.Param[Param]],
       implicitly[Stack.Param[HostStats]],
@@ -469,15 +449,11 @@ object LoadBalancerFactory {
           finalParams = finalParams + params[MinApertureOverride]
         }
 
-        val underlying = loadBalancerFactory.newBalancer(
+        loadBalancerFactory.newBalancer(
           orderedEndpoints,
           balancerExc,
           finalParams
         )
-        params[WhenNoNodesOpenParam].whenNoNodesOpen match {
-          case WhenNoNodesOpen.PickOne => underlying
-          case WhenNoNodesOpen.FailFast => new NoNodesOpenServiceFactory(underlying)
-        }
       }
 
       // we directly pass in these endpoints, instead of keeping track of them ourselves.

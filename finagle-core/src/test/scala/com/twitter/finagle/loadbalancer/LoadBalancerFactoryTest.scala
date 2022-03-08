@@ -18,7 +18,6 @@ import com.twitter.util.Awaitable
 import com.twitter.util.Event
 import com.twitter.util.Future
 import com.twitter.util.Promise
-import com.twitter.util.Time
 import com.twitter.util.Var
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -182,62 +181,6 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
       assert(noBrokers.localDtab == newDtab)
     }
 
-  }
-
-  test("when no nodes are Open and configured to fail fast") {
-    val busySvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
-      override def status: Status = Status.Busy
-      def apply(clientConnection: ClientConnection): Future[Service[String, String]] = {
-        val svc = Service.mk { _: String => Future.value("closed after this") }
-        Future.value(svc)
-      }
-      def close(deadline: Time): Future[Unit] = ???
-    }
-    val endpoint = Stack.leaf(Stack.Role("endpoint"), busySvcFac)
-    val stack = LoadBalancerFactory.module.toStack(endpoint)
-
-    val address = Address(InetSocketAddress.createUnresolved("inet-address", 0))
-    val factory = stack.make(
-      Stack.Params.empty +
-        LoadBalancerFactory.Dest(Var(Addr.Bound(address))) +
-        LoadBalancerFactory.WhenNoNodesOpenParam(WhenNoNodesOpen.FailFast)
-    )
-
-    // Services are lazily established and are considered "Open"
-    // until we have "primed" the pump.
-    Await.ready(factory(ClientConnection.nil), 5.seconds)
-
-    // now that the service is primed, we should fail fast.
-    assert(factory.status == Status.Busy)
-    intercept[NoNodesOpenException] {
-      Await.result(factory(ClientConnection.nil), 5.seconds)
-    }
-  }
-
-  test("when no nodes are Open and not configured to fail fast") {
-    val busySvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
-      override def status: Status = Status.Busy
-      def apply(clientConnection: ClientConnection): Future[Service[String, String]] = {
-        val svc = Service.mk { _: String => Future.value("closed after this") }
-        Future.value(svc)
-      }
-      def close(deadline: Time): Future[Unit] = ???
-    }
-    val endpoint = Stack.leaf(Stack.Role("endpoint"), busySvcFac)
-    val stack = LoadBalancerFactory.module.toStack(endpoint)
-    val address = Address(InetSocketAddress.createUnresolved("inet-address", 0))
-    val factory = stack.make(
-      Stack.Params.empty +
-        LoadBalancerFactory.Dest(Var(Addr.Bound(address)))
-    )
-
-    // as `factory.status == Open` until we have "primed" the pump.
-    // services are lazily established and are considered "Open" until that point.
-    Await.ready(factory(ClientConnection.nil), 5.seconds)
-
-    // we will not see a failure, even though there are no nodes open
-    assert(factory.status == Status.Busy)
-    Await.result(factory(ClientConnection.nil), 5.seconds)
   }
 
   test("default address ordering") {
