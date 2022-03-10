@@ -55,7 +55,7 @@ private[stats] object MetricsView {
   final case class GaugeSnapshot(
     hierarchicalName: String,
     builder: MetricBuilder,
-    value: Double)
+    value: Number)
       extends Snapshot
 
   /** Snapshot representation of a counter */

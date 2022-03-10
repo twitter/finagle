@@ -10,41 +10,39 @@ import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
 private[stats] object PrometheusExporter {
 
   /**
-   * Convert a double to its string representation with positive and negative infinity.
-   */
-  private def doubleToString(d: Double): String = {
-    if (d == Double.MaxValue)
-      "+Inf"
-    else if (d == Double.MinValue)
-      "-Inf"
-    else
-      d.toString
-  }
-
-  /**
    * Write the value of the metric as a Double
    */
-  private def writeValueAsDouble(writer: StringBuilder, value: Double): Unit = {
-    writer.append(doubleToString(value))
+  private def writeValueAsFloat(writer: StringBuilder, value: Float): Unit = {
+    if (value == Float.MaxValue || value == Float.PositiveInfinity)
+      writer.append("+Inf")
+    else if (value == Float.MinValue || value == Float.NegativeInfinity)
+      writer.append("-Inf")
+    else
+      writer.append(value)
   }
 
   /**
-   * Convert a double to its string representation with positive and negative infinity.
+   * Write the value in the format appropriate for its dynamic type
+   *
+   * For gauges we need to allow for writing the value as either an integer or floating
+   * point value depending on the type the gauge emits.
    */
-  private def longToString(l: Long): String = {
-    if (l == Long.MaxValue)
-      "+Inf"
-    else if (l == Long.MinValue)
-      "-Inf"
-    else
-      l.toString
+  private def writeNumberValue(writer: StringBuilder, value: Number): Unit = value match {
+    case l: java.lang.Long => writeValueAsLong(writer, l.longValue)
+    case i: java.lang.Integer => writeValueAsLong(writer, i.intValue)
+    case _ => writeValueAsFloat(writer, value.floatValue)
   }
 
   /**
    * Write the value of the metric as Long for counter
    */
-  private def writeValueAsLong(writer: StringBuilder, value: Double): Unit = {
-    writer.append(longToString(value.toLong))
+  private def writeValueAsLong(writer: StringBuilder, value: Long): Unit = {
+    if (value == Long.MaxValue)
+      writer.append("+Inf")
+    else if (value == Long.MinValue)
+      writer.append("-Inf")
+    else
+      writer.append(value)
   }
 
   /**
@@ -136,7 +134,7 @@ private[stats] object PrometheusExporter {
     writeNameAndLabels(writer, metricName, snapshot.builder.labels)
     snapshot match {
       case gaugeSnap: GaugeSnapshot =>
-        writeValueAsDouble(writer, gaugeSnap.value)
+        writeNumberValue(writer, gaugeSnap.value)
       case counterSnap: CounterSnapshot =>
         writeValueAsLong(writer, counterSnap.value)
       case _ => throw new Exception("Unsupported snapshot type")

@@ -36,16 +36,28 @@ class PrometheusExporterTest extends AnyFunSuite {
       value = 1
     )
 
-  val poolSizeGauge = GaugeSnapshot(
-    hierarchicalName = "finagle/future_pool/pool_size",
+  val poolSizeDoubleGauge = GaugeSnapshot(
+    hierarchicalName = "finagle/future_pool/pool_size_float",
     builder = MetricBuilder(
-      name = Seq("finagle", "future_pool", "pool_size"),
+      name = Seq("finagle", "future_pool", "pool_size_float"),
       metricType = GaugeType,
       units = CustomUnit("Threads"),
       labels = Map("pool" -> "future_pool", "rpc" -> "finagle"),
       statsReceiver = sr
     ),
     value = 3.0
+  )
+
+  val poolSizeLongGauge = GaugeSnapshot(
+    hierarchicalName = "finagle/future_pool/pool_size_long",
+    builder = MetricBuilder(
+      name = Seq("finagle", "future_pool", "pool_size_long"),
+      metricType = GaugeType,
+      units = CustomUnit("Threads"),
+      labels = Map("pool" -> "future_pool", "rpc" -> "finagle"),
+      statsReceiver = sr
+    ),
+    value = 3l
   )
 
   val clntExceptionsCounter = CounterSnapshot(
@@ -82,12 +94,165 @@ class PrometheusExporterTest extends AnyFunSuite {
           |requests 1
           |""".stripMargin)
   }
+
+  test("write counter with +/- infinite value") {
+    val posInfCounter = CounterSnapshot(
+      hierarchicalName = "requests",
+      builder = MetricBuilder(
+        name = Seq("requests_pos"),
+        metricType = CounterType,
+        units = Requests,
+        labels = Map("role" -> "foo"),
+        statsReceiver = sr,
+      ),
+      value = Long.MaxValue
+    )
+
+    val negInfCounter = CounterSnapshot(
+      hierarchicalName = "requests",
+      builder = MetricBuilder(
+        name = Seq("requests_neg"),
+        metricType = CounterType,
+        units = Requests,
+        labels = Map("role" -> "foo"),
+        statsReceiver = sr,
+      ),
+      value = Long.MinValue
+    )
+
+    val writer = new StringBuilder()
+    writeMetrics(writer, counters = Seq(posInfCounter, negInfCounter), gauges = Seq())
+    val expected =
+      """# TYPE requests_pos counter
+        |# UNIT requests_pos Requests
+        |requests_pos{role="foo"} +Inf
+        |# TYPE requests_neg counter
+        |# UNIT requests_neg Requests
+        |requests_neg{role="foo"} -Inf
+        |""".stripMargin
+    assert(writer.toString() == expected)
+  }
+
+  test("write long gauge with +/- infinite value") {
+    val posInfCounter = GaugeSnapshot(
+      hierarchicalName = "requests",
+      builder = MetricBuilder(
+        name = Seq("requests_pos"),
+        metricType = GaugeType,
+        units = Requests,
+        labels = Map("role" -> "foo"),
+        statsReceiver = sr,
+      ),
+      value = Long.MaxValue
+    )
+
+    val negInfCounter = GaugeSnapshot(
+      hierarchicalName = "requests",
+      builder = MetricBuilder(
+        name = Seq("requests_neg"),
+        metricType = GaugeType,
+        units = Requests,
+        labels = Map("role" -> "foo"),
+        statsReceiver = sr,
+      ),
+      value = Long.MinValue
+    )
+
+    val writer = new StringBuilder()
+    writeMetrics(writer, counters = Seq(), gauges = Seq(posInfCounter, negInfCounter))
+    val expected =
+      """# TYPE requests_pos gauge
+        |# UNIT requests_pos Requests
+        |requests_pos{role="foo"} +Inf
+        |# TYPE requests_neg gauge
+        |# UNIT requests_neg Requests
+        |requests_neg{role="foo"} -Inf
+        |""".stripMargin
+    assert(writer.toString() == expected)
+  }
+
+  test("write float gauge with +/- Float.MaxValue value") {
+    val posInfCounter = GaugeSnapshot(
+      hierarchicalName = "requests",
+      builder = MetricBuilder(
+        name = Seq("requests_pos"),
+        metricType = GaugeType,
+        units = Requests,
+        labels = Map("role" -> "foo"),
+        statsReceiver = sr,
+      ),
+      value = Float.MaxValue
+    )
+
+    val negInfCounter = GaugeSnapshot(
+      hierarchicalName = "requests",
+      builder = MetricBuilder(
+        name = Seq("requests_neg"),
+        metricType = GaugeType,
+        units = Requests,
+        labels = Map("role" -> "foo"),
+        statsReceiver = sr,
+      ),
+      value = Float.MinValue
+    )
+
+    val writer = new StringBuilder()
+    writeMetrics(writer, counters = Seq(), gauges = Seq(posInfCounter, negInfCounter))
+    val expected =
+      """# TYPE requests_pos gauge
+        |# UNIT requests_pos Requests
+        |requests_pos{role="foo"} +Inf
+        |# TYPE requests_neg gauge
+        |# UNIT requests_neg Requests
+        |requests_neg{role="foo"} -Inf
+        |""".stripMargin
+    assert(writer.toString() == expected)
+  }
+
+  test("write float gauge with +/- Infinity value") {
+    val posInfCounter = GaugeSnapshot(
+      hierarchicalName = "requests",
+      builder = MetricBuilder(
+        name = Seq("requests_pos"),
+        metricType = GaugeType,
+        units = Requests,
+        labels = Map("role" -> "foo"),
+        statsReceiver = sr,
+      ),
+      value = Float.PositiveInfinity
+    )
+
+    val negInfCounter = GaugeSnapshot(
+      hierarchicalName = "requests",
+      builder = MetricBuilder(
+        name = Seq("requests_neg"),
+        metricType = GaugeType,
+        units = Requests,
+        labels = Map("role" -> "foo"),
+        statsReceiver = sr,
+      ),
+      value = Float.NegativeInfinity
+    )
+
+    val writer = new StringBuilder()
+    writeMetrics(writer, counters = Seq(), gauges = Seq(posInfCounter, negInfCounter))
+    val expected =
+      """# TYPE requests_pos gauge
+        |# UNIT requests_pos Requests
+        |requests_pos{role="foo"} +Inf
+        |# TYPE requests_neg gauge
+        |# UNIT requests_neg Requests
+        |requests_neg{role="foo"} -Inf
+        |""".stripMargin
+    assert(writer.toString() == expected)
+  }
+
   test("Write all metrics") {
     val writer = new StringBuilder()
     writeMetrics(
       writer,
       counters = Seq(requestsCounter, clntExceptionsCounter),
-      gauges = Seq(poolSizeGauge))
+      gauges = Seq(poolSizeDoubleGauge, poolSizeLongGauge))
     val expected =
       """# TYPE requests counter
         |# UNIT requests Requests
@@ -95,9 +260,12 @@ class PrometheusExporterTest extends AnyFunSuite {
         |# TYPE failures counter
         |# UNIT failures Requests
         |failures{side="clnt",exception="com.twitter.finagle.ChannelClosedException",method_name="get",type="logical",client_label="baz-service"} 2
-        |# TYPE pool_size gauge
-        |# UNIT pool_size Threads
-        |pool_size{pool="future_pool",rpc="finagle"} 3.0
+        |# TYPE pool_size_float gauge
+        |# UNIT pool_size_float Threads
+        |pool_size_float{pool="future_pool",rpc="finagle"} 3.0
+        |# TYPE pool_size_long gauge
+        |# UNIT pool_size_long Threads
+        |pool_size_long{pool="future_pool",rpc="finagle"} 3
         |""".stripMargin
     assert(writer.toString() == expected)
   }
