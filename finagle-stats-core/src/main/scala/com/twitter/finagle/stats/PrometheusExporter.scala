@@ -3,6 +3,7 @@ package com.twitter.finagle.stats
 import com.twitter.finagle.stats.MetricBuilder.MetricType
 import com.twitter.finagle.stats.MetricsView.CounterSnapshot
 import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
+import com.twitter.finagle.stats.MetricsView.HistogramSnapshot
 
 /**
  * Exports metrics in a text according to Prometheus format.
@@ -46,6 +47,29 @@ private[stats] object PrometheusExporter {
   }
 
   /**
+   * Write the percentiles, count and sum for a summary
+   */
+  private def writeSummary(
+    writer: StringBuilder,
+    name: String,
+    labels: Iterable[(String, String)],
+    snapshot: Snapshot
+  ): Unit = {
+    snapshot.percentiles.foreach { p =>
+      writeSummaryHistoLabels(writer, name, labels, "quantile", p.quantile)
+      writeValueAsLong(writer, p.value)
+      writer.append('\n')
+    }
+    // prometheus doesn't export min, max, average in the summary by default
+    writeCounterGaugeLabels(writer, name + "_count", labels)
+    writeValueAsLong(writer, snapshot.count)
+    writer.append('\n')
+
+    writeCounterGaugeLabels(writer, name + "_sum", labels)
+    writeValueAsLong(writer, snapshot.sum)
+  }
+
+  /**
    * Write the type of metric. For example
    * # TYPE my_counter counter
    * @param writer StringBuilder
@@ -63,7 +87,7 @@ private[stats] object PrometheusExporter {
   /**
    * Write the units that the metric measures in. For example
    * # UNIT my_boot_time_seconds seconds
-   * @param writer
+   * @param writer StringBuilder
    * @param name metric name
    * @param metricUnit Option of unit the metric is measured in
    */
@@ -89,12 +113,15 @@ private[stats] object PrometheusExporter {
   /**
    * Write the labels, if any. For example
    * {env="prod",hostname="myhost",datacenter="sdc",region="europe",owner="frontend"}
-   * @param writer
+   * @param writer StringBuilder
    * @param labels the key-value pair of labels that the metric carries
+   * @param finishLabels if true, add close curly brace. false for summaries
+   * and histograms because they have reserved labels that are appended last
    */
   private[stats] def writeLabels(
     writer: StringBuilder,
-    labels: Iterable[(String, String)]
+    labels: Iterable[(String, String)],
+    finishLabels: Boolean
   ): Unit = {
     if (labels.nonEmpty) {
       writer.append('{')
@@ -112,7 +139,11 @@ private[stats] object PrometheusExporter {
           writer.append(value)
           writer.append('"')
       }
-      writer.append('}')
+      if (finishLabels) {
+        writer.append('}')
+      } else {
+        writer.append(',')
+      }
     }
   }
 
@@ -131,25 +162,62 @@ private[stats] object PrometheusExporter {
     if (exportMetadata) {
       writeMetadata(writer, metricName, snapshot.builder.metricType, snapshot.builder.units)
     }
-    writeNameAndLabels(writer, metricName, snapshot.builder.labels)
     snapshot match {
-      case gaugeSnap: GaugeSnapshot =>
+      case gaugeSnap: GaugeSnapshot => {
+        writeCounterGaugeLabels(writer, metricName, snapshot.builder.labels)
         writeNumberValue(writer, gaugeSnap.value)
-      case counterSnap: CounterSnapshot =>
+      }
+      case counterSnap: CounterSnapshot => {
+        writeCounterGaugeLabels(writer, metricName, snapshot.builder.labels)
         writeValueAsLong(writer, counterSnap.value)
-      case _ => throw new Exception("Unsupported snapshot type")
+      }
+      case summarySnap: HistogramSnapshot =>
+        writeSummary(writer, metricName, summarySnap.builder.labels, summarySnap.value)
     }
     writer.append('\n')
   }
 
-  private def writeNameAndLabels(
+  /**
+   * Write metric name and labels for counters and gauges
+   * @param writer StringBuilder
+   * @param name metric name
+   * @param labels user-defined labels
+   */
+  private def writeCounterGaugeLabels(
     writer: StringBuilder,
     name: String,
     labels: Iterable[(String, String)]
   ): Unit = {
     writer.append(name)
-    writeLabels(writer, labels)
+    writeLabels(writer, labels, finishLabels = true)
     writer.append(' ')
+  }
+
+  /**
+   * Write user-defined labels and reserved labels for Prometheus summary and
+   * histogram
+   * @param writer StringBuilder
+   * @param name metric name
+   * @param labels user-defined labels
+   * @param reservedLabelName "quantile" or "le"
+   * @param bucket the quantile of the summary or bucket of the histogram
+   */
+  private def writeSummaryHistoLabels(
+    writer: StringBuilder,
+    name: String,
+    labels: Iterable[(String, String)],
+    reservedLabelName: String,
+    bucket: Double,
+  ): Unit = {
+    writer.append(name)
+    if (labels.isEmpty) {
+      writer.append('{')
+    }
+    writeLabels(writer, labels, finishLabels = false)
+    writer.append(reservedLabelName)
+    writer.append("=\"")
+    writer.append(bucket)
+    writer.append("\"} ")
   }
 
   /**
@@ -175,9 +243,11 @@ private[stats] object PrometheusExporter {
     writer: StringBuilder,
     counters: Iterable[CounterSnapshot],
     gauges: Iterable[GaugeSnapshot],
+    histograms: Iterable[HistogramSnapshot],
     exportMetadata: Boolean = true
   ): Unit = {
     counters.foreach(c => writeMetric(writer, c, exportMetadata))
     gauges.foreach(g => writeMetric(writer, g, exportMetadata))
+    histograms.foreach(h => writeMetric(writer, h, exportMetadata))
   }
 }

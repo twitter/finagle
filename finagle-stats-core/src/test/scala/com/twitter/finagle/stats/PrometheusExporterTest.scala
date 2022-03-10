@@ -2,8 +2,11 @@ package com.twitter.finagle.stats
 
 import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.GaugeType
+import com.twitter.finagle.stats.MetricBuilder.HistogramType
 import com.twitter.finagle.stats.MetricsView.CounterSnapshot
 import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
+import com.twitter.finagle.stats.MetricsView.HistogramSnapshot
+import com.twitter.finagle.stats.Snapshot.Percentile
 import org.scalatest.funsuite.AnyFunSuite
 
 class PrometheusExporterTest extends AnyFunSuite {
@@ -36,7 +39,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       value = 1
     )
 
-  val poolSizeDoubleGauge = GaugeSnapshot(
+  val poolSizeFloatGauge = GaugeSnapshot(
     hierarchicalName = "finagle/future_pool/pool_size_float",
     builder = MetricBuilder(
       name = Seq("finagle", "future_pool", "pool_size_float"),
@@ -78,15 +81,36 @@ class PrometheusExporterTest extends AnyFunSuite {
     value = 2
   )
 
+  val dnsLookupMs = HistogramSnapshot(
+    hierarchicalName = "inet/dns/lookup_ms",
+    builder = MetricBuilder(
+      name = Seq("inet", "dns", "lookup_ms"),
+      metricType = HistogramType,
+      units = Milliseconds,
+      labels = Map("resolver" -> "inet", "namer" -> "dns"),
+      statsReceiver = sr
+    ),
+    value = new Snapshot {
+      // 1, 2, 3
+      def count: Long = 3
+      def sum: Long = 6
+      def max: Long = 3
+      def min: Long = 1
+      def average: Double = 2.0
+      def percentiles: IndexedSeq[Snapshot.Percentile] =
+        IndexedSeq(Percentile(0.5, 2), Percentile(0.95, 3))
+    }
+  )
+
   test("Write labels") {
     val writer = new StringBuilder()
-    writeLabels(writer, requestsCounter.builder.labels)
+    writeLabels(writer, requestsCounter.builder.labels, true)
     assert(writer.toString() == """{role="foo",job="baz-service",env="staging",zone="dc1"}""")
   }
 
   test("Write a counter without any labels") {
     val writer = new StringBuilder()
-    writeMetrics(writer, counters = Seq(noLabelCounter), gauges = Seq())
+    writeMetrics(writer, counters = Seq(noLabelCounter), gauges = Seq(), histograms = Seq())
     assert(
       writer.toString() ==
         """# TYPE requests counter
@@ -121,7 +145,11 @@ class PrometheusExporterTest extends AnyFunSuite {
     )
 
     val writer = new StringBuilder()
-    writeMetrics(writer, counters = Seq(posInfCounter, negInfCounter), gauges = Seq())
+    writeMetrics(
+      writer,
+      counters = Seq(posInfCounter, negInfCounter),
+      gauges = Seq(),
+      histograms = Seq())
     val expected =
       """# TYPE requests_pos counter
         |# UNIT requests_pos Requests
@@ -159,7 +187,11 @@ class PrometheusExporterTest extends AnyFunSuite {
     )
 
     val writer = new StringBuilder()
-    writeMetrics(writer, counters = Seq(), gauges = Seq(posInfCounter, negInfCounter))
+    writeMetrics(
+      writer,
+      counters = Seq(),
+      gauges = Seq(posInfCounter, negInfCounter),
+      histograms = Seq())
     val expected =
       """# TYPE requests_pos gauge
         |# UNIT requests_pos Requests
@@ -197,7 +229,11 @@ class PrometheusExporterTest extends AnyFunSuite {
     )
 
     val writer = new StringBuilder()
-    writeMetrics(writer, counters = Seq(), gauges = Seq(posInfCounter, negInfCounter))
+    writeMetrics(
+      writer,
+      counters = Seq(),
+      gauges = Seq(posInfCounter, negInfCounter),
+      histograms = Seq())
     val expected =
       """# TYPE requests_pos gauge
         |# UNIT requests_pos Requests
@@ -235,7 +271,11 @@ class PrometheusExporterTest extends AnyFunSuite {
     )
 
     val writer = new StringBuilder()
-    writeMetrics(writer, counters = Seq(), gauges = Seq(posInfCounter, negInfCounter))
+    writeMetrics(
+      writer,
+      counters = Seq(),
+      gauges = Seq(posInfCounter, negInfCounter),
+      histograms = Seq())
     val expected =
       """# TYPE requests_pos gauge
         |# UNIT requests_pos Requests
@@ -252,7 +292,8 @@ class PrometheusExporterTest extends AnyFunSuite {
     writeMetrics(
       writer,
       counters = Seq(requestsCounter, clntExceptionsCounter),
-      gauges = Seq(poolSizeDoubleGauge, poolSizeLongGauge))
+      gauges = Seq(poolSizeFloatGauge, poolSizeLongGauge),
+      histograms = Seq(dnsLookupMs))
     val expected =
       """# TYPE requests counter
         |# UNIT requests Requests
@@ -266,6 +307,12 @@ class PrometheusExporterTest extends AnyFunSuite {
         |# TYPE pool_size_long gauge
         |# UNIT pool_size_long Threads
         |pool_size_long{pool="future_pool",rpc="finagle"} 3
+        |# TYPE lookup_ms summary
+        |# UNIT lookup_ms Milliseconds
+        |lookup_ms{resolver="inet",namer="dns",quantile="0.5"} 2
+        |lookup_ms{resolver="inet",namer="dns",quantile="0.95"} 3
+        |lookup_ms_count{resolver="inet",namer="dns"} 3
+        |lookup_ms_sum{resolver="inet",namer="dns"} 6
         |""".stripMargin
     assert(writer.toString() == expected)
   }
