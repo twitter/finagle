@@ -15,6 +15,11 @@ Breaking API Changes
   are busy or closed (approx 60%), the load balancer will probabilistically fail open and
   pick a node at random. ``PHAB_ID=D843176``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Bump version of Jackson to 2.13.2. ``PHAB_ID=D848592``
+
 22.2.0
 ------
 New Features

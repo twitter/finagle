@@ -65,7 +65,7 @@ val netty4LibsTest = Seq(
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
 val opencensusVersion = "0.24.0"
-val jacksonVersion = "2.13.1"
+val jacksonVersion = "2.13.2"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
