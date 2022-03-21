@@ -325,13 +325,13 @@ class StatsFilter[Req, Rep] private[service] (
   )
 
   // inject metrics and instrument top-line expressions
-  private[this] val instrumentExpressions = metricsRegistry.map { registry =>
+  metricsRegistry.foreach { registry =>
     registry.setMetricBuilder(SuccessCounter, configuredMetrics.successCount.metadata)
     registry.setMetricBuilder(FailureCounter, configuredMetrics.failureCount.metadata)
     registry.setMetricBuilder(RequestCounter, configuredMetrics.requestCount.metadata)
     registry.setMetricBuilder(LatencyP99Histogram, configuredMetrics.latencyStat.metadata)
 
-    // Construct expressions
+    // Touch each one to construct expressions
     registry.successRate
     registry.latencyP99
     registry.throughput

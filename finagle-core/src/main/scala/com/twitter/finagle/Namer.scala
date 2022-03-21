@@ -1,6 +1,8 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.naming.{NameInterpreter, NamerExceededMaxDepthException, namerMaxDepth}
+import com.twitter.finagle.naming.NameInterpreter
+import com.twitter.finagle.naming.NamerExceededMaxDepthException
+import com.twitter.finagle.naming.namerMaxDepth
 import com.twitter.util._
 import scala.util.control.NonFatal
 
@@ -165,11 +167,6 @@ object Namer {
   private object IntegerString {
     def unapply(s: String): Option[Int] =
       Try(s.toInt).toOption
-  }
-
-  private object DoubleString {
-    def unapply(s: String): Option[Double] =
-      Try(s.toDouble).toOption
   }
 
   /**

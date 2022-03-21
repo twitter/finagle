@@ -1,19 +1,20 @@
 package com.twitter.finagle.client.utils
 
 import com.twitter.finagle.client.StackClient
-import com.twitter.finagle.client.utils.StringClient.{NoDelimStringPipeline, StringClientPipeline}
-import com.twitter.finagle.pushsession.{
-  PipeliningClientPushSession,
-  PushChannelHandle,
-  PushStackClient,
-  PushTransporter
-}
+import com.twitter.finagle.client.utils.StringClient.NoDelimStringPipeline
+import com.twitter.finagle.client.utils.StringClient.StringClientPipeline
+import com.twitter.finagle.pushsession.PipeliningClientPushSession
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.PushStackClient
+import com.twitter.finagle.pushsession.PushTransporter
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
 import com.twitter.finagle.param.ProtocolLibrary
-import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Service, ServiceFactory, Stack}
-import com.twitter.util.{Duration, Future}
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.util.Duration
+import com.twitter.util.Future
 import java.net.SocketAddress
 
 object PushStringClient {
@@ -43,7 +44,6 @@ object PushStringClient {
       Future.value(
         new PipeliningClientPushSession[String, String](
           handle,
-          NullStatsReceiver,
           Duration.Top,
           DefaultTimer
         )

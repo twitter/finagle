@@ -2,10 +2,15 @@ package com.twitter.finagle.pushsession
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
-import com.twitter.finagle.{Failure, IndividualRequestTimeoutException => FinagleTimeoutException}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.util.{Await, MockTimer, Promise, Time, TimeoutException => UtilTimeoutException}
-import java.net.{InetSocketAddress, SocketAddress}
+import com.twitter.finagle.Failure
+import com.twitter.finagle.{IndividualRequestTimeoutException => FinagleTimeoutException}
+import com.twitter.util.Await
+import com.twitter.util.MockTimer
+import com.twitter.util.Promise
+import com.twitter.util.Time
+import com.twitter.util.{TimeoutException => UtilTimeoutException}
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 import org.mockito.Mockito.never
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
@@ -32,7 +37,6 @@ class PipeliningClientPushSessionTest extends AnyFunSuite with MockitoSugar {
           val session =
             new PipeliningClientPushSession[Unit, Unit](
               handle,
-              NullStatsReceiver,
               10.seconds,
               timer
             ).toService
@@ -50,7 +54,6 @@ class PipeliningClientPushSessionTest extends AnyFunSuite with MockitoSugar {
       val service =
         new PipeliningClientPushSession[Unit, Unit](
           handle,
-          NullStatsReceiver,
           10.seconds,
           timer
         ).toService
@@ -68,7 +71,6 @@ class PipeliningClientPushSessionTest extends AnyFunSuite with MockitoSugar {
       val service =
         new PipeliningClientPushSession[Unit, Unit](
           handle,
-          NullStatsReceiver,
           stallTimeout,
           timer
         ).toService
@@ -95,7 +97,6 @@ class PipeliningClientPushSessionTest extends AnyFunSuite with MockitoSugar {
       val session =
         new PipeliningClientPushSession[Unit, Unit](
           handle,
-          NullStatsReceiver,
           stallTimeout,
           timer
         )
@@ -112,7 +113,6 @@ class PipeliningClientPushSessionTest extends AnyFunSuite with MockitoSugar {
   }
 
   test("queue size") {
-    val stats = new InMemoryStatsReceiver()
     val timer = new MockTimer
 
     var p0, p1, p2 = new Promise[String]()
@@ -120,7 +120,6 @@ class PipeliningClientPushSessionTest extends AnyFunSuite with MockitoSugar {
     val session =
       new PipeliningClientPushSession[String, String](
         handle,
-        stats,
         10.seconds,
         timer
       )

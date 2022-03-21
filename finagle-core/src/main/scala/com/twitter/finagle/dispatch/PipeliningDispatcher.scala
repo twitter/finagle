@@ -2,7 +2,9 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Failure, FailureFlags, Stack}
+import com.twitter.finagle.Failure
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.Stack
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
@@ -88,7 +90,7 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
     f.proxyTo(p)
 
     p.setInterruptHandler {
-      case t: Throwable =>
+      case _: Throwable =>
         timer.schedule(Time.now + stallTimeout) {
           if (!f.isDefined) {
             f.raise(stalledPipelineException(stallTimeout))

@@ -2,7 +2,10 @@ package com.twitter.finagle.util
 
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{SlowProbeProxyTimer, Duration, Time, Timer}
+import com.twitter.util.SlowProbeProxyTimer
+import com.twitter.util.Duration
+import com.twitter.util.Time
+import com.twitter.util.Timer
 import scala.collection.JavaConverters._
 
 /**
@@ -30,7 +33,7 @@ private final class LoggingSlowProbeProxyTimer(
   protected def slowTaskCompleted(elapsed: Duration): Unit = slow.incr()
 
   protected def slowTaskExecuting(elapsed: Duration): Unit =
-    if (shouldLog(elapsed)) {
+    if (shouldLog()) {
       val initialLine = s"Timer task has been running for more than $maxRuntime ($elapsed), " +
         "current stacktraces follow.\n"
 
@@ -43,7 +46,7 @@ private final class LoggingSlowProbeProxyTimer(
       log.warning(traces.mkString(initialLine, "\n", ""))
     }
 
-  private[this] def shouldLog(elapsed: Duration): Boolean = {
+  private[this] def shouldLog(): Boolean = {
     val currentTime = Time.now
     synchronized {
       if (currentTime - lastLog <= maxLogFrequency) false

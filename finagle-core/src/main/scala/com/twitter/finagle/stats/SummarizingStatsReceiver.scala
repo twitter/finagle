@@ -1,7 +1,10 @@
 package com.twitter.finagle.stats
 
-import com.github.benmanes.caffeine.cache.{CacheLoader, Caffeine}
-import com.twitter.finagle.stats.MetricBuilder.{CounterType, GaugeType, HistogramType}
+import com.github.benmanes.caffeine.cache.CacheLoader
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.twitter.finagle.stats.MetricBuilder.CounterType
+import com.twitter.finagle.stats.MetricBuilder.GaugeType
+import com.twitter.finagle.stats.MetricBuilder.HistogramType
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.JavaConverters._
@@ -131,7 +134,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
     val fmt = Function.tupled { (k: String, v: String) => "%-30s %s".format(k, v) }
     val fmtCounters = sortedCounters.map(fmt)
-    val fmtGauges = gaugeValues.map(fmt)
+    val fmtGauges = sortedGauges.map(fmt)
     val fmtStats = sortedStats.map(fmt)
     lazy val fmtTails = sortedTails.map(fmt)
 

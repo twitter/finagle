@@ -63,9 +63,6 @@ object Name {
       with CachedHashCode.ForClass {
     def self: Any = id
 
-    // Workaround for https://issues.scala-lang.org/browse/SI-4807
-    def canEqual(that: Any) = true
-
     override protected def computeHashCode: Int = self.hashCode
 
     def idStr: String =

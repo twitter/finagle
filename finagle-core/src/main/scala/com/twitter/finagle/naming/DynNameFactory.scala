@@ -2,8 +2,13 @@ package com.twitter.finagle.naming
 
 import com.twitter.finagle._
 import com.twitter.finagle.factory.ServiceFactoryCache
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.util.{Activity, Future, Promise, Stopwatch, Time}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.util.Activity
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Stopwatch
+import com.twitter.util.Time
 import scala.collection.immutable
 
 /**
@@ -107,7 +112,7 @@ private class DynNameFactory[Req, Rep](
         state = Pending(q enqueue el)
         p
 
-      case other => apply(conn)
+      case _ => apply(conn)
     }
   }
 

@@ -1,10 +1,16 @@
 package com.twitter.finagle.pool
 
 import com.twitter.finagle._
-import com.twitter.finagle.client.{Transporter, StackClient}
-import com.twitter.finagle.loadbalancer.{Balancers, EndpointFactory, LoadBalancerFactory}
+import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.loadbalancer.Balancers
+import com.twitter.finagle.loadbalancer.EndpointFactory
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param
-import com.twitter.util.{Activity, Closable, Future, Time}
+import com.twitter.util.Activity
+import com.twitter.util.Closable
+import com.twitter.util.Future
+import com.twitter.util.Time
 
 /**
  * [[BalancingPool]] is a client [[Stack]] module which composes a collection of
@@ -128,7 +134,6 @@ private[finagle] object BalancingPool {
           // the stack (by prepending it to `next`).
           SingletonPool.module(allowInterrupts).toStack(next)
         } else {
-          val sr = params[param.Stats].statsReceiver
           val addr = params[Transporter.EndpointAddr].addr
 
           // Note, this creates a new singleton pool for each replicated address

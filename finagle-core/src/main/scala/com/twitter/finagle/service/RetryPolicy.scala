@@ -1,16 +1,17 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{
-  Backoff,
-  ChannelClosedException,
-  Failure,
-  FailureFlags,
-  TimeoutException,
-  WriteException
-}
-import com.twitter.util.{Duration, Return, Throw, Try, TimeoutException => UtilTimeoutException}
-import scala.util.control.NonFatal
+import com.twitter.finagle.Backoff
+import com.twitter.finagle.ChannelClosedException
+import com.twitter.finagle.Failure
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.TimeoutException
+import com.twitter.finagle.WriteException
+import com.twitter.util.Duration
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
+import com.twitter.util.{TimeoutException => UtilTimeoutException}
 
 /**
  * A function defining retry behavior for a given value type `A`.
@@ -152,21 +153,6 @@ abstract class SimpleRetryPolicy[A](i: Int)
 }
 
 object RetryPolicy {
-
-  /**
-   * In theory, calling 'toString' on a `Stream` should always be safe.
-   * In practice, we've seen numerous occurrences of
-   * `java.lang.UnsupportedOperationException: tail of empty stream`
-   * when doing so. This method defensively handles `NonFatal` errors
-   * and returns `Stream(?)` as a result.
-   */
-  private def streamToString[T](stream: Stream[T]): String = {
-    try {
-      stream.toString
-    } catch {
-      case NonFatal(_) => "Stream(?)"
-    }
-  }
 
   // We provide a proxy around partial functions so we can give them a better .toString
   private class NamedPf[A, B](name: String, f: PartialFunction[A, B])

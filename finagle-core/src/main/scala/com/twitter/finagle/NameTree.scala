@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.util.{CachedHashCode, Showable}
+import com.twitter.finagle.util.CachedHashCode
+import com.twitter.finagle.util.Showable
 import scala.annotation.tailrec
 
 /**
@@ -149,8 +150,6 @@ object NameTree {
       case Neg => Neg
       case Empty => Empty
     }
-
-  private[this] val unionFail = Seq(Weighted(Weighted.defaultWeight, Fail))
 
   /**
    * Simplify the given [[com.twitter.finagle.NameTree NameTree]],

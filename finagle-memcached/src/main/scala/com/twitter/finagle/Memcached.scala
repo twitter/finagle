@@ -1,24 +1,23 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.{finagle, hashing}
+import com.twitter.finagle
+import com.twitter.hashing
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.{
-  ClientDispatcher,
-  SerialServerDispatcher,
-  StalledPipelineTimeout
-}
-import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
-import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
+import com.twitter.finagle.dispatch.SerialServerDispatcher
+import com.twitter.finagle.dispatch.StalledPipelineTimeout
+import com.twitter.finagle.liveness.FailureAccrualFactory
+import com.twitter.finagle.liveness.FailureAccrualPolicy
+import com.twitter.finagle.loadbalancer.Balancers
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
-import com.twitter.finagle.memcached.protocol.text.transport.{
-  MemcachedNetty4ClientPipelineInit,
-  Netty4ServerFramer
-}
-import com.twitter.finagle.memcached.protocol.{Command, Response}
+import com.twitter.finagle.memcached.protocol.text.transport.MemcachedNetty4ClientPipelineInit
+import com.twitter.finagle.memcached.protocol.text.transport.Netty4ServerFramer
+import com.twitter.finagle.memcached.protocol.Command
+import com.twitter.finagle.memcached.protocol.Response
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
@@ -29,19 +28,23 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
-import com.twitter.finagle.partitioning.param.{KeyHasher, WithPartitioningStrategy}
+import com.twitter.finagle.partitioning.param.KeyHasher
+import com.twitter.finagle.partitioning.param.WithPartitioningStrategy
 import com.twitter.finagle.pool.BalancingPool
-import com.twitter.finagle.pushsession.{
-  PipeliningClientPushSession,
-  PushChannelHandle,
-  PushStackClient,
-  PushTransporter
-}
-import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
+import com.twitter.finagle.pushsession.PipeliningClientPushSession
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.PushStackClient
+import com.twitter.finagle.pushsession.PushTransporter
+import com.twitter.finagle.server.Listener
+import com.twitter.finagle.server.StackServer
+import com.twitter.finagle.server.StdStackServer
 import com.twitter.finagle.service._
-import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.tracing.{ClientDestTracingFilter, Tracer}
-import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.stats.ExceptionStatsHandler
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.tracing.ClientDestTracingFilter
+import com.twitter.finagle.tracing.Tracer
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.io.Buf
 import com.twitter.util._
@@ -213,7 +216,6 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       Future.value(
         new PipeliningClientPushSession[Response, Command](
           handle,
-          params[finagle.param.Stats].statsReceiver.scope(ClientDispatcher.StatsScope),
           params[StalledPipelineTimeout].timeout,
           params[finagle.param.Timer].timer
         )

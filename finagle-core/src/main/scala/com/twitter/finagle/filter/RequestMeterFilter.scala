@@ -1,8 +1,11 @@
 package com.twitter.finagle.filter
 
 import com.twitter.concurrent.AsyncMeter
-import com.twitter.finagle.{Failure, Service, SimpleFilter}
-import com.twitter.util.{Future, Throw}
+import com.twitter.finagle.Failure
+import com.twitter.finagle.Service
+import com.twitter.finagle.SimpleFilter
+import com.twitter.util.Future
+import com.twitter.util.Throw
 
 import java.util.concurrent.RejectedExecutionException
 
@@ -20,11 +23,11 @@ import java.util.concurrent.RejectedExecutionException
  * resources that are artificially bounded, like a rate-limited API.
  */
 class RequestMeterFilter[Req, Rep](meter: AsyncMeter) extends SimpleFilter[Req, Rep] {
-  def apply(request: Req, service: Service[Req, Rep]) = {
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     meter.await(1).transform {
       case Throw(noPermit) =>
         noPermit match {
-          case e: RejectedExecutionException =>
+          case _: RejectedExecutionException =>
             Future.exception(Failure.rejected(noPermit))
           case e => Future.exception(e)
         }

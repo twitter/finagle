@@ -1,7 +1,8 @@
 package com.twitter.finagle.util
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.param.{Label, ProtocolLibrary}
+import com.twitter.finagle.param.Label
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.stack.nilStack
 import com.twitter.util.registry.GlobalRegistry
 import java.util.concurrent.atomic.AtomicInteger
@@ -145,7 +146,6 @@ trait StackRegistry {
 
   private[this] def removeEntries(entry: Entry): Unit = {
     val prefix = registryPrefix(entry)
-    val name = entry.name
     entry.modules.foreach {
       case Module(paramName, _, reflected) =>
         reflected.foreach {

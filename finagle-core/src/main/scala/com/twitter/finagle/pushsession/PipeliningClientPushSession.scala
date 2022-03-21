@@ -1,7 +1,10 @@
 package com.twitter.finagle.pushsession
 
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Service, Status}
+import com.twitter.finagle.ChannelClosedException
+import com.twitter.finagle.Failure
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
 import com.twitter.logging.Logger
 import com.twitter.util._
 
@@ -21,7 +24,6 @@ import com.twitter.util._
  */
 final class PipeliningClientPushSession[In, Out](
   handle: PushChannelHandle[In, Out],
-  statsReceiver: StatsReceiver,
   stallTimeout: Duration,
   timer: Timer)
     extends PushSession[In, Out](handle) { self =>

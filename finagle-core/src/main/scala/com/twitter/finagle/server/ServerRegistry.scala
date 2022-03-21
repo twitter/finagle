@@ -1,7 +1,8 @@
 package com.twitter.finagle.server
 
 import com.twitter.finagle.ClientConnection
-import com.twitter.finagle.util.{InetSocketAddressUtil, StackRegistry}
+import com.twitter.finagle.util.InetSocketAddressUtil
+import com.twitter.finagle.util.StackRegistry
 import com.twitter.logging.Level
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
@@ -18,7 +19,7 @@ private[twitter] object ServerRegistry extends ServerRegistry {
    *
    * @note This is scoped as private[twitter] so that it is accessible by TwitterServer.
    */
-  private[twitter] class ConnectionRegistry(localAddr: SocketAddress) {
+  private[twitter] class ConnectionRegistry {
     private[this] val map = new ConcurrentHashMap[SocketAddress, ClientConnection]
 
     def register(session: ClientConnection): ClientConnection =
@@ -68,13 +69,12 @@ private[twitter] class ServerRegistry extends StackRegistry {
    */
   private[this] val registries = new ConcurrentHashMap[SocketAddress, ConnectionRegistry]()
 
+  private[this] val connRegFn: JFunction[SocketAddress, ConnectionRegistry] = { _ =>
+    new ConnectionRegistry
+  }
+
   def connectionRegistry(localAddr: SocketAddress): ConnectionRegistry =
     registries.computeIfAbsent(localAddr, connRegFn)
-
-  private[this] val connRegFn = new JFunction[SocketAddress, ConnectionRegistry] {
-    def apply(localAddr: SocketAddress): ConnectionRegistry =
-      new ConnectionRegistry(localAddr)
-  }
 
   private[twitter] def serverAddresses: Seq[SocketAddress] = registries.keySet().asScala.toSeq
 }

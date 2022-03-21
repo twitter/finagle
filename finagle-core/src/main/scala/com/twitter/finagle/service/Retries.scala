@@ -1,12 +1,11 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.finagle.param.{
-  HighResTimer,
-  Stats,
-  ResponseClassifier => ParamResponseClassifier
-}
-import com.twitter.finagle.stats.{Counter, StatsReceiver}
+import com.twitter.finagle.param.HighResTimer
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{ResponseClassifier => ParamResponseClassifier}
+import com.twitter.finagle.stats.Counter
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util._
 
 /**
@@ -150,14 +149,13 @@ object Retries {
         // here.
         val nextSvcFac = next.make(params + budget)
 
-        val filters = newRequeueFilter(
+        val filters = newRequeueFilter[Req, Rep](
           budget.retryBudget,
           budget.requeueBackoffs,
           withdrawsOnly = false,
           scoped,
           timer,
-          classifier,
-          nextSvcFac
+          classifier
         )
 
         Stack.leaf(this, svcFactory(budget.retryBudget, filters, scoped, requeues, nextSvcFac))
@@ -208,27 +206,25 @@ object Retries {
 
         val filters =
           if (retryPolicy eq RetryPolicy.Never) {
-            newRequeueFilter(
+            newRequeueFilter[Req, Rep](
               retryBudget,
               budgetP.requeueBackoffs,
               withdrawsOnly = false,
               scoped,
               timerP.timer,
-              classifier,
-              next
+              classifier
             )
           } else {
             val retryFilter =
               new RetryExceptionsFilter[Req, Rep](retryPolicy, timerP.timer, statsRecv, retryBudget)
             // note that we wrap the budget, since the retry filter wraps this
-            val requeueFilter = newRequeueFilter(
+            val requeueFilter = newRequeueFilter[Req, Rep](
               retryBudget,
               budgetP.requeueBackoffs,
               withdrawsOnly = true,
               scoped,
               timerP.timer,
-              classifier,
-              next
+              classifier
             )
             retryFilter.andThen(requeueFilter)
           }
@@ -243,8 +239,7 @@ object Retries {
     withdrawsOnly: Boolean,
     statsReceiver: StatsReceiver,
     timer: Timer,
-    classifier: ResponseClassifier,
-    next: ServiceFactory[Req, Rep]
+    classifier: ResponseClassifier
   ): RequeueFilter[Req, Rep] = {
     val budget =
       if (withdrawsOnly) new WithdrawOnlyRetryBudget(retryBudget)

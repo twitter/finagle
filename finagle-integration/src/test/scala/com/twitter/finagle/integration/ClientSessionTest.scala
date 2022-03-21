@@ -115,7 +115,6 @@ class ClientSessionTest extends AnyFunSuite with MockitoSugar {
     ): Service[memcached.Command, memcached.Response] = {
       val session = new PipeliningClientPushSession[memcached.Response, memcached.Command](
         handle,
-        NullStatsReceiver,
         Duration.Top,
         DefaultTimer
       )
