@@ -18,7 +18,7 @@ class InetResolverTest extends AnyFunSuite {
     if (host.isEmpty || host.equals("localhost")) dnsResolver(host)
     else Future.exception(new UnknownHostException())
   }
-  val resolver = new InetResolver(resolveHost, statsReceiver, None, FuturePool.unboundedPool)
+  val resolver = new InetResolver(resolveHost, statsReceiver, None)
 
   test("local address") {
     val empty = resolver.bind(":9990")
@@ -98,7 +98,7 @@ class InetResolverTest extends AnyFunSuite {
 
     val pollInterval = 100.millis
     val inetResolverWithPool =
-      new InetResolver(resolveLoopback, DefaultStatsReceiver, Some(pollInterval), resolvePool)
+      new InetResolver(resolveLoopback, DefaultStatsReceiver, Some(pollInterval))
 
     val maxWaitTimeout = 10.seconds
     val addr = inetResolverWithPool.bind("127.0.0.1:80")
@@ -111,5 +111,55 @@ class InetResolverTest extends AnyFunSuite {
 
     // Should be completed immediately
     assert(latch.await(maxWaitTimeout.inMilliseconds, TimeUnit.MILLISECONDS))
+  }
+
+  test("Infinite resolutions can be aborted without a poll interval") {
+    val resolving = Promise[Unit]()
+    val neverResolvesAddresses = Promise[Seq[InetAddress]]()
+    neverResolvesAddresses.setInterruptHandler {
+      case t: Throwable => neverResolvesAddresses.updateIfEmpty(Throw(t))
+    }
+
+    val resolveHost = { _: String =>
+      resolving.setDone()
+      neverResolvesAddresses
+    }
+
+    val resolver = new InetResolver(resolveHost, DefaultStatsReceiver, None)
+
+    val addr = resolver.bind("localhost:1234")
+    val c = addr.changes.respond { _ => () }
+
+    Await.result(resolving, 5.seconds)
+    Await.result(c.close(), 10.seconds)
+
+    intercept[InterruptedException] {
+      Await.result(neverResolvesAddresses, 5.seconds)
+    }
+  }
+
+  test("Infinite resolutions can be aborted with a poll interval") {
+    val resolving = Promise[Unit]()
+    val neverResolvesAddresses = Promise[Seq[InetAddress]]()
+    neverResolvesAddresses.setInterruptHandler {
+      case t: Throwable => neverResolvesAddresses.updateIfEmpty(Throw(t))
+    }
+
+    val resolveHost = { _: String =>
+      resolving.setDone()
+      neverResolvesAddresses
+    }
+
+    val resolver = new InetResolver(resolveHost, DefaultStatsReceiver, Some(2.seconds))
+
+    val addr = resolver.bind("localhost:1234")
+    val c = addr.changes.respond { _ => () }
+
+    Await.result(resolving, 5.seconds)
+    Await.result(c.close(), 10.seconds)
+
+    intercept[InterruptedException] {
+      Await.result(neverResolvesAddresses, 5.seconds)
+    }
   }
 }

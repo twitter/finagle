@@ -69,6 +69,27 @@ class FixedInetResolverTest extends AnyFunSuite {
     }
   }
 
+  test("Caching resolver caches by hostname only (not by host:port)") {
+    new Ctx {
+      // make the same request n-times
+      val hostnames = (1 to 5).map { i => s"1.2.3.4:$i" }
+      val iterations = 10
+      for (i <- 1 to iterations; hostname <- hostnames) {
+        val request = resolver.bind(hostname).changes.filter(_ != Addr.Pending)
+
+        Await.result(request.toFuture()) match {
+          case Addr.Bound(_, _) =>
+          case _ => fail("Resolution should have succeeded")
+        }
+      }
+
+      // there should have only been 1 lookup, but all N successes
+      assert(numLookups == 1)
+      assert(statsReceiver.counter("successes")() == iterations * 5)
+      assert(statsReceiver.gauges(Seq("cache", "size"))() == 1)
+    }
+  }
+
   test("Caching resolver respects cache size parameter") {
     new Ctx {
       val maxCacheSize = 1
@@ -179,7 +200,7 @@ class FixedInetResolverTest extends AnyFunSuite {
     }
   }
 
-  test("Caching resolver stops after N retries to prevent infinite loops") {
+  test("Caching resolver stops retrying after nobody is waiting for resolution") {
     new Ctx {
       val maxCacheSize = 1
       shouldFailTimes = 10000
@@ -194,24 +215,22 @@ class FixedInetResolverTest extends AnyFunSuite {
       def assertBoundWithBackoffs(hostname: String): Unit = {
         val request = resolver2.bind(hostname).changes.filter(_ != Addr.Pending)
 
-        // Walk through backoffs with a synthetic timer
+        // We wait for 10 backoff periods but gave up on the resolution at about the time the
+        // cache loader would do a 2nd retry. We then check how many times we retried in total.
+        // It should be 3 (2 retries + 1 origin) and not 11.
         Time.withCurrentTimeFrozen { tc =>
           val addrFuture = request.toFuture()
           var iterations = 0
 
-          while (!addrFuture.isDefined) {
+          while (iterations < 10) {
             tc.advance(backoffDuration)
             mockTimer.tick()
 
-            // should not hit 100 iterations
-            assert(iterations < 100)
             iterations += 1
-          }
 
-          // Resolution should be successful without further delay
-          Await.result(addrFuture, 0.seconds) match {
-            case Addr.Neg =>
-            case _ => fail("Resolution should have succeeded")
+            if (iterations == 2) {
+              addrFuture.raise(new Exception("I give up"))
+            }
           }
         }
         cache.cleanUp()
@@ -220,8 +239,7 @@ class FixedInetResolverTest extends AnyFunSuite {
       // Should retry under the hood
       assertBoundWithBackoffs("example.com:100")
 
-      // max is temporarily set to 5 in the inet internal cache
-      assert(numLookups == 1 + FixedInetResolver.MaxRetries)
+      assert(numLookups == 3)
       assert(statsReceiver.counter("successes")() == 0)
       assert(statsReceiver.gauges(Seq("cache", "size"))() == 1)
       assert(statsReceiver.gauges(Seq("cache", "evicts"))() == 0)

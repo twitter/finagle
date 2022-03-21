@@ -50,6 +50,9 @@ Bug Fixes
 * finagle-postgres: Fixed a bug where a single framer instance was shared across all
   connections to a host when using TLS. ``PHAB_ID=D768581``
 
+* finagle-core: Fixed a bug where `InetResolver` was leaking memory while resolving
+  non-existing address, even if no one is still asking for it. ``PHAB_ID=D771608``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

@@ -3,22 +3,24 @@ package com.twitter.finagle
 import com.github.benmanes.caffeine.cache.CacheLoader
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.LoadingCache
-import com.twitter.cache.caffeine.CaffeineCache
+import com.twitter.cache.EvictingCache
+import com.twitter.cache.caffeine.LoadingFutureCache
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.InetResolver.ResolutionInterrupted
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.util.InetSocketAddressUtil
-import com.twitter.finagle.util.Updater
 import com.twitter.logging.Logger
-import com.twitter.util.Await
 import com.twitter.util.Closable
 import com.twitter.util.Var
 import com.twitter.util._
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.UnknownHostException
+import java.util.concurrent.atomic.AtomicInteger
+import scala.util.control.NoStackTrace
 
 private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: FuturePool)
     extends (String => Future[Seq[InetAddress]]) {
@@ -58,6 +60,14 @@ private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: Fu
  * Resolver for inet scheme.
  */
 object InetResolver {
+
+  /**
+   * An exception indicating that the party that requested an address resolution gave up on waiting.
+   */
+  object ResolutionInterrupted
+      extends InterruptedException("Address resolution interrupted")
+      with NoStackTrace
+
   def apply(): Resolver = apply(DefaultStatsReceiver)
 
   def apply(resolvePool: FuturePool): Resolver = apply(DefaultStatsReceiver, resolvePool)
@@ -77,8 +87,7 @@ object InetResolver {
     new InetResolver(
       new DnsResolver(statsReceiver, resolvePool),
       statsReceiver,
-      pollIntervalOpt,
-      resolvePool
+      pollIntervalOpt
     )
   }
 }
@@ -86,8 +95,7 @@ object InetResolver {
 private[finagle] class InetResolver(
   resolveHost: String => Future[Seq[InetAddress]],
   statsReceiver: StatsReceiver,
-  pollIntervalOpt: Option[Duration],
-  resolvePool: FuturePool)
+  pollIntervalOpt: Option[Duration])
     extends Resolver {
   import InetSocketAddressUtil._
 
@@ -97,8 +105,8 @@ private[finagle] class InetResolver(
   private[this] val latencyStat = statsReceiver.stat("lookup_ms")
   private[this] val successes = statsReceiver.counter("successes")
   private[this] val failures = statsReceiver.counter("failures")
+  private[this] val cancels = statsReceiver.counter("cancels")
   private[this] val log = Logger()
-  private[this] val timer = DefaultTimer
 
   /**
    * Resolve all hostnames and merge into a final Addr.
@@ -117,26 +125,35 @@ private[finagle] class InetResolver(
           }
       })
       .flatMap { seq: Seq[Try[Seq[Address]]] =>
-        // Filter out all successes. If there was at least 1 success, consider
-        // the entire operation a success
-        val results = seq.collect {
-          case Return(subset) => subset
-        }.flatten
+        // Flatten all binds and collect both successes and the first failure.
+        // We do everything in one fell swoop (single collection traverse,
+        // single result aggregation).
+        val builder = Set.newBuilder[Address]
+        var failure = Option.empty[Throwable]
+
+        seq.foreach {
+          case Return(addrs) =>
+            builder ++= addrs
+          case Throw(t) if failure.isEmpty =>
+            failure = Some(t)
+          case _ => ()
+        }
+
+        val results = builder.result()
 
         // Consider any result a success. Ignore partial failures.
         if (results.nonEmpty) {
           successes.incr()
           latencyStat.add(elapsed().inMilliseconds)
-          Future.value(Addr.Bound(results.toSet))
+          Future.value(Addr.Bound(results))
         } else {
-          // Either no hosts or resolution failed for every host
-          failures.incr()
-          latencyStat.add(elapsed().inMilliseconds)
-          log.debug(s"Resolution failed for all hosts in $hp")
+          if (failure.contains(ResolutionInterrupted)) cancels.incr()
+          else failures.incr()
 
-          seq.collectFirst {
-            case Throw(e) => e
-          } match {
+          latencyStat.add(elapsed().inMilliseconds)
+          log.debug(s"Resolution failed (reason: $failure) for all hosts in $hp")
+
+          failure match {
             case Some(_: UnknownHostException) => Future.value(Addr.Neg)
             case Some(e) => Future.value(Addr.Failed(e))
             case None => Future.value(Addr.Bound(Set[Address]()))
@@ -147,23 +164,38 @@ private[finagle] class InetResolver(
 
   def bindHostPortsToAddr(hosts: Seq[HostPortMetadata]): Var[Addr] = {
     Var.async(Addr.Pending: Addr) { u =>
-      toAddr(hosts) onSuccess { u() = _ }
-      pollIntervalOpt match {
-        case Some(pollInterval) =>
-          val updater = new Updater[Unit] {
-            val one = Seq(())
-            // Just perform one update at a time.
-            protected def preprocess(elems: Seq[Unit]) = one
-            protected def handle(unit: Unit): Unit = {
-              // This always runs in a thread pool; it's okay to block.
-              u() = Await.result(toAddr(hosts))
+      @volatile var closed = false
+
+      val firstBind = toAddr(hosts).flatMap { addr =>
+        u() = addr
+
+        // Start polling if needed.
+        pollIntervalOpt match {
+          case Some(pollInterval) if pollInterval.isFinite =>
+            def pollLoop(): Future[Unit] = {
+              val start = Time.now
+
+              toAddr(hosts).flatMap { addr =>
+                u() = addr
+
+                if (closed) Future.Done
+                else {
+                  val elapsed = Time.now - start
+                  Future
+                    .sleep(pollInterval - elapsed)(DefaultTimer)
+                    .before(pollLoop())
+                }
+              }
             }
-          }
-          timer.schedule(pollInterval.fromNow, pollInterval) {
-            resolvePool(updater(()))
-          }
-        case None =>
-          Closable.nop
+            pollLoop()
+          case _ => Future.Done
+        }
+      }
+
+      Closable.make { _ =>
+        closed = true
+        firstBind.raise(ResolutionInterrupted)
+        Future.Done
       }
     }
   }
@@ -192,11 +224,14 @@ private[finagle] class InetResolver(
 object FixedInetResolver {
   private[this] val log = Logger()
 
-  val scheme = "fixedinet"
+  /**
+   *  How many times this particular address was requested for resolution.
+   */
+  private final class PendingResolution extends Promise[Seq[InetAddress]] {
+    val waiters: AtomicInteger = new AtomicInteger()
+  }
 
-  // Temporarily cap max retries at a reasonable value until
-  // we can rework this to be more sensible.
-  val MaxRetries = 5
+  val scheme = "fixedinet"
 
   def apply(): InetResolver =
     apply(DefaultStatsReceiver)
@@ -237,13 +272,9 @@ object FixedInetResolver {
   private[finagle] def cache(
     resolveHost: String => Future[Seq[InetAddress]],
     maxCacheSize: Long,
-    originalBackoff: Backoff = Backoff.empty,
+    backoffs: Backoff = Backoff.empty,
     timer: Timer = DefaultTimer
   ): LoadingCache[String, Future[Seq[InetAddress]]] = {
-
-    // ensure backoffs is not an infinite loop. For *now* try a maximum of 5 times to
-    // mitigate infinite loops seen in production. Redesign coming after the issue is mitigated
-    val backoffs = originalBackoff.take(MaxRetries)
 
     val cacheLoader = new CacheLoader[String, Future[Seq[InetAddress]]]() {
       def load(host: String): Future[Seq[InetAddress]] = {
@@ -263,7 +294,10 @@ object FixedInetResolver {
               }
           }
         }
-        retryingLoad(backoffs)
+
+        val result = new PendingResolution
+        result.become(retryingLoad(backoffs))
+        result
       }
     }
 
@@ -276,6 +310,40 @@ object FixedInetResolver {
     }
     builder.build(cacheLoader)
   }
+
+  /**
+   * Almost exact copy of CaffeineCache.fromLoadingCache except for it takes advantage of our own
+   * (custom to InetResolver) [[PendingResolution]] promise that embeds a counter.
+   */
+  private def fromLoadingCache[K, V](cache: LoadingCache[K, Future[V]]): K => Future[V] = {
+    val evicting = EvictingCache.lazily(new LoadingFutureCache(cache))
+    new (K => Future[V]) {
+      def apply(key: K): Future[V] = evicting.get(key).get match {
+        case resolution: PendingResolution =>
+          resolution.waiters.incrementAndGet()
+
+          // We allow the outermost Future to be interrupted but we'd only interrupt the underlying
+          // 'pending resolution' promise when no one is waiting for it to resolve (its counter is
+          // at 0)
+          val interruptible = Promise.attached(resolution)
+          interruptible.setInterruptHandler {
+            case t: Throwable =>
+              if (interruptible.detach()) {
+                interruptible.setException(t)
+              }
+
+              if (resolution.waiters.decrementAndGet() == 0) {
+                resolution.raise(t)
+              }
+          }
+          interruptible
+
+        case f =>
+          // Fall back to a default behavior if the underlying promise is a generic one.
+          f.interruptible()
+      }
+    }
+  }
 }
 
 /**
@@ -287,10 +355,9 @@ private[finagle] class FixedInetResolver(
   cache: LoadingCache[String, Future[Seq[InetAddress]]],
   statsReceiver: StatsReceiver)
     extends InetResolver(
-      CaffeineCache.fromLoadingCache(cache),
+      FixedInetResolver.fromLoadingCache(cache),
       statsReceiver,
-      None,
-      FuturePool.unboundedPool
+      None
     ) {
 
   override val scheme = FixedInetResolver.scheme

@@ -5,8 +5,13 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
-import com.twitter.finagle.{Addr, Backoff, FixedInetResolver, InetResolver, Resolver}
-import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
+import com.twitter.finagle.Addr
+import com.twitter.finagle.Backoff
+import com.twitter.finagle.FixedInetResolver
+import com.twitter.finagle.InetResolver
+import com.twitter.finagle.Resolver
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -79,7 +84,7 @@ class Zk2Resolver(
       FixedInetResolver(
         statsReceiver,
         dnsCacheSize(),
-        Backoff.exponentialJittered(1.second, 5.minutes),
+        Backoff.exponentialJittered(1.second, 5.minutes).take(5),
         DefaultTimer
       ),
       timer
