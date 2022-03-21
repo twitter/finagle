@@ -1,5 +1,7 @@
 package com.twitter.finagle.stats
 
+import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.http.Request
 import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.GaugeType
 import com.twitter.finagle.stats.MetricBuilder.HistogramType
@@ -7,10 +9,21 @@ import com.twitter.finagle.stats.MetricsView.CounterSnapshot
 import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
 import com.twitter.finagle.stats.MetricsView.HistogramSnapshot
 import com.twitter.finagle.stats.Snapshot.Percentile
+import com.twitter.util.Await
 import org.scalatest.funsuite.AnyFunSuite
 
 class PrometheusExporterTest extends AnyFunSuite {
   import PrometheusExporter._
+
+  private[this] class TestMV(
+    counterSnaps: Iterable[CounterSnapshot],
+    gaugeSnaps: Iterable[GaugeSnapshot],
+    histoSnaps: Iterable[HistogramSnapshot])
+      extends IntermediateMetricsView {
+    override def gauges: Iterable[GaugeSnapshot] = gaugeSnaps
+    override def counters: Iterable[CounterSnapshot] = counterSnaps
+    override def histograms: Iterable[HistogramSnapshot] = histoSnaps
+  }
 
   val sr = new InMemoryStatsReceiver
   val noLabelCounter =
@@ -20,6 +33,20 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests"),
         metricType = CounterType,
         units = Requests,
+        labels = Map[String, String](),
+        statsReceiver = sr,
+      ),
+      value = 1
+    )
+
+  val debugCounter =
+    CounterSnapshot(
+      hierarchicalName = "debug_requests",
+      builder = MetricBuilder(
+        name = Seq("debug_requests"),
+        metricType = CounterType,
+        units = Requests,
+        verbosity = Verbosity.Debug,
         labels = Map[String, String](),
         statsReceiver = sr,
       ),
@@ -110,7 +137,7 @@ class PrometheusExporterTest extends AnyFunSuite {
 
   test("Write a counter without any labels") {
     val writer = new StringBuilder()
-    writeMetrics(writer, counters = Seq(noLabelCounter), gauges = Seq(), histograms = Seq())
+    writeMetrics(writer, counters = Seq(noLabelCounter), gauges = Seq(), histograms = Seq(), true)
     assert(
       writer.toString() ==
         """# TYPE requests counter
@@ -149,7 +176,8 @@ class PrometheusExporterTest extends AnyFunSuite {
       writer,
       counters = Seq(posInfCounter, negInfCounter),
       gauges = Seq(),
-      histograms = Seq())
+      histograms = Seq(),
+      true)
     val expected =
       """# TYPE requests_pos counter
         |# UNIT requests_pos Requests
@@ -191,7 +219,8 @@ class PrometheusExporterTest extends AnyFunSuite {
       writer,
       counters = Seq(),
       gauges = Seq(posInfCounter, negInfCounter),
-      histograms = Seq())
+      histograms = Seq(),
+      true)
     val expected =
       """# TYPE requests_pos gauge
         |# UNIT requests_pos Requests
@@ -233,7 +262,8 @@ class PrometheusExporterTest extends AnyFunSuite {
       writer,
       counters = Seq(),
       gauges = Seq(posInfCounter, negInfCounter),
-      histograms = Seq())
+      histograms = Seq(),
+      true)
     val expected =
       """# TYPE requests_pos gauge
         |# UNIT requests_pos Requests
@@ -275,7 +305,8 @@ class PrometheusExporterTest extends AnyFunSuite {
       writer,
       counters = Seq(),
       gauges = Seq(posInfCounter, negInfCounter),
-      histograms = Seq())
+      histograms = Seq(),
+      true)
     val expected =
       """# TYPE requests_pos gauge
         |# UNIT requests_pos Requests
@@ -287,13 +318,17 @@ class PrometheusExporterTest extends AnyFunSuite {
     assert(writer.toString() == expected)
   }
 
-  test("Write all metrics") {
-    val writer = new StringBuilder()
-    writeMetrics(
-      writer,
-      counters = Seq(requestsCounter, clntExceptionsCounter),
-      gauges = Seq(poolSizeFloatGauge, poolSizeLongGauge),
-      histograms = Seq(dnsLookupMs))
+  test("end-to-end fetching stats works") {
+    val registry: IntermediateMetricsView = new TestMV(
+      Seq(requestsCounter, clntExceptionsCounter),
+      Seq(poolSizeFloatGauge, poolSizeLongGauge),
+      Seq(dnsLookupMs))
+
+    val exporter = new PrometheusExporter(registry)
+
+    val request = Request("/admin/prometheus.txt")
+    val response = Await.result(exporter.apply(request), 1.seconds)
+    assert(Some("text/plain; version=0.0.4;charset=utf-8") == response.contentType)
     val expected =
       """# TYPE requests counter
         |# UNIT requests Requests
@@ -314,6 +349,16 @@ class PrometheusExporterTest extends AnyFunSuite {
         |lookup_ms_count{resolver="inet",namer="dns"} 3
         |lookup_ms_sum{resolver="inet",namer="dns"} 6
         |""".stripMargin
-    assert(writer.toString() == expected)
+    assert(response.contentString == expected)
+  }
+
+  test("Filter out debug metrics by default") {
+    assert(denylistDebugSample(Seq(debugCounter), None).isEmpty)
+  }
+
+  test("Allow debug metrics that match a verbose pattern") {
+    def allow(input: String): Boolean = input.contains("requests")
+    assert(
+      denylistDebugSample(sample = Seq(debugCounter), verbose = Some(allow)) == Seq(debugCounter))
   }
 }

@@ -1,9 +1,37 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.Service
+import com.twitter.finagle.http.MediaType
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
 import com.twitter.finagle.stats.MetricBuilder.MetricType
 import com.twitter.finagle.stats.MetricsView.CounterSnapshot
 import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
 import com.twitter.finagle.stats.MetricsView.HistogramSnapshot
+import com.twitter.util.Future
+
+/**
+ * Temporary trait that mirrors the new MetricsView with Snapshot return types.
+ * TODO: Remove and replace with MetricsView
+ * Provides snapshots of metrics values.
+ */
+private[stats] trait IntermediateMetricsView {
+
+  /**
+   * A read-only snapshot of instantaneous values for all gauges.
+   */
+  def gauges: Iterable[GaugeSnapshot]
+
+  /**
+   * A read-only snapshot of instantaneous values for all counters.
+   */
+  def counters: Iterable[CounterSnapshot]
+
+  /**
+   * A read-only snapshot of instantaneous values for all histograms.
+   */
+  def histograms: Iterable[HistogramSnapshot]
+}
 
 /**
  * Exports metrics in a text according to Prometheus format.
@@ -238,16 +266,64 @@ private[stats] object PrometheusExporter {
    * @param writer writer
    * @param counters Iterable of CounterSnapshot
    * @param gauges Iterable of GaugeSnapshot
+   * @param histograms Iterable of HistogramSnapshot
+   * @param exportMetadata export the type, unit, and other metadata
    */
   def writeMetrics(
     writer: StringBuilder,
     counters: Iterable[CounterSnapshot],
     gauges: Iterable[GaugeSnapshot],
     histograms: Iterable[HistogramSnapshot],
-    exportMetadata: Boolean = true
+    exportMetadata: Boolean
   ): Unit = {
     counters.foreach(c => writeMetric(writer, c, exportMetadata))
     gauges.foreach(g => writeMetric(writer, g, exportMetadata))
     histograms.foreach(h => writeMetric(writer, h, exportMetadata))
+  }
+
+  /**
+   * Filter out metrics with verbosity level of DEBUG.
+   * @param sample the metrics to denylist
+   * @param verbose Allow debug metrics with a hierarchical name that matches
+   * this pattern
+   * */
+  private[stats] def denylistDebugSample[A <: MetricsView.Snapshot](
+    sample: Iterable[A],
+    verbose: Option[String => Boolean]
+  ): Iterable[A] =
+    verbose match {
+      case Some(pattern) =>
+        sample.filter { value =>
+          value.builder.verbosity != Verbosity.Debug || pattern(value.hierarchicalName)
+        }
+
+      case None =>
+        sample.filter(_.builder.verbosity != Verbosity.Debug)
+    }
+
+}
+
+/**
+ * A Finagle HTTP service that exports Metrics in Prometheus format
+ */
+private[stats] class PrometheusExporter(metrics: IntermediateMetricsView)
+    extends Service[Request, Response] {
+  self =>
+
+  import PrometheusExporter._
+
+  def apply(request: Request): Future[Response] = {
+    val response = Response()
+    // content-type version from Prometheus specs
+    response.setContentType(MediaType.PlainText + "; version=0.0.4")
+
+    val filteredCounters = denylistDebugSample[CounterSnapshot](metrics.counters, None)
+    val filteredGauges = denylistDebugSample[GaugeSnapshot](metrics.gauges, None)
+    val filteredHistos = denylistDebugSample[HistogramSnapshot](metrics.histograms, None)
+
+    val writer = new StringBuilder()
+    writeMetrics(writer, filteredCounters, filteredGauges, filteredHistos, exportMetadata = true)
+    response.contentString = writer.toString()
+    Future.value(response)
   }
 }
