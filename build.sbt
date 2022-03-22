@@ -50,8 +50,10 @@ val netty4Libs = Seq(
   "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-aarch_64",
   // this package is a dep of native-epoll above, explicitly add this for coursier plugin
   "io.netty" % "netty-transport-native-unix-common" % netty4Version,
-  "io.netty" % "netty-handler-proxy" % netty4Version
+  "io.netty" % "netty-handler-proxy" % netty4Version,
+  "com.github.luben" % "zstd-jni" % "1.5.2-1"
 )
+
 val netty4LibsTest = Seq(
   "io.netty" % "netty-handler" % netty4Version % "test",
   "io.netty" % "netty-transport" % netty4Version % "test",
@@ -400,10 +402,10 @@ lazy val finagleCore = Project(
       util("routing"),
       util("security"),
       util("stats"),
-      "com.twitter" %% "util-test" % releaseVersion % "test" excludeAll (ExclusionRule(organization =
-    "junit"),
-  ExclusionRule(organization = "org.scala-tools.testing"),
-  ExclusionRule(organization = "org.mockito")),
+      "com.twitter" %% "util-test" % releaseVersion % "test" excludeAll (ExclusionRule(
+        organization = "junit"),
+      ExclusionRule(organization = "org.scala-tools.testing"),
+      ExclusionRule(organization = "org.mockito")),
       util("tunable"),
       caffeineLib,
       hdrHistogramLib,
@@ -597,15 +599,15 @@ lazy val finagleLogging = Project(
   id = "finagle-logging",
   base = file("finagle-logging")
 ).settings(
-  sharedSettings
-).settings(
-  name := "finagle-logging",
-  libraryDependencies ++= Seq(
-    hdrHistogramLib,
-    util("core"),
-    util("slf4j-api"),
-  )
-).dependsOn(finagleCore)
+    sharedSettings
+  ).settings(
+    name := "finagle-logging",
+    libraryDependencies ++= Seq(
+      hdrHistogramLib,
+      util("core"),
+      util("slf4j-api"),
+    )
+  ).dependsOn(finagleCore)
 
 lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
@@ -884,8 +886,8 @@ lazy val finagleDoc = Project(
     DocTest / unmanagedSourceDirectories += baseDirectory.value / "src/sphinx/code",
     DocTest / //resourceDirectory <<= baseDirectory { _ / "src/test/resources" }
 
-    // Make the "test" command run both, test and doctest:test
-    test := Seq(Test / test, DocTest / test).dependOn.value
+      // Make the "test" command run both, test and doctest:test
+      test := Seq(Test / test, DocTest / test).dependOn.value
   ).dependsOn(finagleCore, finagleHttp, finagleMySQL)
 
 /* Test Configuration for running tests on doc sources */

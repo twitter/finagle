@@ -2,6 +2,7 @@ scala_library(
     sources = ["**/*.scala"],
     tags = ["bazel-compatible"],
     dependencies = [
+        "3rdparty/jvm/com/github/luben:zstd-jni",
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/org/apache/curator:curator-framework",
         "3rdparty/jvm/org/apache/curator:curator-test",
