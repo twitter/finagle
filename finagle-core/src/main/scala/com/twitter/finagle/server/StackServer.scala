@@ -149,7 +149,11 @@ object StackServer {
     // initialized context. Actually having these annotations still has value in
     // allowing us to provide a complimentary annotation to the Client WR/WS as well
     // as measure queueing within the server via ConcurrentRequestFilter.
+    //
+    // `ResourceTracingFilter` annotates low level usage such as the accumulated cpu time
+    // of traced requests. We want this to be close to the wire to also capture Finagle's work.
     stk.push(WireTracingFilter.serverModule)
+    stk.push(ResourceTracingFilter.serverModule)
 
     // forks the execution if the current scheduler supports forking
     stk.push(ForkingSchedulerFilter.server)

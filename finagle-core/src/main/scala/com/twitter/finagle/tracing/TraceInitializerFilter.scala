@@ -1,7 +1,9 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle._
-import com.twitter.util.{Future, Throw}
+import com.twitter.util.Future
+import com.twitter.util.ResourceTracker
+import com.twitter.util.Throw
 
 object TraceInitializerFilter {
   val role: Stack.Role = Stack.Role("TraceInitializerFilter")
@@ -227,6 +229,63 @@ object ClientTracingFilter {
         }
       }
     }
+}
+
+/**
+ * Annotate the low level resource utilization of traced requests such as the
+ * accumulated cpu time of executed continuations.
+ */
+object ResourceTracingFilter {
+  private val Role: Stack.Role = Stack.Role("ResourceTracingFilter")
+  private val Description: String = "Trace resource usage of requests"
+  private val CpuTimeAnnotationKey: String = "srv/finagle_cputime_ns"
+  private val ContinuationsAnnotationKey: String = "srv/finagle_continuations_executed"
+
+  private val toggle = CoreToggles("com.twitter.finagle.tracing.ResourceTracing")
+  private val toggleEnabled: Option[TraceId] => Boolean = {
+    case Some(traceId) => toggle(traceId.spanId.toLong.hashCode())
+    case None => false
+  }
+
+  private object ResourceUsageFilter extends Filter.TypeAgnostic {
+    def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
+      def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+        val trace = Trace()
+        val enabled = trace.isActivelyTracing && toggleEnabled(trace.idOption)
+
+        if (!enabled) service(request)
+        else if (!ResourceTracker.threadCpuTimeSupported) {
+          trace.recordBinary(CpuTimeAnnotationKey, "unsupported")
+          service(request)
+        } else {
+          ResourceTracker { accumulator =>
+            // We first calculate the synchronous work on `req`.
+            val serviceApplyStart = ResourceTracker.currentThreadCpuTime
+            val response = service(request)
+            val serviceApplyTime = ResourceTracker.currentThreadCpuTime - serviceApplyStart
+
+            response.ensure {
+              val cpuTime = serviceApplyTime + accumulator.totalCpuTime
+              trace.recordBinary(CpuTimeAnnotationKey, cpuTime)
+              trace.recordBinary(ContinuationsAnnotationKey, accumulator.numContinuations)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = {
+    new Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
+      val role = Role
+      val description = Description
+      def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else ResourceUsageFilter.andThen(next)
+      }
+    }
+  }
 }
 
 /**
