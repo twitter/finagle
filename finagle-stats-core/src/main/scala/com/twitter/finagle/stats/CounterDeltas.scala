@@ -1,7 +1,10 @@
 package com.twitter.finagle.stats
 
-import java.util.{Collections, Map => JMap, HashMap => JHashMap}
+import com.twitter.finagle.stats.MetricsView.CounterSnapshot
+import java.util.Collections
 import scala.collection.JavaConverters._
+
+import java.util.{HashMap => JHashMap}
 
 /**
  * A mechanism for obtaining delta-ed counters.
@@ -11,27 +14,19 @@ import scala.collection.JavaConverters._
 private[stats] class CounterDeltas {
 
   /**
-   * @param abs the last absolute value seen
+   * @param prev the last absolute value seen
    * @param delta the last delta computed
    */
-  private class Last(val abs: Long, val delta: Long)
+  private class Last(val prev: CounterSnapshot, val delta: Long)
 
-  /**
-   * Last values recorded for the counters.
-   *
-   * thread safety provided by synchronization on `this`
-   */
-  private[this] var lasts = Collections.emptyMap[String, Last]
+  // Last values recorded for the counters.
+  @volatile private[this] var lasts = Collections.emptyMap[String, Last]
 
   /**
    * Return the deltas as seen by the last call to [[update]].
    */
-  def deltas: Map[String, Number] = {
-    val prevs = synchronized(lasts)
-    prevs.asScala.map {
-      case (key, pd) =>
-        key -> Long.box(pd.delta)
-    }.toMap
+  def deltas: Iterable[MetricsView.CounterSnapshot] = {
+    lasts.values.asScala.map { l => l.prev.copy(value = l.delta) }
   }
 
   /**
@@ -40,20 +35,20 @@ private[stats] class CounterDeltas {
    *
    * @param newCounters the new absolute values for the counters.
    */
-  def update(newCounters: JMap[String, Number]): Unit = synchronized {
+  def update(newCounters: Iterable[MetricsView.CounterSnapshot]): Unit = synchronized {
     val next = new JHashMap[String, Last](newCounters.size)
-    newCounters.asScala.foreach {
-      case (k, v) =>
-        val last = lasts.get(k)
-        val current = v.longValue
-        val delta =
-          if (last == null) current
-          else {
-            current - last.abs
-          }
-        next.put(k, new Last(current, delta))
+
+    // Just grab the reference once so we don't have to suffer the volatile read every time
+    val prevs = lasts
+    newCounters.foreach { counter =>
+      val last = prevs.get(counter.hierarchicalName)
+      val current = counter.value
+      val delta =
+        if (last == null) current
+        else current - last.prev.value
+
+      next.put(counter.hierarchicalName, new Last(counter, delta))
     }
     lasts = next
   }
-
 }

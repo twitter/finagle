@@ -11,10 +11,10 @@ class CounterDeltasTest extends AnyFunSuite {
     val cd = new CounterDeltas()
 
     def counterDelta: Int =
-      cd.deltas("counter").intValue()
+      cd.deltas.find(_.hierarchicalName == "counter").get.value.toInt
 
     def assertNoDelta(): Unit =
-      assert(!cd.deltas.contains("counter"))
+      assert(!cd.deltas.exists(_.hierarchicalName == "counter"))
 
     // starting empty
     assert(cd.deltas.isEmpty)
@@ -40,5 +40,4 @@ class CounterDeltasTest extends AnyFunSuite {
     cd.update(metrics.counters)
     assert(counterDelta == 1)
   }
-
 }

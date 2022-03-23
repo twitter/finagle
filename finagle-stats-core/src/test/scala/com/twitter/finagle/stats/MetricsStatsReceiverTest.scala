@@ -1,5 +1,6 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.Helpers._
 import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.GaugeType
 import com.twitter.finagle.stats.MetricBuilder.HistogramType
@@ -13,30 +14,28 @@ object MetricsStatsReceiverTest {
     val suffix = "default"
     def addCounter(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
+      name: Seq[String]
     ): Counter
     def addGauge(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
+      name: Seq[String]
     )(
       f: => Float
     ): Gauge
     def addHisto(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
+      name: Seq[String]
     ): Stat
 
     // rootReceiver needs to be isolated to each subclass.
     val rootReceiver = new MetricsStatsReceiver(Metrics.createDetached())
 
-    def readGauge(metrics: MetricsStatsReceiver, name: String): Number =
-      metrics.registry.gauges.get(name)
+    def readGauge(metrics: MetricsStatsReceiver, name: String): Double =
+      get(name, metrics.registry.gauges).value.doubleValue
 
-    def readGaugeInRoot(name: String) = readGauge(rootReceiver, name)
-    def readCounterInRoot(name: String) = rootReceiver.registry.counters.get(name)
+    def readGaugeInRoot(name: String): Double = readGauge(rootReceiver, name)
+    def readCounterInRoot(name: String): Long =
+      get(name, rootReceiver.registry.counters).value
   }
 
   class PreSchemaCtx extends TestCtx {
@@ -44,21 +43,18 @@ object MetricsStatsReceiverTest {
 
     def addCounter(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
-    ) = statsReceiver.counter(verbosity, name: _*)
+      name: Seq[String]
+    ): Counter = statsReceiver.counter(name: _*)
     def addGauge(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
+      name: Seq[String]
     )(
       f: => Float
-    ) = statsReceiver.addGauge(verbosity, name: _*)(f)
+    ): Gauge = statsReceiver.addGauge(name: _*)(f)
     def addHisto(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
-    ) = statsReceiver.stat(verbosity, name: _*)
+      name: Seq[String]
+    ): Stat = statsReceiver.stat(name: _*)
   }
 
   class SchemaCtx extends TestCtx {
@@ -66,27 +62,21 @@ object MetricsStatsReceiverTest {
 
     def addCounter(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
+      name: Seq[String]
     ) =
-      statsReceiver.counter(
-        statsReceiver.metricBuilder(CounterType).withName(name: _*).withVerbosity(verbosity))
+      statsReceiver.counter(statsReceiver.metricBuilder(CounterType).withName(name: _*))
     def addGauge(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
+      name: Seq[String]
     )(
       f: => Float
     ) =
-      statsReceiver.addGauge(
-        statsReceiver.metricBuilder(GaugeType).withName(name: _*).withVerbosity(verbosity))(f)
+      statsReceiver.addGauge(statsReceiver.metricBuilder(GaugeType).withName(name: _*))(f)
     def addHisto(
       statsReceiver: StatsReceiver,
-      name: Seq[String],
-      verbosity: Verbosity = Verbosity.Default
+      name: Seq[String]
     ) =
-      statsReceiver.stat(
-        statsReceiver.metricBuilder(HistogramType).withName(name: _*).withVerbosity(verbosity))
+      statsReceiver.stat(statsReceiver.metricBuilder(HistogramType).withName(name: _*))
   }
 }
 
@@ -145,13 +135,14 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
 
     test("reading histograms initializes correctly" + suffix) {
       val sr = new MetricsStatsReceiver(Metrics.createDetached())
-      val stat = addHisto(sr, Seq("my_cool_stat"))
+      val name = "my_cool_stat"
+      val stat = addHisto(sr, Seq(name))
 
-      val reader = sr.registry.histoDetails.get("my_cool_stat")
+      val reader = sr.registry.histoDetails.get(name)
       assert(reader != null && reader.counts == Nil)
 
       // also ensure the buckets were populated with default values.
-      assert(sr.registry.histograms.get("my_cool_stat").percentiles.length == 6)
+      assert(get(name, sr.registry.histograms).value.percentiles.length == 6)
     }
 
     test("store and read counter into the root StatsReceiver" + suffix) {
@@ -166,49 +157,6 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
       assert(readGauge(detachedReceiver, "xxx") != readGauge(rootReceiver, "xxx"))
     }
 
-    test("keep track of debug metrics" + suffix) {
-      val metrics = Metrics.createDetached()
-      val sr = new MetricsStatsReceiver(metrics)
-
-      addCounter(sr, Seq("foo"), Verbosity.Debug)
-      addHisto(sr, Seq("bar"), Verbosity.Debug)
-      addGauge(sr, Seq("baz"), Verbosity.Debug)(0f)
-
-      assert(metrics.verbosity.get("foo") == Verbosity.Debug)
-      assert(metrics.verbosity.get("bar") == Verbosity.Debug)
-      assert(metrics.verbosity.get("baz") == Verbosity.Debug)
-    }
-
-    test("does not keep track of default metrics" + suffix) {
-      val metrics = Metrics.createDetached()
-      val sr = new MetricsStatsReceiver(metrics)
-
-      addCounter(sr, Seq("foo"), Verbosity.Default)
-      addHisto(sr, Seq("bar"), Verbosity.Default)
-      addGauge(sr, Seq("baz"), Verbosity.Default)(0f)
-
-      assert(!metrics.verbosity.containsKey("foo"))
-      assert(!metrics.verbosity.containsKey("bar"))
-      assert(!metrics.verbosity.containsKey("baz"))
-    }
-
-    test("only assign verbosity at creation" + suffix) {
-      val metrics = Metrics.createDetached()
-      val sr = new MetricsStatsReceiver(metrics)
-
-      addCounter(sr, Seq("foo"), Verbosity.Default)
-      addHisto(sr, Seq("bar"), Verbosity.Default)
-      addGauge(sr, Seq("baz"), Verbosity.Default)(0f)
-
-      addCounter(sr, Seq("foo"), Verbosity.Debug)
-      addHisto(sr, Seq("bar"), Verbosity.Debug)
-      addGauge(sr, Seq("baz"), Verbosity.Debug)(0f)
-
-      assert(!metrics.verbosity.containsKey("foo"))
-      assert(!metrics.verbosity.containsKey("bar"))
-      assert(!metrics.verbosity.containsKey("baz"))
-    }
-
     test("StatsReceivers share underlying metrics maps by default" + suffix) {
       val metrics1 = new Metrics()
       val metrics2 = new Metrics()
@@ -217,16 +165,16 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
       val sr2 = new MetricsStatsReceiver(metrics2)
 
       addCounter(sr1, Seq("foo"))
-      assert(metrics1.counters.containsKey("foo"))
-      assert(metrics2.counters.containsKey("foo"))
+      assert(find("foo", metrics1.counters).isDefined)
+      assert(find("foo", metrics2.counters).isDefined)
 
       addGauge(sr1, Seq("bar"))(1f)
-      assert(metrics1.gauges.containsKey("bar"))
-      assert(metrics2.gauges.containsKey("bar"))
+      assert(find("bar", metrics1.gauges).isDefined)
+      assert(find("bar", metrics2.gauges).isDefined)
 
       addHisto(sr1, Seq("baz"))
-      assert(metrics1.histograms.containsKey("baz"))
-      assert(metrics2.histograms.containsKey("baz"))
+      assert(find("baz", metrics1.histograms).isDefined)
+      assert(find("baz", metrics2.histograms).isDefined)
     }
 
     test("StatsReceivers share underlying schema maps by default" + suffix) {

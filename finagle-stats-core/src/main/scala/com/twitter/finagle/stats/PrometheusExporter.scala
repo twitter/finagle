@@ -11,29 +11,6 @@ import com.twitter.finagle.stats.MetricsView.HistogramSnapshot
 import com.twitter.util.Future
 
 /**
- * Temporary trait that mirrors the new MetricsView with Snapshot return types.
- * TODO: Remove and replace with MetricsView
- * Provides snapshots of metrics values.
- */
-private[stats] trait IntermediateMetricsView {
-
-  /**
-   * A read-only snapshot of instantaneous values for all gauges.
-   */
-  def gauges: Iterable[GaugeSnapshot]
-
-  /**
-   * A read-only snapshot of instantaneous values for all counters.
-   */
-  def counters: Iterable[CounterSnapshot]
-
-  /**
-   * A read-only snapshot of instantaneous values for all histograms.
-   */
-  def histograms: Iterable[HistogramSnapshot]
-}
-
-/**
  * Exports metrics in a text according to Prometheus format.
  */
 private[stats] object PrometheusExporter {
@@ -306,8 +283,7 @@ private[stats] object PrometheusExporter {
 /**
  * A Finagle HTTP service that exports Metrics in Prometheus format
  */
-private[stats] class PrometheusExporter(metrics: IntermediateMetricsView)
-    extends Service[Request, Response] {
+private[stats] class PrometheusExporter(metrics: MetricsView) extends Service[Request, Response] {
   self =>
 
   import PrometheusExporter._

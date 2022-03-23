@@ -1,8 +1,9 @@
 package com.twitter.finagle.stats
 
 import com.twitter.finagle.stats
-import java.util.{Map => JMap}
-import scala.collection.JavaConverters._
+import com.twitter.finagle.stats.MetricsView.CounterSnapshot
+import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
+import com.twitter.finagle.stats.MetricsView.HistogramSnapshot
 
 /**
  * Provides snapshots of metrics values.
@@ -12,24 +13,17 @@ private[stats] trait MetricsView {
   /**
    * A read-only snapshot of instantaneous values for all gauges.
    */
-  def gauges: JMap[String, Number]
+  def gauges: Iterable[GaugeSnapshot]
 
   /**
    * A read-only snapshot of instantaneous values for all counters.
    */
-  def counters: JMap[String, Number]
+  def counters: Iterable[CounterSnapshot]
 
   /**
    * A read-only snapshot of instantaneous values for all histograms.
    */
-  def histograms: JMap[String, Snapshot]
-
-  /**
-   * A read-only snapshot of verbosity levels attached to each metric.
-   * For the sake of efficiency, metrics with verbosity [[Verbosity.Default]]
-   * aren't included into a returned map.
-   */
-  def verbosity: JMap[String, Verbosity]
+  def histograms: Iterable[HistogramSnapshot]
 }
 
 private[stats] object MetricsView {
@@ -44,7 +38,7 @@ private[stats] object MetricsView {
      *       form the hierarchical name once on metric creation and use it
      *       on every emission. It also currently serves as the way to determine
      *       if a metric is unique.
-     * */
+     */
     val hierarchicalName: String
 
     /** The `MetricBuilder` that created this metric. */
@@ -72,13 +66,20 @@ private[stats] object MetricsView {
     value: stats.Snapshot)
       extends Snapshot
 
-  private def merge[T](map1: JMap[String, T], map2: JMap[String, T]): JMap[String, T] = {
-    val merged = new java.util.HashMap[String, T](map1)
-    map2.asScala.foreach {
-      case (k, v) =>
-        merged.putIfAbsent(k, v)
+  private def merge[K <: Snapshot](i1: Iterable[K], i2: Iterable[K]): Iterable[K] = {
+    val merged = new java.util.HashSet[Object]()
+    val result = scala.collection.mutable.ArrayBuffer.newBuilder[K]
+
+    val accumulate: K => Unit = { k =>
+      if (merged.add(k.hierarchicalName)) {
+        result += k
+      }
     }
-    java.util.Collections.unmodifiableMap(merged)
+
+    i1.foreach(accumulate)
+    i2.foreach(accumulate)
+
+    result.result()
   }
 
   /**
@@ -87,17 +88,13 @@ private[stats] object MetricsView {
    * is used.
    */
   def of(view1: MetricsView, view2: MetricsView): MetricsView = new MetricsView {
-    def gauges: JMap[String, Number] =
+    def gauges: Iterable[GaugeSnapshot] =
       merge(view1.gauges, view2.gauges)
 
-    def counters: JMap[String, Number] =
+    def counters: Iterable[CounterSnapshot] =
       merge(view1.counters, view2.counters)
 
-    def histograms: JMap[String, stats.Snapshot] =
+    def histograms: Iterable[HistogramSnapshot] =
       merge(view1.histograms, view2.histograms)
-
-    def verbosity: JMap[String, Verbosity] =
-      merge(view1.verbosity, view2.verbosity)
   }
-
 }

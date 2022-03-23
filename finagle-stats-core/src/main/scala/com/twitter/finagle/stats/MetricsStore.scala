@@ -6,15 +6,14 @@ private[stats] object MetricsStore {
    * The internal representation of any metric in a MetricsStore.
    */
   trait StoreMetric {
-    def name: String
+    def key: String
+    def builder: MetricBuilder
   }
 
   /**
    * The internal representation of counters in a MetricsStore.
    */
   trait StoreCounter extends StoreMetric {
-    def name: String
-
     def count: Long
 
     def counter: Counter
@@ -24,8 +23,6 @@ private[stats] object MetricsStore {
    * The internal representation of gauges in a MetricsStore.
    */
   trait StoreGauge extends StoreMetric {
-    def name: String
-
     def read: Number
   }
 
@@ -33,8 +30,6 @@ private[stats] object MetricsStore {
    * The internal representation of histograms in a MetricsStore.
    */
   trait StoreStat extends StoreMetric {
-    def name: String
-
     def stat: Stat
 
     def snapshot: Snapshot

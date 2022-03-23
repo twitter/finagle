@@ -1,15 +1,14 @@
 package com.twitter.finagle.stats
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 private object MetricsRegistry {
   case class StatEntryImpl(delta: Double, value: Double, metricType: String) extends StatEntry
 
-  def instantaneous(value: Double, metricType: String): StatEntry =
-    StatEntryImpl(value, value, metricType)
+  private def instantaneous(value: Double, metricType: String): StatEntry =
+    StatEntryImpl(value.doubleValue, value.doubleValue, metricType)
 
-  def cumulative(delta: Double, value: Double, metricType: String): StatEntry =
+  private def cumulative(delta: Double, value: Double, metricType: String): StatEntry =
     StatEntryImpl(delta, value, metricType)
 }
 
@@ -20,7 +19,7 @@ private[twitter] trait MetricsRegistry extends StatsRegistry {
    * A reference to the underlying Metrics representation.
    * Note, this may be null.
    */
-  val registry: Metrics
+  val registry: MetricsView
 
   val latched: Boolean = useCounterDeltas()
 
@@ -33,9 +32,9 @@ private[twitter] trait MetricsRegistry extends StatsRegistry {
 
   private[this] def updateMetrics(): Unit =
     if (registry != null) {
-      for (entry <- registry.counters.entrySet.asScala) {
-        val key = entry.getKey()
-        val newValue = entry.getValue().doubleValue
+      for (counter <- registry.counters) {
+        val key = counter.hierarchicalName
+        val newValue = counter.value
         val newMetric = metrics.get(key) match {
           case Some(prev) => cumulative(newValue - prev.value, newValue, "counter")
           case None => cumulative(newValue, newValue, "counter")
@@ -43,9 +42,9 @@ private[twitter] trait MetricsRegistry extends StatsRegistry {
         metrics.put(key, newMetric)
       }
 
-      for (entry <- registry.gauges.entrySet.asScala) {
-        val key = entry.getKey()
-        val newValue = entry.getValue().doubleValue
+      for (gauge <- registry.gauges) {
+        val key = gauge.hierarchicalName
+        val newValue = gauge.value.doubleValue
         metrics.put(key, instantaneous(newValue, "gauge"))
       }
     }

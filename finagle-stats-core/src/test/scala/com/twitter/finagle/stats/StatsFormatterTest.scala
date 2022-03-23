@@ -1,6 +1,5 @@
 package com.twitter.finagle.stats
 
-import scala.collection.JavaConverters._
 import org.scalatest.funsuite.AnyFunSuite
 
 class StatsFormatterTest extends AnyFunSuite {
@@ -14,7 +13,7 @@ class StatsFormatterTest extends AnyFunSuite {
   private val histo1 = sr.stat("histo1")
   (0 to 100).foreach(histo1.add(_))
 
-  private val values = SampledValues(Map.empty, Map.empty, metrics.histograms.asScala)
+  private val values = SampledValues(Seq.empty, Seq.empty, metrics.histograms)
 
   test("Ostrich") {
     val formatter = StatsFormatter.Ostrich
@@ -66,7 +65,7 @@ class StatsFormatterTest extends AnyFunSuite {
     val metrics = newMetrics()
     val stats = new MetricsStatsReceiver(metrics)
     stats.stat("empty_histo")
-    val values = SampledValues(Map.empty, Map.empty, metrics.histograms.asScala)
+    val values = SampledValues(Seq.empty, Seq.empty, metrics.histograms)
 
     val formatter = StatsFormatter.Ostrich
     includeEmptyHistograms.let(false) {

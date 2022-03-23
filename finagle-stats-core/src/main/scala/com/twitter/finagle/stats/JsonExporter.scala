@@ -6,19 +6,22 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{MediaType, ParamMap, Request, Response}
+import com.twitter.finagle.http.MediaType
+import com.twitter.finagle.http.ParamMap
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.tunable.Tunable
-import java.util.{Map => JMap}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.io.IOException
 import scala.collection.immutable
-import scala.io.{Codec, Source}
-import scala.jdk.CollectionConverters._
+import scala.io.Codec
+import scala.io.Source
 import scala.util.control.NonFatal
 import scala.util.matching.Regex
 
@@ -60,18 +63,18 @@ object JsonExporter {
     }
   }
 
-  private def denylistDebugSample[A](
-    sample: collection.Map[String, A],
-    verbose: Option[String => Boolean],
-    verbosityMap: JMap[String, Verbosity]
-  ): collection.Map[String, A] =
+  private def denylistDebugSample[A <: MetricsView.Snapshot](
+    sample: Iterable[A],
+    verbose: Option[String => Boolean]
+  ): Iterable[A] =
     verbose match {
       case Some(pattern) =>
-        sample
-          .filterKeys(name => verbosityMap.get(name) != Verbosity.Debug || pattern(name)).toMap
+        sample.filter { value =>
+          value.builder.verbosity != Verbosity.Debug || pattern(value.hierarchicalName)
+        }
 
       case None =>
-        sample.filterKeys(name => verbosityMap.get(name) != Verbosity.Debug).toMap
+        sample.filter(_.builder.verbosity != Verbosity.Debug)
     }
 }
 
@@ -186,21 +189,21 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   }
 
   def json(pretty: Boolean, filtered: Boolean, counterDeltasOn: Boolean = false): String = {
-    val gauges =
-      try metrics.gauges.asScala
+    val gauges: Iterable[GaugeSnapshot] =
+      try metrics.gauges
       catch {
         case NonFatal(e) =>
           // because gauges run arbitrary user code, we want to protect ourselves here.
           // while the underlying registry should protect against individual misbehaving
           // gauges, an extra level of belt-and-suspenders seemed worthwhile.
           log.error(e, "exception while collecting gauges")
-          Map.empty[String, Number]
+          Nil
       }
-    val histos = metrics.histograms.asScala
+    val histos = metrics.histograms
     val counters = if (counterDeltasOn && useCounterDeltas()) {
       getOrRegisterLatchedStats().deltas
     } else {
-      metrics.counters.asScala
+      metrics.counters
     }
 
     // Converting a *-wildcard expression into a regular expression so we can match on it.
@@ -208,11 +211,10 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
 
     // We have to denylist debug metrics before we apply formatting, which may change
     // the names.
-    val verbosityMap = metrics.verbosity
     val values = SampledValues(
-      denylistDebugSample(gauges, verbosePatten, verbosityMap),
-      denylistDebugSample(counters, verbosePatten, verbosityMap),
-      denylistDebugSample(histos, verbosePatten, verbosityMap)
+      denylistDebugSample(gauges, verbosePatten),
+      denylistDebugSample(counters, verbosePatten),
+      denylistDebugSample(histos, verbosePatten)
     )
 
     val formatted = StatsFormatter.default(values)

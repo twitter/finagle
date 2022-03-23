@@ -19,7 +19,7 @@ class PrometheusExporterTest extends AnyFunSuite {
     counterSnaps: Iterable[CounterSnapshot],
     gaugeSnaps: Iterable[GaugeSnapshot],
     histoSnaps: Iterable[HistogramSnapshot])
-      extends IntermediateMetricsView {
+      extends MetricsView {
     override def gauges: Iterable[GaugeSnapshot] = gaugeSnaps
     override def counters: Iterable[CounterSnapshot] = counterSnaps
     override def histograms: Iterable[HistogramSnapshot] = histoSnaps
@@ -319,7 +319,7 @@ class PrometheusExporterTest extends AnyFunSuite {
   }
 
   test("end-to-end fetching stats works") {
-    val registry: IntermediateMetricsView = new TestMV(
+    val registry: MetricsView = new TestMV(
       Seq(requestsCounter, clntExceptionsCounter),
       Seq(poolSizeFloatGauge, poolSizeLongGauge),
       Seq(dnsLookupMs))

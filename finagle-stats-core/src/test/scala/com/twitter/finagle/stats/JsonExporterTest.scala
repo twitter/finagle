@@ -1,13 +1,22 @@
 package com.twitter.finagle.stats
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.http.{MediaType, Request, RequestParamMap}
-import com.twitter.finagle.stats.MetricBuilder.{CounterType, GaugeType}
+import com.twitter.finagle.http.MediaType
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.RequestParamMap
+import com.twitter.finagle.stats.MetricBuilder.CounterType
+import com.twitter.finagle.stats.MetricBuilder.GaugeType
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.tunable.Tunable
-import com.twitter.util.{Await, MockTimer, Time}
-import java.io.{BufferedWriter, File, FileOutputStream, OutputStreamWriter}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import com.twitter.util.Await
+import com.twitter.util.MockTimer
+import com.twitter.util.Time
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funsuite.AnyFunSuite
 
 class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatience {
@@ -19,7 +28,6 @@ class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatie
 
   test("readBooleanParam") {
     val exporter = new JsonExporter(Metrics.createDetached())
-    val r = Request()
 
     def assertParam(r: Request, expected: Boolean, default: Boolean): Unit =
       withClue(s"params=${r.params}") {

@@ -1,27 +1,23 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.Helpers.get
 import org.scalatest.funsuite.AnyFunSuite
 
 class MetricsHostStatsReceiverTest extends AnyFunSuite {
 
-  private[this] def notNull(n: Number): Number = {
-    if (n == null) throw null
-    else n
-  }
-
   val hostStatsReceiver = new MetricsHostStatsReceiver()
 
-  def readHostStatsReceiverGauge(name: String): Number =
-    notNull(hostStatsReceiver.registry.gauges.get(name))
+  def readHostStatsReceiverGauge(name: String): Double =
+    get(name, hostStatsReceiver.registry.gauges).value.doubleValue
 
-  def readHostStatsReceiverCounter(name: String): Number =
-    notNull(hostStatsReceiver.registry.counters.get(name))
+  def readHostStatsReceiverCounter(name: String): Long =
+    get(name, hostStatsReceiver.registry.counters).value
 
-  def readUnderlyingStatsReceiverGauge(name: String): Number =
-    notNull(hostStatsReceiver.self.registry.gauges.get(name))
+  def readUnderlyingStatsReceiverGauge(name: String): Double =
+    get(name, hostStatsReceiver.self.registry.gauges).value.doubleValue
 
-  def readUnderlyingStatsReceiverCounter(name: String): Number =
-    notNull(hostStatsReceiver.self.registry.counters.get(name))
+  def readUnderlyingStatsReceiverCounter(name: String): Long =
+    get(name, hostStatsReceiver.self.registry.counters).value
 
   test("MetricsHostStatsReceiver is a proxy of underlying MetricsStatsReceiver") {
     hostStatsReceiver.addGauge("my_cumulative_gauge")(1)

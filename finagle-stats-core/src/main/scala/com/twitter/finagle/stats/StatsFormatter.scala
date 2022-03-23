@@ -37,25 +37,28 @@ private[twitter] sealed trait StatsFormatter {
 
   def apply(values: SampledValues): Map[String, Number] = {
     val results = new mutable.HashMap[String, Number]()
-    results ++= values.gauges
-    results ++= values.counters
+    results ++= values.gauges.iterator.map { gauge => gauge.hierarchicalName -> gauge.value }
+    results ++= values.counters.iterator.map { counter =>
+      counter.hierarchicalName -> Long.box(counter.value)
+    }
 
     val includeEmpty = includeEmptyHistograms()
-    values.histograms.foreach {
-      case (name, snapshot) =>
-        val count = snapshot.count
-        results += histoName(name, labelCount) -> count
-        if (count > 0 || includeEmpty) {
-          results += histoName(name, labelSum) -> snapshot.sum
-          results += histoName(name, labelAverage) -> snapshot.average
-          results += histoName(name, labelMin) -> snapshot.min
-          results += histoName(name, labelMax) -> snapshot.max
+    values.histograms.foreach { histogram =>
+      val snapshot = histogram.value
+      val name = histogram.hierarchicalName
+      val count = snapshot.count
+      results += histoName(name, labelCount) -> count
+      if (count > 0 || includeEmpty) {
+        results += histoName(name, labelSum) -> snapshot.sum
+        results += histoName(name, labelAverage) -> snapshot.average
+        results += histoName(name, labelMin) -> snapshot.min
+        results += histoName(name, labelMax) -> snapshot.max
 
-          for (p <- snapshot.percentiles) {
-            val percentileName = histoName(name, labelPercentile(p.quantile))
-            results += percentileName -> p.value
-          }
+        for (p <- snapshot.percentiles) {
+          val percentileName = histoName(name, labelPercentile(p.quantile))
+          results += percentileName -> p.value
         }
+      }
     }
     results
   }
