@@ -726,7 +726,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * The configured policy has jittered backoffs between retries.
    *
-   * To migrate to the Stack-based APIs, use `MethodBuilder`.
+   * To migrate to the Stack-based APIs, use `MethodBuilder`. For HTTP and
+   * ThriftMux, use `MethodBuilder#withMaxRetries`. For all other protocols,
+   * use `MethodBuilder.from(dest, stackClient)` to construct a MethodBuilder
+   * manually. Then use `MethodBuilder#withRetry.maxRetries` to configure the
+   * max number of retries.
+   *
    * For example:
    * {{{
    * import com.twitter.finagle.Http
@@ -740,6 +745,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *     case ReqRep(_, Return(rep)) if rep.statusCode >= 400 && rep.statusCode <= 599 =>
    *       ResponseClass.RetryableFailure
    *   }
+   *   // retry up to 2 times, not including initial attempt
+   *   .withMaxRetries(2)
    * }}}
    *
    * @param value the maximum number of attempts (including retries) that
