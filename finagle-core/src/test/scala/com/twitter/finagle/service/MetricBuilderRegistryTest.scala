@@ -3,18 +3,18 @@ package com.twitter.finagle.service
 import com.twitter.finagle.Service
 import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.acRejectName
 import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.deadlineRejectName
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.failuresName
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.latencyName
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.successRateName
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.throughputName
 import com.twitter.finagle.service.MetricBuilderRegistry._
-import com.twitter.finagle.stats.MetricBuilder.CounterType
-import com.twitter.finagle.stats.MetricBuilder.HistogramType
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.Metadata
 import com.twitter.finagle.stats.MetricBuilder
-import com.twitter.util.testing.ExpressionTestMixin
+import com.twitter.finagle.stats.MetricBuilder.CounterType
+import com.twitter.finagle.stats.MetricBuilder.HistogramType
+import com.twitter.finagle.stats.exp.ExpressionNames.failuresName
+import com.twitter.finagle.stats.exp.ExpressionNames.latencyName
+import com.twitter.finagle.stats.exp.ExpressionNames.successRateName
+import com.twitter.finagle.stats.exp.ExpressionNames.throughputName
 import com.twitter.util.Future
+import com.twitter.util.testing.ExpressionTestMixin
 import org.scalatest.funsuite.AnyFunSuite
 
 class MetricBuilderRegistryTest extends AnyFunSuite with ExpressionTestMixin {

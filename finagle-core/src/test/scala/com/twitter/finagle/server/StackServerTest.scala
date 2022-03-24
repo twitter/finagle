@@ -10,29 +10,24 @@ import com.twitter.finagle.filter.RequestSemaphoreFilter
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.utils.StringServer
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.deadlineRejectName
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.latencyName
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.successRateName
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.throughputName
 import com.twitter.finagle.service.ExpiringService
+import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.deadlineRejectName
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.ssl.session.NullSslSessionInfo
 import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.exp.ExpressionNames.latencyName
+import com.twitter.finagle.stats.exp.ExpressionNames.successRateName
+import com.twitter.finagle.stats.exp.ExpressionNames.throughputName
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.util.StackRegistry
-import com.twitter.util.Await
-import com.twitter.util.Duration
-import com.twitter.util.Future
-import com.twitter.util.MockTimer
-import com.twitter.util.Promise
-import com.twitter.util.Time
+import com.twitter.util._
+import org.scalatest.concurrent.Eventually
+import org.scalatest.funsuite.AnyFunSuite
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress
-import org.scalatest.concurrent.Eventually
-import org.scalatest.funsuite.AnyFunSuite
 
 class StackServerTest extends AnyFunSuite with Eventually {
 

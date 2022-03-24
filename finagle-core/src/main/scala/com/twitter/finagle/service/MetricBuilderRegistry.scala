@@ -1,27 +1,20 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.PercentOps._
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames._
 import com.twitter.finagle.service.MetricBuilderRegistry._
 import com.twitter.finagle.stats._
+import com.twitter.finagle.stats.exp.DefaultExpression
 import com.twitter.finagle.stats.exp.Expression
 import com.twitter.finagle.stats.exp.ExpressionSchema
-import com.twitter.finagle.stats.exp.GreaterThan
-import com.twitter.finagle.stats.exp.MonotoneThresholds
+
 import java.util.concurrent.atomic.AtomicReference
 
 private[twitter] object MetricBuilderRegistry {
 
   object ExpressionNames {
-    val successRateName = "success_rate"
-    val throughputName = "throughput"
-    val latencyName = "latency"
     val deadlineRejectName = "deadline_rejection_rate"
     val acRejectName = "throttling_ac_rejection_rate"
-    val failuresName = "failures"
   }
-
-  private val descriptionSuffix = "constructed by MetricBuilderRegistry"
 
   sealed trait MetricName
   case object SuccessCounter extends MetricName
@@ -73,14 +66,7 @@ private[twitter] class MetricBuilderRegistry {
     val failureMb = failureCounter.get().toMetricBuilder
     (successMb, failureMb) match {
       case (Some(success), Some(failure)) =>
-        ExpressionSchema(
-          successRateName,
-          Expression(100).multiply(
-            Expression(success).divide(Expression(success).plus(Expression(failure)))))
-          .withBounds(MonotoneThresholds(GreaterThan, 99.5, 99.97))
-          .withUnit(Percentage)
-          .withDescription(s"The success rate expression $descriptionSuffix.")
-          .build()
+        DefaultExpression.successRate(Expression(success), Expression(failure)).build()
       case _ => // no-op if any wanted metric is not found or results in NoMetadata
     }
   }
@@ -88,10 +74,7 @@ private[twitter] class MetricBuilderRegistry {
   lazy val throughput: Unit = {
     requestCounter.get().toMetricBuilder match {
       case Some(request) =>
-        ExpressionSchema(throughputName, Expression(request))
-          .withUnit(Requests)
-          .withDescription(s"The total requests expression $descriptionSuffix.")
-          .build()
+        DefaultExpression.throughput(Expression(request)).build()
       case _ => // no-op
     }
   }
@@ -99,10 +82,7 @@ private[twitter] class MetricBuilderRegistry {
   lazy val latencyP99: Unit = {
     latencyP99Histogram.get().toMetricBuilder match {
       case Some(latencyP99) =>
-        ExpressionSchema(latencyName, Expression(latencyP99, Right(99.percent)))
-          .withUnit(Milliseconds)
-          .withDescription(s"The p99 latency of a request $descriptionSuffix.")
-          .build()
+        DefaultExpression.latency99(Expression(latencyP99, Right(99.percent))).build()
       case _ => // no-op
     }
   }
@@ -112,11 +92,7 @@ private[twitter] class MetricBuilderRegistry {
     val rejectionMb = deadlineRejectedCounter.get().toMetricBuilder
     (requestMb, rejectionMb) match {
       case (Some(request), Some(reject)) =>
-        ExpressionSchema(
-          deadlineRejectName,
-          Expression(100).multiply(Expression(reject).divide(Expression(request))))
-          .withUnit(Percentage)
-          .withDescription(s"Deadline Filter rejection rate $descriptionSuffix.")
+        rejection(ExpressionNames.deadlineRejectName, Expression(request), Expression(reject))
           .build()
       case _ => // no-op
     }
@@ -127,12 +103,7 @@ private[twitter] class MetricBuilderRegistry {
     val rejectionMb = aCRejectedCounter.get().toMetricBuilder
     (requestMb, rejectionMb) match {
       case (Some(request), Some(reject)) =>
-        ExpressionSchema(
-          acRejectName,
-          Expression(100).multiply(Expression(reject).divide(Expression(request))))
-          .withUnit(Percentage)
-          .withDescription(s"Admission Control rejection rate $descriptionSuffix.")
-          .build()
+        rejection(ExpressionNames.acRejectName, Expression(request), Expression(reject)).build()
       case _ => // no-op
     }
   }
@@ -140,12 +111,17 @@ private[twitter] class MetricBuilderRegistry {
   lazy val failures: Unit = {
     failureCounter.get().toMetricBuilder match {
       case Some(failures) =>
-        ExpressionSchema(failuresName, Expression(failures, true))
-          .withUnit(Requests)
-          .withDescription(s"All failures $descriptionSuffix")
-          .build()
+        DefaultExpression.failures(Expression(failures, true)).build()
       case None => //no-op
     }
   }
 
+  private[this] def rejection(
+    name: String,
+    request: Expression,
+    reject: Expression
+  ): ExpressionSchema =
+    ExpressionSchema(name, Expression(100).multiply(reject.divide(request)))
+      .withUnit(Percentage)
+      .withDescription(s"Default $name rejection rate.")
 }
