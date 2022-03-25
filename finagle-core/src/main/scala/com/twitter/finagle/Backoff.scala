@@ -159,9 +159,10 @@ object Backoff {
   }
 
   /**
-   * Create backoffs that grow exponentially by 2, capped at `maximum`,
-   * with each backoff having jitter, or randomness, between 0 and the
-   * exponential backoff value.
+   * The formula to calculate the next backoff is:
+   *{{{
+   *   backoff = random_between(0, min({@code maximum}, {@code start} * 2 ** attempt))
+   *}}}
    *
    * @param start must be greater than 0 and less than or equal to `maximum`.
    * @param maximum must be greater than 0 and greater than or equal to
