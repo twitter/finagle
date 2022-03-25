@@ -7,6 +7,7 @@ import com.twitter.finagle.stats.MetricBuilder.HistogramType
 import com.twitter.finagle.stats.exp.Expression
 import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
+import com.twitter.finagle.stats.exp.HistogramComponent
 import org.scalatest.funsuite.AnyFunSuite
 
 object MetricsStatsReceiverTest {
@@ -229,7 +230,7 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
 
     val expression = ExpressionSchema(
       "test_expression",
-      Expression(aCounter.metadata).plus(Expression(bHisto.metadata, Left(Expression.Min))
+      Expression(aCounter.metadata).plus(Expression(bHisto.metadata, HistogramComponent.Min)
         .plus(Expression(cGauge.metadata)))
     ).build()
 
@@ -248,7 +249,7 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     val expected_expression = ExpressionSchema(
       "test_expression",
       Expression(aaSchema).plus(
-        Expression(bbSchema, Left(Expression.Min)).plus(Expression(ccSchema))))
+        Expression(bbSchema, HistogramComponent.Min).plus(Expression(ccSchema))))
 
     assert(
       metrics.expressions

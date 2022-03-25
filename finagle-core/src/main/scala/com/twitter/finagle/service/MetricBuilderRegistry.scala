@@ -6,7 +6,7 @@ import com.twitter.finagle.stats._
 import com.twitter.finagle.stats.exp.DefaultExpression
 import com.twitter.finagle.stats.exp.Expression
 import com.twitter.finagle.stats.exp.ExpressionSchema
-
+import com.twitter.finagle.stats.exp.HistogramComponent
 import java.util.concurrent.atomic.AtomicReference
 
 private[twitter] object MetricBuilderRegistry {
@@ -82,7 +82,8 @@ private[twitter] class MetricBuilderRegistry {
   lazy val latencyP99: Unit = {
     latencyP99Histogram.get().toMetricBuilder match {
       case Some(latencyP99) =>
-        DefaultExpression.latency99(Expression(latencyP99, Right(99.percent))).build()
+        DefaultExpression
+          .latency99(Expression(latencyP99, HistogramComponent.Percentile(99.percent))).build()
       case _ => // no-op
     }
   }
