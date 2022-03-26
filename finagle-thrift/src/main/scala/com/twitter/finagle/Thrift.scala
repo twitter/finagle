@@ -1,6 +1,9 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
+import com.twitter.finagle.client.ClientRegistry
+import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.client.StdStackClient
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.ClientDispatcher
 import com.twitter.finagle.naming.BindingFactory
@@ -11,24 +14,34 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
-import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
-import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
-import com.twitter.finagle.stats.{ExceptionStatsHandler, StandardStatsReceiver, StatsReceiver}
+import com.twitter.finagle.server.Listener
+import com.twitter.finagle.server.StackServer
+import com.twitter.finagle.server.StdStackServer
+import com.twitter.finagle.service.StatsFilter
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service.RetryBudget
+import com.twitter.finagle.stats.ExceptionStatsHandler
+import com.twitter.finagle.stats.StandardStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
-import com.twitter.finagle.thrift.exp.partitioning.{
-  PartitioningParams,
-  ThriftPartitioningService,
-  WithThriftPartitioningStrategy
-}
+import com.twitter.finagle.thrift.exp.partitioning.PartitioningParams
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService
+import com.twitter.finagle.thrift.exp.partitioning.WithThriftPartitioningStrategy
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.ThriftUtil
+import com.twitter.finagle.thrift.filter.ValidationReportingFilter
 import com.twitter.finagle.thrift.transport.ThriftClientPreparer
 import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
 import com.twitter.finagle.thrift.{ClientId => FinagleClientId, _}
 import com.twitter.finagle.tracing.Tracer
-import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
 import com.twitter.scrooge.TReusableBuffer
-import com.twitter.util.{Closable, Duration, Future, FuturePool, Monitor}
+import com.twitter.util.Closable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.FuturePool
+import com.twitter.util.Monitor
 import java.net.SocketAddress
 import java.util.concurrent.ExecutorService
 import org.apache.thrift.protocol.TProtocolFactory
@@ -323,9 +336,14 @@ object Thrift
         val emptyResponse: Array[Byte] = Array.emptyByteArray
       }
 
+      // we insert  validationReporting filter to thrift client after the statsFilter
+      // because we will be able to see all metrics the statsFilter sees
       StackClient.newStack
         .replace(StackClient.Role.prepConn, preparer)
         .insertAfter(BindingFactory.role, ThriftPartitioningService.module(ThriftMarshallable))
+        .insertAfter(
+          StatsFilter.role,
+          ValidationReportingFilter.module[ThriftClientRequest, Array[Byte]])
     }
 
     private def params: Stack.Params = StackClient.defaultParams +
@@ -558,8 +576,11 @@ object Thrift
         }
       }
 
+    // we insert  validationReporting filter to thrift server after the statsFilter
+    // because we will be able to see all metrics the statsFilter sees
     private val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack
       .insertBefore(StackServer.Role.preparer, ServerToReqRepPreparer)
+      .insertAfter(StatsFilter.role, ValidationReportingFilter.module[Array[Byte], Array[Byte]])
       .replace(StackServer.Role.preparer, preparer)
 
     private def params: Stack.Params = StackServer.defaultParams +
