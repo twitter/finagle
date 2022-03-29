@@ -3,6 +3,7 @@
 owners:
   - cockroachdb-admins:ldap
   - banderson
+  - jbestourous
   - mnakamura
   - roanta
   - vkostyukov
