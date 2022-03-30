@@ -247,8 +247,11 @@ Http.client.withResponseClassifier(classifier)</pre></div><dl class="attributes 
 which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code> for some
 HTTP classification tools.</p></span></dd></dl></div></li><li class="indented0 " name="com.twitter.finagle.builder.ClientBuilder#retries" group="Ungrouped" fullComment="yes" data-isabs="false" visbl="pub"><a id="retries(value:Int):ClientBuilder.this.This" class="anchorToMember"></a><a id="retries(Int):This" class="anchorToMember"></a> <span class="permalink"><a href="../../../../com/twitter/finagle/builder/ClientBuilder.html#retries(value:Int):ClientBuilder.this.This" title="Permalink"><i class="material-icons"></i></a></span> <span class="modifier_kind"><span class="modifier"></span> <span class="kind">def</span></span> <span class="symbol"><span class="name">retries</span><span class="params">(<span name="value">value: <a href="https://www.scala-lang.org/api/2.13.6/scala/Int.html#scala.Int" name="scala.Int" id="scala.Int" class="extype">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" name="com.twitter.finagle.builder.ClientBuilder.This" id="com.twitter.finagle.builder.ClientBuilder.This" class="extmbr">This</a></span></span><p class="shortcomment cmt">Retry (some) failed requests up to <code>value - 1</code> times.</p><div class="fullcomment"><div class="comment cmt"><p>Retry (some) failed requests up to <code>value - 1</code> times.</p><p>Retries are only done if the request failed with something
 known to be safe to retry. This includes <a href="../WriteException.html" name="com.twitter.finagle.WriteException" id="com.twitter.finagle.WriteException" class="extype">WriteExceptions</a>
-and <a href="../Failure.html" name="com.twitter.finagle.Failure" id="com.twitter.finagle.Failure" class="extype">Failure</a>s that are marked <a href="../FailureFlags$.html#Retryable:Long" name="com.twitter.finagle.FailureFlags#Retryable" id="com.twitter.finagle.FailureFlags#Retryable" class="extmbr">retryable</a>.</p><p>The configured policy has jittered backoffs between retries.</p><p>To migrate to the Stack-based APIs, use <code>MethodBuilder</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+and <a href="../Failure.html" name="com.twitter.finagle.Failure" id="com.twitter.finagle.Failure" class="extype">Failure</a>s that are marked <a href="../FailureFlags$.html#Retryable:Long" name="com.twitter.finagle.FailureFlags#Retryable" id="com.twitter.finagle.FailureFlags#Retryable" class="extmbr">retryable</a>.</p><p>The configured policy has jittered backoffs between retries.</p><p>To migrate to the Stack-based APIs, use <code>MethodBuilder</code>. For HTTP and
+ThriftMux, use <code>MethodBuilder#withMaxRetries</code>. For all other protocols,
+use <code>MethodBuilder.from(dest, stackClient)</code> to construct a MethodBuilder
+manually. Then use <code>MethodBuilder#withRetry.maxRetries</code> to configure the
+max number of retries.</p><p>For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 <span class="kw">import</span> com.twitter.finagle.service.{ReqRep, ResponseClass}
 <span class="kw">import</span> com.twitter.util.Return
 
@@ -258,7 +261,9 @@ Http.client
   .withRetryForClassifier {
     <span class="kw">case</span> ReqRep(_, Return(rep)) <span class="kw">if</span> rep.statusCode &gt;= <span class="num">400</span> &amp;&amp; rep.statusCode &lt;= <span class="num">599</span> <span class="kw">=&gt;</span>
       ResponseClass.RetryableFailure
-  }</pre></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>the maximum number of attempts (including retries) that
+  }
+  <span class="cmt">// retry up to 2 times, not including initial attempt</span>
+  .withMaxRetries(<span class="num">2</span>)</pre></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>the maximum number of attempts (including retries) that
              can be made.</p><ul><li>A value of <code>1</code> means one attempt and no retries
              on failure.</li><li>A value of <code>2</code> means one attempt and then a
              single retry if the failure is known to be safe to retry.</li></ul></dd></dl><dl class="attributes block"><dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>

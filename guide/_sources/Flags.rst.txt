@@ -76,6 +76,21 @@ Common
   interval (default: `100.milliseconds`). Only finite and positive values are accepted, everything
   else disables the stats.
 
+**com.twitter.finagle.offload.auto** `bool`
+  Experimental flag.
+  When enabled the offload filter will be enabled and the worker pool sizes of both the application
+  pool and underlying I/O system will be set to reasonable values (default: `false`).
+
+**com.twitter.finagle.offload.admissionControl** `none|default|enabled|duration`
+  Experimental flag.
+  When this flag is used in conjunction with flags that enable the offload filter it will also
+  enable offload-based admission control. Offload admission control is based on the worker pools
+  work queue latency, an estimation of how long a task is expected to wait in the work queue before
+  it will be processed. When using `enabled` a reasonable default will be used for the maximum
+  acceptable work queue delay. Tuning can be accomplished by setting the flag to a duration, for
+  example, `50.milliseconds`. A value of `default` currently has the same meaning as `none`, which
+  is to disable offload admission control.
+
 Netty 4
 -------
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Flags &#8212; Finagle 22.2.0 documentation</title>
+    <title>Flags &#8212; Finagle 22.3.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -117,6 +117,19 @@ link between “Netty (producer) and your application (consumer).</dd>
 <dd>When offload filter is enabled, sample additional offload queue stats (<cite>delays_ms</cite>) at this
 interval (default: <cite>100.milliseconds</cite>). Only finite and positive values are accepted, everything
 else disables the stats.</dd>
+<dt><strong>com.twitter.finagle.offload.auto</strong> <cite>bool</cite></dt>
+<dd>Experimental flag.
+When enabled the offload filter will be enabled and the worker pool sizes of both the application
+pool and underlying I/O system will be set to reasonable values (default: <cite>false</cite>).</dd>
+<dt><strong>com.twitter.finagle.offload.admissionControl</strong> <cite>none|default|enabled|duration</cite></dt>
+<dd>Experimental flag.
+When this flag is used in conjunction with flags that enable the offload filter it will also
+enable offload-based admission control. Offload admission control is based on the worker pools
+work queue latency, an estimation of how long a task is expected to wait in the work queue before
+it will be processed. When using <cite>enabled</cite> a reasonable default will be used for the maximum
+acceptable work queue delay. Tuning can be accomplished by setting the flag to a duration, for
+example, <cite>50.milliseconds</cite>. A value of <cite>default</cite> currently has the same meaning as <cite>none</cite>, which
+is to disable offload admission control.</dd>
 </dl>
 </div>
 <div class="section" id="netty-4">
