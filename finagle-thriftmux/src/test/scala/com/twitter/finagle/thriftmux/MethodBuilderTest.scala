@@ -672,21 +672,23 @@ class MethodBuilderTest extends AnyFunSuite with Eventually {
     // see CSL-6751
     val metrics = new ConcurrentHashMap[String, Unit]()
     class CaptureStatsReceiver(protected val self: StatsReceiver) extends StatsReceiverProxy {
-      override def counter(verbosity: Verbosity, names: String*): Counter = {
-        metrics.put(names.mkString("/"), ())
-        super.counter(verbosity, names: _*)
+
+      override def counter(metricBuilder: MetricBuilder): Counter = {
+        metrics.put(metricBuilder.name.mkString("/"), ())
+        super.counter(metricBuilder)
       }
 
-      override def stat(verbosity: Verbosity, names: String*): Stat = {
-        metrics.put(names.mkString("/"), ())
-        super.stat(verbosity, names: _*)
+      override def stat(metricBuilder: MetricBuilder): Stat = {
+        metrics.put(metricBuilder.name.mkString("/"), ())
+        super.stat(metricBuilder)
       }
 
-      override def addGauge(verbosity: Verbosity, names: String*)(f: => Float): Gauge = {
-        metrics.put(names.mkString("/"), ())
-        super.addGauge(verbosity, names: _*)(f)
+      override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge = {
+        metrics.put(metricBuilder.name.mkString("/"), ())
+        super.addGauge(metricBuilder)(f)
       }
     }
+
     val stats = new InMemoryStatsReceiver
 
     val service = new TestService.MethodPerEndpoint {

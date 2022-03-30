@@ -162,24 +162,26 @@ private[stats] object PrometheusExporter {
     writer: StringBuilder,
     snapshot: MetricsView.Snapshot,
     exportMetadata: Boolean
-  ): Unit = {
-    val metricName = snapshot.builder.name.last
-    if (exportMetadata) {
-      writeMetadata(writer, metricName, snapshot.builder.metricType, snapshot.builder.units)
-    }
-    snapshot match {
-      case gaugeSnap: GaugeSnapshot => {
-        writeCounterGaugeLabels(writer, metricName, snapshot.builder.labels)
-        writeNumberValue(writer, gaugeSnap.value)
+  ): Unit = snapshot.builder.identity match {
+    case MetricBuilder.Identity.Hierarchical(_, _) => // nop: we can't write this type.
+    case MetricBuilder.Identity.Full(_, labels) =>
+      val metricName = snapshot.builder.name.last
+      if (exportMetadata) {
+        writeMetadata(writer, metricName, snapshot.builder.metricType, snapshot.builder.units)
       }
-      case counterSnap: CounterSnapshot => {
-        writeCounterGaugeLabels(writer, metricName, snapshot.builder.labels)
-        writeValueAsLong(writer, counterSnap.value)
+      snapshot match {
+        case gaugeSnap: GaugeSnapshot =>
+          writeCounterGaugeLabels(writer, metricName, labels)
+          writeNumberValue(writer, gaugeSnap.value)
+
+        case counterSnap: CounterSnapshot =>
+          writeCounterGaugeLabels(writer, metricName, labels)
+          writeValueAsLong(writer, counterSnap.value)
+
+        case summarySnap: HistogramSnapshot =>
+          writeSummary(writer, metricName, labels, summarySnap.value)
       }
-      case summarySnap: HistogramSnapshot =>
-        writeSummary(writer, metricName, summarySnap.builder.labels, summarySnap.value)
-    }
-    writer.append('\n')
+      writer.append('\n')
   }
 
   /**

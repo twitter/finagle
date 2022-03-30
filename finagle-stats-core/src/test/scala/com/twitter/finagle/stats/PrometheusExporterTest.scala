@@ -33,9 +33,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests"),
         metricType = CounterType,
         units = Requests,
-        labels = Map[String, String](),
         statsReceiver = sr,
-      ),
+      ).withDimensionalSupport,
       value = 1
     )
 
@@ -47,9 +46,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         metricType = CounterType,
         units = Requests,
         verbosity = Verbosity.Debug,
-        labels = Map[String, String](),
         statsReceiver = sr,
-      ),
+      ).withDimensionalSupport,
       value = 1
     )
 
@@ -60,9 +58,10 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests"),
         metricType = CounterType,
         units = Requests,
-        labels = Map("role" -> "foo", "job" -> "baz-service", "env" -> "staging", "zone" -> "dc1"),
         statsReceiver = sr,
-      ),
+      ).withLabels(
+          Map("role" -> "foo", "job" -> "baz-service", "env" -> "staging", "zone" -> "dc1"))
+        .withDimensionalSupport,
       value = 1
     )
 
@@ -72,9 +71,8 @@ class PrometheusExporterTest extends AnyFunSuite {
       name = Seq("finagle", "future_pool", "pool_size_float"),
       metricType = GaugeType,
       units = CustomUnit("Threads"),
-      labels = Map("pool" -> "future_pool", "rpc" -> "finagle"),
       statsReceiver = sr
-    ),
+    ).withLabels(Map("pool" -> "future_pool", "rpc" -> "finagle")).withDimensionalSupport,
     value = 3.0
   )
 
@@ -84,9 +82,8 @@ class PrometheusExporterTest extends AnyFunSuite {
       name = Seq("finagle", "future_pool", "pool_size_long"),
       metricType = GaugeType,
       units = CustomUnit("Threads"),
-      labels = Map("pool" -> "future_pool", "rpc" -> "finagle"),
       statsReceiver = sr
-    ),
+    ).withLabels(Map("pool" -> "future_pool", "rpc" -> "finagle")).withDimensionalSupport,
     value = 3l
   )
 
@@ -97,14 +94,15 @@ class PrometheusExporterTest extends AnyFunSuite {
       metricType = CounterType,
       units = Requests,
       name = Seq("failures"),
-      labels = Map(
-        "side" -> "clnt",
-        "client_label" -> "baz-service",
-        "method_name" -> "get",
-        "type" -> "logical",
-        "exception" -> "com.twitter.finagle.ChannelClosedException"),
       statsReceiver = sr,
-    ),
+    ).withLabels(
+        Map(
+          "side" -> "clnt",
+          "client_label" -> "baz-service",
+          "method_name" -> "get",
+          "type" -> "logical",
+          "exception" -> "com.twitter.finagle.ChannelClosedException"))
+      .withDimensionalSupport,
     value = 2
   )
 
@@ -114,9 +112,8 @@ class PrometheusExporterTest extends AnyFunSuite {
       name = Seq("inet", "dns", "lookup_ms"),
       metricType = HistogramType,
       units = Milliseconds,
-      labels = Map("resolver" -> "inet", "namer" -> "dns"),
       statsReceiver = sr
-    ),
+    ).withLabels(Map("resolver" -> "inet", "namer" -> "dns")).withDimensionalSupport,
     value = new Snapshot {
       // 1, 2, 3
       def count: Long = 3
@@ -131,7 +128,10 @@ class PrometheusExporterTest extends AnyFunSuite {
 
   test("Write labels") {
     val writer = new StringBuilder()
-    writeLabels(writer, requestsCounter.builder.labels, true)
+    writeLabels(
+      writer,
+      Map("role" -> "foo", "job" -> "baz-service", "env" -> "staging", "zone" -> "dc1"),
+      true)
     assert(writer.toString() == """{role="foo",job="baz-service",env="staging",zone="dc1"}""")
   }
 
@@ -153,9 +153,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests_pos"),
         metricType = CounterType,
         units = Requests,
-        labels = Map("role" -> "foo"),
         statsReceiver = sr,
-      ),
+      ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Long.MaxValue
     )
 
@@ -165,9 +164,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests_neg"),
         metricType = CounterType,
         units = Requests,
-        labels = Map("role" -> "foo"),
         statsReceiver = sr,
-      ),
+      ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Long.MinValue
     )
 
@@ -196,9 +194,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests_pos"),
         metricType = GaugeType,
         units = Requests,
-        labels = Map("role" -> "foo"),
         statsReceiver = sr,
-      ),
+      ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Long.MaxValue
     )
 
@@ -208,9 +205,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests_neg"),
         metricType = GaugeType,
         units = Requests,
-        labels = Map("role" -> "foo"),
         statsReceiver = sr,
-      ),
+      ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Long.MinValue
     )
 
@@ -239,9 +235,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests_pos"),
         metricType = GaugeType,
         units = Requests,
-        labels = Map("role" -> "foo"),
         statsReceiver = sr,
-      ),
+      ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Float.MaxValue
     )
 
@@ -251,9 +246,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests_neg"),
         metricType = GaugeType,
         units = Requests,
-        labels = Map("role" -> "foo"),
         statsReceiver = sr,
-      ),
+      ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Float.MinValue
     )
 
@@ -282,9 +276,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests_pos"),
         metricType = GaugeType,
         units = Requests,
-        labels = Map("role" -> "foo"),
         statsReceiver = sr,
-      ),
+      ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Float.PositiveInfinity
     )
 
@@ -294,9 +287,8 @@ class PrometheusExporterTest extends AnyFunSuite {
         name = Seq("requests_neg"),
         metricType = GaugeType,
         units = Requests,
-        labels = Map("role" -> "foo"),
         statsReceiver = sr,
-      ),
+      ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Float.NegativeInfinity
     )
 

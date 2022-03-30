@@ -201,7 +201,7 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     }
 
     test("StatsReceiver metrics expose the underlying schema" + suffix) {
-      val metrics = new Metrics()
+      val metrics = Metrics.createDetached()
 
       val sr = new MetricsStatsReceiver(metrics)
       val counter = addCounter(sr, Seq("aaa"))
