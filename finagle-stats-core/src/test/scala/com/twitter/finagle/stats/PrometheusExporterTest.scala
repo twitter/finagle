@@ -15,16 +15,6 @@ import org.scalatest.funsuite.AnyFunSuite
 class PrometheusExporterTest extends AnyFunSuite {
   import PrometheusExporter._
 
-  private[this] class TestMV(
-    counterSnaps: Iterable[CounterSnapshot],
-    gaugeSnaps: Iterable[GaugeSnapshot],
-    histoSnaps: Iterable[HistogramSnapshot])
-      extends MetricsView {
-    override def gauges: Iterable[GaugeSnapshot] = gaugeSnaps
-    override def counters: Iterable[CounterSnapshot] = counterSnaps
-    override def histograms: Iterable[HistogramSnapshot] = histoSnaps
-  }
-
   val sr = new InMemoryStatsReceiver
   val noLabelCounter =
     CounterSnapshot(
@@ -311,7 +301,7 @@ class PrometheusExporterTest extends AnyFunSuite {
   }
 
   test("end-to-end fetching stats works") {
-    val registry: MetricsView = new TestMV(
+    val registry: MetricsView = new TestMetricsView(
       Seq(requestsCounter, clntExceptionsCounter),
       Seq(poolSizeFloatGauge, poolSizeLongGauge),
       Seq(dnsLookupMs))

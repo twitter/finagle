@@ -290,18 +290,22 @@ private[stats] class PrometheusExporter(metrics: MetricsView) extends Service[Re
 
   import PrometheusExporter._
 
-  def apply(request: Request): Future[Response] = {
-    val response = Response()
-    // content-type version from Prometheus specs
-    response.setContentType(MediaType.PlainText + "; version=0.0.4")
-
+  /** Render the metrics in prometheus format to a `String` */
+  def metricsString: String = {
     val filteredCounters = denylistDebugSample[CounterSnapshot](metrics.counters, None)
     val filteredGauges = denylistDebugSample[GaugeSnapshot](metrics.gauges, None)
     val filteredHistos = denylistDebugSample[HistogramSnapshot](metrics.histograms, None)
 
     val writer = new StringBuilder()
     writeMetrics(writer, filteredCounters, filteredGauges, filteredHistos, exportMetadata = true)
-    response.contentString = writer.toString()
+    writer.toString
+  }
+
+  def apply(request: Request): Future[Response] = {
+    val response = Response()
+    // content-type version from Prometheus specs
+    response.setContentType(MediaType.PlainText + "; version=0.0.4")
+    response.contentString = metricsString
     Future.value(response)
   }
 }

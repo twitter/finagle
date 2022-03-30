@@ -1,2 +1,3 @@
 com.twitter.finagle.stats.MetricsExporter
+com.twitter.finagle.stats.PrometheusExporterHandler
 com.twitter.finagle.stats.HostMetricsExporter
