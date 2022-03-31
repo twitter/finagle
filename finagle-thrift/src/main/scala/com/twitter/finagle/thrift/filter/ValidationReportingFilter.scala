@@ -7,11 +7,15 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.Stackable
 import com.twitter.finagle.param
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.thrift.filter.ValidationReportingFilter.log
+import com.twitter.logging.Logger
 import com.twitter.scrooge.thrift_validation.ThriftValidationException
 import com.twitter.util.Future
 import com.twitter.util.Throw
 
 object ValidationReportingFilter {
+
+  private val log = Logger.get(classOf[ValidationReportingFilter[_, _]])
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
@@ -48,6 +52,7 @@ class ValidationReportingFilter[Req, Rep](
         // the counter reports the number of invalid requests meaning requests with violations
         // that throw exception. we report the endpoint and the class name for the exception
         statsReceiver.counter("violation", e.endpoint, e.requestClazz.getName).incr()
+        log.info(e, "Discovered violations in the request")
       case _ => () // do nothing
     }
   }
