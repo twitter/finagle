@@ -1,24 +1,26 @@
 package com.twitter.finagle.stats
 
-import com.twitter.finagle.Service
-import com.twitter.finagle.http.MediaType
-import com.twitter.finagle.http.Request
-import com.twitter.finagle.http.Response
 import com.twitter.finagle.stats.MetricBuilder.MetricType
 import com.twitter.finagle.stats.MetricsView.CounterSnapshot
 import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
 import com.twitter.finagle.stats.MetricsView.HistogramSnapshot
-import com.twitter.util.Future
 
 /**
  * Exports metrics in a text according to Prometheus format.
+ *
+ * @param exportMetadata export the commends and metadata (lines that start with #)
+ * @param exportEmptyQuantiles export the quantiles of summaries and histograms with no entries
+ * @param verbosityPattern pattern used to export debug metrics based on hierarchical name
  */
-private[stats] object PrometheusExporter {
+private final class PrometheusExporter(
+  exportMetadata: Boolean,
+  exportEmptyQuantiles: Boolean,
+  verbosityPattern: Option[String => Boolean]) {
 
   /**
-   * Write the value of the metric as a Double
+   * Write the value of the metric as a `Double`.
    */
-  private def writeValueAsFloat(writer: StringBuilder, value: Float): Unit = {
+  private[this] def writeValueAsFloat(writer: StringBuilder, value: Float): Unit = {
     if (value == Float.MaxValue || value == Float.PositiveInfinity)
       writer.append("+Inf")
     else if (value == Float.MinValue || value == Float.NegativeInfinity)
@@ -28,21 +30,21 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write the value in the format appropriate for its dynamic type
+   * Write the value in the format appropriate for its dynamic type.
    *
    * For gauges we need to allow for writing the value as either an integer or floating
    * point value depending on the type the gauge emits.
    */
-  private def writeNumberValue(writer: StringBuilder, value: Number): Unit = value match {
+  private[this] def writeNumberValue(writer: StringBuilder, value: Number): Unit = value match {
     case l: java.lang.Long => writeValueAsLong(writer, l.longValue)
     case i: java.lang.Integer => writeValueAsLong(writer, i.intValue)
     case _ => writeValueAsFloat(writer, value.floatValue)
   }
 
   /**
-   * Write the value of the metric as Long for counter
+   * Write the value of the metric as Long for counter.
    */
-  private def writeValueAsLong(writer: StringBuilder, value: Long): Unit = {
+  private[this] def writeValueAsLong(writer: StringBuilder, value: Long): Unit = {
     if (value == Long.MaxValue)
       writer.append("+Inf")
     else if (value == Long.MinValue)
@@ -52,19 +54,22 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write the percentiles, count and sum for a summary
+   * Write the percentiles, count and sum for a summary.
    */
-  private def writeSummary(
+  private[this] def writeSummary(
     writer: StringBuilder,
     name: String,
     labels: Iterable[(String, String)],
     snapshot: Snapshot
   ): Unit = {
-    snapshot.percentiles.foreach { p =>
-      writeSummaryHistoLabels(writer, name, labels, "quantile", p.quantile)
-      writeValueAsLong(writer, p.value)
-      writer.append('\n')
+    if (exportEmptyQuantiles || snapshot.count > 0) {
+      snapshot.percentiles.foreach { p =>
+        writeSummaryHistoLabels(writer, name, labels, "quantile", p.quantile)
+        writeValueAsLong(writer, p.value)
+        writer.append('\n')
+      }
     }
+
     // prometheus doesn't export min, max, average in the summary by default
     writeCounterGaugeLabels(writer, name + "_count", labels)
     writeValueAsLong(writer, snapshot.count)
@@ -75,13 +80,17 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write the type of metric. For example
-   * # TYPE my_counter counter
+   * Write the type of metric.
+   *
+   * Example:
+   *  {{{
+   *    # TYPE my_counter counter
+   *  }}}
    * @param writer StringBuilder
    * @param name metric name
    * @param metricType type of metric
    */
-  private def writeType(writer: StringBuilder, name: String, metricType: MetricType): Unit = {
+  private[this] def writeType(writer: StringBuilder, name: String, metricType: MetricType): Unit = {
     writer.append("# TYPE ");
     writer.append(name);
     writer.append(' ')
@@ -90,13 +99,18 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write the units that the metric measures in. For example
-   * # UNIT my_boot_time_seconds seconds
+   * Write the units that the metric measures in.
+   *
+   * Example:
+   * {{{
+   *   # UNIT my_boot_time_seconds seconds
+   * }}}
+   *
    * @param writer StringBuilder
    * @param name metric name
    * @param metricUnit Option of unit the metric is measured in
    */
-  private def writeUnit(
+  private[this] def writeUnit(
     writer: StringBuilder,
     name: String,
     metricUnit: MetricUnit
@@ -116,14 +130,19 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write the labels, if any. For example
-   * {env="prod",hostname="myhost",datacenter="sdc",region="europe",owner="frontend"}
+   * Write the labels, if any.
+   *
+   * Example:
+   * {{{
+   *   {env="prod",hostname="myhost",datacenter="sdc",region="europe",owner="frontend"}
+   * }}}
+   *
    * @param writer StringBuilder
    * @param labels the key-value pair of labels that the metric carries
    * @param finishLabels if true, add close curly brace. false for summaries
    * and histograms because they have reserved labels that are appended last
    */
-  private[stats] def writeLabels(
+  private[this] def writeLabels(
     writer: StringBuilder,
     labels: Iterable[(String, String)],
     finishLabels: Boolean
@@ -153,15 +172,14 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write each metric
+   * Write a single metric to the provided `StringBuilder`.
+   *
    * @param writer StringBuilder
    * @param snapshot instantaneous view of the metric
-   * @param exportMetadata true if TYPE, UNIT are exported
    */
-  private def writeMetric(
+  private[this] def writeMetric(
     writer: StringBuilder,
-    snapshot: MetricsView.Snapshot,
-    exportMetadata: Boolean
+    snapshot: MetricsView.Snapshot
   ): Unit = snapshot.builder.identity match {
     case MetricBuilder.Identity.Hierarchical(_, _) => // nop: we can't write this type.
     case MetricBuilder.Identity.Full(_, labels) =>
@@ -185,12 +203,13 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write metric name and labels for counters and gauges
+   * Write metric name and labels for counters and gauges.
+   *
    * @param writer StringBuilder
    * @param name metric name
    * @param labels user-defined labels
    */
-  private def writeCounterGaugeLabels(
+  private[this] def writeCounterGaugeLabels(
     writer: StringBuilder,
     name: String,
     labels: Iterable[(String, String)]
@@ -201,15 +220,15 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write user-defined labels and reserved labels for Prometheus summary and
-   * histogram
+   * Write user-defined labels and reserved labels for Prometheus summary and histogram.
+   *
    * @param writer StringBuilder
    * @param name metric name
    * @param labels user-defined labels
    * @param reservedLabelName "quantile" or "le"
    * @param bucket the quantile of the summary or bucket of the histogram
    */
-  private def writeSummaryHistoLabels(
+  private[this] def writeSummaryHistoLabels(
     writer: StringBuilder,
     name: String,
     labels: Iterable[(String, String)],
@@ -228,9 +247,9 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write metadata that begin with #
+   * Write metadata that begin with a `#`.
    */
-  private def writeMetadata(
+  private[this] def writeMetadata(
     writer: StringBuilder,
     name: String,
     metricType: MetricType,
@@ -241,36 +260,15 @@ private[stats] object PrometheusExporter {
   }
 
   /**
-   * Write metrics to a StringBuilder
-   * @param writer writer
-   * @param counters Iterable of CounterSnapshot
-   * @param gauges Iterable of GaugeSnapshot
-   * @param histograms Iterable of HistogramSnapshot
-   * @param exportMetadata export the type, unit, and other metadata
+   * Filter out metrics with verbosity level of `Verbosity.Debug`.
+   *
+   * @param sample the metrics to deny list
+   * @param verbose Allow debug metrics with a hierarchical name that matches this pattern
    */
-  def writeMetrics(
-    writer: StringBuilder,
-    counters: Iterable[CounterSnapshot],
-    gauges: Iterable[GaugeSnapshot],
-    histograms: Iterable[HistogramSnapshot],
-    exportMetadata: Boolean
-  ): Unit = {
-    counters.foreach(c => writeMetric(writer, c, exportMetadata))
-    gauges.foreach(g => writeMetric(writer, g, exportMetadata))
-    histograms.foreach(h => writeMetric(writer, h, exportMetadata))
-  }
-
-  /**
-   * Filter out metrics with verbosity level of DEBUG.
-   * @param sample the metrics to denylist
-   * @param verbose Allow debug metrics with a hierarchical name that matches
-   * this pattern
-   * */
-  private[stats] def denylistDebugSample[A <: MetricsView.Snapshot](
-    sample: Iterable[A],
-    verbose: Option[String => Boolean]
+  private[this] def denylistDebugSample[A <: MetricsView.Snapshot](
+    sample: Iterable[A]
   ): Iterable[A] =
-    verbose match {
+    verbosityPattern match {
       case Some(pattern) =>
         sample.filter { value =>
           value.builder.verbosity != Verbosity.Debug || pattern(value.hierarchicalName)
@@ -280,32 +278,33 @@ private[stats] object PrometheusExporter {
         sample.filter(_.builder.verbosity != Verbosity.Debug)
     }
 
-}
+  /**
+   * Write metrics to a `StringBuilder`.
+   *
+   * @param writer `StringBuilder` in which to encode the metrics
+   * @param metrics [[MetricsView]] to write
+   */
+  def writeMetrics(
+    writer: StringBuilder,
+    metrics: MetricsView
+  ): Unit = {
+    val counters = denylistDebugSample[CounterSnapshot](metrics.counters)
+    val gauges = denylistDebugSample[GaugeSnapshot](metrics.gauges)
+    val histograms = denylistDebugSample[HistogramSnapshot](metrics.histograms)
 
-/**
- * A Finagle HTTP service that exports Metrics in Prometheus format
- */
-private[stats] class PrometheusExporter(metrics: MetricsView) extends Service[Request, Response] {
-  self =>
-
-  import PrometheusExporter._
-
-  /** Render the metrics in prometheus format to a `String` */
-  def metricsString: String = {
-    val filteredCounters = denylistDebugSample[CounterSnapshot](metrics.counters, None)
-    val filteredGauges = denylistDebugSample[GaugeSnapshot](metrics.gauges, None)
-    val filteredHistos = denylistDebugSample[HistogramSnapshot](metrics.histograms, None)
-
-    val writer = new StringBuilder()
-    writeMetrics(writer, filteredCounters, filteredGauges, filteredHistos, exportMetadata = true)
-    writer.toString
+    counters.foreach(c => writeMetric(writer, c))
+    gauges.foreach(g => writeMetric(writer, g))
+    histograms.foreach(h => writeMetric(writer, h))
   }
 
-  def apply(request: Request): Future[Response] = {
-    val response = Response()
-    // content-type version from Prometheus specs
-    response.setContentType(MediaType.PlainText + "; version=0.0.4")
-    response.contentString = metricsString
-    Future.value(response)
+  /**
+   * Write metrics to a `String`.
+   *
+   * @param metrics [[MetricsView]] to write
+   */
+  def writeMetricsString(metrics: MetricsView): String = {
+    val writer = new StringBuilder
+    writeMetrics(writer, metrics)
+    writer.toString()
   }
 }
