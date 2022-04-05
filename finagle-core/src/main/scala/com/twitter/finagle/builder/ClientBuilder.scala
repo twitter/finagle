@@ -981,12 +981,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * means you may go through a SOCKS proxy and then an HTTP proxy, but not the
    * other way around.
    *
-   * To migrate to the Stack-based APIs, use `ClientTransportParams.socksProxy`.
+   * To migrate to the Stack-based APIs, use CLI flags based configuration for SOCKS.
    * For example:
    * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.client.withTransport.socksProxy(socketAddress, socksProxy)
+   * -Dcom.twitter.finagle.socks.socksProxyHost=127.0.0.1
+   * -Dcom.twitter.finagle.socks.socksProxyPort=50001
    * }}}
    */
   def socksProxy(socksProxy: Option[SocketAddress]): This =
