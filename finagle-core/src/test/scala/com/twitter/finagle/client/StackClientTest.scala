@@ -3,28 +3,39 @@ package com.twitter.finagle.client
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
-import com.twitter.finagle.client.utils.{PushStringClient, StringClient}
+import com.twitter.finagle.client.utils.PushStringClient
+import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.filter.ClearContextValueFilter
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
+import com.twitter.finagle.naming.DefaultInterpreter
+import com.twitter.finagle.naming.NameInterpreter
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.finagle.util.{StackRegistry, TestParam}
-import com.twitter.finagle.{Name, param}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
+import com.twitter.finagle.util.StackRegistry
+import com.twitter.finagle.util.TestParam
+import com.twitter.finagle.Name
+import com.twitter.finagle.param
 import com.twitter.util._
-import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
-import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import com.twitter.util.registry.Entry
+import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.registry.SimpleRegistry
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.BeforeAndAfter
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funsuite.AnyFunSuite
 
 private object StackClientTest {
@@ -99,25 +110,21 @@ abstract class AbstractStackClientTest
 
   test("client stats are scoped to label")(new Ctx {
     // use dest when no label is set
-    client.newService("inet!127.0.0.1:8080")
+    client.newService("fixedinet!127.0.0.1:8080")
     eventually {
-      val counter = sr.counters(Seq("inet!127.0.0.1:8080", "loadbalancer", "adds"))
-      assert(
-        counter == 1,
-        s"The instance should be to the loadbalancer once instead of $counter times."
-      )
+      assert(sr.counters.contains(Seq("fixedinet!127.0.0.1:8080", "loadbalancer", "adds")))
     }
 
     // use param.Label when set
-    client.configured(param.Label("myclient")).newService("127.0.0.1:8080")
+    client.configured(param.Label("myclient")).newService("fixedinet!127.0.0.1:8080")
     eventually {
-      assert(sr.counters(Seq("myclient", "loadbalancer", "adds")) == 1)
+      assert(sr.counters.contains(Seq("myclient", "loadbalancer", "adds")))
     }
 
     // use evaled label when both are set
-    client.configured(param.Label("myclient")).newService("othername=127.0.0.1:8080")
+    client.configured(param.Label("myclient")).newService("othername=fixedinet!127.0.0.1:8080")
     eventually {
-      assert(sr.counters(Seq("othername", "loadbalancer", "adds")) == 1)
+      assert(sr.counters.contains((Seq("othername", "loadbalancer", "adds"))))
     }
   })
 
@@ -155,7 +162,7 @@ abstract class AbstractStackClientTest
         .withLabel(label)
         .withStack(_.concat(alwaysFailStack))
       failFastOn.foreach { ffOn => stack = stack.configured(FailFast(ffOn)) }
-      val client = stack.newClient("/$/inet/localhost/0")
+      val client = stack.newClient("/$/fixedinet/localhost/0")
       new FactoryToService[String, String](client)
     }
 
@@ -217,7 +224,7 @@ abstract class AbstractStackClientTest
 
     val svcFac = client
       .withStack(_.concat(nilStack))
-      .newClient("/$/inet/localhost/0")
+      .newClient("/$/fixedinet/localhost/0")
 
     val svc = await(svcFac())
     assert(svc.status == Status.Open)
@@ -262,7 +269,7 @@ abstract class AbstractStackClientTest
         FactoryToService.Enabled(true) +
 
         // default Dest is /$/fail
-        BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0")))
+        BindingFactory.Dest(Name.Path(Path.read("/$/fixedinet/localhost/0")))
     )
 
     val service = new FactoryToService(factory)
@@ -316,7 +323,7 @@ abstract class AbstractStackClientTest
         FactoryToService.Enabled(true) +
 
         // default Dest is /$/fail
-        BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0")))
+        BindingFactory.Dest(Name.Path(Path.read("/$/fixedinet/localhost/0")))
     )
 
     val service = new FactoryToService(factory)
@@ -646,7 +653,7 @@ abstract class AbstractStackClientTest
         ) +
         FactoryToService.Enabled(false) +
         PendingRequestFilter.Param(Some(2)) +
-        BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0")))
+        BindingFactory.Dest(Name.Path(Path.read("/$/fixedinet/localhost/0")))
 
     val svcFac = stack.make(params)
     val session1 = await(svcFac())
