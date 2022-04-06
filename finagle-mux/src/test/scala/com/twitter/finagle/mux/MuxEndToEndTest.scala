@@ -18,6 +18,9 @@ class FragmentingEndToEndTest extends AbstractEndToEndTest {
   override type ClientT = Mux.Client
   override type ServerT = Mux.Server
   def implName: String = "push-based"
+
+  override def skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY_TRAVIS")
+
   def clientImpl() = Mux.client.configured(MaxFrameSize(5.bytes))
   def serverImpl() = Mux.server.configured(MaxFrameSize(5.bytes))
 }
