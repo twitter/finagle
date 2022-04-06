@@ -1,5 +1,6 @@
 package com.twitter.finagle.tracing
 
+import java.io.Serializable
 import scala.util.control.NonFatal
 
 /**
@@ -7,7 +8,7 @@ import scala.util.control.NonFatal
  * span, while TraceIds contain a span ID as well as context (parentId
  * and traceId).
  */
-final class SpanId(val self: Long) extends Proxy {
+final class SpanId(val self: Long) extends Proxy with Serializable {
   def toLong: Long = self
   override def toString: String = SpanId.toString(self)
 }
