@@ -6,6 +6,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.ServerInfo
@@ -544,5 +545,75 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
     server2.close()
     server3.close()
     server4.close()
+  }
+
+  test("Default panic mode is MajorityUnhealthy") {
+    val endpoint: Stack[ServiceFactory[String, String]] =
+      Stack.leaf(
+        Stack.Role("endpoint"),
+        ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
+      )
+
+    val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
+
+    var eps: Vector[String] = Vector.empty
+    val mockBalancer = new LoadBalancerFactory {
+      def newBalancer[Req, Rep](
+        endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
+        emptyException: NoBrokersAvailableException,
+        params: Stack.Params
+      ): ServiceFactory[Req, Rep] = {
+        eps = endpoints.sample().toVector.map(_.address.toString)
+        assert(params[PanicMode].maxEffort == PanicMode.MajorityUnhealthy.maxEffort)
+        ServiceFactory.const(Service.mk(_ => ???))
+      }
+    }
+
+    val addresses = (0 to 10).map { i =>
+      Address(InetSocketAddress.createUnresolved(s"inet-address-$i", 0))
+    }
+
+    stack.make(
+      Stack.Params.empty +
+        LoadBalancerFactory.Param(mockBalancer) +
+        LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet)))
+    )
+  }
+
+  test("PanicModeToggle overrides stack param with FiftyPercentUnhealthy") {
+    val endpoint: Stack[ServiceFactory[String, String]] =
+      Stack.leaf(
+        Stack.Role("endpoint"),
+        ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
+      )
+
+    val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
+
+    var eps: Vector[String] = Vector.empty
+    val mockBalancer = new LoadBalancerFactory {
+      def newBalancer[Req, Rep](
+        endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
+        emptyException: NoBrokersAvailableException,
+        params: Stack.Params
+      ): ServiceFactory[Req, Rep] = {
+        eps = endpoints.sample().toVector.map(_.address.toString)
+        assert(params[PanicMode].maxEffort == PanicMode.FiftyPercentUnhealthy.maxEffort)
+        ServiceFactory.const(Service.mk(_ => ???))
+      }
+    }
+
+    val addresses = (0 to 10).map { i =>
+      Address(InetSocketAddress.createUnresolved(s"inet-address-$i", 0))
+    }
+
+    com.twitter.finagle.toggle.flag.overrides
+      .let("com.twitter.finagle.loadbalancer.PanicMode", 1.0) {
+        stack.make(
+          Stack.Params.empty +
+            LoadBalancerFactory.Param(mockBalancer) +
+            LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet)))
+        )
+      }
+
   }
 }

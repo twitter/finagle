@@ -14,6 +14,8 @@ import com.twitter.util.Var
 import java.util.logging.Level
 import java.util.logging.Logger
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle
+import com.twitter.finagle.naming.BindingFactory
+import com.twitter.finagle.util.Showable
 import scala.util.control.NonFatal
 
 /**
@@ -238,7 +240,9 @@ object LoadBalancerFactory {
   // maxEffort is the fixed number of retries an LB implementation is willing
   // to make if the distributor's pick returns an unavailable (Status.Busy or
   // Status.Closed) node
-  final class PanicMode private[loadbalancer] (val maxEffort: Int) {
+  sealed abstract class PanicMode private[loadbalancer] {
+    def maxEffort: Int
+
     override def toString: String = maxEffort match {
       case 0 => "Always panic (for testing). PanicMode(0)"
       case 1 => "TenPercentUnhealthy"
@@ -266,6 +270,14 @@ object LoadBalancerFactory {
    * Finagle clients have additional layers of requeues above the load balancer.
    */
   object PanicMode {
+    private[loadbalancer] final class StaticPanicMode(val maxEffort: Int) extends PanicMode
+
+    private[loadbalancer] final class ToggledPanicMode(dest: String) extends PanicMode {
+      def maxEffort: Int = {
+        if (PanicModeToggle(dest)) FiftyPercentUnhealthy.maxEffort
+        else MajorityUnhealthy.maxEffort
+      }
+    }
 
     /**
      * Example: If the proportion of unhealthy nodes is 0.5, then the
@@ -277,20 +289,22 @@ object LoadBalancerFactory {
      * 4 times in a row. This means 1% of requests panic.
      */
 
+    // Always panic immediately. For tests only
+    val Paranoid = new StaticPanicMode(0)
     // 10% unhealthy, Prob(2 unhealthy) = 0.1*0.1, maxEffort=1 because 0.01^1 < ε
-    val TenPercentUnhealthy = new PanicMode(1)
+    val TenPercentUnhealthy = new StaticPanicMode(1)
 
     // 20% unhealthy is the same as 30% unhealthy.
     // Prob(2 unhealthy) = 0.2*0.2, maxEffort=2 because 0.04^2 < ε
 
     // 30% unhealthy, Prob(2 unhealthy) = 0.3*0.3, maxEffort=2 because 0.09^2 < ε
-    val ThirtyPercentUnhealthy = new PanicMode(2)
+    val ThirtyPercentUnhealthy = new StaticPanicMode(2)
     // 40% unhealthy, Prob(2 unhealthy) = 0.4*0.4, maxEffort=3 because 0.16^3 < ε
-    val FortyPercentUnhealthy = new PanicMode(3)
+    val FortyPercentUnhealthy = new StaticPanicMode(3)
     // 50% unhealthy, Prob(2 unhealthy) = 0.5*0.5, maxEffort=4 because 0.25^4 < ε
-    val FiftyPercentUnhealthy = new PanicMode(4)
+    val FiftyPercentUnhealthy = new StaticPanicMode(4)
     // Greater than 50% unhealthy
-    val MajorityUnhealthy = new PanicMode(5)
+    val MajorityUnhealthy = new StaticPanicMode(5)
 
     // The default is maxEffort=5
     implicit val param: Stack.Param[PanicMode] =
@@ -447,6 +461,11 @@ object LoadBalancerFactory {
         }
         if (params.contains[MinApertureOverride]) {
           finalParams = finalParams + params[MinApertureOverride]
+        }
+
+        if (!params.contains[PanicMode]) {
+          finalParams = finalParams + new PanicMode.ToggledPanicMode(
+            Showable.show(params[BindingFactory.Dest].dest)).asInstanceOf[PanicMode]
         }
 
         loadBalancerFactory.newBalancer(

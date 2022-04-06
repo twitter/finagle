@@ -53,7 +53,7 @@ object BalancerBench {
   }
 
   private class NullBalancer extends Balancer[Unit, Unit] {
-    private[loadbalancer] val panicMode: PanicMode = new PanicMode(0)
+    private[loadbalancer] val panicMode: PanicMode = PanicMode.Paranoid
 
     protected def emptyException: Throwable = new Exception()
     protected def statsReceiver: StatsReceiver = NullStatsReceiver

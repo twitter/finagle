@@ -14,6 +14,11 @@
       "id": "com.twitter.finagle.tracing.ResourceTracing",
       "description": "Enable the setting of the Resource Tracker on traced requests",
       "fraction": 1.0
+    },
+    {
+      "id": "com.twitter.finagle.loadbalancer.PanicMode",
+      "description": "Load balancer fails open when fifty percent of the nodes are unhealthy",
+      "fraction": 0.0
     }
   ]
 }

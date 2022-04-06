@@ -89,7 +89,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
       BaseWeightedApertureTest.this.manageWeights
     override private[aperture] val minApertureOverride: Int = 0
     override protected def label: String = ""
-    override private[loadbalancer] def panicMode: PanicMode = new PanicMode(0)
+    override private[loadbalancer] def panicMode: PanicMode = PanicMode.Paranoid
     override protected def emptyException: Throwable = new NoBrokersAvailableException
     override protected def statsReceiver: StatsReceiver = new InMemoryStatsReceiver
     override protected def newNode(factory: EndpointFactory[Unit, Unit]): TestNode = TestNode(
