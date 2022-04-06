@@ -1,17 +1,26 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.SpnegoAuthenticator.{ClientFilter, Credentials, ServerFilter}
-import com.twitter.finagle.http.param.{
-  ClientKerberos,
-  ClientKerberosConfiguration,
-  KerberosConfiguration,
-  ServerKerberos,
-  ServerKerberosConfiguration
-}
-import com.twitter.finagle.{Filter, Service, ServiceFactory, Stack, Stackable}
-import com.twitter.util.{Future, FuturePool}
-import java.io.{File, FileOutputStream, PrintWriter}
-import java.nio.file.{FileSystems, Files, Path}
+import com.twitter.finagle.http.SpnegoAuthenticator.ClientFilter
+import com.twitter.finagle.http.SpnegoAuthenticator.Credentials
+import com.twitter.finagle.http.SpnegoAuthenticator.ServerFilter
+import com.twitter.finagle.http.param.ClientKerberos
+import com.twitter.finagle.http.param.ClientKerberosConfiguration
+import com.twitter.finagle.http.param.KerberosConfiguration
+import com.twitter.finagle.http.param.ServerKerberos
+import com.twitter.finagle.http.param.ServerKerberosConfiguration
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Stackable
+import com.twitter.util.Future
+import com.twitter.util.FuturePool
+import java.io.File
+import java.io.FileOutputStream
+import java.io.PrintWriter
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.Path
 import javax.security.auth.login.Configuration
 
 object AuthenticatedIdentityContext {
@@ -97,11 +106,14 @@ object KerberosAuthenticationFilter {
    * Create/append a jaas config and set it to the system property
    * @param kerberosConfiguration Kerberos jaas configuration
    * @param loginContext Kerberos Login context
+   * @param jaasDir the (optional) directory where the jaas config will be written to.
+   *                otherwise, the config will be written to the current working directory.
    * @see JaasConfiguration [[https://docs.oracle.com/javase/7/docs/jre/api/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html]]
    */
   private[this] def jaas(
     kerberosConfiguration: KerberosConfiguration,
-    loginContext: String
+    loginContext: String,
+    jaasDir: Option[Path]
   ): Unit = {
     val jaas = "jaas-internal.conf"
     val jaasConfiguration =
@@ -116,7 +128,10 @@ object KerberosAuthenticationFilter {
          |  doNotPrompt=${kerberosConfiguration.doNotPrompt}
          |  authEnabled=${kerberosConfiguration.authEnabled}; 
          |};""".stripMargin
-    val jaasFilePath = FileSystems.getDefault.getPath(jaas).toAbsolutePath
+    val jaasFilePath = jaasDir
+      .map(_.resolve(jaas))
+      .getOrElse(FileSystems.getDefault.getPath(jaas))
+      .toAbsolutePath
     if (Files.exists(jaasFilePath)) {
       if (!Files.lines(jaasFilePath).anyMatch(line => line.equals(s"$loginContext {"))) {
         writeFile(jaasFilePath, s"\n\n$jaasConfiguration", true)
@@ -142,8 +157,14 @@ object KerberosAuthenticationFilter {
     def apply(
       serverKerberosConfiguration: ServerKerberosConfiguration
     ): Future[Filter[Request, Response, SpnegoAuthenticator.Authenticated[Request], Response]] =
+      apply(serverKerberosConfiguration, None)
+
+    def apply(
+      serverKerberosConfiguration: ServerKerberosConfiguration,
+      jaasDir: Option[Path]
+    ): Future[Filter[Request, Response, SpnegoAuthenticator.Authenticated[Request], Response]] =
       FuturePool.unboundedPool {
-        jaas(serverKerberosConfiguration, "kerberos-http-server")
+        jaas(serverKerberosConfiguration, "kerberos-http-server", jaasDir)
         ServerFilter(new Credentials.JAASServerSource("kerberos-http-server"))
       }
   }
@@ -154,8 +175,14 @@ object KerberosAuthenticationFilter {
   private[finagle] object SpnegoClientFilter {
     def apply(
       clientKerberosConfiguration: ClientKerberosConfiguration
+    ): Future[Filter[Request, Response, Request, Response]] =
+      apply(clientKerberosConfiguration, None)
+
+    def apply(
+      clientKerberosConfiguration: ClientKerberosConfiguration,
+      jaasDir: Option[Path]
     ): Future[Filter[Request, Response, Request, Response]] = FuturePool.unboundedPool {
-      jaas(clientKerberosConfiguration, "kerberos-http-client")
+      jaas(clientKerberosConfiguration, "kerberos-http-client", jaasDir)
       ClientFilter(
         new Credentials.JAASClientSource(
           "kerberos-http-client",

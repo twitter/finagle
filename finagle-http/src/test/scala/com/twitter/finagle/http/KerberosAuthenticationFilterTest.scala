@@ -1,22 +1,27 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.http.KerberosAuthenticationFilter.{
-  ExtractAuthAndCatchUnauthorized,
-  SpnegoClientFilter,
-  SpnegoServerFilter
-}
-import com.twitter.finagle.http.param.{ClientKerberosConfiguration, ServerKerberosConfiguration}
-import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.util.{Await, Future, Promise}
-import java.nio.file.{FileSystems, Files}
+import com.twitter.finagle.http.KerberosAuthenticationFilter.ExtractAuthAndCatchUnauthorized
+import com.twitter.finagle.http.KerberosAuthenticationFilter.SpnegoClientFilter
+import com.twitter.finagle.http.KerberosAuthenticationFilter.SpnegoServerFilter
+import com.twitter.finagle.http.param.ClientKerberosConfiguration
+import com.twitter.finagle.http.param.ServerKerberosConfiguration
+import com.twitter.finagle.Service
+import com.twitter.finagle.SimpleFilter
+import com.twitter.io.TempDirectory
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import java.nio.file.Files
 import org.scalatest.funsuite.AnyFunSuite
 
 class KerberosAuthenticationFilterTest extends AnyFunSuite {
+  private val tmpDir = TempDirectory.create().toPath
   private val serverFilter =
     new AsyncFilter[Request, SpnegoAuthenticator.Authenticated[Request], Response](
       SpnegoServerFilter(
-        ServerKerberosConfiguration(Some("test-principal@twitter.biz"), Some("/keytab/path"))))
+        ServerKerberosConfiguration(Some("test-principal@twitter.biz"), Some("/keytab/path")),
+        Some(tmpDir)))
       .andThen(ExtractAuthAndCatchUnauthorized)
   private val clientFilter =
     new AsyncFilter[Request, Request, Response](
@@ -24,7 +29,9 @@ class KerberosAuthenticationFilterTest extends AnyFunSuite {
         ClientKerberosConfiguration(
           Some("test-principal@twitter.biz"),
           Some("/keytab/path"),
-          Some("test-server-principal@twitter.biz"))))
+          Some("test-server-principal@twitter.biz")),
+        Some(tmpDir)))
+
   private val exampleService = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {
       val response = Response(request)
@@ -49,7 +56,7 @@ class KerberosAuthenticationFilterTest extends AnyFunSuite {
 
   test("successfully test authenticated http client") {
     val response = Await.result(clientFilter(request, clientService), 1.second)
-    val jaasFilePath = FileSystems.getDefault.getPath("jaas-internal.conf").toAbsolutePath
+    val jaasFilePath = tmpDir.resolve("jaas-internal.conf").toAbsolutePath
     assert(Files.exists(jaasFilePath))
     assert(Files.lines(jaasFilePath).anyMatch(line => line.equals("kerberos-http-client {")))
     assert(response.statusCode == 200)
