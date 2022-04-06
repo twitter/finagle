@@ -5,31 +5,43 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.context.{Contexts, Deadline, Retries}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Deadline
+import com.twitter.finagle.context.Retries
 import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.http.codec.context.LoadableHttpContext
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http.{Status => HttpStatus}
 import com.twitter.finagle.http2.param.EncoderIgnoreMaxHeaderListSize
-import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureDetector}
+import com.twitter.finagle.liveness.FailureAccrualFactory
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.service._
-import com.twitter.finagle.stats.{
-  InMemoryStatsReceiver,
-  LoadedStatsReceiver,
-  NullStatsReceiver,
-  StandardStatsReceiver
-}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.LoadedStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StandardStatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.{Buf, BufReader, Pipe, Reader, ReaderDiscardedException, Writer}
+import com.twitter.io.Buf
+import com.twitter.io.BufReader
+import com.twitter.io.Pipe
+import com.twitter.io.Reader
+import com.twitter.io.ReaderDiscardedException
+import com.twitter.io.Writer
 import com.twitter.util._
 import io.netty.buffer.PooledByteBufAllocator
-import java.io.{PrintWriter, StringWriter}
-import java.net.{InetAddress, InetSocketAddress}
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import org.scalactic.source.Position
-import org.scalatest.{BeforeAndAfter, OneInstancePerTest, Tag}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.OneInstancePerTest
+import org.scalatest.Tag
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import scala.language.reflectiveCalls
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -1697,7 +1709,18 @@ abstract class AbstractEndToEndTest
       .withTimeoutPerRequest(5.seconds)
       .newService("slow")
 
-    assert("ok" == await(longTimeout(Request())).contentString)
+    val response =
+      try {
+        await(longTimeout(Request()))
+      } catch {
+        case exn: ChannelClosedException =>
+          // sometimes we race and get a connection from the connection pool that we already interrupted
+          // so we should try one more time.  we only need a single retry because the bad connection
+          // should be purged from the connection pool after this.
+          await(longTimeout(Request()))
+      }
+
+    assert("ok" == response.contentString)
     eventually {
       assert(stats.counter("a_label", "slow", "logical", "requests")() == 1)
       assert(stats.counter("a_label", "slow", "logical", "success")() == 1)
