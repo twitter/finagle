@@ -115,8 +115,6 @@ private final class DeterministicAperture[Req, Rep, NodeT <: ApertureNode[Req, R
 
   def minAperture: Int = aperture.minAperture
 
-  def minApertureOverride: Int = aperture.minApertureOverride
-
   private[this] val ring = new Ring(vector.size, rng)
 
   private[this] val pdist = new ProbabilityDistribution[NodeT] {
@@ -134,9 +132,7 @@ private final class DeterministicAperture[Req, Rep, NodeT <: ApertureNode[Req, R
   override def min: Int = math.min(MinDeterministicAperture, vector.size)
 
   // DeterministicAperture does not dynamically adjust the aperture based on load
-  override def logicalAperture: Int = {
-    if (minApertureOverride >= 1) minApertureOverride else min
-  }
+  override def logicalAperture: Int = min
 
   // Translates the logical `aperture` into a physical one that
   // maps to the ring. Note, we do this in terms of the peer

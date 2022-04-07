@@ -7,7 +7,6 @@ import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
-import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.server.utils.StringServer
@@ -505,46 +504,6 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
 
         assert(!a.isInstanceOf[TrafficDistributor[String, String]])
       }
-  }
-
-  test("MinApertureOverride overrides the minDeterministicAperture for a client") {
-    val addr1 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server1 = StringServer.server.serve(addr1, echoService)
-
-    val addr2 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server2 = StringServer.server.serve(addr2, echoService)
-
-    val addr3 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server3 = StringServer.server.serve(addr3, echoService)
-
-    val addr4 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server4 = StringServer.server.serve(addr4, echoService)
-
-    val dest = Name.bound(
-      Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
-      Address(server2.boundAddress.asInstanceOf[InetSocketAddress]),
-      Address(server3.boundAddress.asInstanceOf[InetSocketAddress]),
-      Address(server4.boundAddress.asInstanceOf[InetSocketAddress])
-    )
-
-    ProcessCoordinate.setCoordinate(0, 1)
-    val sr = new InMemoryStatsReceiver
-    val client = StringClient.client
-      .configured(Stats(sr))
-      .configured(LoadBalancerFactory.Param(Balancers.aperture()))
-      .configured(LoadBalancerFactory.MinApertureOverride(3))
-      .newService(dest, "client")
-
-    println(sr.counters)
-    assert(sr.gauges(Seq("client", "loadbalancer", "logical_aperture"))() == 3f)
-    assert(sr.gauges(Seq("client", "loadbalancer", "algorithm", "aperture_least_loaded"))() >= 1)
-    assert(Await.result(client("hello\n")) == "hello")
-
-    ProcessCoordinate.unsetCoordinate()
-    server1.close()
-    server2.close()
-    server3.close()
-    server4.close()
   }
 
   test("Default panic mode is MajorityUnhealthy") {

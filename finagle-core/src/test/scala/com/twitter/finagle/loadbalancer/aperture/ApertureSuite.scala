@@ -21,8 +21,6 @@ private[loadbalancer] trait ApertureSuite {
     private[loadbalancer] val panicMode: PanicMode = PanicMode.MajorityUnhealthy
     private[aperture] def minAperture = 1
     protected val useDeterministicOrdering: Option[Boolean] = None
-    val minApertureOverride: Int = 0
-
     protected def label = ""
 
     def applyn(n: Int): Unit = {

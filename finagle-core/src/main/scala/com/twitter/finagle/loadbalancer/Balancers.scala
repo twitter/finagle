@@ -248,7 +248,6 @@ object Balancers {
       val eagerConnections = params[EagerConnections].enabled
       val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
       val panicMode = params[LoadBalancerFactory.PanicMode]
-      val minApertureOverride = params[LoadBalancerFactory.MinApertureOverride].size
 
       val balancer = new ApertureLeastLoaded(
         endpoints,
@@ -264,8 +263,7 @@ object Balancers {
         exc,
         useDeterministicOrdering,
         eagerConnections,
-        manageWeights,
-        minApertureOverride
+        manageWeights
       )
       newScopedBal(
         label,
@@ -346,7 +344,6 @@ object Balancers {
       val eagerConnections = params[EagerConnections].enabled
       val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
       val panicMode = params[LoadBalancerFactory.PanicMode]
-      val minApertureOverride = params[LoadBalancerFactory.MinApertureOverride].size
 
       val balancer = new AperturePeakEwma(
         endpoints,
@@ -364,8 +361,7 @@ object Balancers {
         exc,
         useDeterministicOrdering,
         eagerConnections,
-        manageWeights,
-        minApertureOverride
+        manageWeights
       )
       newScopedBal(
         label,

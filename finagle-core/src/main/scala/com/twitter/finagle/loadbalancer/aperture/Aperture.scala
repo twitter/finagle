@@ -70,11 +70,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   private[aperture] def manageWeights: Boolean
 
   /**
-   * Overrides [[minAperture]] when >=1.
-   */
-  private[aperture] def minApertureOverride: Int
-
-  /**
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
    * to derive an ordering for the endpoints used by this [[Balancer]] instance.
    */

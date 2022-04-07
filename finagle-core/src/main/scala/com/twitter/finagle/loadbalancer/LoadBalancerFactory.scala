@@ -36,27 +36,13 @@ object LoadBalancerFactory {
     implicit val param = Stack.Param(ManageWeights(false))
   }
 
-  /**
-   * A temporary stack param that allows you to override the [[WeightedApertureToggle]]
+  /** A temporary stack param that allows you to override the [[WeightedApertureToggle]]
    * for clients without modifying their flags directly.
    */
   private[twitter] case class UseWeightedBalancers(enabled: Boolean)
 
   private[twitter] implicit object UseWeightedBalancers extends Stack.Param[UseWeightedBalancers] {
     val default = UseWeightedBalancers(false)
-  }
-
-  /**
-   * An EXPERIMENTAL stack param that allows overriding the minDeterministicAperture flag on a
-   * per-client basis
-   *
-   * @note This param will likely be removed! Avoid using!
-   *       Does the -minDeterministicAperture flag satisfy your use case?
-   */
-  private[twitter] case class MinApertureOverride(size: Int)
-
-  private[twitter] implicit object MinApertureOverride extends Stack.Param[MinApertureOverride] {
-    val default = MinApertureOverride(0)
   }
 
   /**
@@ -458,9 +444,6 @@ object LoadBalancerFactory {
         var finalParams = params + param.Stats(balancerStats) + ManageWeights(manageWeights)
         if (disableEagerConnections) {
           finalParams = finalParams + EagerConnections(false)
-        }
-        if (params.contains[MinApertureOverride]) {
-          finalParams = finalParams + params[MinApertureOverride]
         }
 
         if (!params.contains[PanicMode]) {
