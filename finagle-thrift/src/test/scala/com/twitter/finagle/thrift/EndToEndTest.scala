@@ -8,6 +8,7 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.ReqRep
 import com.twitter.finagle.service.ResponseClass
 import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service.StatsFilter
 import com.twitter.finagle.ssl.ClientAuth
 import com.twitter.finagle.ssl.KeyCredentials
 import com.twitter.finagle.ssl.TrustCredentials
@@ -453,6 +454,13 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
   }
 
+  // Create a client stack with the StatsFilter at the top to ensure that it is before the
+  // the retry filter and won't count retries
+  private def clientStackForClassifier(): Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
+    Thrift.client.stack
+      .remove(StatsFilter.role)
+      .prepend(StatsFilter.module)
+
   private def testScalaClientResponseClassification(
     sr: InMemoryStatsReceiver,
     client: Echo.MethodPerEndpoint
@@ -614,6 +622,7 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = Thrift.client
+      .withStack(clientStackForClassifier())
       .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
       .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query
@@ -816,6 +825,7 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = Thrift.client
+      .withStack(clientStackForClassifier())
       .configured(Stats(sr))
       .withResponseClassifier(javaClassifier)
       .build[thriftjava.Echo.ServiceIface](
@@ -849,7 +859,7 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val clientBuilder = ClientBuilder()
-      .stack(Thrift.client)
+      .stack(Thrift.client.withStack(clientStackForClassifier()))
       .name("client")
       .reportTo(sr)
       .responseClassifier(scalaClassifier)
@@ -866,7 +876,7 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val clientBuilder = ClientBuilder()
-      .stack(Thrift.client)
+      .stack(Thrift.client.withStack(clientStackForClassifier()))
       .name("client")
       .reportTo(sr)
       .responseClassifier(javaClassifier)
