@@ -1,9 +1,9 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.MetricBuilder.UnlatchedCounter
 import com.twitter.finagle.stats.MetricsView.CounterSnapshot
 import java.util.Collections
 import scala.collection.JavaConverters._
-
 import java.util.{HashMap => JHashMap}
 
 /**
@@ -26,7 +26,14 @@ private[stats] class CounterDeltas {
    * Return the deltas as seen by the last call to [[update]].
    */
   def deltas: Iterable[MetricsView.CounterSnapshot] = {
-    lasts.values.asScala.map { l => l.prev.copy(value = l.delta) }
+    lasts.values.asScala.map { l =>
+      if (l.prev.builder.metricType == UnlatchedCounter) {
+        l.prev
+      } else {
+        l.prev.copy(value = l.delta)
+      }
+
+    }
   }
 
   /**
