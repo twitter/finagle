@@ -8,6 +8,7 @@ import com.twitter.finagle.Stackable
 import com.twitter.finagle.param
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift.filter.ValidationReportingFilter.log
+import com.twitter.finagle.tracing.Trace
 import com.twitter.logging.Logger
 import com.twitter.scrooge.thrift_validation.ThriftValidationException
 import com.twitter.util.Future
@@ -47,12 +48,17 @@ class ValidationReportingFilter[Req, Rep](
     extends SimpleFilter[Req, Rep] {
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+    val trace = Trace()
     service(request).respond {
       case Throw(e: ThriftValidationException) =>
         // the counter reports the number of invalid requests meaning requests with violations
         // that throw exception. we report the endpoint and the class name for the exception
         statsReceiver.counter("violation", e.endpoint, e.requestClazz.getName).incr()
         log.info(e, "Discovered violations in the request")
+        if (trace.isActivelyTracing) {
+          trace.recordBinary("validation/endpoint", e.endpoint)
+          trace.recordBinary("validation/request", e.requestClazz)
+        }
       case _ => () // do nothing
     }
   }

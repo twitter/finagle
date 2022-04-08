@@ -3,6 +3,10 @@ package com.twitter.finagle.thrift.filter
 import com.twitter.conversions.DurationOps.richDurationFromInt
 import com.twitter.finagle.Service
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.tracing.Annotation.BinaryAnnotation
+import com.twitter.finagle.tracing.BufferingTracer
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.Trace
 import com.twitter.scrooge.thrift_validation.ThriftValidationException
 import com.twitter.util.Await
 import com.twitter.util.Future
@@ -47,5 +51,29 @@ class ValidationReportingFilterTest extends AnyFunSuite with MockitoSugar with M
 
     await(filteredService(request))
     assert(!receiver.counters.toString().startsWith("violation"))
+  }
+
+  test("check validation spans are annotated with right identifier") {
+    val receiver = new InMemoryStatsReceiver
+    val filteredService = new ValidationReportingFilter(receiver).andThen(exceptionService)
+    val traceId = Trace.id
+    val tracer = new BufferingTracer
+    Trace.letTracerAndId(tracer, traceId) {
+      intercept[ThriftValidationException] {
+        await(filteredService(request))
+      }
+    }
+
+    def getAnnotation(tracer: BufferingTracer, name: String): Option[Record] = {
+      tracer.toSeq.find { record =>
+        record.annotation match {
+          case a: BinaryAnnotation if a.key == name => true
+          case _ => false
+        }
+      }
+    }
+
+    assert(getAnnotation(tracer, "validation/request").isDefined)
+    assert(getAnnotation(tracer, "validation/endpoint").isDefined)
   }
 }
