@@ -3,7 +3,6 @@ junit_tests(
     compiler_option_sets = ["fatal_warnings"],
     tags = [
         "bazel-compatible",
-        "known-to-fail-jira:CSL-11916",
     ],
     dependencies = [
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
