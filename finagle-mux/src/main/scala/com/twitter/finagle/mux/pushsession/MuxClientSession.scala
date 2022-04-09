@@ -3,13 +3,20 @@ package com.twitter.finagle.mux.pushsession
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle._
-import com.twitter.finagle.mux.{ReqRepFilter, Request, Response, ServerError}
+import com.twitter.finagle.mux.ReqRepFilter
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
+import com.twitter.finagle.mux.ServerError
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.PushSession
 import com.twitter.finagle.mux.ReqRepFilter.CanDispatch
-import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
-import com.twitter.io.{Buf, ByteReader}
-import com.twitter.logging.{Level, Logger}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.Verbosity
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
 import com.twitter.util._
 import java.util.concurrent.Executor
 import scala.util.control.NonFatal
@@ -40,8 +47,7 @@ private[finagle] final class MuxClientSession(
   h_messageWriter: MessageWriter,
   detectorConfig: FailureDetector.Config,
   name: String,
-  statsReceiver: StatsReceiver,
-  timer: Timer)
+  statsReceiver: StatsReceiver)
     extends PushSession[ByteReader, Buf](handle) {
   import MuxClientSession._
 

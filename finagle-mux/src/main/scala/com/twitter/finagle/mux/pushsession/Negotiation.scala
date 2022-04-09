@@ -265,8 +265,7 @@ private[finagle] object Negotiation {
         writer,
         params[FailureDetector.Param].param,
         params[param.Label].label,
-        params[param.Stats].statsReceiver,
-        params[param.Timer].timer
+        params[param.Stats].statsReceiver
       )
     }
   }

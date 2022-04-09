@@ -1,18 +1,23 @@
 package com.twitter.finagle.mux
 
-import com.twitter.finagle.{Mux, Service, ServiceFactory, Stack, mux, param}
+import com.twitter.finagle.Mux
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.finagle.mux
+import com.twitter.finagle.param
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.pushsession._
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
-import com.twitter.finagle.pushsession.{
-  PushChannelHandle,
-  PushSession,
-  PushStackClient,
-  PushTransporter
-}
-import com.twitter.io.{Buf, ByteReader}
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.PushSession
+import com.twitter.finagle.pushsession.PushStackClient
+import com.twitter.finagle.pushsession.PushTransporter
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
 import com.twitter.util.Future
-import io.netty.channel.{Channel, ChannelPipeline}
+import io.netty.channel.Channel
+import io.netty.channel.ChannelPipeline
 import java.net.SocketAddress
 
 // Implementation of the standard mux client that doesn't attempt to negotiate.
@@ -40,8 +45,7 @@ final case class NonNegotiatingClient(
         h_messageWriter = new FragmentingMessageWriter(handle, Int.MaxValue, sessionStats),
         detectorConfig = params[FailureDetector.Param].param,
         name = params[param.Label].label,
-        params[param.Stats].statsReceiver,
-        params[param.Timer].timer
+        params[param.Stats].statsReceiver
       )
     )
   }

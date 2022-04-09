@@ -1,18 +1,27 @@
 package com.twitter.finagle.mux.pushsession
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.pushsession.PushChannelHandle
-import com.twitter.finagle.pushsession.utils.MockChannelHandle
-import com.twitter.finagle.{Failure, Path, Service, Status}
 import com.twitter.finagle.liveness.FailureDetector
-import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.pushsession.MessageWriter.DiscardResult
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message._
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.{Buf, ByteReader}
-import com.twitter.util.{Await, Awaitable, Future, Return, Time}
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.utils.MockChannelHandle
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.Failure
+import com.twitter.finagle.Path
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
 class MuxClientSessionTest extends AnyFunSuite {
@@ -47,8 +56,7 @@ class MuxClientSessionTest extends AnyFunSuite {
       h_messageWriter = newMessageWriter(handle),
       detectorConfig = FailureDetector.MockConfig(() => failureDetectorStatus),
       name = name,
-      statsReceiver = statsReceiver,
-      timer = DefaultTimer
+      statsReceiver = statsReceiver
     )
 
     val service: Service[Request, Response] = await(session.asService)

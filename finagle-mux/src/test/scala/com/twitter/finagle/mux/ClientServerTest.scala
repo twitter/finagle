@@ -2,6 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle._
 import com.twitter.finagle.client.BackupRequestFilter
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.liveness.FailureDetector
@@ -12,27 +13,25 @@ import com.twitter.finagle.mux.pushsession.MuxServerSession
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle._
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.io.BufByteWriter
 import com.twitter.io.ByteReader
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.mockito.invocation.InvocationOnMock
 import org.mockito.Matchers.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.when
+import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalactic.source.Position
-import org.scalatest.concurrent.Eventually
-import org.scalatest.concurrent.IntegrationPatience
-import org.scalatestplus.junit.AssertionsForJUnit
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.OneInstancePerTest
 import org.scalatest.Tag
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatestplus.mockito.MockitoSugar
 
 private object TestContext {
   val testContext = new Contexts.broadcast.Key[Buf]("com.twitter.finagle.mux.MuxContext") {
@@ -113,9 +112,7 @@ private[mux] abstract class ClientServerTest
           new FragmentingMessageWriter(clientHandle, Int.MaxValue, NullStatsReceiver),
         detectorConfig = config,
         name = "test",
-        statsReceiver = NullStatsReceiver,
-        timer = DefaultTimer
-      )
+        statsReceiver = NullStatsReceiver)
       // Register ourselves
       clientHandle.serialExecutor.execute(new Runnable {
         def run(): Unit = clientHandle.registerSession(session)

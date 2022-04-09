@@ -75,9 +75,7 @@ class ClientSessionTest extends AnyFunSuite with MockitoSugar {
         h_messageWriter = mock[MessageWriter],
         detectorConfig = FailureDetector.NullConfig,
         name = "test-dispatcher",
-        statsReceiver = new InMemoryStatsReceiver,
-        timer = mock[Timer]
-      )
+        statsReceiver = new InMemoryStatsReceiver)
 
       () => session.status
     }

@@ -23,6 +23,13 @@ Runtime Behavior Changes
 
 * finagle: Bump version of Jackson to 2.13.2. ``PHAB_ID=D848592``
 
+Bug Fixes
+~~~~~~~~~~
+
+* finagle-integration: we discovered that we had a dead code in MuxClientSession.
+  Let's remove Timer as a parameter in MuxClientSession since it's a dead code.
+  ``PHAB_ID=D869538``
+
 22.2.0
 ------
 New Features
