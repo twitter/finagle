@@ -6,6 +6,11 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Changed the default implementation for random and deterministic aperture 
+load balancers to weighted aperture. ``PHAB_ID=D867878``
 
 22.4.0
 ------

@@ -63,11 +63,11 @@ package exp {
 
   object restrictZone
       extends GlobalFlag[Boolean](
-        true,
+        false,
         "enable zone restriction\n" +
           "When enabled, restricts loadbalancer toggles to a single zone. This applies only to \n" +
           "zone-specific toggles, such as com.twitter.finagle.loadbalancer.WeightedAperture. \n" +
-          "Enabled by default."
+          "Disabled by default."
       )
 
 }

@@ -3,7 +3,7 @@
     {
       "id": "com.twitter.finagle.loadbalancer.WeightedAperture.v2",
       "description": "Enable weight-aware aperture loadbalancers",
-      "fraction": 0.0
+      "fraction": 1.0
     },
     {
       "id": "com.twitter.finagle.service.DeadlineOnly",
