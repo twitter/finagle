@@ -601,6 +601,139 @@ The following retries a request infinitely should it fail with a
       case exc: TimeoutException => fetchUrlWithRetry(url)
     }
 
+Racing Futures
+--------------
+Sometimes we don't care which Future finishes first.  There are three common
+cases for this:
+
+1. Backup or hedged requests, where we send two identical requests in the hope
+   that if one of them is slow, the second one won't be.  This is usually a
+   good opportunity to use :ref:`backup requests <mb_backup_requests>`.
+2. Concurrent work where you want to queue up more work as the work is
+   completed.
+3. Concurrent work where there's processing that needs to be done after each
+   future is satisfied, and which future is satisfied first doesn't matter.
+
+For cases where :ref:`backup requests <mb_backup_requests>` aren't easy to use,
+``Future.select`` is often the right tool.
+
+There are three modes of ``Future.select``.  Although they were originally
+written for Scala, there is also an implementation of ``Futures.select``. The
+methods on the ``Future`` instance should be usable from Java without any
+problem.
+
+The simplest is the methods on the ``Future`` instance, which will simply return
+the future that's returned first, ``Future#select`` and ``Future#or`` which have
+identical behavior.
+
+.. code-block:: scala
+
+  import com.twitter.util.Future
+
+  val original: Future[Tweet] = ???
+  val hedged: Future[Tweet] = ???
+  // Future#select[U >: A](Future[U]): Future[U]
+  val fasterTweet = original.select(hedged)
+
+The more powerful one is ``Future.select`` or ``Future.selectIndex``.
+``Future.select`` accepts a collection of Futures.  It then returns a
+Future which will contain a tuple of the contents of the first satisfied
+Future, and a collection of the rest of the futures.  It can be quite
+useful to have the rest of the futures. You can interrupt the rest if they're
+unneeded, or you can inspect whether other futures have also been satisfied
+and can be process immediately without yielding, or you can select again
+on the futures and yield until one of them is satisfied.  Processing the results
+of ``Future.select`` typically takes advantage of Future recursion. Here are
+some examples of the different modes:
+
+Interrupt the rest:
+
+.. code-block:: scala
+
+  import com.twitter.util.Future
+  import com.twitter.util.Try
+  import java.util.concurrent.CancellationException
+
+  val doWork: () => Future[Tweet] = ???
+  val tweets: Seq[Future[Tweet]] = Seq.fill(10)(doWork)
+  // Future.select[A](Seq[Future[A]]): Future[(Try[A], Seq[Future[A]])]
+  val first: Future[Tweet] = Future.select(tweets).flatMap {
+    case (first, rest) =>
+      val cancelEx = new CancellationException("lost the race")
+      rest.foreach { f => f.raise(cancelEx) }
+      Future.const(first)
+  }
+
+Process as much as you can as eagerly as you can:
+
+.. code-block:: scala
+
+
+  import com.twitter.util.Future
+  import com.twitter.util.Try
+
+  val doWork: () => Future[Tweet]
+  val tweets: Seq[Future[Tweet]] = Seq.fill(10)(doWork)
+  def tweetSentiment(tweet: Tweet): Int = ???
+  def aggregateTweetSentiment(f: Future[(Try[Tweet], Seq[Future[Tweet]])]): Future[Seq[Int]] = f match {
+    case (first, rest) =>
+      val (finished, unfinished) = (Future.const(first) +: rest).foldLeft((Seq[Tweet](), Seq[Future[Tweet]]())) {
+        case ((complete, incomplete), f) => f.poll match {
+	  case Some(Return(tweet)) => (complete :+ tweet, incomplete)
+	  case None => (complete, incomplete :+ f)
+	  case _ => (complete, incomplete) // failed future
+	}
+      }
+      val sentiments = finished.map(tweetSentiment)
+      if (unfinished.isEmpty) Future.value(sentiments)
+      else Future.select(unfinished).flatMap(aggregateTweetSentiment).map(sentiments ++ _)
+  }
+  // Future.select[A](Seq[Future[A]]): Future[(Try[A], Seq[Future[A]])]
+  val avgTweetSentiment: Future[Int] = Future.select(tweets).flatMap(aggregateTweetSentiment).map { seq =>
+    if (seq.isEmpty) 0 else (seq.sum / seq.length)
+  }
+
+Keep going until the first successful result:
+
+.. code-block:: scala
+
+  import com.twitter.util.Future
+  import com.twitter.util.Try
+
+  val doWork: () => Future[Tweet]
+  val tweets: Seq[Future[Tweet]] = Seq.fill(10)(doWork)
+  def raceTheTweets(f: Future[(Try[Tweet], Seq[Future[Tweet]])]): Future[Tweet] = f match {
+    case (Throw(_), rest) if rest.length > 1 => // There was a failure, but there are more futures to await
+      Future.select(rest).flatMap(raceTheTweets _)
+    case (Throw(_), Seq(last)) => // Only one remaining, we will return it regardless of success
+      last
+    case (result, _) => // This is either successful or the last Future has failed
+      Future.const(result)
+  }
+  // Future.select[A](Seq[Future[A]]): Future[(Try[A], Seq[Future[A]])]
+  val first: Future[Tweet] = Future.select(tweets).flatMap(raceTheTweets _)
+
+An even more powerful, but slightly more cumbersome API is ``Future.selectIndex``.  From an
+`IndexedSeq[Future]`, it simply returns which one was satisfied first.  This has two benefits.
+The first is that if you have additional information about the sequence of the collection you
+passed in, you can exploit that in making decisions about what to do.  In comparison, you don't
+know which Future ``Future.select`` returns.  The second benefit is that it avoids returning a
+complex type, and simply returns the index of the array.
+
+.. code-block:: scala
+
+  import com.twitter.util.Future
+  import com.twitter.util.Try
+  import java.util.concurrent.CancellationException
+
+  val doWork: () => Future[Tweet]
+  val tweets: IndexedSeq[Future[Tweet]] = IndexedSeq.fill(10)(doWork)
+  // Future.selectIndex[A](IndexedSeq[Future[A]]): Future[Int]
+  val first: Future[Tweet] = Future.selectIndex(tweets).flatMap { idx =>
+    val cancelEx = new CancellationException("lost the race")
+    for (i < 0 until 10 if i != idx) tweets(i).raise(cancelEx)
+    tweets(idx)
+  }
 
 Other resources
 ---------------
