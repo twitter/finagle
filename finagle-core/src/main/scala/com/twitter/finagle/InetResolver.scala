@@ -46,9 +46,12 @@ private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: Fu
       dnsLookups.incr()
       dnsCond.acquire().flatMap { permit =>
         resolvePool(InetSocketAddressUtil.getAllByName(host).toSeq)
-          .onFailure { e =>
-            log.debug(s"Failed to resolve $host. Error $e")
-            dnsLookupFailures.incr()
+          .onFailure {
+            case InetResolver.ResolutionInterrupted =>
+              log.debug(s"Resolution of $host was cancelled")
+            case e =>
+              log.debug(s"Failed to resolve $host. Error $e")
+              dnsLookupFailures.incr()
           }
           .ensure { permit.release() }
       }
