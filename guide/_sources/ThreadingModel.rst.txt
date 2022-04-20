@@ -156,8 +156,6 @@ Or to enable  with a manually tuned threading configuration:
 Offload Admission Control
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. warning:: This is an experimental feature and may undergo rapid developmental changes.
-
 .. note:: This AC mechanism can only work if global offloading is enabled.
 
 Using system-wide offloading opens the door to an experimental form of admission control. This

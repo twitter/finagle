@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Concurrent Programming with Futures &#8212; Finagle 22.3.0 documentation</title>
+    <title>Concurrent Programming with Futures &#8212; Finagle 22.4.0 documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -122,8 +122,8 @@ thread to execute statements and block all other callers until the
 initial thread is finished with the enclosed statements.</p>
 <p>An example that could fail without synchronization would be:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
-      <span class="n">counter</span>
+  <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+  <span class="n">counter</span>
 <span class="o">}</span>
 </pre></div>
 </div>
@@ -136,10 +136,10 @@ be returned to both threads).</p>
 skipping would be to enclose the critical statements in a synchonized block.
 Syntactially it looks like this:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
-      <span class="n">counter</span>
-    <span class="o">}</span>
+  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="n">counter</span>
+  <span class="o">}</span>
 <span class="o">}</span>
 </pre></div>
 </div>
@@ -157,17 +157,17 @@ can be in control of a lock object. In the example the <cite>this</cite> object 
 lock, meaning that within the class anywhere a <cite>this.synchronized {…}</cite> block
 occurs, it is tied to the same object, <cite>this</cite>. For example:</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
-      <span class="n">counter</span>
-    <span class="o">}</span>
+  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="n">counter</span>
+  <span class="o">}</span>
 <span class="o">}</span>
 
 <span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-      <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
-      <span class="n">counter</span>
-    <span class="o">}</span>
+  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="n">counter</span>
+  <span class="o">}</span>
 <span class="o">}</span>
 </pre></div>
 </div>
@@ -178,17 +178,17 @@ will multiple threads with the same object handle serially execute
 <p>Other methods within the class could be free to execute without waiting by
 omitting the synchronized block</p>
 <div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
-      <span class="n">counter</span>
-    <span class="o">}</span>
+  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="n">counter</span>
+  <span class="o">}</span>
 <span class="o">}</span>
 
 <span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-      <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
-      <span class="n">counter</span>
-    <span class="o">}</span>
+  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="n">counter</span>
+  <span class="o">}</span>
 <span class="o">}</span>
 
 <span class="k">def</span> <span class="n">readCounter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
@@ -204,17 +204,17 @@ at the granularity of the whole instance. For example:</p>
 <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">lock</span><span class="k">:</span> <span class="kt">Object</span> <span class="o">=</span> <span class="n">counter</span>
 
 <span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
-      <span class="n">counter</span>
-    <span class="o">}</span>
+  <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="n">counter</span>
+  <span class="o">}</span>
 <span class="o">}</span>
 
 <span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-      <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
-      <span class="n">counter</span>
-    <span class="o">}</span>
+  <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
+    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="n">counter</span>
+  <span class="o">}</span>
 <span class="o">}</span>
 
 <span class="k">def</span> <span class="n">readCounter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
@@ -371,6 +371,75 @@ futures do <a class="footnote-reference" href="#collecttotry" id="id3">[2]</a>.<
 Futures. This is quite useful, and gives rise to a great amount of
 modularity in distributed systems as common patterns can be cleanly
 abstracted.</p>
+</div>
+<div class="section" id="parallel-composition">
+<h2>Parallel composition<a class="headerlink" href="#parallel-composition" title="Permalink to this headline">¶</a></h2>
+<p>Collect is specialized for when you do the same operation many times, returning
+the same result, and want to know when they’re all complete.  However, we often
+trigger different operations that we can do in parallel, and may return
+different kinds of results.  When we need to use the results of a few different
+kinds of computations, it can be useful to wait for all of the results to come
+back before continuing.  From a classical thread programming model, the
+analogous idea would be calling <cite>join</cite> on a forked thread.  This is where
+<code class="docutils literal notranslate"><span class="pre">Future.join</span></code> comes into play!</p>
+<p>There are actually four different modes of <code class="docutils literal notranslate"><span class="pre">Future.join</span></code>. Although they were
+originally written for Scala, the methods on the <code class="docutils literal notranslate"><span class="pre">Future</span></code> object also have
+Java-friendly versions at <code class="docutils literal notranslate"><span class="pre">Futures.join</span></code>. The method on the <code class="docutils literal notranslate"><span class="pre">Future</span></code> instance
+should be usable from Java without any problem.</p>
+<p>There’s <code class="docutils literal notranslate"><span class="pre">Future#join</span></code>, which is a method directly on the Future class, which
+accepts another Future as an argument and will return a Future that will be
+satisfied once both <cite>this</cite> and the argument passed to <cite>join</cite> are satisfied, and
+will contain the contents of both Futures.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="k">val</span> <span class="n">numFollowers</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">profileImageURL</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+
+<span class="k">val</span> <span class="n">userProfileData</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[(</span><span class="kt">Int</span>, <span class="kt">String</span><span class="o">)]</span> <span class="k">=</span> <span class="n">numFollowers</span><span class="o">.</span><span class="n">join</span><span class="o">(</span><span class="n">profileImageURL</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>There’s also <code class="docutils literal notranslate"><span class="pre">Future.join</span></code>, which can be used for many different results.
+There are many <code class="docutils literal notranslate"><span class="pre">Future.join</span></code> methods to support many different numbers of
+futures that need to be joined.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="k">val</span> <span class="n">numFollowers</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">profileImageURL</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">followersYouKnow</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">User</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
+
+<span class="k">val</span> <span class="n">userProfileData</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[(</span><span class="kt">Int</span>, <span class="kt">String</span>, <span class="kt">Seq</span><span class="o">[</span><span class="kt">User</span><span class="o">])]</span> <span class="k">=</span>
+  <span class="nc">Future</span><span class="o">.</span><span class="n">join</span><span class="o">(</span><span class="n">numFollowers</span><span class="o">,</span> <span class="n">profileImageURL</span><span class="o">,</span> <span class="n">followersYouKnow</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>A common thing to do after calling <code class="docutils literal notranslate"><span class="pre">Future#join</span></code> is to immediately transform
+the result.  As a minor optimization, we can avoid allocating the Tuple2
+instance by using <code class="docutils literal notranslate"><span class="pre">Future#joinWith</span></code>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="k">val</span> <span class="n">numFollowers</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">profileImageURL</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">constructUserProfile</span><span class="k">:</span> <span class="o">(</span><span class="kt">Int</span><span class="o">,</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">UserProfile</span>
+
+<span class="k">val</span> <span class="n">userProfile</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">UserProfile</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">numFollowers</span><span class="o">.</span><span class="n">joinWith</span><span class="o">(</span><span class="n">profileImageURL</span><span class="o">)(</span><span class="n">constructUserProfile</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>The last <code class="docutils literal notranslate"><span class="pre">Future.join</span></code> is a bit of an odd one out–like <code class="docutils literal notranslate"><span class="pre">Future.collect</span></code> it
+operates on a <cite>Seq[Future[A]]</cite>, but it only returns <cite>Future[Unit]</cite> at the
+end–namely, whether all of the components pieces succeeded or not. This method
+is used for implementing the other <code class="docutils literal notranslate"><span class="pre">Future.join</span></code> methods, and is exposed as a
+minor optimization for uses cases where all you need to know is success or failure,
+and not what the actual results was.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="k">val</span> <span class="n">numFollowers</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">profileImageURL</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">followersYouKnow</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">User</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
+
+<span class="k">val</span> <span class="n">profileDataIsReady</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span>
+  <span class="nc">Future</span><span class="o">.</span><span class="n">join</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="n">numFollowers</span><span class="o">,</span> <span class="n">profileImageUrl</span><span class="o">,</span> <span class="n">followersYouKnow</span><span class="o">))</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="synchronization-within-composition">
 <h2>Synchronization within composition<a class="headerlink" href="#synchronization-within-composition" title="Permalink to this headline">¶</a></h2>
@@ -583,6 +652,7 @@ composition we can perform over collections. See the <a class="reference externa
 <li><a class="reference internal" href="#futures-as-containers">Futures as containers</a></li>
 <li><a class="reference internal" href="#sequential-composition">Sequential composition</a></li>
 <li><a class="reference internal" href="#concurrent-composition">Concurrent composition</a></li>
+<li><a class="reference internal" href="#parallel-composition">Parallel composition</a></li>
 <li><a class="reference internal" href="#synchronization-within-composition">Synchronization within composition</a></li>
 <li><a class="reference internal" href="#recovering-from-failure">Recovering from failure</a></li>
 <li><a class="reference internal" href="#other-resources">Other resources</a></li>

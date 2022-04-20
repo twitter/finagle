@@ -79,8 +79,8 @@ An example that could fail without synchronization would be:
 .. code-block:: scala
 
   def incrementAndReturn(): Integer = {
-        counter += 1;
-        counter
+    counter += 1;
+    counter
   }
  
 If two threads are executing the `incrementAndReturn` function concurrently
@@ -96,10 +96,10 @@ Syntactially it looks like this:
 .. code-block:: scala
 
   def incrementAndReturn(): Integer = {
-      this.synchronized {
-        counter += 1;
-        counter
-      }
+    this.synchronized {
+      counter += 1;
+      counter
+    }
   }
 
 Scoping synchronization
@@ -120,17 +120,17 @@ occurs, it is tied to the same object, `this`. For example:
 .. code-block:: scala
 
   def incrementAndReturn(): Integer = {
-      this.synchronized {
-        counter += 1;
-        counter
-      }
+    this.synchronized {
+      counter += 1;
+      counter
+    }
   }
 
   def decrementAndReturn(): Integer = {
-      this.synchronized {
-        counter -= 1;
-        counter
-      }
+    this.synchronized {
+      counter -= 1;
+      counter
+    }
   }
 
 Both functions above are now gated on the same object, `this`, so not only
@@ -144,17 +144,17 @@ omitting the synchronized block
 .. code-block:: scala
 
   def incrementAndReturn(): Integer = {
-      this.synchronized {
-        counter += 1;
-        counter
-      }
+    this.synchronized {
+      counter += 1;
+      counter
+    }
   }
 
   def decrementAndReturn(): Integer = {
-      this.synchronized {
-        counter -= 1;
-        counter
-      }
+    this.synchronized {
+      counter -= 1;
+      counter
+    }
   }
 
   def readCounter(): Integer = {
@@ -173,17 +173,17 @@ at the granularity of the whole instance. For example:
   private[this] val lock: Object = counter
 
   def incrementAndReturn(): Integer = {
-      lock.synchronized {
-        counter += 1;
-        counter
-      }
+    lock.synchronized {
+      counter += 1;
+      counter
+    }
   }
 
   def decrementAndReturn(): Integer = {
-      lock.synchronized {
-        counter -= 1;
-        counter
-      }
+    lock.synchronized {
+      counter -= 1;
+      counter
+    }
   }
 
   def readCounter(): Integer = {
@@ -357,6 +357,86 @@ It is also simple to write your own combinators that operate over
 Futures. This is quite useful, and gives rise to a great amount of
 modularity in distributed systems as common patterns can be cleanly
 abstracted.
+
+Parallel composition
+--------------------
+
+Collect is specialized for when you do the same operation many times, returning
+the same result, and want to know when they're all complete.  However, we often
+trigger different operations that we can do in parallel, and may return
+different kinds of results.  When we need to use the results of a few different
+kinds of computations, it can be useful to wait for all of the results to come
+back before continuing.  From a classical thread programming model, the
+analogous idea would be calling `join` on a forked thread.  This is where
+``Future.join`` comes into play!
+
+There are actually four different modes of ``Future.join``. Although they were
+originally written for Scala, the methods on the ``Future`` object also have
+Java-friendly versions at ``Futures.join``. The method on the ``Future`` instance
+should be usable from Java without any problem.
+
+There's ``Future#join``, which is a method directly on the Future class, which
+accepts another Future as an argument and will return a Future that will be
+satisfied once both `this` and the argument passed to `join` are satisfied, and
+will contain the contents of both Futures.
+
+.. code-block:: scala
+
+  import com.twitter.util.Future
+
+  val numFollowers: Future[Int] = ???
+  val profileImageURL: Future[String] = ???
+
+  val userProfileData: Future[(Int, String)] = numFollowers.join(profileImageURL)
+
+There's also ``Future.join``, which can be used for many different results.
+There are many ``Future.join`` methods to support many different numbers of
+futures that need to be joined.
+
+.. code-block:: scala
+
+  import com.twitter.util.Future
+
+  val numFollowers: Future[Int] = ???
+  val profileImageURL: Future[String] = ???
+  val followersYouKnow: Future[Seq[User]] = ???
+
+  val userProfileData: Future[(Int, String, Seq[User])] =
+    Future.join(numFollowers, profileImageURL, followersYouKnow)
+
+A common thing to do after calling ``Future#join`` is to immediately transform
+the result.  As a minor optimization, we can avoid allocating the Tuple2
+instance by using ``Future#joinWith``.
+
+
+.. code-block:: scala
+
+  import com.twitter.util.Future
+
+  val numFollowers: Future[Int] = ???
+  val profileImageURL: Future[String] = ???
+  val constructUserProfile: (Int, String) => UserProfile
+
+  val userProfile: Future[UserProfile] =
+    numFollowers.joinWith(profileImageURL)(constructUserProfile)
+
+The last ``Future.join`` is a bit of an odd one out--like ``Future.collect`` it
+operates on a `Seq[Future[A]]`, but it only returns `Future[Unit]` at the
+end--namely, whether all of the components pieces succeeded or not. This method
+is used for implementing the other ``Future.join`` methods, and is exposed as a
+minor optimization for uses cases where all you need to know is success or failure,
+and not what the actual results was.
+
+.. code-block:: scala
+
+  import com.twitter.util.Future
+
+  val numFollowers: Future[Int] = ???
+  val profileImageURL: Future[String] = ???
+  val followersYouKnow: Future[Seq[User]] = ???
+
+  val profileDataIsReady: Future[Unit] =
+    Future.join(Seq(numFollowers, profileImageUrl, followersYouKnow))
 
 Synchronization within composition
 ----------------------------------
