@@ -89,34 +89,81 @@ class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatie
     }
   }
 
+  test("statsFilterFile skips non-existent files") {
+    val registry = Metrics.createDetached()
+
+    statsFilterFile.let(Set(new File("/dev/fakefile"))) {
+      val exporter = new JsonExporter(registry)
+      assert(exporter.filterSample eq JsonExporter.mapIdentity)
+    }
+  }
+
   test("statsFilterFile reads multiple files") {
     val registry = Metrics.createDetached()
 
     val tFile1 = File.createTempFile("regex", ".txt")
-    tFile1.deleteOnExit()
-
-    val writer1 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile1), "UTF-8"))
-    writer1.write("abc123\r\n")
-    writer1.close()
-
     val tFile2 = File.createTempFile("regex", ".txt")
-    tFile2.deleteOnExit()
 
-    val writer2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile2), "UTF-8"))
-    writer2.write("def456\r\n")
-    writer2.write("ghi789\r\n")
-    writer2.close()
+    try {
+      val writer1 =
+        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile1), "UTF-8"))
+      writer1.write("abc123\n")
+      writer1.close()
 
-    statsFilterFile.let(Set(tFile1, tFile2)) {
-      val exporter = new JsonExporter(registry)
-      val fn = exporter.filterSample
-      val original: Map[String, Number] = Map(
-        "abc123" -> 1,
-        "def456" -> 2,
-        "ghi789" -> 3,
-        "foo" -> 4
-      )
-      assert(fn(original) == Map("foo" -> 4))
+      val writer2 =
+        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile2), "UTF-8"))
+      writer2.write("def456\n")
+      writer2.write("ghi789\n")
+      writer2.close()
+
+      statsFilterFile.let(Set(tFile1, tFile2)) {
+        val exporter = new JsonExporter(registry)
+        val fn = exporter.filterSample
+        val original: Map[String, Number] = Map(
+          "abc123" -> 1,
+          "def456" -> 2,
+          "ghi789" -> 3,
+          "foo" -> 4
+        )
+        assert(fn(original) == Map("foo" -> 4))
+      }
+    } finally {
+      tFile1.delete()
+      tFile2.delete()
+    }
+  }
+
+  test("statsFilterFile reads multiple files, ignoring missing files") {
+    val registry = Metrics.createDetached()
+
+    val tFile1 = File.createTempFile("regex", ".txt")
+    val tFile2 = File.createTempFile("regex", ".txt")
+    try {
+      val writer1 =
+        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile1), "UTF-8"))
+      writer1.write("abc123\n")
+      writer1.close()
+
+      val writer2 =
+        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile2), "UTF-8"))
+      writer2.write("def456\n")
+      writer2.write("ghi789\n")
+      writer2.close()
+
+      statsFilterFile.let(Set(tFile1, tFile2, new File("/dev/fakefile"))) {
+        val exporter = new JsonExporter(registry)
+        val fn = exporter.filterSample
+        val original: Map[String, Number] = Map(
+          "abc123" -> 1,
+          "def456" -> 2,
+          "ghi789" -> 3,
+          "foo" -> 4
+        )
+        assert(fn(original) == Map("foo" -> 4))
+      }
+    } finally {
+      tFile1.delete()
+      tFile2.delete()
     }
   }
 
@@ -127,7 +174,7 @@ class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatie
     tFile.deleteOnExit()
 
     val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile), "UTF-8"))
-    writer.write("abc123\r\n")
+    writer.write("abc123\n")
     writer.close()
 
     statsFilterFile.let(Set(tFile)) {

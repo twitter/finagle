@@ -117,8 +117,12 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
         Source.fromFile(file)(Codec.UTF8).getLines()
       } catch {
         case e: IOException =>
-          log.error(e, "Unable to read statsFilterFile: %s", file)
-          throw e
+          log.warning(
+            e,
+            "Unable to read statsFilterFile: %s\n" +
+              "Treating file as empty and continuing",
+            file)
+          Iterator.empty
       }
     }
     val regexesFromFlag = statsFilter.get.toSeq.flatMap(_.split(","))
