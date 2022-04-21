@@ -1,16 +1,26 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.{SimpleFilter, Service, ServiceFactory, Stack}
-import com.twitter.finagle.mysql.param.{Credentials, Database}
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.SimpleFilter
+import com.twitter.finagle.Stack
+import com.twitter.finagle.mysql.param.Credentials
+import com.twitter.finagle.mysql.param.Database
 import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.Tracing
 import com.twitter.util.Future
+import net.sf.jsqlparser.parser.CCJSqlParserUtil
+import net.sf.jsqlparser.util.TablesNamesFinder
 import scala.collection.mutable
+import scala.util.control.NonFatal
 
 private[finagle] object MysqlTracingFilter {
   val UserAnnotationKey = "clnt/mysql.user"
   val DatabaseAnnotationKey = "clnt/mysql.database"
   val QueryAnnotationKey = "clnt/mysql.query"
+  val QueryTablesAnnotationKey = "clnt/mysql.query.tables"
   val PrepareAnnotationKey = "clnt/mysql.prepare"
+  val PrepareTablesAnnotationKey = "clnt/mysql.prepare.tables"
   val ExecuteAnnotationKey = "clnt/mysql.execute"
   val UnknownReqAnnotationPrefix = "clnt/mysql."
 
@@ -27,11 +37,47 @@ private[finagle] object MysqlTracingFilter {
     }
   }
 
-  // For security purposes we only emit the first token which will always be a SQL
-  // command (like SELECT) or a fragment (DROP [DATABASE|TABLE]). We don't want to
-  // implement the full parser here so we won't deal with the two token commands.
-  private def firstToken(str: String): String =
-    str.substring(0, math.max(0, str.indexOf(' ')))
+  // Is this query a control query:
+  //  - sent by a client itself, not a user
+  //  - doesn't reference any data
+  private def isControlQuery(query: String): Boolean = {
+    query.startsWith("START") ||
+    query.startsWith("SET") ||
+    query == "COMMIT" ||
+    query == "ROLLBACK" ||
+    query == "LOCK" ||
+    query == "UNLOCK"
+  }
+
+  // We're using https://github.com/JSQLParser/JSqlParser SQL parsing library to extract a few
+  // details out of a raw SQL query:
+  //  - Query verb (Select, Drop, Alter, etc)
+  //  - List of tables involved in the query
+  private def traceQueryDetails(
+    trace: Tracing,
+    verbAnnotationKey: String,
+    tablesAnnotationKey: String,
+    query: String
+  ): Unit = {
+    // The parser we're using doesn't support START TRANSACTION (and perhaps other) commands
+    // so we need to wrap parsing with a few heuristics to ensure safe and quick parsing,
+    // with minimal number of exceptions thrown.
+    if (!isControlQuery(query)) {
+      try {
+        val statement = CCJSqlParserUtil.parse(query)
+        val finder = new TablesNamesFinder
+        val tables = finder.getTableList(statement)
+        val verb = statement.getClass.getSimpleName.toUpperCase()
+
+        trace.recordBinary(verbAnnotationKey, verb)
+        if (!tables.isEmpty) {
+          trace.recordBinary(tablesAnnotationKey, String.join(", ", tables))
+        }
+      } catch {
+        case NonFatal(_) => () // ignore that query
+      }
+    }
+  }
 }
 
 private class MysqlTracingFilter(username: Option[String], database: Option[String])
@@ -54,6 +100,7 @@ private class MysqlTracingFilter(username: Option[String], database: Option[Stri
 
   def apply(request: Request, service: Service[Request, Result]): Future[Result] = {
     val trace = Trace()
+
     if (trace.isActivelyTracing) {
       username match {
         case Some(user) => trace.recordBinary(UserAnnotationKey, user)
@@ -66,9 +113,9 @@ private class MysqlTracingFilter(username: Option[String], database: Option[Stri
 
       request match {
         case QueryRequest(sqlStatement) =>
-          trace.recordBinary(QueryAnnotationKey, firstToken(sqlStatement))
+          traceQueryDetails(trace, QueryAnnotationKey, QueryTablesAnnotationKey, sqlStatement)
         case PrepareRequest(sqlStatement) =>
-          trace.recordBinary(PrepareAnnotationKey, firstToken(sqlStatement))
+          traceQueryDetails(trace, PrepareAnnotationKey, PrepareTablesAnnotationKey, sqlStatement)
         case ExecuteRequest(id, _, _, _) =>
           trace.recordBinary(ExecuteAnnotationKey, id)
         case _ =>

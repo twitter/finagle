@@ -42,6 +42,7 @@ val scalaCollectionCompat = "org.scala-lang.modules" %% "scala-collection-compat
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.9.3"
 val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.11"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
+val jsqlParserLib = "com.github.jsqlparser" % "jsqlparser" % "4.2"
 val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % netty4StaticSslVersion
 val netty4Libs = Seq(
   "io.netty" % "netty-handler" % netty4Version,
@@ -738,7 +739,8 @@ lazy val finagleMySQL = Project(
       util("core"),
       util("stats"),
       caffeineLib,
-      jsr305Lib
+      jsr305Lib,
+      jsqlParserLib
     ) ++ jacksonLibs,
     unmanagedSources / excludeFilter := {
       "EmbeddableMysql.scala" || "ClientTest.scala"
