@@ -7,7 +7,7 @@ import com.twitter.finagle.util.Rng
 import com.twitter.finagle.Address
 import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.util.Activity
 import com.twitter.util.Var
 

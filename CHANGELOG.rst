@@ -6,6 +6,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+
+New Features
+~~~~~~~~~~~~
+* finagle-core: Introduce panic mode in load balancers. Configure the threshold for
+  panic mode to start using `withLoadBalancer.panicMode`. ``PHAB_ID=D879034``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

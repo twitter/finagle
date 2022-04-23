@@ -1,7 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.Future
 import com.twitter.util.Time

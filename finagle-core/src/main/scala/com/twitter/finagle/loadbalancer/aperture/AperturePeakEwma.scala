@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.ServiceFactoryProxy
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.util.Activity
 import com.twitter.util.Duration
 import com.twitter.util.Future

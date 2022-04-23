@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.stats.Counter
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver

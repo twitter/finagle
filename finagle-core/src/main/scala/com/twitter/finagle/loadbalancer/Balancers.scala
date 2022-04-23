@@ -87,7 +87,7 @@ object Balancers {
         params: Stack.Params
       ): ServiceFactory[Req, Rep] = {
         val sr = params[param.Stats].statsReceiver
-        val panicMode = params[LoadBalancerFactory.PanicMode]
+        val panicMode = params[PanicMode]
         val balancer = new P2CLeastLoaded(endpoints, panicMode, rng, sr, exc)
         newScopedBal(
           params[param.Label].label,
@@ -132,7 +132,7 @@ object Balancers {
       params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
-      val panicMode = params[LoadBalancerFactory.PanicMode]
+      val panicMode = params[PanicMode]
       val balancer =
         new P2CPeakEwma(endpoints, decayTime, Stopwatch.systemNanos, panicMode, rng, sr, exc)
       newScopedBal(
@@ -247,7 +247,7 @@ object Balancers {
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
       val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
-      val panicMode = params[LoadBalancerFactory.PanicMode]
+      val panicMode = params[PanicMode]
 
       val balancer = new ApertureLeastLoaded(
         endpoints,
@@ -343,7 +343,7 @@ object Balancers {
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
       val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
-      val panicMode = params[LoadBalancerFactory.PanicMode]
+      val panicMode = params[PanicMode]
 
       val balancer = new AperturePeakEwma(
         endpoints,

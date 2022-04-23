@@ -5,7 +5,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.Address
 import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.finagle.loadbalancer.EndpointFactory
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.util.Activity
 import com.twitter.util.Var
 

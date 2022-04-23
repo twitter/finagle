@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer.p2c
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver

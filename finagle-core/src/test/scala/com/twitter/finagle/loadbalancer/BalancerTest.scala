@@ -2,16 +2,15 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.Await
 import com.twitter.util.Future
 import com.twitter.util.Time
 import org.scalacheck.Gen
 import org.scalatest.concurrent.Conductors
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.language.reflectiveCalls
-import org.scalatest.funsuite.AnyFunSuite
 
 class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenPropertyChecks {
 

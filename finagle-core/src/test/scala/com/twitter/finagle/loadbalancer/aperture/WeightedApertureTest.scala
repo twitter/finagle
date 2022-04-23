@@ -7,7 +7,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceFactoryProxy
 import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.EndpointFactory
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver

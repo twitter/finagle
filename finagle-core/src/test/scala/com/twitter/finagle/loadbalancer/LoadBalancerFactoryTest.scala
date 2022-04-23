@@ -6,7 +6,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.server.utils.StringServer

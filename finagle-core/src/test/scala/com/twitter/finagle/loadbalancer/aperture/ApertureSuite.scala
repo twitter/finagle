@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.EndpointFactory
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
 import scala.collection.mutable

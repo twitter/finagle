@@ -8,7 +8,7 @@ import com.twitter.finagle.ClientConnection
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.Status
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.util.Activity
 import com.twitter.util.Await
 import com.twitter.util.Closable

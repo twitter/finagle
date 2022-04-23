@@ -2,6 +2,7 @@ package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.loadbalancer.PanicMode
 
 /**
  * A collection of methods for configuring the Load Balancing (default) module
@@ -55,6 +56,6 @@ class DefaultLoadBalancingParams[A <: Stack.Parameterized[A]](self: Stack.Parame
    * For round robin, these percents do not apply because it is not a pick two
    * based algorithm.
    */
-  private[twitter] def panicMode(panicThreshold: LoadBalancerFactory.PanicMode): A =
+  def panicMode(panicThreshold: PanicMode): A =
     self.configured(panicThreshold)
 }

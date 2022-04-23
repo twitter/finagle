@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer.roundrobin
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory.PanicMode
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.loadbalancer._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.Activity
