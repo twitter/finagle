@@ -76,7 +76,7 @@ class ResponseConformanceFilterTest extends AnyFunSuite {
 
   test(
     "Doesn't remove non-chunked values for Transfer-Encoding headers when " +
-      "Content-Lenght header is present"
+      "Content-Length header is present"
   ) {
     val resp = Response()
     resp.setChunked(true)

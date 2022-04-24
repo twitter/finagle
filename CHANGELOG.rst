@@ -852,7 +852,7 @@ Bug Fixes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-* finagle-memcached: The key in `RetrievalCommand` are ommited in traces. The total number of Hits
+* finagle-memcached: The key in `RetrievalCommand` are omitted in traces. The total number of Hits
   and Misses are annotated via a counter instead under `clnt/memcached.(hits/misses)` ``PHAB_ID=D491738``
 
 20.5.0
@@ -1500,7 +1500,7 @@ Breaking API Changes
   Additionally, the synthetic `Command.COM_NO_OP` has been removed, as due to the
   restructuring it was no longer necessary. ``PHAB_ID=D327554``
 
-* finagle-mysql: Uses of the abbreivation 'cap' have been renamed to the full
+* finagle-mysql: Uses of the abbreviation 'cap' have been renamed to the full
   word: 'capabilities', including for the `baseCapabilities` of `Capability`.
   ``PHAB_ID=D329603``
 
