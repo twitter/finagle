@@ -1,5 +1,6 @@
 package com.twitter.finagle.naming
 
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.factory.ServiceFactoryCache
@@ -7,6 +8,14 @@ import com.twitter.finagle.util.Drv
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Future
 import com.twitter.util.Time
+
+object retainUneachableUnionBranches
+    extends GlobalFlag[Boolean](
+      true,
+      "Retain empty and unresolved branches from nametree unions. " +
+        "Disabling this may help to avoid certain failures associated with " +
+        "name resolution issues."
+    )
 
 /**
  * A finagle context key that can be used to attach a custom id to a request
@@ -62,13 +71,13 @@ private object NameTreeFactory {
       def close(deadline: Time) = Future.Done
     }
 
-    // Filter 0-weighted empty factories out of Unions. In the case where an
-    // entire Union is zero-weighted, we want to load balance over
-    // non-empty factories.
+    // We want to keep a sub tree in a union if it is reachable
+    // or if it's explicitly weighted more than 0 and we are configured
+    // to retain unreachable subtrees (default True)
     def shouldKeepInUnion(t: NameTree.Weighted[Key]): Boolean = {
       t.tree match {
         case NameTree.Neg | NameTree.Fail | NameTree.Empty =>
-          t.weight != 0.0
+          retainUneachableUnionBranches() && t.weight > 0.0
         case _ => true
       }
     }

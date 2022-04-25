@@ -246,6 +246,14 @@ New Features
   and `withSessionDefaults` APIs to allow configuring sessions before they're used. 
   ``PHAB_ID=D746525``
 
+* finagle-core: `c.t.f.n.NameTreeFactory` now has a configuration flag to determine whether to
+  retain weighted, unreachable branches of a `NameTree.Union`. Current behavior (retain) remains
+  unchanged, but can now be overridden via GlobalFlag. ``PHAB_ID=D879306``
+
+* finagle-core: introduce new GlobalFlag `com.twitter.finagle.naming.retainUneachableUnionBranches`
+  which defaults to `true`. Setting to `false` will prune unreachable `NameTree.Union` branches.
+  ``PHAB_ID=D879306``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

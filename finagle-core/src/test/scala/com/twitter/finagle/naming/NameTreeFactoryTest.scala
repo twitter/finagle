@@ -149,23 +149,9 @@ class NameTreeFactoryTest
   }
 
   test("is available iff all leaves are available") {
-    def isAvailable(tree: NameTree[Status]): Boolean =
-      NameTreeFactory(
-        Path.empty,
-        tree,
-        new ServiceFactoryCache[Status, Unit, Unit](
-          key =>
-            new ServiceFactory[Unit, Unit] {
-              def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(null)
-              def close(deadline: Time) = Future.Done
-              override def status = key
-            },
-          Timer.Nil
-        )
-      ).isAvailable
 
     assert(
-      isAvailable(
+      allLeavesAvailable(
         NameTree.Union(
           NameTree.Weighted(
             1d,
@@ -180,7 +166,7 @@ class NameTreeFactoryTest
     )
 
     assert(
-      !isAvailable(
+      !allLeavesAvailable(
         NameTree.Union(
           NameTree.Weighted(
             1d,
@@ -195,7 +181,7 @@ class NameTreeFactoryTest
     )
 
     assert(
-      !isAvailable(
+      !allLeavesAvailable(
         NameTree.Union(
           NameTree.Weighted(
             1d,
@@ -208,21 +194,6 @@ class NameTreeFactoryTest
         )
       )
     )
-  }
-
-  def canBuildServiceFromTree(tree: NameTree[String]): Boolean = {
-    val factoryCache = new ServiceFactoryCache[String, Unit, Unit](
-      _ =>
-        new ServiceFactory[Unit, Unit] {
-          def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =
-            Future.value(Service.const(Future.Done))
-          def close(deadline: Time) = Future.Done
-          override def status = Status.Open
-        },
-      Timer.Nil
-    )
-
-    NameTreeFactory(Path.empty, tree, factoryCache).isAvailable
   }
 
   test("filters Zero-weighted Neg/Empty/Fail out of unions") {
@@ -298,4 +269,53 @@ class NameTreeFactoryTest
 
     assert(!canBuildServiceFromTree(emptyWeightedNonZero))
   }
+
+  test("non-zero weighted empty are not filtered when retain flag is default") {
+    val emptyWeightedNonZero = NameTree.Union(
+      NameTree.Weighted(0.5, NameTree.Empty),
+      NameTree.Weighted(0.5, NameTree.Leaf(Status.Open))
+    )
+    assert(!allLeavesAvailable(emptyWeightedNonZero))
+  }
+
+  test("non-zero weighted empty are filtered when retain flag set to false") {
+    retainUneachableUnionBranches.let(false) {
+      val emptyWeightedNonZero = NameTree.Union(
+        NameTree.Weighted(0.5, NameTree.Empty),
+        NameTree.Weighted(0.5, NameTree.Leaf(Status.Open))
+      )
+      assert(allLeavesAvailable(emptyWeightedNonZero))
+    }
+  }
+
+  def canBuildServiceFromTree(tree: NameTree[String]): Boolean = {
+    val factoryCache = new ServiceFactoryCache[String, Unit, Unit](
+      _ =>
+        new ServiceFactory[Unit, Unit] {
+          def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =
+            Future.value(Service.const(Future.Done))
+          def close(deadline: Time) = Future.Done
+          override def status = Status.Open
+        },
+      Timer.Nil
+    )
+
+    NameTreeFactory(Path.empty, tree, factoryCache).isAvailable
+  }
+
+  def allLeavesAvailable(tree: NameTree[Status]): Boolean =
+    NameTreeFactory(
+      Path.empty,
+      tree,
+      new ServiceFactoryCache[Status, Unit, Unit](
+        key =>
+          new ServiceFactory[Unit, Unit] {
+            def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(null)
+            def close(deadline: Time) = Future.Done
+            override def status = key
+          },
+        Timer.Nil
+      )
+    ).isAvailable
+
 }
