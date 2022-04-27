@@ -28,9 +28,9 @@ private object WeightedAperture {
    * @note negative weights are not allowed and result in an exception.
    */
   def normalize(weights: Seq[Double]): Seq[Double] = {
-    assert(weights.forall(_ > 0), "negative weight not supported")
+    assert(!weights.exists(_ < 0d), "negative weight not supported")
     val sum = weights.sum
-    if (sum == 0) weights.map { _ => 1d / weights.size }
+    if (sum == 0d) weights.map { _ => 1d / weights.size }
     else weights.map(_ / sum)
   }
 

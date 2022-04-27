@@ -106,6 +106,13 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
     }
   }
 
+  test("WeightedAperture.normalize does not throw exception for 0 weights") {
+    val weights = Seq(0.5, 0.0001, 0.0, 1.0)
+
+    val normalized = WeightedAperture.normalize(weights)
+    assert(approxEqual(normalized.sum, 1.0))
+  }
+
   test("WeightedAperture.adjustWeightsWithCoord can wrap around") {
     // Only add 10 nodes so that we are forced to use the MinDeterministicAperture, 12
     val nodes: Vector[TestNode] = Vector.fill(10)(TestNode(newFactory()))
