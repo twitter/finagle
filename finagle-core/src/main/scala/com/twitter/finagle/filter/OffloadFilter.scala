@@ -1,6 +1,7 @@
 package com.twitter.finagle.filter
 
-import com.twitter.finagle.offload.{OffloadFilterAdmissionControl, OffloadFuturePool}
+import com.twitter.finagle.offload.OffloadFilterAdmissionControl
+import com.twitter.finagle.offload.OffloadFuturePool
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle._
 import com.twitter.util._
@@ -31,23 +32,21 @@ object OffloadFilter {
   private[this] val ClientAnnotationKey = "clnt/finagle.offload_pool_size"
   private[this] val ServerAnnotationKey = "srv/finagle.offload_pool_size"
 
-  sealed abstract class Param
+  final case class Param(pool: Option[FuturePool])
   object Param {
 
-    def apply(pool: FuturePool): Param = Enabled(pool)
-    def apply(executor: ExecutorService): Param = Enabled(FuturePool(executor))
+    def apply(pool: FuturePool): Param = Param(Some(pool))
+    def apply(executor: ExecutorService): Param = Param(Some(FuturePool(executor)))
 
-    final case class Enabled(pool: FuturePool) extends Param
-    final case object Disabled extends Param
+    val Disabled = Param(Option.empty)
 
     implicit val param: Stack.Param[Param] = new Stack.Param[Param] {
-      lazy val default: Param =
-        OffloadFuturePool.configuredPool.map(Enabled.apply).getOrElse(Disabled)
+      lazy val default: Param = Param(OffloadFuturePool.configuredPool)
 
       override def show(p: Param): Seq[(String, () => String)] = {
-        val enabledStr = p match {
-          case Enabled(executorServiceFuturePool) => executorServiceFuturePool.toString
-          case Disabled => "Disabled"
+        val enabledStr = p.pool match {
+          case Some(executorServiceFuturePool) => executorServiceFuturePool.toString
+          case None => "Disabled"
         }
         Seq(("pool", () => enabledStr))
       }
@@ -165,9 +164,9 @@ object OffloadFilter {
       next: Stack[ServiceFactory[Req, Rep]]
     ): Stack[ServiceFactory[Req, Rep]] = {
       val p = params[Param]
-      p match {
-        case Param.Disabled => next
-        case Param.Enabled(pool) =>
+      p.pool match {
+        case None => next
+        case Some(pool) =>
           // This part injects the offload admission control filter, if applicable.
           val nextParams = OffloadFilterAdmissionControl.maybeInjectAC(pool, params)
           Stack.leaf(
@@ -185,10 +184,10 @@ object OffloadFilter {
       p: Param,
       next: ServiceFactory[Req, Rep]
     ): ServiceFactory[Req, Rep] = {
-      p match {
-        case Param.Enabled(pool) =>
+      p.pool match {
+        case Some(pool) =>
           new Client(pool).andThen(next)
-        case Param.Disabled => next
+        case None => next
       }
     }
 

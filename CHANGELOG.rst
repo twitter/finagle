@@ -12,6 +12,12 @@ New Features
 * finagle-core: Introduce panic mode in load balancers. Configure the threshold for
   panic mode to start using `withLoadBalancer.panicMode`. ``PHAB_ID=D879034``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Update OffloadFilter.Param API to encourage recommended construction.
+  ``PHAB_ID=D882210``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
