@@ -44,6 +44,16 @@ private final class FailingEndpointFactory[Req, Rep](cause: Throwable)
 }
 
 private object LazyEndpointFactory {
+
+  private class EndpointAlreadyClosedException(cause: Exception) extends ServiceClosedException {
+    initCause(cause)
+    override def getMessage: String = "Tried to acquire endpoint after it was closed"
+  }
+
+  private class EndpointMarkedClosedException(address: Address) extends ServiceClosedException {
+    override def getMessage: String = s"Endpoint $address was marked closed"
+  }
+
   sealed trait State[-Req, +Rep]
 
   /**
@@ -114,12 +124,7 @@ private final class LazyEndpointFactory[Req, Rep](
 
       case Making => apply(conn)
       case Made(underlying) => underlying(conn)
-      case Closed(cause) =>
-        val exn = new ServiceClosedException {
-          override def getMessage: String = "Tried to acquire endpoint after it was closed"
-        }
-        exn.initCause(cause)
-        Future.exception(exn)
+      case Closed(cause) => Future.exception(new EndpointAlreadyClosedException(cause))
     }
 
   /**
@@ -145,16 +150,11 @@ private final class LazyEndpointFactory[Req, Rep](
     case Closed(_) => Future.Done
     case Making => close(when)
     case Init =>
-      val exn = new ServiceClosedException() {
-        override def getMessage: String = s"Endpoint $address was marked closed"
-      }
-      if (!state.compareAndSet(Init, Closed(exn))) close(when)
+      if (!state.compareAndSet(Init, Closed(new EndpointMarkedClosedException(address))))
+        close(when)
       else Future.Done
     case s @ Made(underlying) =>
-      val exn = new ServiceClosedException() {
-        override def getMessage: String = s"Endpoint $address was marked closed"
-      }
-      if (!state.compareAndSet(s, Closed(exn))) close(when)
+      if (!state.compareAndSet(s, Closed(new EndpointMarkedClosedException(address)))) close(when)
       else underlying.close(when)
   }
 
