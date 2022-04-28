@@ -77,20 +77,20 @@ private[finagle] abstract class ConsistentHashPartitioningService[Req, Rep, Key]
 
   protected def partitionRequest(
     request: Req
-  ): Future[Map[Req, Future[Service[Req, Rep]]]] = {
+  ): Future[Map[Req, Seq[Future[Service[Req, Rep]]]]] = {
     getPartitionKeys(request) match {
       case Seq(key) =>
-        Future.value(Map(request -> partitionServiceForKey(key)))
+        Future.value(Map(request -> Seq(partitionServiceForKey(key))))
       case keys: Seq[Key] if keys.nonEmpty =>
         groupByPartition(keys) match {
           case keyMap if keyMap.size == 1 =>
             // all keys belong to the same partition
-            Future.value(Map(request -> partitionServiceForKey(keys.head)))
+            Future.value(Map(request -> Seq(partitionServiceForKey(keys.head))))
           case keyMap =>
             Future.value(
               keyMap.map {
                 case (ps, pKeys) =>
-                  (createPartitionRequestForKeys(request, pKeys.toSeq), ps)
+                  (createPartitionRequestForKeys(request, pKeys.toSeq), Seq(ps))
               }
             )
         }

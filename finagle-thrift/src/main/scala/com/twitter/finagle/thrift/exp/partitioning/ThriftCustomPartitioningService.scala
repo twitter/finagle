@@ -4,14 +4,17 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.partitioning.PartitioningService
 import com.twitter.finagle.thrift.ClientDeserializeCtx
-import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.{
-  PartitioningStrategyException,
-  ReqRepMarshallable
-}
-import com.twitter.finagle.{Address, Service, ServiceFactory, Stack}
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
+import com.twitter.finagle.Address
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
 import com.twitter.scrooge.ThriftStructIface
-import com.twitter.util.{Future, Time}
+import com.twitter.util.Future
+import com.twitter.util.Time
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle
+import scala.collection.mutable
 import scala.util.control.NonFatal
 
 /**
@@ -52,7 +55,7 @@ private[finagle] class ThriftCustomPartitioningService[Req, Rep](
   // for fan-out requests
   final protected[finagle] def partitionRequest(
     original: Req
-  ): Future[Map[Req, Future[Service[Req, Rep]]]] = {
+  ): Future[Map[Req, Seq[Future[Service[Req, Rep]]]]] = {
     val snapPartitioner = nodeManager.snapshotSharder()
 
     val partitionIdAndRequest = getPartitionIdAndRequestMap(snapPartitioner.partitionFunction)
@@ -63,18 +66,25 @@ private[finagle] class ThriftCustomPartitioningService[Req, Rep](
       } else if (idsAndRequests.size == 1) {
         // optimization: won't serialize request if it is a singleton partition
         Future.value(
-          Map(original -> snapPartitioner.getServiceByPartitionId(idsAndRequests.head._1)))
+          Map(original -> Seq(snapPartitioner.getServiceByPartitionId(idsAndRequests.head._1))))
       } else {
-        Future.value(idsAndRequests.map {
+        val reqAndServices = mutable.Map[Req, Seq[Future[Service[Req, Rep]]]]()
+        idsAndRequests.foreach {
           case (id, request) =>
             val thriftClientRequest =
               serializer.serialize(rpcName, request, thriftMarshallable.isOneway(original))
-
             val partitionedReq =
               thriftMarshallable.framePartitionedRequest(thriftClientRequest, original)
 
-            (partitionedReq, snapPartitioner.getServiceByPartitionId(id))
-        })
+            if (reqAndServices.contains(partitionedReq)) {
+              reqAndServices.update(
+                partitionedReq,
+                reqAndServices(partitionedReq) :+ snapPartitioner.getServiceByPartitionId(id))
+            } else {
+              reqAndServices += (partitionedReq -> Seq(snapPartitioner.getServiceByPartitionId(id)))
+            }
+        }
+        Future.value(reqAndServices.toMap)
       }
     }
   }

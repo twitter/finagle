@@ -1,7 +1,8 @@
 package com.twitter.finagle.partitioning
 
 import com.twitter.util.Future
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
 
 /**
  * Represents the snapshot of the information needed to determine how to
@@ -18,7 +19,7 @@ case class SnapPartitioner[Req, Rep, B >: PartialFunction[Any, Future[Nothing]]]
    * @note we assume that the factory has implemented FactoryToService under the covers,
    * so the returned service does not need to be closed by the caller.
    */
-  def getServiceByPartitionId(partitionId: Int): Future[Service[Req, Rep]] =
+  def getServiceByPartitionId(partitionId: Int): Future[Service[Req, Rep]] = {
     partitionMapping.get(partitionId) match {
       case Some(factory) => factory()
       case None =>
@@ -26,6 +27,7 @@ case class SnapPartitioner[Req, Rep, B >: PartialFunction[Any, Future[Nothing]]]
           new PartitionNodeManager.NoPartitionException(
             s"No partition: $partitionId found in the node manager"))
     }
+  }
 }
 
 object SnapPartitioner {

@@ -24,6 +24,9 @@ Runtime Behavior Changes
 * finagle-core: Changed the default implementation for random and deterministic aperture 
 load balancers to weighted aperture. ``PHAB_ID=D867878``
 
+* finagle-partitioning: ThriftCustomPartitioningServices now allow fanning out the same
+request to multiple partitions. ``PHAB_ID=D882370``
+
 22.4.0
 ------
 

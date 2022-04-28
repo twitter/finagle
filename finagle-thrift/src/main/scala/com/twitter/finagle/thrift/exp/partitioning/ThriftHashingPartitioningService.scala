@@ -2,14 +2,15 @@ package com.twitter.finagle.thrift.exp.partitioning
 
 import com.twitter.finagle.partitioning.ConsistentHashPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.partitioning.param.NumReps
-import com.twitter.finagle.partitioning.{ConsistentHashPartitioningService, PartitioningService}
+import com.twitter.finagle.partitioning.ConsistentHashPartitioningService
+import com.twitter.finagle.partitioning.PartitioningService
 import com.twitter.finagle.thrift.ClientDeserializeCtx
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.RequestMerger
-import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.{
-  PartitioningStrategyException,
-  ReqRepMarshallable
-}
-import com.twitter.finagle.{Service, ServiceFactory, Stack}
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
+import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
@@ -55,7 +56,7 @@ final private[finagle] class ThriftHashingPartitioningService[Req, Rep](
   // until it gets the final request, so that it only serializes request once
   override protected def partitionRequest(
     request: Req
-  ): Future[Map[Req, Future[Service[Req, Rep]]]] = {
+  ): Future[Map[Req, Seq[Future[Service[Req, Rep]]]]] = {
     val keyAndRequest = getKeyAndRequestMap
     if (keyAndRequest.isEmpty || keyAndRequest.head._1 == None) {
       noPartitionInformationHandler(request)
@@ -64,26 +65,26 @@ final private[finagle] class ThriftHashingPartitioningService[Req, Rep](
         .groupBy {
           case (key, _) => partitionServiceForKey(key)
         }
-      // if everything is going to the same partition, we can avoid reserializing
+      // if everything is going to the same partition, we can avoid re-serializing
       Future.value(if (grouped.size == 1) {
-        grouped.map { case (fsvc, _) => request -> fsvc }
+        grouped.map { case (fsvc, _) => request -> Seq(fsvc) }
       } else {
         grouped.map {
           // if there's only one request going to a given partition, we don't need to remerge the requests
           case (svc, shardKeyAndRequestMap) if shardKeyAndRequestMap.size == 1 =>
-            (framePartitionedRequest(shardKeyAndRequestMap.head._2, request), svc)
+            (framePartitionedRequest(shardKeyAndRequestMap.head._2, request), Seq(svc))
           case (svc, shardKeyAndRequestMap) =>
             (
               framePartitionedRequest(
                 mergeRequest(rpcName)(shardKeyAndRequestMap.values.toSeq),
                 request),
-              svc)
+              Seq(svc))
         }
       })
     }
   }
 
-  private[this] def framePartitionedRequest(requests: ThriftStructIface, original: Req) = {
+  private[this] def framePartitionedRequest(requests: ThriftStructIface, original: Req): Req = {
     val serializedRequest = requestSerializer
       .serialize(rpcName, requests, thriftMarshallable.isOneway(original))
     thriftMarshallable.framePartitionedRequest(serializedRequest, original)

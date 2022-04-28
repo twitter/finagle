@@ -25,9 +25,11 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
 
   private[this] def makePartitionedRequests(req: Req): Future[Seq[(Req, Try[Rep])]] =
     partitionRequest(req).flatMap { f =>
-      Future.collect(f.map {
-        case (pReq, service) =>
-          applyService(pReq, service).transform { t => Future.value((pReq, t)) }
+      Future.collect(f.flatMap {
+        case (pReq, services) =>
+          services.map { service =>
+            applyService(pReq, service).transform { t => Future.value((pReq, t)) }
+          }
       }.toSeq)
     }
 
@@ -57,9 +59,14 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    * per-partition requests and return the map of partitioned requests.
    *
    * @param request: Incoming batched request
-   * @return A map of the partitioned request to its service
+   * @return A map of the partitioned request to its service(s)
+   *
+   * @note Fanning out the same request to different partitions is supported in
+   *       ThriftCustomPartitioning, while users can define their fan-out topology in
+   *       CustomStrategy#getPartitionIdAndRequest. HashingStrategy always return a single service
+   *       wrapped in Seq because hash keys are distributed to their unique partitions
    */
-  protected def partitionRequest(request: Req): Future[Map[Req, Future[Service[Req, Rep]]]]
+  protected def partitionRequest(request: Req): Future[Map[Req, Seq[Future[Service[Req, Rep]]]]]
 
   /**
    * This method is used for the batched request case. When the keys belong to multiple partitions,

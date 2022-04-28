@@ -7,11 +7,19 @@ import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.thrift.ClientDeserializeCtx
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
-import com.twitter.finagle.{Addr, Address, Service, ServiceFactory, Stack, Stackable, StackBuilder}
+import com.twitter.finagle.Addr
+import com.twitter.finagle.Address
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Stackable
+import com.twitter.finagle.StackBuilder
 import com.twitter.io.Buf
 import com.twitter.scrooge.ThriftStructIface
 import com.twitter.test.thriftscala.B
-import com.twitter.util.{Future, Return, Var}
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Var
 import org.scalatest.PrivateMethodTester
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -142,6 +150,28 @@ class ThriftCustomPartitioningServiceTest
     Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx1) {
       serdeCtx1.rpcName("mergeable_add")
       assert(await(serviceWithClientStrategy.partitionRequest(fanoutRequest)).size == 3)
+    }
+  }
+
+  test("fan-out request - the same request send to different dest as configured") {
+    val sameRequestFanout = ClientCustomStrategy.noResharding(
+      {
+        case args: B.MergeableAdd.Args =>
+          val idsAndRequests = (0 until 4).map { id =>
+            id -> args
+          }.toMap
+          Future.value(idsAndRequests)
+      },
+      { shardId => Seq(shardId) }
+    )
+    val fanoutRequest = B.MergeableAdd.Args(List(1, 2, 3, 4))
+    val serdeCtx1 = new ClientDeserializeCtx[Int](fanoutRequest, _ => Return(Int.MinValue))
+    Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx1) {
+      serdeCtx1.rpcName("mergeable_add")
+      val partitionRequestAndServices =
+        testService(sameRequestFanout).partitionRequest(fanoutRequest)
+      assert(await(partitionRequestAndServices).size == 1)
+      assert(await(partitionRequestAndServices)(fanoutRequest).size == 4)
     }
   }
 

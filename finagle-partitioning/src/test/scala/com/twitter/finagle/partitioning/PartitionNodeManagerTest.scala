@@ -10,8 +10,15 @@ import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Activity, Await, Awaitable, Duration, Future, Time, Var}
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.util.Activity
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.Var
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.immutable
 import org.scalatest.funsuite.AnyFunSuite

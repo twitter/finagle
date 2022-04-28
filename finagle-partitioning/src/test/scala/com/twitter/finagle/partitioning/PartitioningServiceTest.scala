@@ -4,10 +4,12 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.partitioning.PartitioningService.PartitionedResults
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{Address, _}
+import com.twitter.finagle.Address
+import com.twitter.finagle._
 import com.twitter.util._
 import java.net.InetSocketAddress
-import java.util.concurrent.{ConcurrentHashMap, CountDownLatch}
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CountDownLatch
 
 class PartitioningServiceTest extends PartitioningServiceTestBase {
 
@@ -270,12 +272,12 @@ private[this] class SimplePartitioningService(
 
   private val stringToTuple = (s: String) => {
     val trimmed = s.trim
-    (trimmed, getPartitionFor(trimmed))
+    (trimmed, Seq(getPartitionFor(trimmed)))
   }
 
   override protected def partitionRequest(
     batchedRequest: String
-  ): Future[Map[String, Future[Service[String, String]]]] = {
+  ): Future[Map[String, Seq[Future[Service[String, String]]]]] = {
     // assuming all sub-requests are unique (one request per partition). If not the following code
     // will need to group requests by partition by using getPartitionFor method
     Future.value(batchedRequest.split(RequestDelimiter).map(stringToTuple).toMap)

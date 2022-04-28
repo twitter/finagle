@@ -13,11 +13,23 @@ import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy._
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
-import com.twitter.finagle.thrift.{ThriftRichClient, ThriftRichServer}
-import com.twitter.finagle.{Address, ListeningServer, Name, Stack}
+import com.twitter.finagle.thrift.ThriftRichClient
+import com.twitter.finagle.thrift.ThriftRichServer
+import com.twitter.finagle.Address
+import com.twitter.finagle.ListeningServer
+import com.twitter.finagle.Name
+import com.twitter.finagle.Stack
 import com.twitter.scrooge.ThriftStructIface
-import com.twitter.util.{Activity, Await, Awaitable, Duration, Future, Return, Throw, Var}
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.util.Activity
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Var
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import org.scalatest.funsuite.AnyFunSuite
 
 abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
@@ -240,6 +252,29 @@ abstract class PartitionAwareClientEndToEndTest extends AnyFunSuite {
 
       val result = await(client.getBoxes(Seq(addrInfo0, addrInfo1, addrInfo2), Byte.MinValue)).toSet
       assert(result == expectedTwoNodes)
+    }
+  }
+
+  test("custom partitioning strategy, each shard is a partition, fanout the same request") {
+    new Ctx {
+      val customPartitioningStrategy = ClientCustomStrategy.noResharding({
+        case getBoxes: GetBoxes.Args =>
+          val partitionIdAndRequest: Map[Int, ThriftStructIface] =
+            (0 until 5).map(fixedInetAddresses(_).getPort -> getBoxes).toMap
+          Future.value(partitionIdAndRequest)
+      })
+      customPartitioningStrategy.responseMergerRegistry.add(GetBoxes, getBoxesRepMerger)
+      val client = clientImpl().withPartitioning
+        .strategy(customPartitioningStrategy)
+        .build[DeliveryService.MethodPerEndpoint](Name.bound(addresses: _*), "client")
+
+      val oneResponse =
+        Seq(Box(addrInfo0, "size: 3"), Box(addrInfo2, "size: 3"), Box(addrInfo1, "size: 3"))
+
+      val result = await(client.getBoxes(Seq(addrInfo0, addrInfo1, addrInfo2), Byte.MinValue))
+      assert(result.size == 15)
+      // sort the seq by grouping
+      assert(result.groupBy(_.addrInfo) == Seq.fill(5)(oneResponse).flatten.groupBy(_.addrInfo))
     }
   }
 
