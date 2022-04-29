@@ -4,21 +4,22 @@ Metrics
 This section aims to be a comprehensive list of all of the metrics that Finagle
 exposes. The metrics are organized by layer and then by class.
 
-Finagle leverages `verbosity levels`_ and defines some of its low-utility metrics as "debug".
-Unless explicitly stated, assume ``Verbosity.Default`` is used to define a given metric.
-
 .. NOTE::
 
    Some of the metrics are only for clients, some only for servers, and some are for both.
 
    Some metrics are only visible when certain optional classes are used.
 
-NB: Finagle sometimes uses ``RollupStatsReceivers`` internally, which will take
-stats like "failures/twitter/TimeoutException" and roll them up, aggregating
-into "failures/twitter" and also "failures". For example, if there are 3
-"failures/twitter/TimeoutException" counted, and 4
-"failures/twitter/ConnectTimeoutException", then it will count 7 for
-"failures/twitter".
+Metrics Format
+--------------
+The format that `finagle-stats` exports metrics in varies based on its `type, verbosity level, and scope separator <MetricsFormat.html>`__.
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   MetricsFormat
+
 
 Public
 ------
@@ -353,7 +354,7 @@ These stats pertain to the :ref:`Mux <mux>` protocol.
 Mysql
 -----
 
-.. _mysql_stats
+.. _mysql_stats:
 
 These stats pertain to the finagle-mysql implementation.
 
@@ -367,9 +368,6 @@ ThriftMux
 These stats pertain to the :ref:`ThriftMux <whats_thriftmux>` protocol.
 
 .. include:: metrics/ThriftMux.rst
-
-.. _verbosity levels: https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels
-
 
 PerEndpoint StatsFilter
 -----------------------
