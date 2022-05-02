@@ -9,7 +9,7 @@ import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle._
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.partitioning.zk.ZkMetadata
-import com.twitter.finagle.util.DefaultLogger
+import com.twitter.finagle.stats.Verbosity
 import com.twitter.logging.HasLogLevel
 import com.twitter.logging.Level
 import com.twitter.util._
@@ -17,6 +17,8 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.util.control.NonFatal
 
 private[finagle] object PartitionNodeManager {
+
+  private val logger = logging.Logger.getLogger(classOf[PartitionNodeManager[_, _, _, _]])
 
   /**
    * The given partition Id cannot be found in the Partition node map.
@@ -124,7 +126,6 @@ private[finagle] class PartitionNodeManager[
 
   import PartitionNodeManager._
 
-  private[this] val logger = DefaultLogger
   private[this] val label = params[Label].label
   private[this] val statsReceiver = {
     val stats = params[Stats].statsReceiver
@@ -147,10 +148,17 @@ private[finagle] class PartitionNodeManager[
   private[this] val partitionerMetrics =
     statsReceiver.addGauge("nodes") { partitionServiceNodes.get.partitionMapping.size }
 
+  private[this] val partitionAddressChangesCounter =
+    statsReceiver.counter("partition_updates", Verbosity.Debug)
+  private[this] val snapUpdates = statsReceiver.counter("snap_updates", Verbosity.Debug)
+
+  // Lazy as this metric is not particularly helpful unless there are failures.
+  private[this] lazy val updateFailures = statsReceiver.counter("update_failures")
+
   // Keep track of addresses in the current set that already have associate instances
   private[this] val destActivity = varAddrToActivity(params[LoadBalancerFactory.Dest].va, label)
 
-  private[this] val addressedEndpoints = Activity({
+  private[this] val addressedEndpoints = Activity {
     val newEndpointStk =
       underlying.dropWhile(_.head.role != LoadBalancerFactory.role).tailOption.get
     weightEndpoints(
@@ -158,7 +166,7 @@ private[finagle] class PartitionNodeManager[
       LoadBalancerFactory.newEndpointFn(params, newEndpointStk),
       !params[LoadBalancerFactory.EnableProbation].enable
     )
-  })
+  }
 
   private[this] def getShardIdFromFactory(
     state: A,
@@ -174,13 +182,13 @@ private[finagle] class PartitionNodeManager[
           val partitionIds = getLogicalPartitionPerState(state)(id)
           partitionIds.map(Return(_))
         } catch {
-          case NonFatal(e) =>
-            logger.log(Level.ERROR, "getLogicalPartition failed with: ", e)
-            Seq(Throw(e))
+          case NonFatal(ex) =>
+            logger.error("getLogicalPartition failed", ex)
+            Seq(Throw(ex))
         }
       case None =>
         val ex = new NoShardIdException(s"cannot get shardId from $metadata")
-        logger.log(Level.ERROR, "getLogicalPartition failed with: ", ex)
+        logger.error("getLogicalPartition failed", ex)
         Seq(Throw(ex))
     }
   }
@@ -196,6 +204,7 @@ private[finagle] class PartitionNodeManager[
     addressedEndpoints
       .join(observable).map {
         case (factory, state) =>
+          partitionAddressChangesCounter.incr()
           (
             getPartitionFunctionPerState(state), {
               // the raw grouping from updatePartitionMap, but without the update-in-place
@@ -216,6 +225,12 @@ private[finagle] class PartitionNodeManager[
                   key -> underlying.make(paramsWithLB)
               }
             })
+      }.mapState {
+        case f @ Activity.Failed(ex) =>
+          updateFailures.incr()
+          logger.error("partitionAddressChanges failed", ex)
+          f
+        case other => other
       }.stabilize
   }
 
@@ -242,7 +257,10 @@ private[finagle] class PartitionNodeManager[
   }
 
   private[this] val nodeWatcher: Closable =
-    partitionNodesChange.register(Witness(partitionServiceNodes))
+    partitionNodesChange.register(Witness { v: SnapPartitioner[Req, Rep, B] =>
+      snapUpdates.incr()
+      partitionServiceNodes.set(v)
+    })
 
   private[this] val endpointWatcher: Closable =
     addressedEndpoints.stabilize.values.register(Witness(addressedFactories))
