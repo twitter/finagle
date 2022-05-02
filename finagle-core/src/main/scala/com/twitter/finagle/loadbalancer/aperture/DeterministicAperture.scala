@@ -70,7 +70,7 @@ object DeterministicAperture {
   // aperture without any healthy nodes.
   // Note: the flag will be removed and replaced with a constant after tuning.
   private[loadbalancer] val MinDeterministicAperture: Int = {
-    val min = minDeterminsticAperture()
+    val min = minDeterministicAperture()
     if (1 < min) min
     else {
       log.warning(

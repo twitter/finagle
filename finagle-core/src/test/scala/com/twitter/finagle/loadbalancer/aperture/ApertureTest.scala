@@ -82,7 +82,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     implicit pos: Position
   ): Unit =
     super.test(testName, testTags: _*) {
-      minDeterminsticAperture.let(12) {
+      minDeterministicAperture.let(12) {
         testFun
       }
     }
