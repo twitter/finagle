@@ -51,7 +51,7 @@ class P2CLeastLoadedTest extends AnyFunSuite with App with P2CSuite {
     def removes = r.counters.getOrElse(Seq("removes"), 0L)
     def load = r.gauges.getOrElse(Seq("load"), zero)()
     def available = r.gauges.getOrElse(Seq("available"), zero)()
-    def maxEffortExhausted: Long = r.counters.getOrElse(Seq("max_effort_exhausted"), 0L)
+    def panicked: Long = r.counters.getOrElse(Seq("panicked"), 0L)
   }
 
   test("Balances evenly") {
@@ -178,8 +178,8 @@ class P2CLeastLoadedTest extends AnyFunSuite with App with P2CSuite {
     assertEven(init)
     val init0Load2 = init(0).load
     assert(math.abs(init0Load * 2 - init0Load2) < ε)
-    // maxEffortExhausted increments for every request because all nodes are down
-    assert(stats.maxEffortExhausted == R)
+    // panicked increments for every request because all nodes are down
+    assert(stats.panicked == R)
 
     for (f <- init drop N / 2) f.stat = Status.Open
     for (_ <- 0 until R) bal()
@@ -195,9 +195,9 @@ class P2CLeastLoadedTest extends AnyFunSuite with App with P2CSuite {
     assert(math.abs(init0Load2 - init(0).load) <= R * 0.001)
     assertEven(init drop N / 2)
     assertEven(init take N / 2)
-    // maxEffortExhausted increases by less than 100
-    assert(stats.maxEffortExhausted > R)
-    assert(stats.maxEffortExhausted < R + 100)
+    // panicked increases by less than 100
+    assert(stats.panicked > R)
+    assert(stats.panicked < R + 100)
   }
 
   test("Stats") {

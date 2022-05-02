@@ -124,7 +124,7 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
     assert(bal.status == Status.Busy)
   }
 
-  test("max_effort_exhausted counter updated properly") {
+  test("panicked counter updated properly") {
     val bal = new TestBalancer()
     val closed = newFac(Status.Closed)
     val open = newFac(Status.Open)
@@ -132,15 +132,15 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
     // start out all closed
     bal.update(Vector(closed))
     bal(ClientConnection.nil)
-    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("panicked")))
 
     // now have it be open and a pick must succeed
     bal.update(Vector(open))
     bal(ClientConnection.nil)
-    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("panicked")))
   }
 
-  test("max_effort_exhausted: rebuilds increments for a new distributor") {
+  test("panicked: rebuilds increments for a new distributor") {
     val bal = new TestBalancer()
     val closed = newFac(Status.Closed)
     assert(bal._dist().gen == 1)
@@ -151,11 +151,11 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
 
     bal(ClientConnection.nil)
     assert(bal._dist().gen == 3)
-    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("panicked")))
     assert(2 == bal.stats.counters(Seq("rebuilds")))
   }
 
-  test("max_effort_exhausted: accounts for no-op rebuild") {
+  test("panicked: accounts for no-op rebuild") {
     val bal = new TestBalancer(singletonDistributor = true)
     val closed = newFac(Status.Closed)
     assert(bal._dist().gen == 1)
@@ -166,7 +166,7 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
 
     bal(ClientConnection.nil)
     assert(bal._dist().gen == 2)
-    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("panicked")))
     assert(1 == bal.stats.counters(Seq("rebuilds")))
   }
 

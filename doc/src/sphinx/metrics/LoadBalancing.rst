@@ -49,11 +49,12 @@ All Balancers
    so the actual number of ``rebuilds`` is usually less than the number
    of ``updates``.
 
-**max_effort_exhausted**
-  A counter of the number of times a balancer failed to find a node that was
-  ``Status.Open`` within ``com.twitter.finagle.loadbalancer.Balancer.maxEffort``
-  attempts. When this occurs, a non-open node may be selected for that
-  request.
+**panicked**
+  A counter of the number of times a balancer enters panic mode. The
+  estimated portion of unhealthy nodes (status is not `Status.Open`)
+  in the balancer exceeded the allowable threshold in 
+  `com.twitter.finagle.loadbalancer.PanicMode`. When this occurs, a
+  non-open node may be selected for that request.
 
 **algorithm/{type}**
   A gauge exported with the name of the algorithm used for load balancing.

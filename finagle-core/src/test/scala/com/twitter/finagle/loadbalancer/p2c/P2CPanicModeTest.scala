@@ -59,7 +59,7 @@ class P2CPanicModeTest extends AnyFunSuite with P2CSuite {
   }
 
   def statsDict(r: InMemoryStatsReceiver) = new {
-    def maxEffortExhausted: Long = r.counters.getOrElse(Seq("max_effort_exhausted"), 0L)
+    def panicked: Long = r.counters.getOrElse(Seq("panicked"), 0L)
   }
 
   class PanicModeTester(threshold: PanicMode) {
@@ -75,11 +75,11 @@ class P2CPanicModeTest extends AnyFunSuite with P2CSuite {
       for (f <- init) f.stat = Status.Open
 
       for (numUnhealthy <- 10 to N by 10) {
-        val prevCount = stats.maxEffortExhausted
+        val prevCount = stats.panicked
         for (f <- init take numUnhealthy) f.stat = Status.Closed
         for (_ <- 0 until R) bal()
         // subtract the previous count to get the difference
-        numRequestsPanicked += stats.maxEffortExhausted - prevCount
+        numRequestsPanicked += stats.panicked - prevCount
       }
       numRequestsPanicked
     }

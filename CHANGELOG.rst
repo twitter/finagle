@@ -27,6 +27,9 @@ load balancers to weighted aperture. ``PHAB_ID=D867878``
 * finagle-partitioning: ThriftCustomPartitioningServices now allow fanning out the same
 request to multiple partitions. ``PHAB_ID=D882370``
 
+* finagle-core: Rename the counter metric `loadbalancer/max_effort_exhausted` to
+  `loadbalancer/panicked`. ``PHAB_ID=D881529``
+
 22.4.0
 ------
 

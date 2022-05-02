@@ -214,7 +214,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     assert(factories.forall(_.total == 1))
   }
 
-  test("daperture does not rebuild on max effort exhausted") {
+  test("daperture does not rebuild on panicked") {
     // This tests both traditional and weighted daperture
     // When manageWeights is true, weighted dAperture is enabled.
     for (manageWeights <- Seq(true, false)) {
@@ -243,7 +243,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       assert(stats.gauges(Seq("size"))() == 1)
       assert(stats.gauges(Seq("busy"))() == 1)
       aperture.apply()
-      assert(stats.counters(Seq("max_effort_exhausted")) == 1)
+      assert(stats.counters(Seq("panicked")) == 1)
       assert(stats.counters(Seq("rebuilds")) == 1)
 
       ProcessCoordinate.unsetCoordinate()

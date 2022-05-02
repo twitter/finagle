@@ -148,7 +148,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     statsReceiver.addGauge("size") { size }
   )
 
-  private[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+  private[this] val panicked = statsReceiver.counter("panicked")
   private[this] val adds = statsReceiver.counter("adds")
   private[this] val removes = statsReceiver.counter("removes")
   private[this] val rebuilds = statsReceiver.counter("rebuilds")
@@ -220,7 +220,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
 
     var node = pick(maxEffort)
     if (node == null) {
-      maxEffortExhausted.incr()
+      panicked.incr()
       rebuild()
       node = dist.pick()
     }
