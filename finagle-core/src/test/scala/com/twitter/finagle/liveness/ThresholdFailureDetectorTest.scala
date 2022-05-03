@@ -5,30 +5,38 @@ import com.twitter.finagle.Status
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.Outcome
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.junit.AssertionsForJUnit
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.funsuite.FixtureAnyFunSuite
 
 class ThresholdFailureDetectorTest
-    extends AnyFunSuite
+    extends FixtureAnyFunSuite
     with AssertionsForJUnit
     with Eventually
     with IntegrationPatience {
-  def testt(desc: String)(f: TimeControl => Unit): Unit =
-    test(desc) {
-      Time.withCurrentTimeFrozen(f)
+
+  type FixtureParam = TimeControl
+
+  protected def withFixture(
+    test: OneArgTest
+  ): Outcome = {
+    Time.withCurrentTimeFrozen { timeControl =>
+      withFixture(test.toNoArgTest(timeControl))
     }
+  }
 
   private class Ctx(closeTimeout: Duration = 1000.milliseconds) {
     val n = new AtomicInteger(0)
     val latch = new Latch
 
-    def ping() = {
+    def ping(): Future[Unit] = {
       n.incrementAndGet()
       latch.get
     }
 
-    def nanoTime() = Time.now.inNanoseconds
+    def nanoTime(): Long = Time.now.inNanoseconds
     val sr = new InMemoryStatsReceiver
 
     val timer = new MockTimer
@@ -42,7 +50,7 @@ class ThresholdFailureDetectorTest
     )
   }
 
-  testt("pings every minPeriod") { tc =>
+  test("pings every minPeriod") { tc =>
     val ctx = new Ctx
     import ctx._
 
@@ -57,7 +65,7 @@ class ThresholdFailureDetectorTest
     }
   }
 
-  testt("delays pings until reply") { tc =>
+  test("delays pings until reply") { tc =>
     val ctx = new Ctx(Duration.Top)
     import ctx._
 
@@ -76,7 +84,7 @@ class ThresholdFailureDetectorTest
     assert(n.get == 3)
   }
 
-  testt("close the connection if it becomes unresponsive for too long") { tc =>
+  test("close the connection if it becomes unresponsive for too long") { tc =>
     val ctx = new Ctx
     import ctx._
 
@@ -101,7 +109,7 @@ class ThresholdFailureDetectorTest
     assert(sr.counters(Seq("close")) == 1)
   }
 
-  testt("close if ping throws exceptions") { tc =>
+  test("close if ping throws exceptions") { tc =>
     def nanoTime() = Time.now.inNanoseconds
     val timer = new MockTimer
     val sr = new InMemoryStatsReceiver
