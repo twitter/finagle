@@ -44,7 +44,7 @@ success rate dropped to 95% during this period of time if you used
 round robin. Your success rate only drops to 99.9% if you used EWMA.
 99% if you used queue-depth as your metric.
 
-We setup a load balancing simulation with repsonse latencies from some
+We setup a load balancing simulation with response latencies from some
 collected ping data. The median was 167ms with a stddev of 5ms and a
 max of 200ms.
 

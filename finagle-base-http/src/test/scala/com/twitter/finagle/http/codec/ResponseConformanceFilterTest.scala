@@ -2,11 +2,17 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Fields, Method, Request, Response, Status, Version}
+import com.twitter.finagle.http.Fields
+import com.twitter.finagle.http.Method
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.Status
+import com.twitter.finagle.http.Version
 import com.twitter.finagle.http.Status._
 import com.twitter.io.Buf
 import com.twitter.io.ReaderDiscardedException
-import com.twitter.util.{Await, Future}
+import com.twitter.util.Await
+import com.twitter.util.Future
 import org.scalatest.funsuite.AnyFunSuite
 
 class ResponseConformanceFilterTest extends AnyFunSuite {
@@ -76,7 +82,7 @@ class ResponseConformanceFilterTest extends AnyFunSuite {
 
   test(
     "Doesn't remove non-chunked values for Transfer-Encoding headers when " +
-      "Content-Lenght header is present"
+      "Content-Length header is present"
   ) {
     val resp = Response()
     resp.setChunked(true)
