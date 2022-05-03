@@ -9,3 +9,7 @@ owners:
   - yufang
 watchers:
   - csl-team:ldap
+
+fileOwners:
+  CHANGELOG.rst:
+    - csl-team:ldap
