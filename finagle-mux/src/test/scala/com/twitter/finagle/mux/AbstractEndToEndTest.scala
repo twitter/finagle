@@ -66,10 +66,18 @@ abstract class AbstractEndToEndTest
   // turn off failure detector since we don't need it for these tests.
   override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     if (skipWholeTest) ignore(testName)(f)
-    else
-      super.test(testName, testTags: _*) {
-        liveness.sessionFailureDetector.let("none") { f }
+    else {
+      super.test(s"TLS Snooping enabled: $testName", testTags: _*) {
+        toggle.flag.overrides.let(TlsSnoopingByDefault.ToggleName, 1.0) {
+          liveness.sessionFailureDetector.let("none") { f }
+        }
       }
+      super.test(testName, testTags: _*) {
+        toggle.flag.overrides.let(TlsSnoopingByDefault.ToggleName, 0.0) {
+          liveness.sessionFailureDetector.let("none") { f }
+        }
+      }
+    }
   }
 
   test("Shared metrics are scoped to the client and server names") {

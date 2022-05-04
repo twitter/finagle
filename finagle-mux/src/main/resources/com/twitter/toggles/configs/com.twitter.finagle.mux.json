@@ -1,0 +1,9 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.finagle.mux.TlsSnoopingByDefault",
+      "description": "Enable TLS snooping by default for Mux and ThriftMux servers",
+      "fraction": 0.0
+    }
+  ]
+}

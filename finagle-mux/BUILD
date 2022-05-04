@@ -1,6 +1,7 @@
 target(
     tags = ["bazel-compatible"],
     dependencies = [
+        "finagle/finagle-mux/src/main/resources",
         "finagle/finagle-mux/src/main/scala",
     ],
 )

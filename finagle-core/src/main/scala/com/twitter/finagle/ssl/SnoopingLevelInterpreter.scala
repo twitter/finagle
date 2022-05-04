@@ -104,8 +104,8 @@ object SnoopingLevelInterpreter {
 
           case None =>
             if (level != OpportunisticTls.Off) {
-              logger.warning(
-                "Tls snooping was potentially desired but not enabled because a security " +
+              logger.info(
+                "Tls snooping was not enabled because a security " +
                   "configuration was not specified")
             }
             false

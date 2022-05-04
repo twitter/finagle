@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.Mux.param.CompressionPreferences
 import com.twitter.finagle.Mux.param.MaxFrameSize
+import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.naming.BindingFactory
@@ -16,6 +17,7 @@ import com.twitter.finagle.mux.Handshake
 import com.twitter.finagle.mux.OpportunisticTlsParams
 import com.twitter.finagle.mux.Request
 import com.twitter.finagle.mux.Response
+import com.twitter.finagle.mux.TlsSnoopingByDefault
 import com.twitter.finagle.mux.WithCompressionPreferences
 import com.twitter.finagle.netty4.pushsession.Netty4PushListener
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
@@ -339,6 +341,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   object Server {
 
+    private[this] def tlsSnoopingParams: Params = {
+      if (!TlsSnoopingByDefault()) Params.empty
+      else Params.empty + SnoopingLevelInterpreter.EnabledForNegotiatingProtocols
+    }
+
     private[finagle] val stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       StackServer.newStack
       // We remove the trace init filter and don't replace it with anything because
@@ -355,7 +362,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     private[finagle] def params: Stack.Params = StackServer.defaultParams +
       ProtocolLibrary("mux") +
-      param.TurnOnTlsFn(tlsEnable)
+      param.TurnOnTlsFn(tlsEnable) ++
+      tlsSnoopingParams
 
     type SessionF = (
       RefPushSession[ByteReader, Buf],
