@@ -853,7 +853,7 @@ lazy val finagleBenchmark = Project(
     )
   ).dependsOn(
     finagleBenchmarkThrift,
-    finagleCore,
+    finagleCore % "compile->compile;compile->test",
     finagleExp,
     finagleHttp,
     finagleMemcached,
