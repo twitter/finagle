@@ -26,7 +26,8 @@ public class SslClientConfigurationCompilationTest {
       TrustCredentialsConfig.UNSPECIFIED,
       CipherSuitesConfig.UNSPECIFIED,
       ProtocolsConfig.UNSPECIFIED,
-      ApplicationProtocolsConfig.UNSPECIFIED);
+      ApplicationProtocolsConfig.UNSPECIFIED,
+      false);
   }
 
 }

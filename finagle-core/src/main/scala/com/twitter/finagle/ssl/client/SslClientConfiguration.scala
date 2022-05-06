@@ -1,12 +1,10 @@
 package com.twitter.finagle.ssl.client
 
-import com.twitter.finagle.ssl.{
-  ApplicationProtocols,
-  CipherSuites,
-  KeyCredentials,
-  Protocols,
-  TrustCredentials
-}
+import com.twitter.finagle.ssl.ApplicationProtocols
+import com.twitter.finagle.ssl.CipherSuites
+import com.twitter.finagle.ssl.KeyCredentials
+import com.twitter.finagle.ssl.Protocols
+import com.twitter.finagle.ssl.TrustCredentials
 
 /**
  * SslClientConfiguration represents the collection of parameters that an engine factory
@@ -27,6 +25,9 @@ import com.twitter.finagle.ssl.{
  *
  * @param applicationProtocols The ALPN or NPN protocols which should be supported by a particular
  * client engine.
+ *
+ * @param forceJdk when true, forces use of the JDK SslProvider. Note that until
+ * JDK 9, this does not work with H2. For this reason, it's false by default.
  */
 case class SslClientConfiguration(
   hostname: Option[String] = None,
@@ -35,4 +36,5 @@ case class SslClientConfiguration(
   trustCredentials: TrustCredentials = TrustCredentials.Unspecified,
   cipherSuites: CipherSuites = CipherSuites.Unspecified,
   protocols: Protocols = Protocols.Unspecified,
-  applicationProtocols: ApplicationProtocols = ApplicationProtocols.Unspecified)
+  applicationProtocols: ApplicationProtocols = ApplicationProtocols.Unspecified,
+  forceJdk: Boolean = false)

@@ -5,7 +5,8 @@ import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.io.TempFile
 import java.io.File
 import java.security.KeyStore
-import javax.net.ssl.{KeyManagerFactory, TrustManagerFactory}
+import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl.TrustManagerFactory
 import org.scalatest.funsuite.AnyFunSuite
 
 class Netty4ServerEngineFactoryTest extends AnyFunSuite {
@@ -214,17 +215,17 @@ class Netty4ServerEngineFactoryTest extends AnyFunSuite {
 
   // application protocols are supported only by netty-tcnative, which is
   // not tested via these tests.
-  test("config with any application protocols fails for JDK provider") {
-    // tests are run against the JDK provider which does not support NPN_AND_ALPN
-    val appProtocols = ApplicationProtocols.Supported(Seq("h2"))
+  test("config with any application protocols does not fail for JDK provider") {
+    // tests are run against the JDK provider which does not support NPN_AND_ALPN,
+    // but the protocol should be automatically updated to just ALPN
+    val appProtocols = ApplicationProtocols.Supported(Seq("http/1.1"))
     val config = SslServerConfiguration(
       keyCredentials = goodKeyCredentials,
       applicationProtocols = appProtocols
     )
 
-    intercept[UnsupportedOperationException] {
-      factory(config)
-    }
+    val engine = factory(config)
+    assert(engine != null)
   }
 
   test("config with client auth Off succeeds") {

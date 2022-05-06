@@ -37,13 +37,17 @@ private[finagle] object Netty4ServerSslConfigurations {
    */
   private def configureServerApplicationProtocols(
     builder: SslContextBuilder,
-    applicationProtocols: ApplicationProtocols
-  ): SslContextBuilder =
+    applicationProtocols: ApplicationProtocols,
+    forceJdk: Boolean
+  ): SslContextBuilder = {
+    // JDK provider does not support NPN_AND_ALPN protocol, so if forceJDK is true we default to ALPN only
+    val protocol = if (forceJdk) Protocol.ALPN else Protocol.NPN_AND_ALPN
     Netty4SslConfigurations.configureApplicationProtocols(
       builder,
       applicationProtocols,
-      Protocol.NPN_AND_ALPN
+      protocol
     )
+  }
 
   /**
    * Creates an `SslContextBuilder` for a server with the supplied `KeyCredentials`.
@@ -101,7 +105,8 @@ private[finagle] object Netty4ServerSslConfigurations {
     }
     val withAppProtocols = Netty4ServerSslConfigurations.configureServerApplicationProtocols(
       withCiphers,
-      config.applicationProtocols
+      config.applicationProtocols,
+      forceJdk
     )
 
     // We only want to use the `FinalizedSslContext` if we're using the non-JDK implementation.

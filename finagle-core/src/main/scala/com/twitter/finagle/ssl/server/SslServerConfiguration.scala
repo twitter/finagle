@@ -21,6 +21,9 @@ import com.twitter.finagle.ssl._
  *
  * @param applicationProtocols The ALPN or NPN protocols which should be supported by a particular
  * server engine.
+ *
+ * @param forceJdk when true, forces use of the JDK SslProvider. Note that until
+ * JDK 9, this does not work with H2. For this reason, it's false by default.
  */
 case class SslServerConfiguration(
   keyCredentials: KeyCredentials = KeyCredentials.Unspecified,
@@ -28,4 +31,5 @@ case class SslServerConfiguration(
   trustCredentials: TrustCredentials = TrustCredentials.Unspecified,
   cipherSuites: CipherSuites = CipherSuites.Unspecified,
   protocols: Protocols = Protocols.Unspecified,
-  applicationProtocols: ApplicationProtocols = ApplicationProtocols.Unspecified)
+  applicationProtocols: ApplicationProtocols = ApplicationProtocols.Unspecified,
+  forceJdk: Boolean = false)
