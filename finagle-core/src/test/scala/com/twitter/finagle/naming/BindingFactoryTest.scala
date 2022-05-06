@@ -265,7 +265,6 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
       Seq(
         Annotation.BinaryAnnotation("clnt/namer.path", "/foo/bar"),
         Annotation.BinaryAnnotation("clnt/namer.dtab.base", "/test1010=>/$/inet/1010"),
-        Annotation.BinaryAnnotation("clnt/namer.name", "/$/inet/1010")
       )
     )
   })

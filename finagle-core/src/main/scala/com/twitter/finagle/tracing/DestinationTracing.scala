@@ -2,6 +2,8 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.naming.BindingFactory
+import com.twitter.finagle.util.Showable
 import com.twitter.util.Future
 import java.net.InetSocketAddress
 
@@ -58,13 +60,15 @@ private final class ServerDestTracingFilter[Req, Rep](conn: ClientConnection)
 private[finagle] object ClientDestTracingFilter {
   val role = Stack.Role("EndpointTracing")
   val ProtocolAnnotationKey = "clnt/finagle.protocol"
+  val NamerNameAnnotationKey = "clnt/namer.name"
 
   /**
    * Applies the [[com.twitter.finagle.tracing.ClientDestTracingFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[
+    new Stack.Module4[
       Transporter.EndpointAddr,
+      BindingFactory.Dest,
       param.ProtocolLibrary,
       param.Tracer,
       ServiceFactory[Req, Rep]
@@ -73,31 +77,42 @@ private[finagle] object ClientDestTracingFilter {
       val description = "Record remote address of server"
       def make(
         _addr: Transporter.EndpointAddr,
+        _dest: BindingFactory.Dest,
         _protocol: param.ProtocolLibrary,
         _tracer: param.Tracer,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         if (_tracer.tracer.isNull) next
-        else new ClientDestTracingFilter(_protocol.name, _addr.addr).andThen(next)
+        else new ClientDestTracingFilter(_protocol.name, _addr.addr, _dest.dest).andThen(next)
       }
     }
 }
 
 /**
- * [[com.twitter.finagle.Filter]] for clients to record the remote address and protocol of the server.
- * We don't log the local addr here because it's already done in the client Dispatcher.
+ * [[com.twitter.finagle.Filter]] for clients to record the remote destination, address,
+ * and protocol of the server. We don't log the local addr here because it's already done in the
+ * client Dispatcher.
+ *
+ * This filter is placed lower in the stack where the endpoint is resolved so we surely have both:
+ * - bound name (since we're bellow the namer/resolver)
+ * - endpoint address (since we're bellow the LB)
  */
-private final class ClientDestTracingFilter[Req, Rep](protocol: String, addr: Address)
+private final class ClientDestTracingFilter[Req, Rep](protocol: String, addr: Address, dest: Name)
     extends SimpleFilter[Req, Rep] {
-  import ClientDestTracingFilter.ProtocolAnnotationKey
+  import ClientDestTracingFilter._
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val trace = Trace()
     if (trace.isActivelyTracing) {
       trace.recordBinary(ProtocolAnnotationKey, protocol)
 
+      dest match {
+        case bound: Name.Bound =>
+          trace.recordBinary(NamerNameAnnotationKey, Showable.show(bound))
+        case _ => // do nothing
+      }
+
       addr match {
-        // this filter is placed lower in the stack where the endpoint is resolved
         case Address.Inet(sa, _) =>
           trace.recordServerAddr(sa)
 

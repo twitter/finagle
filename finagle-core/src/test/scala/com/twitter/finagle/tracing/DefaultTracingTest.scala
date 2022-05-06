@@ -6,8 +6,10 @@ import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.{param => fparam, _}
 import com.twitter.util._
-import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funsuite.AnyFunSuite
 
 class DefaultTracingTest extends AnyFunSuite with Eventually with IntegrationPatience {
@@ -161,5 +163,36 @@ class DefaultTracingTest extends AnyFunSuite with Eventually with IntegrationPat
     } finally {
       TraceServiceName.set(saved)
     }
+  }
+
+  test("client destination is traced") {
+    val serverTracer = new BufferingTracer
+    val clientTracer = new BufferingTracer
+
+    val server = StringServer.server
+      .configured(fparam.Tracer(serverTracer))
+      .configured(fparam.Label("theServer"))
+      .serve("localhost:*", Svc)
+
+    val client = StringClient.client
+      .configured(fparam.Tracer(clientTracer))
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "theClient"
+      )
+
+    Await.result(client("foo"), 1.second)
+    Console.err.println(clientTracer.toSeq.map(_.annotation))
+
+    val annotations = clientTracer.toSeq.map(_.annotation)
+    assert(annotations.contains(Annotation.BinaryAnnotation("clnt/finagle.protocol", "string")))
+    assert(
+      annotations
+        .collect({ case Annotation.ServerAddr(ia) => ia }).head.toString.contains("127.0.0.1"))
+    assert(
+      annotations
+        .collect({
+          case Annotation.BinaryAnnotation("clnt/namer.name", n) => n
+        }).head.toString.contains("127.0.0.1"))
   }
 }

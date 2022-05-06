@@ -265,7 +265,7 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
         assert(
           traces.collect {
             case r @ Record(_, _, Annotation.BinaryAnnotation(_, _), _) => r
-          }.size == 14
+          }.size == 15
         )
         assert(traces.collect { case Record(_, _, Annotation.ServerAddr(_), _) => () }.size == 2)
         // With Stack, we get an extra ClientAddr because of the

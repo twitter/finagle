@@ -10,7 +10,6 @@ import com.twitter.finagle.stats._
 import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.CachedHashCode
-import com.twitter.finagle.util.Showable
 import com.twitter.logging.Logger
 import com.twitter.util._
 
@@ -59,27 +58,12 @@ class BindingFactory[Req, Rep] private[naming] (
     extends ServiceFactory[Req, Rep] {
 
   import BindingFactory.Dtabs
-  import BindingFactory.NamerNameAnnotationKey
   import BindingFactory.NamerPathAnnotationKey
   import BindingFactory.DtabBaseAnnotationKey
 
   private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](
-      bound => {
-        val boundShow = Showable.show(bound)
-        val filter = new SimpleFilter[Req, Rep] {
-          def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-            val trace = Trace()
-            if (trace.isActivelyTracing) {
-              trace.recordBinary(NamerNameAnnotationKey, boundShow)
-            }
-
-            service(request)
-          }
-        }
-
-        filter.andThen(newFactory(bound))
-      },
+      bound => newFactory(bound),
       timer,
       statsReceiver.scope("namecache"),
       maxNameCacheSize,
@@ -154,7 +138,6 @@ class BindingFactory[Req, Rep] private[naming] (
 object BindingFactory {
   private val log = Logger.get()
 
-  private[finagle] val NamerNameAnnotationKey = "clnt/namer.name"
   private[finagle] val NamerPathAnnotationKey = "clnt/namer.path"
   private[finagle] val DtabBaseAnnotationKey = "clnt/namer.dtab.base"
 
