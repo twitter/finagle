@@ -1,12 +1,14 @@
 package com.twitter.finagle.mysql.unit
 
-import com.twitter.finagle.mysql.{FailedToEncryptPasswordException, PasswordUtils}
+import com.twitter.finagle.mysql.FailedToEncryptPasswordException
+import com.twitter.finagle.mysql.PasswordUtils
+import com.twitter.io.TempFile
 import org.scalatest.funsuite.AnyFunSuite
 
 class PasswordUtilsTest extends AnyFunSuite {
   val longByteArray: Array[Byte] = Array(0, 0, 0, 1, 1, 1, 0, 0, 0, 1)
   val shortByteArray: Array[Byte] = Array(1, 0, 1, 0)
-  val rsaKeyPath: String = getClass.getResource("/auth/keys/mysql_rsa_public_key.pem").getPath
+  val rsaKeyPath: String = TempFile.fromResourcePath("/auth/keys/mysql_rsa_public_key.pem").getPath
   val rsaKeyString: String = """-----BEGIN PUBLIC KEY-----
                                |MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3qvJnC27k9lYEmnRJuzs
                                |wrzzS+/REP7caX7Osy1kliu/nz50rkYHrL+qEw/X15YH+LaLv2IobuZ6JqvSHqjP

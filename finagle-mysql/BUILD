@@ -7,6 +7,7 @@ target(
 
 test_suite(
     name = "tests",
+    tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-mysql/src/test/java",
         "finagle/finagle-mysql/src/test/scala/com/twitter/finagle/mysql/integration",
