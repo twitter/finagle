@@ -30,6 +30,8 @@ request to multiple partitions. ``PHAB_ID=D882370``
 * finagle-core: Rename the counter metric `loadbalancer/max_effort_exhausted` to
   `loadbalancer/panicked`. ``PHAB_ID=D881529``
 
+* finagle: Upgrade to Netty 4.1.76.Final and netty-tcnative 2.0.51.Final. ``PHAB_ID=D886019``
+
 22.4.0
 ------
 
