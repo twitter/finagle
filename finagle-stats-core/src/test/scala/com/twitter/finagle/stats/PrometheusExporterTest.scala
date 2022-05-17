@@ -209,20 +209,10 @@ class PrometheusExporterTest extends AnyFunSuite {
     val response = Await.result(exporter.apply(request), 1.seconds)
     assert(Some("text/plain; version=0.0.4;charset=utf-8") == response.contentType)
     val expected =
-      """# TYPE requests counter
-        |# UNIT requests Requests
-        |requests{role="foo",job="baz-service",env="staging",zone="dc1"} 1
-        |# TYPE failures counter
-        |# UNIT failures Requests
+      """requests{role="foo",job="baz-service",env="staging",zone="dc1"} 1
         |failures{side="clnt",exception="com.twitter.finagle.ChannelClosedException",method_name="get",type="logical",client_label="baz-service"} 2
-        |# TYPE pool_size_float gauge
-        |# UNIT pool_size_float Threads
         |pool_size_float{pool="future_pool",rpc="finagle"} 3.0
-        |# TYPE pool_size_long gauge
-        |# UNIT pool_size_long Threads
         |pool_size_long{pool="future_pool",rpc="finagle"} 3
-        |# TYPE lookup_ms summary
-        |# UNIT lookup_ms Milliseconds
         |lookup_ms{resolver="inet",namer="dns",quantile="0.5"} 2
         |lookup_ms{resolver="inet",namer="dns",quantile="0.95"} 3
         |lookup_ms_count{resolver="inet",namer="dns"} 3

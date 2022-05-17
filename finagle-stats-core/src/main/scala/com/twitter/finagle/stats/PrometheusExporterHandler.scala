@@ -34,7 +34,7 @@ class PrometheusExporterHandler(metrics: MetricsView) extends HttpMuxHandler {
   }
 
   private[this] def exportMetadata(req: Request): Boolean =
-    req.params.getBoolean("export_metadata").getOrElse(true)
+    req.params.getBoolean("export_metadata").getOrElse(false)
 
   private[this] def exportEmptyQuantiles(req: Request): Boolean =
     req.params.getBoolean("export_empty_quantiles").getOrElse(includeEmptyHistograms())

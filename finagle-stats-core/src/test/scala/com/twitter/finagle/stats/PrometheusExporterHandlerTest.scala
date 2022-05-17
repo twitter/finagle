@@ -51,9 +51,9 @@ class PrometheusExporterHandlerTest extends AnyFunSuite {
         Seq(SampleSnapshots.EmptyDnsLookupMs)
       ))
 
-    // Defaults to exporting the metadata
+    // Defaults to hiding the metadata
     assert(
-      await(exporter(Request("/"))).contentString
+      !await(exporter(Request("/"))).contentString
         .contains("# TYPE lookup_ms summary"))
 
     assert(
