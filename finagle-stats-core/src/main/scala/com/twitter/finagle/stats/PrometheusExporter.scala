@@ -58,24 +58,24 @@ private final class PrometheusExporter(
    */
   private[this] def writeSummary(
     writer: StringBuilder,
-    name: String,
+    name: Seq[String],
     labels: Iterable[(String, String)],
     snapshot: Snapshot
   ): Unit = {
     if (exportEmptyQuantiles || snapshot.count > 0) {
       snapshot.percentiles.foreach { p =>
-        writeSummaryHistoLabels(writer, name, labels, "quantile", p.quantile)
+        writeSummaryHistoLabels(writer, name, "quantile", labels, p.quantile)
         writeValueAsLong(writer, p.value)
         writer.append('\n')
       }
     }
 
     // prometheus doesn't export min, max, average in the summary by default
-    writeCounterGaugeLabels(writer, name + "_count", labels)
+    writeSummaryCountSum(writer, name, "_count", labels)
     writeValueAsLong(writer, snapshot.count)
     writer.append('\n')
 
-    writeCounterGaugeLabels(writer, name + "_sum", labels)
+    writeSummaryCountSum(writer, name, "_sum", labels)
     writeValueAsLong(writer, snapshot.sum)
   }
 
@@ -90,9 +90,13 @@ private final class PrometheusExporter(
    * @param name metric name
    * @param metricType type of metric
    */
-  private[this] def writeType(writer: StringBuilder, name: String, metricType: MetricType): Unit = {
+  private[this] def writeType(
+    writer: StringBuilder,
+    name: Seq[String],
+    metricType: MetricType
+  ): Unit = {
     writer.append("# TYPE ");
-    writer.append(name);
+    writeName(writer, name)
     writer.append(' ')
     writer.append(metricType.toPrometheusString);
     writer.append('\n')
@@ -112,12 +116,12 @@ private final class PrometheusExporter(
    */
   private[this] def writeUnit(
     writer: StringBuilder,
-    name: String,
+    name: Seq[String],
     metricUnit: MetricUnit
   ): Unit = {
     def writeComment(unit: String): Unit = {
       writer.append("# UNIT ");
-      writer.append(name);
+      writeName(writer, name)
       writer.append(' ')
       writer.append(unit)
       writer.append('\n')
@@ -180,26 +184,27 @@ private final class PrometheusExporter(
   private[this] def writeMetric(
     writer: StringBuilder,
     snapshot: MetricsView.Snapshot
-  ): Unit = snapshot.builder.identity match {
-    case MetricBuilder.Identity.Hierarchical(_, _) => // nop: we can't write this type.
-    case MetricBuilder.Identity.Full(_, labels) =>
-      val metricName = snapshot.builder.name.last
+  ): Unit = {
+    if (!snapshot.builder.identity.hierarchicalOnly) {
+      val name = snapshot.builder.identity.dimensionalName
+      val labels = snapshot.builder.identity.labels
       if (exportMetadata) {
-        writeMetadata(writer, metricName, snapshot.builder.metricType, snapshot.builder.units)
+        writeMetadata(writer, name, snapshot.builder.metricType, snapshot.builder.units)
       }
       snapshot match {
         case gaugeSnap: GaugeSnapshot =>
-          writeCounterGaugeLabels(writer, metricName, labels)
+          writeCounterGaugeLabels(writer, name, labels)
           writeNumberValue(writer, gaugeSnap.value)
 
         case counterSnap: CounterSnapshot =>
-          writeCounterGaugeLabels(writer, metricName, labels)
+          writeCounterGaugeLabels(writer, name, labels)
           writeValueAsLong(writer, counterSnap.value)
 
         case summarySnap: HistogramSnapshot =>
-          writeSummary(writer, metricName, labels, summarySnap.value)
+          writeSummary(writer, name, labels, summarySnap.value)
       }
       writer.append('\n')
+    }
   }
 
   /**
@@ -211,31 +216,53 @@ private final class PrometheusExporter(
    */
   private[this] def writeCounterGaugeLabels(
     writer: StringBuilder,
-    name: String,
+    name: Seq[String],
     labels: Iterable[(String, String)]
   ): Unit = {
-    writer.append(name)
+    writeName(writer, name)
     writeLabels(writer, labels, finishLabels = true)
     writer.append(' ')
   }
+
+  /**
+   * Write metric name and labels for the sum and count of a summary.
+   *
+   * @param writer StringBuilder
+   * @param name metric name
+   * @param suffix the suffix to add to the metric name
+   * @param labels user-defined labels
+   */
+  private[this] def writeSummaryCountSum(
+    writer: StringBuilder,
+    name: Seq[String],
+    suffix: String,
+    labels: Iterable[(String, String)]
+  ): Unit = {
+    writeName(writer, name)
+    writer.append(suffix)
+    writeLabels(writer, labels, finishLabels = true)
+    writer.append(' ')
+  }
+
+  private[this] def writeName(writer: StringBuilder, name: Seq[String]): Unit =
+    name.addString(writer, MetricBuilder.DimensionalNameScopeSeparator)
 
   /**
    * Write user-defined labels and reserved labels for Prometheus summary and histogram.
    *
    * @param writer StringBuilder
    * @param name metric name
-   * @param labels user-defined labels
    * @param reservedLabelName "quantile" or "le"
    * @param bucket the quantile of the summary or bucket of the histogram
    */
   private[this] def writeSummaryHistoLabels(
     writer: StringBuilder,
-    name: String,
-    labels: Iterable[(String, String)],
+    name: Seq[String],
     reservedLabelName: String,
+    labels: Iterable[(String, String)],
     bucket: Double,
   ): Unit = {
-    writer.append(name)
+    writeName(writer, name)
     if (labels.isEmpty) {
       writer.append('{')
     }
@@ -251,7 +278,7 @@ private final class PrometheusExporter(
    */
   private[this] def writeMetadata(
     writer: StringBuilder,
-    name: String,
+    name: Seq[String],
     metricType: MetricType,
     metricUnit: MetricUnit
   ): Unit = {

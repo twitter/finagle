@@ -48,21 +48,21 @@ class PrometheusExporterHandlerTest extends AnyFunSuite {
       new TestMetricsView(
         Seq.empty,
         Seq.empty,
-        Seq(SampleSnapshots.EmptyDnsLookupMs)
+        Seq(SampleSnapshots.EmptyHistoSample)
       ))
 
     // Defaults to hiding the metadata
     assert(
       !await(exporter(Request("/"))).contentString
-        .contains("# TYPE lookup_ms summary"))
+        .contains("# TYPE"))
 
     assert(
       await(exporter(Request("/?export_metadata=true"))).contentString
-        .contains("# TYPE lookup_ms summary"))
+        .contains("# TYPE"))
 
     assert(
       !await(exporter(Request("/?export_metadata=false"))).contentString
-        .contains("# TYPE lookup_ms summary"))
+        .contains("# TYPE"))
   }
 
   test("Can handle the 'export_empty_quantiles' query param") {
@@ -70,7 +70,7 @@ class PrometheusExporterHandlerTest extends AnyFunSuite {
       new TestMetricsView(
         Seq.empty,
         Seq.empty,
-        Seq(SampleSnapshots.EmptyDnsLookupMs)
+        Seq(SampleSnapshots.EmptyHistoSample)
       ))
 
     // Defaults to using the `includeEmptyHistograms` flag if query param isn't present

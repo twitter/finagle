@@ -201,7 +201,7 @@ class PrometheusExporterTest extends AnyFunSuite {
     val registry: MetricsView = new TestMetricsView(
       Seq(RequestsCounter, ClntExceptionsCounter),
       Seq(PoolSizeFloatGauge, poolSizeLongGauge),
-      Seq(DnsLookupMs))
+      Seq(HistoSample))
 
     val exporter = new PrometheusExporterHandler(registry)
 
@@ -213,10 +213,10 @@ class PrometheusExporterTest extends AnyFunSuite {
         |failures{side="clnt",exception="com.twitter.finagle.ChannelClosedException",method_name="get",type="logical",client_label="baz-service"} 2
         |pool_size_float{pool="future_pool",rpc="finagle"} 3.0
         |pool_size_long{pool="future_pool",rpc="finagle"} 3
-        |lookup_ms{resolver="inet",namer="dns",quantile="0.5"} 2
-        |lookup_ms{resolver="inet",namer="dns",quantile="0.95"} 3
-        |lookup_ms_count{resolver="inet",namer="dns"} 3
-        |lookup_ms_sum{resolver="inet",namer="dns"} 6
+        |foo_ping_ms{biz="bar",quantile="0.5"} 2
+        |foo_ping_ms{biz="bar",quantile="0.95"} 3
+        |foo_ping_ms_count{biz="bar"} 3
+        |foo_ping_ms_sum{biz="bar"} 6
         |""".stripMargin
     assert(response.contentString == expected)
   }
@@ -237,16 +237,16 @@ class PrometheusExporterTest extends AnyFunSuite {
     val result = writeMetrics(
       Seq.empty,
       Seq.empty,
-      Seq(EmptyDnsLookupMs),
+      Seq(EmptyHistoSample),
       exportMetadata = true,
       exportEmptyQuantiles = false)
 
     assert(
       result ==
-        """# TYPE lookup_ms summary
-        |# UNIT lookup_ms Milliseconds
-        |lookup_ms_count{resolver="inet",namer="dns"} 0
-        |lookup_ms_sum{resolver="inet",namer="dns"} 0
+        """# TYPE foo_ping_ms summary
+        |# UNIT foo_ping_ms Milliseconds
+        |foo_ping_ms_count{biz="bar"} 0
+        |foo_ping_ms_sum{biz="bar"} 0
         |""".stripMargin
     )
   }
@@ -255,18 +255,18 @@ class PrometheusExporterTest extends AnyFunSuite {
     val result = writeMetrics(
       Seq.empty,
       Seq.empty,
-      Seq(DnsLookupMs),
+      Seq(HistoSample),
       exportMetadata = true,
       exportEmptyQuantiles = false)
 
     assert(
       result ==
-        """# TYPE lookup_ms summary
-          |# UNIT lookup_ms Milliseconds
-          |lookup_ms{resolver="inet",namer="dns",quantile="0.5"} 2
-          |lookup_ms{resolver="inet",namer="dns",quantile="0.95"} 3
-          |lookup_ms_count{resolver="inet",namer="dns"} 3
-          |lookup_ms_sum{resolver="inet",namer="dns"} 6
+        """# TYPE foo_ping_ms summary
+          |# UNIT foo_ping_ms Milliseconds
+          |foo_ping_ms{biz="bar",quantile="0.5"} 2
+          |foo_ping_ms{biz="bar",quantile="0.95"} 3
+          |foo_ping_ms_count{biz="bar"} 3
+          |foo_ping_ms_sum{biz="bar"} 6
           |""".stripMargin)
   }
 }

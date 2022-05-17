@@ -55,22 +55,32 @@ private object SampleSnapshots {
   val PoolSizeFloatGauge: GaugeSnapshot = GaugeSnapshot(
     hierarchicalName = "finagle/future_pool/pool_size_float",
     builder = MetricBuilder(
-      name = Seq("finagle", "future_pool", "pool_size_float"),
       metricType = GaugeType,
       units = CustomUnit("Threads"),
       statsReceiver = sr
-    ).withLabels(Map("pool" -> "future_pool", "rpc" -> "finagle")).withDimensionalSupport,
+    ).withIdentity(
+      MetricBuilder.Identity(
+        hierarchicalName = Seq("finagle", "future_pool", "pool_size_float"),
+        dimensionalName = Seq("pool_size_float"),
+        labels = Map("pool" -> "future_pool", "rpc" -> "finagle"),
+        hierarchicalOnly = false
+      )),
     value = 3.0
   )
 
   val poolSizeLongGauge: GaugeSnapshot = GaugeSnapshot(
     hierarchicalName = "finagle/future_pool/pool_size_long",
     builder = MetricBuilder(
-      name = Seq("finagle", "future_pool", "pool_size_long"),
       metricType = GaugeType,
       units = CustomUnit("Threads"),
       statsReceiver = sr
-    ).withLabels(Map("pool" -> "future_pool", "rpc" -> "finagle")).withDimensionalSupport,
+    ).withIdentity(
+      MetricBuilder.Identity(
+        hierarchicalName = Seq("finagle", "future_pool", "pool_size_long"),
+        dimensionalName = Seq("pool_size_long"),
+        labels = Map("pool" -> "future_pool", "rpc" -> "finagle"),
+        hierarchicalOnly = false
+      )),
     value = 3l
   )
 
@@ -93,14 +103,20 @@ private object SampleSnapshots {
     value = 2
   )
 
-  val DnsLookupMs: HistogramSnapshot = HistogramSnapshot(
-    hierarchicalName = "inet/dns/lookup_ms",
+  val HistoSample: HistogramSnapshot = HistogramSnapshot(
+    hierarchicalName = "foo/bar/ping_ms",
     builder = MetricBuilder(
-      name = Seq("inet", "dns", "lookup_ms"),
       metricType = HistogramType,
       units = Milliseconds,
       statsReceiver = sr
-    ).withLabels(Map("resolver" -> "inet", "namer" -> "dns")).withDimensionalSupport,
+    ).withIdentity(
+      MetricBuilder.Identity(
+        hierarchicalName = Seq("foo", "bar", "ping_ms"),
+        dimensionalName = Seq("foo", "ping_ms"),
+        labels = Map("biz" -> "bar"),
+        hierarchicalOnly = false
+      )
+    ),
     value = new Snapshot {
       // 1, 2, 3
       def count: Long = 3
@@ -113,14 +129,7 @@ private object SampleSnapshots {
     }
   )
 
-  val EmptyDnsLookupMs: HistogramSnapshot = HistogramSnapshot(
-    hierarchicalName = "inet/dns/lookup_ms",
-    builder = MetricBuilder(
-      name = Seq("inet", "dns", "lookup_ms"),
-      metricType = HistogramType,
-      units = Milliseconds,
-      statsReceiver = sr
-    ).withLabels(Map("resolver" -> "inet", "namer" -> "dns")).withDimensionalSupport,
+  val EmptyHistoSample: HistogramSnapshot = HistoSample.copy(
     value = new Snapshot {
       def count: Long = 0
       def sum: Long = 0
