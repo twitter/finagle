@@ -8,7 +8,6 @@ import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.loadbalancer.NodeT
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Activity
 import com.twitter.util.Await
@@ -42,7 +41,8 @@ abstract class BaseApertureTools(doesManageWeights: Boolean)
     val manageWeights: Boolean = doesManageWeights
     protected def nodeLoad: Double = 0.0
 
-    protected def statsReceiver: StatsReceiver = NullStatsReceiver
+    lazy val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver
+
     class Node(val factory: EndpointFactory[Unit, Unit])
         extends ServiceFactoryProxy[Unit, Unit](factory)
         with NodeT[Unit, Unit]
@@ -61,11 +61,7 @@ abstract class BaseApertureTools(doesManageWeights: Boolean)
     protected def newNode(factory: EndpointFactory[Unit, Unit]): Node =
       new Node(factory)
 
-    var rebuilds: Int = 0
-    override def rebuild(): Unit = {
-      rebuilds += 1
-      super.rebuild()
-    }
+    def rebuilds: Long = statsReceiver.counters(Seq("rebuilds"))
   }
 }
 
@@ -477,7 +473,10 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       override protected val useDeterministicOrdering = Some(false)
     }
 
+    assert(bal.rebuilds == 0)
     bal.update(counts.range(2))
+    assert(bal.rebuilds == 1)
+
     assert(bal.aperturex == 1)
     assert(bal.isRandomAperture)
 
@@ -489,7 +488,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
 
     // should be moved forward on rebuild
     val svc = Await.result(bal(ClientConnection.nil))
-    assert(bal.rebuilds == 1)
+    assert(bal.rebuilds == 2)
     assert(bal.status == Status.Open)
     assert(svc.status == Status.Open)
   }
@@ -653,13 +652,8 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       override val address: Address = Inet(addr, Addr.Metadata.empty)
     }
 
-    val sr = new InMemoryStatsReceiver
-
-    def getVectorHash: Float = sr.gauges(Seq("vector_hash")).apply()
-
-    val bal = new Bal {
-      override protected def statsReceiver = sr
-    }
+    val bal = new Bal
+    def getVectorHash: Float = bal.statsReceiver.gauges(Seq("vector_hash")).apply()
 
     def updateWithIps(ips: Vector[String]): Unit =
       bal.update(ips.map { addr =>

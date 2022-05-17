@@ -586,7 +586,10 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
           override protected val useDeterministicOrdering = Some(false)
         }
 
+        assert(bal.rebuilds == 0)
         bal.update(counts.range(2))
+        assert(bal.rebuilds == 1)
+
         assert(bal.aperturex == 1)
         assert(bal.isRandomAperture)
 
@@ -598,7 +601,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
 
         // should be moved forward on rebuild
         val svc = Await.result(bal(ClientConnection.nil))
-        assert(bal.rebuilds == 1)
+        assert(bal.rebuilds == 2)
         assert(bal.status == Status.Open)
         assert(svc.status == Status.Open)
       }

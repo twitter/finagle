@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.Future
 import com.twitter.util.Time
+import java.util.concurrent.locks.ReentrantLock
 import scala.annotation.tailrec
 import scala.collection.immutable
 import scala.collection.mutable
@@ -96,30 +97,37 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
 
   private[this] val nodeStatus: Node => Status = _.factory.status
 
-  // Can be read from any thread but all modifications must be done while synchronized on
-  // `this` to avoid things like a rebuild clobbering an update.
+  private[this] val lock = new ReentrantLock()
+
+  // Can be read from any thread but all modifications must be done while holding the lock
+  // to avoid things like a rebuild clobbering an update.
   @volatile protected var dist: Distributor = initDistributor()
 
   protected def rebuild(): Unit = {
-    val initial = dist
-    // since all rebuilds/updates grab the lock, we know that once we have the lock nobody
-    // else is rebuilding or updating. We can then make sure that we are still rebuilding
-    // what we think we're rebuilding to avoid unhelpful and costly rebuilds. Empirically
-    // this hasn't been observed but we do it anyway since it's easy to check.
-    val rebuilt = synchronized {
-      if (initial != dist) false // someone else rebuild for us so no need for us to do so
-      else {
-        val rebuildAttempt = initial.rebuild()
-        if (rebuildAttempt != initial) {
-          dist = rebuildAttempt
-          true
-        } else {
-          false
-        }
-      }
-    }
+    lock.lock()
+    try doRebuild()
+    finally lock.unlock()
+  }
 
-    if (rebuilt) rebuilds.incr()
+  // This is an optimization for the max-effort rebuilds. Some load balancers can
+  // attempt to rebuild and that may result in a more healthy distributor. However,
+  // if someone else is already rebuilding we don't want to wait.
+  private[this] def tryRebuild(): Unit = {
+    if (lock.tryLock()) {
+      try doRebuild()
+      finally lock.unlock()
+    }
+  }
+
+  // must be called while holding `lock`
+  private[this] def doRebuild(): Unit = {
+    assert(lock.isLocked)
+    val initial = dist
+    val rebuildAttempt = initial.rebuild()
+    if (rebuildAttempt != initial) {
+      dist = rebuildAttempt
+      rebuilds.incr()
+    }
   }
 
   def numAvailable: Int =
@@ -159,43 +167,48 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
    * may run asynchronously, is completed, the load balancer balances
    * across these factories and no others.
    */
-  def update(newFactories: IndexedSeq[EndpointFactory[Req, Rep]]): Unit = synchronized {
-    updates.incr()
-    // We get a new list of service factories, and compare against the
-    // current service factories in the distributor. We want to preserve
-    // the existing nodes if possible. We rebuild the distributor with new
-    // factories, preserving the nodes of the factories in the intersection.
+  def update(newFactories: IndexedSeq[EndpointFactory[Req, Rep]]): Unit = {
+    lock.lock()
+    try {
+      updates.incr()
+      // We get a new list of service factories, and compare against the
+      // current service factories in the distributor. We want to preserve
+      // the existing nodes if possible. We rebuild the distributor with new
+      // factories, preserving the nodes of the factories in the intersection.
 
-    // We will rebuild `Distributor` with these nodes. Note, it's important
-    // that we maintain the order of the `newFactories` collection as some
-    // `Distributor` implementations rely on its ordering.
-    val transferred: immutable.VectorBuilder[Node] = new immutable.VectorBuilder[Node]
+      // We will rebuild `Distributor` with these nodes. Note, it's important
+      // that we maintain the order of the `newFactories` collection as some
+      // `Distributor` implementations rely on its ordering.
+      val transferred: immutable.VectorBuilder[Node] = new immutable.VectorBuilder[Node]
 
-    // These nodes are currently maintained by `Distributor`.
-    val oldFactories = mutable.HashMap.empty[EndpointFactory[Req, Rep], Node]
-    dist.vector.foreach { node => oldFactories.update(node.factory, node) }
+      // These nodes are currently maintained by `Distributor`.
+      val oldFactories = mutable.HashMap.empty[EndpointFactory[Req, Rep], Node]
+      dist.vector.foreach { node => oldFactories.update(node.factory, node) }
 
-    var numAdded: Int = 0
-    for (factory <- newFactories) {
-      oldFactories.remove(factory) match {
-        case Some(f) =>
-          transferred += f
-        case None =>
-          transferred += newNode(factory)
-          numAdded += 1
+      var numAdded: Int = 0
+      for (factory <- newFactories) {
+        oldFactories.remove(factory) match {
+          case Some(f) =>
+            transferred += f
+          case None =>
+            transferred += newNode(factory)
+            numAdded += 1
+        }
       }
-    }
-    val numRemoved = oldFactories.size
+      val numRemoved = oldFactories.size
 
-    removes.incr(numRemoved)
-    adds.incr(numAdded)
+      removes.incr(numRemoved)
+      adds.incr(numAdded)
 
-    // It isn't contractual that `newFactories` must have new or removed endpoints from the
-    // current serverset. Lets guard against unnecessarily rebuilding here if no endpoints
-    // have been added or removed.
-    if (numAdded > 0 || numRemoved > 0) {
-      dist = dist.rebuild(transferred.result())
-      rebuilds.incr()
+      // It isn't contractual that `newFactories` must have new or removed endpoints from the
+      // current serverset. Lets guard against unnecessarily rebuilding here if no endpoints
+      // have been added or removed.
+      if (numAdded > 0 || numRemoved > 0) {
+        dist = dist.rebuild(transferred.result())
+        rebuilds.incr()
+      }
+    } finally {
+      lock.unlock()
     }
   }
 
@@ -221,11 +234,17 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     var node = pick(maxEffort)
     if (node == null) {
       panicked.incr()
-      rebuild()
+      tryRebuild()
       node = dist.pick()
     }
-    if (snap.eq(dist) && snap.needsRebuild)
-      rebuild()
+    if (snap.eq(dist) && snap.needsRebuild) {
+      // if `.needsRebuild == true` we definitely want a rebuild and even
+      // with `tryRebuild` we will get it:
+      //   - if we get the lock then we will rebuild
+      //   - if we fail to get the lock it means that someone else is currently
+      //     rebuilding and `snap` will be replaced by them.
+      tryRebuild()
+    }
 
     node(conn)
   }
