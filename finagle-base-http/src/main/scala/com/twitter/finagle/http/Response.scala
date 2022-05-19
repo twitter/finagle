@@ -2,7 +2,10 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.http.collection.RecordSchema
 import com.twitter.finagle.http.util.FailingWriter
-import com.twitter.io.{Buf, Pipe, Reader, Writer}
+import com.twitter.io.Buf
+import com.twitter.io.Pipe
+import com.twitter.io.Reader
+import com.twitter.io.Writer
 
 /**
  * Rich HttpResponse
@@ -21,6 +24,35 @@ abstract class Response private extends Message {
   final def isRequest = false
 
   def status: Status
+
+  /** Get Location header */
+  def location: Option[String] = headerMap.get(Fields.Location)
+
+  /** Set Location header */
+  def location_=(value: String): Unit = headerMap.set(Fields.Location, value)
+
+  /** Get Retry-After header */
+  def retryAfter: Option[String] = headerMap.get(Fields.RetryAfter)
+
+  /** Set Retry-After header */
+  def retryAfter_=(value: String): Unit = headerMap.set(Fields.RetryAfter, value)
+
+  /** Set Retry-After header by seconds */
+  def retryAfter_=(value: Long): Unit = {
+    retryAfter = value.toString
+  }
+
+  /** Get Server header */
+  def server: Option[String] = headerMap.get(Fields.Server)
+
+  /** Set Server header */
+  def server_=(value: String): Unit = headerMap.set(Fields.Server, value)
+
+  /** Get WWW-Authenticate header */
+  def wwwAuthenticate: Option[String] = headerMap.get(Fields.WwwAuthenticate)
+
+  /** Set WWW-Authenticate header */
+  def wwwAuthenticate_=(value: String): Unit = headerMap.set(Fields.WwwAuthenticate, value)
 
   /**
    * Set the status of this response

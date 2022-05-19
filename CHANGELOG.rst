@@ -15,6 +15,13 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-base-http: Methods for getting/setting `Accept`, `Authorization`, `Host`, `Referer`,
+  `User-Agent`, `X-Forwarded-For` headers were moved from `c.t.f.http.Message` class to
+  `c.t.f.http.Request` as these headers are only valid on requests and not on responses.
+  Methods for getting/setting `Location`, `Retry-After`, `Server`, and `WWW-Authenticate` headers
+  were moved from `c.t.f.http.Message` class to `c.t.f.http.Response` as they are only valid
+  on responses and not on requests.
+
 * finagle-core: Update OffloadFilter.Param API to encourage recommended construction.
   ``PHAB_ID=D882210``
 

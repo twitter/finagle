@@ -2,12 +2,21 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.http.Message.BufOutputStream
 import com.twitter.finagle.http.util.StringUtil
-import com.twitter.io.{Buf, BufInputStream, Reader, Writer}
-import com.twitter.util.{Duration, Future}
-import java.nio.charset.{Charset, StandardCharsets}
+import com.twitter.io.Buf
+import com.twitter.io.BufInputStream
+import com.twitter.io.Reader
+import com.twitter.io.Writer
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, ZoneId, ZoneOffset}
-import java.util.{Date, Locale, Iterator => JIterator}
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.Date
+import java.util.Locale
+import java.util.{Iterator => JIterator}
 import scala.collection.JavaConverters._
 
 /**
@@ -186,43 +195,16 @@ abstract class Message {
     cookies -= name
   }
 
-  /** Accept header */
-  def accept: Seq[String] =
-    headerMap.get(Fields.Accept) match {
-      case Some(s) => s.split(",").map(_.trim).filter(_.nonEmpty)
-      case None => Seq()
-    }
-
-  /** Set Accept header */
-  def accept_=(value: String): Unit = headerMap.set(Fields.Accept, value)
-
-  /** Set Accept header with list of values */
-  def accept_=(values: Iterable[String]): Unit = accept = values.mkString(", ")
-
-  /** Accept header media types (normalized, no parameters) */
-  def acceptMediaTypes: Seq[String] =
-    accept.flatMap {
-      _.split(";", 2).headOption
-        .map(_.trim.toLowerCase) // media types are case-insensitive
-        .filter(_.nonEmpty) // skip blanks
-    }
-
   /** Allow header */
   def allow: Option[String] = headerMap.get(Fields.Allow)
 
-  /** Set Authorization header */
+  /** Set Allow header */
   def allow_=(value: String): Unit = headerMap.set(Fields.Allow, value)
 
-  /** Set Authorization header */
+  /** Set Allow header */
   def allow_=(values: Iterable[Method]): Unit = {
     allow = values.mkString(",").toUpperCase
   }
-
-  /** Get Authorization header */
-  def authorization: Option[String] = headerMap.get(Fields.Authorization)
-
-  /** Set Authorization header */
-  def authorization_=(value: String): Unit = headerMap.set(Fields.Authorization, value)
 
   /** Get Cache-Control header */
   def cacheControl: Option[String] = headerMap.get(Fields.CacheControl)
@@ -361,26 +343,6 @@ abstract class Message {
     expires = Message.httpDateFormat(value)
   }
 
-  /** Get Host header */
-  def host: Option[String] = headerMap.get(Fields.Host)
-
-  /**
-   * Set Host header
-   *
-   * @see host(String) for Java users
-   */
-  def host_=(value: String): Unit = headerMap.set(Fields.Host, value)
-
-  /**
-   * Set the Host header
-   *
-   * @see [[host_=(String)]] for Scala users
-   */
-  final def host(value: String): this.type = {
-    host = value
-    this
-  }
-
   /** Get Last-Modified header */
   def lastModified: Option[String] = headerMap.get(Fields.LastModified)
 
@@ -391,12 +353,6 @@ abstract class Message {
   def lastModified_=(value: Date): Unit = {
     lastModified = Message.httpDateFormat(value)
   }
-
-  /** Get Location header */
-  def location: Option[String] = headerMap.get(Fields.Location)
-
-  /** Set Location header */
-  def location_=(value: String): Unit = headerMap.set(Fields.Location, value)
 
   /** Get media-type from Content-Type header */
   def mediaType: Option[String] =
@@ -430,47 +386,6 @@ abstract class Message {
         this.contentType = value
     }
   }
-
-  /** Get Referer [sic] header */
-  def referer: Option[String] = headerMap.get(Fields.Referer)
-
-  /** Set Referer [sic] header */
-  def referer_=(value: String): Unit = headerMap.set(Fields.Referer, value)
-
-  /** Get Retry-After header */
-  def retryAfter: Option[String] = headerMap.get(Fields.RetryAfter)
-
-  /** Set Retry-After header */
-  def retryAfter_=(value: String): Unit = headerMap.set(Fields.RetryAfter, value)
-
-  /** Set Retry-After header by seconds */
-  def retryAfter_=(value: Long): Unit = {
-    retryAfter = value.toString
-  }
-
-  /** Get Server header */
-  def server: Option[String] = headerMap.get(Fields.Server)
-
-  /** Set Server header */
-  def server_=(value: String): Unit = headerMap.set(Fields.Server, value)
-
-  /** Get User-Agent header */
-  def userAgent: Option[String] = headerMap.get(Fields.UserAgent)
-
-  /** Set User-Agent header */
-  def userAgent_=(value: String): Unit = headerMap.set(Fields.UserAgent, value)
-
-  /** Get WWW-Authenticate header */
-  def wwwAuthenticate: Option[String] = headerMap.get(Fields.WwwAuthenticate)
-
-  /** Set WWW-Authenticate header */
-  def wwwAuthenticate_=(value: String): Unit = headerMap.set(Fields.WwwAuthenticate, value)
-
-  /** Get X-Forwarded-For header */
-  def xForwardedFor: Option[String] = headerMap.get("X-Forwarded-For")
-
-  /** Set X-Forwarded-For header */
-  def xForwardedFor_=(value: String): Unit = headerMap.set("X-Forwarded-For", value)
 
   /**
    * Check if X-Requested-With contains XMLHttpRequest, usually signalling a

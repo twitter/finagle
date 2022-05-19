@@ -2,9 +2,16 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.http.collection.RecordSchema
 import com.twitter.finagle.http.util.FailingWriter
-import com.twitter.io.{Buf, Pipe, Reader, Writer}
-import java.net.{InetAddress, InetSocketAddress}
-import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
+import com.twitter.io.Buf
+import com.twitter.io.Pipe
+import com.twitter.io.Reader
+import com.twitter.io.Writer
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.util.AbstractMap
+import java.util.{List => JList}
+import java.util.{Map => JMap}
+import java.util.{Set => JSet}
 import scala.beans.BeanProperty
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
@@ -97,6 +104,71 @@ abstract class Request private extends Message {
    * @see [[uri(String)]] for Java users.
    */
   def uri_=(uri: String): Unit
+
+  /** Accept header */
+  def accept: Seq[String] =
+    headerMap.get(Fields.Accept) match {
+      case Some(s) => s.split(",").map(_.trim).filter(_.nonEmpty)
+      case None => Seq()
+    }
+
+  /** Set Accept header */
+  def accept_=(value: String): Unit = headerMap.set(Fields.Accept, value)
+
+  /** Set Accept header with list of values */
+  def accept_=(values: Iterable[String]): Unit = accept = values.mkString(", ")
+
+  /** Accept header media types (normalized, no parameters) */
+  def acceptMediaTypes: Seq[String] =
+    accept.flatMap {
+      _.split(";", 2).headOption
+        .map(_.trim.toLowerCase) // media types are case-insensitive
+        .filter(_.nonEmpty) // skip blanks
+    }
+
+  /** Get Authorization header */
+  def authorization: Option[String] = headerMap.get(Fields.Authorization)
+
+  /** Set Authorization header */
+  def authorization_=(value: String): Unit = headerMap.set(Fields.Authorization, value)
+
+  /** Get Host header */
+  def host: Option[String] = headerMap.get(Fields.Host)
+
+  /**
+   * Set Host header
+   *
+   * @see host(String) for Java users
+   */
+  def host_=(value: String): Unit = headerMap.set(Fields.Host, value)
+
+  /**
+   * Set the Host header
+   *
+   * @see [[host_=(String)]] for Scala users
+   */
+  final def host(value: String): this.type = {
+    host = value
+    this
+  }
+
+  /** Get Referer [sic] header */
+  def referer: Option[String] = headerMap.get(Fields.Referer)
+
+  /** Set Referer [sic] header */
+  def referer_=(value: String): Unit = headerMap.set(Fields.Referer, value)
+
+  /** Get User-Agent header */
+  def userAgent: Option[String] = headerMap.get(Fields.UserAgent)
+
+  /** Set User-Agent header */
+  def userAgent_=(value: String): Unit = headerMap.set(Fields.UserAgent, value)
+
+  /** Get X-Forwarded-For header */
+  def xForwardedFor: Option[String] = headerMap.get("X-Forwarded-For")
+
+  /** Set X-Forwarded-For header */
+  def xForwardedFor_=(value: String): Unit = headerMap.set("X-Forwarded-For", value)
 
   /** Path from URI. */
   @BeanProperty
