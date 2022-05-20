@@ -51,8 +51,10 @@ object BackupRequestFilter {
    */
   private val MinSendBackupAfterMs: Int = 1
 
-  private[finagle] val SupersededRequestFailure =
-    Failure.ignorable("Request was superseded by another in BackupRequestFilter")
+  private[finagle] val supersededBackupRequestWhy =
+    "Request was superseded by another in BackupRequestFilter"
+
+  private[finagle] val SupersededRequestFailure = Failure.ignorable(supersededBackupRequestWhy)
 
   private[finagle] val SupersededRequestFailureToString = SupersededRequestFailure.toString
 

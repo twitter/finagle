@@ -1,12 +1,21 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.finagle.{Service, FailureFlags}
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.Service
 import com.twitter.finagle.client.BackupRequestFilter
-import com.twitter.finagle.mux.{ClientDiscardedRequestException, ServerProcessor, Request, Response}
+import com.twitter.finagle.mux.ClientDiscardedRequestException
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
+import com.twitter.finagle.mux.ServerProcessor
+import com.twitter.finagle.mux.lease.exp.Lessee
+import com.twitter.finagle.mux.lease.exp.Lessor
+import com.twitter.finagle.mux.lease.exp.nackOnExpiredLease
 import com.twitter.finagle.mux.pushsession.ServerTracker._
-import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.mux.transport.Message.{Rdiscarded, Rerr, Tdispatch, Treq}
+import com.twitter.finagle.mux.transport.Message.Rdiscarded
+import com.twitter.finagle.mux.transport.Message.Rerr
+import com.twitter.finagle.mux.transport.Message.Tdispatch
+import com.twitter.finagle.mux.transport.Message.Treq
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -106,15 +115,7 @@ private class ServerTracker(
       case dispatch =>
         // We raise on the dispatch and immediately send back a Rdiscarded
         why match {
-          // We match on both the `BackupRequestFilter` failure string, and the
-          // exception string. The first one handles a single hop, while the second
-          // one handles multi-level propagation.
-          case BackupRequestFilter.SupersededRequestFailureToString |
-              ServerTracker.SupersededBackupRequestExceptionString =>
-            dispatch.response.raise(newSupersededBackupRequestException())
-          // This condition handles where an in-between hop has not been updated to this
-          // version of code and is still adding an additional wrapping.
-          case reason if reason.endsWith(ServerTracker.SupersededBackupRequestExceptionString) =>
+          case backupFailure if isSupersededBackupRequestException(backupFailure) =>
             dispatch.response.raise(newSupersededBackupRequestException())
           case _ =>
             dispatch.response.raise(new ClientDiscardedRequestException(why))
@@ -268,13 +269,15 @@ private object ServerTracker {
   private def newSupersededBackupRequestException(): Exception =
     new ClientDiscardedRequestException(
       BackupRequestFilter.SupersededRequestFailureToString,
-      FailureFlags.Interrupted | FailureFlags.Ignorable
-    )
+      FailureFlags.Interrupted | FailureFlags.Ignorable)
 
-  // This ends up being the BackupRequestFilter.SupersededRequestFailureToString
-  // with "com.twitter.finagle.mux.ClientDiscardedRequestException: " prepended.
-  private val SupersededBackupRequestExceptionString: String =
-    newSupersededBackupRequestException().toString
+  // cases included:
+  // 1. the SupersededRequestFailure thrown by BackRequestFilter,
+  //    e.g.: Failure(Request was superseded by another in BackupRequestFilter, ...)
+  // 2. Multi-level propagation that the SupersededRequestFailure is wrapped by ClientDiscardedRequestException
+  // 3. Other wrappers (in-between hop has not been updated to this version) over SupersededRequestFailure
+  private def isSupersededBackupRequestException(failureMessage: String): Boolean =
+    failureMessage.contains(BackupRequestFilter.supersededBackupRequestWhy)
 
   private case class Dispatch(tag: Int, response: Future[Message], timer: Stopwatch.Elapsed)
 
