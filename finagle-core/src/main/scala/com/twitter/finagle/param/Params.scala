@@ -1,10 +1,15 @@
 package com.twitter.finagle.param
 
-import com.twitter.finagle.service.{MetricBuilderRegistry, StatsFilter}
+import com.twitter.finagle.service.CoreMetricsRegistry
+import com.twitter.finagle.service.StatsFilter
 import com.twitter.finagle.stats.Disabled
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Stack, stats, tracing, util}
-import com.twitter.util.{JavaTimer, NullMonitor}
+import com.twitter.finagle.Stack
+import com.twitter.finagle.stats
+import com.twitter.finagle.tracing
+import com.twitter.finagle.util
+import com.twitter.util.JavaTimer
+import com.twitter.util.NullMonitor
 import scala.annotation.varargs
 import scala.language.reflectiveCalls
 
@@ -183,12 +188,12 @@ private[finagle] object StandardStats {
 }
 
 /**
- * A class eligible for configuring a [[com.twitter.finagle.service.MetricBuilderRegistry]]
- * throughout finagle servers. The MetricBuilderRegistry allows for constructing a set of
- * essential metrics expressions, [[MetricBuilderRegistry]] is a stateful class and should
+ * A class eligible for configuring a [[com.twitter.finagle.service.CoreMetricsRegistry]]
+ * throughout finagle servers. The CoreMetricsRegistry allows for constructing a set of
+ * essential metrics expressions, [[CoreMetricsRegistry]] is a stateful class and should
  * be configured per-stack.
  */
-case class MetricBuilders(registry: Option[MetricBuilderRegistry]) {
+case class MetricBuilders(registry: Option[CoreMetricsRegistry]) {
   def mk(): (MetricBuilders, Stack.Param[MetricBuilders]) =
     (this, MetricBuilders.param)
 }

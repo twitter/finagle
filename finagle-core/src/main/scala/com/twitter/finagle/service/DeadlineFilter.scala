@@ -3,10 +3,14 @@ package com.twitter.finagle.service
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Deadline
-import com.twitter.finagle.service.MetricBuilderRegistry.DeadlineRejectedCounter
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.logging.{HasLogLevel, Level}
-import com.twitter.util.{Duration, Future, Stopwatch, Time, TokenBucket}
+import com.twitter.logging.HasLogLevel
+import com.twitter.logging.Level
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Stopwatch
+import com.twitter.util.Time
+import com.twitter.util.TokenBucket
 
 /**
  * DeadlineFilter provides an admission control module that can be pushed onto the stack to
@@ -192,7 +196,7 @@ object DeadlineFilter {
  *        ".../admission_control/deadline/"
  * @param nowMillis current time in milliseconds
  * @param isDarkMode DarkMode will collect stats but not reject requests
- * @param metricsRegistry an optional [MetricBuilderRegistry] set by stack parameter
+ * @param metricsRegistry an optional [CoreMetricsRegistry] set by stack parameter
  *        for injecting metrics and instrumenting top-line expressions
  * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline user guide]]
  *      for more details.
@@ -202,7 +206,7 @@ class DeadlineFilter[Req, Rep](
   maxRejectFraction: Double = DeadlineFilter.DefaultMaxRejectFraction,
   statsReceiver: StatsReceiver,
   nowMillis: () => Long = Stopwatch.systemMillis,
-  metricsRegistry: Option[MetricBuilderRegistry] = None,
+  metricsRegistry: Option[CoreMetricsRegistry] = None,
   isDarkMode: Boolean)
     extends SimpleFilter[Req, Rep] {
 
@@ -228,9 +232,11 @@ class DeadlineFilter[Req, Rep](
   private[this] val rejectedCounter = statsReceiver.counter("rejected")
 
   // inject deadline rejection counter and instrument deadline rejection rate expression
-  metricsRegistry.map { registry =>
-    registry.setMetricBuilder(DeadlineRejectedCounter, rejectedCounter.metadata)
-    registry.deadlineRejection
+  for {
+    registry <- metricsRegistry
+    mb <- rejectedCounter.metadata.toMetricBuilder
+  } {
+    registry.setMetricBuilder(registry.DeadlineRejectedCounter, mb, statsReceiver)
   }
 
   private[this] val expiredTimeStat = statsReceiver.stat("expired_ms")

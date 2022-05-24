@@ -6,7 +6,7 @@ import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.DeadlineFilter
 import com.twitter.finagle.service.ExpiringService
-import com.twitter.finagle.service.MetricBuilderRegistry
+import com.twitter.finagle.service.CoreMetricsRegistry
 import com.twitter.finagle.service.StatsFilter
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.ServerStatsReceiver
@@ -176,12 +176,12 @@ object StackServer {
 
   /**
    * The default params used for StackServers.
-   * @note The MetricBuilderRegistry is stateful for each stack,
+   * @note The `CoreMetricsRegistry` is stateful for each stack,
    *       this should be evaluated every time calling,
    */
   def defaultParams: Stack.Params =
     Stack.Params.empty + Stats(ServerStatsReceiver) +
-      MetricBuilders(Some(new MetricBuilderRegistry()))
+      MetricBuilders(Some(new CoreMetricsRegistry()))
 
   /**
    * A set of StackTransformers for transforming server stacks.

@@ -47,15 +47,11 @@ class CounterDeltasTest extends AnyFunSuite with OneInstancePerTest {
   }
 
   test("UnlatchedCounter type is respected") {
-    val unlatched = sr.counter(
-      MetricBuilder(
-        name = Seq("unlatched_counter"),
-        metricType = UnlatchedCounter,
-        statsReceiver = sr))
+    val unlatched =
+      sr.counter(MetricBuilder(name = Seq("unlatched_counter"), metricType = UnlatchedCounter))
 
     val latched =
-      sr.counter(
-        MetricBuilder(name = Seq("latched_counter"), metricType = CounterType, statsReceiver = sr))
+      sr.counter(MetricBuilder(name = Seq("latched_counter"), metricType = CounterType))
 
     def getUnlatched: Int = counterDelta("unlatched_counter")
 

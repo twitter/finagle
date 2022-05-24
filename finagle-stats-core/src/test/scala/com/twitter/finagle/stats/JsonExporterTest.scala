@@ -198,15 +198,13 @@ class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatie
         MetricBuilder(
           verbosity = Verbosity.Default,
           name = Seq("views"),
-          metricType = CounterType,
-          statsReceiver = null)).counter
+          metricType = CounterType)).counter
     val gcCounter = registry
       .getOrCreateCounter(
         MetricBuilder(
           verbosity = Verbosity.Default,
           name = Seq("jvm_gcs"),
-          metricType = CounterType,
-          statsReceiver = null)).counter
+          metricType = CounterType)).counter
     viewsCounter.incr()
     gcCounter.incr()
     val exporter = new JsonExporter(registry) {
@@ -262,8 +260,7 @@ class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatie
           MetricBuilder(
             verbosity = Verbosity.Default,
             name = Seq(name),
-            metricType = CounterType,
-            statsReceiver = null)).counter
+            metricType = CounterType)).counter
 
     val timer = new MockTimer()
     val exporter = new JsonExporter(registry, timer)
@@ -323,8 +320,7 @@ class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatie
         MetricBuilder(
           verbosity = Verbosity.Default,
           name = Seq("anCounter"),
-          metricType = CounterType,
-          statsReceiver = null)).counter
+          metricType = CounterType)).counter
     counter.incr(11)
 
     val timer = new MockTimer()
@@ -376,11 +372,7 @@ class JsonExporterTest extends AnyFunSuite with Eventually with IntegrationPatie
     val registry = Metrics.createDetached()
     val sr =
       registry.registerGauge(
-        MetricBuilder(
-          verbosity = Verbosity.Default,
-          name = Seq("boom"),
-          metricType = GaugeType,
-          statsReceiver = null),
+        MetricBuilder(verbosity = Verbosity.Default, name = Seq("boom"), metricType = GaugeType),
         throw new RuntimeException("loolool"))
 
     val exporter = new JsonExporter(registry)

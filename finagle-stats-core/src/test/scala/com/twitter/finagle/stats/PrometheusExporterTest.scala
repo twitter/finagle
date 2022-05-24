@@ -47,8 +47,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       builder = MetricBuilder(
         name = Seq("requests_pos"),
         metricType = CounterType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Long.MaxValue
     )
@@ -58,8 +57,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       builder = MetricBuilder(
         name = Seq("requests_neg"),
         metricType = CounterType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Long.MinValue
     )
@@ -86,8 +84,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       builder = MetricBuilder(
         name = Seq("requests_pos"),
         metricType = GaugeType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Long.MaxValue
     )
@@ -97,8 +94,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       builder = MetricBuilder(
         name = Seq("requests_neg"),
         metricType = GaugeType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Long.MinValue
     )
@@ -125,8 +121,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       builder = MetricBuilder(
         name = Seq("requests_pos"),
         metricType = GaugeType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Float.MaxValue
     )
@@ -136,8 +131,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       builder = MetricBuilder(
         name = Seq("requests_neg"),
         metricType = GaugeType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Float.MinValue
     )
@@ -164,8 +158,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       builder = MetricBuilder(
         name = Seq("requests_pos"),
         metricType = GaugeType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Float.PositiveInfinity
     )
@@ -175,8 +168,7 @@ class PrometheusExporterTest extends AnyFunSuite {
       builder = MetricBuilder(
         name = Seq("requests_neg"),
         metricType = GaugeType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(Map("role" -> "foo")).withDimensionalSupport,
       value = Float.NegativeInfinity
     )

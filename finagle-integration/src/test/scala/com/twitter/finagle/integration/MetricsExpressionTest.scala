@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.http.Request
 import com.twitter.finagle.http.Response
 import com.twitter.finagle.integration.thriftscala.Echo
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.deadlineRejectName
+import com.twitter.finagle.service.CoreMetricsRegistry.ExpressionNames.deadlineRejectName
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.exp.ExpressionNames
 import com.twitter.util.Await

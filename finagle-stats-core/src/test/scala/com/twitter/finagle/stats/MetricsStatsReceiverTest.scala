@@ -228,23 +228,23 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     val bHisto = sr.scope("test").stat("b")
     val cGauge = sr.scope(("test")).addGauge("c") { 1 }
 
-    val expression = ExpressionSchema(
-      "test_expression",
-      Expression(aCounter.metadata).plus(Expression(bHisto.metadata, HistogramComponent.Min)
-        .plus(Expression(cGauge.metadata)))
-    ).build()
+    sr.registerExpression(
+      ExpressionSchema(
+        "test_expression",
+        Expression(aCounter.metadata).plus(Expression(bHisto.metadata, HistogramComponent.Min)
+          .plus(Expression(cGauge.metadata)))
+      ))
 
     // what we expected as hydrated metric builders
     val aaSchema =
-      MetricBuilder(name = Seq("test", "a"), metricType = CounterType, statsReceiver = sr)
+      MetricBuilder(name = Seq("test", "a"), metricType = CounterType)
     val bbSchema =
       MetricBuilder(
         name = Seq("test", "b"),
         percentiles = BucketedHistogram.DefaultQuantiles,
-        metricType = HistogramType,
-        statsReceiver = sr)
+        metricType = HistogramType)
     val ccSchema =
-      MetricBuilder(name = Seq("test", "c"), metricType = GaugeType, statsReceiver = sr)
+      MetricBuilder(name = Seq("test", "c"), metricType = GaugeType)
 
     val expected_expression = ExpressionSchema(
       "test_expression",
@@ -262,26 +262,24 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     val sr = new MetricsStatsReceiver(metrics)
     val exporter = new MetricsExporter(metrics)
     val aCounter =
-      MetricBuilder(name = Seq("a"), metricType = CounterType, statsReceiver = sr)
+      MetricBuilder(name = Seq("a"), metricType = CounterType)
 
-    val expression = ExpressionSchema("test_expression", Expression(aCounter))
-      .build()
+    sr.registerExpression(ExpressionSchema("test_expression", Expression(aCounter)))
     assert(exporter.expressions.keySet.size == 1)
 
-    val expressionWithServiceName = ExpressionSchema("test_expression", Expression(aCounter))
-      .withServiceName("thrift")
-      .build()
+    sr.registerExpression(
+      ExpressionSchema("test_expression", Expression(aCounter))
+        .withServiceName("thrift"))
     assert(exporter.expressions.keySet.size == 2)
 
-    val expressionWithNamespace = ExpressionSchema("test_expression", Expression(aCounter))
-      .withNamespace("a", "b")
-      .build()
+    sr.registerExpression(
+      ExpressionSchema("test_expression", Expression(aCounter))
+        .withNamespace("a", "b"))
     assert(exporter.expressions.keySet.size == 3)
 
-    val expressionWithNamespaceAndServiceName =
+    sr.registerExpression(
       ExpressionSchema("test_expression", Expression(aCounter))
-        .withNamespace("a", "b").withServiceName("thrift")
-        .build()
+        .withNamespace("a", "b").withServiceName("thrift"))
     assert(exporter.expressions.keySet.size == 4)
   }
 
@@ -290,19 +288,19 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     val sr = new MetricsStatsReceiver(metrics)
     val exporter = new MetricsExporter(metrics)
     val aCounter =
-      MetricBuilder(name = Seq("a"), metricType = CounterType, statsReceiver = sr)
+      MetricBuilder(name = Seq("a"), metricType = CounterType)
 
     val bCounter =
-      MetricBuilder(name = Seq("b"), metricType = CounterType, statsReceiver = sr)
+      MetricBuilder(name = Seq("b"), metricType = CounterType)
 
-    val expression1 = ExpressionSchema("test_expression", Expression(aCounter))
-      .withNamespace("a", "b")
-      .build()
+    val expression1 = sr.registerExpression(
+      ExpressionSchema("test_expression", Expression(aCounter))
+        .withNamespace("a", "b"))
     assert(exporter.expressions.keySet.size == 1)
 
-    val expression2 = ExpressionSchema("test_expression", Expression(bCounter))
-      .withNamespace("a", "b")
-      .build()
+    val expression2 = sr.registerExpression(
+      ExpressionSchema("test_expression", Expression(bCounter))
+        .withNamespace("a", "b"))
     assert(exporter.expressions.keySet.size == 1)
 
     assert(exporter.expressions.values.head.expr == Expression(aCounter))

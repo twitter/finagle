@@ -11,8 +11,6 @@ import com.twitter.finagle.stats.Snapshot.Percentile
 // Collection of sample snapshots for use with tests
 private object SampleSnapshots {
 
-  val sr = new InMemoryStatsReceiver
-
   val NoLabelCounter: CounterSnapshot =
     CounterSnapshot(
       hierarchicalName = "requests",
@@ -20,7 +18,6 @@ private object SampleSnapshots {
         name = Seq("requests"),
         metricType = CounterType,
         units = Requests,
-        statsReceiver = sr,
       ).withDimensionalSupport,
       value = 1
     )
@@ -33,7 +30,6 @@ private object SampleSnapshots {
         metricType = CounterType,
         units = Requests,
         verbosity = Verbosity.Debug,
-        statsReceiver = sr,
       ).withDimensionalSupport,
       value = 1
     )
@@ -44,8 +40,7 @@ private object SampleSnapshots {
       builder = MetricBuilder(
         name = Seq("requests"),
         metricType = CounterType,
-        units = Requests,
-        statsReceiver = sr,
+        units = Requests
       ).withLabels(
           Map("role" -> "foo", "job" -> "baz-service", "env" -> "staging", "zone" -> "dc1"))
         .withDimensionalSupport,
@@ -56,8 +51,7 @@ private object SampleSnapshots {
     hierarchicalName = "finagle/future_pool/pool_size_float",
     builder = MetricBuilder(
       metricType = GaugeType,
-      units = CustomUnit("Threads"),
-      statsReceiver = sr
+      units = CustomUnit("Threads")
     ).withIdentity(
       MetricBuilder.Identity(
         hierarchicalName = Seq("finagle", "future_pool", "pool_size_float"),
@@ -72,8 +66,7 @@ private object SampleSnapshots {
     hierarchicalName = "finagle/future_pool/pool_size_long",
     builder = MetricBuilder(
       metricType = GaugeType,
-      units = CustomUnit("Threads"),
-      statsReceiver = sr
+      units = CustomUnit("Threads")
     ).withIdentity(
       MetricBuilder.Identity(
         hierarchicalName = Seq("finagle", "future_pool", "pool_size_long"),
@@ -90,8 +83,7 @@ private object SampleSnapshots {
     builder = MetricBuilder(
       metricType = CounterType,
       units = Requests,
-      name = Seq("failures"),
-      statsReceiver = sr,
+      name = Seq("failures")
     ).withLabels(
         Map(
           "side" -> "clnt",
@@ -107,8 +99,7 @@ private object SampleSnapshots {
     hierarchicalName = "foo/bar/ping_ms",
     builder = MetricBuilder(
       metricType = HistogramType,
-      units = Milliseconds,
-      statsReceiver = sr
+      units = Milliseconds
     ).withIdentity(
       MetricBuilder.Identity(
         hierarchicalName = Seq("foo", "bar", "ping_ms"),

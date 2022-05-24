@@ -11,27 +11,15 @@ import org.scalatest.funsuite.AnyFunSuite
 class MetricsViewTest extends AnyFunSuite {
 
   private[this] def counterMetricBuilder(name: String): MetricBuilder = {
-    MetricBuilder(
-      verbosity = Verbosity.Debug,
-      name = Seq(name),
-      metricType = CounterType,
-      statsReceiver = null)
+    MetricBuilder(verbosity = Verbosity.Debug, name = Seq(name), metricType = CounterType)
   }
 
   private[this] def gaugeMetricBuilder(name: String): MetricBuilder = {
-    MetricBuilder(
-      verbosity = Verbosity.Debug,
-      name = Seq(name),
-      metricType = GaugeType,
-      statsReceiver = null)
+    MetricBuilder(verbosity = Verbosity.Debug, name = Seq(name), metricType = GaugeType)
   }
 
   private[this] def histogramMetricBuilder(name: String): MetricBuilder = {
-    MetricBuilder(
-      verbosity = Verbosity.Debug,
-      name = Seq(name),
-      metricType = HistogramType,
-      statsReceiver = null)
+    MetricBuilder(verbosity = Verbosity.Debug, name = Seq(name), metricType = HistogramType)
   }
 
   private val EmptySnapshot: Snapshot = new Snapshot {

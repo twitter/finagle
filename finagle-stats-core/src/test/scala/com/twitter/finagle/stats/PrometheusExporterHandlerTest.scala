@@ -108,8 +108,7 @@ class PrometheusExporterHandlerTest extends AnyFunSuite {
           name = Seq("debug_requests"),
           metricType = CounterType,
           units = Requests,
-          verbosity = Verbosity.Debug,
-          statsReceiver = null,
+          verbosity = Verbosity.Debug
         ).withDimensionalSupport,
         value = 1
       )

@@ -2,10 +2,6 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.service.MetricBuilderRegistry.FailureCounter
-import com.twitter.finagle.service.MetricBuilderRegistry.LatencyP99Histogram
-import com.twitter.finagle.service.MetricBuilderRegistry.RequestCounter
-import com.twitter.finagle.service.MetricBuilderRegistry.SuccessCounter
 import com.twitter.finagle.service.StatsFilter.Descriptions.dispatch
 import com.twitter.finagle.service.StatsFilter.Descriptions.failures
 import com.twitter.finagle.service.StatsFilter.Descriptions.latency
@@ -194,7 +190,7 @@ class StatsFilter[Req, Rep] private[service] (
   exceptionStatsHandler: ExceptionStatsHandler,
   timeUnit: TimeUnit,
   now: () => Long,
-  metricsRegistry: Option[MetricBuilderRegistry] = None,
+  metricsRegistry: Option[CoreMetricsRegistry] = None,
   standardStats: StandardStats = Disabled)
     extends SimpleFilter[Req, Rep] {
 
@@ -260,7 +256,7 @@ class StatsFilter[Req, Rep] private[service] (
   private[service] def this(
     statsReceiver: StatsReceiver,
     exceptionStatsHandler: ExceptionStatsHandler,
-    metricBuilderRegistry: MetricBuilderRegistry
+    metricBuilderRegistry: CoreMetricsRegistry
   ) = {
     this(
       statsReceiver,
@@ -326,17 +322,17 @@ class StatsFilter[Req, Rep] private[service] (
 
   // inject metrics and instrument top-line expressions
   metricsRegistry.foreach { registry =>
-    registry.setMetricBuilder(SuccessCounter, configuredMetrics.successCount.metadata)
-    registry.setMetricBuilder(FailureCounter, configuredMetrics.failureCount.metadata)
-    registry.setMetricBuilder(RequestCounter, configuredMetrics.requestCount.metadata)
-    registry.setMetricBuilder(LatencyP99Histogram, configuredMetrics.latencyStat.metadata)
-
-    // Touch each one to construct expressions
-    registry.successRate
-    registry.latencyP99
-    registry.throughput
-    registry.acRejection
-    registry.failures
+    Seq(
+      registry.SuccessCounter -> configuredMetrics.successCount.metadata,
+      registry.FailureCounter -> configuredMetrics.failureCount.metadata,
+      registry.RequestCounter -> configuredMetrics.requestCount.metadata,
+      registry.LatencyP99Histogram -> configuredMetrics.latencyStat.metadata
+    ).foreach {
+      case (k, metadata) =>
+        metadata.toMetricBuilder.foreach { metricBuilder =>
+          registry.setMetricBuilder(k, metricBuilder, statsReceiver)
+        }
+    }
   }
 
   private[this] def isIgnorableResponse(rep: Try[Rep]): Boolean = rep match {

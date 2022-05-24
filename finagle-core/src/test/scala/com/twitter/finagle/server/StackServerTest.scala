@@ -11,7 +11,7 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.service.ExpiringService
-import com.twitter.finagle.service.MetricBuilderRegistry.ExpressionNames.deadlineRejectName
+import com.twitter.finagle.service.CoreMetricsRegistry.ExpressionNames.deadlineRejectName
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.ssl.session.NullSslSessionInfo
 import com.twitter.finagle.ssl.session.SslSessionInfo

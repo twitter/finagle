@@ -250,7 +250,7 @@ object BindingFactory {
             stats.counter(metricBuilder.withIdentifier(Some(displayed)))
           override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge =
             stats.addGauge(metricBuilder.withIdentifier(Some(displayed)))(f)
-          override protected[finagle] def registerExpression(expr: ExpressionSchema): Try[Unit] =
+          override def registerExpression(expr: ExpressionSchema): Try[Unit] =
             super.registerExpression(expr.withLabel(ExpressionSchema.ProcessPath, displayed))
         }
 
