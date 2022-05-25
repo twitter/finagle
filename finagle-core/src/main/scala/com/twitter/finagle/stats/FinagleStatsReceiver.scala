@@ -25,16 +25,28 @@ object LoadedHostStatsReceiver extends {
  * are prefixed with the string "clnt" by default.
  */
 object ClientStatsReceiver extends StatsReceiverProxy {
-  @volatile protected var self: StatsReceiver =
-    RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope("clnt"), Client)
+  @volatile protected var self: StatsReceiver = _
+  setRootScope("clnt")
 
   def setRootScope(rootScope: String): Unit = {
-    self = RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope(rootScope), Client)
+    self = RoleConfiguredStatsReceiver(transformLoadedStatsReceiver(rootScope), Client)
   }
 
   override def repr: ClientStatsReceiver.type = this
 
   def get: StatsReceiver = this
+
+  private[this] def transformLoadedStatsReceiver(rootScope: String): StatsReceiver = {
+    // The hierarchical structure is flexible but we're not allowing changes to the
+    // dimensional representation at this time.
+    LoadedStatsReceiver
+      .hierarchicalScope(rootScope)
+      .dimensionalScope("rpc")
+      .dimensionalScope("finagle")
+      .dimensionalScope("client")
+      .label("rpc_system", "finagle")
+      .label("implementation", "finagle")
+  }
 }
 
 /**
