@@ -162,18 +162,6 @@ object LoadBalancerFactory {
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with whether endpoints
-   * should remain open and reusable. When enabled, endpoints will not be closed by the
-   * LoadBalancerFactory so implementations must ensure they close the endpoints
-   * themselves.
-   */
-  private[finagle] case class ReusableEndpoints(enabled: Boolean)
-  private[finagle] object ReusableEndpoints {
-    implicit val param: Stack.Param[ReusableEndpoints] = Stack.Param(ReusableEndpoints(false))
-  }
-
-  /**
-   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a
    * finagle [[Address]] ordering. The collection of endpoints in a load
    * balancer are sorted by this ordering. Although it's generally not a
@@ -418,8 +406,7 @@ object LoadBalancerFactory {
           new TrafficDistributor[Req, Rep](
             dest = endpoints,
             newBalancer = newBalancer(_, _, manageWeights = false),
-            statsReceiver = balancerStats,
-            reuseEndpoints = params[ReusableEndpoints].enabled
+            statsReceiver = balancerStats
           )
         )
       }

@@ -122,7 +122,6 @@ private[finagle] object TrafficDistributor {
   private class Distributor[Req, Rep](
     classes: Iterable[WeightClass[Req, Rep]],
     busyWeightClasses: Counter,
-    reuseEndpoints: Boolean,
     rng: Rng = Rng.threadLocal)
       extends ServiceFactory[Req, Rep] {
 
@@ -182,16 +181,12 @@ private[finagle] object TrafficDistributor {
       }
 
     def close(deadline: Time): Future[Unit] = {
-      if (reuseEndpoints) {
-        Closable.all(balancers: _*).close(deadline)
-      } else {
-        Closable
-          .all(
-            Closable.all(balancers: _*),
-            Closable.all(endpoints: _*)
-          )
-          .close(deadline)
-      }
+      Closable
+        .all(
+          Closable.all(balancers: _*),
+          Closable.all(endpoints: _*)
+        )
+        .close(deadline)
     }
 
     private[this] val svcFactoryStatus: ServiceFactory[Req, Rep] => Status =
@@ -219,7 +214,6 @@ private[finagle] object TrafficDistributor {
 private class TrafficDistributor[Req, Rep](
   dest: Event[Activity.State[Set[EndpointFactory[Req, Rep]]]],
   newBalancer: (Activity[Set[EndpointFactory[Req, Rep]]], Boolean) => ServiceFactory[Req, Rep],
-  reuseEndpoints: Boolean,
   rng: Rng = Rng.threadLocal,
   statsReceiver: StatsReceiver = NullStatsReceiver)
     extends ServiceFactory[Req, Rep] {
@@ -334,7 +328,7 @@ private class TrafficDistributor[Req, Rep](
   private[this] val underlying: Event[ServiceFactory[Req, Rep]] =
     weightClasses.foldLeft(init) {
       case (_, Activity.Ok(wcs)) =>
-        val dist = new Distributor(wcs, busyWeightClasses, reuseEndpoints, rng)
+        val dist = new Distributor(wcs, busyWeightClasses, rng)
         updateGauges(wcs)
         pending.updateIfEmpty(Return(dist))
         dist

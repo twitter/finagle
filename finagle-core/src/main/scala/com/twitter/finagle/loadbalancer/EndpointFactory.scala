@@ -166,3 +166,26 @@ private final class LazyEndpointFactory[Req, Rep](
 
   override def toString: String = s"EndpointFactory(addr=$address, status=$status)"
 }
+
+/**
+ * A proxy masks the underlying EndpointFactory to make it not closable.
+ * The endpoint passed in here is shared among load balancers, it is reusable and should
+ * not be closed by any balancer or LoadBalancerFactory.
+ *
+ * Note: `factory` should be managed by the above layers to ensure we release the resources and
+ * close reusable endpoints eventually.
+ */
+private[finagle] final case class NotClosableEndpointFactoryProxy[Req, Rep](
+  factory: EndpointFactory[Req, Rep])
+    extends EndpointFactory[Req, Rep] {
+
+  override def status: Status = factory.status
+
+  val address: Address = factory.address
+
+  def remake(): Unit = factory.remake()
+
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = factory(conn)
+
+  def close(deadline: Time): Future[Unit] = Future.Done
+}

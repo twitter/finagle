@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.loadbalancer.NotClosableEndpointFactoryProxy
 import com.twitter.finagle.loadbalancer.TrafficDistributor._
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle._
 import com.twitter.finagle.param.Label
@@ -213,15 +214,17 @@ private[finagle] class PartitionNodeManager[
                 { factory: EndpointFactory[Req, Rep] => getShardIdFromFactory(state, factory) })
               grouped.map {
                 case (key, endpoints) =>
+                  // This is so the loadbalancer knows that partitioning is enabled so that it
+                  // doesn't close endpoints when closing the balancers.
+                  // these endpoints eventually close by endpointsAsClosable.close()
+                  val reusableEndpoints = endpoints.map(NotClosableEndpointFactoryProxy(_))
                   val paramsWithLB = params +
-                    LoadBalancerFactory.Endpoints(Var
-                      .value(
-                        Activity.Ok(endpoints.asInstanceOf[Set[EndpointFactory[_, _]]])).changes) +
-                    LoadBalancerFactory.Dest(Var.value(Addr.Bound(endpoints.map(_.address)))) +
-                    // This is so the loadbalancer knows that partitioning is enabled so that it
-                    // doesn't close endpoints when closing the balancers.
-                    LoadBalancerFactory.ReusableEndpoints(true)
-
+                    LoadBalancerFactory.Endpoints(
+                      Var
+                        .value(Activity.Ok(
+                          reusableEndpoints.asInstanceOf[Set[EndpointFactory[_, _]]])).changes) +
+                    LoadBalancerFactory.Dest(
+                      Var.value(Addr.Bound(reusableEndpoints.map(_.address))))
                   key -> underlying.make(paramsWithLB)
               }
             })

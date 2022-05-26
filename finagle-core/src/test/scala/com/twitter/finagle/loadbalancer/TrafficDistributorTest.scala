@@ -143,7 +143,6 @@ private object TrafficDistributorTest {
       val dist = new TrafficDistributor[Int, Int](
         dest = endpoints,
         newBalancer = newBalancer,
-        reuseEndpoints = false,
         rng = Rng("seed".hashCode),
         statsReceiver = statsReceiver)
 
@@ -495,7 +494,6 @@ class TrafficDistributorTest extends AnyFunSuite {
     val dist = new TrafficDistributor[Int, Int](
       dest = endpoints,
       newBalancer = mkBalancer,
-      reuseEndpoints = false,
       rng = Rng("seed".hashCode),
       statsReceiver = NullStatsReceiver)
 

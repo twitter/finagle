@@ -4,15 +4,18 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.EndpointFactory
-import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.loadbalancer.NodeT
+import com.twitter.finagle.loadbalancer.NotClosableEndpointFactoryProxy
+import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Activity
 import com.twitter.util.Await
 import com.twitter.util.Duration
+import com.twitter.util.Future
 import com.twitter.util.NullTimer
+import com.twitter.util.Time
 import com.twitter.util.Var
 import java.net.InetSocketAddress
 import org.scalactic.source.Position
@@ -681,5 +684,50 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     val hash4 = getVectorHash
 
     assert(hash1 != hash4)
+  }
+
+  test("can't close notClosableEndpoint") {
+    def newFac() = new EndpointFactory[Unit, Unit] {
+      val address: Address = Address.Failed(new Exception)
+      var _status: Status = Status.Open
+      def remake(): Unit = ()
+
+      def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
+      override def status: Status = _status
+
+      def close(deadline: Time): Future[Unit] = {
+        _status = Status.Closed
+        Future.Done
+      }
+    }
+
+    val bal = new Bal {
+      override val manageWeights: Boolean = true
+    }
+    val f1, f2, f3 = newFac()
+    val nc1 = NotClosableEndpointFactoryProxy(f1)
+    bal.update(Vector(nc1, f2, f3))
+
+    assert(f1.status == Status.Open)
+    assert(f2.status == Status.Open)
+    assert(f3.status == Status.Open)
+    assert(nc1.status == Status.Open)
+
+    // close balancer won't close endpoint1
+    Await.result(bal.close(), 5.seconds)
+    assert(f1.status == Status.Open)
+    assert(f2.status == Status.Closed)
+    assert(f3.status == Status.Closed)
+    assert(nc1.status == Status.Open)
+
+    // close the proxy won't close endpoint1
+    Await.result(nc1.close(), 5.seconds)
+    assert(f1.status == Status.Open)
+    assert(nc1.status == Status.Open)
+
+    // close the endpoint1 directly close it
+    Await.result(f1.close(), 5.seconds)
+    assert(f1.status == Status.Closed)
+    assert(nc1.status == Status.Closed)
   }
 }
