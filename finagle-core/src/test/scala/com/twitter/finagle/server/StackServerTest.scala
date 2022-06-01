@@ -28,8 +28,11 @@ import org.scalatest.funsuite.AnyFunSuite
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress
+import com.twitter.finagle.util.TestParam
+import com.twitter.finagle.client.utils.StringClient
 
 class StackServerTest extends AnyFunSuite with Eventually {
+  def await[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 5.seconds)
 
   test("withStack (Function1)") {
     val module = new Module0[ServiceFactory[String, String]] {
@@ -253,6 +256,41 @@ class StackServerTest extends AnyFunSuite with Eventually {
     assert(didRun)
 
     Await.ready(server.close(), 10.seconds)
+  }
+
+  test("Injects the appropriate params") {
+    var testParamValue = 0
+
+    val verifyModule = new Stack.Module1[TestParam, ServiceFactory[String, String]] {
+      val role = Stack.Role("verify")
+      val description = "Verifies the value of the test param"
+
+      def make(
+        testParam: TestParam,
+        next: ServiceFactory[String, String]
+      ): ServiceFactory[String, String] = {
+        testParamValue = testParam.p1
+        new SimpleFilter[String, String] {
+          def apply(request: String, service: Service[String, String]): Future[String] = {
+            Future.value("world")
+          }
+        }.andThen(next)
+      }
+    }
+    // push the verification module onto the stack.  doesn't really matter where in the stack it
+    // goes
+    val listeningServer = StringServer.server
+      .withStack(verifyModule +: _)
+      .serve(":*", Service.mk[String, String](Future.value))
+    val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
+    val label = "stringClient"
+
+    val svc = StringClient.client
+      .newService(Name.bound(Address(boundAddress)), label)
+
+    await(svc("hello"))
+
+    assert(testParamValue == 38)
   }
 
   private[this] def nameToKey(

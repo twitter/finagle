@@ -4,10 +4,12 @@ import com.twitter.concurrent.Once
 import com.twitter.finagle.exp.FinagleScheduler
 import com.twitter.finagle.loadbalancer.aperture
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
-import com.twitter.finagle.stats.{DefaultStatsReceiver, FinagleStatsReceiver}
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.server.StackServer
-import com.twitter.finagle.util.{DefaultLogger, LoadService}
+import com.twitter.finagle.util.DefaultLogger
+import com.twitter.finagle.util.LoadService
 import com.twitter.jvm.JvmStats
 import com.twitter.util.FuturePool
 import java.util.concurrent.atomic.AtomicReference
@@ -115,6 +117,7 @@ private[twitter] object Init {
     // StackTransformers.  at the same time, we occasionally want to inject parameters
     // before we ever call Stack#make.  this gives us an opportunity to do it.
     LoadService[ClientParamsInjector]().foreach { nt => StackClient.DefaultInjectors.append(nt) }
+    LoadService[ServerParamsInjector]().foreach { nt => StackServer.DefaultInjectors.append(nt) }
 
     log.info(
       "Finagle version %s (rev=%s) built at %s".format(

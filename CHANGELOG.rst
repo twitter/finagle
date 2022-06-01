@@ -12,6 +12,10 @@ New Features
 * finagle-core: Introduce panic mode in load balancers. Configure the threshold for
   panic mode to start using `withLoadBalancer.panicMode`. ``PHAB_ID=D879034``
 
+* finagle-core: Provide `ServerParamsInjector`, a class that will be service-loaded at run-time
+  by Finagle servers, and will allow generic configuration of all sets of parameters.
+  ``PHAB_ID=D897484``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

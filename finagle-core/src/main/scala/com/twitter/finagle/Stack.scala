@@ -1,7 +1,9 @@
 package com.twitter.finagle
 
-import scala.annotation.{implicitNotFound, tailrec}
-import scala.collection.{immutable, mutable}
+import scala.annotation.implicitNotFound
+import scala.annotation.tailrec
+import scala.collection.immutable
+import scala.collection.mutable
 
 /**
  * Stacks represent stackable elements of type T. It is assumed that
@@ -849,6 +851,17 @@ abstract class StackTransformerCollection {
   private[finagle] def clear(): Unit = synchronized {
     underlying = immutable.Queue.empty[StackTransformer]
   }
+}
+
+/**
+ * ServerParamsInjector is the standard mechanism for injecting params into
+ * the server.  It is a ``Stack.ParamsInjector`` with a name.  The injection
+ * will run at materialization time for Finagle servers, so that the parameters
+ * for a Stack will be injected in a consistent way.
+ */
+abstract class ServerParamsInjector extends Stack.ParamsInjector {
+  def name: String
+  override def toString: String = s"ServerParamsInjector(name=$name)"
 }
 
 /**
