@@ -79,7 +79,7 @@ val thriftLibs = Seq(
 )
 val scroogeLibs = thriftLibs ++ Seq("com.twitter" %% "scrooge-core" % releaseVersion)
 
-val lz4Lib = "org.lz4" % "lz4-java" % "1.6.0"
+val lz4Lib = "org.lz4" % "lz4-java" % "1.8.0"
 
 def util(which: String) =
   "com.twitter" %% ("util-" + which) % releaseVersion excludeAll (ExclusionRule(organization =
