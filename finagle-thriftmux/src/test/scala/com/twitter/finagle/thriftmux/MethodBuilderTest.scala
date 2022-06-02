@@ -791,18 +791,44 @@ class MethodBuilderTest extends AnyFunSuite with Eventually {
         def inquiry(z: String): Future[String] = Future.value(z)
       }
     )
+
     val sr = new InMemoryStatsReceiver
     val client = clientImpl
     // ensure we install an lb which supports eager conns
       .withLoadBalancer(com.twitter.finagle.loadbalancer.Balancers.aperture())
-      .configured(com.twitter.finagle.loadbalancer.aperture.EagerConnections(true))
       .withStatsReceiver(sr)
       .withLabel("eager_clnt")
     val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
-    val builder: MethodBuilder = client.methodBuilder(name)
 
-    builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
-    assert(sr.gauges(Seq("eager_clnt", "loadbalancer", "eager_connections"))() == 1.0)
+    { // First check that eager connections can be disabled
+      val builder: MethodBuilder = client
+        .configured(
+          com.twitter.finagle.loadbalancer.aperture.EagerConnections(false)).methodBuilder(name)
+
+      val service: TestService.ServicePerEndpoint =
+        builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1")
+      // We shouldn't have any connections yet, and not even the gauge since nothing has been initialized.
+      assert(sr.gauges.get(Seq("eager_clnt", "connections")) == None)
+
+      service.asClosable.close()
+    }
+
+    { // Now check with eager connections
+      val builder: MethodBuilder =
+        client
+          .configured(
+            com.twitter.finagle.loadbalancer.aperture.EagerConnections(true)).methodBuilder(name)
+
+      val service: TestService.ServicePerEndpoint =
+        builder.servicePerEndpoint[TestService.ServicePerEndpoint]("query1")
+      eventually {
+        // With eager connections we should have at least 1 connection open even though we've sent no requests
+        assert(sr.gauges(Seq("eager_clnt", "connections")).apply() >= 1f)
+        assert(sr.counters(Seq("eager_clnt", "requests")) == 0l)
+      }
+
+      service.asClosable.close()
+    }
 
     server.close()
   }

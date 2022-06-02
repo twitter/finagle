@@ -144,9 +144,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     statsReceiver.addGauge("use_deterministic_ordering") {
       if (dapertureActive) 1f else 0f
     },
-    statsReceiver.addGauge("eager_connections") {
-      if (eagerConnections) 1f else 0f
-    },
     statsReceiver.addGauge("vector_hash") { _vectorHash }
   )
 
@@ -178,7 +175,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       "physical_aperture_size" -> dist.physicalAperture,
       "min_aperture_size" -> dist.min,
       "max_aperture_size" -> dist.max,
-      "vector_hash" -> vectorHash
+      "vector_hash" -> vectorHash,
+      "eager_connections" -> eagerConnections
     ) ++ dist.additionalMetadata
   }
 
