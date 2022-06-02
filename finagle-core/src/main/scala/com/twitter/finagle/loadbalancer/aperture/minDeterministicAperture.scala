@@ -2,7 +2,9 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.app.GlobalFlag
 
-// This is for initial tuning only and will be removed
+/**
+ * Flag for the minimum number of backend instances that deterministic aperture will utilize.
+ */
 private object minDeterministicAperture
     extends GlobalFlag(
       12,

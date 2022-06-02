@@ -32,6 +32,9 @@ Common
   Enable/disable per-host granularity for stats (default: `false`). When enabled,the configured stats
   receiver will be used, or the loaded stats receiver if none given.
 
+**com.twitter.finagle.loadbalancer.aperture.minDeterministicAperture** `int`
+  Set the lower bound of the aperture size when using the determistic aperture load balancer (default: 12).
+
 **com.twitter.finagle.socks.socksProxyHost** `string`
   When non empty, enables SOCKS proxy on each Finagle client (default: empty string).
 
