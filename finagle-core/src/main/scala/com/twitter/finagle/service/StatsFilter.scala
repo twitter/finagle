@@ -342,6 +342,30 @@ class StatsFilter[Req, Rep] private[service] (
       false
   }
 
+  private[this] def recordStats(
+    request: Req,
+    response: Try[Rep],
+    start: Long,
+    rpcMetrics: RPCMetrics
+  ): Unit = {
+    rpcMetrics.requestCount.incr()
+    rpcMetrics.responseClassifier
+      .applyOrElse(ReqRep(request, response), ResponseClassifier.Default) match {
+      case ResponseClass.Ignorable => // Do nothing.
+      case ResponseClass.Failed(_) =>
+        rpcMetrics.latencyStat.add(now() - start)
+        response match {
+          case Throw(e) =>
+            exceptionStatsHandler.record(rpcMetrics.statsReceiver, e)
+          case _ =>
+            exceptionStatsHandler.record(rpcMetrics.statsReceiver, SyntheticException)
+        }
+      case ResponseClass.Successful(_) =>
+        rpcMetrics.successCount.incr()
+        rpcMetrics.latencyStat.add(now() - start)
+    }
+  }
+
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val start = now()
     outstandingRequestCount.increment()
@@ -363,50 +387,5 @@ class StatsFilter[Req, Rep] private[service] (
         }
       }
     }
-  }
-
-  private[this] val recordStats =
-    (request: Req, response: Try[Rep], start: Long, rpcMetrics: RPCMetrics) => {
-      rpcMetrics.requestCount.incr()
-      rpcMetrics.responseClassifier
-        .applyOrElse(ReqRep(request, response), ResponseClassifier.Default) match {
-        case ResponseClass.Ignorable => // Do nothing.
-        case ResponseClass.Failed(_) =>
-          rpcMetrics.latencyStat.add(now() - start)
-          response match {
-            case Throw(e) =>
-              exceptionStatsHandler.record(rpcMetrics.statsReceiver, e)
-            case _ =>
-              exceptionStatsHandler.record(rpcMetrics.statsReceiver, SyntheticException)
-          }
-        case ResponseClass.Successful(_) =>
-          rpcMetrics.successCount.incr()
-          rpcMetrics.latencyStat.add(now() - start)
-      }
-    }
-}
-
-private[finagle] object StatsServiceFactory {
-  val role: Stack.Role = Stack.Role("FactoryStats")
-
-  /**
-   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsServiceFactory]].
-   */
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
-      val role: Stack.Role = StatsServiceFactory.role
-      val description: String = "Report connection statistics"
-      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
-        val param.Stats(statsReceiver) = _stats
-        if (statsReceiver.isNull) next
-        else new StatsServiceFactory(next, statsReceiver)
-      }
-    }
-}
-
-class StatsServiceFactory[Req, Rep](factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver)
-    extends ServiceFactoryProxy[Req, Rep](factory) {
-  private[this] val availableGauge = statsReceiver.addGauge("available") {
-    if (isAvailable) 1f else 0f
   }
 }
