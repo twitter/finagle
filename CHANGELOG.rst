@@ -43,6 +43,8 @@ request to multiple partitions. ``PHAB_ID=D882370``
 
 * finagle: Upgrade to Netty 4.1.76.Final and netty-tcnative 2.0.51.Final. ``PHAB_ID=D886019``
 
+* finagle: Update Jackson library to version 2.13.3 ``PHAB_ID=D906005``
+
 * finagle: Bump version of lz4-java to 1.8.0. ``PHAB_ID=D905411``
 
 22.4.0
