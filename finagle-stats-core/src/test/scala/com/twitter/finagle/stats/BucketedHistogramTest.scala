@@ -152,6 +152,18 @@ class BucketedHistogramTest extends AnyFunSuite with ScalaCheckDrivenPropertyChe
     )
   }
 
+  test("negative values are treated as 0s") {
+    val h = BucketedHistogram()
+    h.add(-10)
+    h.add(10)
+    h.add(20)
+    assert(h.minimum == 0)
+    assert(h.maximum == 20)
+    assert(h.count == 3)
+    assert(h.average == 10)
+    assert(h.sum == 30)
+  }
+
   test("exporting counts responds to clear") {
     val h = BucketedHistogram()
     h.add(-1)

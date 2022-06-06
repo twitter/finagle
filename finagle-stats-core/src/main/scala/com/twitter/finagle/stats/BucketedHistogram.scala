@@ -1,6 +1,7 @@
 package com.twitter.finagle.stats
 
-import java.util.concurrent.atomic.{AtomicLong, AtomicIntegerArray}
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicIntegerArray
 
 private[twitter] object BucketedHistogram {
 
@@ -158,11 +159,8 @@ private[stats] final class BucketedHistogram(error: Double) {
    */
   // 0 to inflectionPoint
   private[stats] def findBucket(num: Int): Int = {
-    if (num <= inflectionBucket) {
-      math.max(0, num)
-    } else {
-      logarithm(num).toInt - offset
-    }
+    if (num <= inflectionBucket) num
+    else logarithm(num).toInt - offset
   }
 
   // we acquire the "read" lock when we add an element to the histogram
@@ -183,13 +181,14 @@ private[stats] final class BucketedHistogram(error: Double) {
   private[this] val counts = new AtomicIntegerArray(countsLength)
 
   /**
-   * Note: only values between `0` and `Int.MaxValue`, inclusive, are recorded.
+   * Note: Only values between `0` and `Int.MaxValue`, inclusive, are recorded. Negative values
+   * are treated as 0s.
    *
    * @inheritdoc
    */
   def add(value: Long): Unit = {
     var index = 0
-    var truncatedValue = value
+    var truncatedValue = math.max(0, value)
     if (truncatedValue >= Int.MaxValue) {
       truncatedValue = Int.MaxValue
       index = countsLength - 1
