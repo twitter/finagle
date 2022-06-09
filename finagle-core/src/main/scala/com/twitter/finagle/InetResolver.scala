@@ -12,6 +12,7 @@ import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.util.InetSocketAddressUtil
+import com.twitter.finagle.util.LoadService
 import com.twitter.logging.Logger
 import com.twitter.util.Closable
 import com.twitter.util.Var
@@ -64,6 +65,37 @@ private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: Fu
  */
 object InetResolver {
 
+  private val log = Logger()
+
+  abstract class Factory {
+    def apply(
+      stats: StatsReceiver,
+      pollIntervalOpt: Option[Duration],
+      resolvePool: FuturePool
+    ): InetResolver
+  }
+
+  object DefaultFactory extends Factory {
+    def apply(
+      stats: StatsReceiver,
+      pollIntervalOpt: Option[Duration],
+      resolvePool: FuturePool
+    ): InetResolver = new InetResolver(
+      new DnsResolver(stats, resolvePool),
+      stats,
+      pollIntervalOpt
+    )
+  }
+
+  private lazy val factory = LoadService[Factory] match {
+    case loaded +: _ =>
+      log.info(s"Successfully loaded an inet resolver: $loaded")
+      loaded
+    case _ =>
+      log.info("Couldn't load an external inet resolver; falling back to a JDK resolver")
+      DefaultFactory
+  }
+
   /**
    * An exception indicating that the party that requested an address resolution gave up on waiting.
    */
@@ -87,11 +119,7 @@ object InetResolver {
     resolvePool: FuturePool
   ) = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
-    new InetResolver(
-      new DnsResolver(statsReceiver, resolvePool),
-      statsReceiver,
-      pollIntervalOpt
-    )
+    factory(statsReceiver, pollIntervalOpt, resolvePool)
   }
 }
 
@@ -100,6 +128,7 @@ private[finagle] class InetResolver(
   statsReceiver: StatsReceiver,
   pollIntervalOpt: Option[Duration])
     extends Resolver {
+  import InetResolver.log
   import InetSocketAddressUtil._
 
   type HostPortMetadata = (String, Int, Addr.Metadata)
@@ -109,7 +138,6 @@ private[finagle] class InetResolver(
   private[this] val successes = statsReceiver.counter("successes")
   private[this] val failures = statsReceiver.counter("failures")
   private[this] val cancels = statsReceiver.counter("cancels")
-  private[this] val log = Logger()
 
   /**
    * Resolve all hostnames and merge into a final Addr.
@@ -225,7 +253,43 @@ private[finagle] class InetResolver(
  * do not occur.
  */
 object FixedInetResolver {
-  private[this] val log = Logger()
+  private val log = Logger()
+
+  abstract class Factory {
+    def apply(
+      stats: StatsReceiver,
+      maxCacheSize: Long,
+      backoffs: Backoff,
+      timer: Timer
+    ): FixedInetResolver
+  }
+
+  object DefaultFactory extends Factory {
+    def apply(
+      stats: StatsReceiver,
+      maxCacheSize: Long,
+      backoffs: Backoff,
+      timer: Timer
+    ): FixedInetResolver =
+      new FixedInetResolver(
+        cache(
+          new DnsResolver(stats, FuturePool.unboundedPool),
+          maxCacheSize,
+          backoffs,
+          timer
+        ),
+        stats
+      )
+  }
+
+  private lazy val factory = LoadService[Factory] match {
+    case loaded +: _ =>
+      log.info(s"Successfully loaded a fixed inet resolver: $loaded")
+      loaded
+    case _ =>
+      log.info("Couldn't load an external fixed inet resolver; falling back to a JDK resolver")
+      DefaultFactory
+  }
 
   /**
    *  How many times this particular address was requested for resolution.
@@ -260,15 +324,7 @@ object FixedInetResolver {
     timer: Timer
   ): InetResolver = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
-    new FixedInetResolver(
-      cache(
-        new DnsResolver(statsReceiver, FuturePool.unboundedPool),
-        maxCacheSize,
-        backoffs,
-        timer
-      ),
-      statsReceiver
-    )
+    factory(statsReceiver, maxCacheSize, backoffs, timer)
   }
 
   // A size-bounded FutureCache backed by a LoaderCache

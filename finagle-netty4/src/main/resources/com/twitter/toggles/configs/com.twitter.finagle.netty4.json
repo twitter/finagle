@@ -1,0 +1,9 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.finagle.netty4.UseAsyncInetResolver",
+      "description": "Use Netty DNS Resolver instead of JDK",
+      "fraction": 0.0
+    }
+  ]
+}

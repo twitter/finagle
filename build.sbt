@@ -47,6 +47,7 @@ val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % netty4Sta
 val netty4Libs = Seq(
   "io.netty" % "netty-handler" % netty4Version,
   "io.netty" % "netty-transport" % netty4Version,
+  "io.netty" % "netty-resolver-dns" % netty4Version,
   "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-x86_64",
   "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-aarch_64",
   // this package is a dep of native-epoll above, explicitly add this for coursier plugin
@@ -58,6 +59,7 @@ val netty4Libs = Seq(
 val netty4LibsTest = Seq(
   "io.netty" % "netty-handler" % netty4Version % "test",
   "io.netty" % "netty-transport" % netty4Version % "test",
+  "io.netty" % "netty-resolver-dns" % netty4Version % "test",
   "io.netty" % "netty-transport-native-epoll" % netty4Version % "test" classifier "linux-x86_64",
   "io.netty" % "netty-transport-native-epoll" % netty4Version % "test" classifier "linux-aarch_64",
   // this package is a dep of native-epoll above, explicitly add this for coursier plugin
