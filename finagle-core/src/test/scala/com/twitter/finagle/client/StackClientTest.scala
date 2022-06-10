@@ -759,7 +759,10 @@ abstract class AbstractStackClientTest
       await(svc("hello"))
     }
 
-    assert(failure.toString == "Failure(boom!, flags=0x00) with Service -> stringClient")
+    // appId varies with local test
+    assert(
+      failure.toString.contains(
+        "Failure(boom!, flags=0x00) with Service -> stringClient with AppId -> "))
   }
 
   test("Injects the appropriate params") {

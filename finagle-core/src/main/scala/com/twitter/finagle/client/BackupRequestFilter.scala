@@ -7,6 +7,7 @@ import com.twitter.finagle.context.BackupRequest
 import com.twitter.finagle.naming.BindingFactory.Dest
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.param.ProtocolLibrary
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service.ReqRep
 import com.twitter.finagle.service.ResponseClass
 import com.twitter.finagle.service.ResponseClassifier
@@ -51,12 +52,9 @@ object BackupRequestFilter {
    */
   private val MinSendBackupAfterMs: Int = 1
 
-  private[finagle] val supersededBackupRequestWhy =
+  // testing purpose, we need to monitor changes of this message
+  private[finagle] val SupersededRequestFailureWhy =
     "Request was superseded by another in BackupRequestFilter"
-
-  private[finagle] val SupersededRequestFailure = Failure.ignorable(supersededBackupRequestWhy)
-
-  private[finagle] val SupersededRequestFailureToString = SupersededRequestFailure.toString
 
   private val log = Logger.get(this.getClass.getName)
 
@@ -212,7 +210,8 @@ object BackupRequestFilter {
       params[Histogram].lowestDiscernibleMsValue,
       params[Histogram].highestTrackableMsValue,
       params[param.Stats].statsReceiver.scope("backups"),
-      params[param.Timer].timer
+      params[param.Timer].timer,
+      params[param.Label].label
     )
 
   /**
@@ -355,7 +354,8 @@ private[finagle] class BackupRequestFilter[Req, Rep](
   nowMs: () => Long,
   statsReceiver: StatsReceiver,
   timer: Timer,
-  windowedPercentileHistogramFac: () => WindowedPercentileHistogram)
+  windowedPercentileHistogramFac: () => WindowedPercentileHistogram,
+  serviceName: String)
     extends SimpleFilter[Req, Rep]
     with Closable {
   import BackupRequestFilter._
@@ -367,7 +367,8 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     responseClassifier: ResponseClassifier,
     clientRetryBudget: RetryBudget,
     statsReceiver: StatsReceiver,
-    timer: Timer
+    timer: Timer,
+    serviceName: String
   ) =
     this(
       maxExtraLoadTunable,
@@ -379,7 +380,8 @@ private[finagle] class BackupRequestFilter[Req, Rep](
       Stopwatch.systemMillis,
       statsReceiver,
       timer,
-      () => new WindowedPercentileHistogram(timer)
+      () => new WindowedPercentileHistogram(timer),
+      serviceName
     )
 
   def this(
@@ -391,7 +393,8 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     lowestDiscernibleMsValue: Int,
     highestTrackableMsValue: Int,
     statsReceiver: StatsReceiver,
-    timer: Timer
+    timer: Timer,
+    serviceName: String
   ) =
     this(
       maxExtraLoadTunable,
@@ -410,10 +413,16 @@ private[finagle] class BackupRequestFilter[Req, Rep](
           lowestDiscernibleMsValue,
           highestTrackableMsValue,
           timer
-        )
+        ),
+      serviceName
     )
   @volatile private[this] var backupRequestRetryBudget: RetryBudget =
     newRetryBudget(getAndValidateMaxExtraLoad(maxExtraLoadTunable), nowMs)
+
+  private[this] val SupersededRequestFailure = Failure
+    .ignorable(SupersededRequestFailureWhy)
+    .withSource(Failure.Source.Service, serviceName)
+    .withSource(Failure.Source.AppId, ServerInfo().id)
 
   private[this] def percentileFromMaxExtraLoad(maxExtraLoad: Double): Double =
     1.0 - maxExtraLoad

@@ -2,19 +2,21 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{
-  Backoff,
-  FailedFastException,
-  Service,
-  ServiceFactory,
-  SourcedException,
-  Status
-}
+import com.twitter.finagle.Backoff
+import com.twitter.finagle.FailedFastException
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.SourcedException
+import com.twitter.finagle.Status
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, times, verify, when}
-import org.scalatest.concurrent.{Conductors, IntegrationPatience}
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.scalatest.concurrent.Conductors
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 import org.scalatest.funsuite.AnyFunSuite

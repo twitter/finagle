@@ -114,11 +114,10 @@ private class ServerTracker(
 
       case dispatch =>
         // We raise on the dispatch and immediately send back a Rdiscarded
-        why match {
-          case backupFailure if isSupersededBackupRequestException(backupFailure) =>
-            dispatch.response.raise(newSupersededBackupRequestException())
-          case _ =>
-            dispatch.response.raise(new ClientDiscardedRequestException(why))
+        if (isSupersededBackupRequestException(why)) {
+          dispatch.response.raise(newSupersededBackupRequestException(why))
+        } else {
+          dispatch.response.raise(new ClientDiscardedRequestException(why))
         }
 
         h_messageWriter.write(Rdiscarded(tag))
@@ -266,10 +265,8 @@ private object ServerTracker {
 
   private val log = Logger.get()
 
-  private def newSupersededBackupRequestException(): Exception =
-    new ClientDiscardedRequestException(
-      BackupRequestFilter.SupersededRequestFailureToString,
-      FailureFlags.Interrupted | FailureFlags.Ignorable)
+  private def newSupersededBackupRequestException(why: String): Exception =
+    new ClientDiscardedRequestException(why, FailureFlags.Interrupted | FailureFlags.Ignorable)
 
   // cases included:
   // 1. the SupersededRequestFailure thrown by BackRequestFilter,
@@ -277,7 +274,7 @@ private object ServerTracker {
   // 2. Multi-level propagation that the SupersededRequestFailure is wrapped by ClientDiscardedRequestException
   // 3. Other wrappers (in-between hop has not been updated to this version) over SupersededRequestFailure
   private def isSupersededBackupRequestException(failureMessage: String): Boolean =
-    failureMessage.contains(BackupRequestFilter.supersededBackupRequestWhy)
+    failureMessage.contains(BackupRequestFilter.SupersededRequestFailureWhy)
 
   private case class Dispatch(tag: Int, response: Future[Message], timer: Stopwatch.Elapsed)
 

@@ -277,7 +277,7 @@ private[mux] abstract class ClientServerTest
     assert(f.poll == None)
     assert(p.isInterrupted == None)
 
-    val exc = BackupRequestFilter.SupersededRequestFailure
+    val exc = Failure.ignorable(BackupRequestFilter.SupersededRequestFailureWhy)
     f.raise(exc)
     val e = intercept[ClientDiscardedRequestException] {
       throw p.isInterrupted.get

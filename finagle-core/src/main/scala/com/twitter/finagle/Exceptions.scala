@@ -1,12 +1,11 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.IOExceptionStrings.{
-  ChannelClosedStrings,
-  ConnectionFailedStrings,
-  ChannelClosedSslExceptionMessages
-}
+import com.twitter.finagle.IOExceptionStrings.ChannelClosedStrings
+import com.twitter.finagle.IOExceptionStrings.ConnectionFailedStrings
+import com.twitter.finagle.IOExceptionStrings.ChannelClosedSslExceptionMessages
 import com.twitter.finagle.context.RemoteInfo
-import com.twitter.logging.{HasLogLevel, Level}
+import com.twitter.logging.HasLogLevel
+import com.twitter.logging.Level
 import com.twitter.util.Duration
 import java.net.SocketAddress
 import javax.net.ssl.{SSLException => JSSLException}
@@ -40,10 +39,12 @@ trait HasRemoteInfo extends Exception {
  */
 trait SourcedException extends Exception with HasRemoteInfo {
   var serviceName: String = SourcedException.UnspecifiedServiceName
+  var appId: String = SourcedException.UnspecifiedAppId
 }
 
 object SourcedException {
-  val UnspecifiedServiceName: String = "unspecified"
+  val UnspecifiedServiceName: String = "unspecifiedService"
+  val UnspecifiedAppId: String = "unspecifiedApp"
 
   def unapply(t: Throwable): Option[String] = t match {
     case sourced: SourcedException
@@ -93,7 +94,8 @@ trait TimeoutException extends SourcedException with HasLogLevel { self: Excepti
   protected def explanation: String
   def logLevel: Level = Level.TRACE
 
-  override def exceptionMessage: String = s"exceeded $timeout to $serviceName while $explanation"
+  override def exceptionMessage: String =
+    s"exceeded $timeout to $serviceName at $appId while $explanation"
 }
 
 /**

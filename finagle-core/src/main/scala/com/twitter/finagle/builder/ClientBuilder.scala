@@ -13,6 +13,7 @@ import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.BindingFactory
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.TrustCredentials
@@ -1287,8 +1288,9 @@ private[finagle] object ClientBuilderClient {
 
     def make(labelP: Label, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
       val Label(label) = labelP
+      val appId = ServerInfo().id
 
-      val exceptionSource = new ExceptionSourceFilter[Req, Rep](label)
+      val exceptionSource = new ExceptionSourceFilter[Req, Rep](label, appId)
       exceptionSource.andThen(next)
     }
   }

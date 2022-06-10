@@ -48,7 +48,8 @@ object BackupRequests {
       Stopwatch.timeMillis,
       NullStatsReceiver,
       timer,
-      () => wp
+      () => wp,
+      "client"
     )
   }
 

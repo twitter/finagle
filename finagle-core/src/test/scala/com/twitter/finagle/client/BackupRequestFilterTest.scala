@@ -76,7 +76,8 @@ class BackupRequestFilterTest
       Stopwatch.timeMillis,
       statsReceiver,
       timer,
-      () => wp
+      () => wp,
+      "client"
     )
 
   private[this] def newBrfWithSendBackup10ms: BackupRequestFilter[String, String] =
@@ -90,7 +91,8 @@ class BackupRequestFilterTest
       Stopwatch.timeMillis,
       statsReceiver,
       timer,
-      () => wp
+      () => wp,
+      "client"
     )
 
   private[this] def newService(
@@ -145,7 +147,8 @@ class BackupRequestFilterTest
       Stopwatch.timeMillis,
       NullStatsReceiver,
       timer,
-      () => wp
+      () => wp,
+      "client"
     )
     assert(currentRetryBudget eq RetryBudget.Empty)
     assert(currentMaxExtraLoad == 0.percent)
@@ -166,7 +169,8 @@ class BackupRequestFilterTest
         Stopwatch.timeMillis,
         NullStatsReceiver,
         timer,
-        () => wp
+        () => wp,
+        "client"
       )
       assert(currentRetryBudget ne RetryBudget.Empty)
       assert(currentMaxExtraLoad == 50.percent)
@@ -332,7 +336,7 @@ class BackupRequestFilterTest
     sendInterrupts: Boolean
   ): Future[String] = {
 
-    val brf = (new BackupRequestFilter[String, String](
+    val brf = new BackupRequestFilter[String, String](
       Tunable.const("brfTunable", 50.percent),
       sendInterrupts,
       1,
@@ -342,8 +346,9 @@ class BackupRequestFilterTest
       Stopwatch.timeMillis,
       statsReceiver,
       timer,
-      () => wp
-    ))
+      () => wp,
+      "client"
+    )
 
     val service = brf.andThen(underlying)
 
@@ -395,6 +400,16 @@ class BackupRequestFilterTest
           origPromise.setException(f)
         case None => fail("expected Failure flagged FailureFlags.Ignorable")
       }
+
+      val ex = intercept[Failure] {
+        Await.result(origPromise, 2.seconds)
+      }
+
+      // appId varies with local test
+      assert(
+        ex.toString.contains(
+          "Failure(Request was superseded by another in BackupRequestFilter, flags=0x20) " +
+            "with Service -> client with AppId ->"))
 
       // ensure latency for original recorded
       assert(wp.percentile(50.percent) == (WarmupRequestLatency + 1.second).inMillis)
@@ -660,7 +675,8 @@ class BackupRequestFilterTest
         Stopwatch.timeMillis,
         statsReceiver,
         timer,
-        () => wp
+        () => wp,
+        "client"
       )
       val service = newService(brf)
       warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
@@ -711,7 +727,8 @@ class BackupRequestFilterTest
         Stopwatch.timeMillis,
         statsReceiver,
         timer,
-        () => wp
+        () => wp,
+        "client"
       )
       val service = newService(brf)
       warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
@@ -745,7 +762,8 @@ class BackupRequestFilterTest
         Stopwatch.timeMillis,
         statsReceiver,
         timer,
-        () => new WindowedPercentileHistogram(5, 3.seconds, timer)
+        () => new WindowedPercentileHistogram(5, 3.seconds, timer),
+        "client"
       )
       val service = newService(brf)
       assert(currentRetryBudget.balance == 100)
@@ -847,9 +865,8 @@ class BackupRequestFilterTest
   }
 
   test("SupersededRequestFailureToString hasn't changed") {
-    val expected =
-      "Failure(Request was superseded by another in BackupRequestFilter, flags=0x20) with NoSources"
-    assert(BackupRequestFilter.SupersededRequestFailureToString == expected)
+    val expected = "Request was superseded by another in BackupRequestFilter"
+    assert(BackupRequestFilter.SupersededRequestFailureWhy == expected)
   }
 
   test("Percentile latency exceeds measurable latency") {

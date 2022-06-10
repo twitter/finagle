@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.logging.{HasLogLevel, Level}
+import com.twitter.logging.HasLogLevel
+import com.twitter.logging.Level
 import com.twitter.util.Future
 import scala.annotation.tailrec
 import scala.util.control.NoStackTrace
@@ -112,7 +113,10 @@ object Failure {
      * Represents the name of the method.
      * See [[com.twitter.finagle.client.MethodBuilder]].
      */
-    Method = Value
+    Method, /**
+     * Represents the identifier for the server.
+     */
+    AppId = Value
   }
 
   /**

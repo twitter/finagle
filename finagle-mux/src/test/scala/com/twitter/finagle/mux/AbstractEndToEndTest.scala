@@ -551,7 +551,7 @@ abstract class AbstractEndToEndTest
       await(slow, 5.seconds)
     }
 
-    assert(e.getMessage == BackupRequestFilter.SupersededRequestFailureToString)
+    assert(e.getMessage.contains(BackupRequestFilter.SupersededRequestFailureWhy))
     assert(e.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
 
     await(client.close(), 5.seconds)
@@ -578,7 +578,7 @@ abstract class AbstractEndToEndTest
       await(slow)
     }
 
-    assert(e.getMessage == BackupRequestFilter.SupersededRequestFailureToString)
+    assert(e.getMessage.contains(BackupRequestFilter.SupersededRequestFailureWhy))
     assert(e.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
 
     await(client.close(), 5.seconds)

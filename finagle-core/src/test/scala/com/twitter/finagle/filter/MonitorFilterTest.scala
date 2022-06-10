@@ -6,9 +6,12 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util._
-import java.net.{InetAddress, InetSocketAddress}
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.mockito.Mockito
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
