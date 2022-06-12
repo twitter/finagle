@@ -36,6 +36,9 @@ scala_library(
 junit_tests(
     sources = SOURCES,
     compiler_option_sets = COMPILER_OPTION_SETS,
-    tags = ["bazel-compatible"],
+    tags = [
+        "bazel-compatible",
+        "known-to-fail-jira:CSL-12083",
+    ],
     dependencies = DEPENDENCIES,
 )
