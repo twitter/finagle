@@ -1,6 +1,9 @@
 scala_library(
     sources = ["**/*.scala"],
-    tags = ["bazel-compatible"],
+    tags = [
+        "bazel-compatible",
+        "bazel-incompatible-scaladoc",  # see http://go/bazel-incompatible-scaladoc
+    ],
     dependencies = [
         "3rdparty/jvm/com/github/luben:zstd-jni",
         "3rdparty/jvm/io/netty:netty4-codec-http",
