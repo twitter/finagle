@@ -24,8 +24,8 @@ import com.twitter.finagle.ssl.client.SslContextClientEngineFactory
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.stats.RelativeNameMarkingStatsReceiver
 import com.twitter.finagle.stats.RoleConfiguredStatsReceiver
+import com.twitter.finagle.stats.SourceRole
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.stats.{Client => ClientRole}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util
@@ -1130,7 +1130,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val Label(label) = params[Label]
     new RoleConfiguredStatsReceiver(
       new RelativeNameMarkingStatsReceiver(sr.scope(label)),
-      ClientRole,
+      SourceRole.Client,
       Some(label))
   }
 

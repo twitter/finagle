@@ -17,7 +17,7 @@ import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.LoadedStatsReceiver
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.stats.Server
+import com.twitter.finagle.stats.SourceRole
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
@@ -202,7 +202,10 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
 
     assert(
       sr.expressions.contains(
-        ExpressionSchemaKey("success_rate", Map(ExpressionSchema.Role -> Server.toString), Nil)))
+        ExpressionSchemaKey(
+          "success_rate",
+          Map(ExpressionSchema.Role -> SourceRole.Server.toString),
+          Nil)))
 
     server.close()
   }

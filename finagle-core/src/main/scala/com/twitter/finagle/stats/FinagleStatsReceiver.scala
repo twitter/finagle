@@ -29,7 +29,7 @@ object ClientStatsReceiver extends StatsReceiverProxy {
   setRootScope("clnt")
 
   def setRootScope(rootScope: String): Unit = {
-    self = RoleConfiguredStatsReceiver(transformLoadedStatsReceiver(rootScope), Client)
+    self = RoleConfiguredStatsReceiver(transformLoadedStatsReceiver(rootScope), SourceRole.Client)
   }
 
   override def repr: ClientStatsReceiver.type = this
@@ -55,10 +55,10 @@ object ClientStatsReceiver extends StatsReceiverProxy {
  */
 object ServerStatsReceiver extends StatsReceiverProxy {
   @volatile protected var self: StatsReceiver =
-    RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope("srv"), Server)
+    RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope("srv"), SourceRole.Server)
 
   def setRootScope(rootScope: String): Unit = {
-    self = RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope(rootScope), Server)
+    self = RoleConfiguredStatsReceiver(LoadedStatsReceiver.scope(rootScope), SourceRole.Server)
   }
 
   override def repr: ServerStatsReceiver.type = this

@@ -10,7 +10,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.RelativeNameMarkingStatsReceiver
 import com.twitter.finagle.stats.RoleConfiguredStatsReceiver
-import com.twitter.finagle.stats.Server
+import com.twitter.finagle.stats.SourceRole
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.CloseAwaitably
 import com.twitter.util.Future
@@ -61,11 +61,11 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       private[this] val serverLabel = ServerRegistry.nameOf(addr).getOrElse(label)
 
       private[this] val statsReceiver =
-        if (serverLabel.isEmpty) RoleConfiguredStatsReceiver(stats, Server)
+        if (serverLabel.isEmpty) RoleConfiguredStatsReceiver(stats, SourceRole.Server)
         else
           RoleConfiguredStatsReceiver(
             RelativeNameMarkingStatsReceiver(stats.scope(serverLabel)),
-            Server,
+            SourceRole.Server,
             Some(serverLabel))
 
       private[this] val serverParams = StackServer.DefaultInjectors.injectors.foldLeft(

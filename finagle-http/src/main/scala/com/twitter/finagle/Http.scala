@@ -20,6 +20,7 @@ import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.ssl.ApplicationProtocols
 import com.twitter.finagle.stats.ExceptionStatsHandler
+import com.twitter.finagle.stats.SourceRole
 import com.twitter.finagle.stats.StandardStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
@@ -410,7 +411,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       responseClassifierParam +
       StandardStats(
         stats.StatsAndClassifier(
-          StandardStatsReceiver(stats.Server, protocolLibrary.name),
+          StandardStatsReceiver(SourceRole.Server, protocolLibrary.name),
           HttpResponseClassifier.ServerErrorsAsFailures)) +
       PreferDeadlineOverTimeout(enabled = true)
   }

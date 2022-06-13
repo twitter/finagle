@@ -1,6 +1,8 @@
 package com.twitter.finagle.stats
 
-import com.twitter.finagle.stats.StandardStatsReceiver.{description, rootStatsReceiver, serverCount}
+import com.twitter.finagle.stats.StandardStatsReceiver.description
+import com.twitter.finagle.stats.StandardStatsReceiver.rootStatsReceiver
+import com.twitter.finagle.stats.StandardStatsReceiver.serverCount
 import java.util.concurrent.atomic.AtomicInteger
 
 object StandardStatsReceiver {
@@ -35,10 +37,10 @@ private[finagle] case class StandardStatsReceiver(
   protocol: String)
     extends StatsReceiverProxy {
 
-  require(sourceRole == Server, "StandardStatsReceiver should be apply to servers")
+  require(sourceRole == SourceRole.Server, "StandardStatsReceiver should be apply to servers")
 
   private[this] val serverScope = sourceRole match {
-    case Server => sourceRole.toString.toLowerCase + s"-${serverCount.getAndIncrement()}"
+    case SourceRole.Server => sourceRole.toString.toLowerCase + s"-${serverCount.getAndIncrement()}"
     case _ => "unsupported" // won't reach
   }
 

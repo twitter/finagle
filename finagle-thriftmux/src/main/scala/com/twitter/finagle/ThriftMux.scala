@@ -27,6 +27,7 @@ import com.twitter.finagle.ssl.OpportunisticTls
 import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.stats.ExceptionStatsHandler
 import com.twitter.finagle.stats.ServerStatsReceiver
+import com.twitter.finagle.stats.SourceRole
 import com.twitter.finagle.stats.StandardStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift._
@@ -712,7 +713,7 @@ object ThriftMux
       .configured(
         StandardStats(
           stats.StatsAndClassifier(
-            StandardStatsReceiver(stats.Server, protocolLibraryName),
+            StandardStatsReceiver(SourceRole.Server, protocolLibraryName),
             ThriftMuxResponseClassifier.ThriftExceptionsAsFailures
           )))
 

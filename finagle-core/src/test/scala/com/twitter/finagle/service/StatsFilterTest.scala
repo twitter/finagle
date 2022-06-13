@@ -344,7 +344,7 @@ class StatsFilterTest extends AnyFunSuite {
     StandardStatsReceiver.serverCount.set(0)
     LoadedStatsReceiver.self = builtinSr
     def standardStats(protoName: String) =
-      StatsOnly(new StandardStatsReceiver(stats.Server, protoName))
+      StatsOnly(new StandardStatsReceiver(SourceRole.Server, protoName))
 
     def statsFilter(configuredSr: StatsReceiver, protoName: String) = new StatsFilter[Int, Int](
       statsReceiver = configuredSr,
@@ -397,7 +397,7 @@ class StatsFilterTest extends AnyFunSuite {
     StandardStatsReceiver.serverCount.set(0)
     LoadedStatsReceiver.self = sr
     val standardStats =
-      StatsAndClassifier(new StandardStatsReceiver(stats.Server, "thriftmux"), aClassifier)
+      StatsAndClassifier(new StandardStatsReceiver(SourceRole.Server, "thriftmux"), aClassifier)
 
     val statsFilter = new StatsFilter[Int, Int](
       statsReceiver = sr,

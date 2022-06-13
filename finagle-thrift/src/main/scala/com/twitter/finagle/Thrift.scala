@@ -21,6 +21,7 @@ import com.twitter.finagle.service.StatsFilter
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.stats.ExceptionStatsHandler
+import com.twitter.finagle.stats.SourceRole
 import com.twitter.finagle.stats.StandardStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.ReqRepMarshallable
@@ -587,7 +588,7 @@ object Thrift
       ProtocolLibrary(protocolLibraryName) +
       StandardStats(
         stats.StatsAndClassifier(
-          StandardStatsReceiver(stats.Server, protocolLibraryName),
+          StandardStatsReceiver(SourceRole.Server, protocolLibraryName),
           ThriftResponseClassifier.ThriftExceptionsAsFailures
         ))
   }
