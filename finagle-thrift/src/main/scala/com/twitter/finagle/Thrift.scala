@@ -588,7 +588,7 @@ object Thrift
       ProtocolLibrary(protocolLibraryName) +
       StandardStats(
         stats.StatsAndClassifier(
-          StandardStatsReceiver(SourceRole.Server, protocolLibraryName),
+          new StandardStatsReceiver(SourceRole.Server, protocolLibraryName),
           ThriftResponseClassifier.ThriftExceptionsAsFailures
         ))
   }

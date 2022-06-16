@@ -19,7 +19,6 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.LoadedStatsReceiver
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.stats.StandardStatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
@@ -2328,7 +2327,6 @@ abstract class AbstractEndToEndTest
     val sr = new InMemoryStatsReceiver()
     val loadedSr = LoadedStatsReceiver.self
     LoadedStatsReceiver.self = builtinSr
-    StandardStatsReceiver.serverCount.set(0)
     val server = serverImpl()
       .withStatsReceiver(sr)
       .withResponseClassifier(ResponseClassifier.Default)
@@ -2345,12 +2343,19 @@ abstract class AbstractEndToEndTest
     assert(builtinSr.counter("standard-service-metric-v1", "srv", "requests")() == 3)
     assert(sr.counter("requests")() == 3)
     assert(sr.counter("success")() == 3)
+
+    val serverId = builtinSr.counters.keys.collectFirst {
+      case Seq("standard-service-metric-v1", "srv", "http", server, _)
+          if server.startsWith("server-") =>
+        server
+    }.get
+
     assert(
       builtinSr
-        .counter("standard-service-metric-v1", "srv", "http", "server-0", "requests")() == 3)
+        .counter("standard-service-metric-v1", "srv", "http", serverId, "requests")() == 3)
     assert(
       builtinSr
-        .counter("standard-service-metric-v1", "srv", "http", "server-0", "success")() == 2)
+        .counter("standard-service-metric-v1", "srv", "http", serverId, "success")() == 2)
     LoadedStatsReceiver.self = loadedSr
     await(client.close())
     await(server.close())

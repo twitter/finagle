@@ -713,7 +713,7 @@ object ThriftMux
       .configured(
         StandardStats(
           stats.StatsAndClassifier(
-            StandardStatsReceiver(SourceRole.Server, protocolLibraryName),
+            new StandardStatsReceiver(SourceRole.Server, protocolLibraryName),
             ThriftMuxResponseClassifier.ThriftExceptionsAsFailures
           )))
 

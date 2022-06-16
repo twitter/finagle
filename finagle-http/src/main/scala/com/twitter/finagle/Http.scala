@@ -411,7 +411,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       responseClassifierParam +
       StandardStats(
         stats.StatsAndClassifier(
-          StandardStatsReceiver(SourceRole.Server, protocolLibrary.name),
+          new StandardStatsReceiver(SourceRole.Server, protocolLibrary.name),
           HttpResponseClassifier.ServerErrorsAsFailures)) +
       PreferDeadlineOverTimeout(enabled = true)
   }

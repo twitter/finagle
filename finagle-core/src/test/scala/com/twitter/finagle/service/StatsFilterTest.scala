@@ -9,12 +9,27 @@ import com.twitter.finagle.stats.exp.MetricExpression
 import com.twitter.finagle.stats._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.funsuite.AnyFunSuite
 
 class StatsFilterTest extends AnyFunSuite {
-  val BasicExceptions = new CategorizingExceptionStatsHandler(_ => None, _ => None, rollup = false)
 
-  def getService(
+  // We extend only to get access to the protected constructor.
+  private class TestStandardStatsReceiver(
+    sourceRole: SourceRole,
+    protocol: String,
+    counter: AtomicInteger)
+      extends StandardStatsReceiver(sourceRole, protocol, counter)
+
+  private[this] val BasicExceptions =
+    new CategorizingExceptionStatsHandler(_ => None, _ => None, rollup = false)
+
+  private[this] val svc: Service[Int, Int] = Service.mk { i: Int =>
+    if (i < 0) Future.exception(new RuntimeException(i.toString))
+    else Future(i)
+  }
+
+  private[this] def getService(
     exceptionStatsHandler: ExceptionStatsHandler = BasicExceptions
   ): (Promise[String], InMemoryStatsReceiver, Service[String, String]) = {
     val receiver = new InMemoryStatsReceiver()
@@ -280,10 +295,7 @@ class StatsFilterTest extends AnyFunSuite {
 
   test("respects ResponseClassifier") {
     val sr = new InMemoryStatsReceiver()
-    val svc = Service.mk { i: Int =>
-      if (i < 0) Future.exception(new RuntimeException(i.toString))
-      else Future(i)
-    }
+
     val aClassifier: ResponseClassifier = {
       case ReqRep(_, Return(i: Int)) if i == 5 => ResponseClass.RetryableFailure
       case ReqRep(_, Throw(x)) if x.getMessage == "-5" => ResponseClass.Success
@@ -336,15 +348,10 @@ class StatsFilterTest extends AnyFunSuite {
     val sr2 = new InMemoryStatsReceiver()
     val builtinSr = new InMemoryStatsReceiver()
 
-    val svc = Service.mk { i: Int =>
-      if (i < 0) Future.exception(new RuntimeException(i.toString))
-      else Future(i)
-    }
-
-    StandardStatsReceiver.serverCount.set(0)
     LoadedStatsReceiver.self = builtinSr
+    val counter = new AtomicInteger()
     def standardStats(protoName: String) =
-      StatsOnly(new StandardStatsReceiver(SourceRole.Server, protoName))
+      StatsOnly(new TestStandardStatsReceiver(SourceRole.Server, protoName, counter))
 
     def statsFilter(configuredSr: StatsReceiver, protoName: String) = new StatsFilter[Int, Int](
       statsReceiver = configuredSr,
@@ -362,9 +369,11 @@ class StatsFilterTest extends AnyFunSuite {
     assert(5 == Await.result(service2(5), 1.second))
 
     assert(1 == sr1.counter("requests")())
+
     assert(
       1 == builtinSr
         .counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "requests")())
+
     assert(1 == sr1.counter("success")())
     assert(
       1 == builtinSr
@@ -380,24 +389,31 @@ class StatsFilterTest extends AnyFunSuite {
     assert(1 == sr2.counter("requests")())
     assert(
       1 == builtinSr.counter("standard-service-metric-v1", "srv", "http", "server-1", "requests")())
+
+    assert(
+      1 ==
+        builtinSr
+          .stat(
+            "standard-service-metric-v1",
+            "srv",
+            "thriftmux",
+            "server-0",
+            "request_latency_ms")().length)
   }
 
   test("standard metrics respects a different ResponseClassifier") {
     val sr = new InMemoryStatsReceiver()
-    val svc = Service.mk { i: Int =>
-      if (i < 0) Future.exception(new RuntimeException(i.toString))
-      else Future(i)
-    }
 
     val aClassifier: ResponseClassifier = {
       case ReqRep(_, Return(i: Int)) if i == 5 => ResponseClass.RetryableFailure
       case ReqRep(_, Throw(x)) if x.getMessage == "-5" => ResponseClass.Success
     }
 
-    StandardStatsReceiver.serverCount.set(0)
     LoadedStatsReceiver.self = sr
     val standardStats =
-      StatsAndClassifier(new StandardStatsReceiver(SourceRole.Server, "thriftmux"), aClassifier)
+      StatsAndClassifier(
+        new TestStandardStatsReceiver(SourceRole.Server, "thriftmux", new AtomicInteger),
+        aClassifier)
 
     val statsFilter = new StatsFilter[Int, Int](
       statsReceiver = sr,

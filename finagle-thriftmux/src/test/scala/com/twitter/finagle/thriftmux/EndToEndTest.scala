@@ -174,7 +174,6 @@ class EndToEndTest
   test("end-to-end thriftmux with standard metrics") {
     val sr = new InMemoryStatsReceiver()
     LoadedStatsReceiver.self = sr
-    StandardStatsReceiver.serverCount.set(0)
     new ThriftMuxTestServer {
       val client = clientImpl.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
@@ -183,8 +182,14 @@ class EndToEndTest
       assert(await(client.query("ok")) == "okok")
 
       assert(sr.counter("standard-service-metric-v1", "srv", "requests")() == 1)
-      assert(
-        sr.counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "requests")() == 1)
+
+      val metricKey = sr.counters.keys.collectFirst {
+        case key @ Seq("standard-service-metric-v1", "srv", "thriftmux", x, "requests")
+            if x.startsWith("server-") =>
+          key
+      }.get
+
+      assert(sr.counter(metricKey: _*)() == 1)
 
       await(server.close())
     }
@@ -193,7 +198,6 @@ class EndToEndTest
   test("end-to-end thriftmux aperture_least_loaded_weighted client") {
     val sr = new InMemoryStatsReceiver()
     LoadedStatsReceiver.self = sr
-    StandardStatsReceiver.serverCount.set(0)
     new ThriftMuxTestServer {
       val client = clientImpl
         .withLoadBalancer(Balancers.aperture())
@@ -217,8 +221,15 @@ class EndToEndTest
       assert(await(client.query("ok")) == "okok")
 
       assert(sr.counter("standard-service-metric-v1", "srv", "requests")() == 1)
+
+      val metricKey = sr.counters.keys.collectFirst {
+        case k @ Seq("standard-service-metric-v1", "srv", "thriftmux", server, "requests")
+            if server.startsWith("server-") =>
+          k
+      }.get
+
       assert(
-        sr.counter("standard-service-metric-v1", "srv", "thriftmux", "server-0", "requests")() == 1
+        sr.counter(metricKey: _*)() == 1
       )
 
       assert(sr.gauges(Seq("clnt", "client", "connections"))() == 1)
