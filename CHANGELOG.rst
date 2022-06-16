@@ -16,6 +16,12 @@ New Features
   by Finagle servers, and will allow generic configuration of all sets of parameters.
   ``PHAB_ID=D897484``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-core: fix issue where `Trace.traceLocal` and `Trace.traceLocalFuture` nested traces mistakenly
+  annotate to the parent span. ``PHAB_ID=D912760``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -28,6 +34,8 @@ Breaking API Changes
 
 * finagle-core: Update OffloadFilter.Param API to encourage recommended construction.
   ``PHAB_ID=D882210``
+
+* finagle-core: `Trace.recordLocalSpan` is `private[this]` and no longer `protected`. ``PHAB_ID=D912760``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -52,6 +52,12 @@ object Trace extends Tracing {
         TraceId.deserialize(Buf.ByteArray.Owned.extract(body))
     }
 
+  @deprecated("Please use Tracing.LocalBeginAnnotation directly", "2022-06-09")
+  def LocalBeginAnnotation: String = Tracing.LocalBeginAnnotation
+
+  @deprecated("Please use Tracing.LocalEndAnnotation directly", "2022-06-09")
+  def LocalEndAnnotation: String = Tracing.LocalEndAnnotation
+
   // It's ok to either write or read this value without synchronizing as long as we're not
   // doing read-modify-write concurrently (which we don't).
   @volatile private var _enabled = com.twitter.finagle.tracing.enabled()

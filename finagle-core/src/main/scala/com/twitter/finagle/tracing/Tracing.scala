@@ -21,6 +21,8 @@ object Tracing {
   private[tracing] val notSampled = tracingStats.counter("not_sampled")
   private[tracing] val deferred = tracingStats.counter("deferred")
   private val localSpans = tracingStats.counter("local_spans")
+  val LocalBeginAnnotation: String = "local/begin"
+  val LocalEndAnnotation: String = "local/end"
 
   @tailrec private[tracing] def nextSpanId(r: Random): SpanId = {
     val nextLong = r.nextLong()
@@ -310,9 +312,6 @@ abstract class Tracing {
     }
   }
 
-  val LocalBeginAnnotation: String = "local/begin"
-  val LocalEndAnnotation: String = "local/end"
-
   /**
    * Convenience method for event loops in services.  Put your
    * service handling code inside this to get proper tracing with all
@@ -407,8 +406,9 @@ abstract class Tracing {
    *
    * @note This method does *not* check `isActivelyTracing` -- the onus is on the user to include this check.
    */
-  final protected def recordLocalSpan(name: String, timestamp: Time, duration: Duration): Unit = {
-    val lid = id
+  private[this] def recordLocalSpan(name: String, timestamp: Time, duration: Duration): Unit = {
+    // the correct local id information needs to be retrieved from the local scope
+    val lid = Trace.id
     // these annotations are necessary to get the
     // zipkin ui to properly display the span.
     localSpans.incr()
