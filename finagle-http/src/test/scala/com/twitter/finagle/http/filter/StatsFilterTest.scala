@@ -7,6 +7,7 @@ import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.HistogramType
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.stats.MetricBuilder
+import com.twitter.finagle.stats.NameTranslatingStatsReceiver
 import com.twitter.util.Await
 import com.twitter.util.Duration
 import com.twitter.util.Future
@@ -27,8 +28,12 @@ class StatsFilterTest extends AnyFunSuite {
     }
   }
 
+  private class FullTranlationInMemoryStatsReceiver extends InMemoryStatsReceiver {
+    override def scopeTranslation = NameTranslatingStatsReceiver.FullTranslation
+  }
+
   test("increment stats") {
-    val receiver = spy(new InMemoryStatsReceiver)
+    val receiver = new InMemoryStatsReceiver
 
     val filter = new StatsFilter(receiver, Stopwatch.timeMillis) andThen service
 
@@ -41,7 +46,7 @@ class StatsFilterTest extends AnyFunSuite {
   }
 
   test("status and time counters and stats are memoized") {
-    val receiver = spy(new InMemoryStatsReceiver)
+    val receiver = spy(new FullTranlationInMemoryStatsReceiver)
 
     val filter = new StatsFilter(receiver, Stopwatch.timeMillis) andThen service
 

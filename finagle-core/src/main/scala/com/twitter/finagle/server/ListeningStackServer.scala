@@ -7,9 +7,11 @@ import com.twitter.finagle.ClientConnection
 import com.twitter.finagle.ListeningServer
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.Stack
+import com.twitter.finagle.server.ListeningStackServer.DimensionalServerScopes
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.RelativeNameMarkingStatsReceiver
 import com.twitter.finagle.stats.RoleConfiguredStatsReceiver
+import com.twitter.finagle.stats.RootFinagleStatsReceiver
 import com.twitter.finagle.stats.SourceRole
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.CloseAwaitably
@@ -64,7 +66,9 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
         if (serverLabel.isEmpty) RoleConfiguredStatsReceiver(stats, SourceRole.Server)
         else
           RoleConfiguredStatsReceiver(
-            RelativeNameMarkingStatsReceiver(stats.scope(serverLabel)),
+            RelativeNameMarkingStatsReceiver(
+              new RootFinagleStatsReceiver(stats, serverLabel, DimensionalServerScopes)
+            ),
             SourceRole.Server,
             Some(serverLabel))
 
@@ -210,4 +214,8 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
     )
     GlobalRegistry.get.put(listenerImplKey, listenerName)
   }
+}
+
+private object ListeningStackServer {
+  private val DimensionalServerScopes: Seq[String] = Seq("rpc", "finagle", "server")
 }

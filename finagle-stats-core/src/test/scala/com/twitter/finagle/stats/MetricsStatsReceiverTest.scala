@@ -4,6 +4,7 @@ import com.twitter.finagle.stats.Helpers._
 import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.GaugeType
 import com.twitter.finagle.stats.MetricBuilder.HistogramType
+import com.twitter.finagle.stats.MetricBuilder.Identity
 import com.twitter.finagle.stats.exp.Expression
 import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
@@ -237,14 +238,14 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
 
     // what we expected as hydrated metric builders
     val aaSchema =
-      MetricBuilder(name = Seq("test", "a"), metricType = CounterType)
+      MetricBuilder(metricType = CounterType)
+        .withIdentity(Identity(Seq("test", "a"), Seq("a")))
     val bbSchema =
-      MetricBuilder(
-        name = Seq("test", "b"),
-        percentiles = BucketedHistogram.DefaultQuantiles,
-        metricType = HistogramType)
+      MetricBuilder(percentiles = BucketedHistogram.DefaultQuantiles, metricType = HistogramType)
+        .withIdentity(Identity(Seq("test", "b"), Seq("b")))
     val ccSchema =
-      MetricBuilder(name = Seq("test", "c"), metricType = GaugeType)
+      MetricBuilder(metricType = GaugeType)
+        .withIdentity(Identity(Seq("test", "c"), Seq("c")))
 
     val expected_expression = ExpressionSchema(
       "test_expression",
