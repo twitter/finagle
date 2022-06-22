@@ -628,7 +628,7 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
       .withStack(clientStackForClassifier())
       .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
-      .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query
+      .withRequestTimeout(300.milliseconds) // used in conjunction with a "slow" query
       .build[Echo.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
@@ -866,7 +866,7 @@ class EndToEndTest extends AnyFunSuite with ThriftTest with BeforeAndAfter {
       .name("client")
       .reportTo(sr)
       .responseClassifier(scalaClassifier)
-      .requestTimeout(100.milliseconds) // used in conjuection with a "slow" query
+      .requestTimeout(100.milliseconds) // used in conjunction with a "slow" query
       .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
       .build()
     val client = new Echo.FinagledClient(clientBuilder, RichClientParam())
