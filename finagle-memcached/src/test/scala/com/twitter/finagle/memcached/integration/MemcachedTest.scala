@@ -4,14 +4,23 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
 import com.twitter.finagle.memcached.protocol.ClientError
-import com.twitter.finagle.memcached.{Client, GetResult, GetsResult, PartitionedClient}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.memcached.Client
+import com.twitter.finagle.memcached.GetResult
+import com.twitter.finagle.memcached.GetsResult
+import com.twitter.finagle.memcached.PartitionedClient
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util._
-import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
-import org.scalatest.time.{Milliseconds, Seconds, Span}
-import org.scalatest.{BeforeAndAfter, Outcome}
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.PatienceConfiguration
+import org.scalatest.time.Milliseconds
+import org.scalatest.time.Seconds
+import org.scalatest.time.Span
+import org.scalatest.BeforeAndAfter
+import org.scalatest.Outcome
 import scala.util.Random
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -71,6 +80,15 @@ abstract class MemcachedTest
     assert(awaitResult(client.get("foo")) == None)
     awaitResult(client.set("foo", Buf.Utf8("bar")))
     assert(awaitResult(client.get("foo")).get == Buf.Utf8("bar"))
+  }
+
+  test("set and get without partioning") {
+    val c = Memcached.client
+      .newLoadBalancedTwemcacheClient(
+        Name.bound(servers.map { s => Address(s.address) }.head),
+        clientName)
+    awaitResult(c.set("xyz", Buf.Utf8("value1")))
+    assert(awaitResult(c.get("xyz")).get == Buf.Utf8("value1"))
   }
 
   test("set & get data containing newlines") {

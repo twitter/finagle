@@ -63,8 +63,13 @@ import java.util.concurrent.ExecutorService
  * method on `Memcached.client`. Failing hosts can be ejected from the
  * hash ring if `withEjectFailedHost` is set to true. Note, the current
  * implementation only supports bound [[com.twitter.finagle.Name Names]].
- * @define label
  *
+ * @define notpartioned
+ * If LoadBalancedTwemcacheClient is used to create a client a key hasher won't be used
+ * and instead a load balancing algorithm will be used that doesn't account for keys. Some settings
+ * related to configuring client side hashing will be ignored
+ *
+ * @define label
  * Argument `label` is used to assign a label to this client.
  * The label is used to scope stats, etc.
  */
@@ -87,6 +92,15 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
   def newTwemcacheClient(dest: String): TwemcacheClient = {
     val (n, l) = evalLabeledDest(dest)
     newTwemcacheClient(n, l)
+  }
+
+  /** $notpartioned $label */
+  def newLoadBalancedTwemcacheClient(dest: Name, label: String): TwemcacheClient
+
+  /** $notpartioned */
+  def newLoadBalancedTwemcacheClient(dest: String): TwemcacheClient = {
+    val (n, l) = evalLabeledDest(dest)
+    newLoadBalancedTwemcacheClient(n, l)
   }
 
   private def evalLabeledDest(dest: String): (Name, String) = {
@@ -262,6 +276,19 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
             s"Memcached client only supports Bound Names or Name.Path, was: $n"
           )
       }
+    }
+
+    def newLoadBalancedTwemcacheClient(
+      dest: Name,
+      label: String
+    ): TwemcacheClient = {
+      val destination = if (LocalMemcached.enabled) {
+        Resolver.eval(Client.mkDestination("localhost", LocalMemcached.port))
+      } else dest
+
+      val label0 = if (label == "") params[Label].label else label
+
+      TwemcacheClient(newService(destination, label0))
     }
 
     /**

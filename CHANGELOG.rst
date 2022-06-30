@@ -16,9 +16,12 @@ New Features
   by Finagle servers, and will allow generic configuration of all sets of parameters.
   ``PHAB_ID=D897484``
 
+* finagle-memcached: Add new function, `newLoadBalancedTwemcacheClient`, to create a TwemcacheClient
+  that doesn't use a partitioning service.
+  ``PHAB_ID=D911789`
+
 Bug Fixes
 ~~~~~~~~~
-
 * finagle-core: fix issue where `Trace.traceLocal` and `Trace.traceLocalFuture` nested traces mistakenly
   annotate to the parent span. ``PHAB_ID=D912760``
 
