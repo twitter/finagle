@@ -1,5 +1,6 @@
 scala_library(
     sources = ["**/*.scala"],
+    platform = "java8",
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-serversets",

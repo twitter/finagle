@@ -1,6 +1,7 @@
 scala_library(
     name = "filter_flags",
     sources = ["com/twitter/finagle/stats/StatsFilterFlags.scala"],
+    platform = "java8",
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-stats-core-filterflags",
@@ -18,6 +19,7 @@ scala_library(
         "**/*.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-stats-core",

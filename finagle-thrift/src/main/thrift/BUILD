@@ -3,6 +3,7 @@ java_thrift_library(
     sources = ["scribe.thrift"],
     compiler = "scrooge",
     language = "scala",
+    platform = "java8",
     provides = artifact(
         org = "com.twitter",
         name = "finagle-thrift-scribe",

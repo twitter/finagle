@@ -1,5 +1,6 @@
 java_library(
     sources = ["**/*.java"],
+    platform = "java8",
     provides = artifact(
         org = "com.twitter",
         name = "finagle-thrift-java",

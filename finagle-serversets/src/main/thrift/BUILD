@@ -17,6 +17,7 @@
 create_thrift_libraries(
     base_name = "thrift",
     sources = ["com/twitter/serversets/endpoint.thrift"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     generate_languages = [
         "java",
