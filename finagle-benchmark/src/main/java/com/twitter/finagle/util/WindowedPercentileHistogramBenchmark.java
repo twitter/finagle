@@ -12,8 +12,6 @@ import com.twitter.finagle.benchmark.StdBenchAnnotations;
 import com.twitter.util.Duration;
 import com.twitter.util.NullTimer;
 
-// ./pants run --jvm-run-jvm-program-args='-prof=gc'
-// ./finagle/finagle-benchmark/src/main/java/com/twitter/finagle/util/:jmh
 public class WindowedPercentileHistogramBenchmark extends StdBenchAnnotations {
 
   public static final int NUM_BUCKETS = 10;

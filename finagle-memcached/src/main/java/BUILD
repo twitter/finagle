@@ -19,8 +19,8 @@ java_library(
     ],
 )
 
-# TODO: Remove this and references to it,
-# when a fix for https://github.com/pantsbuild/pants/issues/7200 has landed.
+# TODO: Change this to filegroup per https://github.com/pantsbuild/pants/issues/7200
+# when we switch entirely to bazel
 files(
     name = "pants-workaround",
     sources = ["**/*.java"],

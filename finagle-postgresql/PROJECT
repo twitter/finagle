@@ -1,4 +1,4 @@
-# See go/project-docs. Generated using ./pants run src/python/twitter/phabricator:owners_to_project -- --dirs=a/owned/path,b/owned/path
+# See go/project-docs. Generated using ./bazel run src/python/twitter/phabricator:owners_to_project -- --dirs=a/owned/path,b/owned/path
 
 owners:
   - cockroachdb-admins:ldap

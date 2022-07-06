@@ -1,4 +1,4 @@
-# See go/project-docs. Generated using ./pants run src/python/twitter/phabricator:owners_to_project -- --dirs=a/owned/path,b/owned/path
+# See go/project-docs. Generated using ./bazel run src/python/twitter/phabricator:owners_to_project -- --dirs=a/owned/path,b/owned/path
 
 # finagle-memcached has a shared ownership between RealTime Storage (cache-group) and CSL.
 # CSL team owns the library support and RTS team owns the functional changes (protocol, hashing algorithms etc) of the client.

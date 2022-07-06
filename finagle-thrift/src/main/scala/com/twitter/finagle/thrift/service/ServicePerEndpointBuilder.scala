@@ -1,7 +1,8 @@
 package com.twitter.finagle.thrift.service
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.thrift.{RichClientParam, ThriftClientRequest}
+import com.twitter.finagle.thrift.RichClientParam
+import com.twitter.finagle.thrift.ThriftClientRequest
 
 /**
  * Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.
@@ -16,8 +17,8 @@ trait ServicePerEndpointBuilder[
    * A runtime class for this service. This is known at compile time and is filled in by Scrooge.
    */
   def serviceClass: Class[ServicePerEndpoint] = {
-    // This is a temporary hack until we figure out how to restore a proper Scrooge bootstrapping
-    // in source/pants. Adding a new method with implementation to a trait should be both source &
+    // This is a temporary hack until we figure out how to restore a proper Scrooge
+    // bootstrapping. Adding a new method with implementation to a trait should be both source &
     // binary compatible change, which would allow IDL classes generated with an older Scrooge to
     // compile & run against newer Finagle.
     null

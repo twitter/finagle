@@ -4,7 +4,9 @@ import com.twitter.finagle.Addr
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.Logger
-import com.twitter.util.{Await, Duration, Promise}
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Promise
 import org.openjdk.jmh.annotations._
 import java.util.concurrent.TimeUnit
 
@@ -14,7 +16,7 @@ import java.util.concurrent.TimeUnit
  * patterns.
  *
  * 1. Run the server separately to isolate client allocations:
- *  ./pants run finagle/finagle-benchmark/src/main/scala:serverset-service
+ *  ./bazel run finagle/finagle-benchmark/src/main/scala:serverset-service
  *
  * 2. Run this client in sbt
  * $ ./sbt

@@ -11,7 +11,6 @@ java_library(
         "finagle/finagle-core/src/main",
         "util/util-core:scala",
     ],
-    # Not supported: __shaded_by_pants__.sbt.internal.inc.javac.WriteReportingJavaFileObject@3ea7d550
 )
 
 jvm_binary(
