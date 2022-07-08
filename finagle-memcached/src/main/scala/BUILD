@@ -4,6 +4,7 @@ scala_library(
     # NB: This is not an actual dependency, but is necessary to have Pants behave
     #     like SBT, throwing an error for "import java.*" statements.
     java_sources = ["finagle/finagle-memcached/src/main/java"],
+    platform = "java8",
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-memcached",
