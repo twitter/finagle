@@ -106,6 +106,11 @@ class ZkSessionEndToEndTest extends AnyFunSuite with BeforeAndAfter with Eventua
       retryStream,
       () => ZkSession(retryStream, inst.zookeeperConnectString, statsReceiver = NullStatsReceiver)
     )
+    @volatile var sessions = Seq[ZkSession]()
+    // The initial size of sessions is 1, because the current value
+    // of varZkSession (WatchState.pending) is emitted upon subscription.
+    varZkSession.changes.register(Witness({ s: ZkSession => sessions = s +: sessions }))
+
     val varZkState = varZkSession flatMap { _.state }
 
     @volatile var zkStates = Seq[(SessionState, Duration)]()
@@ -116,11 +121,6 @@ class ZkSessionEndToEndTest extends AnyFunSuite with BeforeAndAfter with Eventua
         case _ =>
       }
     }))
-
-    @volatile var sessions = Seq[ZkSession]()
-    // The initial size of sessions is 1, because the current value
-    // of varZkSession (WatchState.pending) is emitted upon subscription.
-    varZkSession.changes.register(Witness({ s: ZkSession => sessions = s +: sessions }))
 
     // Wait for the initial connect.
     eventually {

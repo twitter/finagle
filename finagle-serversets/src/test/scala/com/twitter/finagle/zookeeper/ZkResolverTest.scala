@@ -15,11 +15,13 @@ import com.twitter.util.Var
 import java.net.InetSocketAddress
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.Eventually
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.time._
 import scala.jdk.CollectionConverters._
-import org.scalatest.funsuite.AnyFunSuite
+import scala.collection.mutable
 
 class ZkResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually {
+
   private class ZkGroup(serverSet: ServerSet, path: String)
       extends Thread("ZkGroup(%s)".format(path)) {
     setDaemon(true)
@@ -56,147 +58,156 @@ class ZkResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually {
 
   def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
 
-  // Flaky tests. See COORD-437 for details.
-  if (!sys.props.contains("SKIP_FLAKY")) {
-    test("represent the underlying ServerSet") {
-      val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
-      val clust = new ZkGroup(serverSet, "/foo/bar/baz")
-      assert(clust().isEmpty)
+  private[this] def getRandomSocketWithDistinctPort(set: mutable.Set[Int]): InetSocketAddress = {
+    val socket = RandomSocket.nextAddress()
+    if (set(socket.getPort)) getRandomSocketWithDistinctPort(set)
+    else {
+      set += socket.getPort
+      socket
+    }
+  }
 
-      val ephAddr1 = RandomSocket.nextAddress()
-      val ephAddr2 = RandomSocket.nextAddress()
+  test("represent the underlying ServerSet") {
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
+    val clust = new ZkGroup(serverSet, "/foo/bar/baz")
+    assert(clust().isEmpty)
 
-      serverSet.join(ephAddr1, Map[String, InetSocketAddress]().asJava, ALIVE)
+    val ports = mutable.Set[Int]()
+    // assert that 2 hosts show up in an unfiltered cluster
+    val ephAddr1 = getRandomSocketWithDistinctPort(ports)
+    val ephAddr2 = getRandomSocketWithDistinctPort(ports)
 
-      eventually { assert(clust().size == 1) }
-      val ep = clust().head.getServiceEndpoint
-      assert(ep.getHost == "0.0.0.0")
-      assert(ep.getPort == ephAddr1.getPort)
+    serverSet.join(ephAddr1, Map[String, InetSocketAddress]().asJava, ALIVE)
 
-      assert(clust() == clust())
-      val snap = clust()
+    eventually { assert(clust().size == 1) }
+    val ep = clust().head.getServiceEndpoint
+    assert(ep.getHost == "0.0.0.0")
+    assert(ep.getPort == ephAddr1.getPort)
 
-      serverSet.join(ephAddr2, Map[String, InetSocketAddress]().asJava, ALIVE)
+    assert(clust() == clust())
+    val snap = clust()
 
-      eventually { assert(clust().size == 2) }
-      assert {
-        val Seq(fst) = (clust() &~ snap).toSeq
-        fst.getServiceEndpoint.getPort == ephAddr2.getPort
-      }
+    serverSet.join(ephAddr2, Map[String, InetSocketAddress]().asJava, ALIVE)
+
+    eventually { assert(clust().size == 2) }
+    assert {
+      val Seq(fst) = (clust() &~ snap).toSeq
+      fst.getServiceEndpoint.getPort == ephAddr2.getPort
+    }
+  }
+
+  test("filter by shardid") {
+
+    val path = "/bar/foo/baz"
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
+    val clust = new ZkGroup(serverSet, path)
+    assert(clust().isEmpty)
+
+    val ports = mutable.Set[Int]()
+    // assert that 3 hosts show up in an unfiltered cluster
+    val ephAddr1 = getRandomSocketWithDistinctPort(ports)
+    val ephAddr2 = getRandomSocketWithDistinctPort(ports)
+    val ephAddr3 = getRandomSocketWithDistinctPort(ports)
+
+    Seq(ephAddr1, ephAddr2, ephAddr3).foreach { sockAddr =>
+      serverSet
+        .join(
+        sockAddr,
+          Map[String, InetSocketAddress]().asJava,
+          sockAddr.getPort
+      )
     }
 
-    test("filter by shardid") {
-      val path = "/bar/foo/baz"
-      val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
-      val clust = new ZkGroup(serverSet, path)
-      assert(clust().isEmpty)
+    eventually { assert(clust().size == 3) }
 
-      // assert that 3 hosts show up in an unfiltered cluster
-      val ephAddr1 = RandomSocket.nextAddress()
-      val ephAddr2 = RandomSocket.nextAddress()
-      val ephAddr3 = RandomSocket.nextAddress()
-
-      Seq(ephAddr1, ephAddr2, ephAddr3).foreach { sockAddr =>
-        serverSet
-          .join(
-            sockAddr,
-            Map[String, InetSocketAddress]().asJava,
-            sockAddr.getPort
-          )
-          .update(ALIVE)
-      }
-
-      eventually { assert(clust().size == 3) }
-
-      // and 1 in a cluster filtered by shardid (== to the port in this case)
-      val filteredAddr =
-        new ZkResolver(factory).resolve(
-          Set(inst.zookeeperAddress),
-          path,
-          shardId = Some(ephAddr2.getPort)
-        )
-      eventually {
-        Var.sample(filteredAddr) match {
-          case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty => true
-          case _ => fail()
-        }
+    // and 1 in a cluster filtered by shardid (== to the port in this case)
+    val filteredAddr =
+      new ZkResolver(factory).resolve(
+        Set(inst.zookeeperAddress),
+        path,
+        shardId = Some(ephAddr2.getPort)
+      )
+    eventually {
+      Var.sample(filteredAddr) match {
+        case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty => true
+        case _ => fail()
       }
     }
+  }
 
-    test("resolve ALIVE endpoints") {
-      val res = new ZkResolver(factory)
-      val va = res.bind("localhost:%d!/foo/bar/baz".format(inst.zookeeperAddress.getPort))
-      eventually { Var.sample(va) == Addr.Bound() }
+  test("resolve ALIVE endpoints") {
+    val res = new ZkResolver(factory)
+    val va = res.bind("localhost:%d!/foo/bar/baz".format(inst.zookeeperAddress.getPort))
+    eventually { Var.sample(va) == Addr.Bound() }
 
-      /*
-       val inetClust = clust collect { case ia: InetSocketAddress => ia }
-       assert(inetClust() == inetClust())
-       */
+    /*
+     val inetClust = clust collect { case ia: InetSocketAddress => ia }
+     assert(inetClust() == inetClust())
+     */
 
-      val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
-      val port1 = RandomSocket.nextPort()
-      val port2 = RandomSocket.nextPort()
-      val sockAddr = Address.Inet(new InetSocketAddress("127.0.0.1", port1), Addr.Metadata.empty)
-      val blahAddr = Address.Inet(new InetSocketAddress("10.0.0.1", port2), Addr.Metadata.empty)
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
+    val port1 = RandomSocket.nextPort()
+    val port2 = RandomSocket.nextPort()
+    val sockAddr = Address.Inet(new InetSocketAddress("127.0.0.1", port1), Addr.Metadata.empty)
+    val blahAddr = Address.Inet(new InetSocketAddress("10.0.0.1", port2), Addr.Metadata.empty)
 
-      val status = serverSet.join(
-        sockAddr.addr,
-        Map[String, InetSocketAddress]("blah" -> blahAddr.addr).asJava,
-        ALIVE
+    val status = serverSet.join(
+      sockAddr.addr,
+      Map[String, InetSocketAddress]("blah" -> blahAddr.addr).asJava,
+      ALIVE
+    )
+
+    eventually { assert(Var.sample(va) == Addr.Bound(sockAddr)) }
+    status.leave()
+    eventually { assert(Var.sample(va) == Addr.Neg) }
+    serverSet.join(
+      sockAddr.addr,
+      Map[String, InetSocketAddress]("blah" -> blahAddr.addr).asJava,
+      ALIVE
+    )
+    eventually { assert(Var.sample(va) == Addr.Bound(sockAddr)) }
+
+    val blahVa = res.bind("localhost:%d!/foo/bar/baz!blah".format(inst.zookeeperAddress.getPort))
+    eventually { assert(Var.sample(blahVa) == Addr.Bound(blahAddr)) }
+  }
+
+  test("filter by endpoint") {
+    val path = "/bar/foo/baz"
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
+    val clust = new ZkGroup(serverSet, path)
+    assert(clust().isEmpty)
+
+    val ports = mutable.Set[Int]()
+    // assert that 3 hosts show up in an unfiltered cluster
+    val ephAddr1 = getRandomSocketWithDistinctPort(ports)
+    val ephAddr2 = getRandomSocketWithDistinctPort(ports)
+    val ephAddr3 = getRandomSocketWithDistinctPort(ports)
+    Seq(ephAddr1, ephAddr2, ephAddr3).foreach { sockAddr =>
+      serverSet
+        .join(
+        sockAddr,
+          Map[String, InetSocketAddress](sockAddr.getPort.toString -> sockAddr).asJava
+      )
+    }
+
+    eventually { assert(clust().size == 3) }
+
+    val filteredAddr =
+      new ZkResolver(factory).resolve(
+        Set(inst.zookeeperAddress),
+        path,
+        endpoint = Some(ephAddr1.getPort.toString)
       )
 
-      eventually { assert(Var.sample(va) == Addr.Bound(sockAddr)) }
-      status.leave()
-      eventually { assert(Var.sample(va) == Addr.Neg) }
-      serverSet.join(
-        sockAddr.addr,
-        Map[String, InetSocketAddress]("blah" -> blahAddr.addr).asJava,
-        ALIVE
-      )
-      eventually { assert(Var.sample(va) == Addr.Bound(sockAddr)) }
-
-      val blahVa = res.bind("localhost:%d!/foo/bar/baz!blah".format(inst.zookeeperAddress.getPort))
-      eventually { assert(Var.sample(blahVa) == Addr.Bound(blahAddr)) }
-    }
-
-    test("filter by endpoint") {
-      val path = "/bar/foo/baz"
-      val serverSet = new ServerSetImpl(inst.zookeeperClient, path)
-      val clust = new ZkGroup(serverSet, path)
-      assert(clust().isEmpty)
-
-      // assert that 3 hosts show up in an unfiltered cluster
-      val ephAddr1 = RandomSocket.nextAddress()
-      val ephAddr2 = RandomSocket.nextAddress()
-      val ephAddr3 = RandomSocket.nextAddress()
-      Seq(ephAddr1, ephAddr2, ephAddr3).foreach { sockAddr =>
-        serverSet
-          .join(
-            sockAddr,
-            Map[String, InetSocketAddress](sockAddr.getPort.toString -> sockAddr).asJava
-          )
-          .update(ALIVE)
-      }
-
-      eventually { assert(clust().size == 3) }
-
-      val filteredAddr =
-        new ZkResolver(factory).resolve(
-          Set(inst.zookeeperAddress),
-          path,
-          endpoint = Some(ephAddr1.getPort.toString)
-        )
-
-      eventually {
-        Var.sample(filteredAddr) match {
-          case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty => true
-          case _ => fail()
-        }
+    eventually {
+      Var.sample(filteredAddr) match {
+        case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty => true
+        case _ => fail()
       }
     }
+  }
 
-    test("resolves from the main resolver") {
-      Resolver.eval("zk!localhost:%d!/foo/bar/baz!blah".format(inst.zookeeperAddress.getPort))
-    }
+  test("resolves from the main resolver") {
+    Resolver.eval("zk!localhost:%d!/foo/bar/baz!blah".format(inst.zookeeperAddress.getPort))
   }
 }
