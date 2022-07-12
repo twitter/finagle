@@ -2,12 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.service.StatsFilter.Descriptions.dispatch
-import com.twitter.finagle.service.StatsFilter.Descriptions.failures
-import com.twitter.finagle.service.StatsFilter.Descriptions.latency
-import com.twitter.finagle.service.StatsFilter.Descriptions.pending
-import com.twitter.finagle.service.StatsFilter.Descriptions.success
-import com.twitter.finagle.service.StatsFilter.RPCMetrics
+import com.twitter.finagle.service.StatsFilter.Descriptions
 import com.twitter.finagle.stats._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
@@ -98,8 +93,9 @@ object StatsFilter {
     override def toString: String = "DefaultCategorizer"
   }
 
-  private val SyntheticException =
-    new ResponseClassificationSyntheticException()
+  private object Descriptions {
+    val pending: Some[String] = Some("A gauge of the current total number of outstanding requests.")
+  }
 
   def typeAgnostic(
     statsReceiver: StatsReceiver,
@@ -148,22 +144,6 @@ object StatsFilter {
     case _ =>
       () => timeUnit.convert(System.nanoTime(), TimeUnit.NANOSECONDS)
   }
-
-  private case class RPCMetrics(
-    requestCount: Counter,
-    successCount: Counter,
-    failureCount: Counter,
-    latencyStat: Stat,
-    responseClassifier: ResponseClassifier,
-    statsReceiver: StatsReceiver)
-
-  object Descriptions {
-    val dispatch = Some("A counter of the total number of successes + failures.")
-    val success = Some("A counter of the total number of successes.")
-    val latency = Some("A histogram of the latency of requests in milliseconds.")
-    val pending = Some("A gauge of the current total number of outstanding requests.")
-    val failures = Some("A counter of the number of times any failure has been observed.")
-  }
 }
 
 /**
@@ -193,8 +173,6 @@ class StatsFilter[Req, Rep] private[service] (
   metricsRegistry: Option[CoreMetricsRegistry] = None,
   standardStats: StandardStats = Disabled)
     extends SimpleFilter[Req, Rep] {
-
-  import StatsFilter.SyntheticException
 
   /**
    * A `StatsFilter` reports request statistics including number of requests,
@@ -267,122 +245,61 @@ class StatsFilter[Req, Rep] private[service] (
       Some(metricBuilderRegistry))
   }
 
-  private[this] def latencyStatSuffix: String = {
-    timeUnit match {
-      case TimeUnit.NANOSECONDS => "ns"
-      case TimeUnit.MICROSECONDS => "us"
-      case TimeUnit.MILLISECONDS => "ms"
-      case TimeUnit.SECONDS => "secs"
-      case _ => timeUnit.toString.toLowerCase
+  // Instantiates the standard set of stats for the cases of standard service metrics and the
+  // regular metrics. For the metrics registry we only want to register the configured metrics.
+  // Ideally we'd register the standard service metrics but these are not well used yet.
+  private[this] def mkBasicStats(
+    registerMetrics: Boolean,
+    statsReceiver: StatsReceiver,
+    responseClassifier: ResponseClassifier
+  ): BasicServiceMetrics =
+    new BasicServiceMetrics(
+      timeUnit,
+      exceptionStatsHandler,
+      if (registerMetrics) metricsRegistry else None,
+      statsReceiver,
+      responseClassifier)
+
+  private[this] val standardServiceMetrics: Option[BasicServiceMetrics] = {
+    standardStats match {
+      case StatsAndClassifier(stdStatsReceiver, responseClassifier) =>
+        Some(mkBasicStats(registerMetrics = false, stdStatsReceiver, responseClassifier))
+      case StatsOnly(stdStatsReceiver) =>
+        Some(mkBasicStats(registerMetrics = false, stdStatsReceiver, ResponseClassifier.Default))
+      case Disabled => None
     }
   }
 
-  private[this] val builtinMetrics: Option[RPCMetrics] = standardStats match {
-    case Disabled => None
-    case StatsOnly(stdStatsReceiver) =>
-      Some(createStdMetrics(stdStatsReceiver, ResponseClassifier.Default))
-    case StatsAndClassifier(stdStatsReceiver, responseClassifier) =>
-      Some(createStdMetrics(stdStatsReceiver, responseClassifier))
-  }
-
-  private[this] def createStdMetrics(
-    standardStatsReceiver: StandardStatsReceiver,
-    responseClassifier: ResponseClassifier
-  ): RPCMetrics = {
-    val requestCounter = standardStatsReceiver.counter("requests")
-    val failureCounter = standardStatsReceiver.counter(ExceptionStatsHandler.Failures)
-    val successCounter = standardStatsReceiver.counter("success")
-    val latencyStat = standardStatsReceiver.stat(s"request_latency_$latencyStatSuffix")
-    RPCMetrics(
-      requestCount = requestCounter,
-      successCount = successCounter,
-      failureCount = failureCounter,
-      latencyStat = latencyStat,
-      responseClassifier = responseClassifier,
-      statsReceiver = standardStatsReceiver
-    )
-  }
+  private[this] val registeredMetrics: BasicServiceMetrics =
+    mkBasicStats(registerMetrics = true, statsReceiver, responseClassifier)
 
   private[this] val outstandingRequestCount = new LongAdder()
   private[this] val outstandingRequestCountGauge =
-    statsReceiver.addGauge(pending, "pending") {
+    statsReceiver.addGauge(Descriptions.pending, "pending") {
       outstandingRequestCount.sum()
     }
 
-  private[this] val configuredMetrics = RPCMetrics(
-    requestCount = statsReceiver.counter(dispatch, "requests"),
-    successCount = statsReceiver.counter(success, "success"),
-    // ExceptionStatsHandler creates the failure counter lazily.
-    // We need to eagerly register this counter in metrics for success rate expression.
-    failureCount = statsReceiver.counter(failures, ExceptionStatsHandler.Failures),
-    latencyStat = statsReceiver.stat(latency, s"request_latency_$latencyStatSuffix"),
-    responseClassifier = responseClassifier,
-    statsReceiver = statsReceiver
-  )
-
-  // inject metrics and instrument top-line expressions
-  metricsRegistry.foreach { registry =>
-    Seq(
-      registry.SuccessCounter -> configuredMetrics.successCount.metadata,
-      registry.FailureCounter -> configuredMetrics.failureCount.metadata,
-      registry.RequestCounter -> configuredMetrics.requestCount.metadata,
-      registry.LatencyP99Histogram -> configuredMetrics.latencyStat.metadata
-    ).foreach {
-      case (k, metadata) =>
-        metadata.toMetricBuilder.foreach { metricBuilder =>
-          registry.setMetricBuilder(k, metricBuilder, statsReceiver)
-        }
-    }
-  }
-
   private[this] def isIgnorableResponse(rep: Try[Rep]): Boolean = rep match {
-    case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Ignorable) =>
-      true
-    case _ =>
-      false
-  }
-
-  private[this] def recordStats(
-    request: Req,
-    response: Try[Rep],
-    start: Long,
-    rpcMetrics: RPCMetrics
-  ): Unit = {
-    rpcMetrics.requestCount.incr()
-    rpcMetrics.responseClassifier
-      .applyOrElse(ReqRep(request, response), ResponseClassifier.Default) match {
-      case ResponseClass.Ignorable => // Do nothing.
-      case ResponseClass.Failed(_) =>
-        rpcMetrics.latencyStat.add(now() - start)
-        response match {
-          case Throw(e) =>
-            exceptionStatsHandler.record(rpcMetrics.statsReceiver, e)
-          case _ =>
-            exceptionStatsHandler.record(rpcMetrics.statsReceiver, SyntheticException)
-        }
-      case ResponseClass.Successful(_) =>
-        rpcMetrics.successCount.incr()
-        rpcMetrics.latencyStat.add(now() - start)
-    }
+    case Throw(f: FailureFlags[_]) => f.isFlagged(FailureFlags.Ignorable)
+    case _ => false
   }
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val start = now()
     outstandingRequestCount.increment()
     val result =
-      try {
-        service(request)
-      } catch {
-        case NonFatal(e) =>
-          Future.exception(e)
-      }
+      try service(request)
+      catch { case NonFatal(e) => Future.exception(e) }
 
     result.respond { response =>
       outstandingRequestCount.decrement()
       if (!isIgnorableResponse(response)) {
-        recordStats(request, response, start, configuredMetrics)
-        builtinMetrics match {
-          case Some(stats) => recordStats(request, response, start, stats)
+        val duration = now() - start
+        registeredMetrics.recordStats(request, response, duration)
+
+        standardServiceMetrics match {
+          case Some(stats) =>
+            stats.recordStats(request, response, duration)
           case None => // no-op
         }
       }

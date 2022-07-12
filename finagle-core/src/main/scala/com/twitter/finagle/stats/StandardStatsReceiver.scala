@@ -39,6 +39,14 @@ private[finagle] class StandardStatsReceiver protected (
   def this(sourceRole: SourceRole, protocol: String) =
     this(sourceRole, protocol, StandardStatsReceiver.serverCount)
 
+  private[this] def withDescription(metricBuilder: MetricBuilder): MetricBuilder = {
+    val existing = metricBuilder.description
+    val next =
+      if (existing == MetricBuilder.NoDescription) description
+      else s"$description: $existing"
+    metricBuilder.withDescription(next)
+  }
+
   private[this] val serverScope = sourceRole match {
     case SourceRole.Server => s"${sourceRole.toString.toLowerCase}-${counter.getAndIncrement()}"
     case other =>
@@ -51,11 +59,11 @@ private[finagle] class StandardStatsReceiver protected (
       Seq(rootStatsReceiver, rootStatsReceiver.scope(protocol).scope(serverScope)))
 
   final override def counter(metricBuilder: MetricBuilder): Counter =
-    self.counter(metricBuilder.withStandard.withUnlatchedCounter.withDescription(description))
+    self.counter(withDescription(metricBuilder).withStandard.withUnlatchedCounter)
 
   final override def stat(metricBuilder: MetricBuilder): Stat =
-    self.stat(metricBuilder.withStandard.withDescription(description))
+    self.stat(withDescription(metricBuilder).withStandard)
 
   final override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge =
-    self.addGauge(metricBuilder.withStandard.withDescription(description))(f)
+    self.addGauge(withDescription(metricBuilder).withStandard)(f)
 }
