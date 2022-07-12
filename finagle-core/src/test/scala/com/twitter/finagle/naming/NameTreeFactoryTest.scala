@@ -279,7 +279,7 @@ class NameTreeFactoryTest
   }
 
   test("non-zero weighted empty are filtered when retain flag set to false") {
-    retainUneachableUnionBranches.let(false) {
+    retainUnreachableUnionBranches.let(false) {
       val emptyWeightedNonZero = NameTree.Union(
         NameTree.Weighted(0.5, NameTree.Empty),
         NameTree.Weighted(0.5, NameTree.Leaf(Status.Open))

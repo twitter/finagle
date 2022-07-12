@@ -9,7 +9,7 @@ import com.twitter.finagle.util.Rng
 import com.twitter.util.Future
 import com.twitter.util.Time
 
-object retainUneachableUnionBranches
+object retainUnreachableUnionBranches
     extends GlobalFlag[Boolean](
       true,
       "Retain empty and unresolved branches from nametree unions. " +
@@ -77,7 +77,7 @@ private object NameTreeFactory {
     def shouldKeepInUnion(t: NameTree.Weighted[Key]): Boolean = {
       t.tree match {
         case NameTree.Neg | NameTree.Fail | NameTree.Empty =>
-          retainUneachableUnionBranches() && t.weight > 0.0
+          retainUnreachableUnionBranches() && t.weight > 0.0
         case _ => true
       }
     }
