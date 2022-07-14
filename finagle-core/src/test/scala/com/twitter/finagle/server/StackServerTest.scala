@@ -82,6 +82,7 @@ class StackServerTest extends AnyFunSuite with Eventually {
         Future.value(svc)
       }
       def close(deadline: Time) = Future.Done
+      def status: Status = Status.Open
     }
     val stack = StackServer.newStack[Int, Int] ++ Stack.leaf(Endpoint, connSF)
     val sr = new InMemoryStatsReceiver

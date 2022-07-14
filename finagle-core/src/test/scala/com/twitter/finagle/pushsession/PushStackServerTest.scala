@@ -5,18 +5,24 @@ import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{
-  ClientConnection,
-  ListeningServer,
-  Service,
-  ServiceFactory,
-  Stack,
-  Status
-}
-import com.twitter.util.registry.{Entry, GlobalRegistry}
-import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
-import java.net.{InetSocketAddress, SocketAddress}
-import java.security.cert.{Certificate, X509Certificate}
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.ListeningServer
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Status
+import com.twitter.util.registry.Entry
+import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Time
+import java.net.InetSocketAddress
+import java.net.SocketAddress
+import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
@@ -174,6 +180,7 @@ class PushStackServerTest extends AnyFunSuite with MockitoSugar {
       }
 
       def close(deadline: Time): Future[Unit] = Future.Unit
+      def status: Status = Status.Open
     }
 
     server.serve(new InetSocketAddress(0), TestServiceFactory)

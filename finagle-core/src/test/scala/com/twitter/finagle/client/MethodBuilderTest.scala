@@ -611,6 +611,7 @@ class MethodBuilderTest
         Future.value(svc)
       def close(deadline: Time): Future[Unit] =
         svc.close(deadline)
+      def status: Status = Status.Open
     }
     val stk = Stack.leaf(Stack.Role("test"), svcFac)
     val stackClient = TestStackClient(stk, Stack.Params.empty)

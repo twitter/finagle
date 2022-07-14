@@ -101,6 +101,7 @@ private[finagle] object BalancingPool {
       params)
 
     def apply(conn: ClientConnection): Future[Service[Req, Rep]] = balancer()
+    def status: Status = balancer.status
 
     def close(deadline: Time): Future[Unit] =
       balancer

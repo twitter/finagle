@@ -1,8 +1,14 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Status, ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle.Status
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Return, Await, Future, Time}
+import com.twitter.util.Return
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
 class DefaultPoolTest extends AnyFunSuite {
@@ -11,6 +17,8 @@ class DefaultPoolTest extends AnyFunSuite {
       Future.value(new MockService())
 
     override def close(deadline: Time): Future[Unit] = Future.Done
+
+    def status: Status = Status.Open
   }
 
   class MockService extends Service[Unit, Unit] {

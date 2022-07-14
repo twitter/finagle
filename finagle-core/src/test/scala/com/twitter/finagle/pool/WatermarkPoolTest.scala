@@ -3,9 +3,17 @@ package com.twitter.finagle.pool
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Time
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, times, verify, when}
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 import org.scalatest.funspec.AnyFunSpec
@@ -304,6 +312,7 @@ class WatermarkPoolTest extends AnyFunSpec with MockitoSugar {
           Future.value(Service.mk[Int, Int](Future.value(_)))
 
         def close(deadline: Time): Future[Unit] = Future.Done
+        def status: Status = Status.Open
       }
       val sr = new InMemoryStatsReceiver
       val wmp = new WatermarkPool[Int, Int](svcFac, 0, 5, sr)
@@ -348,6 +357,7 @@ class WatermarkPoolTest extends AnyFunSpec with MockitoSugar {
           Future.value(Service.mk[Int, Int](Future.value(_)))
 
         def close(deadline: Time): Future[Unit] = Future.Done
+        def status: Status = Status.Open
       }
       val sr = new InMemoryStatsReceiver
       val wmp = new WatermarkPool[Int, Int](svcFac, 0, 1, sr)

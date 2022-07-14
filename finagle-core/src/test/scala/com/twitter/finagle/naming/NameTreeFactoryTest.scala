@@ -32,6 +32,8 @@ class NameTreeFactoryTest
           Future.value(null)
         }
         def close(deadline: Time) = Future.Done
+
+        def status: Status = Status.Open
       },
     Timer.Nil
   )
@@ -295,7 +297,7 @@ class NameTreeFactoryTest
           def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =
             Future.value(Service.const(Future.Done))
           def close(deadline: Time) = Future.Done
-          override def status = Status.Open
+          def status = Status.Open
         },
       Timer.Nil
     )

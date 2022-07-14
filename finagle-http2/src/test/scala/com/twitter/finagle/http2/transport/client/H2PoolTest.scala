@@ -2,10 +2,22 @@ package com.twitter.finagle.http2.transport.client
 
 import com.twitter.finagle.client.EndpointerModule
 import com.twitter.finagle.client.Transporter.EndpointAddr
-import com.twitter.finagle.http.{Request, Response, Status => HttpStatus}
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.{Status => HttpStatus}
 import com.twitter.finagle.http2.transport.client.H2Pool.OnH2Service
-import com.twitter.finagle.{Address, ClientConnection, Service, ServiceFactory, Stack, Status}
-import com.twitter.util.{Await, Awaitable, Closable, Duration, Future, Time}
+import com.twitter.finagle.Address
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Status
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Closable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Time
 import java.util.concurrent.atomic.AtomicInteger
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -96,6 +108,8 @@ class H2PoolTest extends AnyFunSuite with MockitoSugar {
             onH2Service(h2svc)
             Future.value(h1svc)
           }
+
+          def status: Status = Status.Open
         }
     }
 
@@ -142,6 +156,8 @@ class H2PoolTest extends AnyFunSuite with MockitoSugar {
             onH2Service(h2svc)
             Future.value(h1svc)
           }
+
+          def status: Status = Status.Open
         }
     }
 
@@ -181,13 +197,16 @@ class H2PoolTest extends AnyFunSuite with MockitoSugar {
     when(h2svc.status).thenReturn(Status.Open)
 
     val ctx = new Ctx {
-      def endpointer(onH2Service: OnH2Service): ServiceFactory[Request, Response] =
+      def endpointer(onH2Service: OnH2Service): ServiceFactory[Request, Response] = {
         new H2ServiceFactory {
           def apply(conn: ClientConnection): Future[Service[Request, Response]] = {
             onH2Service(h2svc)
             Future.value(h1svc)
           }
+
+          def status: Status = Status.Open
         }
+      }
     }
 
     val svc1 = await(ctx.serviceFactory()) // triggers upgrade.

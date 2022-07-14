@@ -5,7 +5,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.tracing.Trace
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
 import java.net.InetSocketAddress
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
@@ -17,6 +19,7 @@ class ExceptionRemoteInfoFactoryTest extends AnyFunSuite with MockitoSugar {
     val failingFactory = new ServiceFactory[String, String] {
       def apply(conn: ClientConnection): Future[Nothing] = Future.exception(new HasRemoteInfo {})
       def close(deadline: Time): Future[Unit] = Future.Done
+      def status: Status = Status.Open
     }
 
     val downstreamAddr = new InetSocketAddress("1.2.3.4", 100)

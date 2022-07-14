@@ -311,6 +311,7 @@ abstract class AbstractEndToEndTest
         Future.exception(new Exception)
 
       def close(deadline: Time): Future[Unit] = Future.Done
+      def status: Status = Status.Open
     }
 
     val server = serverImpl.serve("localhost:*", factory)

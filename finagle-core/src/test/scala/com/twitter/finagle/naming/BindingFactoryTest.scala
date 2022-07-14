@@ -62,6 +62,7 @@ case class Factory(i: Int) extends EndpointFactory[String, String] {
   override def close(deadline: Time): Future[Unit] = {
     Future.Done
   }
+  def status: Status = Status.Open
 }
 
 class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter {
@@ -112,6 +113,7 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
             tcOpt.foreach(_.advance(1234.microseconds))
             Future.value(Service.mk { _ => Future.value(bound.addr) })
           }
+          def status: Status = Status.Open
 
           def close(deadline: Time) = {
             closes += 1
@@ -237,6 +239,7 @@ class BindingFactoryTest extends AnyFunSuite with MockitoSugar with BeforeAndAft
             Future.exception(new NoBrokersAvailableException("/foo/bar"))
 
           def close(deadline: Time) = Future.Done
+          def status: Status = Status.Open
         }
       },
       Timer.Nil

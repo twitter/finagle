@@ -4,8 +4,12 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.util.{Await, Awaitable, Future, Time}
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
+import com.twitter.util.Time
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import org.scalatest.funsuite.AnyFunSuite
 
 object BalancingPoolTest {
@@ -39,6 +43,7 @@ object BalancingPoolTest {
               closes += 1
               Future.Done
             }
+            def status: Status = Status.Open
           }
         }
       }

@@ -2,7 +2,11 @@ package com.twitter.finagle.factory
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.util.{Future, MockTimer, Time, Timer, Await}
+import com.twitter.util.Future
+import com.twitter.util.MockTimer
+import com.twitter.util.Time
+import com.twitter.util.Timer
+import com.twitter.util.Await
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -31,6 +35,8 @@ class ServiceFactoryCacheTest extends AnyFunSuite with MockitoSugar {
         factories -= i
         Future.Done
       }
+
+      def status: Status = Status.Open
     }
   }
 

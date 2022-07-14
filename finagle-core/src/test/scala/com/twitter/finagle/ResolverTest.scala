@@ -1,6 +1,8 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Future, Time, Var}
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.Var
 import org.scalatest.funsuite.AnyFunSuite
 
 object TestAddr {
@@ -8,6 +10,7 @@ object TestAddr {
     val svc = Service.const(Future.value(s))
     override def apply(conn: ClientConnection) = Future.value(svc)
     override def close(deadline: Time) = Future.Done
+    def status: Status = svc.status
   }
 
   def apply(arg: String): Address = {

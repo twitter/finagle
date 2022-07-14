@@ -1,6 +1,10 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Closable, Future, Return, Throw, Time}
+import com.twitter.util.Closable
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Time
 
 abstract class ServiceFactory[-Req, +Rep]
     extends (ClientConnection => Future[Service[Req, Rep]])
@@ -66,7 +70,7 @@ abstract class ServiceFactory[-Req, +Rep]
   /**
    * The current availability [[Status]] of this ServiceFactory
    */
-  def status: Status = Status.Open
+  def status: Status
 
   /**
    * Return `true` if and only if [[status]] is currently [[Status.Open]].
@@ -104,6 +108,7 @@ object ServiceFactory {
     new ServiceFactory[Req, Rep] {
       def apply(_conn: ClientConnection): Future[Service[Req, Rep]] = f()
       def close(deadline: Time): Future[Unit] = Future.Done
+      def status: Status = Status.Open
 
       override def toString: String = s"${getClass.getName}(${f.toString()})"
     }

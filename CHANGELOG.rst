@@ -40,6 +40,9 @@ Breaking API Changes
 
 * finagle-core: `Trace.recordLocalSpan` is `private[this]` and no longer `protected`. ``PHAB_ID=D912760``
 
+* finagle-core: "ServiceFactory#status" is abstract and requires implementation in the inherited
+  classes. ``PHAB_ID=D933288``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

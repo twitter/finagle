@@ -1,9 +1,15 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.{Address, ClientConnection, Service, Failure}
+import com.twitter.finagle.Address
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.Failure
+import com.twitter.finagle.Status
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Duration, Future, Time}
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Time
 import java.util.concurrent.atomic.AtomicInteger
 
 private trait Server extends EndpointFactory[Unit, Unit] {
@@ -81,6 +87,7 @@ private object ServerFactory {
     def count: Long = _numRequests.get().toLong
     def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(service)
     def close(deadline: Time): Future[Unit] = Future.Done
+    def status: Status = service.status
     override def toString: String = id
   }
 }

@@ -64,6 +64,7 @@ abstract class BaseWeightedApertureTest(manageWeights: Boolean)
         })
 
       def close(when: Time): Future[Unit] = Future.Done
+      def status: Status = Status.Open
     }
   }
 

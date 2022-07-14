@@ -28,6 +28,8 @@ object BalancerBench {
           def apply(req: Unit): Future[Unit] = Future.Done
         })
       def close(when: Time): Future[Unit] = Future.Done
+
+      def status: Status = Status.Open
     }
 
   def newActivity(num: Int): Activity[Vector[EndpointFactory[Unit, Unit]]] = {

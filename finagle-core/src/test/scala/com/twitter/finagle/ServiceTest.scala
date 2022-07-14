@@ -1,10 +1,14 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.service.{ConstantService, FailedService, NilService}
+import com.twitter.finagle.service.ConstantService
+import com.twitter.finagle.service.FailedService
+import com.twitter.finagle.service.NilService
 import com.twitter.util._
 import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatestplus.mockito.MockitoSugar
@@ -17,6 +21,8 @@ object ServiceTest {
       Future.value(new ConstantService[Int, Int](Future.value(2)))
 
     def close(deadline: Time): Future[Unit] = Future.Done
+
+    def status: Status = Status.Open
   }
 
   def await[A](fa: Future[A], timeout: Duration = 5.seconds): A =
@@ -110,6 +116,7 @@ class ServiceTest extends AnyFunSuite with MockitoSugar {
       def apply(conn: ClientConnection): Future[Service[Int, Int]] = Future.value(constSvc)
       def close(deadline: Time): Future[Unit] = Future.Done
       override def toString: String = "ServiceFactory"
+      def status: Status = constSvc.status
     }
     assert(svcFactoryWithToString.toString == "ServiceFactory")
   }
@@ -157,6 +164,7 @@ class ServiceTest extends AnyFunSuite with MockitoSugar {
     val factory = new ServiceFactory[String, String] {
       def apply(conn: ClientConnection) = Future.value(service)
       def close(deadline: Time) = Future.Done
+      def status: Status = service.status
     }
 
     verify(service, times(0)).close(any)

@@ -1,14 +1,21 @@
 package com.twitter.finagle.http2.transport.client
 
-import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
 import com.twitter.finagle.http2.MultiplexHandlerBuilder
 import com.twitter.finagle.http2.transport.common.H2StreamChannelInit
 import com.twitter.finagle.netty4.ConnectionBuilder
-import com.twitter.finagle.netty4.http.{Http2CodecName, Http2MultiplexHandlerName}
+import com.twitter.finagle.netty4.http.Http2CodecName
+import com.twitter.finagle.netty4.http.Http2MultiplexHandlerName
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Stack}
-import com.twitter.util.{Future, Time}
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Status
+import com.twitter.util.Future
+import com.twitter.util.Time
 import io.netty.channel.Channel
 import java.net.SocketAddress
 
@@ -41,6 +48,8 @@ private[finagle] final class PriorKnowledgeServiceFactory(
   }
 
   def close(deadline: Time): Future[Unit] = Future.Done
+
+  def status: Status = Status.Open
 
   private[this] def initH2SocketChannel(parentChannel: Channel): ClientSession = {
     upgradeCounter.incr()

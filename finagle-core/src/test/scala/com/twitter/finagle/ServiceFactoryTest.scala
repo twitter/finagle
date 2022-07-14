@@ -1,7 +1,9 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.service.{ConstantService, ServiceFactoryRef}
-import com.twitter.util.{Future, Time}
+import com.twitter.finagle.service.ConstantService
+import com.twitter.finagle.service.ServiceFactoryRef
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
 class ServiceFactoryTest extends AnyFunSuite {
@@ -11,6 +13,8 @@ class ServiceFactoryTest extends AnyFunSuite {
       Future.value(new ConstantService[Int, Int](Future.value(7)))
 
     def close(deadline: Time): Future[Unit] = Future.Done
+
+    def status: Status = Status.Open
   }
 
   case class TestProxy(_self: ServiceFactory[Int, Int]) extends ServiceFactoryProxy(_self)

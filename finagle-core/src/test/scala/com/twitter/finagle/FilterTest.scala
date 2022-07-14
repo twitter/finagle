@@ -1,11 +1,19 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.service.{ConstantService, NilService}
-import com.twitter.util.{Await, Future, Promise, Time}
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+import com.twitter.finagle.service.ConstantService
+import com.twitter.finagle.service.NilService
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Time
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import org.mockito.Matchers._
-import org.mockito.Mockito.{never, spy, times, verify}
+import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.scalatest.funsuite.AnyFunSuite
 
 class FilterTest extends AnyFunSuite {
@@ -24,6 +32,7 @@ class FilterTest extends AnyFunSuite {
   class PassThruServiceFactory extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection): Future[Service[Int, Int]] = Future.value(constSvc)
     def close(deadline: Time): Future[Unit] = Future.Done
+    def status: Status = Status.Open
   }
 
   val constSvc = new ConstantService[Int, Int](Future.value(2))

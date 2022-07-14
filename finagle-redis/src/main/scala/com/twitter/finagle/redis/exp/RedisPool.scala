@@ -1,14 +1,23 @@
 package com.twitter.finagle.redis.exp
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Stack, Stackable}
+import com.twitter.finagle.Status
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Stackable
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
-import com.twitter.finagle.redis.protocol.{Command, Reply}
+import com.twitter.finagle.redis.protocol.Command
+import com.twitter.finagle.redis.protocol.Reply
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Future, Local, Time}
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Local
+import com.twitter.util.Time
 
 object RedisPool {
 
@@ -62,6 +71,14 @@ class RedisPool(underlying: ServiceFactory[Command, Reply], statsReceiver: Stats
         subscribePool(conn)
       case None =>
         singletonPool(conn)
+    }
+  }
+
+  def status: Status = {
+    RedisPool.useFor() match {
+      case Some(RedisPool.Transaction) => underlying.status
+      case Some(RedisPool.Subscription) => subscribePool.status
+      case None => singletonPool.status
     }
   }
 

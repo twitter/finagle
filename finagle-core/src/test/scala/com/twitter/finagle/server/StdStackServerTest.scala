@@ -3,10 +3,17 @@ package com.twitter.finagle.server
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.ssl.session.SslSessionInfo
-import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Await, Closable, Future, Time}
-import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import java.security.cert.{Certificate, X509Certificate}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
+import com.twitter.util.Await
+import com.twitter.util.Closable
+import com.twitter.util.Future
+import com.twitter.util.Time
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.SocketAddress
+import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 import org.mockito.Mockito
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
@@ -67,6 +74,7 @@ class StdStackServerTest extends AnyFunSuite with MockitoSugar {
     }
 
     override def close(deadline: Time): Future[Unit] = Future.Done
+    def status: Status = Status.Open
   }
 
   test("peer certificate is available to service factory") {

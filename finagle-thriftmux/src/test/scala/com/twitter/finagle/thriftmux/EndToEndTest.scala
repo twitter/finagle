@@ -2030,6 +2030,7 @@ class EndToEndTest
           Future.exception(new Exception)
         }
         def close(deadline: Time): Future[Unit] = Future.Done
+        def status: Status = Status.Open
       }
     )
 
@@ -2041,6 +2042,7 @@ class EndToEndTest
           Future.exception(new Exception)
         }
         def close(deadline: Time): Future[Unit] = Future.Done
+        def status: Status = Status.Open
       }
     )
 
@@ -2249,6 +2251,7 @@ class EndToEndTest
             def apply(conn: ClientConnection): Future[Nothing] =
               Future.exception(new Exception("unhappy"))
             def close(deadline: Time): Future[Unit] = Future.Done
+            def status: Status = Status.Open
           }
         )
 
@@ -2261,6 +2264,7 @@ class EndToEndTest
             def apply(conn: ClientConnection): Future[Nothing] =
               Future.exception(new Exception("unhappy"))
             def close(deadline: Time): Future[Unit] = Future.Done
+            def status: Status = Status.Open
           }
         )
 

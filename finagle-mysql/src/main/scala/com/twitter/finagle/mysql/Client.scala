@@ -1,14 +1,13 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.concurrent.AsyncMutex
+import com.twitter.finagle.Status
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{
-  ChannelClosedException,
-  ClientConnection,
-  Service,
-  ServiceFactory,
-  ServiceProxy
-}
+import com.twitter.finagle.ChannelClosedException
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.ServiceProxy
 import com.twitter.logging.Logger
 import com.twitter.util._
 import scala.annotation.tailrec
@@ -373,6 +372,8 @@ private class StdClient(
       def apply(conn: ClientConnection): Future[Service[Request, Result]] = proxy()
 
       def close(deadline: Time): Future[Unit] = svc.close(deadline)
+
+      def status: Status = svc.status
     }
 
     val client =

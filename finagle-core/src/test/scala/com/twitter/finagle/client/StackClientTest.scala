@@ -256,6 +256,7 @@ abstract class AbstractStackClientTest
         })
 
       def close(deadline: Time) = Future.Done
+      def status: Status = Status.Open
     }
 
     val stack = StackClient
@@ -300,6 +301,7 @@ abstract class AbstractStackClientTest
         })
 
       def close(deadline: Time) = Future.Done
+      def status: Status = Status.Open
     }
 
     val stack = StackClient
@@ -419,6 +421,7 @@ abstract class AbstractStackClientTest
         Failure.rejected("unable to establish session")
       )
       def close(deadline: Time) = Future.Done
+      def status: Status = Status.Open
     }
 
     intercept[Failure] { await(cl()) }
@@ -432,6 +435,7 @@ abstract class AbstractStackClientTest
         Failure("don't restart this!")
       )
       def close(deadline: Time) = Future.Done
+      def status: Status = Status.Open
     }
 
     intercept[Failure] { await(cl()) }
@@ -474,6 +478,7 @@ abstract class AbstractStackClientTest
 
       def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(service)
       def close(deadline: Time): Future[Unit] = Future.Done
+      def status: Status = service.status
     }
 
     val fac1 = new CountFactory
@@ -635,6 +640,7 @@ abstract class AbstractStackClientTest
               }
 
             def close(deadline: Time): Future[Unit] = Future.Done
+            def status: Status = Status.worst(endpoint1.status, endpoint2.status)
           }
         )
       )

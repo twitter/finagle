@@ -2,14 +2,15 @@ package com.twitter.finagle.mysql
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.{
-  ChannelClosedException,
-  ClientConnection,
-  Service,
-  ServiceFactory,
-  Status
-}
-import com.twitter.util.{Await, Awaitable, Future, Time}
+import com.twitter.finagle.ChannelClosedException
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Status
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
 class RollbackFactoryTest extends AnyFunSuite {
@@ -60,6 +61,7 @@ class RollbackFactoryTest extends AnyFunSuite {
       }
       def apply(c: ClientConnection) = Future.value(svc)
       def close(deadline: Time): Future[Unit] = svc.close(deadline)
+      def status: Status = svc.status
     }
 
     val rollbackClient = new RollbackFactory(client, NullStatsReceiver)
@@ -86,6 +88,7 @@ class RollbackFactoryTest extends AnyFunSuite {
       }
       def apply(c: ClientConnection) = Future.value(svc)
       def close(deadline: Time): Future[Unit] = svc.close(deadline)
+      def status: Status = svc.status
     }
 
     val rollbackClient = new RollbackFactory(client, NullStatsReceiver)
@@ -114,6 +117,7 @@ class RollbackFactoryTest extends AnyFunSuite {
       }
       def apply(c: ClientConnection): Future[Service[Request, Result]] = Future.value(svc)
       def close(deadline: Time): Future[Unit] = svc.close(deadline)
+      def status: Status = svc.status
     }
 
     val rollbackClient = new RollbackFactory(client, NullStatsReceiver)
@@ -143,6 +147,7 @@ class RollbackFactoryTest extends AnyFunSuite {
       }
       def apply(c: ClientConnection): Future[Service[Request, Result]] = Future.value(svc)
       def close(deadline: Time): Future[Unit] = svc.close(deadline)
+      def status: Status = svc.status
     }
 
     val rollbackClient = new RollbackFactory(client, NullStatsReceiver)

@@ -1,11 +1,20 @@
 package com.twitter.finagle.redis
 
-import com.twitter.finagle.redis.exp.{RedisPool, SubscribeCommands}
+import com.twitter.finagle.Status
+import com.twitter.finagle.redis.exp.RedisPool
+import com.twitter.finagle.redis.exp.SubscribeCommands
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{ClientConnection, Redis, Service, ServiceFactory, ServiceProxy}
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Redis
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.ServiceProxy
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Future, Time, Timer}
+import com.twitter.util.Closable
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.Timer
 
 object Client {
 
@@ -63,6 +72,7 @@ trait Transactions { self: Client =>
 
       def apply(conn: ClientConnection) = proxiedService
       def close(deadline: Time): Future[Unit] = svc.map(_.close(deadline))
+      def status: Status = factory.status
     }
 
   def transaction[T](cmds: Seq[Command]): Future[Seq[Reply]] =
