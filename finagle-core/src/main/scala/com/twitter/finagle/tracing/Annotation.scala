@@ -1,7 +1,6 @@
 package com.twitter.finagle.tracing
 
 import java.net.InetSocketAddress
-import java.nio.ByteBuffer
 
 /**
  * An ADT describing a tracing annotation. Prefer [[Tracing]] API to creating raw [[Annotation]]
@@ -31,8 +30,5 @@ object Annotation {
   final case class ServerAddr(ia: InetSocketAddress) extends Annotation
   final case class LocalAddr(ia: InetSocketAddress) extends Annotation
 
-  final case class BinaryAnnotation(key: String, value: Any) extends Annotation {
-    /* Needed to not break backwards compatibility.  Can be removed later */
-    def this(key: String, value: ByteBuffer) = this(key, value: Any)
-  }
+  final case class BinaryAnnotation(key: String, value: Any) extends Annotation
 }

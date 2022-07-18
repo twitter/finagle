@@ -523,8 +523,7 @@ class TimeoutFilterTest extends AnyFunSuite with Matchers with MockitoSugar {
           assert(sr.counter("deadline_lt_timeout_experiment")() == 0)
 
           assert(
-            tracer.toSeq == Seq(
-              Record(Trace.id, Time.now - 1.second, fakeTraceRecord(deadline), None)))
+            tracer.toSeq == Seq(Record(Trace.id, Time.Bottom, fakeTraceRecord(deadline), None)))
         }
       }
     }

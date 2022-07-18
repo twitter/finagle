@@ -1,10 +1,19 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.tracing.{Annotation, BufferingTracer, Record, Trace, TraceId}
-import com.twitter.util.{Await, Future, Time}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.BufferingTracer
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funsuite.AnyFunSuite
 
 class PayloadSizeFilterTest extends AnyFunSuite with Eventually with IntegrationPatience {
@@ -32,13 +41,13 @@ class PayloadSizeFilterTest extends AnyFunSuite with Eventually with Integration
         tracer.toSeq == Seq(
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("request_bytes", 5),
             None
           ),
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("response_bytes", 6),
             None
           )

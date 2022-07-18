@@ -2,11 +2,19 @@ package com.twitter.finagle.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.finagle.tracing.{Trace, Record, BufferingTracer, Annotation}
-import com.twitter.jvm.{Jvm, Gc}
-import com.twitter.util.{TimeControl, Promise, Time, Duration}
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.BufferingTracer
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.jvm.Jvm
+import com.twitter.jvm.Gc
+import com.twitter.util.TimeControl
+import com.twitter.util.Promise
+import com.twitter.util.Time
+import com.twitter.util.Duration
 import org.mockito.Matchers._
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -68,13 +76,13 @@ class MkJvmFilterTest extends AnyFunSuite with MockitoSugar {
           ),
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("jvm/gc_count", 1),
             None
           ),
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("jvm/gc_ms", 1.second.inMilliseconds),
             None
           )
@@ -116,13 +124,13 @@ class MkJvmFilterTest extends AnyFunSuite with MockitoSugar {
           ),
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("jvm/gc_count", 1),
             None
           ),
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("jvm/gc_ms", 2.seconds.inMilliseconds),
             None
           )
@@ -145,13 +153,13 @@ class MkJvmFilterTest extends AnyFunSuite with MockitoSugar {
         trace == Seq(
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("jvm/gc_count", 0),
             None
           ),
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("jvm/gc_ms", 0),
             None
           )

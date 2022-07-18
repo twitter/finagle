@@ -231,7 +231,7 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
   test("Trace.record: record binary annotations") {
     Time.withCurrentTimeFrozen { tc =>
       Trace.letTracerAndId(tracer1, id0) {
-        val rec1 = Record(id0, Time.now, Annotation.BinaryAnnotation("key", "test"))
+        val rec1 = Record(id0, Time.Bottom, Annotation.BinaryAnnotation("key", "test"))
         Trace.recordBinary("key", "test")
         verify(tracer1, times(1)).record(rec1)
       }
@@ -255,10 +255,10 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
           Trace.recordCallSite()
         }
         foo()
-        verify(tracer1, times(1)).record(Record(id0, Time.now, functionAnn))
-        verify(tracer1, times(1)).record(Record(id0, Time.now, namespaceAnn))
-        verify(tracer1, times(1)).record(Record(id0, Time.now, filePathAnn))
-        verify(tracer1, times(1)).record(Record(id0, Time.now, lineNoAnn))
+        verify(tracer1, times(1)).record(Record(id0, Time.Bottom, functionAnn))
+        verify(tracer1, times(1)).record(Record(id0, Time.Bottom, namespaceAnn))
+        verify(tracer1, times(1)).record(Record(id0, Time.Bottom, filePathAnn))
+        verify(tracer1, times(1)).record(Record(id0, Time.Bottom, lineNoAnn))
       }
     }
   }
@@ -493,10 +493,11 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
 
         val traces = tracer.toSeq
 
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
-          traces.contains(Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+          traces.contains(
+            Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
         assert(traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
           traces.contains(
@@ -531,20 +532,22 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         val traces = tracer.toSeq
 
         assert(subChildTraceId != parentTraceId)
-        assert(traces.contains(Record(parentTraceId, startTime, Annotation.Rpc("outer"))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(parentTraceId, Time.Bottom, Annotation.Rpc("outer"))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
-          traces.contains(Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+          traces.contains(
+            Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
         assert(traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
           traces.contains(
             Record(childTraceId, startTime.plus(2.second), Annotation.Message("local/end"))))
-        assert(traces.contains(Record(subChildTraceId, startTime, Annotation.Rpc("sub"))))
-        assert(traces.contains(Record(subChildTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.Rpc("sub"))))
+        assert(
+          traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
           traces.contains(
-            Record(subChildTraceId, startTime, Annotation.BinaryAnnotation("lc", "sub"))))
+            Record(subChildTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", "sub"))))
         assert(
           traces.contains(Record(subChildTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
@@ -583,20 +586,22 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         val traces = tracer.toSeq
 
         assert(subChildTraceId != parentTraceId)
-        assert(traces.contains(Record(parentTraceId, startTime, Annotation.Rpc("outer"))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(parentTraceId, Time.Bottom, Annotation.Rpc("outer"))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
-          traces.contains(Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+          traces.contains(
+            Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
         assert(traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
           traces.contains(
             Record(childTraceId, startTime.plus(2.second), Annotation.Message("local/end"))))
-        assert(traces.contains(Record(subChildTraceId, startTime, Annotation.Rpc("sub"))))
-        assert(traces.contains(Record(subChildTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.Rpc("sub"))))
+        assert(
+          traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
           traces.contains(
-            Record(subChildTraceId, startTime, Annotation.BinaryAnnotation("lc", "sub"))))
+            Record(subChildTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", "sub"))))
         assert(
           traces.contains(Record(subChildTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
@@ -639,20 +644,22 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         val traces = tracer.toSeq
 
         assert(subChildTraceId != parentTraceId)
-        assert(traces.contains(Record(parentTraceId, startTime, Annotation.Rpc("outer"))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(parentTraceId, Time.Bottom, Annotation.Rpc("outer"))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
-          traces.contains(Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+          traces.contains(
+            Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
         assert(traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
           traces.contains(
             Record(childTraceId, startTime.plus(2.second), Annotation.Message("local/end"))))
-        assert(traces.contains(Record(subChildTraceId, startTime, Annotation.Rpc("sub"))))
-        assert(traces.contains(Record(subChildTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.Rpc("sub"))))
+        assert(
+          traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
           traces.contains(
-            Record(subChildTraceId, startTime, Annotation.BinaryAnnotation("lc", "sub"))))
+            Record(subChildTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", "sub"))))
         assert(
           traces.contains(Record(subChildTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
@@ -683,12 +690,12 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         } catch {
           case TraceIdException(childTraceId) =>
             val traces = tracer.toSeq
-            assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
+            assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
             assert(
-              traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+              traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
             assert(
               traces.contains(
-                Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+                Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
             assert(
               traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
             assert(
@@ -718,10 +725,11 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         val childTraceId = Await.result(childTraceIdFuture, 1.second)
 
         val traces = tracer.toSeq
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
-          traces.contains(Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+          traces.contains(
+            Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
         assert(traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
           traces.contains(
@@ -761,26 +769,22 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         val traces = tracer.toSeq
 
         assert(subChildTraceId != parentTraceId)
-        assert(traces.contains(Record(parentTraceId, startTime, Annotation.Rpc("outer"))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(parentTraceId, Time.Bottom, Annotation.Rpc("outer"))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
-          traces.contains(Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+          traces.contains(
+            Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
         assert(traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
           traces.contains(
             Record(childTraceId, startTime.plus(1.second), Annotation.Message("local/end"))))
+        assert(traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.Rpc("sub"))))
         assert(
-          traces.contains(Record(subChildTraceId, startTime.plus(1.second), Annotation.Rpc("sub"))))
-        assert(
-          traces.contains(
-            Record(subChildTraceId, startTime.plus(1.second), Annotation.ServiceName("local"))))
+          traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
           traces.contains(
-            Record(
-              subChildTraceId,
-              startTime.plus(1.second),
-              Annotation.BinaryAnnotation("lc", "sub"))))
+            Record(subChildTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", "sub"))))
         assert(
           traces.contains(
             Record(subChildTraceId, startTime.plus(1.second), Annotation.Message("local/begin"))))
@@ -825,26 +829,22 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         val traces = tracer.toSeq
 
         assert(subChildTraceId != parentTraceId)
-        assert(traces.contains(Record(parentTraceId, startTime, Annotation.Rpc("outer"))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(parentTraceId, Time.Bottom, Annotation.Rpc("outer"))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
-          traces.contains(Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+          traces.contains(
+            Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
         assert(traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
           traces.contains(
             Record(childTraceId, startTime.plus(1.second), Annotation.Message("local/end"))))
+        assert(traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.Rpc("sub"))))
         assert(
-          traces.contains(Record(subChildTraceId, startTime.plus(1.second), Annotation.Rpc("sub"))))
-        assert(
-          traces.contains(
-            Record(subChildTraceId, startTime.plus(1.second), Annotation.ServiceName("local"))))
+          traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
           traces.contains(
-            Record(
-              subChildTraceId,
-              startTime.plus(1.second),
-              Annotation.BinaryAnnotation("lc", "sub"))))
+            Record(subChildTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", "sub"))))
         assert(
           traces.contains(
             Record(subChildTraceId, startTime.plus(1.second), Annotation.Message("local/begin"))))
@@ -893,26 +893,22 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         val traces = tracer.toSeq
 
         assert(subChildTraceId != parentTraceId)
-        assert(traces.contains(Record(parentTraceId, startTime, Annotation.Rpc("outer"))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
-        assert(traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+        assert(traces.contains(Record(parentTraceId, Time.Bottom, Annotation.Rpc("outer"))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
+        assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
-          traces.contains(Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+          traces.contains(
+            Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
         assert(traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
         assert(
           traces.contains(
             Record(childTraceId, startTime.plus(1.second), Annotation.Message("local/end"))))
+        assert(traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.Rpc("sub"))))
         assert(
-          traces.contains(Record(subChildTraceId, startTime.plus(1.second), Annotation.Rpc("sub"))))
-        assert(
-          traces.contains(
-            Record(subChildTraceId, startTime.plus(1.second), Annotation.ServiceName("local"))))
+          traces.contains(Record(subChildTraceId, Time.Bottom, Annotation.ServiceName("local"))))
         assert(
           traces.contains(
-            Record(
-              subChildTraceId,
-              startTime.plus(1.second),
-              Annotation.BinaryAnnotation("lc", "sub"))))
+            Record(subChildTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", "sub"))))
         assert(
           traces.contains(
             Record(subChildTraceId, startTime.plus(1.second), Annotation.Message("local/begin"))))
@@ -949,12 +945,12 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
         } catch {
           case TraceIdException(childTraceId) =>
             val traces = tracer.toSeq
-            assert(traces.contains(Record(childTraceId, startTime, Annotation.Rpc(name))))
+            assert(traces.contains(Record(childTraceId, Time.Bottom, Annotation.Rpc(name))))
             assert(
-              traces.contains(Record(childTraceId, startTime, Annotation.ServiceName("local"))))
+              traces.contains(Record(childTraceId, Time.Bottom, Annotation.ServiceName("local"))))
             assert(
               traces.contains(
-                Record(childTraceId, startTime, Annotation.BinaryAnnotation("lc", name))))
+                Record(childTraceId, Time.Bottom, Annotation.BinaryAnnotation("lc", name))))
             assert(
               traces.contains(Record(childTraceId, startTime, Annotation.Message("local/begin"))))
             assert(
@@ -978,7 +974,7 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
 
         assert(
           tracer.toSeq.contains(
-            Record(traceId, startTime.plus(1.second), BinaryAnnotation("duration", 1.second))))
+            Record(traceId, Time.Bottom, BinaryAnnotation("duration", 1.second))))
       }
     }
   }
@@ -1001,8 +997,7 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
       Await.ready(result)
 
       assert(
-        tracer.toSeq.contains(
-          Record(traceId, startTime.plus(1.second), BinaryAnnotation("duration", 1.second))))
+        tracer.toSeq.contains(Record(traceId, Time.Bottom, BinaryAnnotation("duration", 1.second))))
     }
   }
 }

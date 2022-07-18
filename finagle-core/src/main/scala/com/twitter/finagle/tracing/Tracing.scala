@@ -205,6 +205,11 @@ abstract class Tracing {
   final def record(ann: Annotation, duration: Duration): Unit =
     record(Record(id, Time.nowNanoPrecision, ann, Some(duration)))
 
+  // we're putting in a placeholder start value in here because we don't really
+  // need it for binary annotations.
+  private[this] final def recordBinary(ann: Annotation): Unit =
+    record(Record(id, Time.Bottom, ann, None))
+
   final def recordWireSend(): Unit =
     record(Annotation.WireSend)
 
@@ -253,26 +258,26 @@ abstract class Tracing {
     record(Annotation.Message(message), duration)
 
   final def recordServiceName(serviceName: String): Unit =
-    record(Annotation.ServiceName(serviceName))
+    recordBinary(Annotation.ServiceName(serviceName))
 
   final def recordRpc(name: String): Unit =
-    record(Annotation.Rpc(name))
+    recordBinary(Annotation.Rpc(name))
 
   final def recordClientAddr(ia: InetSocketAddress): Unit =
-    record(Annotation.ClientAddr(ia))
+    recordBinary(Annotation.ClientAddr(ia))
 
   final def recordServerAddr(ia: InetSocketAddress): Unit =
-    record(Annotation.ServerAddr(ia))
+    recordBinary(Annotation.ServerAddr(ia))
 
   final def recordLocalAddr(ia: InetSocketAddress): Unit =
-    record(Annotation.LocalAddr(ia))
+    recordBinary(Annotation.LocalAddr(ia))
 
   final def recordBinary(key: String, value: Any): Unit =
-    record(Annotation.BinaryAnnotation(key, value))
+    recordBinary(Annotation.BinaryAnnotation(key, value))
 
   final def recordBinaries(annotations: Map[String, Any]): Unit = {
     for ((key, value) <- annotations) {
-      recordBinary(key, value)
+      recordBinary(Annotation.BinaryAnnotation(key, value))
     }
   }
 
@@ -412,9 +417,9 @@ abstract class Tracing {
     // these annotations are necessary to get the
     // zipkin ui to properly display the span.
     localSpans.incr()
-    record(Record(lid, timestamp, Annotation.Rpc(name)))
-    record(Record(lid, timestamp, Annotation.ServiceName(serviceName)))
-    record(Record(lid, timestamp, Annotation.BinaryAnnotation("lc", name)))
+    record(Record(lid, Time.Bottom, Annotation.Rpc(name)))
+    record(Record(lid, Time.Bottom, Annotation.ServiceName(serviceName)))
+    record(Record(lid, Time.Bottom, Annotation.BinaryAnnotation("lc", name)))
     record(Record(lid, timestamp, Annotation.Message(LocalBeginAnnotation)))
     record(Record(lid, timestamp + duration, Annotation.Message(LocalEndAnnotation)))
   }

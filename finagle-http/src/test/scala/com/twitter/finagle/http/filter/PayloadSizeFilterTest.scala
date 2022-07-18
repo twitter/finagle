@@ -2,11 +2,25 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Method, Request, Response, Status, Version}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.tracing.{Annotation, BufferingTracer, Record, Trace, TraceId}
-import com.twitter.io.{Buf, BufReader, Reader}
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.finagle.http.Method
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.Status
+import com.twitter.finagle.http.Version
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.BufferingTracer
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.io.Buf
+import com.twitter.io.BufReader
+import com.twitter.io.Reader
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalatest.concurrent.Eventually
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -58,13 +72,13 @@ class PayloadSizeFilterTest extends AnyFunSuite with Eventually {
         tracer.toSeq == Seq(
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("srv/request_payload_bytes", 9),
             None
           ),
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("srv/response_payload_bytes", 10),
             None
           )
@@ -110,13 +124,13 @@ class PayloadSizeFilterTest extends AnyFunSuite with Eventually {
         tracer.toSeq == Seq(
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("srv/stream/request/chunk_payload_bytes", 6),
             None
           ),
           Record(
             Trace.id,
-            Time.now,
+            Time.Bottom,
             Annotation.BinaryAnnotation("srv/stream/response/chunk_payload_bytes", 22),
             None
           )
