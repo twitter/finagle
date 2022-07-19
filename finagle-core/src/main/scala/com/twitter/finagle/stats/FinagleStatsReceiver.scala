@@ -6,7 +6,9 @@ import com.twitter.finagle.util.LoadService
  * A global StatsReceiver for generic finagle metrics.
  */
 private[finagle] object FinagleStatsReceiver extends StatsReceiverProxy {
-  val self: StatsReceiver = LoadedStatsReceiver.scope("finagle")
+
+  protected val self: StatsReceiver = new FinagleStatsReceiverImpl(LoadedStatsReceiver)
+
   override def repr: FinagleStatsReceiver.type = this
 
   def get: StatsReceiver = this
