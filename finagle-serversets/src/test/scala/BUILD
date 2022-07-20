@@ -29,6 +29,7 @@ target(
 junit_tests(
     name = "defaultloader",
     sources = ["com/twitter/finagle/serverset2/client/apache/*.scala"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         ":core",
@@ -45,6 +46,7 @@ junit_tests(
     name = "client",
     sources = ["com/twitter/finagle/serverset2/client/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         ":core",
@@ -63,6 +65,7 @@ junit_tests(
         "com/twitter/finagle/serverset2/naming/*.scala",
         "com/twitter/finagle/zookeeper/*.scala",
     ],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         ":core",

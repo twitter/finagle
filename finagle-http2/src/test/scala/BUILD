@@ -1,6 +1,7 @@
 junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/io/netty:netty4-codec-http",

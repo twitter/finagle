@@ -6,6 +6,7 @@ EXTERNAL_SOURCES = [
 scala_library(
     name = "external",
     sources = EXTERNAL_SOURCES,
+    platform = "java8",
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-memcached-testutils",
@@ -23,6 +24,7 @@ junit_tests(
     name = "scala",
     sources = ["**/*.scala"] + exclude_globs(EXTERNAL_SOURCES),
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         ":external",

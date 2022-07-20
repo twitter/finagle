@@ -29,6 +29,7 @@ scala_library(
     name = "lib",
     sources = SOURCES,
     compiler_option_sets = COMPILER_OPTION_SETS,
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = DEPENDENCIES,
 )
@@ -36,6 +37,7 @@ scala_library(
 junit_tests(
     sources = SOURCES,
     compiler_option_sets = COMPILER_OPTION_SETS,
+    platform = "java8",
     tags = [
         "bazel-compatible",
     ],

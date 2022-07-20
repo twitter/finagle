@@ -3,6 +3,7 @@ junit_tests(
         "**/*.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",

@@ -7,6 +7,7 @@ scala_library(
         "com/twitter/finagle/server/utils/StringServer.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-core",
@@ -24,6 +25,7 @@ scala_library(
         "com/twitter/finagle/pushsession/utils/MockPushSession.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-core/src/main",
@@ -36,6 +38,7 @@ junit_tests(
         "**/*.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     # env_local is tag for bazel only, added due to DPB-14188
     tags = ["bazel-compatible"],
     dependencies = [

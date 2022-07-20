@@ -1,6 +1,7 @@
 java_library(
     sources = ["**/*.java"],
     compiler_option_sets = [],
+    platform = "java8",
     provides = artifact(
         org = "com.twitter",
         name = "finagle-example-java",
@@ -23,6 +24,7 @@ java_library(
 jvm_binary(
     name = "thrift-server",
     main = "com.twitter.finagle.example.java.thrift.ThriftServer",
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         ":java",
@@ -32,6 +34,7 @@ jvm_binary(
 jvm_binary(
     name = "thrift-client",
     main = "com.twitter.finagle.example.java.thrift.ThriftClient",
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         ":java",

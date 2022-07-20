@@ -1,5 +1,6 @@
 scala_library(
     sources = ["**/*.scala"],
+    platform = "java8",
     tags = [
         "bazel-compatible",
         "bazel-incompatible-scaladoc",  # see http://go/bazel-incompatible-scaladoc
@@ -40,6 +41,7 @@ scala_library(
 jvm_binary(
     name = "lbsim",
     main = "com.twitter.finagle.loadbalancer.Simulation",
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         ":scala",
@@ -50,6 +52,7 @@ jvm_binary(
 jvm_binary(
     name = "hello-server",
     main = "com.twitter.finagle.thrift.HelloServer",
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [":scala"],
 )
@@ -57,6 +60,7 @@ jvm_binary(
 jvm_binary(
     name = "serverset-service",
     main = "com.twitter.finagle.serverset2.LocalServerSetService",
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [":scala"],
 )
