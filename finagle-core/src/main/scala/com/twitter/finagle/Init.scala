@@ -111,7 +111,13 @@ private[twitter] object Init {
     _finagleVersion.set(p.getProperty("version", unknownVersion))
     _finagleBuildRevision.set(p.getProperty("build_revision", unknownVersion))
 
-    LoadService[StackTransformer]().foreach { nt => StackServer.DefaultTransformer.append(nt) }
+    // Load up the client and server `Stack.Transformer`s.
+    LoadService[ServerStackTransformer]().foreach { nt =>
+      StackServer.DefaultTransformer.append(nt)
+    }
+    LoadService[ClientStackTransformer]().foreach { nt =>
+      StackClient.DefaultTransformer.append(nt)
+    }
     // we split out params injection from stack transformation because params are typically
     // injected at the top of the stack, and it can create confusing deps to inject them via
     // StackTransformers.  at the same time, we occasionally want to inject parameters

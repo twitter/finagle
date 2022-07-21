@@ -111,7 +111,8 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
 
   protected def injectors: Seq[ClientParamsInjector] = StackClient.DefaultInjectors.injectors
 
-  protected def transformers: Seq[StackTransformer] = StackClient.DefaultTransformer.transformers
+  protected def transformers: Seq[ClientStackTransformer] =
+    StackClient.DefaultTransformer.transformers
 
   /**
    * @inheritdoc

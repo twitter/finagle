@@ -231,8 +231,8 @@ class StackTest extends AnyFunSuite {
   }
 
   test("StackTransformerCollection") {
-    val ts = new StackTransformerCollection {}
-    ts.append(new StackTransformer {
+    val ts = new StackTransformerCollection[ServerStackTransformer] {}
+    ts.append(new ServerStackTransformer {
       def name: String = "test"
       def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
         stack

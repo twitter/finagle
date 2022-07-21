@@ -43,6 +43,13 @@ Breaking API Changes
 * finagle-core: "ServiceFactory#status" is abstract and requires implementation in the inherited
   classes. ``PHAB_ID=D933288``
 
+* finagle-core: `StackTransformer` has been renamed to `ServerStackTransformer` and the symmetric
+  client equivalent (`ClientStackTransformer`) has been added. For those using the older `StackTransformer`
+  API you will both need to change the code (fix the extends) __and__ rename the META-INF file from
+  `resources/META-INF/services/com.twitter.finagle.StackTransformer` to
+  `resources/META-INF/services/com.twitter.finagle.ServerStackTransformer` in order to have your
+  transformer continue to service-load correctly. ``PHAB_ID=D937634``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

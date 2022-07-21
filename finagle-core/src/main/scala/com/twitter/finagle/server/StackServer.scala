@@ -14,7 +14,6 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.Stack
 import com.twitter.finagle._
 import com.twitter.jvm.Jvm
-import scala.collection.immutable
 
 object StackServer {
   private[this] lazy val newJvmFilter = new MkJvmFilter(Jvm())
@@ -187,20 +186,13 @@ object StackServer {
   /**
    * A set of StackTransformers for transforming server stacks.
    */
-  private[finagle] object DefaultTransformer extends StackTransformerCollection
+  private[finagle] object DefaultTransformer
+      extends StackTransformerCollection[ServerStackTransformer]
 
   /**
    * A set of ServerParamsInjectors for transforming server params.
    */
-  private[finagle] object DefaultInjectors {
-    @volatile private var underlying = immutable.Queue.empty[ServerParamsInjector]
-
-    def append(injector: ServerParamsInjector): Unit =
-      synchronized { underlying = underlying :+ injector }
-
-    def injectors: Seq[ServerParamsInjector] =
-      underlying
-  }
+  private[finagle] object DefaultInjectors extends ParamsInjectorCollection[ServerParamsInjector]
 }
 
 /**

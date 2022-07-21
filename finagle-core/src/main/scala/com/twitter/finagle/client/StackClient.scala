@@ -16,7 +16,6 @@ import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.stats.LoadedHostStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.util.registry.GlobalRegistry
-import scala.collection.immutable.Queue
 
 object StackClient {
 
@@ -497,20 +496,13 @@ object StackClient {
   /**
    * A set of StackTransformers for transforming client stacks.
    */
-  private[twitter] object DefaultTransformer extends StackTransformerCollection
+  private[twitter] object DefaultTransformer
+      extends StackTransformerCollection[ClientStackTransformer]
 
   /**
    * A set of ClientParamsInjectors for transforming client params.
    */
-  private[finagle] object DefaultInjectors {
-    @volatile private var underlying = Queue.empty[ClientParamsInjector]
-
-    def append(injector: ClientParamsInjector): Unit =
-      synchronized { underlying = underlying :+ injector }
-
-    def injectors: Seq[ClientParamsInjector] =
-      underlying
-  }
+  private[finagle] object DefaultInjectors extends ParamsInjectorCollection[ClientParamsInjector]
 }
 
 /**

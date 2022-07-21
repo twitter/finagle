@@ -809,7 +809,7 @@ abstract class AbstractStackClientTest
 
   test("DefaultTransformers") {
     val exc = new Exception("DefaultTransformer.boom!")
-    val defaultElem = new StackTransformer {
+    val defaultElem = new ClientStackTransformer {
       def name = "prepend-nop-module"
       def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
         stack.prepend(new Stack.Module0[ServiceFactory[Req, Rep]] {

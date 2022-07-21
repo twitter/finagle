@@ -3,6 +3,7 @@ package com.twitter.finagle
 import scala.annotation.implicitNotFound
 import scala.annotation.tailrec
 import scala.collection.immutable
+import scala.collection.immutable.Queue
 import scala.collection.mutable
 
 /**
@@ -810,11 +811,11 @@ object Stack {
 }
 
 /**
- * StackTransformer is a standard mechanism for transforming the default
- * shape of the Stack. It is a [[Stack.Transformer]] with a name.
+ * `ClientStackTransformer` is a standard mechanism for transforming the default
+ * shape of the [[Stack]]. It is a [[Stack.Transformer]] with a name.
  * Registration and retrieval of transformers from global state is managed by
- * [[StackServer.DefaultTransformer]]. The transformers will run at
- * materialization time for Finagle servers, allowing users to mutate a Stack
+ * [[StackClient.DefaultTransformer]]. The transformers will run at
+ * materialization time for Finagle clients, allowing users to mutate a [[Stack]]
  * in a consistent way.
  *
  * Warning: While it's possible to modify params with this API, it's strongly
@@ -823,33 +824,52 @@ object Stack {
  * params, as it may change depending on the module's placement in the stack.
  * Whenever possible, [[ClientParamsInjector]] should be used instead.
  */
-abstract class StackTransformer extends Stack.Transformer {
+abstract class ClientStackTransformer extends Stack.Transformer {
   def name: String
-  override def toString: String = s"StackTransformer(name=$name)"
+  override def toString: String = s"ClientStackTransformer(name=$name)"
+}
+
+/**
+ * `ServerStackTransformer` is a standard mechanism for transforming the default
+ * shape of the [[Stack]]. It is a [[Stack.Transformer]] with a name.
+ * Registration and retrieval of transformers from global state is managed by
+ * [[StackServer.DefaultTransformer]]. The transformers will run at
+ * materialization time for Finagle servers, allowing users to mutate a [[Stack]]
+ * in a consistent way.
+ *
+ * Warning: While it's possible to modify params with this API, it's strongly
+ * discouraged. Modifying params via transformers creates subtle dependencies
+ * between modules and makes it difficult to reason about the value of
+ * params, as it may change depending on the module's placement in the stack.
+ * Whenever possible, [[ServerParamsInjector]] should be used instead.
+ */
+abstract class ServerStackTransformer extends Stack.Transformer {
+  def name: String
+  override def toString: String = s"ServerStackTransformer(name=$name)"
 }
 
 /**
  * A [[TransformerCollection]] is a collection of transformers which are typically
  * used globally by a stack. For example, both StackClient and StackServer have
- * a global collection of [[StackTransformers]] which can be "injected" before
+ * a global collection of [[Stack.Transformer]]s which can be "injected" before
  * the stack is materialized for all clients/servers in a process.
  *
  * This is purely additive and there isn't a way to remove elements from this collection
  * to limit the type mutations allowed.
  */
-abstract class StackTransformerCollection {
-  @volatile private var underlying = immutable.Queue.empty[StackTransformer]
+private[finagle] abstract class StackTransformerCollection[T <: Stack.Transformer] {
+  @volatile private var underlying = immutable.Queue.empty[T]
 
-  def append(transformer: StackTransformer): Unit =
+  def append(transformer: T): Unit =
     synchronized { underlying = underlying :+ transformer }
 
-  def transformers: Seq[StackTransformer] =
+  def transformers: Seq[T] =
     underlying
 
   // Used for testing only! Allows us to clear any state that we set here
   // so we don't pollute other tests.
   private[finagle] def clear(): Unit = synchronized {
-    underlying = immutable.Queue.empty[StackTransformer]
+    underlying = immutable.Queue.empty[T]
   }
 }
 
@@ -873,6 +893,25 @@ abstract class ServerParamsInjector extends Stack.ParamsInjector {
 abstract class ClientParamsInjector extends Stack.ParamsInjector {
   def name: String
   override def toString: String = s"ClientParamsInjector(name=$name)"
+}
+
+/**
+ * A [[ParamsInjectorCollection]] is a collection of param injectors which are
+ * typically used globally. For example, both StackClient and StackServer have
+ * a global collection of [[Stack.ParamsInjector]]s which can be "injected" before
+ * the stack is materialized for all clients/servers in a process.
+ *
+ * This is purely additive and there isn't a way to remove elements from this collection
+ * to limit the type mutations allowed.
+ */
+private[finagle] abstract class ParamsInjectorCollection[T <: Stack.ParamsInjector] {
+  @volatile private var underlying = Queue.empty[T]
+
+  def append(injector: T): Unit =
+    synchronized { underlying = underlying :+ injector }
+
+  def injectors: Seq[T] =
+    underlying
 }
 
 /**

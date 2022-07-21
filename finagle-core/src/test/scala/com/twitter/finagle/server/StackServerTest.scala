@@ -191,7 +191,7 @@ class StackServerTest extends AnyFunSuite with Eventually {
   }
 
   test("Items appended to DefaultTransformer appear in the listing") {
-    val transformer = new StackTransformer {
+    val transformer = new ServerStackTransformer {
       val name = "id"
       def apply[A, B](s: Stack[ServiceFactory[A, B]]) = s
     }
@@ -232,7 +232,7 @@ class StackServerTest extends AnyFunSuite with Eventually {
       }
 
     StackServer.DefaultTransformer.append(
-      new StackTransformer {
+      new ServerStackTransformer {
         val name = "test"
         def apply[A, B](stack: Stack[ServiceFactory[A, B]]) =
           stack
