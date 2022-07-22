@@ -6,6 +6,8 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+* finagle-thrift: Changing visibility of InputBuffer and OutputBuffer from [finagle] to [twitter].
+ ``PHAB_ID=D938475``
 
 New Features
 ~~~~~~~~~~~~

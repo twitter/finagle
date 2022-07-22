@@ -18,7 +18,7 @@ private[finagle] object InputBuffer {
   }
 }
 
-private[finagle] class InputBuffer(bytes: Array[Byte], protocolFactory: TProtocolFactory) {
+private[twitter] class InputBuffer(bytes: Array[Byte], protocolFactory: TProtocolFactory) {
 
   private[this] val memoryTransport = new TMemoryInputTransport(bytes)
   private[this] val iprot = protocolFactory.getProtocol(memoryTransport)

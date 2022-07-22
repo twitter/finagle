@@ -16,7 +16,7 @@ private[finagle] object OutputBuffer {
   }
 }
 
-private[finagle] class OutputBuffer(protocolFactory: TProtocolFactory) {
+private[twitter] class OutputBuffer(protocolFactory: TProtocolFactory) {
   private[this] val memoryBuffer = new TMemoryBuffer(512)
   private[this] val oprot = protocolFactory.getProtocol(memoryBuffer)
 
