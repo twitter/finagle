@@ -68,6 +68,10 @@ request to multiple partitions. ``PHAB_ID=D882370``
 
 * finagle: Bump version of lz4-java to 1.8.0. ``PHAB_ID=D905411``
 
+* finagle: Upgrade to Netty 4.1.78.Final and netty-tcnative 2.0.53.Final to support
+  tls tracing for finagle in [Pixie](https://pixie.dev/). The Pixie changes aren't
+  complete yet, but upgrading netty is a prerequisite for that. ``PHAB_ID=D916996```
+
 22.4.0
 ------
 
