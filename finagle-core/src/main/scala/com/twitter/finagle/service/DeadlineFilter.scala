@@ -10,6 +10,7 @@ import com.twitter.util.Duration
 import com.twitter.util.Future
 import com.twitter.util.Stopwatch
 import com.twitter.util.Time
+import com.twitter.util.TimeFormat
 import com.twitter.util.TokenBucket
 
 /**
@@ -165,20 +166,30 @@ object DeadlineFilter {
     }
 
   class DeadlineExceededException private[DeadlineFilter] (
-    timestamp: Time,
-    deadline: Time,
-    elapsed: Duration,
-    now: Time,
+    msg: String,
     val flags: Long = FailureFlags.DeadlineExceeded)
-      extends Exception(
-        s"exceeded request deadline of ${deadline - timestamp} "
-          + s"by $elapsed. Deadline expired at $deadline and now it is $now."
-      )
+      extends Exception(msg)
       with FailureFlags[DeadlineExceededException]
       with HasLogLevel {
     def logLevel: Level = Level.DEBUG
     protected def copyWithFlags(flags: Long): DeadlineExceededException =
-      new DeadlineExceededException(timestamp, deadline, elapsed, now, flags)
+      new DeadlineExceededException(msg, flags)
+  }
+
+  private object DeadlineExceededException {
+    private[this] val millisecondFormat: TimeFormat = new TimeFormat("yyyy-MM-dd HH:mm:ss:SSS Z")
+    private[this] def fmt(time: Time): String = millisecondFormat.format(time)
+
+    def apply(
+      deadline: Time,
+      elapsed: Duration,
+      now: Time,
+      flags: Long = FailureFlags.DeadlineExceeded
+    ): DeadlineExceededException = {
+      val msg = s"Exceeded request deadline by $elapsed. Deadline expired at ${fmt(
+        deadline)}. The time now is ${fmt(now)}."
+      new DeadlineExceededException(msg, flags)
+    }
   }
 }
 
@@ -218,8 +229,6 @@ class DeadlineFilter[Req, Rep](
   ) =
     this(rejectPeriod, maxRejectFraction, statsReceiver, nowMillis, None, false)
 
-  import DeadlineFilter.DeadlineExceededException
-
   require(
     rejectPeriod.inSeconds >= 1 && rejectPeriod.inSeconds <= 60,
     s"rejectPeriod must be [1 second, 60 seconds]: $rejectPeriod"
@@ -254,7 +263,7 @@ class DeadlineFilter[Req, Rep](
   // serviced and `serviceDeposit` tokens are added to `rejectBucket`.
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     Deadline.current match {
-      case Some(Deadline(timestamp, deadline)) =>
+      case Some(Deadline(_, deadline)) =>
         val now = Time.now
 
         if (deadline < now) {
@@ -269,7 +278,7 @@ class DeadlineFilter[Req, Rep](
               service(request)
             else
               Future.exception(
-                new DeadlineExceededException(timestamp, deadline, exceeded, now)
+                DeadlineFilter.DeadlineExceededException(deadline, exceeded, now)
               )
           } else {
             rejectBucket.put(serviceDeposit)

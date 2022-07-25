@@ -1,7 +1,8 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.finagle.context.{Deadline, Contexts}
+import com.twitter.finagle.context.Deadline
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import com.twitter.conversions.DurationOps._
@@ -103,7 +104,7 @@ class DeadlineFilterTest extends AnyFunSuite with MockitoSugar with OneInstanceP
         val f = intercept[DeadlineExceededException] {
           await(deadlineService("marco"))
         }
-        assert(f.getMessage.contains("exceeded request deadline"))
+        assert(f.getMessage.contains("Exceeded request deadline"))
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
