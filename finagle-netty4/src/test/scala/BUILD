@@ -19,6 +19,7 @@ junit_tests(
             scope = "runtime",
         ),
         "finagle/finagle-core/src/main",
+        "finagle/finagle-core/src/test/scala:injectors-resolvers",
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-netty4",
         "finagle/finagle-netty4/src/test/resources",

@@ -16,6 +16,7 @@ scala_library(
         "3rdparty/jvm/org/scala-lang:scala-library",
         "finagle/finagle-benchmark-thrift/src/main/thrift:thrift-scala",
         "finagle/finagle-core/src/main",
+        "finagle/finagle-core/src/test/scala:injectors-resolvers",
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-exp/src/main/scala",
         "finagle/finagle-http/src/main/scala",

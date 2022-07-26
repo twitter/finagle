@@ -10,6 +10,7 @@ junit_tests(
         "3rdparty/jvm/org/scalatestplus:junit",
         "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "finagle/finagle-core/src/main",
+        "finagle/finagle-core/src/test/scala:injectors-resolvers",
         "finagle/finagle-core/src/test/scala:pushsession-utils",
         "finagle/finagle-http/src/main/scala",
         "finagle/finagle-http2/src/main/scala",

@@ -32,6 +32,23 @@ scala_library(
     ],
 )
 
+scala_library(
+    name = "injectors-resolvers",
+    sources = [
+        "com/twitter/finagle/ResolverTest.scala",
+        "com/twitter/finagle/TestAsyncInetResolver.scala",
+        "com/twitter/finagle/client/TestClientParamsInjector.scala",
+        "com/twitter/finagle/server/TestServerParamsInjector.scala",
+        "com/twitter/finagle/util/params.scala",
+    ],
+    compiler_option_sets = ["fatal_warnings"],
+    tags = ["bazel-compatible"],
+    dependencies = [
+        "3rdparty/jvm/org/scalatest",
+        "finagle/finagle-core/src/main",
+    ],
+)
+
 junit_tests(
     sources = [
         "!com/twitter/finagle/init/*",

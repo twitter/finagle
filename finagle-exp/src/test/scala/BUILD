@@ -9,6 +9,7 @@ junit_tests(
         "3rdparty/jvm/org/scalatest",
         "3rdparty/jvm/org/scalatestplus:junit",
         "finagle/finagle-core/src/main",
+        "finagle/finagle-core/src/test/scala:injectors-resolvers",
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-exp",
         "util/util-core:scala",

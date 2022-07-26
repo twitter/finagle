@@ -12,6 +12,7 @@ junit_tests(
         "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         "3rdparty/jvm/org/scalatestplus:scalacheck",
         "finagle/finagle-core/src/main",
+        "finagle/finagle-core/src/test/scala:injectors-resolvers",
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-redis",
         "util/util-core:scala",
