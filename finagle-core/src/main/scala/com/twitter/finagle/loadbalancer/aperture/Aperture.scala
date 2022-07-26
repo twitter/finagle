@@ -65,11 +65,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   private[aperture] def minAperture: Int
 
   /**
-   * Enables [[Aperture]] to create weight-aware balancers
-   */
-  private[aperture] def manageWeights: Boolean
-
-  /**
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
    * to derive an ordering for the endpoints used by this [[Balancer]] instance.
    */
@@ -185,21 +180,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     initAperture: Int,
     coord: Coord
   ): BaseDist[Req, Rep, Node] = {
-    if (manageWeights) {
-      new WeightedAperture[Req, Rep, Node](
-        this,
-        vector,
-        initAperture,
-        coord
-      )
-    } else {
-      new DeterministicAperture[Req, Rep, Node](
-        this,
-        vector,
-        initAperture,
-        coord
-      )
-    }
+    new WeightedAperture[Req, Rep, Node](this, vector, initAperture, coord)
   }
 
   private[aperture] def mkRandomAperture(
@@ -223,9 +204,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   override def close(deadline: Time): Future[Unit] = {
     gauges.foreach(_.remove())
-    // If manageWeights is true, the Balancer is not wrapped in a TrafficDistributor and therefore
-    // needs to manage its own lifecycle.
-    val closeNodes = if (!manageWeights) Closable.nop else Closable.all(dist.vector: _*)
+    val closeNodes = Closable.all(dist.vector: _*)
     coordObservation
       .close(deadline)
       .before { closeNodes.close(deadline) }

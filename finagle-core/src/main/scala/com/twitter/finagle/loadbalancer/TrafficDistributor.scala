@@ -41,7 +41,7 @@ private[finagle] object TrafficDistributor {
   private[finagle] def weightEndpoints[Req, Rep](
     addrs: Activity[Set[Address]],
     newEndpoint: Address => ServiceFactory[Req, Rep],
-    eagerEviction: Boolean,
+    eagerEviction: Boolean
   ): Event[Activity.State[Set[EndpointFactory[Req, Rep]]]] = {
 
     // The EndpointFactoryProxy enables us to replace an EndpointFactory's
@@ -52,9 +52,13 @@ private[finagle] object TrafficDistributor {
         extends EndpointFactory[Req, Rep] {
 
       override def status: Status = factory.status
+
       override def remake(): Unit = factory.remake()
+
       override def close(deadline: Time): Future[Unit] = factory.close(deadline)
+
       override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = factory(conn)
+
       override def toString: String = address.toString
     }
 

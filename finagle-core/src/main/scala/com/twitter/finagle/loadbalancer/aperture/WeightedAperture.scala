@@ -1,24 +1,8 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.aperture.DeterministicAperture.MinDeterministicAperture
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
-import com.twitter.finagle.loadbalancer.exp.restrictZone
-import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.CoreToggles
-import com.twitter.finagle.Status
-import scala.util.hashing.MurmurHash3
-
-object WeightedApertureToggle {
-  private val toggle = CoreToggles("com.twitter.finagle.loadbalancer.WeightedAperture.v2")
-  private val zoneAllowed =
-    if (restrictZone()) ServerInfo().zone.getOrElse("") == "smf1" else true
-
-  def apply(client: String): Boolean = {
-    toggle(
-      MurmurHash3.mix(ServerInfo().clusterId.hashCode, client.hashCode)
-    ) && zoneAllowed
-  }
-}
 
 private object WeightedAperture {
 

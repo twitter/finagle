@@ -22,11 +22,9 @@ import org.scalactic.source.Position
 import org.scalatest.Tag
 import org.scalatest.funsuite.AnyFunSuite
 
-class ApertureTest extends BaseApertureTest(doesManageWeights = false)
+class ApertureTest extends BaseApertureTest()
 
-abstract class BaseApertureTools(doesManageWeights: Boolean)
-    extends AnyFunSuite
-    with ApertureSuite {
+abstract class BaseApertureTools() extends AnyFunSuite with ApertureSuite {
 
   /**
    * A simple aperture balancer which doesn't have a controller or load metric
@@ -41,7 +39,6 @@ abstract class BaseApertureTools(doesManageWeights: Boolean)
    */
   private[aperture] class Bal extends TestBal {
 
-    val manageWeights: Boolean = doesManageWeights
     protected def nodeLoad: Double = 0.0
 
     lazy val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver
@@ -68,8 +65,7 @@ abstract class BaseApertureTools(doesManageWeights: Boolean)
   }
 }
 
-abstract class BaseApertureTest(doesManageWeights: Boolean)
-    extends BaseApertureTools(doesManageWeights) {
+abstract class BaseApertureTest() extends BaseApertureTools() {
 
   // Ensure the flag value is 12 since many of the tests depend on it.
   override protected def test(
@@ -101,8 +97,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
         timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
         useDeterministicOrdering = None,
-        eagerConnections = false,
-        manageWeights = doesManageWeights
+        eagerConnections = false
       )
     }
   }
@@ -124,8 +119,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      eagerConnections = false,
-      manageWeights = doesManageWeights
+      eagerConnections = false
     )
 
     assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -149,8 +143,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(false),
-      eagerConnections = false,
-      manageWeights = doesManageWeights
+      eagerConnections = false
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -175,8 +168,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(false),
-      eagerConnections = false,
-      manageWeights = doesManageWeights
+      eagerConnections = false
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -202,8 +194,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
       useDeterministicOrdering = Some(true),
-      eagerConnections = true,
-      manageWeights = doesManageWeights
+      eagerConnections = true
     )
     assert(factories.forall(_.total == 1))
 
@@ -233,8 +224,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
         timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
         useDeterministicOrdering = Some(true),
-        eagerConnections = false,
-        manageWeights = manageWeights
+        eagerConnections = false
       )
       assert(stats.counters(Seq("rebuilds")) == 1)
 
@@ -269,8 +259,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
         timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
         useDeterministicOrdering = Some(true),
-        eagerConnections = false,
-        manageWeights = manageWeights
+        eagerConnections = false
       )
       assert(stats.counters(Seq("rebuilds")) == 1)
 
@@ -455,7 +444,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     ProcessCoordinate.setCoordinate(instanceId = 0, totalInstances = 12)
     bal.update(counts.range(24))
     bal.rebuildx()
-    assert(bal.isDeterministicAperture)
+    assert(bal.isWeightedAperture)
     assert(bal.minUnitsx == 12)
 
     // mark all endpoints within the aperture as busy
@@ -505,7 +494,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     ProcessCoordinate.setCoordinate(instanceId = 0, totalInstances = 12)
     bal.update(counts.range(24))
     bal.rebuildx()
-    assert(bal.isDeterministicAperture)
+    assert(bal.isWeightedAperture)
     assert(bal.minUnitsx == 12)
     bal.applyn(2000)
 
@@ -521,7 +510,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     ProcessCoordinate.setCoordinate(instanceId = 1, totalInstances = 4)
     bal.update(counts.range(18))
     bal.rebuildx()
-    assert(bal.isDeterministicAperture)
+    assert(bal.isWeightedAperture)
     assert(bal.minUnitsx == 12)
     bal.applyn(2000)
 
@@ -592,7 +581,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     ProcessCoordinate.setCoordinate(0, 150)
     bal.update(Vector.tabulate(150)(Factory))
     bal.rebuildx()
-    assert(bal.isDeterministicAperture)
+    assert(bal.isWeightedAperture)
     // ignore 150, since we are using d-aperture and instead
     // default to 12.
     assert(bal.minUnitsx == 12)
@@ -614,7 +603,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     ProcessCoordinate.setCoordinate(0, 1)
     bal.update(counts.range(3))
     bal.rebuildx()
-    assert(bal.isDeterministicAperture)
+    assert(bal.isWeightedAperture)
     assert(bal.minUnitsx == 3)
     bal.applyn(3000)
 
@@ -639,7 +628,7 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
     ProcessCoordinate.unsetCoordinate()
     bal.update(counts.range(3))
     bal.rebuildx()
-    assert(bal.isDeterministicAperture)
+    assert(bal.isWeightedAperture)
     assert(bal.minUnitsx == 3)
     bal.applyn(3000)
 
@@ -701,9 +690,8 @@ abstract class BaseApertureTest(doesManageWeights: Boolean)
       }
     }
 
-    val bal = new Bal {
-      override val manageWeights: Boolean = true
-    }
+    val bal = new Bal
+
     val f1, f2, f3 = newFac()
     val nc1 = NotClosableEndpointFactoryProxy(f1)
     bal.update(Vector(nc1, f2, f3))

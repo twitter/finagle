@@ -9,7 +9,6 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.Balancers
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.param.{Tracer => PTracer}
@@ -201,7 +200,6 @@ class EndToEndTest
     new ThriftMuxTestServer {
       val client = clientImpl
         .withLoadBalancer(Balancers.aperture())
-        .configured(LoadBalancerFactory.UseWeightedBalancers(true))
         .build[TestService.MethodPerEndpoint](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"

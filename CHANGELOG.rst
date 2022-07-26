@@ -30,6 +30,9 @@ Bug Fixes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: Remove unused `DeterministicAperture` along with pathways to use weight-unaware 
+  aperture loadbalancers. ``PHAB_ID=D933405``
+
 * finagle-base-http: Methods for getting/setting `Accept`, `Authorization`, `Host`, `Referer`,
   `User-Agent`, `X-Forwarded-For` headers were moved from `c.t.f.http.Message` class to
   `c.t.f.http.Request` as these headers are only valid on requests and not on responses.

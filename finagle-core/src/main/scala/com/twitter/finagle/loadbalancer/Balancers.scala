@@ -48,8 +48,7 @@ object Balancers {
     label: String,
     sr: StatsReceiver,
     lbType: String,
-    bal: ServiceFactory[Req, Rep],
-    manageWeights: Boolean
+    bal: ServiceFactory[Req, Rep]
   ): ServiceFactory[Req, Rep] = {
     bal match {
       case balancer: Balancer[Req, Rep] => balancer.register(label)
@@ -57,7 +56,7 @@ object Balancers {
     }
 
     new ServiceFactoryProxy(bal) {
-      val lbWithSuffix = if (manageWeights) lbType + "_weighted" else lbType
+      val lbWithSuffix = lbType + "_weighted"
       private[this] val typeGauge = sr.scope("algorithm").addGauge(lbWithSuffix)(1)
       override def close(when: Time): Future[Unit] = {
         typeGauge.remove()
@@ -89,12 +88,7 @@ object Balancers {
         val sr = params[param.Stats].statsReceiver
         val panicMode = params[PanicMode]
         val balancer = new P2CLeastLoaded(endpoints, panicMode, rng, sr, exc)
-        newScopedBal(
-          params[param.Label].label,
-          sr,
-          "p2c_least_loaded",
-          balancer,
-          manageWeights = false)
+        newScopedBal(params[param.Label].label, sr, "p2c_least_loaded", balancer)
       }
     }
 
@@ -139,8 +133,7 @@ object Balancers {
         params[param.Label].label,
         sr,
         "p2c_peak_ewma",
-        balancer,
-        manageWeights = false
+        balancer
       )
     }
   }
@@ -166,8 +159,7 @@ object Balancers {
           params[param.Label].label,
           sr,
           "heap_least_loaded",
-          new HeapLeastLoaded(endpoints, sr, exc, rng),
-          manageWeights = false
+          new HeapLeastLoaded(endpoints, sr, exc, rng)
         )
       }
     }
@@ -246,7 +238,6 @@ object Balancers {
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
-      val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
       val panicMode = params[PanicMode]
 
       val balancer = new ApertureLeastLoaded(
@@ -262,15 +253,13 @@ object Balancers {
         timer,
         exc,
         useDeterministicOrdering,
-        eagerConnections,
-        manageWeights
+        eagerConnections
       )
       newScopedBal(
         label,
         sr,
         "aperture_least_loaded",
-        balancer,
-        manageWeights
+        balancer
       )
     }
   }
@@ -342,7 +331,6 @@ object Balancers {
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
       val eagerConnections = params[EagerConnections].enabled
-      val manageWeights = params[LoadBalancerFactory.ManageWeights].enabled
       val panicMode = params[PanicMode]
 
       val balancer = new AperturePeakEwma(
@@ -360,15 +348,13 @@ object Balancers {
         timer,
         exc,
         useDeterministicOrdering,
-        eagerConnections,
-        manageWeights
+        eagerConnections
       )
       newScopedBal(
         label,
         sr,
         "aperture_peak_ewma",
-        balancer,
-        manageWeights
+        balancer
       )
     }
   }
@@ -392,7 +378,7 @@ object Balancers {
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
       val balancer = new RoundRobinBalancer(endpoints, sr, exc)
-      newScopedBal(params[param.Label].label, sr, "round_robin", balancer, manageWeights = false)
+      newScopedBal(params[param.Label].label, sr, "round_robin", balancer)
     }
   }
 }

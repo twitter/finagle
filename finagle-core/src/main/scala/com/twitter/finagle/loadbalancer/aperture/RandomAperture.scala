@@ -1,7 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.Status
-import com.twitter.finagle.loadbalancer.p2c.P2CPick
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.Level
 import scala.collection.immutable.VectorBuilder
@@ -145,10 +144,7 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     aperture.rebuildLog.debug(s"[RandomAperture.rebuild $labelForLogging] nodes=$vecAsString")
   }
 
-  def indices: Set[Int] = {
-    val range = if (pdist.isEmpty) (0 until logicalAperture) else (0 to pdist.get.maxIdx)
-    range.toSet
-  }
+  def indices: Set[Int] = (0 to pdist.maxIdx).toSet
 
   // we iterate over the entire set as RandomAperture has the ability for
   // the nodes within its logical aperture to change dynamically. `needsRebuild`
@@ -167,22 +163,13 @@ private final class RandomAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
     status
   }
 
-  // This is only necessary for aperture.manageWeights == true
-  private[aperture] val pdist: Option[RandomApertureProbabilityDist[Req, Rep, NodeT]] = {
-    if (aperture.manageWeights)
-      Some(
-        new RandomApertureProbabilityDist[Req, Rep, NodeT](
-          vec,
-          () => logicalAperture,
-          aperture.rng))
-    else None
-  }
+  private[aperture] val pdist: RandomApertureProbabilityDist[Req, Rep, NodeT] =
+    new RandomApertureProbabilityDist[Req, Rep, NodeT](vec, () => logicalAperture, aperture.rng)
 
   def pick(): NodeT = {
     if (vector.isEmpty) aperture.failingNode
     else if (vector.length == 1) vector(0)
-    else if (pdist.isDefined) WeightedP2CPick.pick(pdist.get, aperture.pickLog)
-    else P2CPick.pick(vec, logicalAperture, aperture.rng)
+    else WeightedP2CPick.pick(pdist, aperture.pickLog)
   }
 
   // To reduce the amount of rebuilds needed, we rely on the probabilistic
