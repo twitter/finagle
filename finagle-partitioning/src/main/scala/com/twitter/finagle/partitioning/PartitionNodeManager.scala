@@ -1,6 +1,10 @@
 package com.twitter.finagle.partitioning
 
-import com.twitter.finagle._
+import com.twitter.finagle.Addr
+import com.twitter.finagle.Address
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
@@ -13,13 +17,23 @@ import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.stats.Verbosity
 import com.twitter.logging.HasLogLevel
 import com.twitter.logging.Level
-import com.twitter.util._
+import com.twitter.util.Activity
+import com.twitter.util.Closable
+import com.twitter.util.Event
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Time
+import com.twitter.util.Try
+import com.twitter.util.Var
+import com.twitter.util.Witness
+import com.twitter.util.logging.Logger
 import java.util.concurrent.atomic.AtomicReference
 import scala.util.control.NonFatal
 
 private[finagle] object PartitionNodeManager {
 
-  private val logger = logging.Logger.getLogger(classOf[PartitionNodeManager[_, _, _, _]])
+  private val logger = Logger.getLogger(classOf[PartitionNodeManager[_, _, _, _]])
 
   /**
    * The given partition Id cannot be found in the Partition node map.
