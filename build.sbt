@@ -1,5 +1,4 @@
 import Tests._
-import scoverage.ScoverageKeys
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 Global / excludeLintKeys += scalacOptions
@@ -168,7 +167,6 @@ val sharedSettings = Seq(
       case _ => sourceDir / "scala-2.12-"
     }
   },
-  ScoverageKeys.coverageHighlighting := true,
   Test / ScroogeSBT.autoImport.scroogeLanguages := Seq("java", "scala"),
   ivyXML :=
     <dependencies>
