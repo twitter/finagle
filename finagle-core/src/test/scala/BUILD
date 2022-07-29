@@ -42,6 +42,7 @@ scala_library(
         "com/twitter/finagle/util/params.scala",
     ],
     compiler_option_sets = ["fatal_warnings"],
+    platform = "java8",
     tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/org/scalatest",
