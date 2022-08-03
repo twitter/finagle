@@ -130,7 +130,7 @@ object StackServer {
     // TimeoutFilter, the deadline will start from the current time, and
     // therefore not be expired if the request were to then pass through
     // DeadlineFilter. Thus, DeadlineFilter is pushed after TimeoutFilter.
-    stk.push(DeadlineFilter.module)
+    stk.push(DeadlineFilter.serverModule)
     stk.push(DtabStatsFilter.module)
     // Admission Control filters are inserted before `StatsFilter` so that rejected
     // requests are counted. We may need to adjust how latency are recorded
