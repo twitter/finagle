@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http: `c.t.f.Http.Http2` and `c.t.f.Http.Netty4Impl` values were removed because they
+  were confusing. Use `.withHttp2` and `.withNoHttp2` to toggle HTTP/2 support ON and OFF
+  respectively.  ``PHAB_ID=D935292``
+
 22.7.0
 ------
 * finagle-thrift: Changing visibility of InputBuffer and OutputBuffer from [finagle] to [twitter].

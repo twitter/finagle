@@ -1,13 +1,16 @@
 package com.twitter.finagle.integration
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.client.{MethodBuilder, StackClient}
-import com.twitter.finagle.Http.Http2
-import com.twitter.finagle.memcached.protocol.{NoOp, Quit}
+import com.twitter.finagle.client.MethodBuilder
+import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.memcached.protocol.NoOp
+import com.twitter.finagle.memcached.protocol.Quit
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{mux, _}
-import com.twitter.util.{Await, Future}
+import com.twitter.finagle.mux
+import com.twitter.finagle._
+import com.twitter.util.Await
+import com.twitter.util.Future
 import java.net.InetSocketAddress
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -66,8 +69,8 @@ class MethodBuilderTest extends AnyFunSuite {
 
   testTotalTimeout(
     "HTTP/2",
-    Http.server.configuredParams(Http2),
-    Http.client.configuredParams(Http2),
+    Http.server.withHttp2,
+    Http.client.withHttp2,
     http.Request(),
     http.Response()
   )
@@ -129,8 +132,8 @@ class MethodBuilderTest extends AnyFunSuite {
 
   testPerRequestTimeout(
     "HTTP/2",
-    Http.server.configuredParams(Http2),
-    Http.client.configuredParams(Http2),
+    Http.server.withHttp2,
+    Http.client.withHttp2,
     http.Request(),
     http.Response()
   )

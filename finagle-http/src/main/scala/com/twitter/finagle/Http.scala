@@ -63,7 +63,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
    * @param serverTransport server [[StreamTransport]] factory
    * @param listener [[Listener]] factory
    */
-  final class HttpImpl private (
+  private[finagle] final class HttpImpl private (
     private[finagle] val clientEndpointer: Stackable[ServiceFactory[Request, Response]],
     private[finagle] val serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
     private[finagle] val listener: Stack.Params => Listener[Any, Any, TransportContext],
@@ -72,10 +72,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     def mk(): (HttpImpl, Stack.Param[HttpImpl]) = (this, HttpImpl.httpImplParam)
   }
 
-  object HttpImpl {
-    implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty4Impl)
+  private[finagle] object HttpImpl {
+    implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Http11Impl)
 
-    val Netty4Impl: Http.HttpImpl = new Http.HttpImpl(
+    val Http11Impl: Http.HttpImpl = new Http.HttpImpl(
       ClientEndpointer.HttpEndpointer,
       new Netty4ServerStreamTransport(_),
       Netty4HttpListener,
@@ -90,9 +90,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     )
   }
 
-  val Netty4Impl: Http.HttpImpl = HttpImpl.Netty4Impl
-
-  val Http2: Stack.Params = Stack.Params.empty +
+  private val Http2Params: Stack.Params = Stack.Params.empty +
     HttpImpl.Http2Impl +
     com.twitter.finagle.param.ProtocolLibrary("http/2") +
     com.twitter.finagle.netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
@@ -275,7 +273,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note this will override whatever has been set in the toggle.
      */
     def withHttp2: Client =
-      configuredParams(Http2)
+      configuredParams(Http2Params)
 
     /**
      * Disable HTTP/2
@@ -283,7 +281,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note this will override whatever has been set in the toggle.
      */
     def withNoHttp2: Client =
-      configured(HttpImpl.Netty4Impl)
+      configured(HttpImpl.Http11Impl)
 
     /**
      * Enable kerberos client authentication for http requests
@@ -534,7 +532,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note this will override whatever has been set in the toggle.
      */
     def withHttp2: Server =
-      configuredParams(Http2)
+      configuredParams(Http2Params)
 
     /**
      * Disable HTTP/2
@@ -542,7 +540,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note this will override whatever has been set in the toggle.
      */
     def withNoHttp2: Server =
-      configured(HttpImpl.Netty4Impl)
+      configured(HttpImpl.Http11Impl)
 
     /**
      * Enable kerberos server authentication for http requests
@@ -561,9 +559,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note Servers operating as proxies should disable automatic responses in
      *       order to allow origin servers to determine whether the expectation
      *       can be met.
-     *
      * @note Disabling automatic continues is only supported in
-     *       [[com.twitter.finagle.Http.HttpImpl.Netty4Impl]] servers.
+     *       [[com.twitter.finagle.Http.HttpImpl.Http11Impl]] servers.
      */
     def withNoAutomaticContinue: Server =
       configured(http.param.AutomaticContinue(false))
