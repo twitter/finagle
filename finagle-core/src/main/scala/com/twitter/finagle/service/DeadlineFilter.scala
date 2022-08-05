@@ -119,7 +119,7 @@ object DeadlineFilter {
    * Creates a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.service.DeadlineFilter]].
    */
-  private[this] def module[Req, Rep](key: String): Stackable[ServiceFactory[Req, Rep]] =
+  private[this] def module[Req, Rep](sourceRole: String): Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module5[
       param.Stats,
       param.MetricBuilders,
@@ -160,7 +160,7 @@ object DeadlineFilter {
                       statsReceiver = scopedStatsReceiver,
                       metricsRegistry = _metrics.registry,
                       isDarkMode = darkMode,
-                      key = key
+                      sourceRole = sourceRole
                     ).andThen(service)
 
                 override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
@@ -216,6 +216,8 @@ object DeadlineFilter {
  * @param isDarkMode DarkMode will collect stats but not reject requests
  * @param metricsRegistry an optional [CoreMetricsRegistry] set by stack parameter
  *        for injecting metrics and instrumenting top-line expressions
+ * @param sourceRole an optional param provides a prefix for deadline traces, typically "srv/" for
+ *        server side filters and "clnt/" for client side
  * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline user guide]]
  *      for more details.
  */
@@ -226,7 +228,7 @@ class DeadlineFilter[Req, Rep](
   nowMillis: () => Long = Stopwatch.systemMillis,
   metricsRegistry: Option[CoreMetricsRegistry] = None,
   isDarkMode: Boolean,
-  key: String = "")
+  sourceRole: String = "")
     extends SimpleFilter[Req, Rep] {
 
   def this(
@@ -321,11 +323,12 @@ class DeadlineFilter[Req, Rep](
     reject: Boolean
   ): Unit = {
     if (tracing.isActivelyTracing) {
-      tracing.recordBinary(s"${key}request_deadline", DeadlineFilter.fmt(deadline))
+      tracing.recordBinary(s"${sourceRole}request_deadline", DeadlineFilter.fmt(deadline))
       if (difference.inMillis < 0l) {
-        tracing.recordBinary(s"${key}request_deadline_exceeded_ms", difference.abs.inMillis)
-        if (reject) tracing.recordBinary(s"${key}request_deadline_rejected", true)
-      } else tracing.recordBinary(s"${key}request_deadline_remaining_ms", difference.inMillis)
+        tracing.recordBinary(s"${sourceRole}request_deadline_exceeded_ms", difference.abs.inMillis)
+        if (reject) tracing.recordBinary(s"${sourceRole}request_deadline_rejected", true)
+      } else
+        tracing.recordBinary(s"${sourceRole}request_deadline_remaining_ms", difference.inMillis)
     }
   }
 }

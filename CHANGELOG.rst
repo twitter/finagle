@@ -10,6 +10,9 @@ Unreleased
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: `DeadlineFilter.module` has been replaced with `DeadlineFilter.clientModule`
+  and `DeadlineFilter.serverModule`. ``PHAB_ID=D943426``
+
 * finagle-http: `c.t.f.Http.Http2` and `c.t.f.Http.Netty4Impl` values were removed because they
   were confusing. Use `.withHttp2` and `.withNoHttp2` to toggle HTTP/2 support ON and OFF
   respectively.  ``PHAB_ID=D935292``
