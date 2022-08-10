@@ -32,7 +32,7 @@ public class ZstdDecoder extends ByteToMessageDecoder {
   }
 
   private ZstdDecoderState decompressionState = ZstdDecoderState.CheckMagic;
-  private ZstdRefillableDirectBufferDecompressingStream decompresser = null;
+  private ZstdRefillableDirectBufferDecompressingStream decompressor = null;
   private int decoded = 0;
   private final ByteBuffer inputBuf = ByteBuffer.allocateDirect(MAX_BLOCK_SIZE);
   private final ByteBuffer outputBuf =
@@ -56,8 +56,8 @@ public class ZstdDecoder extends ByteToMessageDecoder {
             if (in.readableBytes() >= SIZE_OF_MAGIC) {
               verifyMagic(in);
 
-              if (decompresser == null) {
-                decompresser = new ZstdRefillableDirectBufferDecompressingStream(inputBuf);
+              if (decompressor == null) {
+                decompressor = new ZstdRefillableDirectBufferDecompressingStream(inputBuf);
               }
 
               decompressionState = ZstdDecoderState.DecompressData;
@@ -71,7 +71,7 @@ public class ZstdDecoder extends ByteToMessageDecoder {
               // has side effects on `in`, `out`, and `decompressor`
               consumeAndDecompress(ctx, in, out);
 
-              if (!decompresser.hasRemaining()) {
+              if (!decompressor.hasRemaining()) {
                 resetState(true);
               }
             } catch (Exception e) {
@@ -100,20 +100,22 @@ public class ZstdDecoder extends ByteToMessageDecoder {
   private void consumeAndDecompress(ChannelHandlerContext ctx, ByteBuf in, List<Object> out)
       throws IOException {
     do {
-      decompresser.transferBuffer(in);
-      decoded = decompresser.read(outputBuf);
+      decompressor.transferBuffer(in);
+      decoded = decompressor.read(outputBuf);
       if (decoded > 0) {
         outputBuf.flip();
         out.add(ctx.alloc().buffer(decoded, decoded).writeBytes(outputBuf));
-        outputBuf.position(0);
+        outputBuf.compact();
       }
     } while (decoded > 0);
   }
 
   private void resetState(boolean retainBuf) throws IOException {
     // done! reset decoder state and clear buffers for next frame
-    decompresser.close();
-    decompresser = null;
+    if (decompressor != null) {
+      decompressor.close();
+      decompressor = null;
+    }
     if (retainBuf) {
       // retain the buffer that we have not yet read
       // e.g. we have bytes that span two frames pending (should be rare)

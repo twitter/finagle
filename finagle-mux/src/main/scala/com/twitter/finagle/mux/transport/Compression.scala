@@ -1,13 +1,11 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.netty4.codec.compression.zstd.ZstdConstants.DEFAULT_BLOCK_SIZE
 import com.twitter.finagle.netty4.codec.compression.zstd.ZstdConstants.DEFAULT_COMPRESSION_LEVEL
-import com.twitter.finagle.netty4.codec.compression.zstd.ZstdConstants.DEFAULT_MAX_ENCODE_SIZE
 import com.twitter.finagle.netty4.codec.compression.zstd.ZstdDecoder
+import com.twitter.finagle.netty4.codec.compression.zstd.ZstdStreamingEncoder
 import io.netty.channel.ChannelHandler
 import io.netty.handler.codec.compression.Lz4FrameEncoder
 import io.netty.handler.codec.compression.Lz4FrameDecoder
-import io.netty.handler.codec.compression.ZstdEncoder
 
 object Compression {
   private[this] val isValidCharacter: Char => Boolean = { c: Char =>
@@ -77,20 +75,17 @@ object Compression {
     override protected[mux] def apply(): ChannelHandler = new Lz4FrameDecoder()
   }
 
-  // Convenience overload for Java consumers
-  def zstdCompressor(): ByteTransformer =
-    zstdCompressor(DEFAULT_COMPRESSION_LEVEL, DEFAULT_BLOCK_SIZE, DEFAULT_MAX_ENCODE_SIZE)
+  private[finagle] def zstdCompressor(): ByteTransformer =
+    zstdCompressor(DEFAULT_COMPRESSION_LEVEL)
 
-  def zstdCompressor(
-    compressionLevel: Int = DEFAULT_COMPRESSION_LEVEL,
-    blockSize: Int = DEFAULT_BLOCK_SIZE,
-    maxEncodeSize: Int = DEFAULT_MAX_ENCODE_SIZE
+  private[finagle] def zstdCompressor(
+    compressionLevel: Int = DEFAULT_COMPRESSION_LEVEL
   ): ByteTransformer = new ByteTransformer(ZstdString) {
     override protected[mux] def apply(): ChannelHandler =
-      new ZstdEncoder(compressionLevel, blockSize, maxEncodeSize)
+      new ZstdStreamingEncoder(compressionLevel)
   }
 
-  def zstdDecompressor(): ByteTransformer = new ByteTransformer(ZstdString) {
+  private[finagle] def zstdDecompressor(): ByteTransformer = new ByteTransformer(ZstdString) {
     override protected[mux] def apply(): ChannelHandler = new ZstdDecoder()
   }
 

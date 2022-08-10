@@ -34,7 +34,7 @@ public final class ZstdConstants {
   /**
    * Default block size
    */
-  public static final int DEFAULT_BLOCK_SIZE = 1 << 16; // 64kB
+  public static final int DEFAULT_BLOCK_SIZE = 1 << 17; // 64kB
 
   /**
    * Default buffer size

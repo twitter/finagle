@@ -4,6 +4,7 @@ import com.github.luben.zstd.Zstd
 import com.twitter.finagle.netty4.codec.compression.CompressionTestUtils.rand
 import com.twitter.finagle.netty4.codec.compression.zstd.ZstdConstants.DEFAULT_COMPRESSION_LEVEL
 import com.twitter.finagle.netty4.codec.compression.zstd.ZstdDecoder
+import com.twitter.finagle.netty4.codec.compression.zstd.ZstdStreamingEncoder
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.CompositeByteBuf
@@ -30,17 +31,20 @@ class ZstdDecoderTest
   protected var wrappedVeryLargeBytes: ByteBuf = Unpooled.wrappedBuffer(veryLargeBytes)
 
   protected var channel: EmbeddedChannel = createChannel()
+  protected val zstdCompressChannel = createChannel(
+    new ZstdStreamingEncoder(DEFAULT_COMPRESSION_LEVEL))
 
-  protected var compressedBytesVerySmall: Array[Byte] = compress(verySmallBytes)
-  protected var compressedBytesSmall: Array[Byte] = compress(smallBytes)
-  protected var compressedBytesLarge: Array[Byte] = compress(largeBytes)
-  protected var compressedBytesVeryLarge: Array[Byte] = compress(veryLargeBytes)
+  protected var compressedBytesVerySmall: Array[Byte] = compressStatic(verySmallBytes)
+  protected var compressedBytesSmall: Array[Byte] = compressStatic(smallBytes)
+  protected var compressedBytesLarge: Array[Byte] = compressStatic(largeBytes)
+  protected var compressedBytesVeryLarge: Array[Byte] = compressStatic(veryLargeBytes)
 
-  /**
-   * Compresses data with some external library.
-   */
-  @throws[Exception]
-  protected def compress(data: Array[Byte]): Array[Byte] = {
+  protected def compressStream(channel: EmbeddedChannel, data: Array[Byte]): ByteBuf = {
+    channel.writeOutbound(Unpooled.wrappedBuffer(data));
+    readCompressed(channel)
+  }
+
+  protected def compressStatic(data: Array[Byte]): Array[Byte] = {
     Zstd.compress(data, DEFAULT_COMPRESSION_LEVEL)
   }
 
@@ -288,6 +292,25 @@ class ZstdDecoderTest
       chunkSize)
   }
 
+  test("Decompression of several different sized buffers through a stream") {
+    val zstdCompressChannel = createChannel(new ZstdStreamingEncoder(DEFAULT_COMPRESSION_LEVEL))
+    val verySmallData = compressStream(zstdCompressChannel, verySmallBytes)
+    val smallData = compressStream(zstdCompressChannel, smallBytes)
+    val largeData = compressStream(zstdCompressChannel, largeBytes)
+    val veryLargeData = compressStream(zstdCompressChannel, veryLargeBytes)
+    testDecompression(wrappedVerySmallBytes, verySmallData)
+    testDecompression(wrappedSmallBytes, smallData)
+    testDecompression(wrappedLargeBytes, largeData)
+    testDecompression(wrappedVeryLargeBytes, veryLargeData)
+  }
+
+  test("Decompression of lots of buffers through a stream") {
+    val zstdCompressChannel = createChannel(new ZstdStreamingEncoder(DEFAULT_COMPRESSION_LEVEL))
+    for { _ <- 0 to 1000 } {
+      testDecompression(wrappedLargeBytes, compressStream(zstdCompressChannel, largeBytes))
+    }
+  }
+
   @throws[Exception]
   protected def testDecompression(
     expected: ByteBuf,
@@ -302,7 +325,6 @@ class ZstdDecoderTest
     decompressed.release
   }
 
-  @throws[Exception]
   protected def testDecompressionOfBatchedFlow(expected: ByteBuf, data: ByteBuf): Unit = {
 
     val compressedLength = data.readableBytes
@@ -326,7 +348,6 @@ class ZstdDecoderTest
     data.release
   }
 
-  @throws[Exception]
   protected def testDecompressionOfFixedBatchSize(
     expected: ByteBuf,
     data: ByteBuf,
@@ -355,6 +376,15 @@ class ZstdDecoderTest
       case e: Exception =>
         throw e
     }
+  }
+
+  private def readCompressed(channel: EmbeddedChannel): ByteBuf = {
+    val compressed = Unpooled.compositeBuffer
+    var msg: ByteBuf = null
+    while ({
+      msg = channel.readOutbound.asInstanceOf[ByteBuf]; msg != null
+    }) compressed.addComponent(true, msg)
+    compressed
   }
 
   private def readDecompressed(channel: EmbeddedChannel): ByteBuf = {
