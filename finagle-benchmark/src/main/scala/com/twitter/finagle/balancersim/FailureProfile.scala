@@ -1,8 +1,9 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.balancersim
 
-import com.twitter.util.{Duration, Stopwatch}
-import scala.util.Random
+import com.twitter.util.Duration
+import com.twitter.util.Stopwatch
 import scala.io.Source
+import scala.util.Random
 
 private object FailureProfile {
   val rng: Random = new Random("seed".hashCode)

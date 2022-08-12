@@ -4,9 +4,11 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.util.Duration
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.Backoff
-import org.openjdk.jmh.annotations.{Scope, State, Benchmark}
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.State
+import org.openjdk.jmh.annotations.Benchmark
 
-// ./sbt 'project finagle-benchmark' 'jmh:run BackoffBenchmark'
+// ./bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- 'BackoffBenchmark'
 class BackoffBenchmark extends StdBenchAnnotations {
   import BackoffBenchmark._
 

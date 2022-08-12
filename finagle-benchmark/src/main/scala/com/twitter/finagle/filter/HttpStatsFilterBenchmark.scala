@@ -2,14 +2,19 @@ package com.twitter.finagle.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.Status
 import com.twitter.finagle.http.filter.StatsFilter
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.{Await, Future}
-import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import org.openjdk.jmh.annotations.Benchmark
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.State
 import scala.util.Random
 
-// ./sbt 'project finagle-benchmark' 'jmh:run HttpStatsFilterBenchmark'
+// /bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- 'HttpStatsFilterBenchmark'
 @State(Scope.Benchmark)
 class HttpStatsFilterBenchmark extends StdBenchAnnotations {
 

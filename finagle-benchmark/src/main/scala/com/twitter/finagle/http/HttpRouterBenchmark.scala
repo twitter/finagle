@@ -2,21 +2,23 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.http.exp.routing.{
-  HttpRouter,
-  LinearPathRouter,
-  Path,
-  Schema,
-  Segment,
-  StringParam
-}
-import com.twitter.finagle.exp.routing.{Request => Req, Response => Rep, Route => ExpRoute}
+import com.twitter.finagle.http.exp.routing.HttpRouter
+import com.twitter.finagle.http.exp.routing.LinearPathRouter
+import com.twitter.finagle.http.exp.routing.Path
+import com.twitter.finagle.http.exp.routing.Schema
+import com.twitter.finagle.http.exp.routing.Segment
+import com.twitter.finagle.http.exp.routing.StringParam
+import com.twitter.finagle.exp.routing.{Request => Req}
+import com.twitter.finagle.exp.routing.{Response => Rep}
+import com.twitter.finagle.exp.routing.{Route => ExpRoute}
 import com.twitter.util.Future
 import com.twitter.util.routing.Result
-import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
+import org.openjdk.jmh.annotations.Benchmark
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.State
 
 // to run:
-// sbt 'project finagle-benchmark' 'jmh:run -prof gc HttpRouterBenchmark'
+// /bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- 'HttpRouterBenchmark'
 @State(Scope.Benchmark)
 class HttpRouterBenchmark extends StdBenchAnnotations {
 

@@ -1,7 +1,9 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.balancersim
 
-import com.twitter.finagle.stats.{Stat, StatsReceiver}
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.stats.Stat
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
 import com.twitter.util.Future
 
 private trait Client extends Service[Unit, Unit]

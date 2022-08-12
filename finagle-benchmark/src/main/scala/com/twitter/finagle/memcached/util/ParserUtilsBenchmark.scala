@@ -2,10 +2,12 @@ package com.twitter.finagle.memcached.util
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.io.Buf
-import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
+import org.openjdk.jmh.annotations.Benchmark
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.State
 import scala.util.Random
 
-// ./sbt 'project finagle-benchmark' 'jmh:run ParserUtilsBenchmark'
+// ./bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- ' ParserUtilsBenchmark'
 class ParserUtilsBenchmark extends StdBenchAnnotations {
   import ParserUtilsBenchmark._
 

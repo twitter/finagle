@@ -1,10 +1,15 @@
 package com.twitter.finagle.context
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import org.openjdk.jmh.annotations.{Benchmark, Level, Param, Scope, Setup, State}
+import org.openjdk.jmh.annotations.Benchmark
+import org.openjdk.jmh.annotations.Level
+import org.openjdk.jmh.annotations.Param
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.Setup
+import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.infra.Blackhole
 
-// ./sbt 'project finagle-benchmark' 'jmh:run LocalContextBenchmark -prof gc'
+// ./bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- 'LocalContextBenchmark' -prof gc
 @State(Scope.Benchmark)
 class LocalContextBenchmark extends StdBenchAnnotations {
   import com.twitter.finagle.context.Contexts.local

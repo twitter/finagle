@@ -2,10 +2,15 @@ package com.twitter.finagle.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.util.{Await, Duration, Future, NullMonitor}
-import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.NullMonitor
+import org.openjdk.jmh.annotations.Benchmark
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.State
 
-// ./sbt 'project finagle-benchmark' 'jmh:run MonitorFilterBenchmark'
+// /bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- 'MonitorFilterBenchmark'
 @State(Scope.Benchmark)
 class MonitorFilterBenchmark extends StdBenchAnnotations {
 

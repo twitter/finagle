@@ -1,10 +1,15 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.balancersim
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{param, Stack}
+import com.twitter.finagle.loadbalancer.Balancers
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.NoBrokersAvailableException
-import com.twitter.util.{Activity, Future, Stopwatch, Var}
+import com.twitter.finagle.Stack
+import com.twitter.finagle.param
+import com.twitter.util.Activity
+import com.twitter.util.Future
+import com.twitter.util.Stopwatch
+import com.twitter.util.Var
 
 private object Simulation extends com.twitter.app.App {
   val qps = flag("qps", 1250, "Number of queries to send per second")

@@ -1,12 +1,13 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.balancersim
 
-import com.twitter.finagle.Address
-import com.twitter.finagle.ClientConnection
-import com.twitter.finagle.Service
-import com.twitter.finagle.Failure
-import com.twitter.finagle.Status
+import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.Address
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Failure
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
 import com.twitter.util.Duration
 import com.twitter.util.Future
 import com.twitter.util.Time

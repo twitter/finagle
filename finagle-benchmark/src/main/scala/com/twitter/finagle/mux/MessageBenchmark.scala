@@ -5,7 +5,7 @@ import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.mux.transport.Message
 import org.openjdk.jmh.annotations._
 
-// ./sbt 'project finagle-benchmark' 'jmh:run PipelineBenchmark'
+// ./bazel run //finagle/finagle-benchmark/src/main/scala:jmh 'PipelineBenchmark'
 class MessageBenchmark extends StdBenchAnnotations {
 
   @Benchmark

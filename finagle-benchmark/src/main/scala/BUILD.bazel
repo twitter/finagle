@@ -1,8 +1,8 @@
 scala_library(
-    sources = ["**/*.scala"],
+    name = "lib",
+    sources = ["**/benchmark/*.scala"],
     platform = "java8",
     tags = [
-        "bazel-compatible",
         "bazel-incompatible-scaladoc",  # see http://go/bazel-incompatible-scaladoc
     ],
     dependencies = [
@@ -39,13 +39,22 @@ scala_library(
     ],
 )
 
+scala_benchmark_jmh(
+    name = "jmh",
+    sources = [
+        "**/*.scala",
+    ],
+    platform = "java8",
+    dependencies = [":lib"],
+)
+
 jvm_binary(
     name = "lbsim",
-    main = "com.twitter.finagle.loadbalancer.Simulation",
+    main = "com.twitter.finagle.balancersim.Simulation",
+    sources = ["**/balancersim/*.scala"],
     platform = "java8",
-    tags = ["bazel-compatible"],
     dependencies = [
-        ":scala",
+        ":lib",
         "finagle/finagle-benchmark/src/main/resources",
     ],
 )
@@ -53,15 +62,15 @@ jvm_binary(
 jvm_binary(
     name = "hello-server",
     main = "com.twitter.finagle.thrift.HelloServer",
+    sources = ["**/thrift/HelloServer.scala"],
     platform = "java8",
-    tags = ["bazel-compatible"],
-    dependencies = [":scala"],
+    dependencies = [":lib"],
 )
 
 jvm_binary(
     name = "serverset-service",
     main = "com.twitter.finagle.serverset2.LocalServerSetService",
+    sources = ["**/serverset2/LocalServerSetService.scala"],
     platform = "java8",
-    tags = ["bazel-compatible"],
-    dependencies = [":scala"],
+    dependencies = [":lib"],
 )

@@ -4,7 +4,7 @@ import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.util.Future
 import org.openjdk.jmh.annotations._
 
-// ./sbt 'project finagle-benchmark' 'jmh:run FilterBenchmark'
+// ./bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- 'FilterBenchmark'
 @State(Scope.Benchmark)
 class FilterBenchmark extends StdBenchAnnotations {
   import FilterBenchmark._

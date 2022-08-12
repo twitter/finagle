@@ -1,6 +1,7 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.balancersim
 
-import com.twitter.finagle.util.{Drv, Rng}
+import com.twitter.finagle.util.Drv
+import com.twitter.finagle.util.Rng
 import com.twitter.util.Duration
 import scala.io.Source
 

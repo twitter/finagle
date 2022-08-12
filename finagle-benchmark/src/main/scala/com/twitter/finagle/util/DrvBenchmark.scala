@@ -8,7 +8,7 @@ import org.openjdk.jmh.annotations.Setup
 import org.openjdk.jmh.annotations.State
 import scala.util.Random
 
-// ./sbt 'project finagle-benchmark' 'jmh:run DrvBenchmark -prof gc'
+// ./bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- 'DrvBenchmark' -prof gc
 @State(Scope.Benchmark)
 class DrvBenchmark extends StdBenchAnnotations {
 

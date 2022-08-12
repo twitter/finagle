@@ -4,7 +4,7 @@ import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.util.AsyncLatch
 import org.openjdk.jmh.annotations._
 
-// ./sbt 'project finagle-benchmark' 'jmh:run AsyncLatchBenchmark'
+// ./bazel run //finagle/finagle-benchmark/src/main/scala:jmh -- 'AsyncLatchBenchmark'
 @State(Scope.Benchmark)
 class AsyncLatchBenchmark extends StdBenchAnnotations {
 
