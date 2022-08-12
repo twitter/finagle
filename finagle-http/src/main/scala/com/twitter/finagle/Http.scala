@@ -66,11 +66,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   private[finagle] final class HttpImpl private (
     private[finagle] val clientEndpointer: Stackable[ServiceFactory[Request, Response]],
     private[finagle] val serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
-    private[finagle] val listener: Stack.Params => Listener[Any, Any, TransportContext],
-    private[finagle] val implName: String) {
-
-    def mk(): (HttpImpl, Stack.Param[HttpImpl]) = (this, HttpImpl.httpImplParam)
-  }
+    private[finagle] val listener: Stack.Params => Listener[Any, Any, TransportContext])
 
   private[finagle] object HttpImpl {
     implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Http11Impl)
@@ -78,24 +74,25 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     val Http11Impl: Http.HttpImpl = new Http.HttpImpl(
       ClientEndpointer.HttpEndpointer,
       new Netty4ServerStreamTransport(_),
-      Netty4HttpListener,
-      "Netty4"
+      Netty4HttpListener
     )
 
     val Http2Impl: Http.HttpImpl = new Http.HttpImpl(
       ClientEndpointer.Http2Endpointer,
       new Netty4ServerStreamTransport(_),
-      Http2Listener.apply _,
-      "Netty4"
+      Http2Listener.apply _
     )
   }
+
+  private val Http11Params: Stack.Params = Stack.Params.empty +
+    HttpImpl.Http11Impl +
+    com.twitter.finagle.param.ProtocolLibrary("http") +
+    com.twitter.finagle.netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("http/1.1")))
 
   private val Http2Params: Stack.Params = Stack.Params.empty +
     HttpImpl.Http2Impl +
     com.twitter.finagle.param.ProtocolLibrary("http/2") +
     com.twitter.finagle.netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
-
-  private val protocolLibrary = com.twitter.finagle.param.ProtocolLibrary("http")
 
   private[this] def treatServerErrorsAsFailures: Boolean = serverErrorsAsFailures()
 
@@ -161,7 +158,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     private def params: Stack.Params =
       StackClient.defaultParams +
-        protocolLibrary +
         responseClassifierParam +
         PreferDeadlineOverTimeout(enabled = true)
   }
@@ -281,7 +277,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note this will override whatever has been set in the toggle.
      */
     def withNoHttp2: Client =
-      configured(HttpImpl.Http11Impl)
+      configuredParams(Http11Params)
 
     /**
      * Enable kerberos client authentication for http requests
@@ -405,11 +401,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           BackupRequest.traceAnnotationModule[Request, Response])
 
     private def params: Stack.Params = StackServer.defaultParams +
-      protocolLibrary +
       responseClassifierParam +
       StandardStats(
         stats.StatsAndClassifier(
-          new StandardStatsReceiver(SourceRole.Server, protocolLibrary.name),
+          new StandardStatsReceiver(SourceRole.Server, "http"),
           HttpResponseClassifier.ServerErrorsAsFailures)) +
       PreferDeadlineOverTimeout(enabled = true)
   }
@@ -540,7 +535,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note this will override whatever has been set in the toggle.
      */
     def withNoHttp2: Server =
-      configured(HttpImpl.Http11Impl)
+      configuredParams(Http11Params)
 
     /**
      * Enable kerberos server authentication for http requests

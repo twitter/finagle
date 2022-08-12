@@ -5,6 +5,8 @@ import com.twitter.finagle.http.ClientEndpointer
 import com.twitter.finagle.http.Request
 import com.twitter.finagle.http.Response
 import com.twitter.finagle.http.serverErrorsAsFailures
+import com.twitter.finagle.netty4.ssl.Alpn
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.ReqRep
 import com.twitter.finagle.service.ResponseClass
 import com.twitter.finagle.service.ResponseClassifier
@@ -162,5 +164,15 @@ class HttpTest extends AnyFunSuite with Eventually {
         assert(s.sniHostName.get == sniHostname)
       case _ => // no-op
     }
+  }
+
+  test(".withHttp2.withNoHttp2 sequence sets the correct protocolLibrary") {
+    assert(Http.client.withHttp2.withNoHttp2.params[ProtocolLibrary].name == "http")
+    assert(Http.server.withHttp2.withNoHttp2.params[ProtocolLibrary].name == "http")
+  }
+
+  test(".withHttp2.withNoHttp2 sequence sets the correct Alpn") {
+    assert(Http.client.withHttp2.withNoHttp2.params[Alpn] == Http.client.withNoHttp2.params[Alpn])
+    assert(Http.server.withHttp2.withNoHttp2.params[Alpn] == Http.server.withNoHttp2.params[Alpn])
   }
 }
