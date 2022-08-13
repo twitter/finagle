@@ -42,17 +42,37 @@ private[twitter] sealed trait StatsFormatter {
       counter.hierarchicalName -> Long.box(counter.value)
     }
 
-    val includeEmpty = includeEmptyHistograms()
+    def exportShortSummary(name: String, snapshot: Snapshot): Unit = {
+      results += histoName(name, labelCount) -> snapshot.count
+      results += histoName(name, labelSum) -> snapshot.sum
+    }
+
+    def exportFullSummary(name: String, snapshot: Snapshot): Unit = {
+      exportShortSummary(name, snapshot)
+      results += histoName(name, labelMin) -> snapshot.min
+      results += histoName(name, labelMax) -> snapshot.max
+      results += histoName(name, labelAverage) -> snapshot.average
+    }
+
     values.histograms.foreach { histogram =>
       val snapshot = histogram.value
       val name = histogram.hierarchicalName
-      val count = snapshot.count
-      results += histoName(name, labelCount) -> count
-      if (count > 0 || includeEmpty) {
-        results += histoName(name, labelSum) -> snapshot.sum
-        results += histoName(name, labelAverage) -> snapshot.average
-        results += histoName(name, labelMin) -> snapshot.min
-        results += histoName(name, labelMax) -> snapshot.max
+
+      if (snapshot.count == 0 && !includeEmptyHistograms()) {
+        if (histogram.builder.histogramFormat != HistogramFormat.NoSummary) {
+          results += histoName(name, labelCount) -> snapshot.count
+        }
+      } else {
+        histogram.builder.histogramFormat match {
+          case HistogramFormat.Default =>
+            exportFullSummary(name, snapshot)
+          case HistogramFormat.ShortSummary =>
+            exportShortSummary(name, snapshot)
+          case HistogramFormat.FullSummary =>
+            exportFullSummary(name, snapshot)
+          case HistogramFormat.NoSummary =>
+          // DO NOTHING
+        }
 
         for (p <- snapshot.percentiles) {
           val percentileName = histoName(name, labelPercentile(p.quantile))
@@ -60,6 +80,7 @@ private[twitter] sealed trait StatsFormatter {
         }
       }
     }
+
     results
   }
 

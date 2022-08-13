@@ -83,4 +83,49 @@ class StatsFormatterTest extends AnyFunSuite {
     stats.counter("a/a") // doesn't throw
   }
 
+  test("histogram format (short-summary") {
+    val metrics = newMetrics()
+    val stats = new MetricsStatsReceiver(metrics)
+    val stat = stats.stat(
+      MetricBuilder.forStat
+        .withName("my_histogram")
+        .withHistogramFormat(HistogramFormat.ShortSummary)
+    )
+
+    stat.add(10.0f)
+
+    val values = SampledValues(Seq.empty, Seq.empty, metrics.histograms)
+
+    val formatter = StatsFormatter.CommonsMetrics
+    val formatted = formatter(values)
+
+    assert(formatted("my_histogram.count") == 1)
+    assert(formatted("my_histogram.sum") == 10)
+    assert(!formatted.contains("my_histogram.max"))
+    assert(!formatted.contains("my_histogram.min"))
+    assert(!formatted.contains("my_histogram.avg"))
+  }
+
+  test("histogram format (no-summary") {
+    val metrics = newMetrics()
+    val stats = new MetricsStatsReceiver(metrics)
+    val stat = stats.stat(
+      MetricBuilder.forStat
+        .withName("my_histogram")
+        .withHistogramFormat(HistogramFormat.NoSummary)
+    )
+
+    stat.add(10.0f)
+
+    val values = SampledValues(Seq.empty, Seq.empty, metrics.histograms)
+
+    val formatter = StatsFormatter.CommonsMetrics
+    val formatted = formatter(values)
+
+    assert(!formatted.contains("my_histogram.count"))
+    assert(!formatted.contains("my_histogram.sum"))
+    assert(!formatted.contains("my_histogram.max"))
+    assert(!formatted.contains("my_histogram.min"))
+    assert(!formatted.contains("my_histogram.avg"))
+  }
 }
