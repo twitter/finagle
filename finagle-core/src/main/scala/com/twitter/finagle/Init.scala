@@ -8,6 +8,7 @@ import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.server.StackServer
+import com.twitter.finagle.stats.Verbosity
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.finagle.util.LoadService
 import com.twitter.jvm.JvmStats
@@ -38,7 +39,7 @@ private[twitter] object Init {
       fpoolStats.addGauge("pool_size") { pool.poolSize },
       fpoolStats.addGauge("active_tasks") { pool.numActiveTasks },
       fpoolStats.addGauge("completed_tasks") { pool.numCompletedTasks },
-      apertureStats.addGauge("coordinate") {
+      apertureStats.addGauge(Verbosity.ShortLived, "coordinate") {
         aperture.ProcessCoordinate() match {
           case Some(coord) => coord.offset.toFloat
           // We know the coordinate's range is [0, 1.0), so anything outside
@@ -46,7 +47,7 @@ private[twitter] object Init {
           case None => -1f
         }
       },
-      apertureStats.addGauge("peerset_size") {
+      apertureStats.addGauge(Verbosity.ShortLived, "peerset_size") {
         aperture.ProcessCoordinate() match {
           case Some(FromInstanceId(_, size)) => size.toFloat
           case _ => -1f
