@@ -1,6 +1,8 @@
 package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
+import com.twitter.finagle.server.ServerInfo
+import com.twitter.finagle.toggle.Toggle
 import scala.collection.Map
 import scala.collection.mutable
 import scala.util.matching.Regex
@@ -27,6 +29,16 @@ object includeEmptyHistograms
       false,
       "Include full histogram details when there are no data points"
     )
+
+// When enabled, export 'short' histogram summary. Otherwise, export 'full' summary.
+private object exportSlimHistogram {
+  private val toggle = Toggles(toString)
+  // We fall back to "disabled" when toggle isn't defined, which would be the case in our tests
+  // and for the OSS users.
+    .orElse(Toggle.off(toString))
+  def apply(): Boolean = toggle(ServerInfo().clusterId.hashCode)
+  override def toString: String = "com.twitter.finagle.stats.ExportSlimHistograms"
+}
 
 /**
  * Allows for customization of how stat names get formatted.
@@ -65,7 +77,8 @@ private[twitter] sealed trait StatsFormatter {
       } else {
         histogram.builder.histogramFormat match {
           case HistogramFormat.Default =>
-            exportFullSummary(name, snapshot)
+            if (exportSlimHistogram()) exportShortSummary(name, snapshot)
+            else exportFullSummary(name, snapshot)
           case HistogramFormat.ShortSummary =>
             exportShortSummary(name, snapshot)
           case HistogramFormat.FullSummary =>

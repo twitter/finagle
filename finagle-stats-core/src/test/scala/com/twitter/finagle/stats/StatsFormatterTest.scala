@@ -128,4 +128,46 @@ class StatsFormatterTest extends AnyFunSuite {
     assert(!formatted.contains("my_histogram.min"))
     assert(!formatted.contains("my_histogram.avg"))
   }
+
+  test("histogram format (default, toggle is OFF") {
+    com.twitter.finagle.toggle.flag.overrides
+      .let(exportSlimHistogram.toString, 0.0) {
+        val metrics = newMetrics()
+        val stats = new MetricsStatsReceiver(metrics)
+        val stat = stats.stat("my_histogram")
+        stat.add(10.0f)
+
+        val values = SampledValues(Seq.empty, Seq.empty, metrics.histograms)
+
+        val formatter = StatsFormatter.CommonsMetrics
+        val formatted = formatter(values)
+
+        assert(formatted.contains("my_histogram.count"))
+        assert(formatted.contains("my_histogram.sum"))
+        assert(formatted.contains("my_histogram.max"))
+        assert(formatted.contains("my_histogram.min"))
+        assert(formatted.contains("my_histogram.avg"))
+      }
+  }
+
+  test("histogram format (default, toggle is ON") {
+    com.twitter.finagle.toggle.flag.overrides
+      .let(exportSlimHistogram.toString, 1.0) {
+        val metrics = newMetrics()
+        val stats = new MetricsStatsReceiver(metrics)
+        val stat = stats.stat("my_histogram")
+        stat.add(10.0f)
+
+        val values = SampledValues(Seq.empty, Seq.empty, metrics.histograms)
+
+        val formatter = StatsFormatter.CommonsMetrics
+        val formatted = formatter(values)
+
+        assert(formatted.contains("my_histogram.count"))
+        assert(formatted.contains("my_histogram.sum"))
+        assert(!formatted.contains("my_histogram.max"))
+        assert(!formatted.contains("my_histogram.min"))
+        assert(!formatted.contains("my_histogram.avg"))
+      }
+  }
 }

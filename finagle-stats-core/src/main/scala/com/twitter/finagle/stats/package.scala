@@ -1,7 +1,9 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.toggle.StandardToggleMap
 import com.twitter.finagle.tunable.StandardTunableMap
-import com.twitter.util.tunable.{Tunable, TunableMap}
+import com.twitter.util.tunable.Tunable
+import com.twitter.util.tunable.TunableMap
 
 package object stats {
 
@@ -22,4 +24,6 @@ package object stats {
    */
   private[stats] val Verbose: Tunable[String] =
     Tunables(TunableMap.Key[String]("com.twitter.finagle.stats.verbose"))
+
+  private[stats] val Toggles = StandardToggleMap("com.twitter.finagle.stats", DefaultStatsReceiver)
 }
