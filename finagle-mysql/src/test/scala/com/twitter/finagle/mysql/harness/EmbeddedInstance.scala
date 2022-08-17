@@ -30,7 +30,7 @@ import scala.sys.process.Process
  */
 object EmbeddedInstance {
   val SocketParamName = "--socket="
-  val SetupTeardownTimeout: Duration = 5.seconds
+  val SetupTeardownTimeout: Duration = 30.seconds
 
   val log: Logger = Logger.get()
 
