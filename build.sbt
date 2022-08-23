@@ -768,7 +768,9 @@ lazy val finagleExp = Project(
   ).settings(
     name := "finagle-exp",
     libraryDependencies ++= Seq(
-      "com.netflix.concurrency-limits" % "concurrency-limits-core" % "0.3.0"
+      "com.netflix.concurrency-limits" % "concurrency-limits-core" % "0.3.0",
+      "io.netty" % "netty-common" % netty4Version,
+      "commons-io" % "commons-io" % "2.11.0"
     )
   ).dependsOn(
     finagleCore % "compile->compile;test->test",

@@ -1,0 +1,23 @@
+35 34 8:1 / / rw,noatime - ext3 /dev/root rw,seclabel,nobarrier,data=ordered
+36 35 0:15 / /dev rw,relatime - tmpfs /dev rw,seclabel,mode=755
+37 36 0:9 / /dev/pts rw,relatime - devpts devpts rw,seclabel,gid=5,mode=620,ptmxmode=000
+38 36 0:16 / /dev/shm rw,relatime - tmpfs tmpfs rw,seclabel
+39 35 0:3 / /proc rw,relatime - proc /proc rw
+40 39 0:18 / /proc/sys/fs/binfmt_misc rw,relatime - binfmt_misc none rw
+41 35 0:14 / /sys rw,relatime - sysfs /sys rw,seclabel
+42 41 0:17 / /sys/fs/cgroup rw,nosuid,nodev,noexec,relatime - tmpfs tmpfs rw,seclabel,mode=755
+43 42 0:21 / /sys/fs/cgroup/cpuacct rw,relatime - cgroup cpuacct rw,cpuacct
+44 42 0:20 / /sys/fs/cgroup/cpu rw,relatime - cgroup cpu rw,cpu
+45 42 0:22 / /sys/fs/cgroup/memory rw,relatime - cgroup memory rw,memory
+46 42 0:23 / /sys/fs/cgroup/perf_event rw,relatime - cgroup perf_event rw,perf_event
+47 42 0:24 / /sys/fs/cgroup/freezer rw,relatime - cgroup freezer rw,freezer
+48 41 0:6 / /sys/kernel/debug rw,relatime - debugfs none rw
+49 35 0:12 / /selinux rw,relatime - selinuxfs none rw
+50 35 8:17 / /data/disk1 rw,noatime - ext4 /dev/sdb1 rw,seclabel,errors=remount-ro,data=ordered
+51 35 8:33 / /data/disk2 rw,noatime - ext4 /dev/sdc1 rw,seclabel,errors=remount-ro,data=ordered
+52 35 8:1 /var/run/netns /var/run/netns rw,noatime master:1 - ext3 /dev/root rw,seclabel,nobarrier,data=ordered
+53 52 0:3 / /var/run/netns/23519 rw,relatime master:4 - proc /proc rw
+104 52 0:3 / /var/run/netns/21233 rw,relatime master:2 - proc /proc rw
+106 52 0:3 / /var/run/netns/37612 rw,relatime master:3 - proc /proc rw
+156 52 0:3 / /var/run/netns/15751 rw,relatime master:6 - proc /proc rw
+129 52 0:3 / /var/run/netns/50010 rw,relatime master:5 - proc /proc rw

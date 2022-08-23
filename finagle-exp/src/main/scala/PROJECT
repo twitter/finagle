@@ -1,0 +1,16 @@
+# Experimental project developed in collaboration between multiple teams
+
+owners:
+  # CSL team
+  - attila
+  - avargasmorawetz
+  - banderson
+  - roanta
+  - vkostyukov
+
+  # Strato team
+  - bnavetta
+  - rli
+
+watchers:
+  - csl-team@twitter.com
