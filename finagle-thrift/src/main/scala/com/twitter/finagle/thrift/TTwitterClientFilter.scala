@@ -3,7 +3,10 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.finagle.{Service, SimpleFilter, Dtab, Dentry}
+import com.twitter.finagle.Service
+import com.twitter.finagle.SimpleFilter
+import com.twitter.finagle.Dtab
+import com.twitter.finagle.Dentry
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import java.util.ArrayList
@@ -27,7 +30,8 @@ private[thrift] class TTwitterClientFilter(
   clientId: Option[ClientId],
   protocolFactory: TProtocolFactory)
     extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
-  private[this] val clientIdBuf = clientId map { id => Buf.Utf8(id.name) }
+
+  private[this] val clientIdBuf = clientId.map(id => Buf.Utf8(id.name))
 
   /**
    * Produces an upgraded TTwitter ThriftClientRequest based on Trace,
@@ -36,7 +40,10 @@ private[thrift] class TTwitterClientFilter(
   private[this] def mkTTwitterRequest(baseRequest: ThriftClientRequest): ThriftClientRequest = {
     val header = new thrift.RequestHeader
 
-    clientId match {
+    val overriddenClientId = ClientId.overridden
+    val finalClientId = overriddenClientId.orElse(clientId)
+
+    finalClientId match {
       case Some(clientId) =>
         header.setClient_id(new thrift.ClientId(clientId.name))
       case None =>
@@ -73,7 +80,12 @@ private[thrift] class TTwitterClientFilter(
         }
       }
     }
-    clientIdBuf match {
+
+    val finalClientIdBuf = overriddenClientId
+      .map(id => Buf.Utf8(id.name))
+      .orElse(clientIdBuf)
+
+    finalClientIdBuf match {
       case Some(buf) =>
         val ctx = new thrift.RequestContext(
           Buf.ByteBuffer.Owned.extract(ClientId.clientIdCtx.marshalId),

@@ -2,7 +2,8 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle.context.Contexts
 import com.twitter.io.Buf
-import com.twitter.util.{Return, Try}
+import com.twitter.util.Return
+import com.twitter.util.Try
 
 case class ClientId(name: String) {
 
@@ -12,6 +13,14 @@ case class ClientId(name: String) {
    * on completion.
    */
   def asCurrent[T](f: => T): T = ClientId.let(Some(this))(f)
+
+  /**
+   * USE WITH CARE:
+   *
+   * This would force-override the ClientId in the RPC context. This can be used to set a
+   * per-request ClientId, which could be helpful in the multi-tenant systems.
+   */
+  private[twitter] def asOverride[T](f: => T): T = ClientId.letOverride(this)(f)
 }
 
 /**
@@ -21,6 +30,9 @@ case class ClientId(name: String) {
  * to specify the client ID in their codec.
  */
 object ClientId {
+
+  private val OverriddenClientId = new Contexts.local.Key[ClientId]
+
   // As a matter of legacy, we need to support the notion of
   // an empty client id. Old version of contexts could serialize
   // the absence of a client id with an empty buffer.
@@ -42,6 +54,8 @@ object ClientId {
   def current: Option[ClientId] =
     Contexts.broadcast.getOrElse(clientIdCtx, NoClientFn)
 
+  def overridden: Option[ClientId] = Contexts.local.get(OverriddenClientId)
+
   /**
    * See [[ClientId.asCurrent]]
    */
@@ -51,4 +65,7 @@ object ClientId {
       case None => Contexts.broadcast.letClear(clientIdCtx)(f)
     }
   }
+
+  private def letOverride[R](clientId: ClientId)(f: => R): R =
+    Contexts.local.let(OverriddenClientId, clientId)(f)
 }

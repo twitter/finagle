@@ -341,7 +341,8 @@ object ThriftMux
         // We set ClientId a bit early, because ThriftMux relies on that broadcast
         // context to be set when dispatching.
         ExceptionRemoteInfoFactory.letUpstream(Upstream.addr, ClientId.current.map(_.name)) {
-          ClientId.let(clientId) {
+          val finalClientId = ClientId.overridden.orElse(clientId)
+          ClientId.let(finalClientId) {
             val requestCtx = Contexts.local.getOrElse(Headers.Request.Key, EmptyRequestHeadersFn)
             // TODO set the Path here.
             val muxRequest =

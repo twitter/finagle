@@ -773,6 +773,38 @@ class EndToEndTest
     await(server.close())
   }
 
+  test(
+    "thriftmux server + Finagle thrift client: ClientId can be overridable externally if we want") {
+    val server = serverImpl.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new TestService.MethodPerEndpoint {
+        def query(x: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
+        def question(y: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
+        def inquiry(z: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
+      }
+    )
+
+    val clientId = ClientId("test.service")
+    val otherClientId = ClientId("other.bar")
+    val client = Thrift.client
+      .withClientId(clientId)
+      .build[TestService.MethodPerEndpoint](
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    1 to 5 foreach { _ =>
+      otherClientId.asOverride {
+        assert(await(client.query("ok")) == otherClientId.name)
+      }
+    }
+
+    await(server.close())
+  }
+
   test("RemoteInfo's upstreamId is correct") {
     val slowServer = serverImpl
       .withLabel("slowServer")
@@ -896,6 +928,35 @@ class EndToEndTest
 
     otherClientId.asCurrent {
       assert(await(client.query("ok")) == clientId.name)
+    }
+
+    await(server.close())
+  }
+
+  test("thriftmux server + thriftmux client: ClientId can overridden when we want") {
+    val server = serverImpl.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new TestService.MethodPerEndpoint {
+        def query(x: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse(""))
+        def question(y: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse(""))
+        def inquiry(z: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse(""))
+      }
+    )
+
+    val clientId = ClientId("test.service")
+    val otherClientId = ClientId("other.bar")
+    val client = clientImpl
+      .withClientId(clientId)
+      .build[TestService.MethodPerEndpoint](
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    otherClientId.asOverride {
+      assert(await(client.query("ok")) == otherClientId.name)
     }
 
     await(server.close())
