@@ -37,13 +37,6 @@ sealed abstract class PanicMode private[loadbalancer] {
 object PanicMode {
   private[loadbalancer] final class StaticPanicMode(val maxEffort: Int) extends PanicMode
 
-  private[loadbalancer] final class ToggledPanicMode(dest: String) extends PanicMode {
-    def maxEffort: Int = {
-      if (PanicModeToggle(dest)) FiftyPercentUnhealthy.maxEffort
-      else MajorityUnhealthy.maxEffort
-    }
-  }
-
   /**
    * Example: If the proportion of unhealthy nodes is 0.5, then the
    * probability of picking two unhealthy nodes with P2C is 0.5*0.5 = 25%. How
@@ -71,7 +64,7 @@ object PanicMode {
   // Greater than 50% unhealthy
   val MajorityUnhealthy = new StaticPanicMode(5)
 
-  // The default is maxEffort=5
+  // The default is maxEffort=4
   implicit val param: Stack.Param[PanicMode] =
-    Stack.Param(PanicMode.MajorityUnhealthy)
+    Stack.Param(PanicMode.FiftyPercentUnhealthy)
 }

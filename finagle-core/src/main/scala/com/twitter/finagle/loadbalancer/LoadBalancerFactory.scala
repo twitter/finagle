@@ -4,12 +4,10 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.loadbalancer.aperture.EagerConnections
 import com.twitter.finagle.loadbalancer.distributor.AddrLifecycle
-import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.finagle.util.DefaultMonitor
-import com.twitter.finagle.util.Showable
 import com.twitter.util.Activity
 import com.twitter.util.Event
 import com.twitter.util.Var
@@ -338,11 +336,6 @@ object LoadBalancerFactory {
         var finalParams = params + param.Stats(balancerStats)
         if (disableEagerConnections) {
           finalParams = finalParams + EagerConnections(false)
-        }
-
-        if (!params.contains[PanicMode]) {
-          finalParams = finalParams + new PanicMode.ToggledPanicMode(
-            Showable.show(params[BindingFactory.Dest].dest)).asInstanceOf[PanicMode]
         }
 
         loadBalancerFactory.newBalancer(

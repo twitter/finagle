@@ -459,44 +459,11 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
 
   }
 
-  test("Default panic mode is MajorityUnhealthy") {
+  test("Default panic mode is FiftyPercentUnhealthy") {
     val endpoint: Stack[ServiceFactory[String, String]] =
       Stack.leaf(
         Stack.Role("endpoint"),
-        ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
-      )
-
-    val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
-
-    var eps: Vector[String] = Vector.empty
-    val mockBalancer = new LoadBalancerFactory {
-      def newBalancer[Req, Rep](
-        endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-        emptyException: NoBrokersAvailableException,
-        params: Stack.Params
-      ): ServiceFactory[Req, Rep] = {
-        eps = endpoints.sample().toVector.map(_.address.toString)
-        assert(params[PanicMode].maxEffort == PanicMode.MajorityUnhealthy.maxEffort)
-        ServiceFactory.const(Service.mk(_ => ???))
-      }
-    }
-
-    val addresses = (0 to 10).map { i =>
-      Address(InetSocketAddress.createUnresolved(s"inet-address-$i", 0))
-    }
-
-    stack.make(
-      Stack.Params.empty +
-        LoadBalancerFactory.Param(mockBalancer) +
-        LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet)))
-    )
-  }
-
-  test("PanicModeToggle overrides stack param with FiftyPercentUnhealthy") {
-    val endpoint: Stack[ServiceFactory[String, String]] =
-      Stack.leaf(
-        Stack.Role("endpoint"),
-        ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
+        ServiceFactory.const[String, String](Service.mk[String, String](_ => ???))
       )
 
     val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
@@ -518,14 +485,11 @@ class LoadBalancerFactoryTest extends AnyFunSuite with Eventually with Integrati
       Address(InetSocketAddress.createUnresolved(s"inet-address-$i", 0))
     }
 
-    com.twitter.finagle.toggle.flag.overrides
-      .let("com.twitter.finagle.loadbalancer.PanicMode", 1.0) {
-        stack.make(
-          Stack.Params.empty +
-            LoadBalancerFactory.Param(mockBalancer) +
-            LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet)))
-        )
-      }
+    stack.make(
+      Stack.Params.empty +
+        LoadBalancerFactory.Param(mockBalancer) +
+        LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet)))
+    )
 
   }
 }
