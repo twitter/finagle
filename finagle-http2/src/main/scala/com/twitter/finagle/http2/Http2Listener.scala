@@ -2,15 +2,25 @@ package com.twitter.finagle.http2
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http2.transport.server.H2ServerFilter
-import com.twitter.finagle.{Announcement, ListeningServer, Stack}
+import com.twitter.finagle.Announcement
+import com.twitter.finagle.ListeningServer
+import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.Netty4Listener
-import com.twitter.finagle.netty4.http.{HttpCodecName, initServer, newHttpServerCodec}
+import com.twitter.finagle.netty4.http.HttpCodecName
+import com.twitter.finagle.netty4.http.initServer
+import com.twitter.finagle.netty4.http.newHttpServerCodec
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
-import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
 import com.twitter.util.Awaitable.CanAwait
-import com.twitter.util.{Duration, Future, Time}
-import io.netty.channel.{Channel, ChannelHandler, ChannelInitializer, ChannelPipeline}
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Time
+import io.netty.channel.Channel
+import io.netty.channel.ChannelHandler
+import io.netty.channel.ChannelInitializer
+import io.netty.channel.ChannelPipeline
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.concurrent.GlobalEventExecutor
 import java.net.SocketAddress
@@ -45,16 +55,16 @@ private[http2] class Http2Listener[In, Out](
   implicit val mOut: Manifest[Out])
     extends Listener[In, Out, TransportContext] {
 
+  private[this] val initServerParams = initServer(params)
   private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
-
   private[this] def pipelineInit(pipeline: ChannelPipeline): Unit = {
     channels.add(pipeline.channel)
     pipeline.addLast(HttpCodecName, newHttpServerCodec(params))
-    initServer(params)(pipeline)
+    initServerParams(pipeline)
   }
 
   private[this] val underlyingListener = Netty4Listener[In, Out, TransportContext](
-    pipelineInit = pipelineInit(_),
+    pipelineInit = pipelineInit,
     params = params,
     setupMarshalling = setupMarshalling,
     transportFactory = { ch: Channel =>

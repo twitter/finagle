@@ -15,6 +15,7 @@ import com.twitter.finagle.netty4.http.Netty4HttpListener
 import com.twitter.finagle.netty4.http.Netty4ServerStreamTransport
 import com.twitter.finagle.param.StandardStats
 import com.twitter.finagle.server._
+import com.twitter.finagle.service.DeadlineFilter
 import com.twitter.finagle.service.TimeoutFilter.PreferDeadlineOverTimeout
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.service.RetryBudget
@@ -399,6 +400,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         .insertAfter(
           ServerContextFilter.role,
           BackupRequest.traceAnnotationModule[Request, Response])
+        // The current DeadlineFilter won't work for Http2 server, remove it from Http server
+        // until it is fixed
+        .remove(DeadlineFilter.serverModule.role)
 
     private def params: Stack.Params = StackServer.defaultParams +
       responseClassifierParam +

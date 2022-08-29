@@ -1,7 +1,9 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Address, Name}
+import com.twitter.finagle.Address
+import com.twitter.finagle.Name
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.Future
 import java.net.InetSocketAddress
@@ -71,5 +73,25 @@ abstract class AbstractHttp2EndToEndTest extends AbstractEndToEndTest {
       await(client.close())
       await(server.close())
     }
+  }
+
+  test("server doesn't create dup BadRequestHandlers") {
+    val sr = new InMemoryStatsReceiver
+    val server = serverImpl().withStatsReceiver(sr).serve("localhost:*", initService)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl().newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    (1 to 20).foreach { _ =>
+      await(client(Request("/1")))
+    }
+
+    // guard against the com.twitter.finagle.netty4.http#initServer partially applied before chained
+    // with each pipeline, so BadRequestHandler is initiated at the beginning and is sharable
+    assert(sr.duplicatedMetrics.contains(Seq("rejected_invalid_header_names")))
+    // Http2Listener and H2StreamChannelInit each partially applied initServer once,
+    // but won't do it per-stream
+    assert(sr.duplicatedMetrics(Seq("rejected_invalid_header_names")) == 1)
+    await(client.close())
+    await(server.close())
   }
 }

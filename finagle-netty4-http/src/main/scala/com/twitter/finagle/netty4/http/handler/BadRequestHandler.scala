@@ -1,17 +1,23 @@
 package com.twitter.finagle.netty4.http.handler
 
 import com.twitter.finagle.http.headers.Rfc7230HeaderValidation
-import com.twitter.finagle.http.{BadRequestResponse, Response}
+import com.twitter.finagle.http.BadRequestResponse
+import com.twitter.finagle.http.Response
 import com.twitter.finagle.netty4.http.Bijections
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
-import io.netty.channel.{ChannelFutureListener, ChannelHandlerContext, ChannelInboundHandlerAdapter}
+import io.netty.channel.ChannelFutureListener
+import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.handler.codec.TooLongFrameException
-import io.netty.handler.codec.http.{HttpMessage, HttpObject}
+import io.netty.handler.codec.http.HttpMessage
+import io.netty.handler.codec.http.HttpObject
 import io.netty.util.ReferenceCountUtil
 
-private object BadRequestHandler {
+object BadRequestHandler {
   val log = Logger()
+  val HandlerName: String = "badRequestHandler"
 }
 
 /**
@@ -24,6 +30,7 @@ private object BadRequestHandler {
  *
  * @see [[ClientExceptionMapper]] for a client-side implementation of this handler
  */
+@Sharable
 private[netty4] class BadRequestHandler(stats: StatsReceiver) extends ChannelInboundHandlerAdapter {
 
   private[this] val invalidHeaderNames = stats.counter("rejected_invalid_header_names")

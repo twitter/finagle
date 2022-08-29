@@ -28,6 +28,7 @@ private[http2] object H2StreamChannelInit {
     params: Stack.Params,
     isServer: Boolean)
       extends ChannelInitializer[Channel] {
+    private val initParams = if (isServer) http.initServer(params) else http.initClient(params)
     def initChannel(ch: Channel): Unit = {
       val alloc = params[Allocator].allocator
       ch.config.setAllocator(alloc)
@@ -47,10 +48,9 @@ private[http2] object H2StreamChannelInit {
       ch.pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
       ch.pipeline.addLast(Http2StreamMessageHandler(isServer = isServer))
 
-      if (isServer) {
-        http.initServer(params)(ch.pipeline)
-      } else {
-        http.initClient(params)(ch.pipeline)
+      initParams(ch.pipeline)
+
+      if (!isServer) {
         ch.pipeline.addLast("event-mapper", Http2ClientEventMapper)
       }
 
