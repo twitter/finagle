@@ -27,4 +27,37 @@ class FlagsTest extends AnyFunSuite {
     assert(!flags.isFlagSet(1L))
     assert(!flags.isFlagSet(2L))
   }
+
+  test("set and get sampleRate") {
+    val flags = Flags()
+    val sampleRate = Float.MinPositiveValue
+    val changed = flags.setSampleRate(sampleRate)
+    assert(changed.getSampleRate() == sampleRate)
+  }
+
+  test("setSampleRate throws exception on negative sampleRate") {
+    intercept[IllegalArgumentException] {
+      Flags().setSampleRate(-0.1f)
+    }
+  }
+
+  test("sampleRate flag doesn't clobber the others") {
+    val flags = Flags()
+    val sampleRate = Float.MinPositiveValue
+    assert(!flags.isFlagSet(Flags.Debug))
+    assert(!flags.isFlagSet(Flags.Sampled))
+    assert(!flags.isFlagSet(Flags.SamplingKnown))
+
+    val changed = flags.setFlags(Seq(Flags.Debug, Flags.SamplingKnown, Flags.Sampled))
+    assert(changed.isFlagSet(Flags.Debug))
+    assert(changed.isFlagSet(Flags.Sampled))
+    assert(changed.isFlagSet(Flags.SamplingKnown))
+
+    val changedWithSR = changed.setSampleRate(sampleRate)
+    assert(changedWithSR.isFlagSet(Flags.Debug))
+    assert(changedWithSR.isFlagSet(Flags.Sampled))
+    assert(changedWithSR.isFlagSet(Flags.SamplingKnown))
+
+    assert(changedWithSR.getSampleRate() == sampleRate)
+  }
 }

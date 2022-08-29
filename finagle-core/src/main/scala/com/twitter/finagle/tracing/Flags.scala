@@ -5,11 +5,11 @@ object Flags {
   /**
    * Overview of Tracing flags
    * size in bits:
-   *  1  2                  40                               20          1
-   * +-+--+----------------------------------------+--------------------+-+
-   * | |  |                                        |      Extension     |0|
-   * | |  |                                        |        Flags       |0|
-   * +-+--+----------------------------------------+--------------------+-+
+   *  1  2                 32                   8            20          1
+   * +-+--+--------------------------------+-------+--------------------+-+
+   * | |  |          [[SampleRate]]        |       |      Extension     |0|
+   * | |  |                                |       |        Flags       |0|
+   * +-+--+--------------------------------+-------+--------------------+-+
    *  |  |                                                               |
    *  |  +-[[SamplingKnown]][[Sampled]]                                  +-Most Significant Bit
    *  +-[[Debug]]
@@ -36,6 +36,20 @@ object Flags {
    */
   val SamplingKnown = 1L << 1
   val Sampled = 1L << 2
+
+  /**
+   * We reserve 32 bits to encode the sampling rate as a float value. These are the bits
+   * immediately succeeding the Sampled flag, hence the shift of 3
+   */
+  private val SampleRateNumBits: Int = 32
+  private val MaxSampleRateFlagsValue: Long = (1L << SampleRateNumBits) - 1
+  private[tracing] val SampleRateShift: Int = 3
+
+  /**
+   * The SampleRateMask is used to store and propagate the sampling rate to child or non-deciding
+   * traces.
+   */
+  private[tracing] val SampleRateMask = MaxSampleRateFlagsValue << SampleRateShift
 
   private[this] val Empty: Flags = Flags(0L)
 
@@ -96,6 +110,31 @@ case class Flags(flags: Long) {
    * Convenience method to set the debug flag.
    */
   def setDebug: Flags = setFlag(Flags.Debug)
+
+  /**
+   * Method to set the value of sampleRate flag
+   */
+  def setSampleRate(value: Float): Flags = {
+    // We convert the float to bytes and then insert them in the right place within the 64 bits (offset by 3)
+    if (value < 0 || value > 1)
+      throw new IllegalArgumentException(
+        "Sample rate not within the valid range of 0-1, was " + value
+      )
+    else {
+      val floatAsInt = java.lang.Float.floatToRawIntBits(value)
+      val bitVal = floatAsInt.toLong << Flags.SampleRateShift
+      val maskedBitVal = bitVal & Flags.SampleRateMask
+      Flags(flags | maskedBitVal)
+    }
+  }
+
+  /**
+   * Method that converts the bits storing the sample rate back into a float
+   */
+  def getSampleRate(): Float = {
+    val unshifted: Long = flags >> Flags.SampleRateShift
+    java.lang.Float.intBitsToFloat(unshifted.toInt)
+  }
 
   /**
    * @return a long that we can use to pass in the tracing header
