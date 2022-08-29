@@ -3,6 +3,10 @@ Deadline Admission Control
 
 .. _deadline_admission_control_stats:
 
+Note that if the deadline filter is in darkmode (which is the default),
+these metrics will have the prefix `admission_control/darkmode_deadline`
+instead of `admission_control/deadline`. 
+
 **admission_control/deadline/exceeded**
   A counter of the number of requests whose deadline has expired.
 

@@ -147,8 +147,10 @@ object DeadlineFilter {
             if (maxRejectFraction <= 0.0) next
             else {
               val param.Stats(statsReceiver) = _stats
-              val scopedStatsReceiver = statsReceiver.scope("admission_control", "deadline")
               val darkMode = mode == Mode(Mode.DarkMode)
+              val counterPrefix = if (darkMode) "darkmode_" else ""
+              val scopedStatsReceiver =
+                statsReceiver.scope("admission_control", counterPrefix + "deadline")
 
               new ServiceFactoryProxy[Req, Rep](next) {
 
