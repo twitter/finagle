@@ -241,19 +241,11 @@ object ResourceTracingFilter {
   private val CpuTimeAnnotationKey: String = "srv/finagle_cputime_ns"
   private val ContinuationsAnnotationKey: String = "srv/finagle_continuations_executed"
 
-  private val toggle = CoreToggles("com.twitter.finagle.tracing.ResourceTracing")
-  private val toggleEnabled: Option[TraceId] => Boolean = {
-    case Some(traceId) => toggle(traceId.spanId.toLong.hashCode())
-    case None => false
-  }
-
   private object ResourceUsageFilter extends Filter.TypeAgnostic {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
       def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
         val trace = Trace()
-        val enabled = trace.isActivelyTracing && toggleEnabled(trace.idOption)
-
-        if (!enabled) service(request)
+        if (!trace.isActivelyTracing) service(request)
         else if (!ResourceTracker.threadCpuTimeSupported) {
           trace.recordBinary(CpuTimeAnnotationKey, "unsupported")
           service(request)

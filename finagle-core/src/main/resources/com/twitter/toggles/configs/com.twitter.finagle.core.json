@@ -4,11 +4,6 @@
       "id": "com.twitter.finagle.service.DeadlineOnly",
       "description": "Ignore the user configured timeouts, only respect the deadline propagation in ATLA",
       "fraction": 0.0
-    },
-    {
-      "id": "com.twitter.finagle.tracing.ResourceTracing",
-      "description": "Enable the setting of the Resource Tracker on traced requests",
-      "fraction": 1.0
     }
   ]
 }
