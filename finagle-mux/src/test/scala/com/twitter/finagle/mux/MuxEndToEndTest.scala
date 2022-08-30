@@ -162,3 +162,26 @@ class ZstdCompressionServerDisabledTest extends ZstdCompressingEndToEndTest {
       .withCompressionPreferences.decompression(CompressionLevel.Desired, decompressor)
   def serverImpl() = Mux.server
 }
+
+abstract class MixedCompressingEndToEndTest extends AbstractEndToEndTest {
+  override type ClientT = Mux.Client
+  override type ServerT = Mux.Server
+
+  override def skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY_TRAVIS")
+
+  val compressor = Seq(Compression.lz4Compressor(highCompression = false))
+  val decompressor = Seq(Compression.zstdDecompressor())
+}
+
+class MixedCompressionServerAcceptingTest extends MixedCompressingEndToEndTest {
+  def implName: String = "compression-client-enabled"
+
+  def clientImpl() =
+    Mux.client.withCompressionPreferences.compression(CompressionLevel.Desired, compressor)
+  def serverImpl() =
+    Mux.server.withCompressionPreferences
+      .compression(CompressionLevel.Accepted, compressor)
+      .withCompressionPreferences.decompression(
+        CompressionLevel.Desired,
+        Seq(Compression.lz4Decompressor()))
+}

@@ -8,26 +8,42 @@ import com.github.luben.zstd.ZstdDirectBufferCompressingStream;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
-/**
- * This is an experimental streaming compressor for ZStd
- * We will hopefully upstream this to Netty in the future once we're
- * convinced it works well.
- */
 public class ZstdByteBufDirectBufferCompressingStream extends ZstdDirectBufferCompressingStream {
 
-  private final ByteBuffer source;
   private final ChannelHandlerContext ctx;
+  private ByteBuf currentByteBuf;
+
+
+  // This is 131591 by default, just over 128 KB.
+  private static final int DEFAULT_BUFFER_SIZE =
+      ZstdDirectBufferCompressingStream.recommendedOutputBufferSize();
+
+  // This value is currently is 16448, or ~16 KB.
+  private static final int BUFFER_COPY_THRESHOLD = DEFAULT_BUFFER_SIZE  / 8;
+
+  private static ByteBuffer byteBufferView(ByteBuf buffer) {
+    // We perform a `.slice()` operation to ensure that our view of the buffer is pure:
+    // the index will start at 0 and the size will be DEFAULT_BUFFER_SIZE.
+    return buffer.internalNioBuffer(buffer.writerIndex(), DEFAULT_BUFFER_SIZE).slice();
+  }
+
+  private static ByteBuf allocateByteBuf(ChannelHandlerContext ctx) {
+    return ctx.alloc().directBuffer(DEFAULT_BUFFER_SIZE);
+  }
 
   /**
    * Constructor to initialize underlying decompression wrapper and retain handle to buffer
-   * @param target ByteBuffer that will hold and cycle through input data
    */
-  public ZstdByteBufDirectBufferCompressingStream(ChannelHandlerContext ctx,
-      ByteBuffer source, ByteBuffer target, int level
+  public ZstdByteBufDirectBufferCompressingStream(ChannelHandlerContext ctx, int level
   ) throws IOException {
-    super(target, level);
+    this(ctx, allocateByteBuf(ctx), level);
+  }
+
+  private ZstdByteBufDirectBufferCompressingStream(ChannelHandlerContext ctx,
+                                                   ByteBuf initial, int level) throws IOException {
+    super(byteBufferView(initial), level);
     this.ctx = ctx;
-    this.source = source;
+    currentByteBuf = initial;
   }
 
   /**
@@ -35,52 +51,71 @@ public class ZstdByteBufDirectBufferCompressingStream extends ZstdDirectBufferCo
    * @param in to compress
    * @throws IOException
    */
-  public void compress(ByteBuf in) throws IOException {
-    while (in.isReadable()) {
-      transferBuffer(in);
-      compress(source);
+  public void compressByteBuf(ByteBuf in) throws IOException {
+    if (in.isDirect() && in.isContiguous()) {
+      compressDirect(in);
+    } else {
+      compressHeap(in);
     }
+  }
+
+  private void compressHeap(ByteBuf in) throws IOException {
+    ByteBuf newDirectIn = ctx.alloc().directBuffer(in.readableBytes());
+    try {
+      // Advances the reader index of `in` automatically.
+      newDirectIn.writeBytes(in);
+      compressDirect(newDirectIn);
+    } finally {
+      newDirectIn.release();
+    }
+  }
+
+  private void compressDirect(ByteBuf in) throws IOException {
+    final int readableBytes = in.readableBytes();
+    ByteBuffer byteBuffer = in.internalNioBuffer(in.readerIndex(), readableBytes);
+
+    while (byteBuffer.hasRemaining()) {
+        compress(byteBuffer);
+    }
+    // Make sure we advance our buffer.
+    in.readerIndex(in.readerIndex() + readableBytes);
+  }
+
+  // This is the method that `ZstdDirectBufferCompressingStream` uses to tell the application
+  // that the buffer needs to be flushed to the destination (at some point) and expects to receive
+  // a buffer, which can be new or the same but with space available, to store more bytes.
+  @Override
+  protected ByteBuffer flushBuffer(ByteBuffer toFlush) {
+    // `toFlush` is the underlying `ByteBuffer` that backs `currentByteBuf` and they have the same
+    // size because we did a `.slice()` call when getting our view.
+    final int bytesWritten = DEFAULT_BUFFER_SIZE - toFlush.remaining();
+
+    // Decide if we want to copy the bytes into a new smaller buffer or just send the whole
+    // thing and reallocate a new buffer.
+    final ByteBuf out;
+    if (bytesWritten < BUFFER_COPY_THRESHOLD) {
+      // Copy the bytes into a new smaller buffer and keep on trucking.
+      out = ctx.alloc().directBuffer(bytesWritten);
+      // This variant of `writeBytes` does not mutate the indexes of `currentByteBuf`
+      out.writeBytes(currentByteBuf, currentByteBuf.writerIndex(), bytesWritten);
+    } else {
+      // We're going to send off `currentByteBuf` and allocate a new one, but first we need
+      // to bump netty's view of the data to reflect what was written to the underlying buffer.
+      currentByteBuf.writerIndex(currentByteBuf.writerIndex() + bytesWritten);
+      out = currentByteBuf;
+      currentByteBuf = allocateByteBuf(ctx);
+    }
+
+    ctx.write(out, ctx.voidPromise());
+    return byteBufferView(currentByteBuf);
   }
 
   @Override
-  protected ByteBuffer flushBuffer(ByteBuffer toFlush) {
-    toFlush.flip();
-    int toWrite = toFlush.remaining();
-    if (toWrite > 0) {
-      ByteBuf out = ctx.alloc().buffer(toWrite);
-      out.writeBytes(toFlush);
-      ctx.write(out);
-    }
-
-    toFlush.clear();
-    return toFlush;
-  }
-
-  /**
-   * Siphon bytes from an input ByteBuf to the decompression stream buffer
-   * The super class has an overridable "refill" method that is called on target exhaustion,
-   * but this is much friendlier to the Netty system wherein we can't control the sizes of
-   * incoming bytes, and we don't have block header info to know how many bytes to buffer per
-   * block.
-   *
-   * This manually swaps the buffer to "write mode" to append the bytes, then flips
-   * back to "read" mode for the bytes that have yet to be decompressed.
-   *
-   * @param in input ByteBuf, ostensibly from a Channel
-   * @return true if we dropped off some bytes
-   */
-  private void transferBuffer(ByteBuf in) {
-    if (source.limit() + in.readableBytes() > source.capacity()) {
-      source.compact();
-      source.flip();
-    }
-    int safeReadable = Math.min(in.readableBytes(), source.capacity() - source.limit());
-    if (safeReadable > 0) {
-      source.mark();
-      source.position(source.limit());
-      source.limit(source.limit() + safeReadable);
-      in.readBytes(source);
-      source.reset();
+  public synchronized void close() throws IOException {
+    super.close();
+    if (currentByteBuf != null) {
+      currentByteBuf.release();
+      currentByteBuf = null;
     }
   }
 }
