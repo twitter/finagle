@@ -8,10 +8,8 @@ junit_tests(
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/mysql:mysql-connector-java",
-        "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalatest",
         "3rdparty/jvm/org/scalatestplus:junit",
-        "3rdparty/jvm/org/scalatestplus:mockito-1-10",
         scoped(
             "3rdparty/jvm/mysql:mysql-connector-mxj-gpl-db-files",
             scope = "runtime",
