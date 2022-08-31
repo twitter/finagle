@@ -6,14 +6,23 @@ import com.twitter.finagle.context.BackupRequest
 import com.twitter.finagle.integration.thriftscala.Echo
 import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.tracing.{Annotation, Record, TraceId, Tracer}
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Http, Service, ThriftMux, http}
-import com.twitter.util.{Await, Future}
+import com.twitter.finagle.Http
+import com.twitter.finagle.Service
+import com.twitter.finagle.ThriftMux
+import com.twitter.finagle.http
+import com.twitter.util.Await
+import com.twitter.util.Future
 import java.net.InetSocketAddress
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funsuite.AnyFunSuite
 
 class BackupRequestFilterTest extends AnyFunSuite with Eventually with IntegrationPatience {
@@ -31,6 +40,7 @@ class BackupRequestFilterTest extends AnyFunSuite with Eventually with Integrati
       }
     }
     def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+    def getSampleRate: Float = 1f
   }
 
   private def assertServerTracerMessages(messages: LinkedBlockingQueue[String]): Unit = {

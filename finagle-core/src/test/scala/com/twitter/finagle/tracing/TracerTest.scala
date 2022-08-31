@@ -3,12 +3,14 @@ package com.twitter.finagle.tracing
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.funsuite.AnyFunSuite
+import scala.Float.NaN
 
 class TracerTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
   case class TestTracer(res: Option[Boolean]) extends Tracer {
     def record(record: Record): Unit = ()
     def sampleTrace(traceId: TraceId): Option[Boolean] = res
+    def getSampleRate: Float = NaN
     override def isActivelyTracing(traceId: TraceId): Boolean = res.getOrElse(true)
   }
 

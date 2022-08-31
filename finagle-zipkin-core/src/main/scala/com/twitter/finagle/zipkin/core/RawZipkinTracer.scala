@@ -34,6 +34,9 @@ abstract class RawZipkinTracer(timer: Timer = DefaultTimer) extends Tracer {
    */
   def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
 
+  // technically we're not using the sample rate, but it's effectively 100%
+  def getSampleRate: Float = 1f
+
   override def isActivelyTracing(traceId: TraceId): Boolean = true
 
   /**

@@ -19,6 +19,7 @@ class MysqlBuilderTest extends EmbeddedSuite {
         annotations ::= record.annotation
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)
+      def getSampleRate: Float = 1f
     }
     val client = fixture
       .newClient()

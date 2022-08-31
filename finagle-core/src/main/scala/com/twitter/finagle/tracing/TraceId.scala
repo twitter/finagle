@@ -1,7 +1,9 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.util.{Return, Throw, Try}
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
 import java.lang.{Boolean => JBool}
 
 object TraceId {
@@ -169,6 +171,11 @@ final case class TraceId(
     case None => spanId
     case Some(id) => id
   }
+
+  /**
+   * Convenience method for getting sampleRate from id flags
+   */
+  def getSampleRate(): Float = flags.getSampleRate()
 
   /**
    * Override [[_sampled]] to Some(true) if the debug flag is set.

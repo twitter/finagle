@@ -179,9 +179,14 @@ object Trace extends Tracing {
 
           oldId.copy(_sampled = sampledOption)
       }
+      val tracerSR: Float = tracer.getSampleRate
+      val idFlags: Flags = newId.flags
+      val newIdWithSR =
+        if (idFlags.getSampleRate() != tracerSR) newId.copy(flags = idFlags.setSampleRate(tracerSR))
+        else newId
 
       val ts = tracers
-      if (ts.contains(tracer)) Contexts.broadcast.let(TraceIdContext, newId)(f)
+      if (ts.contains(tracer)) Contexts.broadcast.let(TraceIdContext, newIdWithSR)(f)
       else {
         Contexts.local.let(tracersCtx, tracer +: ts) {
           Contexts.broadcast.let(TraceIdContext, newId)(f)

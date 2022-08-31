@@ -21,6 +21,8 @@ object DefaultTracer extends Tracer with Proxy {
 
   val get: DefaultTracer.type = this
 
+  def getSampleRate: Float = self.getSampleRate
+
   override def isActivelyTracing(traceId: TraceId): Boolean =
     self != null && self.isActivelyTracing(traceId)
 }

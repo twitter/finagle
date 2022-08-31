@@ -480,6 +480,7 @@ class EndToEndTest
         }
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = None
+      def getSampleRate: Float = 0f
     }
 
     val server = serverImpl
@@ -528,6 +529,7 @@ class EndToEndTest
         }
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = None
+      def getSampleRate: Float = 0f
     }
 
     Time.withTimeAt(Time.fromSeconds(1465510280)) { tc => // Thursday, June 9, 2016 10:11:20 PM
@@ -581,6 +583,7 @@ class EndToEndTest
         }
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+      def getSampleRate: Float = 1f
     }
 
     val serverRpc = new AtomicReference[String]()
@@ -625,6 +628,7 @@ class EndToEndTest
         }
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+      def getSampleRate: Float = 1f
     }
     val server = serverImpl
       .withTracer(serverTracer)
@@ -654,6 +658,7 @@ class EndToEndTest
         }
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+      def getSampleRate: Float = 1f
     }
 
     val client = clientImpl
@@ -688,6 +693,7 @@ class EndToEndTest
         }
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+      def getSampleRate: Float = 1f
     }
     val server = serverImpl
       .withTracer(serverTracer)

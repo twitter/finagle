@@ -36,6 +36,13 @@ trait Tracer {
   def sampleTrace(traceId: TraceId): Option[Boolean]
 
   /**
+   * What is the percentage of traces we're sampling?
+   * The sample rate is a float value between 0.0 and 1.0. If sampling
+   * is decided based on factors other than the sampleRate, this value should NaN
+   */
+  def getSampleRate: Float
+
+  /**
    * Is this tracer actively tracing this traceId?
    *
    * Return:

@@ -1,7 +1,8 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.context.{Contexts, Deadline}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.util.Time
 import org.openjdk.jmh.annotations._
@@ -115,6 +116,7 @@ private object TraceBenchmark {
   private val NoopAlwaysSamplingTracer: Tracer = new Tracer {
     def record(record: Record): Unit = ()
     def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+    def getSampleRate: Float = 1f
     override def isActivelyTracing(traceId: TraceId): Boolean = true
   }
 }

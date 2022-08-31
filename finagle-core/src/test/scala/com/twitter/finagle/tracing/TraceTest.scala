@@ -331,6 +331,25 @@ class TraceTest extends AnyFunSuite with MockitoSugar with BeforeAndAfter with O
     }
   }
 
+  test("Trace.letTracerAndId: propagate sampleRate") {
+    Time.withCurrentTimeFrozen { tc =>
+      val tracer = new Tracer {
+        def record(record: Record): Unit = ???
+        def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)
+        def getSampleRate: Float = 0.5f
+      }
+
+      val parentId =
+        TraceId(Some(SpanId(123)), Some(SpanId(456)), SpanId(789), Some(false), Flags(0))
+      Trace.letTracerAndId(tracer, parentId) {
+        Trace.letTracerAndNextId(tracer) {
+          val currentId = Trace.id
+          assert(currentId.flags.getSampleRate == tracer.getSampleRate)
+        }
+      }
+    }
+  }
+
   test("Trace.letTracerAndNextId: call with terminal=true") {
     Time.withCurrentTimeFrozen { tc =>
       val tracer = mock[Tracer]

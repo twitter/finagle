@@ -1,5 +1,7 @@
 package com.twitter.finagle.tracing
 
+import scala.Float.NaN
+
 /**
  * A no-op [[Tracer]].
  *
@@ -12,6 +14,7 @@ package com.twitter.finagle.tracing
 class NullTracer extends Tracer {
   def record(record: Record): Unit = ()
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
+  def getSampleRate: Float = NaN
   override def isNull: Boolean = true
   override def isActivelyTracing(traceId: TraceId): Boolean = false
   override def toString: String = "NullTracer"

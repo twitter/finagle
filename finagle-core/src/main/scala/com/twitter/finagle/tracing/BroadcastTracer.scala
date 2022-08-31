@@ -1,5 +1,7 @@
 package com.twitter.finagle.tracing
 
+import scala.Float.NaN
+
 object BroadcastTracer {
 
   def apply(tracers: Seq[Tracer]): Tracer = tracers.filterNot(_.isNull) match {
@@ -43,6 +45,8 @@ object BroadcastTracer {
       }
     }
 
+    def getSampleRate: Float = NaN
+
     override def isActivelyTracing(traceId: TraceId): Boolean =
       first.isActivelyTracing(traceId) || second.isActivelyTracing(traceId)
   }
@@ -77,6 +81,8 @@ object BroadcastTracer {
       }
     }
 
+    def getSampleRate: Float = NaN
+
     override def isActivelyTracing(traceId: TraceId): Boolean =
       first.isActivelyTracing(traceId) ||
         second.isActivelyTracing(traceId) ||
@@ -100,6 +106,8 @@ object BroadcastTracer {
       else
         None
     }
+
+    def getSampleRate: Float = NaN
 
     override def isActivelyTracing(traceId: TraceId): Boolean =
       tracers.exists { _.isActivelyTracing(traceId) }

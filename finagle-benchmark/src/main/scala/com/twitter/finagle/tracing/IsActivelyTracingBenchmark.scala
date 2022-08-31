@@ -1,7 +1,10 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import org.openjdk.jmh.annotations.{Benchmark, OperationsPerInvocation, Scope, State}
+import org.openjdk.jmh.annotations.Benchmark
+import org.openjdk.jmh.annotations.OperationsPerInvocation
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.infra.Blackhole
 
 @OperationsPerInvocation(50)
@@ -14,6 +17,8 @@ class IsActivelyTracingBenchmark extends StdBenchAnnotations {
     def record(record: Record): Unit = ???
 
     def sampleTrace(traceId: TraceId): Option[Boolean] = ???
+
+    def getSampleRate: Float = ???
   }
 
   private[this] val traceIdWithSampled = TraceId(

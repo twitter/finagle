@@ -3,9 +3,15 @@ package com.twitter.finagle.filter
 import com.twitter.finagle.Service
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.tracing.{Record, Trace, TraceId, Tracer}
-import com.twitter.util.{Await, Future}
-import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
+import com.twitter.finagle.tracing.Record
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.finagle.tracing.Tracer
+import com.twitter.util.Await
+import com.twitter.util.Future
+import org.openjdk.jmh.annotations.Benchmark
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.State
 
 @State(Scope.Benchmark)
 class PayloadSizeFilterBenchmark extends StdBenchAnnotations {
@@ -24,6 +30,7 @@ class PayloadSizeFilterBenchmark extends StdBenchAnnotations {
     def record(record: Record): Unit = ()
     def sampleTrace(traceId: TraceId): Option[Boolean] = None
     override def isActivelyTracing(traceId: TraceId): Boolean = true
+    def getSampleRate: Float = 0f
   }
 
   @Benchmark
