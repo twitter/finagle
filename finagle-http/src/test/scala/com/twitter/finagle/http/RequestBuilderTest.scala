@@ -39,6 +39,16 @@ v33
 --Boundary--
 """.replace("\r\n", "\n")
 
+  val MULTIPART1 =
+    """--Boundary
+content-disposition: form-data; name="foo"; filename="file-name"
+content-length: 6
+content-type: application/json; charset=UTF-8
+
+foobar
+--Boundary--
+""".replace("\r\n", "\n")
+
   val FORMPOST0 = "k1=v&k2=v2&k3=v33"
 
   test("reject non-http urls") {
@@ -325,5 +335,19 @@ v33
       .replace("\r\n", "\n")
 
     assert(content == MULTIPART0)
+  }
+
+  test("build multipart form with files") {
+    val builder0 = RequestBuilder()
+      .url(URL0)
+      .add(
+        FileElement("foo", Buf.Utf8("foobar"), Some("application/json"), Some("file-name"), true))
+
+    val req0 = builder0.buildFormPost(true)
+    val content = "--[^-\r\n]+".r
+      .replaceAllIn(req0.contentString, "--Boundary")
+      .replace("\r\n", "\n")
+
+    assert(content == MULTIPART1)
   }
 }

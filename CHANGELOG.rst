@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-http: RequestBuilder's `c.t.f.http.FileElement` now has `isText` (default: false)
+  attribute. When set to `true`, no `Content-Transfer-Encoding` header is populated on the request.
+  ``PHAB_ID=D969859``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

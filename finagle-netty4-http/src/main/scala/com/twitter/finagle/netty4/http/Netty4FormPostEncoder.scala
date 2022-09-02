@@ -3,14 +3,18 @@ package com.twitter.finagle.netty4.http
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.FormPostEncoder
 import com.twitter.finagle.netty4.ByteBufConversion
-import com.twitter.io.{Buf, Reader}
-import io.netty.buffer.{ByteBufAllocator, PooledByteBufAllocator, UnpooledByteBufAllocator}
-import io.netty.handler.codec.http.multipart.{
-  DefaultHttpDataFactory,
-  HttpDataFactory,
-  HttpPostRequestEncoder
-}
-import io.netty.handler.codec.http.{DefaultHttpRequest, FullHttpRequest, HttpRequest, HttpUtil}
+import com.twitter.io.Buf
+import com.twitter.io.Reader
+import io.netty.buffer.ByteBufAllocator
+import io.netty.buffer.PooledByteBufAllocator
+import io.netty.buffer.UnpooledByteBufAllocator
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
+import io.netty.handler.codec.http.multipart.HttpDataFactory
+import io.netty.handler.codec.http.multipart.HttpPostRequestEncoder
+import io.netty.handler.codec.http.DefaultHttpRequest
+import io.netty.handler.codec.http.FullHttpRequest
+import io.netty.handler.codec.http.HttpRequest
+import io.netty.handler.codec.http.HttpUtil
 import java.net.InetSocketAddress
 
 private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
@@ -50,7 +54,7 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
     val encoder = new HttpPostRequestEncoder(dataFactory, netty4Request, multipart)
     try {
       config.formElements.foreach {
-        case FileElement(name, content, contentType, filename) =>
+        case FileElement(name, content, contentType, filename, isText) =>
           addBodyFileUpload(
             encoder = encoder,
             factory = dataFactory,
@@ -59,7 +63,7 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
             filename = filename.getOrElse(""),
             content = content,
             contentType = contentType.orNull,
-            isText = false
+            isText = isText
           )
 
         case SimpleElement(name, value) =>
@@ -161,7 +165,7 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
       }
     val contentTransferEncoding =
       if (!isText) BinaryTransferEncodingMechanism
-      else SevenBitTransferEncodingMechanism
+      else null // netty is happy with the null
 
     val fileUpload = factory.createFileUpload(
       request,
@@ -178,5 +182,4 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
 
   /** Fields defined in the Netty private class HttpPostBodyUtil. */
   private val BinaryTransferEncodingMechanism = "binary"
-  private val SevenBitTransferEncodingMechanism = "7bit"
 }

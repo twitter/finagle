@@ -19,5 +19,6 @@ final case class FileElement(
   name: String,
   content: Buf,
   contentType: Option[String] = None,
-  filename: Option[String] = None)
+  filename: Option[String] = None,
+  isText: Boolean = false)
     extends FormElement
