@@ -1,6 +1,7 @@
 package com.twitter.finagle.thriftmux
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.conversions.PercentOps._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
@@ -14,8 +15,12 @@ import com.twitter.finagle.stats._
 import com.twitter.finagle.thriftmux.thriftscala.InvalidQueryException
 import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.util.Showable
 import com.twitter.scrooge
 import com.twitter.util._
+import com.twitter.util.registry.Entry
+import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.registry.SimpleRegistry
 import com.twitter.util.tunable.Tunable
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -917,5 +922,97 @@ class MethodBuilderTest extends AnyFunSuite with Eventually {
     assert(mbToString.contains("params=Stack.Params.") || mbToString.contains("params=Iterable"))
     assert(mbToString.contains("config=Config("))
     server.close()
+  }
+
+  test("backup stats are scoped correctly") {
+    val server = serverImpl.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new TestService.MethodPerEndpoint {
+        def query(x: String): Future[String] = Future.value(x)
+        def question(y: String): Future[String] = Future.value(y)
+        def inquiry(z: String): Future[String] = Future.value(z)
+      }
+    )
+    val stats = new InMemoryStatsReceiver()
+    val timer = new MockTimer
+
+    val intermediateClient = clientImpl
+      .withStatsReceiver(stats).withLabel("a_label")
+      .configured(param.Timer(timer))
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+
+    val mb = intermediateClient.methodBuilder(name).idempotent(maxExtraLoad = 1.percent)
+    val spe = mb.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
+    Time.withCurrentTimeFrozen { tc =>
+      await(spe(TestService.Query.Args("echo1"))) == "echo1"
+      tc.advance(5.seconds)
+      timer.tick()
+      assert(
+        stats.stat("a_label", "query1", "backups", "send_backup_after_ms")()
+          == List(1.0)
+      )
+    }
+    spe.close()
+    server.close()
+  }
+
+  test("BackupRequestFilter is added to the Registry") {
+    val registry = new SimpleRegistry()
+    GlobalRegistry.withRegistry(registry) {
+      val server = serverImpl.serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.MethodPerEndpoint {
+          def query(x: String): Future[String] = Future.value(x)
+          def question(y: String): Future[String] = Future.value(y)
+          def inquiry(z: String): Future[String] = Future.value(z)
+        }
+      )
+      val stats = new InMemoryStatsReceiver()
+      val timer = new MockTimer
+
+      val intermediateClient = clientImpl
+        .withStatsReceiver(stats).withLabel("a_label")
+        .configured(param.Timer(timer))
+      val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+
+      val mb = intermediateClient.methodBuilder(name).idempotent(maxExtraLoad = 5.percent)
+      val inquirySPE = mb.servicePerEndpoint[TestService.ServicePerEndpoint]("inquiry").inquiry
+
+      // Reuse the method builder to ensure configs for BRF have changed
+      val nonIdempotentMB = mb.nonIdempotent
+      val questionSPE =
+        nonIdempotentMB.servicePerEndpoint[TestService.ServicePerEndpoint]("question1").question
+
+      // Reuse the method builder to ensure configs for BRF have changed
+      val idempotentMB = nonIdempotentMB.idempotent(maxExtraLoad = 1.percent)
+      val querySPE = idempotentMB.servicePerEndpoint[TestService.ServicePerEndpoint]("query1").query
+
+      await(inquirySPE(TestService.Inquiry.Args("echo1"))) == "echo1"
+      await(questionSPE(TestService.Question.Args("echo1"))) == "echo1"
+      await(querySPE(TestService.Query.Args("echo1"))) == "echo1"
+      def key(methodName: String, suffix: String): Seq[String] =
+        Seq("client", "thriftmux", "a_label", Showable.show(name), "methods", methodName, suffix)
+
+      def filteredRegistry: Set[Entry] =
+        registry.filter { entry =>
+          entry.key.head == "client" && entry.key.contains("BackupRequestFilter")
+        }.toSet
+
+      val brfEntries =
+        Set(
+          Entry(
+            key("query1", "BackupRequestFilter"),
+            "maxExtraLoad: Some(0.01), sendInterrupts: true"),
+          Entry(
+            key("inquiry", "BackupRequestFilter"),
+            "maxExtraLoad: Some(0.05), sendInterrupts: true")
+        )
+      assert(filteredRegistry.size == 2)
+      assert(filteredRegistry == brfEntries)
+      inquirySPE.close()
+      querySPE.close()
+      questionSPE.close()
+      server.close()
+    }
   }
 }

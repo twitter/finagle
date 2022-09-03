@@ -5,6 +5,8 @@ import com.twitter.conversions.PercentOps._
 import com.twitter.finagle.Stack.NoOpModule
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
+import com.twitter.finagle.client.DynamicBackupRequestFilter.BRFConfig
+import com.twitter.finagle.client.DynamicBackupRequestFilter.PoolKey
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.service._
@@ -427,51 +429,6 @@ class MethodBuilderTest
     }
   }
 
-  test("BackupRequestFilter is added to the Registry") {
-    val registry = new SimpleRegistry()
-    GlobalRegistry.withRegistry(registry) {
-      val protocolLib = "test_lib"
-      val clientName = "some_svc"
-      val addr = "test_addr"
-      val stats = new InMemoryStatsReceiver()
-      val params =
-        Stack.Params.empty +
-          param.Stats(stats) +
-          param.Label(clientName) +
-          param.ProtocolLibrary(protocolLib)
-      val stackClient = TestStackClient(stack, params)
-      val methodBuilder = MethodBuilder.from(addr, stackClient)
-
-      val classifier: ResponseClassifier = ResponseClassifier.named("foo") {
-        case ReqRep(_, Throw(_: IndividualRequestTimeoutException)) =>
-          ResponseClass.RetryableFailure
-      }
-
-      def key(name: String, suffix: String*): Seq[String] =
-        Seq("client", protocolLib, clientName, addr, "methods", name) ++ suffix
-
-      def filteredRegistry: Set[Entry] =
-        registry.filter { entry => entry.key.head == "client" }.toSet
-
-      val sundaeSvc = methodBuilder
-        .idempotent(1.percent, false, classifier)
-        .newService("sundae")
-
-      val sundaeEntries = Set(
-        Entry(key("sundae", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/sundae"),
-        Entry(key("sundae", "retry"), "Config(Some(Idempotent(foo)),2)"),
-        Entry(
-          key("sundae", "BackupRequestFilter"),
-          "maxExtraLoad: Some(0.01), sendInterrupts: false")
-      )
-
-      filteredRegistry should contain theSameElementsAs sundaeEntries
-
-      awaitReady(sundaeSvc.close())
-      assert(Set.empty == filteredRegistry)
-    }
-  }
-
   test("stats are filtered with methodName if it exists") {
     val stats = new InMemoryStatsReceiver()
     val clientLabel = "the_client"
@@ -697,20 +654,23 @@ class MethodBuilderTest
       BackupRequestFilter.Configured(maxExtraLoad = 1.percent, sendInterrupts = true)
 
     // Configure BackupRequestFilter
-    val params = Stack.Params.empty + configuredBrfParam
+    val params = Stack.Params.empty
 
     val stack = Stack.leaf(Stack.Role("test"), svc)
 
     val stackClient = TestStackClient(stack, params)
-    val methodBuilder = MethodBuilder.from("with backups", stackClient)
+    val initialMethodBuilder = MethodBuilder.from("with backups", stackClient)
+    val methodBuilder = initialMethodBuilder.withConfig(
+      initialMethodBuilder.config.copy(brfConfig =
+        BRFConfig(configuredBrfParam, None, None, None, new PoolKey())))
 
     // Ensure BRF is configured before calling `nonIdempotent`
-    assert(methodBuilder.params[BackupRequestFilter.Param] == configuredBrfParam)
+    assert(methodBuilder.config.brfConfig.configParam == configuredBrfParam)
 
     val nonIdempotentClient = methodBuilder.nonIdempotent
 
     // Ensure BRF is disabled after calling `nonIdempotent`
-    assert(nonIdempotentClient.params[BackupRequestFilter.Param] == BackupRequestFilter.Disabled)
+    assert(nonIdempotentClient.config.brfConfig.configParam == BackupRequestFilter.Disabled)
   }
 
   test("nonIdempotent client keeps existing ResponseClassifier in params ") {
@@ -838,7 +798,7 @@ class MethodBuilderTest
       .total(totalTimeout)
       .idempotent(1.percent, sendInterrupts = true, classifier)
 
-    mb.params[BackupRequestFilter.Param] match {
+    mb.config.brfConfig.configParam match {
       case BackupRequestFilter.Param
             .Configured(maxExtraLoadTunable, sendInterrupts, minSendBackupAfterMs) =>
         assert(
@@ -905,38 +865,30 @@ class MethodBuilderTest
       .idempotent(tunable, sendInterrupts = true, ResponseClassifier.Default)
 
     assert(
-      mb.params[BackupRequestFilter.Param] == BackupRequestFilter
+      mb.config.brfConfig.configParam == BackupRequestFilter
         .Configured(tunable, sendInterrupts = true)
     )
   }
 
-  test("backup stats are scoped correctly") {
-    val stats = new InMemoryStatsReceiver()
-    val timer = new MockTimer
+  test("method builder has different BackupRequestFilter configs when configured multiple times") {
+    val underlying = mock[Service[Int, Int]]
+    val svc = ServiceFactory.const(underlying)
 
-    val svc: Service[Int, Int] = Service.const(Future.value(1))
-    val stack = Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val tunable = Tunable.const("brfTunable", 50.percent)
+    val stack = Stack.leaf(Stack.Role("test"), svc)
 
-    val stackClient = TestStackClient(
-      stack,
-      Stack.Params.empty + param.Timer(timer) + param.Stats(stats) + param.Label("clientLabel")
+    val stackClient = TestStackClient(stack, Stack.Params.empty)
+    val mb = MethodBuilder
+      .from("with Tunable", stackClient)
+      .idempotent(tunable, sendInterrupts = true, ResponseClassifier.Default)
+
+    assert(
+      mb.config.brfConfig.configParam == BackupRequestFilter
+        .Configured(tunable, sendInterrupts = true)
     )
 
-    val mb = MethodBuilder
-      .from("mb", stackClient)
-      .idempotent(maxExtraLoad = 1.percent, sendInterrupts = true, ResponseClassifier.Default)
-
-    val client = mb.newService("a_method")
-    Time.withCurrentTimeFrozen { tc =>
-      awaitResult(client(1), 1.second)
-      tc.advance(5.seconds)
-      timer.tick()
-      assert(
-        stats.stat("clientLabel", "a_method", "backups", "send_backup_after_ms")()
-          == List(1.0)
-      )
-    }
-
+    val nonIdempotentMB = mb.nonIdempotent
+    assert(nonIdempotentMB.config.brfConfig.configParam == BackupRequestFilter.Disabled)
   }
 
   test("idempotent combines existing classifier with new one") {

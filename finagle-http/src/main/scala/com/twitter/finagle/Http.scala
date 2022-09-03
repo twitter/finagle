@@ -11,6 +11,7 @@ import com.twitter.finagle.http.param.ClientKerberosConfiguration
 import com.twitter.finagle.http.param.ServerKerberosConfiguration
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.Http2Listener
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.http.Netty4HttpListener
 import com.twitter.finagle.netty4.http.Netty4ServerStreamTransport
 import com.twitter.finagle.param.StandardStats
@@ -156,6 +157,11 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         )
         .insertAfter(http.filter.StatsFilter.role, StreamingStatsFilter.module)
         .prepend(KerberosAuthenticationFilter.clientModule)
+        // `BackupRequestFilter` comes after BindingFactory so that it has
+        // the same spot in the HTTP stack as it does in the Thriftmux client stack.
+        .insertAfter(
+          BindingFactory.role,
+          DynamicBackupRequestFilter.perRequestModule[Request, Response])
 
     private def params: Stack.Params =
       StackClient.defaultParams +

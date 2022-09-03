@@ -113,7 +113,8 @@ object MethodBuilder {
     traceInitializer: Filter.TypeAgnostic,
     retry: MethodBuilderRetry.Config,
     timeout: MethodBuilderTimeout.Config,
-    filter: Filter.TypeAgnostic = Filter.typeAgnosticIdentity)
+    filter: Filter.TypeAgnostic = Filter.typeAgnosticIdentity,
+    brfConfig: DynamicBackupRequestFilter.BRFConfig = DynamicBackupRequestFilter.BRFConfig.Empty)
 
   /** Used by the `ClientRegistry` */
   private[client] val RegistryKey = "methods"
@@ -381,11 +382,47 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       // If the RetryBudget is not configured, BackupRequestFilter and RetryFilter will each
       // get a new instance of the default budget. Since we want them to share the same
       // client retry budget, insert the budget into the params.
-      params
-        + brfParam
-        + params[Retries.Budget],
+      params + params[Retries.Budget],
       config
-    ).withRetry.forClassifier(idempotentedConfigClassifier)
+    ).withRetry
+      .forClassifier(idempotentedConfigClassifier)
+      // We update part of the backup request filter config (brfConfig) here with the param and the
+      // response classifier. The method name and stats receiver happen elsewhere.
+      .setParamAndResponseClassifierInBRFConfig(brfParam, idempotentedConfigClassifier)
+  }
+
+  private def setParamAndResponseClassifierInBRFConfig(
+    configParam: BackupRequestFilter.Param,
+    responseClassifier: ResponseClassifier
+  ): MethodBuilder[Req, Rep] = {
+    val current = config.brfConfig
+    withConfig(
+      config.copy(brfConfig = current
+        .copy(configParam = configParam, responseClassifier = Some(responseClassifier))))
+  }
+
+  private def setMethodAndStatsReceiverInBRFConfig(
+    methodName: Option[String],
+    statsReceiver: StatsReceiver
+  ): MethodBuilder[Req, Rep] = {
+    val current = config.brfConfig
+    withConfig(
+      config.copy(brfConfig = current
+        .copy(methodName = methodName, statsReceiver = Some(statsReceiver))))
+  }
+
+  private[this] def enabledBackupRequestFilterWithConfig(
+    brfConfig: DynamicBackupRequestFilter.BRFConfig
+  ): Filter.TypeAgnostic = {
+    new Filter.TypeAgnostic {
+      def toFilter[Request, Response] = new SimpleFilter[Request, Response] {
+        def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+          DynamicBackupRequestFilter.withBackupRequestFilterConfig(brfConfig) {
+            service(request)
+          }
+        }
+      }
+    }
   }
 
   private[this] def nonidempotentify(
@@ -421,8 +458,8 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       methodPool,
       dest,
       stack,
-      params + BackupRequestFilter.Disabled,
-      config
+      params,
+      config.copy(brfConfig = DynamicBackupRequestFilter.BRFConfig.Empty)
     ).withRetry.forClassifier(nonidempotentedConfigClassifier)
   }
 
@@ -449,7 +486,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   //
   private[this] def newService(methodName: Option[String]): Service[Req, Rep] = {
     materialize()
-    val withStats = configured(param.Stats(statsReceiver(methodName)))
+    val withStats = mbWithStats(methodName)
     withStats.filters(methodName).andThen(withStats.wrappedService(methodName))
   }
 
@@ -486,7 +523,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   ): ServicePerEndpoint = {
     materialize()
 
-    val withStats = configured(param.Stats(statsReceiver(methodName)))
+    val withStats = mbWithStats(methodName)
 
     builder
       .servicePerEndpoint(withStats.wrappedService(methodName))
@@ -520,6 +557,14 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     }
   }
 
+  private[this] def mbWithStats(methodName: Option[String]): MethodBuilder[Req, Rep] = {
+    val sr = statsReceiver(methodName)
+    // We update the backup request filter config (brfConfig) here with the method name
+    // and stats receiver because this information wasn't available when `idemptotent` is called.
+    configured(param.Stats(sr))
+      .setMethodAndStatsReceiverInBRFConfig(methodName, sr)
+  }
+
   private[this] def materialize(): Unit = {
     methodPool.materialize(params)
   }
@@ -551,7 +596,12 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       case None => TypeAgnostic.Identity
     }
 
+    // Ensure `build` is called in order to have a key unique to this BRFConfig.
+    val brfConfigFilter = enabledBackupRequestFilterWithConfig(
+      DynamicBackupRequestFilter.BRFConfig.build(config.brfConfig))
+
     config.traceInitializer
+      .andThen(brfConfigFilter)
       .andThen(config.filter)
       .andThen(retries.logicalStatsFilter)
       .andThen(retries.logFailuresFilter(clientName, methodName))
@@ -616,13 +666,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     addToRegistry(name)
     methodPool.open()
 
-    val backupRequestParams = params +
-      param.ResponseClassifier(config.retry.responseClassifier)
-
-    // register BackupRequestFilter under the same prefixes as other method entries
-    val prefixes = Seq(registryEntry().addr) ++ registryKeyPrefix(name)
-    val underlying = BackupRequestFilter
-      .filterServiceWithPrefix(backupRequestParams, methodPool.get, prefixes)
+    val underlying = methodPool.get
 
     new ServiceProxy[Req, Rep](underlying) with CloseOnce {
       override def apply(request: Req): Future[Rep] =

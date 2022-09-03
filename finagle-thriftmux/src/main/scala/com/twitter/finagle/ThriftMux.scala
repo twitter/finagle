@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.ClientRegistry
+import com.twitter.finagle.client.DynamicBackupRequestFilter
 import com.twitter.finagle.client.ExceptionRemoteInfoFactory
 import com.twitter.finagle.client.StackBasedClient
 import com.twitter.finagle.client.StackClient
@@ -150,6 +151,10 @@ object ThriftMux
         ExceptionTracingFilter.role,
         ExceptionTracingFilter.module(new thriftmux.service.ClientExceptionTracingFilter))
       .insertAfter(BindingFactory.role, ThriftPartitioningService.module(ThriftMuxMarshallable))
+      // BackupRequestFilter comes after Partitioning so that physical requests are backed up across a fanout
+      .insertAfter(
+        ThriftPartitioningService.role,
+        DynamicBackupRequestFilter.perRequestModule[mux.Request, mux.Response])
   }
 
   /**
