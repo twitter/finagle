@@ -1,6 +1,7 @@
 package com.twitter.finagle.ssl.session
 
 import com.twitter.conversions.StringOps._
+import com.twitter.util.security.ProxyX509Certificate
 import com.twitter.util.security.NullSslSession
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSession
@@ -53,7 +54,11 @@ private[finagle] final class UsingSslSessionInfo(val session: SSLSession) extend
   val localCertificates: Seq[X509Certificate] = {
     val localCerts = session.getLocalCertificates
     if (localCerts == null) Nil
-    else localCerts.toSeq.collect { case cert: X509Certificate => cert }
+    else
+      localCerts.toSeq.collect {
+        case cert: X509Certificate =>
+          new SystemIdentityCertificate(cert)
+      }
   }
 
   /**
@@ -66,6 +71,21 @@ private[finagle] final class UsingSslSessionInfo(val session: SSLSession) extend
    * @return The sequence of peer certificates received.
    */
   val peerCertificates: Seq[X509Certificate] =
-    session.getPeerCertificates.toSeq.collect { case cert: X509Certificate => cert }
+    session.getPeerCertificates.toSeq.collect {
+      case cert: X509Certificate =>
+        new SystemIdentityCertificate(cert)
+    }
 
+}
+
+private[session] class SystemIdentityCertificate(underlying: X509Certificate)
+    extends ProxyX509Certificate(underlying) {
+  override def equals(other: Any): Boolean = {
+    other match {
+      case identityCert: SystemIdentityCertificate => this eq identityCert
+      case _ => false
+    }
+  }
+
+  override def hashCode: Int = System.identityHashCode(this)
 }
