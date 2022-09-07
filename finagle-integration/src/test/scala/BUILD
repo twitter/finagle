@@ -2,7 +2,10 @@ junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
     platform = "java8",
-    tags = ["bazel-compatible"],
+    tags = [
+        "bazel-compatible",
+        "known-to-fail-jira:CSL-12292",
+    ],
     dependencies = [
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
