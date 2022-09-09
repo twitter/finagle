@@ -246,6 +246,20 @@ object BackupRequestFilter {
     service: Service[Req, Rep],
     keyPrefixes: Seq[String]
   ): Service[Req, Rep] =
+    filterWithPrefixes[Req, Rep](params, keyPrefixes) match {
+      case Some(brf) =>
+        new ServiceProxy[Req, Rep](brf.andThen(service)) {
+          override def close(deadline: Time): Future[Unit] =
+            service.close(deadline).before(brf.close(deadline))
+        }
+
+      case None => service
+    }
+
+  private[client] def filterWithPrefixes[Req, Rep](
+    params: Stack.Params,
+    keyPrefixes: Seq[String]
+  ): Option[BackupRequestFilter[Req, Rep]] =
     params[BackupRequestFilter.Param] match {
       case BackupRequestFilter.Param
             .Configured(maxExtraLoad, sendInterrupts, minSendBackupAfterMs) =>
@@ -256,14 +270,11 @@ object BackupRequestFilter {
           val prefixes = keyPrefixes ++ Seq(BackupRequestFilter.role.name, value)
           ClientRegistry.export(params, prefixes: _*)
         }
-        val brf =
-          mkFilterFromParams[Req, Rep](maxExtraLoad, sendInterrupts, minSendBackupAfterMs, params)
-        new ServiceProxy[Req, Rep](brf.andThen(service)) {
-          override def close(deadline: Time): Future[Unit] =
-            service.close(deadline).before(brf.close(deadline))
-        }
+
+        Some(
+          mkFilterFromParams[Req, Rep](maxExtraLoad, sendInterrupts, minSendBackupAfterMs, params))
       case BackupRequestFilter.Param.Disabled =>
-        service
+        None
     }
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =

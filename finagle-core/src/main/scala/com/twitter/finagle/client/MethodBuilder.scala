@@ -20,6 +20,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.param
 import com.twitter.finagle._
 import com.twitter.util.tunable.Tunable
+import com.twitter.util.Closable
 import com.twitter.util.CloseOnce
 import com.twitter.util.Future
 import com.twitter.util.Time
@@ -114,7 +115,7 @@ object MethodBuilder {
     retry: MethodBuilderRetry.Config,
     timeout: MethodBuilderTimeout.Config,
     filter: Filter.TypeAgnostic = Filter.typeAgnosticIdentity,
-    brfConfig: DynamicBackupRequestFilter.BRFConfig = DynamicBackupRequestFilter.BRFConfig.Empty)
+    backup: BackupRequestFilter.Param = BackupRequestFilter.Param.Disabled)
 
   /** Used by the `ClientRegistry` */
   private[client] val RegistryKey = "methods"
@@ -375,7 +376,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     val configClassifier = config.retry.underlyingClassifier
     val idempotentedConfigClassifier = idempotentify(configClassifier, classifier)
 
-    new MethodBuilder[Req, Rep](
+    val base = new MethodBuilder[Req, Rep](
       methodPool,
       dest,
       stack,
@@ -383,46 +384,10 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       // get a new instance of the default budget. Since we want them to share the same
       // client retry budget, insert the budget into the params.
       params + params[Retries.Budget],
-      config
-    ).withRetry
-      .forClassifier(idempotentedConfigClassifier)
-      // We update part of the backup request filter config (brfConfig) here with the param and the
-      // response classifier. The method name and stats receiver happen elsewhere.
-      .setParamAndResponseClassifierInBRFConfig(brfParam, idempotentedConfigClassifier)
-  }
+      config.copy(backup = brfParam)
+    )
 
-  private def setParamAndResponseClassifierInBRFConfig(
-    configParam: BackupRequestFilter.Param,
-    responseClassifier: ResponseClassifier
-  ): MethodBuilder[Req, Rep] = {
-    val current = config.brfConfig
-    withConfig(
-      config.copy(brfConfig = current
-        .copy(configParam = configParam, responseClassifier = Some(responseClassifier))))
-  }
-
-  private def setMethodAndStatsReceiverInBRFConfig(
-    methodName: Option[String],
-    statsReceiver: StatsReceiver
-  ): MethodBuilder[Req, Rep] = {
-    val current = config.brfConfig
-    withConfig(
-      config.copy(brfConfig = current
-        .copy(methodName = methodName, statsReceiver = Some(statsReceiver))))
-  }
-
-  private[this] def enabledBackupRequestFilterWithConfig(
-    brfConfig: DynamicBackupRequestFilter.BRFConfig
-  ): Filter.TypeAgnostic = {
-    new Filter.TypeAgnostic {
-      def toFilter[Request, Response] = new SimpleFilter[Request, Response] {
-        def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
-          DynamicBackupRequestFilter.withBackupRequestFilterConfig(brfConfig) {
-            service(request)
-          }
-        }
-      }
-    }
+    base.withRetry.forClassifier(idempotentedConfigClassifier)
   }
 
   private[this] def nonidempotentify(
@@ -459,7 +424,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       dest,
       stack,
       params,
-      config.copy(brfConfig = DynamicBackupRequestFilter.BRFConfig.Empty)
+      config.copy(backup = BackupRequestFilter.Param.Disabled)
     ).withRetry.forClassifier(nonidempotentedConfigClassifier)
   }
 
@@ -486,7 +451,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   //
   private[this] def newService(methodName: Option[String]): Service[Req, Rep] = {
     materialize()
-    val withStats = mbWithStats(methodName)
+    val withStats = withStatsForMethod(methodName)
     withStats.filters(methodName).andThen(withStats.wrappedService(methodName))
   }
 
@@ -523,7 +488,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   ): ServicePerEndpoint = {
     materialize()
 
-    val withStats = mbWithStats(methodName)
+    val withStats = withStatsForMethod(methodName)
 
     builder
       .servicePerEndpoint(withStats.wrappedService(methodName))
@@ -557,12 +522,11 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     }
   }
 
-  private[this] def mbWithStats(methodName: Option[String]): MethodBuilder[Req, Rep] = {
+  private[this] def withStatsForMethod(methodName: Option[String]): MethodBuilder[Req, Rep] = {
     val sr = statsReceiver(methodName)
     // We update the backup request filter config (brfConfig) here with the method name
     // and stats receiver because this information wasn't available when `idemptotent` is called.
     configured(param.Stats(sr))
-      .setMethodAndStatsReceiverInBRFConfig(methodName, sr)
   }
 
   private[this] def materialize(): Unit = {
@@ -596,12 +560,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       case None => TypeAgnostic.Identity
     }
 
-    // Ensure `build` is called in order to have a key unique to this BRFConfig.
-    val brfConfigFilter = enabledBackupRequestFilterWithConfig(
-      DynamicBackupRequestFilter.BRFConfig.build(config.brfConfig))
-
     config.traceInitializer
-      .andThen(brfConfigFilter)
       .andThen(config.filter)
       .andThen(retries.logicalStatsFilter)
       .andThen(retries.logFailuresFilter(clientName, methodName))
@@ -662,29 +621,78 @@ final class MethodBuilder[Req, Rep] private[finagle] (
     }
   }
 
+  private class WrappedService(name: Option[String], underlying: Service[Req, Rep])
+      extends ServiceProxy[Req, Rep](underlying)
+      with CloseOnce {
+
+    protected def dispatch(request: Req): Future[Rep] = underlying(request)
+    protected def toClose: Closable = Closable.nop
+
+    override def apply(request: Req): Future[Rep] =
+      if (isClosed) Future.exception(new ServiceClosedException())
+      else dispatch(request)
+
+    override def status: Status =
+      if (isClosed) Status.Closed
+      else underlying.status
+
+    override protected def closeOnce(deadline: Time): Future[Unit] = {
+      // remove our method builder's entries from the registry
+      ClientRegistry.unregisterPrefixes(registryEntry(), registryKeyPrefix(name))
+
+      // call refCounted.close to decrease the ref count. `underlying.close` is only
+      // called when the closable underlying `refCounted` is closed.
+      Closable
+        .sequence(
+          methodPool,
+          toClose,
+          underlying
+        ).close(deadline)
+    }
+  }
+
   private def wrappedService(name: Option[String]): Service[Req, Rep] = {
     addToRegistry(name)
     methodPool.open()
 
     val underlying = methodPool.get
 
-    new ServiceProxy[Req, Rep](underlying) with CloseOnce {
-      override def apply(request: Req): Future[Rep] =
-        if (isClosed) Future.exception(new ServiceClosedException())
-        else super.apply(request)
+    val backupRequestParams = params +
+      config.backup +
+      param.ResponseClassifier(config.retry.responseClassifier)
 
-      override def status: Status =
-        if (isClosed) Status.Closed
-        else underlying.status
+    // register BackupRequestFilter under the same prefixes as other method entries
+    val prefixes = Seq(registryEntry().addr) ++ registryKeyPrefix(name)
+    val backupsFilter = BackupRequestFilter
+      .filterWithPrefixes[Any, Any](backupRequestParams, prefixes)
 
-      override protected def closeOnce(deadline: Time): Future[Unit] = {
-        // remove our method builder's entries from the registry
-        ClientRegistry.unregisterPrefixes(registryEntry(), registryKeyPrefix(name))
-        // call refCounted.close to decrease the ref count. `underlying.close` is only
-        // called when the closable underlying `refCounted` is closed.
-        methodPool.close(deadline).transform(_ => underlying.close(deadline))
-      }
+    // Depending on what underlying protocol we're dealing with, we either apply backups filter
+    // right away or pass it down in a local to apply later (in ThriftMux, HTTP, "later" is after
+    // partitioning).
+    val supportsPerRequestBackups = stack.contains(DynamicBackupRequestFilter.role)
+
+    backupsFilter match {
+      case Some(filter) if supportsPerRequestBackups =>
+        // Dynamic BRF is available. Let's set the local.
+        new WrappedService(name, underlying) {
+          override protected def dispatch(request: Req): Future[Rep] =
+            DynamicBackupRequestFilter.let(filter) {
+              underlying(request)
+            }
+          override protected def toClose: Closable = filter
+        }
+
+      case Some(filter) =>
+        // Dynamic BRF is not available. Apply BRF right away.
+        new WrappedService(name, underlying) {
+          override protected def dispatch(request: Req): Future[Rep] =
+            filter.asInstanceOf[Filter[Req, Rep, Req, Rep]].apply(request, underlying)
+          override protected def toClose: Closable = filter
+        }
+
+      case None =>
+        // BRF is disabled.
+        new WrappedService(name, underlying)
     }
   }
-
 }

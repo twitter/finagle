@@ -5,8 +5,6 @@ import com.twitter.conversions.PercentOps._
 import com.twitter.finagle.Stack.NoOpModule
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
-import com.twitter.finagle.client.DynamicBackupRequestFilter.BRFConfig
-import com.twitter.finagle.client.DynamicBackupRequestFilter.PoolKey
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.service._
@@ -660,17 +658,16 @@ class MethodBuilderTest
 
     val stackClient = TestStackClient(stack, params)
     val initialMethodBuilder = MethodBuilder.from("with backups", stackClient)
-    val methodBuilder = initialMethodBuilder.withConfig(
-      initialMethodBuilder.config.copy(brfConfig =
-        BRFConfig(configuredBrfParam, None, None, None, new PoolKey())))
+    val methodBuilder =
+      initialMethodBuilder.withConfig(initialMethodBuilder.config.copy(backup = configuredBrfParam))
 
     // Ensure BRF is configured before calling `nonIdempotent`
-    assert(methodBuilder.config.brfConfig.configParam == configuredBrfParam)
+    assert(methodBuilder.config.backup == configuredBrfParam)
 
     val nonIdempotentClient = methodBuilder.nonIdempotent
 
     // Ensure BRF is disabled after calling `nonIdempotent`
-    assert(nonIdempotentClient.config.brfConfig.configParam == BackupRequestFilter.Disabled)
+    assert(nonIdempotentClient.config.backup == BackupRequestFilter.Disabled)
   }
 
   test("nonIdempotent client keeps existing ResponseClassifier in params ") {
@@ -798,7 +795,7 @@ class MethodBuilderTest
       .total(totalTimeout)
       .idempotent(1.percent, sendInterrupts = true, classifier)
 
-    mb.config.brfConfig.configParam match {
+    mb.config.backup match {
       case BackupRequestFilter.Param
             .Configured(maxExtraLoadTunable, sendInterrupts, minSendBackupAfterMs) =>
         assert(
@@ -865,7 +862,7 @@ class MethodBuilderTest
       .idempotent(tunable, sendInterrupts = true, ResponseClassifier.Default)
 
     assert(
-      mb.config.brfConfig.configParam == BackupRequestFilter
+      mb.config.backup == BackupRequestFilter
         .Configured(tunable, sendInterrupts = true)
     )
   }
@@ -883,12 +880,12 @@ class MethodBuilderTest
       .idempotent(tunable, sendInterrupts = true, ResponseClassifier.Default)
 
     assert(
-      mb.config.brfConfig.configParam == BackupRequestFilter
+      mb.config.backup == BackupRequestFilter
         .Configured(tunable, sendInterrupts = true)
     )
 
     val nonIdempotentMB = mb.nonIdempotent
-    assert(nonIdempotentMB.config.brfConfig.configParam == BackupRequestFilter.Disabled)
+    assert(nonIdempotentMB.config.backup == BackupRequestFilter.Disabled)
   }
 
   test("idempotent combines existing classifier with new one") {
