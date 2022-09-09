@@ -44,8 +44,6 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
       new Ema(tau)
     }
 
-    def rate(): Int = synchronized { pending }
-
     // Calculate the exponential weighted moving average of our
     // round trip time. It isn't exactly an ewma, but rather a
     // "peak-ewma", since `cost` is hyper-sensitive to latency peaks.
@@ -96,7 +94,6 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
     private[this] val metric: Metric = new Metric
 
     def load: Double = metric.get()
-    def pending: Int = metric.rate()
 
     abstract override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
       val ts = metric.start()

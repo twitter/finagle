@@ -54,7 +54,6 @@ abstract class BaseApertureTools() extends AnyFunSuite with ApertureSuite {
       // the internal behavior of aperture.
       def id: Int = 0
       def load: Double = nodeLoad
-      def pending: Int = 0
       override val token: Int = 0
     }
 

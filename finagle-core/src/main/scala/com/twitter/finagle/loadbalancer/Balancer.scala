@@ -139,9 +139,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   def numClosed: Int =
     dist.vector.count(n => n.status == Status.Closed)
 
-  def totalPending: Int =
-    dist.vector.map(_.pending).sum
-
   def totalLoad: Double =
     dist.vector.map(_.load).sum
 
@@ -152,7 +149,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     statsReceiver.addGauge("available") { numAvailable },
     statsReceiver.addGauge("busy") { numBusy },
     statsReceiver.addGauge("closed") { numClosed },
-    statsReceiver.addGauge("load") { totalPending },
+    statsReceiver.addGauge("load") { totalLoad.toFloat },
     statsReceiver.addGauge("size") { size }
   )
 

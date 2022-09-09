@@ -55,7 +55,6 @@ class BalancerTest extends AnyFunSuite with Conductors with ScalaCheckDrivenProp
         extends ServiceFactoryProxy(factory)
         with NodeT[Unit, Unit] {
       def load: Double = ???
-      def pending: Int = ???
       override def close(deadline: Time): Future[Unit] = TestBalancer.this.synchronized {
         factory.close()
         Future.Done

@@ -28,7 +28,6 @@ private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
       with NodeT[Req, Rep] {
     // Note: These stats are never updated.
     def load: Double = 0.0
-    def pending: Int = 0
 
     override def close(deadline: Time): Future[Unit] = factory.close(deadline)
     override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = factory(conn)

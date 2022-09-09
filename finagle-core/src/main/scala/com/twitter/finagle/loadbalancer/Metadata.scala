@@ -40,10 +40,6 @@ final class Metadata private[loadbalancer] (val label: String, balancer: Balance
   def numClosed: Int =
     balancer.numClosed
 
-  /** The total number of pending requests across all nodes. */
-  def totalPending: Int =
-    balancer.totalPending
-
   /**
    * The total load across all nodes.
    *

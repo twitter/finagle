@@ -1,7 +1,10 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.util.{Throw, Time, Future, Return}
+import com.twitter.util.Throw
+import com.twitter.util.Time
+import com.twitter.util.Future
+import com.twitter.util.Return
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -20,7 +23,6 @@ private trait LeastLoaded[Req, Rep] extends BalancerNode[Req, Rep] { self: Balan
     private[this] val counter = new AtomicInteger(0)
 
     def load: Double = counter.get
-    def pending: Int = counter.get
 
     abstract override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
       counter.incrementAndGet()

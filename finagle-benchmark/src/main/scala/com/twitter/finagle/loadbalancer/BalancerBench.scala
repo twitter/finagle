@@ -41,7 +41,6 @@ object BalancerBench {
       with NodeT[Unit, Unit] {
 
     def load: Double = 0.0
-    def pending: Int = 0
     override def close(deadline: Time): Future[Unit] = Future.Done
   }
 
