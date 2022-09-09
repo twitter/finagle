@@ -1,13 +1,10 @@
-java_thrift_library(
-    name = "thrift-scala",
+create_thrift_libraries(
+    base_name = "thrift",
     sources = ["**/*.thrift"],
-    compiler = "scrooge",
-    language = "scala",
     platform = "java8",
-    provides = artifact(
-        org = "com.twitter",
-        name = "finagle-benchmark",
-        repo = artifactory,
-    ),
     tags = ["bazel-compatible"],
+    generate_languages = [
+        "java",
+        "scala",
+    ],
 )
