@@ -2,7 +2,8 @@ package com.twitter.finagle
 
 import com.twitter.finagle
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.{ClientDispatcher, StalledPipelineTimeout}
+import com.twitter.finagle.dispatch.ClientDispatcher
+import com.twitter.finagle.dispatch.StalledPipelineTimeout
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.{
@@ -13,16 +14,25 @@ import com.twitter.finagle.param.{
   _
 }
 import com.twitter.finagle.redis.RedisPartitioningService
-import com.twitter.finagle.redis.exp.{ConnectionInitCommand, RedisPool}
-import com.twitter.finagle.redis.filter.{RedisLoggingFilter, RedisTracingFilter}
-import com.twitter.finagle.redis.param.{Database, Password}
-import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
-import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
-import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.redis.exp.ConnectionInitCommand
+import com.twitter.finagle.redis.exp.RedisPool
+import com.twitter.finagle.redis.filter.RedisTracingFilter
+import com.twitter.finagle.redis.param.Database
+import com.twitter.finagle.redis.param.Password
+import com.twitter.finagle.redis.protocol.Command
+import com.twitter.finagle.redis.protocol.Reply
+import com.twitter.finagle.redis.protocol.StageTransport
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service.RetryBudget
+import com.twitter.finagle.stats.ExceptionStatsHandler
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Tracer
-import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
 import com.twitter.io.Buf
-import com.twitter.util.{Duration, FuturePool, Monitor}
+import com.twitter.util.Duration
+import com.twitter.util.FuturePool
+import com.twitter.util.Monitor
 import java.net.SocketAddress
 import java.util.concurrent.ExecutorService
 
@@ -74,7 +84,6 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
       .insertBefore(DefaultPool.Role, RedisPool.module)
       .insertAfter(StackClient.Role.prepConn, ConnectionInitCommand.module)
       .replace(StackClient.Role.protoTracing, RedisTracingFilter.module)
-      .insertBefore(StackClient.Role.protoTracing, RedisLoggingFilter.module)
 
     private[finagle] val hashRingStack: Stack[ServiceFactory[Command, Reply]] =
       stack.insertAfter(BindingFactory.role, RedisPartitioningService.module)
