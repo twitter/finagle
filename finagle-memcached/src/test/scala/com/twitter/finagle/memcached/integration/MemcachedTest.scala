@@ -357,7 +357,8 @@ abstract class MemcachedTest
       intercept[Exception] { awaitResult(client.set("foo", Buf.Utf8("bar"))) }
 
       // Node should have been ejected
-      assert(statsReceiver.counters.get(ejectionsKey) == Some(1))
+      val timeout = PatienceConfiguration.Timeout(Span(1, Seconds))
+      eventually(timeout) { assert(statsReceiver.counters.get(ejectionsKey).contains(1)) }
 
       // Node should have been marked dead, and still be dead after 5 minutes
       timeControl.advance(5.minutes)

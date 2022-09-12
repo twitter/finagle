@@ -2,14 +2,20 @@ package com.twitter.finagle.scribe
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.thrift.scribe.thriftscala.{LogEntry, ResultCode, Scribe}
-import com.twitter.finagle.{ChannelWriteException, Service}
-import com.twitter.util.{Await, Awaitable, Future}
+import com.twitter.finagle.thrift.scribe.thriftscala.LogEntry
+import com.twitter.finagle.thrift.scribe.thriftscala.ResultCode
+import com.twitter.finagle.thrift.scribe.thriftscala.Scribe
+import com.twitter.finagle.ChannelWriteException
+import com.twitter.finagle.Service
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
 import java.nio.charset.{StandardCharsets => JChar}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.concurrent.Eventually
 
 private object PublisherTest {
   val TestArrayBytes: Array[Byte] = "Hello, world".getBytes(JChar.UTF_8)
@@ -29,7 +35,7 @@ private object PublisherTest {
   }
 }
 
-class PublisherTest extends AnyFunSuite with MockitoSugar {
+class PublisherTest extends AnyFunSuite with MockitoSugar with Eventually {
   import PublisherTest._
 
   private def await[A](a: Awaitable[A]): A = Await.result(a, 2.seconds)
@@ -48,17 +54,20 @@ class PublisherTest extends AnyFunSuite with MockitoSugar {
     assert(inMemoryStatsReceiver.counter("foo-publisher", "scribe", "try_later")() == 3)
     assert(inMemoryStatsReceiver.counter("foo-publisher", "scribe", "ok")() == 0)
 
-    assert(inMemoryStatsReceiver.stat("clnt", "foo-publisher", "retries")().map(_.toInt) == Seq(2))
-    assert(inMemoryStatsReceiver.counter("clnt", "foo-publisher", "logical", "requests")() == 1)
-    assert(inMemoryStatsReceiver.counter("clnt", "foo-publisher", "logical", "success")() == 0)
-    assert(inMemoryStatsReceiver.counter("clnt", "foo-publisher", "logical", "failures")() == 1)
-    assert(
-      inMemoryStatsReceiver.counter(
-        "clnt",
-        "foo-publisher",
-        "logical",
-        "failures",
-        "com.twitter.finagle.service.ResponseClassificationSyntheticException")() == 1)
+    eventually {
+      assert(
+        inMemoryStatsReceiver.stat("clnt", "foo-publisher", "retries")().map(_.toInt) == Seq(2))
+      assert(inMemoryStatsReceiver.counter("clnt", "foo-publisher", "logical", "requests")() == 1)
+      assert(inMemoryStatsReceiver.counter("clnt", "foo-publisher", "logical", "success")() == 0)
+      assert(inMemoryStatsReceiver.counter("clnt", "foo-publisher", "logical", "failures")() == 1)
+      assert(
+        inMemoryStatsReceiver.counter(
+          "clnt",
+          "foo-publisher",
+          "logical",
+          "failures",
+          "com.twitter.finagle.service.ResponseClassificationSyntheticException")() == 1)
+    }
   }
 
   test("exhaustively retries TryLater responses -- array bytes") {
