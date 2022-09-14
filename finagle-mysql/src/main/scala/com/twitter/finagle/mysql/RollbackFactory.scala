@@ -52,7 +52,9 @@ final class RollbackFactory(client: ServiceFactory[Request, Result], statsReceiv
 
       private[this] def rollback(deadline: Time): Future[Unit] = {
         val elapsed = Stopwatch.start()
-        self(RollbackQuery).transform { result =>
+        // the rollback is `masked` in order to protect it from prior interrupts/raises.
+        // this statement should run regardless.
+        self(RollbackQuery).masked.transform { result =>
           rollbackLatencyStat.add(elapsed().inMillis)
           result match {
             case Return(_) => self.close(deadline)
@@ -78,7 +80,9 @@ final class RollbackFactory(client: ServiceFactory[Request, Result], statsReceiv
       }
 
       private[this] def poisonAndClose(deadline: Time): Future[Unit] = {
-        self(PoisonConnectionRequest).transform { _ => self.close(deadline) }
+        // the poison req is `masked` in order to protect it from prior interrupts/raises.
+        // this statement should run regardless.
+        self(PoisonConnectionRequest).masked.transform { _ => self.close(deadline) }
       }
     }
 
