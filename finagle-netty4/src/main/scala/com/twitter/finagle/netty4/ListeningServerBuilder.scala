@@ -1,24 +1,31 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.finagle.{ListeningServer, Stack}
-import com.twitter.finagle.netty4.channel.{
-  Netty4FramedServerChannelInitializer,
-  Netty4RawServerChannelInitializer
-}
+import com.twitter.finagle.ListeningServer
+import com.twitter.finagle.Stack
+import com.twitter.finagle.netty4.channel.Netty4FramedServerChannelInitializer
+import com.twitter.finagle.netty4.channel.Netty4RawServerChannelInitializer
 import com.twitter.finagle.netty4.threading.EventLoopGroupExecutionDelayTracker
-import com.twitter.finagle.param.{Stats, Timer}
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
-import com.twitter.util.{CloseAwaitably, Future, Promise, Time}
+import com.twitter.util.CloseAwaitably
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Time
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel._
 import io.netty.channel.unix.UnixChannelOption
-import io.netty.channel.epoll.{Epoll, EpollServerSocketChannel}
+import io.netty.channel.epoll.Epoll
+import io.netty.channel.epoll.EpollServerSocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.channel.local.{LocalAddress, LocalServerChannel}
-import io.netty.util.concurrent.{FutureListener, Future => NettyFuture}
-import java.lang.{Boolean => JBool, Integer => JInt}
+import io.netty.channel.local.LocalAddress
+import io.netty.channel.local.LocalServerChannel
+import io.netty.util.concurrent.FutureListener
+import io.netty.util.concurrent.{Future => NettyFuture}
+import java.lang.{Boolean => JBool}
+import java.lang.{Integer => JInt}
 import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
@@ -31,7 +38,7 @@ import com.twitter.finagle.netty4.Netty4Listener.MaxConnections
  * @see [[com.twitter.finagle.server.Listener]]
  * @see [[com.twitter.finagle.param]]
  */
-private class ListeningServerBuilder(
+private[finagle] class ListeningServerBuilder(
   pipelineInit: ChannelPipeline => Unit,
   params: Stack.Params,
   setupMarshalling: ChannelInitializer[Channel] => ChannelHandler) {
