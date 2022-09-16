@@ -1,11 +1,16 @@
 package com.twitter.finagle.offload
 
-import com.twitter.finagle.{Failure, Filter, Service, SimpleFilter, Stack}
+import com.twitter.finagle.Failure
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Service
+import com.twitter.finagle.SimpleFilter
+import com.twitter.finagle.Stack
 import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, FuturePool}
+import com.twitter.util.Future
+import com.twitter.util.FuturePool
 import java.util.concurrent.atomic.AtomicInteger
 
 // An admission control mechanism that is uses the OffloadFilters work queue
@@ -43,7 +48,7 @@ private[finagle] object OffloadFilterAdmissionControl {
   def maybeInjectAC(pool: FuturePool, params: Stack.Params): Stack.Params = {
     val acEnabled = params[ServerAdmissionControl.Param].serverAdmissionControlEnabled
     pool match {
-      case p: OffloadFuturePool if acEnabled && p.admissionControl.isDefined =>
+      case p: OffloadFuturePool if acEnabled && p.hasAdmissionControl =>
         val stats = params[Stats].statsReceiver.scope("admission_control", "offload_based")
         val existingFilters = params[ServerAdmissionControl.Filters].filters
         params + ServerAdmissionControl.Filters(

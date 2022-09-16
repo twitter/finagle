@@ -1,11 +1,19 @@
 package com.twitter.finagle.offload
 
-import com.twitter.finagle.stats.{FinagleStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Duration, ExecutorServiceFuturePool, FuturePool}
+import com.twitter.util.Duration
+import com.twitter.util.ExecutorServiceFuturePool
+import com.twitter.util.FuturePool
 import java.util.concurrent.ExecutorService
 
-private final class OffloadFuturePool(executor: ExecutorService, stats: StatsReceiver)
+/**
+ * Custom FuturePool for offloading
+ *
+ * Instrumented to improve debuggability, and to work with offload admission control
+ */
+final class OffloadFuturePool(executor: ExecutorService, stats: StatsReceiver)
     extends ExecutorServiceFuturePool(executor) {
   // Reference held so GC doesn't clean these up automatically.
   private val gauges = Seq(
@@ -15,8 +23,10 @@ private final class OffloadFuturePool(executor: ExecutorService, stats: StatsRec
     stats.addGauge("queue_depth") { numPendingTasks }
   )
 
-  val admissionControl: Option[OffloadFilterAdmissionControl] =
+  private[offload] val admissionControl: Option[OffloadFilterAdmissionControl] =
     OffloadFilterAdmissionControl(this, stats.scope("admission_control"))
+
+  val hasAdmissionControl: Boolean = admissionControl.isDefined
 }
 
 object OffloadFuturePool {
