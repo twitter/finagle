@@ -21,6 +21,7 @@ import com.twitter.finagle.service.TimeoutFilter.PreferDeadlineOverTimeout
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.ssl.ApplicationProtocols
+import com.twitter.finagle.ssl.SnoopingLevelInterpreter
 import com.twitter.finagle.stats.ExceptionStatsHandler
 import com.twitter.finagle.stats.SourceRole
 import com.twitter.finagle.stats.StandardStatsReceiver
@@ -569,6 +570,19 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      */
     def withNoAutomaticContinue: Server =
       configured(http.param.AutomaticContinue(false))
+
+    /**
+     * When enabled simultaneously with TLS (`withTransport.tls`), this server would use
+     * both cleartext and TLS socket connections on the same port (default: `disabled`).
+     */
+    def withTlsSnooping: Server =
+      configured(SnoopingLevelInterpreter.EnabledForNonNegotiatingProtocols)
+
+    /**
+     * Disables TLS snooping for this server.
+     */
+    def withNoTlsSnooping: Server =
+      configured(SnoopingLevelInterpreter.Off)
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
