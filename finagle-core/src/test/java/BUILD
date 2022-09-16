@@ -8,7 +8,6 @@ junit_tests(
         "3rdparty/jvm/org/scalatestplus:junit",
         "finagle/finagle-core",
         "util/util-core",
-        "util/util-logging/src/main/scala",
         "util/util-stats/src/main/scala",
         "util/util-tunable/src/main/scala",
     ],

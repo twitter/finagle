@@ -20,7 +20,6 @@ junit_tests(
         "finagle/finagle-netty4",
         "finagle/finagle-netty4-http",
         "util/util-core",
-        "util/util-logging",
         "util/util-stats",
     ],
 )
