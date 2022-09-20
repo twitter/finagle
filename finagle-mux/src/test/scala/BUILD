@@ -2,7 +2,10 @@ junit_tests(
     sources = ["**/*.scala"],
     compiler_option_sets = ["fatal_warnings"],
     platform = "java8",
-    tags = ["bazel-compatible"],
+    tags = [
+        "bazel-compatible",
+        "known-to-fail-jira:CSL-12337",
+    ],
     dependencies = [
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/junit",
