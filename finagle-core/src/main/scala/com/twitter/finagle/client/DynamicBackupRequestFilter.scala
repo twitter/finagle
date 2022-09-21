@@ -20,6 +20,9 @@ private[finagle] object DynamicBackupRequestFilter {
   private def current: Option[BackupRequestFilter[_, _]] =
     Contexts.local.get(localFilter)
 
+  def placeholder[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.NoOpModule[ServiceFactory[Req, Rep]](role, description)
+
   def perRequestModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module0[ServiceFactory[Req, Rep]] {
       val role = DynamicBackupRequestFilter.role

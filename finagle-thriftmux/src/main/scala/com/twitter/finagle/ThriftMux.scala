@@ -154,7 +154,7 @@ object ThriftMux
       // BackupRequestFilter comes after Partitioning so that physical requests are backed up across a fanout
       .insertAfter(
         ThriftPartitioningService.role,
-        DynamicBackupRequestFilter.perRequestModule[mux.Request, mux.Response])
+        DynamicBackupRequestFilter.placeholder[mux.Request, mux.Response])
   }
 
   /**

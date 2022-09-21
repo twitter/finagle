@@ -73,13 +73,18 @@ object MethodBuilder {
     stack: Stack[ServiceFactory[Req, Rep]]
   ): Stack[ServiceFactory[Req, Rep]] = {
     stack
-    // backup requests happen before the stack's filters so MethodBuilder
-    // has to place this before (outside of the stack).
+    // We need to move trace initializing filter up so it "covers' MB's own
+    // filters such as retries and backups.
       .remove(TraceInitializerFilter.role)
       // total timeouts are managed directly by MethodBuilder
       .remove(TimeoutFilter.totalTimeoutRole)
       // allow for dynamic per-request timeouts
       .replace(TimeoutFilter.role, DynamicTimeout.perRequestModule[Req, Rep])
+      // If the stack we're working with had support for dynamic BRF, let's install the
+      // real filter instead of a placeholder.
+      .replace(
+        DynamicBackupRequestFilter.role,
+        DynamicBackupRequestFilter.perRequestModule[Req, Rep])
   }
 
   private[finagle] object Config {
