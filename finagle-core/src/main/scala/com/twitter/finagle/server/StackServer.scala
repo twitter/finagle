@@ -160,6 +160,9 @@ object StackServer {
     // This module is placed at the top of the stack and shifts Future execution context
     // from IO threads into a configured FuturePool right after Netty.
     stk.push(OffloadFilter.server)
+    // Fork requests into a new Fiber early in the stack so all work by subsequent
+    // modules goes through Fiber submission.
+    stk.push(FiberForkFilter.module)
     // The StatsFilter needs to be above the OffloadFilter so that we can
     // calculate latency metric changes when there's an offload delay.
     stk.push(StatsFilter.module)
