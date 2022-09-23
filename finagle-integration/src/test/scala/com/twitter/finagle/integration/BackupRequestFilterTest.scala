@@ -183,7 +183,6 @@ class BackupRequestFilterTest extends AnyFunSuite with Eventually with Integrati
   }
 
   test("Backup requests happen post partitioning in Thriftmux client") {
-
     // ------------ Setup servers ------------
     // Healthy service
     val service = new Echo.MethodPerEndpoint {
@@ -270,7 +269,7 @@ class BackupRequestFilterTest extends AnyFunSuite with Eventually with Integrati
     val statsRecv = new InMemoryStatsReceiver()
     val client = ThriftMux.client
       .withStatsReceiver(statsRecv)
-      .withRetryBudget(RetryBudget.Infinite)
+      .withRetryBudget(RetryBudget.Empty)
       .withLabel("backend")
       .methodBuilder(Name.bound(addresses: _*))
       .idempotent(99.percent)
@@ -285,25 +284,24 @@ class BackupRequestFilterTest extends AnyFunSuite with Eventually with Integrati
     }
 
     // Get post-request counters
-    val clientBackupCounter = statsRecv.counter("backend", "backups", "backups_sent")
-    val clientReqCounter = statsRecv.counter("backend", "requests")
-    val clientLogicalReqCounter = statsRecv.counter("backend", "logical", "requests")
-    val healthyServerReqCounter = healthyServerSR.counter("healthyServer", "requests")
-    val unhealthyServer1ReqCounter = unhealthyServerSR1.counter("unhealthyServer1", "requests")
-    val unhealthyServer2ReqCounter = unhealthyServerSR2.counter("unhealthyServer2", "requests")
+    def clientBackupCounter = statsRecv.counter("backend", "backups", "backups_sent")
+    def clientLogicalReqCounter = statsRecv.counter("backend", "logical", "requests")
+    def healthyServerReqCounter = healthyServerSR.counter("healthyServer", "requests")
+    def unhealthyServer1ReqCounter = unhealthyServerSR1.counter("unhealthyServer1", "requests")
+    def unhealthyServer2ReqCounter = unhealthyServerSR2.counter("unhealthyServer2", "requests")
 
     // Healthy server gets the same number of client logical requests
-    assert(healthyServerReqCounter() == clientLogicalReqCounter())
+    eventually {
+      assert(healthyServerReqCounter() == clientLogicalReqCounter())
+    }
 
-    val backupsSentToUnhealthy1 = unhealthyServer1ReqCounter() - clientLogicalReqCounter()
-    val backupsSentToUnhealthy2 = unhealthyServer2ReqCounter() - clientLogicalReqCounter()
-    val totalBackupsSentAccordingToServers = backupsSentToUnhealthy1 + backupsSentToUnhealthy2
+    def backupsSentToUnhealthy1 = unhealthyServer1ReqCounter() - clientLogicalReqCounter()
+    def backupsSentToUnhealthy2 = unhealthyServer2ReqCounter() - clientLogicalReqCounter()
+    def totalBackupsSentAccordingToServers = backupsSentToUnhealthy1 + backupsSentToUnhealthy2
 
-    // Some the request stats aren't always accurate so we check for
-    // totalBackupsSentAccordingToServers == backupsAfterWarmup +/- 2
-    assert(
-      totalBackupsSentAccordingToServers <= clientBackupCounter() + 2 &&
-        totalBackupsSentAccordingToServers >= clientBackupCounter() - 2)
+    eventually {
+      assert(totalBackupsSentAccordingToServers == clientBackupCounter())
+    }
   }
 
 }
