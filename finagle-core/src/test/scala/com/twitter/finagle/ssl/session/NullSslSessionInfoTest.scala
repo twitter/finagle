@@ -30,4 +30,9 @@ class NullSslSessionInfoTest extends AnyFunSuite {
     assert(NullSslSessionInfo.peerCertificates.length == 0)
   }
 
+  test("NullSslSessionInfo does not have identities") {
+    assert(NullSslSessionInfo.localIdentity.isEmpty)
+    assert(NullSslSessionInfo.peerIdentity.isEmpty)
+  }
+
 }

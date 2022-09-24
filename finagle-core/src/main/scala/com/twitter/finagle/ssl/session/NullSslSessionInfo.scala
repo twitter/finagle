@@ -52,4 +52,7 @@ object NullSslSessionInfo extends SslSessionInfo {
    * @return The returned value is always an empty sequence.
    */
   def peerCertificates: Seq[X509Certificate] = Nil
+
+  override protected def getLocalIdentity: Option[ServiceIdentity] = None
+  override protected def getPeerIdentity: Option[ServiceIdentity] = None
 }

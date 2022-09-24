@@ -10,6 +10,9 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: Added helpers for local and peer ServiceIdentity to `SslSessionInfo`.
+  ``PHAB_ID=D973030``
+* finagle-core: Added a dependency on org.bouncycastle.bcpkix-jdk15on. ``PHAB_ID=D973030``
 * finagle-http: RequestBuilder's `c.t.f.http.FileElement` now has `isText` (default: false)
   attribute. When set to `true`, no `Content-Transfer-Encoding` header is populated on the request.
   ``PHAB_ID=D969859``

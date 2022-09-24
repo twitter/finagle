@@ -4,26 +4,31 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.pushsession.RefPushSession
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.{param => fparam}
-import com.twitter.finagle.mux.{Request, Response}
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.{Service, Stack, ThriftMux}
-import com.twitter.finagle.mux.pushsession.{
-  MuxChannelHandle,
-  MuxClientNegotiatingSession,
-  SharedNegotiationStats
-}
+import com.twitter.finagle.Service
+import com.twitter.finagle.Stack
+import com.twitter.finagle.ThriftMux
+import com.twitter.finagle.mux.pushsession.MuxChannelHandle
+import com.twitter.finagle.mux.pushsession.MuxClientNegotiatingSession
+import com.twitter.finagle.mux.pushsession.SharedNegotiationStats
 import com.twitter.finagle.param.OppTls
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.ssl.OpportunisticTls
 import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.finagle.thriftmux.thriftscala.TestService
-import com.twitter.io.{Buf, ByteReader}
-import com.twitter.util.{Future, Try}
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
+import com.twitter.util.Future
+import com.twitter.util.Try
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSession
 import org.apache.thrift.protocol.TBinaryProtocol
-import org.apache.thrift.transport.{TFramedTransport, TMemoryBuffer}
+import org.apache.thrift.transport.TFramedTransport
+import org.apache.thrift.transport.TMemoryBuffer
 import org.scalatest.funsuite.AnyFunSuite
+import com.twitter.finagle.ssl.session.ServiceIdentity
 
 class MuxDowngradingNegotiatorTest extends AnyFunSuite {
 
@@ -52,6 +57,8 @@ class MuxDowngradingNegotiatorTest extends AnyFunSuite {
         def cipherSuite: String = ???
         def localCertificates: Seq[X509Certificate] = ???
         def peerCertificates: Seq[X509Certificate] = ???
+        override def getLocalIdentity: Option[ServiceIdentity] = None
+        override def getPeerIdentity: Option[ServiceIdentity] = None
       }
     }
 

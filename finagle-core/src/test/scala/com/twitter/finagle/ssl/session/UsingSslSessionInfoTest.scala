@@ -1,26 +1,26 @@
 package com.twitter.finagle.ssl.session
 
+import com.twitter.finagle.ssl.session.ServiceIdentity.UriServiceIdentity
+import com.twitter.io.TempFile
 import com.twitter.util.security.NullSslSession
-import java.math.BigInteger
-import java.security.cert.{Certificate, X509Certificate}
+import com.twitter.util.security.X509CertificateFile
+import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSession
 import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.mockito.MockitoSugar
 
 class UsingSslSessionInfoTest extends AnyFunSuite with MockitoSugar {
 
   val sessionID: Array[Byte] = (1 to 32).toArray.map(_.toByte)
-  val localCerts: Array[Certificate] = Array.empty
 
-  val localSerialNumber: BigInteger = new BigInteger("1")
-  val peerSerialNumber: BigInteger = new BigInteger("2")
+  private val localCertFile = TempFile.fromResourcePath("/ssl/certs/test-ec-with-sans.crt")
+  private val peerCertFile = TempFile.fromResourcePath("/ssl/certs/test-ecclient-with-sans.crt")
 
-  val localCert: X509Certificate = mock[X509Certificate]
-  when(localCert.getSerialNumber).thenReturn(localSerialNumber)
-
-  val peerCert: X509Certificate = mock[X509Certificate]
-  when(peerCert.getSerialNumber).thenReturn(peerSerialNumber)
+  val localCert: X509Certificate =
+    new X509CertificateFile(localCertFile).readX509Certificate().get()
+  val peerCert: X509Certificate = new X509CertificateFile(peerCertFile).readX509Certificate().get()
 
   val mockSslSession: SSLSession = mock[SSLSession]
   when(mockSslSession.getId).thenReturn(sessionID)
@@ -61,7 +61,7 @@ class UsingSslSessionInfoTest extends AnyFunSuite with MockitoSugar {
 
   test("UsingSslSessionInfo returns a local X509Certificate") {
     assert(sessionInfo.localCertificates.length == 1)
-    assert(sessionInfo.localCertificates.head.getSerialNumber == localSerialNumber)
+    assert(sessionInfo.localCertificates.head.getSerialNumber == localCert.getSerialNumber)
   }
 
   test("UsingSslSessionInfo works when local certificates are null") {
@@ -72,12 +72,19 @@ class UsingSslSessionInfoTest extends AnyFunSuite with MockitoSugar {
     when(nullLocalSession.getCipherSuite).thenReturn("my-made-up-cipher")
 
     val sessionInfo: SslSessionInfo = new UsingSslSessionInfo(nullLocalSession)
-    assert(sessionInfo.localCertificates.length == 0)
+    assert(sessionInfo.localCertificates.isEmpty)
   }
 
   test("UsingSslSessionInfo returns a peer X509Certificate") {
     assert(sessionInfo.peerCertificates.length == 1)
-    assert(sessionInfo.peerCertificates.head.getSerialNumber == peerSerialNumber)
+    assert(sessionInfo.peerCertificates.head.getSerialNumber == peerCert.getSerialNumber)
+  }
+
+  test("UsingSslSessionInfo returns local and peer identities") {
+    assert(sessionInfo.localIdentity.get.isInstanceOf[UriServiceIdentity])
+    assert(sessionInfo.peerIdentity.get.isInstanceOf[UriServiceIdentity])
+    assert(sessionInfo.localIdentity.get.name == "twtr:svc:csl-test:test-ecserver:devel:local")
+    assert(sessionInfo.peerIdentity.get.name == "twtr:svc:csl-test:test-ecclient:devel:local")
   }
 
 }

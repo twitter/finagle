@@ -1,7 +1,7 @@
 package com.twitter.finagle.ssl.session
 
-import javax.net.ssl.SSLSession
 import java.security.cert.X509Certificate
+import javax.net.ssl.SSLSession
 
 /**
  * `SslSessionInfo` provides information related to an existing connection's use
@@ -59,5 +59,11 @@ abstract class SslSessionInfo {
    * @note If SSL/TLS is not being used, an empty sequence will be returned instead.
    */
   def peerCertificates: Seq[X509Certificate]
+
+  lazy val localIdentity: Option[ServiceIdentity] = getLocalIdentity
+  lazy val peerIdentity: Option[ServiceIdentity] = getPeerIdentity
+
+  protected def getLocalIdentity: Option[ServiceIdentity]
+  protected def getPeerIdentity: Option[ServiceIdentity]
 
 }

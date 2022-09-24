@@ -81,6 +81,7 @@ val thriftLibs = Seq(
 val scroogeLibs = thriftLibs ++ Seq("com.twitter" %% "scrooge-core" % releaseVersion)
 
 val lz4Lib = "org.lz4" % "lz4-java" % "1.8.0"
+val bouncyCastleLib = "org.bouncycastle" % "bcpkix-jdk15on" % "1.69"
 
 def util(which: String) =
   "com.twitter" %% ("util-" + which) % releaseVersion excludeAll (ExclusionRule(organization =
@@ -410,7 +411,8 @@ lazy val finagleCore = Project(
       util("tunable"),
       caffeineLib,
       hdrHistogramLib,
-      jsr305Lib
+      jsr305Lib,
+      bouncyCastleLib
     ) ++ netty4LibsTest,
     Test / unmanagedClasspath ++= (LocalProject("finagle-netty4") / Compile / fullClasspath).value
   ).dependsOn(finagleToggle, finagleInit)
