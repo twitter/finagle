@@ -245,6 +245,12 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    *                   These determinations are also reflected in stats, and used by
    *                   [[FailureAccrualFactory]].
    *
+   * @note Clients using a maxExtraLoad of 1% will need to get at least 10 QPS in order for any
+   * backups to be sent at all because the BackupRequestFilter's retryBudget has a TTL of 10 seconds
+   * for deposits (that is, 100 requests need to occur within 10 seconds before a single backup is
+   * allowed). The maxExtraLoad can be increased for these clients if they hope to see backups at
+   * lower QPS rates.
+   *
    * @note See `idempotent` below for a version that takes a [[Tunable[Double]]] for `maxExtraLoad`.
    */
   def idempotent(
@@ -277,6 +283,8 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    *                   whether or not requests have succeeded and should be retried.
    *                   These determinations are also reflected in stats, and used by
    *                   [[FailureAccrualFactory]].
+   *
+   * @note See `idempotent` above for note about low QPS clients and maxExtraLoad
    */
   def idempotent(
     maxExtraLoad: Double,
@@ -315,6 +323,8 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    *                   whether or not requests have succeeded and should be retried.
    *                   These determinations are also reflected in stats, and used by
    *                   [[FailureAccrualFactory]].
+   *
+   * @note See `idempotent` above for note about low QPS clients and maxExtraLoad
    */
   def idempotent(
     maxExtraLoad: Tunable[Double],
@@ -346,6 +356,8 @@ final class MethodBuilder[Req, Rep] private[finagle] (
    *                   whether or not requests have succeeded and should be retried.
    *                   These determinations are also reflected in stats, and used by
    *                   [[FailureAccrualFactory]].
+   *
+   * @note See `idempotent` above for note about low QPS clients and maxExtraLoad
    */
   def idempotent(
     maxExtraLoad: Tunable[Double],

@@ -75,7 +75,12 @@ object BackupRequestFilter {
     else
       RetryBudget(
         ttl = RetryBudget.DefaultTtl,
-        minRetriesPerSec = RetryBudget.DefaultMinRetriesPerSec,
+        // Set minRetriesPerSec to 0 to ensure that the BackupRequestFilter respects the
+        // maxExtraLoad configured. This means that low QPS clients won't send more backups than
+        // allowed just by sending minRetriesPerSec. The tradeoff is that backups may be slow to
+        // kick in for a new client while QPS is temporarily low, but as QPS rises this issue will
+        // go away.
+        minRetriesPerSec = 0,
         percentCanRetry = maxExtraLoad,
         nowMillis
       )
@@ -134,6 +139,12 @@ object BackupRequestFilter {
    * @param minSendBackupAfterMs Use a minimum non-zero delay to prevent sending unnecessary backup requests
    *                             immediately for services where the latency at the percentile where a
    *                             backup will be sent is ~0ms.
+   *
+   * @note Clients using a maxExtraLoad of 1% will need to get at least 10 QPS in order for any
+   * backups to be sent at all because the BackupRequestFilter's retryBudget has a TTL of 10 seconds
+   * for deposits (that is, 100 requests need to occur within 10 seconds before a single backup is
+   * allowed). The maxExtraLoad can be increased for these clients if they hope to see backups at
+   * lower QPS rates.
    */
   def Configured(
     maxExtraLoad: Double,
@@ -161,6 +172,8 @@ object BackupRequestFilter {
    *                       is returned and the result of the outstanding request is superseded. For
    *                       protocols without a control plane, where the connection is cut on
    *                       interrupts, this should be "false" to avoid connection churn
+   *
+   * @note See `Configured` above for note about low QPS clients and maxExtraLoad
    */
   def Configured(maxExtraLoad: Double, sendInterrupts: Boolean): Param = {
     require(
@@ -184,6 +197,8 @@ object BackupRequestFilter {
    * @param minSendBackupAfterMs Use a minimum non-zero delay to prevent sending unnecessary backup
    *                             requests immediately for services where the latency at the percentile
    *                             where a backup will be sent is ~0ms.
+   *
+   * @note See `Configured` above for note about low QPS clients and maxExtraLoad
    */
   def Configured(
     maxExtraLoad: Tunable[Double],

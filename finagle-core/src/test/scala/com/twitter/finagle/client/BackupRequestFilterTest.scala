@@ -680,7 +680,7 @@ class BackupRequestFilterTest
       )
       val service = newService(brf)
       warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
-      assert(currentRetryBudget.balance == 100)
+      assert(currentRetryBudget.balance == 0)
 
       // Set filter to send no backups; advance 3 seconds so we see the change
       maxExtraLoadTunable.set(0.percent)
@@ -766,7 +766,7 @@ class BackupRequestFilterTest
         "client"
       )
       val service = newService(brf)
-      assert(currentRetryBudget.balance == 100)
+      assert(currentRetryBudget.balance == 0)
       (0 until 90).foreach { _ =>
         val p = new Promise[String]
         when(underlying("ok")).thenReturn(p)
@@ -786,7 +786,7 @@ class BackupRequestFilterTest
       assert(brf.sendBackupAfterDuration == 100.millis)
       assert(
         currentRetryBudget.toString ==
-          "TokenRetryBudget(deposit=1000, withdraw=100000, balance=101)"
+          "TokenRetryBudget(deposit=1000, withdraw=100000, balance=1)"
       )
 
       // Set filter to send 10% backups; advance the time to see the change
@@ -799,7 +799,7 @@ class BackupRequestFilterTest
       eventually {
         assert(
           currentRetryBudget.toString ==
-            "TokenRetryBudget(deposit=1000, withdraw=10000, balance=100)"
+            "TokenRetryBudget(deposit=1000, withdraw=10000, balance=0)"
         )
       }
     }

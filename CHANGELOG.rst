@@ -22,6 +22,10 @@ Runtime Behavior Changes
 
 * finagle-http: Remove DeadlineFilter from Server stack. ``PHAB_ID=D964479``
 
+* finagle-core: Ensure BackupRequestFilter respects maxExtraLoad. For low QPS finagle clients
+  this may mean fewer backup requests, so such clients can increase their maxExtraLoad setting
+  if they actually want higher backup request rates. ``PHAB_ID=D981168``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
