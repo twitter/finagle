@@ -1,5 +1,6 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.MetricBuilder.IdentityType
 import org.scalatest.funsuite.AnyFunSuite
 
 class RootFinagleStatsReceiverTest extends AnyFunSuite {
@@ -15,7 +16,7 @@ class RootFinagleStatsReceiverTest extends AnyFunSuite {
     val counter = sr.counter("foo")
     val identity = counter.metadata.toMetricBuilder.get.identity
 
-    assert(identity.hierarchicalOnly == false)
+    assert(identity.identityType == IdentityType.Full)
     assert(identity.dimensionalName == Seq("rpc", "finagle", "client", "foo"))
     assert(identity.hierarchicalName == Seq("clnt", "foo"))
     assert(
@@ -31,7 +32,31 @@ class RootFinagleStatsReceiverTest extends AnyFunSuite {
     val counter = sr.counter("foo")
     val identity = counter.metadata.toMetricBuilder.get.identity
 
-    assert(identity.hierarchicalOnly == false)
+    assert(identity.identityType == IdentityType.Full)
+    assert(identity.dimensionalName == Seq("rpc", "finagle", "client", "foo"))
+    assert(identity.hierarchicalName == Seq("foo"))
+    assert(
+      identity.labels == Map(
+        "rpc_system" -> "finagle",
+        "implementation" -> "finagle",
+        "rpc_service" -> ""))
+  }
+
+  test("doesn't override metrics flagged hierarchical-only") {
+    val sr = new RootFinagleStatsReceiver(root, serviceLabel = "", Seq("rpc", "finagle", "client"))
+
+    val counter = sr.counter(
+      MetricBuilder.forCounter.withIdentity(
+        MetricBuilder.Identity(
+          hierarchicalName = Seq("foo"),
+          dimensionalName = Seq("foo"),
+          identityType = IdentityType.HierarchicalOnly
+        )
+      ))
+
+    val identity = counter.metadata.toMetricBuilder.get.identity
+
+    assert(identity.identityType == IdentityType.HierarchicalOnly)
     assert(identity.dimensionalName == Seq("rpc", "finagle", "client", "foo"))
     assert(identity.hierarchicalName == Seq("foo"))
     assert(

@@ -7,6 +7,7 @@ import com.twitter.finagle.http.RouteIndex
 import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.GaugeType
 import com.twitter.finagle.stats.MetricBuilder.HistogramType
+import com.twitter.finagle.stats.MetricBuilder.IdentityType
 import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.util.DefaultTimer
@@ -130,11 +131,12 @@ class MetricsStatsReceiver(val registry: Metrics)
    */
   def counter(metricBuilder: MetricBuilder): Counter = {
     validateMetricType(metricBuilder, CounterType)
+    val determinedMetricBuilder = determineIdentityType(metricBuilder)
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.counter on $metricBuilder.name")
+      log.trace(s"Calling StatsReceiver.counter on ${determinedMetricBuilder.name}")
     counterRequests.increment()
 
-    val storeCounter = registry.getOrCreateCounter(metricBuilder)
+    val storeCounter = registry.getOrCreateCounter(determinedMetricBuilder)
     storeCounter.counter
   }
 
@@ -143,19 +145,21 @@ class MetricsStatsReceiver(val registry: Metrics)
    */
   def stat(metricBuilder: MetricBuilder): Stat = {
     validateMetricType(metricBuilder, HistogramType)
+    val determinedMetricBuilder = determineIdentityType(metricBuilder)
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.stat for $metricBuilder.name")
+      log.trace(s"Calling StatsReceiver.stat for ${determinedMetricBuilder.name}")
     statRequests.increment()
-    val storeStat = registry.getOrCreateStat(metricBuilder)
+    val storeStat = registry.getOrCreateStat(determinedMetricBuilder)
     storeStat.stat
   }
 
   override def addGauge(metricBuilder: MetricBuilder)(f: => Float): Gauge = {
     validateMetricType(metricBuilder, GaugeType)
+    val determinedMetricBuilder = determineIdentityType(metricBuilder)
     if (log.isLoggable(Level.TRACE))
-      log.trace(s"Calling StatsReceiver.addGauge for $metricBuilder.name")
+      log.trace(s"Calling StatsReceiver.addGauge for ${determinedMetricBuilder.name}")
     gaugeRequests.increment()
-    super.addGauge(metricBuilder)(f)
+    super.addGauge(determinedMetricBuilder)(f)
   }
 
   protected[this] def registerGauge(metricBuilder: MetricBuilder, f: => Float): Unit = {
@@ -172,6 +176,13 @@ class MetricsStatsReceiver(val registry: Metrics)
     expressionSchema: ExpressionSchema
   ): Try[Unit] = registry.registerExpression(expressionSchema)
 
+  private[this] def determineIdentityType(metricBuilder: MetricBuilder): MetricBuilder = {
+    val identityType = metricBuilder.identity.identityType
+    if (identityType != IdentityType.NonDeterminate) metricBuilder
+    else
+      metricBuilder.withIdentity(identity = metricBuilder.identity.copy(
+        identityType = IdentityType.toResolvedIdentityType(identityType)))
+  }
 }
 
 private object MetricsExporter {

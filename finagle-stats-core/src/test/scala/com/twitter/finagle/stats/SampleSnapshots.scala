@@ -3,6 +3,7 @@ package com.twitter.finagle.stats
 import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.GaugeType
 import com.twitter.finagle.stats.MetricBuilder.HistogramType
+import com.twitter.finagle.stats.MetricBuilder.IdentityType
 import com.twitter.finagle.stats.MetricsView.CounterSnapshot
 import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
 import com.twitter.finagle.stats.MetricsView.HistogramSnapshot
@@ -57,7 +58,7 @@ private object SampleSnapshots {
         hierarchicalName = Seq("finagle", "future_pool", "pool_size_float"),
         dimensionalName = Seq("pool_size_float"),
         labels = Map("pool" -> "future_pool", "rpc" -> "finagle"),
-        hierarchicalOnly = false
+        identityType = IdentityType.Full
       )),
     value = 3.0
   )
@@ -72,7 +73,7 @@ private object SampleSnapshots {
         hierarchicalName = Seq("finagle", "future_pool", "pool_size_long"),
         dimensionalName = Seq("pool_size_long"),
         labels = Map("pool" -> "future_pool", "rpc" -> "finagle"),
-        hierarchicalOnly = false
+        identityType = IdentityType.Full
       )),
     value = 3l
   )
@@ -105,7 +106,7 @@ private object SampleSnapshots {
         hierarchicalName = Seq("foo", "bar", "ping_ms"),
         dimensionalName = Seq("foo", "ping_ms"),
         labels = Map("biz" -> "bar"),
-        hierarchicalOnly = false
+        identityType = IdentityType.Full
       )
     ),
     value = new Snapshot {

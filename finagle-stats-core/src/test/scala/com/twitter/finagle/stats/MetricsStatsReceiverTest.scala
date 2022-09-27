@@ -5,6 +5,7 @@ import com.twitter.finagle.stats.MetricBuilder.CounterType
 import com.twitter.finagle.stats.MetricBuilder.GaugeType
 import com.twitter.finagle.stats.MetricBuilder.HistogramType
 import com.twitter.finagle.stats.MetricBuilder.Identity
+import com.twitter.finagle.stats.MetricBuilder.IdentityType
 import com.twitter.finagle.stats.exp.Expression
 import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
@@ -240,12 +241,15 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     val aaSchema =
       MetricBuilder(metricType = CounterType)
         .withIdentity(Identity(Seq("test", "a"), Seq("a")))
+        .withHierarchicalOnly
     val bbSchema =
       MetricBuilder(percentiles = BucketedHistogram.DefaultQuantiles, metricType = HistogramType)
         .withIdentity(Identity(Seq("test", "b"), Seq("b")))
+        .withHierarchicalOnly
     val ccSchema =
       MetricBuilder(metricType = GaugeType)
         .withIdentity(Identity(Seq("test", "c"), Seq("c")))
+        .withHierarchicalOnly
 
     val expected_expression = ExpressionSchema(
       "test_expression",
@@ -309,4 +313,45 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     assert(expression2.isThrow)
   }
 
+  test("identity type is resolved to HierarchicalOnly if it is undetermined") {
+    val metrics = Metrics.createDetached()
+    val sr = new MetricsStatsReceiver(metrics)
+    val counter = sr.counter("counter")
+    val gauge = sr.addGauge("gauge") { 1.0f }
+    val stat = sr.stat("stat")
+
+    assert(
+      counter.metadata.toMetricBuilder.get.identity.identityType == IdentityType.HierarchicalOnly)
+    assert(
+      gauge.metadata.toMetricBuilder.get.identity.identityType == IdentityType.HierarchicalOnly)
+    assert(stat.metadata.toMetricBuilder.get.identity.identityType == IdentityType.HierarchicalOnly)
+  }
+
+  test("identity type of Hierarchical only is not modified") {
+    val metrics = Metrics.createDetached()
+    val sr = new MetricsStatsReceiver(metrics)
+    val counter = sr.counter(MetricBuilder.forCounter.withName("counter").withHierarchicalOnly)
+    val gauge = sr.addGauge(MetricBuilder.forGauge.withName("gauge").withHierarchicalOnly) { 1.0f }
+    val stat = sr.stat(MetricBuilder.forStat.withName("stat").withHierarchicalOnly)
+
+    assert(
+      counter.metadata.toMetricBuilder.get.identity.identityType == IdentityType.HierarchicalOnly)
+    assert(
+      gauge.metadata.toMetricBuilder.get.identity.identityType == IdentityType.HierarchicalOnly)
+    assert(stat.metadata.toMetricBuilder.get.identity.identityType == IdentityType.HierarchicalOnly)
+  }
+
+  test("identity type of Full only is not modified") {
+    val metrics = Metrics.createDetached()
+    val sr = new MetricsStatsReceiver(metrics)
+    val counter = sr.counter(MetricBuilder.forCounter.withName("counter").withDimensionalSupport)
+    val gauge = sr.addGauge(MetricBuilder.forGauge.withName("gauge").withDimensionalSupport) {
+      1.0f
+    }
+    val stat = sr.stat(MetricBuilder.forStat.withName("stat").withDimensionalSupport)
+
+    assert(counter.metadata.toMetricBuilder.get.identity.identityType == IdentityType.Full)
+    assert(gauge.metadata.toMetricBuilder.get.identity.identityType == IdentityType.Full)
+    assert(stat.metadata.toMetricBuilder.get.identity.identityType == IdentityType.Full)
+  }
 }

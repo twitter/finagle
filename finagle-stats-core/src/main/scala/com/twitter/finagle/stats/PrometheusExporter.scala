@@ -1,5 +1,6 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.MetricBuilder.IdentityType
 import com.twitter.finagle.stats.MetricBuilder.MetricType
 import com.twitter.finagle.stats.MetricsView.CounterSnapshot
 import com.twitter.finagle.stats.MetricsView.GaugeSnapshot
@@ -185,7 +186,7 @@ private final class PrometheusExporter(
     writer: StringBuilder,
     snapshot: MetricsView.Snapshot
   ): Unit = {
-    if (!snapshot.builder.identity.hierarchicalOnly) {
+    if (shouldEmit(snapshot.builder.identity)) {
       val name = snapshot.builder.identity.dimensionalName
       val labels = snapshot.builder.identity.labels
       if (exportMetadata) {
@@ -206,6 +207,9 @@ private final class PrometheusExporter(
       writer.append('\n')
     }
   }
+
+  private[this] def shouldEmit(identity: MetricBuilder.Identity): Boolean =
+    IdentityType.toResolvedIdentityType(identity.identityType) == IdentityType.Full
 
   /**
    * Write metric name and labels for counters and gauges.

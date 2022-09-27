@@ -1,5 +1,7 @@
 package com.twitter.finagle.stats
 
+import com.twitter.finagle.stats.MetricBuilder.IdentityType
+
 private object RootFinagleStatsReceiver {
   private val RpcSystemLabel = "rpc_system" -> "finagle"
   private val ImplementationLabel = "implementation" -> "finagle"
@@ -30,11 +32,12 @@ private[finagle] class RootFinagleStatsReceiver(
 
     val dimensionalName = dimensionalScopes ++ identity.dimensionalName
     val labels = rpcServiceLabels ++ identity.labels
+
     identity.copy(
       hierarchicalName = hierarchicalName,
       dimensionalName = dimensionalName,
       labels = labels,
-      hierarchicalOnly = false
+      identityType = identity.identityType.bias(IdentityType.Full)
     )
   }
 
