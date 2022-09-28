@@ -1,7 +1,9 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.finagle.serverset2.client.{SessionState, WatchState}
-import com.twitter.finagle.stats.{Stat, StatsReceiver}
+import com.twitter.finagle.serverset2.client.SessionState
+import com.twitter.finagle.serverset2.client.WatchState
+import com.twitter.finagle.stats.Stat
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.Logger
 import com.twitter.util._
