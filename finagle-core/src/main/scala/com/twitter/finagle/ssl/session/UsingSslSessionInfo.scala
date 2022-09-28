@@ -1,14 +1,12 @@
 package com.twitter.finagle.ssl.session
 
 import com.twitter.conversions.StringOps._
-import com.twitter.util.security.ProxyX509Certificate
+import com.twitter.finagle.ssl.session.ServiceIdentity.GeneralName
 import com.twitter.util.security.NullSslSession
+import com.twitter.util.security.ProxyX509Certificate
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSession
-import org.bouncycastle.asn1.x509.Extension
-import org.bouncycastle.asn1.x509.GeneralName
-import org.bouncycastle.asn1.x509.GeneralNames
-import org.bouncycastle.cert.X509CertificateHolder
+import scala.collection.JavaConverters._
 
 /**
  * Class which indicates that a particular connection is using SSL/TLS,
@@ -66,14 +64,15 @@ private[finagle] class UsingSslSessionInfo(
   }
 
   /**
-   * Private helper to extract the general names from the SubjectAlternativeName x509 extension field of a cert.
+   * Private helper to extract the string names from the SubjectAlternativeName x509 extension field of a cert.
    */
-  private def getSans(certificate: X509Certificate): Seq[GeneralName] = {
-    val holder = new X509CertificateHolder(certificate.getEncoded)
-    Option(
-      GeneralNames
-        .fromExtensions(holder.getExtensions, Extension.subjectAlternativeName))
-      .map(_.getNames.toSeq).getOrElse(Nil)
+  private def getServiceIdentityCandidates(certificate: X509Certificate): Seq[GeneralName] = {
+    Option(certificate.getSubjectAlternativeNames).fold(Seq.empty[GeneralName])(
+      _.asScala.toSeq
+        .flatMap(_.asScala.toList match {
+          case List(tag: Int, name: String) => Some(GeneralName(tag, name))
+          case _ => None
+        }))
   }
 
   /**
@@ -92,9 +91,11 @@ private[finagle] class UsingSslSessionInfo(
     }
 
   override def getLocalIdentity: Option[ServiceIdentity] =
-    localCertificates.headOption.map(getSans).flatMap(ServiceIdentity.apply)
+    localCertificates.headOption
+      .map(getServiceIdentityCandidates).flatMap(ServiceIdentity.apply)
+
   override def getPeerIdentity: Option[ServiceIdentity] =
-    peerCertificates.headOption.map(getSans).flatMap(ServiceIdentity.apply)
+    peerCertificates.headOption.map(getServiceIdentityCandidates).flatMap(ServiceIdentity.apply)
 }
 
 private[session] class SystemIdentityCertificate(underlying: X509Certificate)

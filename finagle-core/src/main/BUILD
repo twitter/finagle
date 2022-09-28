@@ -14,7 +14,6 @@ scala_library(
     dependencies = [
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
-        "3rdparty/jvm/org/bouncycastle:bcpkix-jdk15on",
         "3rdparty/jvm/org/hdrhistogram",
         "3rdparty/jvm/org/scala-lang/modules:scala-collection-compat",
         "finagle-internal/init/src/main/scala",
