@@ -4,15 +4,16 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.server.ListeningStackServer
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{
-  ClientConnection,
-  ClientConnectionProxy,
-  Failure,
-  ListeningServer,
-  Service,
-  ServiceFactory
-}
-import com.twitter.util.{Future, Return, Throw}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.ClientConnectionProxy
+import com.twitter.finagle.Failure
+import com.twitter.finagle.ListeningServer
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Throw
 import java.net.SocketAddress
 
 /**
@@ -98,9 +99,13 @@ trait PushStackServer[Req, Rep, This <: PushStackServer[Req, Rep, This]]
             Future.exception(Failure.rejected("Terminating session and rejecting request", exc))
           )
           val session = mkSession(svc)
-          // We provide 10 seconds for the session to drain gracefully which should
-          // be enough time to signal draining and nack any racing requests.
-          session.close(10.seconds)
+          // Delay closing the session to give the server time for negotiation during session
+          // initialization.
+          DefaultTimer.doLater(10.seconds) {
+            // We provide 10 seconds for the session to drain gracefully which should
+            // be enough time to signal draining and nack any racing requests.
+            session.close(10.seconds)
+          }
           Future.value(session)
       }
     }

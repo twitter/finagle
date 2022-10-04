@@ -24,8 +24,12 @@ import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
 import org.mockito.Mockito.when
+import org.scalatest.concurrent.Eventually.eventually
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.time.Seconds
+import org.scalatest.time.Span
 
 class PushStackServerTest extends AnyFunSuite with MockitoSugar {
 
@@ -165,7 +169,7 @@ class PushStackServerTest extends AnyFunSuite with MockitoSugar {
     val session = await(server.mockListener.builder(handle))
 
     session match {
-      case s: MockSession => assert(s.closeCalled)
+      case s: MockSession => eventually(Timeout(Span(30, Seconds))) { assert(s.closeCalled) }
       case other => fail(s"Unexpected type: $other")
     }
   }

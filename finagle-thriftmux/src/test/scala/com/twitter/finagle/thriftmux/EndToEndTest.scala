@@ -2364,7 +2364,9 @@ class EndToEndTest
       // we don't expect to see any retries.
       assert(sr.counters(Seq("client", "retries", "requeues")) == 0)
       assert(sr.counters(Seq("client", "connects")) == 1)
-      assert(sr.counters(Seq("client", "mux", "draining")) == 1)
+      eventually {
+        assert(sr.counters(Seq("client", "mux", "draining")) == 1)
+      }
       await(closeServers())
     }
   }
