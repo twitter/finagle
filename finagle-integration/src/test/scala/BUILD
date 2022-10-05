@@ -22,6 +22,7 @@ junit_tests(
         "finagle/finagle-mysql/src/main/scala",
         "finagle/finagle-mysql/src/test/scala/com/twitter/finagle/mysql/harness",
         "finagle/finagle-netty4-http",
+        "finagle/finagle-postgresql/src/main/scala/com/twitter/finagle",
         "finagle/finagle-redis",
         "finagle/finagle-thrift",
         "finagle/finagle-thriftmux",

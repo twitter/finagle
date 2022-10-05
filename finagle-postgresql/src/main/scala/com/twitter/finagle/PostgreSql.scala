@@ -40,7 +40,7 @@ object PostgreSql {
         NackAdmissionFilter.module[Request, Response]
       )
 
-  val defaultParams: Stack.Params = StackClient.defaultParams +
+  def defaultParams: Stack.Params = StackClient.defaultParams +
     // Keep NackAdmissionFilter disabled by default for backwards compatibility.
     NackAdmissionFilter.Disabled
 

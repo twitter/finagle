@@ -360,7 +360,8 @@ lazy val finagleIntegration = Project(
     finagleNetty4Http,
     finagleRedis % "test",
     finagleThrift,
-    finagleThriftMux % "test->compile;test->test"
+    finagleThriftMux % "test->compile;test->test",
+    finaglePostgresql % "test->compile;test->test"
   )
 
 lazy val finagleToggle = Project(

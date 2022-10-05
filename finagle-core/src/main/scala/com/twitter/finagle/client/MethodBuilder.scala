@@ -5,7 +5,6 @@ import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
 import com.twitter.finagle.service.Filterable
 import com.twitter.finagle.service.ResponseClass
 import com.twitter.finagle.service.ResponseClassifier
-import com.twitter.finagle.service.Retries
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.LazyStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
@@ -56,6 +55,7 @@ object MethodBuilder {
    */
   def from[Req, Rep](dest: Name, stackClient: StackClient[Req, Rep]): MethodBuilder[Req, Rep] = {
     val stack = modifiedStack(stackClient.stack)
+
     new MethodBuilder(
       new MethodPool[Req, Rep](stackClient.withStack(stack), dest, param.Label.Default),
       dest,
@@ -397,10 +397,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       methodPool,
       dest,
       stack,
-      // If the RetryBudget is not configured, BackupRequestFilter and RetryFilter will each
-      // get a new instance of the default budget. Since we want them to share the same
-      // client retry budget, insert the budget into the params.
-      params + params[Retries.Budget],
+      params,
       config.copy(backup = brfParam)
     )
 

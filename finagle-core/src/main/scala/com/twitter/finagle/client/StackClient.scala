@@ -491,7 +491,9 @@ object StackClient {
     Stack.Params.empty +
       Stats(ClientStatsReceiver) +
       LoadBalancerFactory.HostStats(LoadedHostStatsReceiver) +
-      MetricBuilders(Some(new CoreMetricsRegistry()))
+      MetricBuilders(Some(new CoreMetricsRegistry())) +
+      // RetryBudget needs to be shared across one physical client.
+      Retries.Budget.default
 
   /**
    * A set of StackTransformers for transforming client stacks.

@@ -1120,8 +1120,8 @@ class MethodBuilderTest
     assert(client.params[Retries.Budget].retryBudget eq retryBudget)
   }
 
-  test("idempotent adds retry budget to params") {
-    val params = Stack.Params.empty
+  test("shares RetryBudget between methods") {
+    val params = StackClient.defaultParams
 
     val svc: Service[Int, Int] = Service.const(Future.value(1))
 
@@ -1131,16 +1131,16 @@ class MethodBuilderTest
     val stackClient = TestStackClient(stack, params)
     val client = MethodBuilder.from("mb", stackClient)
 
-    // there's no budget to start with; if we get the budget it's a new default one each time
-    assert(client.params[Retries.Budget].retryBudget ne client.params[Retries.Budget].retryBudget)
-
-    val idempotentClient =
+    val method1 =
       client.idempotent(1.percent, sendInterrupts = true, ResponseClassifier.Default)
 
-    // now that the budget has been added (a new default one), we get the same one each time
+    val method2 =
+      client.idempotent(1.percent, sendInterrupts = true, ResponseClassifier.Default)
+
+    // each method should share the same retryBudget
     assert(
-      idempotentClient.params[Retries.Budget].retryBudget eq
-        idempotentClient.params[Retries.Budget].retryBudget
+      method1.params[Retries.Budget].retryBudget eq
+        method2.params[Retries.Budget].retryBudget
     )
   }
 
