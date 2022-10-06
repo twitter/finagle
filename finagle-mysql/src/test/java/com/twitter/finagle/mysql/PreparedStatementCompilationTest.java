@@ -1,7 +1,7 @@
 package com.twitter.finagle.mysql;
 
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.twitter.util.Future;
@@ -10,9 +10,9 @@ public final class PreparedStatementCompilationTest {
 
   private PreparedStatement.AsJava preparedStatement() {
     PreparedStatement stmt = Mockito.mock(PreparedStatement.class);
-    Mockito.when(stmt.apply(Matchers.any()))
+    Mockito.when(stmt.apply(ArgumentMatchers.any()))
         .thenReturn(Future.exception(new RuntimeException("nope")));
-    Mockito.when(stmt.select(Matchers.any(), Matchers.any()))
+    Mockito.when(stmt.select(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.exception(new RuntimeException("nope")));
     return new PreparedStatement.AsJava(stmt);
   }

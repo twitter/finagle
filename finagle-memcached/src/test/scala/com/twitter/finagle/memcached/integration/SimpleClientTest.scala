@@ -1,7 +1,10 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Address, Memcached, Name, param}
+import com.twitter.finagle.Address
+import com.twitter.finagle.Memcached
+import com.twitter.finagle.Name
+import com.twitter.finagle.param
 import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
 import com.twitter.finagle.memcached.protocol._
@@ -9,13 +12,20 @@ import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.io.Buf
-import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
-import com.twitter.util.{Await, Awaitable}
+import com.twitter.util.registry.Entry
+import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.registry.SimpleRegistry
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
 import java.net.InetSocketAddress
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{atLeastOnce, spy, verify, when}
-import org.scalatest.{BeforeAndAfter, Outcome}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.scalatest.BeforeAndAfter
+import org.scalatest.Outcome
 import scala.collection.JavaConverters._
 import org.scalatest.funsuite.AnyFunSuite
 

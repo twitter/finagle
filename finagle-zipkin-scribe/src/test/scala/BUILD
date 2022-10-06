@@ -8,7 +8,7 @@ junit_tests(
         "3rdparty/jvm/org/scalacheck",
         "3rdparty/jvm/org/scalatest",
         "3rdparty/jvm/org/scalatestplus:junit",
-        "3rdparty/jvm/org/scalatestplus:mockito-1-10",
+        "3rdparty/jvm/org/scalatestplus:mockito",
         "finagle/finagle-core/src/main",
         "finagle/finagle-scribe/src/main/scala/com/twitter/finagle/scribe",
         "finagle/finagle-thrift/src/main/thrift:scribe",

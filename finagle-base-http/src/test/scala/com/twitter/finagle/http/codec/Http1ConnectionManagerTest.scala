@@ -8,7 +8,7 @@ import com.twitter.util.Future
 import com.twitter.util.Promise
 import com.twitter.util.Return
 import com.twitter.util.Time
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify

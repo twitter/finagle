@@ -13,8 +13,9 @@ import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util.{Command => _, _}
-import java.net.{InetAddress, InetSocketAddress}
-import org.mockito.Matchers._
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.BeforeAndAfterEach

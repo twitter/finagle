@@ -1,20 +1,25 @@
 package com.twitter.finagle.thriftmux.exp.partitioning
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.mux.{Request, Response}
-import com.twitter.finagle.partitioning.{PartitionNodeManager, SnapPartitioner}
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
+import com.twitter.finagle.partitioning.PartitionNodeManager
+import com.twitter.finagle.partitioning.SnapPartitioner
 import com.twitter.finagle.thrift.exp.partitioning.ThriftPartitioningService.PartitioningStrategyException
-import com.twitter.finagle.thrift.exp.partitioning.{
-  ClientCustomStrategy,
-  CustomPartitioningStrategy,
-  HashingPartitioningStrategy,
-  ThriftCustomPartitioningService,
-  ThriftHashingPartitioningService
-}
-import com.twitter.finagle.{Service, ServiceFactory, Stack}
+import com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy
+import com.twitter.finagle.thrift.exp.partitioning.CustomPartitioningStrategy
+import com.twitter.finagle.thrift.exp.partitioning.HashingPartitioningStrategy
+import com.twitter.finagle.thrift.exp.partitioning.ThriftCustomPartitioningService
+import com.twitter.finagle.thrift.exp.partitioning.ThriftHashingPartitioningService
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Stack
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Awaitable, Duration, Future}
-import org.mockito.Matchers.any
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

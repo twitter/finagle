@@ -1,11 +1,15 @@
 package com.twitter.finagle.netty4.util
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.util.{Duration, Time}
-import io.netty.util.{HashedWheelTimer, Timeout, Timer, TimerTask}
+import com.twitter.util.Duration
+import com.twitter.util.Time
+import io.netty.util.HashedWheelTimer
+import io.netty.util.Timeout
+import io.netty.util.Timer
+import io.netty.util.TimerTask
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.scalatest.concurrent.Eventually
 import scala.concurrent.duration.TimeUnit
 import org.scalatest.funsuite.AnyFunSuite

@@ -5,7 +5,7 @@ junit_tests(
     tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/junit",
-        "3rdparty/jvm/org/mockito:mockito-all",
+        "3rdparty/jvm/org/mockito:mockito-core",
         "3rdparty/jvm/org/scalatestplus:junit",
         "finagle/finagle-core/src/main",
         "finagle/finagle-mysql",

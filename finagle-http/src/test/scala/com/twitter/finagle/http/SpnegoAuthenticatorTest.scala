@@ -1,16 +1,22 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
-import com.twitter.util.{Await, Future, Time}
-import java.net.{InetAddress, InetSocketAddress}
-import java.security.{Principal, PrivilegedAction}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.security.Principal
+import java.security.PrivilegedAction
 import java.util.Arrays.{equals => arrayEquals}
 import javax.security.auth.Subject
-import javax.security.auth.kerberos.{KerberosPrincipal, KerberosTicket}
+import javax.security.auth.kerberos.KerberosPrincipal
+import javax.security.auth.kerberos.KerberosTicket
 import javax.security.auth.login.LoginContext
 import org.ietf.jgss.GSSContext
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{stub, verify}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.mockito.Mockito.verify
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -52,7 +58,7 @@ class SpnegoAuthenticatorTest extends AnyFunSuite with MockitoSugar {
     // Spnego-filtered client/server
     val (client, server, service) = serve(credSrc, Some(credSrc))
     val req = builder.buildGet()
-    stub(service.apply(anyAuthenticated)).toReturn(
+    when(service.apply(anyAuthenticated)).thenReturn(
       Future(Response(req.version, Status.Ok))
     )
     try {
@@ -119,14 +125,14 @@ class SpnegoAuthenticatorTest extends AnyFunSuite with MockitoSugar {
     val goodTicket = createTicketWithEndTime(Time.Top, principal)
     val goodSubject = createSubjectWithTicket(goodTicket)
     val goodLoginContext = mock[LoginContext]
-    stub(goodLoginContext.getSubject).toReturn(goodSubject)
+    when(goodLoginContext.getSubject).thenReturn(goodSubject)
     assert(jaas.testIsLoginValid(Some(goodLoginContext)))
 
     // End date for TGT has already passed, ticket is invalid
     val badTicket = createTicketWithEndTime(Time.Bottom, principal)
     val badSubject = createSubjectWithTicket(badTicket)
     val badLoginContext = mock[LoginContext]
-    stub(badLoginContext.getSubject).toReturn(badSubject)
+    when(badLoginContext.getSubject).thenReturn(badSubject)
     assert(!jaas.testIsLoginValid(Some(badLoginContext)))
   }
 

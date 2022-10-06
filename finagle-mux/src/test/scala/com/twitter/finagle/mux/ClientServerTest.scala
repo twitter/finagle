@@ -18,7 +18,7 @@ import com.twitter.io.BufByteWriter
 import com.twitter.io.ByteReader
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.when

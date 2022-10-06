@@ -4,20 +4,24 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.liveness.FailureAccrualPolicy
-import com.twitter.finagle.partitioning.{
-  ConsistentHashingFailureAccrualFactory,
-  FailureAccrualException,
-  HashNodeKey,
-  NodeHealth,
-  NodeMarkedDead,
-  NodeRevived
-}
+import com.twitter.finagle.partitioning.ConsistentHashingFailureAccrualFactory
+import com.twitter.finagle.partitioning.FailureAccrualException
+import com.twitter.finagle.partitioning.HashNodeKey
+import com.twitter.finagle.partitioning.NodeHealth
+import com.twitter.finagle.partitioning.NodeMarkedDead
+import com.twitter.finagle.partitioning.NodeRevived
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.{Await, Awaitable, Future, MockTimer, Time}
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
+import com.twitter.util.MockTimer
+import com.twitter.util.Time
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -34,7 +38,7 @@ class ConsistentHashingFailureAccrualFactoryTest extends AnyFunSuite with Mockit
     val underlyingService = mock[Service[Int, Int]]
     when(underlyingService.close(any[Time])) thenReturn Future.Done
     when(underlyingService.status) thenReturn underlyingStatus
-    when(underlyingService(Matchers.anyInt)) thenReturn serviceRep
+    when(underlyingService(ArgumentMatchers.anyInt)) thenReturn serviceRep
 
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.close(any[Time])) thenReturn Future.Done

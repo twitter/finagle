@@ -11,7 +11,7 @@ junit_tests(
         "3rdparty/jvm/org/scalacheck",
         "3rdparty/jvm/org/scalatest",
         "3rdparty/jvm/org/scalatestplus:junit",
-        "3rdparty/jvm/org/scalatestplus:mockito-1-10",
+        "3rdparty/jvm/org/scalatestplus:mockito",
         "3rdparty/jvm/org/scalatestplus:scalacheck",
         "finagle/finagle-base-http",
         "finagle/finagle-base-http/src/test/scala:cookie-map-test-lib",

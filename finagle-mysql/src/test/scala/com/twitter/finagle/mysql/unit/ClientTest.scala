@@ -2,9 +2,10 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.{ChannelClosedException, Mysql}
+import com.twitter.finagle.ChannelClosedException
+import com.twitter.finagle.Mysql
 import com.twitter.util.Time
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.must.Matchers

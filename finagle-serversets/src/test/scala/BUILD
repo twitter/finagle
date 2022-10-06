@@ -12,9 +12,9 @@ target(
     tags = ["bazel-compatible"],
     dependencies = [
         "3rdparty/jvm/junit",
-        "3rdparty/jvm/org/mockito:mockito-all",
+        "3rdparty/jvm/org/mockito:mockito-core",
         "3rdparty/jvm/org/scalatest",
-        "3rdparty/jvm/org/scalatestplus:mockito-1-10",
+        "3rdparty/jvm/org/scalatestplus:mockito",
         "finagle/finagle-core",
         "finagle/finagle-serversets",
         "src/java/com/twitter/common/io",

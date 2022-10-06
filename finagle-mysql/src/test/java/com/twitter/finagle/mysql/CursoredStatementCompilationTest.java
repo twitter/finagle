@@ -1,7 +1,7 @@
 package com.twitter.finagle.mysql;
 
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.twitter.util.Future;
@@ -11,9 +11,9 @@ public class CursoredStatementCompilationTest {
   private CursoredStatement.AsJava cursoredStatement() {
     CursoredStatement stmt = Mockito.mock(CursoredStatement.class);
     Mockito.when(stmt.apply(
-        Matchers.anyInt(),
-        Matchers.any(),
-        Matchers.any())
+        ArgumentMatchers.anyInt(),
+        ArgumentMatchers.any(),
+        ArgumentMatchers.any())
     ).thenReturn(Future.exception(new RuntimeException("nope")));
     return new CursoredStatement.AsJava(stmt);
   }

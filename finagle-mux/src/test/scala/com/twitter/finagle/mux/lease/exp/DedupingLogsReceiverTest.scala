@@ -1,8 +1,10 @@
 package com.twitter.finagle.mux.lease.exp
 
 import java.util.logging.Logger
-import org.mockito.Mockito.{never, times, verify}
-import org.mockito.Matchers.anyString
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.ArgumentMatchers.anyString
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

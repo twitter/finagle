@@ -5,8 +5,10 @@ import com.twitter.io.Buf
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.Service
-import com.twitter.util.{Await, Awaitable, Future}
-import org.mockito.Matchers._
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

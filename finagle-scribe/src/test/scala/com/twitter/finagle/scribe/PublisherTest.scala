@@ -11,7 +11,7 @@ import com.twitter.util.Await
 import com.twitter.util.Awaitable
 import com.twitter.util.Future
 import java.nio.charset.{StandardCharsets => JChar}
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.mockito.MockitoSugar

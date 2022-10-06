@@ -4,11 +4,12 @@ import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.client.StackBasedClient
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
+import com.twitter.finagle.thrift.service.Filterable
+import com.twitter.finagle.thrift.service.ServicePerEndpointBuilder
 import org.apache.thrift.protocol.TProtocolFactory
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -70,9 +71,9 @@ class ThriftRichClientTest extends AnyFunSuite with MockitoSugar {
   ) {
     val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
     val mockBuilder = mock[ServicePerEndpointBuilder[SvcIface]]
-    doReturn(svcIface).when(mockBuilder).servicePerEndpoint(any(), captor.capture())
+    doReturn(svcIface, Nil: _*).when(mockBuilder).servicePerEndpoint(any(), captor.capture())
     val client = spy(new MockClient(Stack.Params.empty)(_ => ()))
-    doReturn(client).when(client).withParams(any[Stack.Params])
+    doReturn(client, Nil: _*).when(client).withParams(any[Stack.Params])
     client.servicePerEndpoint("dest_string", "client")(builder = mockBuilder)
 
     assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/client")
@@ -83,11 +84,11 @@ class ThriftRichClientTest extends AnyFunSuite with MockitoSugar {
     "ThriftRichClientTest servicePerEndpoint takes dest Name and stats scoping label arguments") {
     val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
     val mockBuilder = mock[ServicePerEndpointBuilder[SvcIface]]
-    doReturn(svcIface).when(mockBuilder).servicePerEndpoint(any(), captor.capture())
+    doReturn(svcIface, Nil: _*).when(mockBuilder).servicePerEndpoint(any(), captor.capture())
 
     val name = Name.empty
     val client = spy(new MockClient(Stack.Params.empty)(_ => ()))
-    doReturn(client).when(client).withParams(any[Stack.Params])
+    doReturn(client, Nil: _*).when(client).withParams(any[Stack.Params])
     client.servicePerEndpoint(name, "client")(builder = mockBuilder)
 
     assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/client")
@@ -112,7 +113,7 @@ class ThriftRichClientTest extends AnyFunSuite with MockitoSugar {
     val client = spy(new MockClient(Stack.Params.empty)(created =>
       assert(created.params[Thrift.param.ServiceClass].clazz == Some(classOf[SvcIface]))))
 
-    doReturn(svcIface)
+    doReturn(svcIface, Nil: _*)
       .when(client)
       .newIface(
         any[Name],
@@ -128,7 +129,7 @@ class ThriftRichClientTest extends AnyFunSuite with MockitoSugar {
     val client = spy(new MockClient(Stack.Params.empty)(created =>
       assert(created.params[Thrift.param.ServiceClass].clazz == Some(classOf[SvcIface]))))
 
-    doReturn(svcIface)
+    doReturn(svcIface, Nil: _*)
       .when(client)
       .build(
         any[Name],

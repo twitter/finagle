@@ -1,10 +1,11 @@
 package com.twitter.finagle.netty4
 
 import io.netty.buffer.ByteBuf
-import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
+import io.netty.util.ResourceLeakDetector
+import io.netty.util.ResourceLeakDetectorFactory
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.scalatest.funsuite.AnyFunSuite
 
 class StatsLeakDetectorFactoryTest extends AnyFunSuite with MockitoSugar {

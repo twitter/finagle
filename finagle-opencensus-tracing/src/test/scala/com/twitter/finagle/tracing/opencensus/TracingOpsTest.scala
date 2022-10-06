@@ -1,8 +1,11 @@
 package com.twitter.finagle.tracing.opencensus
 
 import com.twitter.util.Future
-import io.opencensus.trace.{BlankSpan, EndSpanOptions, Span, SpanBuilder}
-import org.mockito.Matchers._
+import io.opencensus.trace.BlankSpan
+import io.opencensus.trace.EndSpanOptions
+import io.opencensus.trace.Span
+import io.opencensus.trace.SpanBuilder
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

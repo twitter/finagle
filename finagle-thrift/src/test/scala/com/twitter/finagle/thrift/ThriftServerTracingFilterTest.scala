@@ -4,8 +4,10 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.Future
-import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
-import org.mockito.Matchers
+import org.apache.thrift.protocol.TBinaryProtocol
+import org.apache.thrift.protocol.TMessage
+import org.apache.thrift.protocol.TMessageType
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
@@ -28,7 +30,7 @@ class ThriftServerTracingFilterTest extends AnyFunSuite with MockitoSugar {
       upgradeMsg().writeMessageEnd()
 
       val service = mock[Service[Array[Byte], Array[Byte]]]
-      when(service(Matchers.any[Array[Byte]])).thenReturn(Future(Array[Byte]()))
+      when(service(ArgumentMatchers.any[Array[Byte]])).thenReturn(Future(Array[Byte]()))
 
       // now finagle knows we can handle the headers
       filter(upgradeMsg.toArray, service)

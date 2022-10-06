@@ -1,11 +1,19 @@
 package com.twitter.finagle.mysql.unit
 
 import com.twitter.finagle.mysql.PoisonConnection.PoisonedConnectionException
-import com.twitter.finagle.{Service, Status}
-import com.twitter.finagle.service.{RetryPolicy, RequeueFilter}
-import com.twitter.finagle.mysql.{CloseRequest, PoisonConnectionRequest, Request, Result}
-import com.twitter.util.{Future, Promise, Throw, Time}
-import org.mockito.Matchers._
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
+import com.twitter.finagle.service.RetryPolicy
+import com.twitter.finagle.service.RequeueFilter
+import com.twitter.finagle.mysql.CloseRequest
+import com.twitter.finagle.mysql.PoisonConnectionRequest
+import com.twitter.finagle.mysql.Request
+import com.twitter.finagle.mysql.Result
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Throw
+import com.twitter.util.Time
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

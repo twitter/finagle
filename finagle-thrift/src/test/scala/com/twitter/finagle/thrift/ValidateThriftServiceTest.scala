@@ -1,12 +1,22 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Status, Service, WriteException}
-import com.twitter.util.{Await, Future, Promise, Return, Throw}
+import com.twitter.finagle.Status
+import com.twitter.finagle.Service
+import com.twitter.finagle.WriteException
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Throw
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
-import org.mockito.Matchers
-import org.mockito.Mockito.{verify, when, times}
+import org.apache.thrift.protocol.TBinaryProtocol
+import org.apache.thrift.protocol.TMessage
+import org.apache.thrift.protocol.TMessageType
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.mockito.Mockito.times
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -17,7 +27,7 @@ class ValidateThriftServiceTest extends AnyFunSuite with MockitoSugar {
 
     lazy val service: Service[ThriftClientRequest, Array[Byte]] = {
       val service = mock[Service[ThriftClientRequest, Array[Byte]]]
-      when(service(Matchers.any[ThriftClientRequest])).thenReturn(p)
+      when(service(ArgumentMatchers.any[ThriftClientRequest])).thenReturn(p)
       when(service.status).thenReturn(Status.Open)
       service
     }
@@ -73,7 +83,7 @@ class ValidateThriftServiceTest extends AnyFunSuite with MockitoSugar {
       buf().writeMessageEnd()
       val validate = newValidate()
       val arr = buf.toArray
-      when(service(Matchers.any[ThriftClientRequest])).thenReturn(Future.value(arr))
+      when(service(ArgumentMatchers.any[ThriftClientRequest])).thenReturn(Future.value(arr))
       assert(validate.isAvailable)
       val f = validate(req)
       assert(f.isDefined)
@@ -104,7 +114,7 @@ class ValidateThriftServiceTest extends AnyFunSuite with MockitoSugar {
       buf().writeMessageEnd()
       val validate = newValidate()
       val arr = buf.toArray
-      when(service(Matchers.any[ThriftClientRequest])).thenReturn(Future.value(arr))
+      when(service(ArgumentMatchers.any[ThriftClientRequest])).thenReturn(Future.value(arr))
       assert(validate.isAvailable)
       val f = validate(req)
       assert(f.isDefined)

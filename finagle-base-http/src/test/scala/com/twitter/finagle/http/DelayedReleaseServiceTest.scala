@@ -1,9 +1,13 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
-import com.twitter.util.{Await, Duration, Future}
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, stub, verify}
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.never
+import org.mockito.Mockito.when
+import org.mockito.Mockito.verify
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -14,7 +18,7 @@ class DelayedReleaseServiceTest extends AnyFunSuite with MockitoSugar {
   test("close closes underlying") {
     val service = mock[Service[Request, Response]]
     val proxy = new DelayedReleaseService(service)
-    stub(service.close()).toReturn(Future.Done)
+    when(service.close()).thenReturn(Future.Done)
 
     proxy.close()
     verify(service).close()
@@ -26,8 +30,8 @@ class DelayedReleaseServiceTest extends AnyFunSuite with MockitoSugar {
     response.writer.close()
 
     val service = mock[Service[Request, Response]]
-    stub(service.close()).toReturn(Future.Done)
-    stub(service.apply(any[Request])).toReturn(Future.value(response))
+    when(service.close()).thenReturn(Future.Done)
+    when(service.apply(any[Request])).thenReturn(Future.value(response))
 
     val proxy = new DelayedReleaseService(service)
 
@@ -47,8 +51,8 @@ class DelayedReleaseServiceTest extends AnyFunSuite with MockitoSugar {
     request.writer.close()
 
     val service = mock[Service[Request, Response]]
-    stub(service.close()).toReturn(Future.Done)
-    stub(service.apply(any[Request])).toReturn(Future.value(Response()))
+    when(service.close()).thenReturn(Future.Done)
+    when(service.apply(any[Request])).thenReturn(Future.value(Response()))
 
     val proxy = new DelayedReleaseService(service)
 
@@ -72,8 +76,8 @@ class DelayedReleaseServiceTest extends AnyFunSuite with MockitoSugar {
     response.writer.close()
 
     val service = mock[Service[Request, Response]]
-    stub(service.close()).toReturn(Future.Done)
-    stub(service.apply(any[Request])).toReturn(Future.value(response))
+    when(service.close()).thenReturn(Future.Done)
+    when(service.apply(any[Request])).thenReturn(Future.value(response))
 
     val proxy = new DelayedReleaseService(service)
 
@@ -95,8 +99,8 @@ class DelayedReleaseServiceTest extends AnyFunSuite with MockitoSugar {
   test("inner service failure") {
     val service = mock[Service[Request, Response]]
     val proxy = new DelayedReleaseService(service)
-    stub(service.close()).toReturn(Future.Done)
-    stub(service.apply(any[Request])).toReturn(Future.exception(new Exception))
+    when(service.close()).thenReturn(Future.Done)
+    when(service.apply(any[Request])).thenReturn(Future.exception(new Exception))
 
     val request = Request()
 

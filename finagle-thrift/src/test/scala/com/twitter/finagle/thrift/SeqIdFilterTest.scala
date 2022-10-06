@@ -1,11 +1,18 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
-import com.twitter.util.{Return, Throw, Promise, Time}
-import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Promise
+import com.twitter.util.Time
+import org.apache.thrift.protocol.TBinaryProtocol
+import org.apache.thrift.protocol.TMessage
+import org.apache.thrift.protocol.TMessageType
 import org.apache.thrift.transport.TMemoryBuffer
-import org.mockito.{Matchers, ArgumentCaptor}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
@@ -32,7 +39,7 @@ class SeqIdFilterTest extends AnyFunSuite with MockitoSugar with OneInstancePerT
   def testFilter(how: String, seqId: Int, mkmsg: TMessage => Array[Byte]): Unit = {
     val service = mock[Service[ThriftClientRequest, Array[Byte]]]
     val p = new Promise[Array[Byte]]
-    when(service(Matchers.any[ThriftClientRequest])).thenReturn(p)
+    when(service(ArgumentMatchers.any[ThriftClientRequest])).thenReturn(p)
     val filter = new SeqIdFilter
     val filtered = filter andThen service
 
@@ -94,7 +101,7 @@ class SeqIdFilterTest extends AnyFunSuite with MockitoSugar with OneInstancePerT
       val origBuf = reqBuf.clone()
       filtered(new ThriftClientRequest(reqBuf, false))
 
-      verify(service).apply(Matchers.any[ThriftClientRequest])
+      verify(service).apply(ArgumentMatchers.any[ThriftClientRequest])
       assert(reqBuf.toSeq == origBuf.toSeq)
     }
 

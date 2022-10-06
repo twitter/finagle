@@ -2,9 +2,12 @@ package com.twitter.finagle.thrift
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.util.{Await, Future}
-import org.mockito.Matchers
-import org.mockito.Mockito.{times, verify, when}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -38,7 +41,7 @@ class ClientIdRequiredFilterTest extends AnyFunSuite with MockitoSugar {
       intercept[NoClientIdSpecifiedException] {
         Await.result(service(request), 10.seconds)
       }
-      verify(underlying, times(0)).apply(Matchers.anyString())
+      verify(underlying, times(0)).apply(ArgumentMatchers.anyString())
     }
   }
 }

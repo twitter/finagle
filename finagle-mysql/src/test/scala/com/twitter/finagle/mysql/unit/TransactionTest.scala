@@ -2,8 +2,10 @@ package com.twitter.finagle.mysql
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.{Await, Awaitable, Time}
-import org.mockito.Matchers._
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Time
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

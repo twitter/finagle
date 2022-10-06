@@ -3,9 +3,14 @@ package com.twitter.finagle.mysql.unit
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.{Await, Awaitable, Future, Time}
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{spy, times, verify}
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Future
+import com.twitter.util.Time
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

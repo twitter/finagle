@@ -10,9 +10,12 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Duration, Future}
-import java.net.{InetAddress, InetSocketAddress}
-import org.mockito.Matchers._
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar

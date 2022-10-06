@@ -6,9 +6,14 @@ import com.twitter.util.Duration
 import io.netty.channel.nio.NioEventLoopGroup
 import com.twitter.logging.Logger
 import java.util.concurrent.Executors
-import org.mockito.Mockito.{never, verify, atLeast}
-import org.mockito.Matchers.{anyString, contains, anyVararg}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.atLeast
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.contains
+import org.mockito.ArgumentMatchers.anyVararg
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.JavaConverters._
 import org.scalatest.funsuite.AnyFunSuite

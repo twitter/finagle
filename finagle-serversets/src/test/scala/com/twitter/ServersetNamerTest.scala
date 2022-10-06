@@ -2,9 +2,14 @@ package com.twitter
 
 import com.twitter.finagle._
 import com.twitter.finagle.serverset2.Zk2Resolver
-import com.twitter.util.{Activity, Var}
-import org.mockito.Matchers.{anyString, any}
-import org.mockito.Mockito.{verify, when, never, times}
+import com.twitter.util.Activity
+import com.twitter.util.Var
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

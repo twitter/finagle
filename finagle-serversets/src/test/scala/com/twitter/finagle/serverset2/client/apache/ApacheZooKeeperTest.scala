@@ -4,12 +4,16 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
-import com.twitter.util.{Return, Await}
+import com.twitter.util.Return
+import com.twitter.util.Await
 import java.util.concurrent.ExecutionException
 import org.apache.zookeeper
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.{eq => meq}
-import org.mockito.Mockito.{doNothing, doThrow, verify, when}
+import org.mockito.ArgumentMatchers.{eq => meq}
+import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.doThrow
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.OneInstancePerTest
 import scala.jdk.CollectionConverters._

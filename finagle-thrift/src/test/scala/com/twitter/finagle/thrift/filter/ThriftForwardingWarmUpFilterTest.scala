@@ -2,9 +2,11 @@ package com.twitter.finagle.thrift.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
-import com.twitter.util.{Future, Time}
-import org.mockito.Matchers._
+import com.twitter.finagle.thrift.ClientId
+import com.twitter.finagle.thrift.ThriftClientRequest
+import com.twitter.util.Future
+import com.twitter.util.Time
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

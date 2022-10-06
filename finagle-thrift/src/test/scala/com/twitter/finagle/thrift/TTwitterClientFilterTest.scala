@@ -5,9 +5,11 @@ import com.twitter.finagle.tracing.ClientTracingFilter.TracingFilter
 import com.twitter.finagle.tracing._
 import com.twitter.io.Buf
 import com.twitter.util.Future
-import org.apache.thrift.protocol.{TMessageType, TMessage, TBinaryProtocol}
+import org.apache.thrift.protocol.TMessageType
+import org.apache.thrift.protocol.TMessage
+import org.apache.thrift.protocol.TBinaryProtocol
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.JavaConverters._
