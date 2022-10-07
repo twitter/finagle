@@ -11,10 +11,10 @@ abstract class ServiceIdentity extends Serializable {
 object ServiceIdentity {
 
   /** @see https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6 */
-  private[session] val UriTag = 6
-  private[session] val DnsTag = 2
-  private[session] val IpTag = 7
-  private[session] case class GeneralName(tag: Int, name: String)
+  private[finagle] val UriTag = 6
+  private[finagle] val DnsTag = 2
+  private[finagle] val IpTag = 7
+  private[finagle] case class GeneralName(tag: Int, name: String)
   class DnsServiceIdentity(override val name: String) extends ServiceIdentity
 
   class IpServiceIdentity(override val name: String) extends ServiceIdentity
