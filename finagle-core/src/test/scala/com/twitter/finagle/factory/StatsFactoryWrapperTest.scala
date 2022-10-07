@@ -1,10 +1,13 @@
 package com.twitter.finagle.factory
 
-import com.twitter.finagle.{ClientConnection, ServiceFactory}
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Future}
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{verify, when}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

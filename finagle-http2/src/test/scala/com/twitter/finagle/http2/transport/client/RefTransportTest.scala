@@ -1,10 +1,15 @@
 package com.twitter.finagle.http2.transport.client
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.transport.{Transport, TransportProxy}
-import com.twitter.util.{Await, Future, Time}
-import org.mockito.Matchers.{any, anyInt}
-import org.mockito.Mockito.{verify, when}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportProxy
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

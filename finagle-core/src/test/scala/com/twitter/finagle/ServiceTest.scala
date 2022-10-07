@@ -5,7 +5,7 @@ import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.service.NilService
 import com.twitter.util._
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.when

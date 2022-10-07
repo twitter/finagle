@@ -2,13 +2,16 @@ package com.twitter.finagle.http2.transport.server
 
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.netty4.http.handler.UriValidatorHandler
-import com.twitter.finagle.netty4.http.{Http2CodecName, HttpCodecName}
+import com.twitter.finagle.netty4.http.Http2CodecName
+import com.twitter.finagle.netty4.http.HttpCodecName
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.ssl.{ApplicationProtocolNames, SslHandler, SslHandshakeCompletionEvent}
-import org.mockito.Matchers._
+import io.netty.handler.ssl.ApplicationProtocolNames
+import io.netty.handler.ssl.SslHandler
+import io.netty.handler.ssl.SslHandshakeCompletionEvent
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar

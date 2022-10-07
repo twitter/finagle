@@ -6,7 +6,7 @@ import com.twitter.finagle.Failure
 import com.twitter.util.Await
 import com.twitter.util.Future
 
-import org.mockito.Matchers.anyInt
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

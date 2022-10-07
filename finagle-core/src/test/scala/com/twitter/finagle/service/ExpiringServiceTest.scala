@@ -1,11 +1,24 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.{Service, Status, WriteException}
-import com.twitter.util.{Await, Future, Time, MockTimer, Promise, Return, Duration, Timer}
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, verify, when}
+import com.twitter.finagle.stats.Counter
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
+import com.twitter.finagle.WriteException
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.MockTimer
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Duration
+import com.twitter.util.Timer
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

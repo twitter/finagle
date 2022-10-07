@@ -2,15 +2,21 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.finagle.context.{Contexts, RemoteInfo}
-import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
-import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.RemoteInfo
+import com.twitter.finagle.ssl.session.NullSslSessionInfo
+import com.twitter.finagle.ssl.session.SslSessionInfo
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
 import com.twitter.util._
 import java.net.SocketAddress
 import java.security.cert.X509Certificate
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
-import org.mockito.Mockito.{atLeastOnce, never, times, verify}
+import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls

@@ -2,9 +2,12 @@ package com.twitter.finagle.service
 
 import com.twitter.util._
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.{Matchers, Mockito}
-import org.mockito.Matchers._
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
+import org.mockito.ArgumentMatchers._
 import com.twitter.finagle.Service
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -14,7 +17,7 @@ class RefcountedServiceTest extends AnyFunSuite with MockitoSugar {
     val service = mock[Service[Any, Any]]
     when(service.close(any)) thenReturn Future.Done
     val promise = new Promise[Any]
-    when(service(Matchers.any)) thenReturn promise
+    when(service(ArgumentMatchers.any)) thenReturn promise
     val wrapper = Mockito.spy(new RefcountedService[Any, Any](service))
   }
 

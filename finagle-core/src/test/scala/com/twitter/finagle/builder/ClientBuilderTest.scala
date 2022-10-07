@@ -6,20 +6,21 @@ import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.RetryPolicy
 import com.twitter.finagle.ssl.Engine
-import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration,
-  SslClientEngineFactory,
-  SslClientSessionVerifier
-}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.ssl.client.SslClientEngineFactory
+import com.twitter.finagle.ssl.client.SslClientSessionVerifier
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import java.net.InetSocketAddress
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import javax.net.ssl.SSLSession
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

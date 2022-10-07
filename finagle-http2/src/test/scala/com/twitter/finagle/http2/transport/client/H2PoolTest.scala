@@ -19,7 +19,7 @@ import com.twitter.util.Duration
 import com.twitter.util.Future
 import com.twitter.util.Time
 import java.util.concurrent.atomic.AtomicInteger
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

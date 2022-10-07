@@ -1,10 +1,14 @@
 package com.twitter.finagle.builder
 
-import com.twitter.finagle.{Failure, RequestException}
+import com.twitter.finagle.Failure
+import com.twitter.finagle.RequestException
 import java.io.IOException
-import java.util.logging.{Level, Logger}
-import org.mockito.Matchers.{any, eq => mockitoEq}
-import org.mockito.Mockito.{never, verify}
+import java.util.logging.Level
+import java.util.logging.Logger
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{eq => mockitoEq}
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

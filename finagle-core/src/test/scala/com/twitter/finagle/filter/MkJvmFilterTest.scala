@@ -12,7 +12,7 @@ import com.twitter.util.TimeControl
 import com.twitter.util.Promise
 import com.twitter.util.Time
 import com.twitter.util.Duration
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar

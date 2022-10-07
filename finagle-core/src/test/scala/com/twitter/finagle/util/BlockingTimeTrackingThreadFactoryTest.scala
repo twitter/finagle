@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import java.util.concurrent.ThreadFactory
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.verify
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

@@ -2,11 +2,14 @@ package com.twitter.finagle.service
 
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito.when
-import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.util.{Await, Duration, Future, Time}
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
 class RateLimitingFilterTest extends AnyFunSuite with MockitoSugar {
@@ -18,7 +21,7 @@ class RateLimitingFilterTest extends AnyFunSuite with MockitoSugar {
     val filter = new RateLimitingFilter[Int, Int](strategy)
     val service = mock[Service[Int, Int]]
     when(service.close(any)) thenReturn Future.Done
-    when(service(Matchers.anyInt)) thenReturn Future.value(1)
+    when(service(ArgumentMatchers.anyInt)) thenReturn Future.value(1)
 
     val rateLimitedService = filter andThen service
   }

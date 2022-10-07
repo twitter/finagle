@@ -1,8 +1,13 @@
 package com.twitter.finagle.http2.transport.client
 
-import com.twitter.finagle.{FailureFlags, Service, Status}
-import com.twitter.util.{Await, Awaitable, Duration, Future}
-import org.mockito.Matchers._
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.Service
+import com.twitter.finagle.Status
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar

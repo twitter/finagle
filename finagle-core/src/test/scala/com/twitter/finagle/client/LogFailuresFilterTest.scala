@@ -1,12 +1,26 @@
 package com.twitter.finagle.client
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
-import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Await, Future, Return, Stopwatch, Time}
-import org.mockito.Matchers.{any, anyString, anyVararg, contains}
-import org.mockito.Mockito.{never, times, verify, when}
+import com.twitter.finagle.Service
+import com.twitter.finagle.SimpleFilter
+import com.twitter.finagle.service.ReqRep
+import com.twitter.finagle.service.ResponseClass
+import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Stopwatch
+import com.twitter.util.Time
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.anyVararg
+import org.mockito.ArgumentMatchers.contains
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

@@ -2,9 +2,15 @@ package com.twitter.finagle.factory
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.util.{Await, Future, Promise, MockTimer, Return, Time}
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{verify, when}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.MockTimer
+import com.twitter.util.Return
+import com.twitter.util.Time
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 import org.scalatest.funsuite.AnyFunSuite

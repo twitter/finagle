@@ -3,14 +3,18 @@ package com.twitter.finagle.liveness
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Backoff.EqualJittered
 import com.twitter.finagle.service._
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{Backoff, _}
+import com.twitter.finagle.Backoff
+import com.twitter.finagle._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
-import org.mockito.Matchers
-import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatestplus.mockito.MockitoSugar
@@ -43,7 +47,7 @@ class FailureAccrualFactoryTest extends AnyFunSuite with MockitoSugar {
     val underlyingService = mock[Service[Int, Int]]
     when(underlyingService.close(any[Time])) thenReturn Future.Done
     when(underlyingService.status) thenReturn Status.Open
-    when(underlyingService(Matchers.anyInt)) thenReturn Future.exception(new Exception)
+    when(underlyingService(ArgumentMatchers.anyInt)) thenReturn Future.exception(new Exception)
 
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.close(any[Time])) thenReturn Future.Done
@@ -327,7 +331,7 @@ class FailureAccrualFactoryTest extends AnyFunSuite with MockitoSugar {
     val underlyingService = mock[Service[Int, Int]]
     when(underlyingService.close(any[Time])) thenReturn Future.Done
     when(underlyingService.status) thenReturn Status.Open
-    when(underlyingService(Matchers.anyInt)) thenReturn Future.exception(new Exception)
+    when(underlyingService(ArgumentMatchers.anyInt)) thenReturn Future.exception(new Exception)
 
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.close(any[Time])) thenReturn Future.Done
@@ -681,7 +685,7 @@ class FailureAccrualFactoryTest extends AnyFunSuite with MockitoSugar {
     val underlyingService = mock[Service[Int, Int]]
     when(underlyingService.close(any[Time])) thenReturn Future.Done
     when(underlyingService.status) thenReturn Status.Open
-    when(underlyingService(Matchers.anyInt)) thenReturn Future.value(321)
+    when(underlyingService(ArgumentMatchers.anyInt)) thenReturn Future.value(321)
 
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.close(any[Time])) thenReturn Future.Done
@@ -794,7 +798,7 @@ class FailureAccrualFactoryTest extends AnyFunSuite with MockitoSugar {
     val underlyingService = mock[Service[Int, Int]]
     when(underlyingService.close(any[Time])) thenReturn Future.Done
     when(underlyingService.status) thenReturn Status.Open
-    when(underlyingService(Matchers.anyInt)) thenReturn Future.value(321)
+    when(underlyingService(ArgumentMatchers.anyInt)) thenReturn Future.value(321)
 
     val underlying = mock[ServiceFactory[Int, Int]]
     when(underlying.close(any[Time])) thenReturn Future.Done

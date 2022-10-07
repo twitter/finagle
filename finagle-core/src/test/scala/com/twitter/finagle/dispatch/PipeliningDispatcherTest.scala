@@ -2,12 +2,20 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{IndividualRequestTimeoutException => FinagleTimeoutException}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Promise, Future, Time, MockTimer, TimeoutException => UtilTimeoutException}
-import org.mockito.Matchers._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.TransportContext
+import com.twitter.util.Promise
+import com.twitter.util.Future
+import com.twitter.util.Time
+import com.twitter.util.MockTimer
+import com.twitter.util.{TimeoutException => UtilTimeoutException}
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
-import org.mockito.Mockito.{never, verify, times}
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.times
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls

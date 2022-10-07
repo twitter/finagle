@@ -1,7 +1,12 @@
 package com.twitter.finagle.http2.transport.client
 
-import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
-import org.mockito.Matchers._
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Time
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.OneInstancePerTest
 import org.scalatestplus.mockito.MockitoSugar

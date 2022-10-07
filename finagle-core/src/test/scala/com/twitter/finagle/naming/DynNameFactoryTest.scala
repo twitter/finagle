@@ -2,8 +2,12 @@ package com.twitter.finagle.naming
 
 import com.twitter.finagle._
 import com.twitter.finagle.factory.ServiceFactoryCache
-import com.twitter.util.{Await, Activity, Future, Return, Throw}
-import org.mockito.Matchers.any
+import com.twitter.util.Await
+import com.twitter.util.Activity
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

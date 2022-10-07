@@ -21,7 +21,7 @@ import com.twitter.util.Time
 
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

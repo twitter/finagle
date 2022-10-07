@@ -10,7 +10,7 @@ import com.twitter.finagle.SourcedException
 import com.twitter.finagle.Status
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify

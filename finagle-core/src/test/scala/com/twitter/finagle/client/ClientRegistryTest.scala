@@ -4,13 +4,18 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.{StackRegistry, TestParam, TestParam2}
+import com.twitter.finagle.util.StackRegistry
+import com.twitter.finagle.util.TestParam
+import com.twitter.finagle.util.TestParam2
 import com.twitter.util._
-import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
-import org.mockito.Matchers.anyObject
+import com.twitter.util.registry.Entry
+import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.registry.SimpleRegistry
+import org.mockito.ArgumentMatchers.anyObject
 import org.mockito.Mockito.when
 import org.scalatest.BeforeAndAfter
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 

@@ -17,7 +17,7 @@ import com.twitter.util.registry.Entry
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.registry.SimpleRegistry
 import com.twitter.util.tunable.Tunable
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.Eventually

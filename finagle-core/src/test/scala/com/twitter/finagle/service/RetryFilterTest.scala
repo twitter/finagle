@@ -2,17 +2,17 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{
-  Backoff,
-  FailedFastException,
-  Failure,
-  FailureFlags,
-  Service,
-  WriteException
-}
+import com.twitter.finagle.Backoff
+import com.twitter.finagle.FailedFastException
+import com.twitter.finagle.Failure
+import com.twitter.finagle.FailureFlags
+import com.twitter.finagle.Service
+import com.twitter.finagle.WriteException
 import com.twitter.util._
-import org.mockito.Matchers.anyObject
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.ArgumentMatchers.anyObject
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls

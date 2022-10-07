@@ -2,12 +2,21 @@ package com.twitter.finagle.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.stack.{Endpoint, nilStack}
-import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Await, Duration, Future, Stopwatch, Time}
+import com.twitter.finagle.stack.Endpoint
+import com.twitter.finagle.stack.nilStack
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
+import com.twitter.util.Stopwatch
+import com.twitter.util.Time
 import java.util.concurrent.atomic.AtomicInteger
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers.{anyObject, contains}
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.anyObject
+import org.mockito.ArgumentMatchers.contains
 import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite

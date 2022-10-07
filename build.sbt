@@ -154,7 +154,7 @@ val sharedSettings = Seq(
     "org.scalacheck" %% "scalacheck" % "1.15.4" % "test",
     "org.scalatest" %% "scalatest" % "3.1.1" % "test",
     "org.scalatestplus" %% "junit-4-12" % "3.1.2.0" % "test",
-    "org.scalatestplus" %% "mockito-1-10" % "3.1.0.0" % "test",
+    "org.scalatestplus" %% "mockito-3-3" % "3.1.2.0" % "test",
     "org.scalatestplus" %% "scalacheck-1-14" % "3.1.2.0" % "test",
     scalaCollectionCompat
   ),

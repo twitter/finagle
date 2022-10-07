@@ -1,10 +1,17 @@
 package com.twitter.finagle.pool
 
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers._
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Status}
-import com.twitter.util.{Await, Future, Time}
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers._
+import com.twitter.finagle.ClientConnection
+import com.twitter.finagle.Service
+import com.twitter.finagle.ServiceFactory
+import com.twitter.finagle.Status
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
 class BufferingPoolTest extends AnyFunSuite with MockitoSugar {

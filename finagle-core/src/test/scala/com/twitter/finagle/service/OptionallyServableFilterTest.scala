@@ -1,10 +1,14 @@
 package com.twitter.finagle.service
 
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers._
-import com.twitter.finagle.{NotServableException, Service}
-import com.twitter.util.{Await, Future}
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers._
+import com.twitter.finagle.NotServableException
+import com.twitter.finagle.Service
+import com.twitter.util.Await
+import com.twitter.util.Future
 import org.scalatest.funsuite.AnyFunSuite
 
 class OptionallyServableFilterTest extends AnyFunSuite with MockitoSugar {

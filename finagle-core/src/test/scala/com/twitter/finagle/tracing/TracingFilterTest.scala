@@ -1,12 +1,19 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.{Filter, Dtab, Service}
-import com.twitter.util.{Await, Future}
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Dtab
+import com.twitter.finagle.Service
+import com.twitter.util.Await
+import com.twitter.util.Future
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{spy, verify, when, atLeastOnce}
-import org.mockito.Matchers.any
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
+import org.mockito.Mockito.atLeastOnce
+import org.mockito.ArgumentMatchers.any
 import org.scalactic.source.Position
-import org.scalatest.{BeforeAndAfter, Tag}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.Tag
 import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.JavaConverters._
