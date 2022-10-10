@@ -12,7 +12,7 @@ import com.twitter.util.Duration
 import com.twitter.util.Future
 import com.twitter.util.Stopwatch
 import com.twitter.util.Time
-import com.twitter.util.TimeFormat
+import com.twitter.util.TimeFormatter
 import com.twitter.util.TokenBucket
 
 /**
@@ -30,7 +30,7 @@ import com.twitter.util.TokenBucket
  */
 object DeadlineFilter {
 
-  private[this] val millisecondFormat: TimeFormat = new TimeFormat("yyyy-MM-dd HH:mm:ss:SSS Z")
+  private[this] val millisecondFormat: TimeFormatter = TimeFormatter("yyyy-MM-dd HH:mm:ss:SSS Z")
   private[service] def fmt(time: Time): String = millisecondFormat.format(time)
 
   private val DefaultRejectPeriod = 10.seconds

@@ -1,6 +1,8 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.util.{Duration, Time, TimeFormat}
+import com.twitter.util.Duration
+import com.twitter.util.Time
+import com.twitter.util.TimeFormatter
 
 /**
  * Records information of interest to the tracing system. For example when an event happened,
@@ -24,6 +26,6 @@ object Record {
     Record(traceId, timestamp, annotation, None)
   }
 
-  private val timeFormat = new TimeFormat("MMdd HH:mm:ss.SSS")
+  private val timeFormat = TimeFormatter("MMdd HH:mm:ss.SSS")
 
 }
