@@ -1,13 +1,15 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.filter.{
-  LogFormatter => CoreLogFormatter,
-  LoggingFilter => CoreLoggingFilter
-}
-import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.finagle.filter.{LogFormatter => CoreLogFormatter}
+import com.twitter.finagle.filter.{LoggingFilter => CoreLoggingFilter}
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.Status
+import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
 import com.twitter.util.Duration
-import java.time.{ZoneId, ZonedDateTime}
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -86,6 +88,10 @@ class CommonLogFormatter extends LogFormatter {
 
   def format(request: Request, response: Response, responseTime: Duration) = {
     val remoteAddr = request.remoteAddress.getHostAddress
+    val remoteUser: String = Transport.sslSessionInfo.peerIdentity match {
+      case Some(identity) => identity.name
+      case _ => "-"
+    }
 
     val contentLength = response.length
     val contentLengthStr = if (contentLength > 0) contentLength.toString else "-"
@@ -94,7 +100,10 @@ class CommonLogFormatter extends LogFormatter {
 
     val builder = new StringBuilder
     builder.append(remoteAddr)
-    builder.append(" - - [")
+    // %l is unavailable
+    builder.append(" - ")
+    builder.append(remoteUser)
+    builder.append(" [")
     builder.append(formattedDate)
     builder.append("] \"")
     builder.append(escape(request.method.toString))

@@ -15,6 +15,8 @@ New Features
 * finagle-http: RequestBuilder's `c.t.f.http.FileElement` now has `isText` (default: false)
   attribute. When set to `true`, no `Content-Transfer-Encoding` header is populated on the request.
   ``PHAB_ID=D969859``
+* finagle-http: When Finagle Http servers are secured with S2S, write `c.t.finagle.SslSessionInfo#peerIdentity` 
+  as remote user in access log. ``PHAB_ID=D988224``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -2,42 +2,41 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Method, Request, Response, Version}
-import com.twitter.logging.{BareFormatter, Logger, StringHandler}
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.finagle.http.Method
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.Version
+import com.twitter.logging.BareFormatter
+import com.twitter.logging.Logger
+import com.twitter.logging.StringHandler
+import com.twitter.util.Await
+import com.twitter.util.Future
 import java.time.ZonedDateTime
 import org.scalatest.funsuite.AnyFunSuite
+import com.twitter.finagle.ssl.session.ServiceIdentity
+import com.twitter.finagle.ssl.session.SslSessionInfo
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.context.Contexts
+import com.twitter.util.security.NullSslSession
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLSession
+import LoggingFilterTest._
 
-class LoggingFilterTest extends AnyFunSuite {
+object LoggingFilterTest {
+  val request = Request("/search.json")
+  request.method = Method.Get
+  request.xForwardedFor = "10.0.0.1"
+  request.referer = "http://www.example.com/"
+  request.userAgent = "User Agent"
+  request.version = Version.Http11
 
-  test("log") {
-    val logger = Logger.get("access")
-    logger.setLevel(Logger.INFO)
-    val stringHandler = new StringHandler(BareFormatter, Some(Logger.INFO))
-    logger.addHandler(stringHandler)
-    logger.setUseParentHandlers(false)
-
-    val request = Request("/search.json")
-    request.method = Method.Get
-    request.xForwardedFor = "10.0.0.1"
-    request.referer = "http://www.example.com/"
-    request.userAgent = "User Agent"
-    request.version = Version.Http11
-
-    val formatter = new CommonLogFormatter
-    val service = new Service[Request, Response] {
-      def apply(request: Request): Future[Response] = {
-        val response = Response()
-        response.statusCode = 123
-        response.write("hello")
-        Future.value(response)
-      }
+  val service = new Service[Request, Response] {
+    def apply(request: Request): Future[Response] = {
+      val response = Response()
+      response.statusCode = 123
+      response.write("hello")
+      Future.value(response)
     }
-    val filter = (new LoggingFilter(logger, formatter)).andThen(service)
-
-    Time.withTimeAt(Time.fromSeconds(1302121932)) { _ => Await.result(filter(request), 1.second) }
-
-    stringHandler.get == ("""127\.0\.0\.1 - - \[06/Apr/2011:20:32:12 \+0000\] "GET /search\.json HTTP/1\.1" 123 5 [0-9]+ "User Agent"""" + "\n")
   }
 
   val UnescapedEscaped =
@@ -179,6 +178,53 @@ class LoggingFilterTest extends AnyFunSuite {
       ("\u00e9", "\\xc3\\xa9"), // é
       ("\u2603", "\\xe2\\x98\\x83") // snowman
     )
+
+}
+
+class LoggingFilterTest extends AnyFunSuite {
+  test("log") {
+    val logger = Logger.get("access")
+    logger.setLevel(Logger.INFO)
+    val stringHandler = new StringHandler(BareFormatter, Some(Logger.INFO))
+    logger.addHandler(stringHandler)
+    logger.setUseParentHandlers(false)
+    val formatter = new CommonLogFormatter
+    val filter = (new LoggingFilter(logger, formatter)).andThen(service)
+
+    Await.result(filter(request), 1.second)
+
+    assert(stringHandler.get.contains("0.0.0.0 - -"))
+    assert(stringHandler.get.contains("""GET /search.json HTTP/1.1" 123 5"""))
+    assert(stringHandler.get.contains("""User Agent"""" + "\n"))
+  }
+
+  test("log with service identifiers") {
+    val logger = Logger.get("access")
+    logger.setLevel(Logger.INFO)
+    val stringHandler = new StringHandler(BareFormatter, Some(Logger.INFO))
+    logger.addHandler(stringHandler)
+    logger.setUseParentHandlers(false)
+    val formatter = new CommonLogFormatter
+    val filter = (new LoggingFilter(logger, formatter)).andThen(service)
+
+    object MockSessionInfo extends SslSessionInfo {
+      def usingSsl: Boolean = false
+      def session: SSLSession = NullSslSession
+      def sessionId: String = ""
+      def cipherSuite: String = ""
+      def localCertificates: Seq[X509Certificate] = Nil
+      def peerCertificates: Seq[X509Certificate] = Nil
+      override protected def getLocalIdentity: Option[ServiceIdentity] = None
+      override protected def getPeerIdentity: Option[ServiceIdentity] =
+        Some(new ServiceIdentity.GeneralNameServiceIdentity("itsMe"))
+    }
+    Await.result(
+      Contexts.local.let(Transport.sslSessionInfoCtx, MockSessionInfo) { filter(request) },
+      1.second)
+    assert(stringHandler.get.contains("0.0.0.0 - itsMe"))
+    assert(stringHandler.get.contains("""GET /search.json HTTP/1.1" 123 5"""))
+    assert(stringHandler.get.contains("""User Agent"""" + "\n"))
+  }
 
   test("escape() escapes non-printable, non-ASCII") {
     UnescapedEscaped.foreach {
