@@ -7,8 +7,8 @@ import com.twitter.util.Future
 import com.twitter.util.Stopwatch
 import com.twitter.util.Time
 import java.net.InetSocketAddress
-import java.util.concurrent.ConcurrentHashMap
 import java.util.Random
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import scala.annotation.tailrec
 
@@ -156,6 +156,25 @@ abstract class Tracing {
         TraceId(
           Some(id.traceId),
           Some(id.spanId),
+          nextSpanId(ThreadLocalRandom.current()),
+          id.sampled,
+          id.flags,
+          id.traceIdHigh)
+      case None => newId
+    }
+  }
+
+  /**
+   * Create a derived id from the current [[TraceId]].
+   * Whereas nextId derives a new Id by making it a child of the current,
+   * peerId creates a new Id by making it a peer of the current
+   */
+  final def peerId: TraceId = {
+    idOption match {
+      case Some(id) =>
+        TraceId(
+          Some(id.traceId),
+          Some(id.parentId),
           nextSpanId(ThreadLocalRandom.current()),
           id.sampled,
           id.flags,

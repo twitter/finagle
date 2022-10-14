@@ -11,35 +11,47 @@ object TraceInitializerFilter {
   /**
    * @param newId Set the next TraceId when the tracer is pushed, `true` for clients.
    */
-  private[finagle] def apply[Req, Rep](tracer: Tracer, newId: Boolean): Filter[Req, Rep, Req, Rep] =
-    new TraceInitializerFilter[Req, Rep](tracer, newId)
+  private[finagle] def apply[Req, Rep](
+    tracer: Tracer,
+    newId: Boolean,
+    fanout: Boolean = false
+  ): Filter[Req, Rep, Req, Rep] =
+    new TraceInitializerFilter[Req, Rep](tracer, newId, fanout)
 
   private[finagle] def typeAgnostic(tracer: Tracer, newId: Boolean): Filter.TypeAgnostic =
     new Filter.TypeAgnostic {
       def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = apply(tracer, newId)
     }
 
-  private[finagle] class Module[Req, Rep](newId: Boolean)
+  private[finagle] class Module[Req, Rep](newId: Boolean, fanout: Boolean)
       extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
-    def this() = this(true)
+    def this() = this(true, false)
     val role: Stack.Role = TraceInitializerFilter.role
     val description = "Initialize the tracing system"
     def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
-      apply(_tracer.tracer, newId).andThen(next)
+      apply(_tracer.tracer, newId, fanout).andThen(next)
     }
   }
 
   /**
    * Create a new stack module for clients. On each request a
    * [[com.twitter.finagle.tracing.Tracer]] will pushed and the next TraceId will be set
+   *
+   * @param fanout indicator of whether client is configured with partitioning so that it can be
+   *               traced properly. false by default
    */
-  private[finagle] def clientModule[Req, Rep] = new Module[Req, Rep](true)
+  private[finagle] def clientModule[Req, Rep](fanout: Boolean = false) =
+    new Module[Req, Rep](true, fanout)
 
   /**
    * Create a new stack module for servers. On each request a
    * [[com.twitter.finagle.tracing.Tracer]] will pushed.
+   *
+   * @param fanout indicator of whether server is configured with partitioning so that it can be
+   *               traced properly. false by default
    */
-  private[finagle] def serverModule[Req, Rep] = new Module[Req, Rep](false)
+  private[finagle] def serverModule[Req, Rep](fanout: Boolean = false) =
+    new Module[Req, Rep](false, fanout)
 
   private[finagle] def empty[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module0[ServiceFactory[Req, Rep]] {
@@ -60,18 +72,28 @@ object TraceInitializerFilter {
  *
  * @param tracer An instance of a tracer to use. Eg: ZipkinTracer
  * @param newId Set the next TraceId when the tracer is pushed (used for clients)
+ * @param fanout indicator of whether partitioning is enabled to wrap tracer in [[FanoutTracer]]
  */
-class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean)
+class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean, fanout: Boolean = false)
     extends SimpleFilter[Req, Rep] {
-  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     if (tracer.isNull) {
       if (newId) Trace.letId(Trace.nextId) { service(request) }
       else service(request)
     } else {
-      if (newId) Trace.letTracerAndNextId(tracer) { service(request) }
-      else
-        Trace.letTracer(tracer) { service(request) }
+      if (fanout) {
+        val wrappedTracer = FanoutTracer(tracer)
+        val res = {
+          if (newId) Trace.letFanoutTracerAndNextId(wrappedTracer) { service(request) }
+          else Trace.letFanoutTracer(wrappedTracer) { service(request) }
+        }
+        res.ensure(wrappedTracer.flush())
+      } else {
+        if (newId) Trace.letTracerAndNextId(tracer) { service(request) }
+        else Trace.letTracer(tracer) { service(request) }
+      }
     }
+  }
 }
 
 /**

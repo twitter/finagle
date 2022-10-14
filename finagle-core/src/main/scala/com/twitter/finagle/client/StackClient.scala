@@ -480,7 +480,7 @@ object StackClient {
     stk.push(ForwardAnnotation.module)
     stk.push(RegistryEntryLifecycle.module)
     stk.push(ClientExceptionTracingFilter.module())
-    stk.push(TraceInitializerFilter.clientModule)
+    stk.push(TraceInitializerFilter.clientModule())
     stk.result
   }
 

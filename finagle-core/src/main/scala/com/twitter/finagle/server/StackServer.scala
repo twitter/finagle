@@ -171,7 +171,7 @@ object StackServer {
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate
     // span.
-    stk.push(TraceInitializerFilter.serverModule)
+    stk.push(TraceInitializerFilter.serverModule())
     stk.push(MonitorFilter.serverModule)
 
     stk.result

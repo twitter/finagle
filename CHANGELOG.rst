@@ -10,6 +10,8 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: Enable tracing for individual fanout requests via the FanoutTracer. 
+  ``PHAB_ID=D974564`` 
 * finagle-core: Added helpers for local and peer ServiceIdentity to `SslSessionInfo`.
   ``PHAB_ID=D973030``
 * finagle-http: RequestBuilder's `c.t.f.http.FileElement` now has `isText` (default: false)

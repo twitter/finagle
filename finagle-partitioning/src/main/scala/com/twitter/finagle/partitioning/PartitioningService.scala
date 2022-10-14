@@ -1,6 +1,7 @@
 package com.twitter.finagle.partitioning
 
 import com.twitter.finagle._
+import com.twitter.finagle.tracing.Trace
 import com.twitter.util._
 import scala.collection.compat.immutable.ArraySeq
 
@@ -17,21 +18,32 @@ import scala.collection.compat.immutable.ArraySeq
  * operate only on a specific partition.
  */
 private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Req, Rep] {
+
   import PartitioningService._
 
   def apply(request: Req): Future[Rep] = {
     makePartitionedRequests(request).map(doMergeResponses(request))
   }
 
-  private[this] def makePartitionedRequests(req: Req): Future[Seq[(Req, Try[Rep])]] =
+  private[this] def makePartitionedRequests(req: Req): Future[Seq[(Req, Try[Rep])]] = {
+    val trace = Trace()
     partitionRequest(req).flatMap { f =>
       Future.collect(f.flatMap {
         case (pReq, services) =>
-          services.map { service =>
-            applyService(pReq, service).transform { t => Future.value((pReq, t)) }
+          services.map {
+            service =>
+              // We go ahead and make peerIds without real concern for "skipping" an the original ID
+              // because so long as the original is never populated, it won't appear in Zipkin or
+              // break the relationship of data.
+              Trace.letPeerId(trace.tracers) {
+                applyService(pReq, service).transform { t =>
+                  Future.value((pReq, t))
+                }
+              }
           }
       }.toSeq)
     }
+  }
 
   private[this] def applyService(request: Req, fService: Future[Service[Req, Rep]]): Future[Rep] =
     fService.flatMap { svc => svc(request) }

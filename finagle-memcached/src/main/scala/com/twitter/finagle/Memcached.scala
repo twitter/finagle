@@ -42,6 +42,8 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.ExceptionStatsHandler
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.ClientDestTracingFilter
+import com.twitter.finagle.tracing.ClientTracingFilter
+import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.transport.TransportContext
@@ -257,10 +259,24 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       def partitionAwareFinagleClient() = {
         DefaultLogger.fine(s"Using the new partitioning finagle client for memcached: $destination")
         val rawClient: Service[Command, Response] = {
-          val stk = stack.insertAfter(
-            BindingFactory.role,
-            MemcachedPartitioningService.module
-          )
+          val stk = stack
+            .insertAfter(
+              BindingFactory.role,
+              MemcachedPartitioningService.module
+            )
+            // We want this to go after the MemcachedPartitioningService so that we can get individual
+            // spans for fanout requests. It's currently at protoTracing, so we remove it to re-add below
+            .remove(MemcachedTracingFilter.memcachedTracingModule.role)
+            .remove(ClientTracingFilter.role)
+            .insertAfter(
+              MemcachedPartitioningService.role,
+              MemcachedTracingFilter.memcachedTracingModule)
+            .replace(
+              TraceInitializerFilter.role,
+              TraceInitializerFilter.clientModule[Command, Response](fanout = true))
+            .insertAfter(
+              MemcachedTracingFilter.memcachedTracingModule.role,
+              ClientTracingFilter.module[Command, Response])
           withStack(stk).newService(destination, label0)
         }
         TwemcacheClient(rawClient)

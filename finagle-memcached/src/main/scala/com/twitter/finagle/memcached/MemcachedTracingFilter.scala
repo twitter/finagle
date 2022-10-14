@@ -2,13 +2,18 @@ package com.twitter.finagle.memcached
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
+import com.twitter.finagle.memcached.protocol.Command
+import com.twitter.finagle.memcached.protocol.Response
+import com.twitter.finagle.memcached.protocol.RetrievalCommand
+import com.twitter.finagle.memcached.protocol.Values
 import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.tracing.Trace
-import com.twitter.util.{Future, Return}
+import com.twitter.util.Future
+import com.twitter.util.Return
 
 private[finagle] object MemcachedTracingFilter {
   val ShardIdAnnotationKey = "clnt/memcached.shard_id"
+  val HitBooleanAnnotationKey = "clnt/memcached.hit"
   val HitsAnnotationKey = "clnt/memcached.hits"
   val MissesAnnotationKey = "clnt/memcached.misses"
 
@@ -62,8 +67,14 @@ private final class MemcachedTracingFilter extends SimpleFilter[Command, Respons
         case command: RetrievalCommand =>
           response.respond {
             case Return(Values(vals)) =>
-              trace.recordBinary(HitsAnnotationKey, vals.size)
-              trace.recordBinary(MissesAnnotationKey, command.keys.size - vals.size)
+              val singleCommand = command.keys.size == 1
+              if (singleCommand) {
+                val isHit = command.keys.size == vals.size
+                trace.recordBinary(HitBooleanAnnotationKey, isHit)
+              } else {
+                trace.recordBinary(HitsAnnotationKey, vals.size)
+                trace.recordBinary(MissesAnnotationKey, command.keys.size - vals.size)
+              }
             case _ =>
           }
         case _ =>
