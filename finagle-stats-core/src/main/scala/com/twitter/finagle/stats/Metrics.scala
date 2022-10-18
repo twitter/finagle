@@ -152,15 +152,12 @@ private[finagle] class Metrics private (
 
   private[this] val loggedStats: Set[String] = debugLoggedStatNames()
 
-  private[this] val countersMap = metricsMaps.countersMap
-
-  private[this] val statsMap = metricsMaps.statsMap
-
-  private[this] val gaugesMap = metricsMaps.gaugesMap
-
-  private[this] val metricSchemas = metricsMaps.metricSchemas
-
-  private[this] val expressionSchemas = metricsMaps.expressionSchemas
+  private[this] val Metrics.MetricsMaps(
+    countersMap,
+    statsMap,
+    gaugesMap,
+    metricSchemas,
+    expressionSchemas) = metricsMaps
 
   private[this] val reservedNames = new ConcurrentHashMap[String, Repr]()
 
@@ -241,7 +238,6 @@ private[finagle] class Metrics private (
         ExpressionCollisionException(
           s"An expression with the key ${exprSchema.schemaKey()} had already been defined."))
     }
-
   }
 
   private def validateStringExpression(expr: Expression): Unit = {
