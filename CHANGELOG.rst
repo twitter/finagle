@@ -39,6 +39,9 @@ Breaking API Changes
   were confusing. Use `.withHttp2` and `.withNoHttp2` to toggle HTTP/2 support ON and OFF
   respectively.  ``PHAB_ID=D935292``
 
+* finagle-core: Allow users of MethodBuilder.idempotent to specify non-retryable responses for
+  idempotent methods. Previously these were overridden to be retryable.  ``PHAB_ID=D999969``
+
 22.7.0
 ------
 * finagle-thrift: Changing visibility of InputBuffer and OutputBuffer from [finagle] to [twitter].

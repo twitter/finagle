@@ -378,12 +378,7 @@ final class MethodBuilder[Req, Rep] private[finagle] (
       case Some(classifier) => classifier.orElse(protocolClassifier)
       case None => protocolClassifier
     }
-    ResponseClassifier.named(s"Idempotent($combined)") {
-      case reqrep if combined.isDefinedAt(reqrep) =>
-        val result = combined(reqrep)
-        if (result == ResponseClass.NonRetryableFailure) ResponseClass.RetryableFailure
-        else result
-    }
+    ResponseClassifier.named(s"Idempotent($combined)")(combined)
   }
 
   private[this] def addBackupRequestFilterParamAndClassifier(

@@ -949,7 +949,7 @@ class MethodBuilderTest
     }
   }
 
-  test("idempotent turns nonretryablefailures into retryablefailures") {
+  test("idempotent does not turn nonretryablefailures into retryablefailures") {
     val stats = new InMemoryStatsReceiver()
     val params = Stack.Params.empty +
       param.Stats(stats)
@@ -973,9 +973,11 @@ class MethodBuilderTest
       awaitResult(rep, 1.second)
     }
     assert(exc == myException)
+    // There should be no retries because the configured classifier marked all Throws as
+    // non-retryable
     eventually {
       assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 1)
-      assert(stats.stat("mb", "a_client", "retries")() == Seq(2))
+      assert(stats.stat("mb", "a_client", "retries")() == Seq(0))
     }
   }
 
@@ -1051,7 +1053,7 @@ class MethodBuilderTest
     eventually {
       assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 2)
       assert(stats.counters(Seq("mb", "a_client", "logical", "success")) == 1)
-      assert(stats.stat("mb", "a_client", "retries")() == Seq(0, 2))
+      assert(stats.stat("mb", "a_client", "retries")() == Seq(0, 0))
     }
   }
 
