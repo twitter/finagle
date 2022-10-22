@@ -191,11 +191,13 @@ class Zk2Resolver(
 
         @volatile var nlimbo = 0
         @volatile var size = 0
+        @volatile var weightRemovals = 0
 
         // The lifetimes of these gauges need to be managed if we
         // ever de-memoize addrOf.
         scoped.provideGauge("limbo") { nlimbo }
         scoped.provideGauge("size") { size }
+        scoped.provideGauge("weightRemovals") { weightRemovals }
 
         // First, convert the Op-based serverset address to a
         // Var[Addr], then select only endpoints that are alive
@@ -205,7 +207,13 @@ class Zk2Resolver(
           case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
           case Activity.Ok(weightedEntries) =>
             val endpoint = endpointOption.orNull
-            val hosts: Seq[(String, Int, Addr.Metadata)] = weightedEntries.collect {
+            weightRemovals = 0 // reset the gauge each time the serverset is recalculated
+            val hosts: Seq[(String, Int, Addr.Metadata)] = weightedEntries.flatMap {
+              // discard endpoint with weight == -1 from the serverset
+              // useful for things like squeeze testing
+              case (Endpoint(_, _, _, _, Endpoint.Status.Alive, _, _), weight) if weight == -1.0 =>
+                weightRemovals += 1
+                None
               case (
                     Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _, metadata),
                     weight)
@@ -214,7 +222,8 @@ class Zk2Resolver(
                     shardOption.forall { s => s == shardId && shardId != Int.MinValue } =>
                 val shardIdOpt = if (shardId == Int.MinValue) None else Some(shardId)
                 val zkMetadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt, metadata))
-                (host, port, zkMetadata + (WeightedAddress.weightKey -> weight))
+                Some((host, port, zkMetadata + (WeightedAddress.weightKey -> weight)))
+              case _ => None
             }
 
             if (chatty()) {

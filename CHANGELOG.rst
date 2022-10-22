@@ -29,6 +29,11 @@ Runtime Behavior Changes
   this may mean fewer backup requests, so such clients can increase their maxExtraLoad setting
   if they actually want higher backup request rates. ``PHAB_ID=D981168``
 
+* finagle-serversets: Remove Endpoints with a weight of -1.0 from resolved zookeeper serversets
+  Negative weights aren't normally valid so we use "-1.0" as a specific signal to not include
+  the node in the resolved serverset returned to the client.  This is useful for various types
+  of testing. ``PHAB_ID=D1001342``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
