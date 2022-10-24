@@ -74,13 +74,6 @@ ChannelStatsHandler
   A gauge of the total number of connections that are currently open in the
   channel.
 
-**pending_io_events**
-  A gauge of the number of pending IO events enqueued in all event loops servicing
-  this client or server. If this metric climbs up, it indicates an overload scenario
-  when IO threads are not being able to process the scheduled work (handling new
-  requests and new connections). A very typical cause of these symptoms is either
-  blocking or running a CPU intensive workloads on IO threads.
-
 **exn/<exception_name>+**
   A counter of the number of times a specific exception has been thrown within
   a Netty pipeline.

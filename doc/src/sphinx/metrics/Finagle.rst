@@ -157,6 +157,13 @@ These metrics are exported from Finagle's underlying transport
 implementation, the Netty 4 library and available under `finagle/netty4`
 on any instance running Finagle with Netty 4.
 
+**pending_io_events**
+  A gauge of the number of pending IO events enqueued in all event loops servicing
+  this client or server. If this metric climbs up, it indicates an overload scenario
+  when IO threads are not being able to process the scheduled work (handling new
+  requests and new connections). A very typical cause of these symptoms is either
+  blocking or running a CPU intensive workloads on IO threads.
+
 **worker_threads**
   A gauge for the size of the Netty worker pool. This will only
   reflect `EventLoopGroup`s constructed by Finagle and not those

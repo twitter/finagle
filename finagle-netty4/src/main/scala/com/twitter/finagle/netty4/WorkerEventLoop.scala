@@ -7,6 +7,8 @@ import io.netty.channel.epoll.Epoll
 import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.util.concurrent.DefaultThreadFactory
+import io.netty.util.concurrent.SingleThreadEventExecutor
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -19,10 +21,30 @@ private object WorkerEventLoop {
 
   private[this] val workerPoolSize = new AtomicInteger(0)
 
+  private[this] val eventLoopGroups = ConcurrentHashMap.newKeySet[EventLoopGroup]()
+
   // We hold onto the reference so the gauge doesn't get GC'd
   private[this] val workerGauge = FinagleStatsReceiver.addGauge("netty4", "worker_threads") {
     workerPoolSize.get
   }
+
+  // We hold onto the reference so the gauge doesn't get GC'd
+  private[this] val pendingEventsGauge =
+    FinagleStatsReceiver.addGauge("netty4", "pending_io_events") {
+      var total = 0l
+      eventLoopGroups.forEach { group =>
+        if (group.isShutdown) {
+          eventLoopGroups.remove(group)
+        } else {
+          group.forEach {
+            case loop: SingleThreadEventExecutor =>
+              total += loop.pendingTasks()
+            case _ => // nop
+          }
+        }
+      }
+      total
+    }
 
   // This uses the netty DefaultThreadFactory to create thread pool threads. This factory creates
   // special FastThreadLocalThreads that netty has specific optimizations for.
@@ -41,8 +63,13 @@ private object WorkerEventLoop {
 
   def make(executor: Executor, numWorkers: Int): EventLoopGroup = {
     workerPoolSize.addAndGet(numWorkers)
-    if (useNativeEpoll() && Epoll.isAvailable) new EpollEventLoopGroup(numWorkers, executor)
-    else new NioEventLoopGroup(numWorkers, executor)
+    val result =
+      if (useNativeEpoll() && Epoll.isAvailable) new EpollEventLoopGroup(numWorkers, executor)
+      else new NioEventLoopGroup(numWorkers, executor)
+
+    eventLoopGroups.add(result)
+
+    result
   }
 
   lazy val Global: EventLoopGroup = make(

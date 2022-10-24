@@ -4,16 +4,18 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Duration, Time}
+import com.twitter.util.Duration
+import com.twitter.util.Time
 import io.netty.buffer.Unpooled.wrappedBuffer
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import java.util.concurrent.TimeoutException
 import org.mockito.Mockito.when
+import org.scalatest.concurrent.Eventually
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
-class ChannelStatsHandlerTest extends AnyFunSuite with MockitoSugar {
+class ChannelStatsHandlerTest extends AnyFunSuite with MockitoSugar with Eventually {
 
   trait SocketTest {
     val chan = mock[Channel]
@@ -119,29 +121,6 @@ class ChannelStatsHandlerTest extends AnyFunSuite with MockitoSugar {
 
     handler2.close(ctx2.ctx, ctx2.ctx.newPromise)
     closeCountEquals(2)
-  }
-
-  test("ChannelStatsHandler counts pending_io_events") {
-    val sr = new InMemoryStatsReceiver
-    val params = Stack.Params.empty + Stats(sr)
-    val sharedStats = new SharedChannelStats(params)
-    val ch = mock[Channel]
-    val ctx = mock[ChannelHandlerContext]
-    val eventLoop = mock[SingleThreadEventLoop]
-    val handler = new ChannelStatsHandler(sharedStats)
-
-    when(eventLoop.pendingTasks()).thenReturn(1, 2)
-    when(ch.eventLoop()).thenReturn(eventLoop)
-    when(ctx.channel()).thenReturn(ch)
-
-    handler.handlerAdded(ctx)
-    assert(sr.gauges(Seq("pending_io_events"))() == 0)
-
-    handler.channelActive(ctx)
-    assert(sr.gauges(Seq("pending_io_events"))() == 1)
-
-    handler.channelInactive(ctx)
-    assert(sr.gauges(Seq("pending_io_events"))() == 0)
   }
 
   test("ChannelStatsHandler handles multiple channelInactive calls") {

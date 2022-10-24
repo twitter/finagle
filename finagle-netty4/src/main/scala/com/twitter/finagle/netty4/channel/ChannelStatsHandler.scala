@@ -1,22 +1,23 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.Failure
-import com.twitter.util.{Duration, Monitor, Stopwatch}
+import com.twitter.util.Duration
+import com.twitter.util.Monitor
+import com.twitter.util.Stopwatch
 import io.netty.buffer.ByteBuf
-import io.netty.channel.epoll.{EpollSocketChannel, EpollTcpInfo}
-import io.netty.channel.{
-  ChannelDuplexHandler,
-  ChannelException,
-  ChannelHandlerContext,
-  ChannelPromise,
-  SingleThreadEventLoop
-}
+import io.netty.channel.epoll.EpollSocketChannel
+import io.netty.channel.epoll.EpollTcpInfo
+import io.netty.channel.ChannelDuplexHandler
+import io.netty.channel.ChannelException
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelPromise
 import io.netty.handler.ssl.SslHandshakeCompletionEvent
 import io.netty.handler.timeout.TimeoutException
 import io.netty.util.concurrent.ScheduledFuture
 import java.io.IOException
 import java.util.concurrent.TimeUnit
-import java.util.logging.{Level, Logger}
+import java.util.logging.Level
+import java.util.logging.Logger
 import scala.util.control.NonFatal
 
 private object ChannelStatsHandler {
@@ -112,18 +113,12 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
   }
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
-    sharedChannelStats.connects.incr()
-    sharedChannelStats.connectionCountIncrement()
+    sharedChannelStats.connectionIncrement()
 
     ctx.channel() match {
       case epsc: EpollSocketChannel =>
         if (tcpStatsUpdater != null) tcpStatsUpdater.cancel()
         tcpStatsUpdater = new TcpStatsUpdater(sharedChannelStats, epsc)
-      case _ =>
-    }
-
-    ctx.channel().eventLoop() match {
-      case stel: SingleThreadEventLoop => sharedChannelStats.registerEventLoop(stel)
       case _ =>
     }
 
@@ -174,7 +169,7 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
       val elapsed = connectionDuration
       connectionDuration = null
       sharedChannelStats.connectionDuration.add(elapsed().inMilliseconds)
-      sharedChannelStats.connectionCountDecrement()
+      sharedChannelStats.connectionDecrement()
 
       val oldChannelBytesRead = channelBytesRead
       val oldChannelBytesWritten = channelBytesWritten
@@ -189,12 +184,7 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
 
       if (tlsChannelActive) {
         tlsChannelActive = false
-        sharedChannelStats.tlsConnectionCountDecrement()
-      }
-
-      ctx.channel().eventLoop() match {
-        case stel: SingleThreadEventLoop => sharedChannelStats.unregisterEventLoop(stel)
-        case _ =>
+        sharedChannelStats.tlsConnectionDecrement()
       }
     }
     super.channelInactive(ctx)
@@ -234,11 +224,10 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
   // and tls connections.
   override def userEventTriggered(ctx: ChannelHandlerContext, evt: AnyRef): Unit = {
     evt match {
-      case _: SslHandshakeCompletionEvent =>
-        if (channelActive) {
-          tlsChannelActive = true
-          sharedChannelStats.tlsConnectionCountIncrement()
-        }
+      case e: SslHandshakeCompletionEvent if e.isSuccess && channelActive =>
+        tlsChannelActive = true
+        sharedChannelStats.tlsConnectionIncrement()
+
       case _ => // do nothing
     }
     super.userEventTriggered(ctx, evt)
