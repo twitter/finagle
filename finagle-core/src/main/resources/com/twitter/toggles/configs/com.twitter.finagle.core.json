@@ -4,6 +4,11 @@
       "id": "com.twitter.finagle.service.DeadlineOnly",
       "description": "Ignore the user configured timeouts, only respect the deadline propagation in ATLA",
       "fraction": 0.0
+    },
+    {
+      "id": "com.twitter.finagle.filter.UseWorkQueueFiber",
+      "description": "When enabled, use a WorkQueueFiber for task scheduling. Only in ATLA.",
+      "fraction": 0.0
     }
   ]
 }
