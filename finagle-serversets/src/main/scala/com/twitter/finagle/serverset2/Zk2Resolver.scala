@@ -24,6 +24,11 @@ object dnsCacheSize extends GlobalFlag(16000L, "Maximum size of DNS resolution c
 private[serverset2] object Zk2Resolver {
 
   /**
+   * A sentinel weight value.
+   */
+  val WeightFilter: Double = -1.0
+
+  /**
    * A representation of an Addr accompanied by its total size and the number of
    * members that are in "limbo".
    */
@@ -191,39 +196,32 @@ class Zk2Resolver(
 
         @volatile var nlimbo = 0
         @volatile var size = 0
-        @volatile var weightRemovals = 0
 
         // The lifetimes of these gauges need to be managed if we
         // ever de-memoize addrOf.
         scoped.provideGauge("limbo") { nlimbo }
         scoped.provideGauge("size") { size }
-        scoped.provideGauge("weightRemovals") { weightRemovals }
 
-        // First, convert the Op-based serverset address to a
-        // Var[Addr], then select only endpoints that are alive
-        // and match any specified endpoint name and shard ID.
+        // Convert the Op-based serverset address to a Var[Addr].
         val rawServerSetAddr: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
           case Activity.Pending => Var.value(Addr.Pending)
           case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
           case Activity.Ok(weightedEntries) =>
-            val endpoint = endpointOption.orNull
-            weightRemovals = 0 // reset the gauge each time the serverset is recalculated
-            val hosts: Seq[(String, Int, Addr.Metadata)] = weightedEntries.flatMap {
-              // discard endpoint with weight == -1 from the serverset
-              // useful for things like squeeze testing
-              case (Endpoint(_, _, _, _, Endpoint.Status.Alive, _, _), weight) if weight == -1.0 =>
-                weightRemovals += 1
-                None
-              case (
-                    Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _, metadata),
-                    weight)
-                  if names.contains(endpoint) &&
-                    host != null &&
-                    shardOption.forall { s => s == shardId && shardId != Int.MinValue } =>
-                val shardIdOpt = if (shardId == Int.MinValue) None else Some(shardId)
-                val zkMetadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt, metadata))
-                Some((host, port, zkMetadata + (WeightedAddress.weightKey -> weight)))
-              case _ => None
+            // Select endpoints that are: alive, have a valid weight,
+            // and match the provided endpoint name + shard number.
+            def predicate(endpoint: Endpoint, weight: Double): Boolean = {
+              endpoint.status == Endpoint.Status.Alive &&
+              endpoint.host != null &&
+              weight != WeightFilter &&
+              endpoint.names.contains(endpointOption.orNull) &&
+              shardOption.forall { s => s == endpoint.shard && endpoint.shard != Int.MinValue }
+            }
+
+            val hosts: Seq[(String, Int, Addr.Metadata)] = weightedEntries.collect {
+              case (e: Endpoint, weight) if predicate(e, weight) =>
+                val shardOpt = if (e.shard == Int.MinValue) None else Some(e.shard)
+                val zkMetadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardOpt, e.metadata))
+                (e.host, e.port, zkMetadata + (WeightedAddress.weightKey -> weight))
             }
 
             if (chatty()) {

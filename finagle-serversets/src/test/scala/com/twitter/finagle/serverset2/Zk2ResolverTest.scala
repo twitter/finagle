@@ -7,7 +7,6 @@ import com.twitter.finagle.Name
 import com.twitter.finagle.Resolver
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.partitioning.zk.ZkMetadata
-import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.util.RandomSocket
 import com.twitter.util.Var
@@ -206,67 +205,50 @@ class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually wi
     inst2.stop()
   }
 
-  test("end-to-end: -1 weights are removed") {
-    // build our own resolver so we can capture and compare metrics
-    val stats = new InMemoryStatsReceiver
-    val zk2 = new Zk2Resolver(stats)
-    val va = zk2.bind(inst.zookeeperConnectString + "!" + "/foo/bar")
+  test("end-to-end: -1 weighted endpoints are filtered") {
+    val Name.Bound(va) = zk2resolve("/foo/bar")
     eventually {
       assert(va.sample() == Addr.Neg, "resolution is not negative before serverset exists")
     }
 
-    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
     val serviceAddr = RandomSocket()
-    val negAddr = RandomSocket()
-    // add two different nodes
-    val status = serverSet.join(serviceAddr, Map.empty[String, InetSocketAddress].asJava, shardId)
-    val status2 = serverSet.join(negAddr, Map.empty[String, InetSocketAddress].asJava, shardId + 1)
+    val filteredAddr = RandomSocket()
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
+    serverSet.join(serviceAddr, Map("https" -> RandomSocket()).asJava, shardId)
+    serverSet.join(filteredAddr, Map("https" -> RandomSocket()).asJava, shardId + 1)
+
     eventually {
       assert(
-        va.sample() == Addr.Bound(address(serviceAddr), address(negAddr, Some(shardId + 1))),
+        va.sample() == Addr.Bound(address(serviceAddr), address(filteredAddr, Some(shardId + 1))),
         "resolution is not bound once the serverset exists"
       )
     }
 
-    //  create the vector for negAddr/shardId+1 node
+    // create vector node to set the weight of filteredAddr to -1
     val vector = s"""{"vector": [{"select": "shard=${shardId + 1}", "weight": -1.0}]}"""
     val zkClient = inst.zookeeperClient.get()
     zkClient.create(
       "/foo/bar/vector_0000000000",
       vector.getBytes(),
       Ids.OPEN_ACL_UNSAFE,
-      CreateMode.EPHEMERAL)
+      CreateMode.EPHEMERAL
+    )
+
     eventually {
       assert(
         va.sample() == Addr.Bound(address(serviceAddr)),
-        "node with negative weight is not removed from Var[Addr]"
+        "address with a weight of -1 is not filtered from va"
       )
     }
-    assert(
-      stats.gauges(
-        Seq(
-          inst.zookeeperConnectString,
-          "foo",
-          "bar",
-          "endpoint=default",
-          "weightRemovals"))() == 1.0)
 
-    // remove the vector so node is added back to the serverset
+    // delete vector node to remove the weight of -1 from filteredAddr
     zkClient.delete("/foo/bar/vector_0000000000", 0)
+
     eventually {
       assert(
-        va.sample() == Addr.Bound(address(serviceAddr), address(negAddr, Some(shardId + 1))),
-        "Var[Addr] should contain both nodes again"
+        va.sample() == Addr.Bound(address(serviceAddr), address(filteredAddr, Some(shardId + 1))),
+        "filteredAddr should re-join va"
       )
-    }
-    // verify gauge accurately tracks the number of current weightRemovals
-    assert(stats.gauges(
-      Seq(inst.zookeeperConnectString, "foo", "bar", "endpoint=default", "weightRemovals"))() == 0)
-
-    status.leave()
-    status2.leave()
-    eventually(stabilizationTimeout, stabilizationInterval) {
-      assert(va.sample() == Addr.Neg, "resolution is not negative after the serverset disappears")
     }
   }
 
