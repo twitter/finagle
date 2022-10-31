@@ -3,6 +3,7 @@ package com.twitter.finagle.loadbalancer.aperture
 import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.aperture.DeterministicAperture.MinDeterministicAperture
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord
+import com.twitter.finagle.stats.Verbosity
 
 private object WeightedAperture {
 
@@ -171,5 +172,12 @@ private class WeightedAperture[Req, Rep, NodeT <: ApertureNode[Req, Rep]](
 
   def needsRebuild: Boolean = false
 
-  def pick(): NodeT = WeightedP2CPick.pick(pdist, aperture.pickLog)
+  private[this] val p2cZeroCounter = aperture.balancerStatsReceiver.counter(
+    description = "counts the number of times p2c selects two nodes with a zero load",
+    Verbosity.ShortLived,
+    "p2c",
+    "zero"
+  )
+
+  def pick(): NodeT = WeightedP2CPick.pick(pdist, aperture.pickLog, p2cZeroCounter)
 }

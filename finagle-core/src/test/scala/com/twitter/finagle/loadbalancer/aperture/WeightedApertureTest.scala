@@ -10,6 +10,7 @@ import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.loadbalancer.PanicMode
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Await
@@ -76,7 +77,7 @@ abstract class BaseWeightedApertureTest()
     def pending: Int = 0
   }
 
-  class TestAperture() extends Aperture[Unit, Unit] {
+  class TestAperture(stats: StatsReceiver = NullStatsReceiver) extends Aperture[Unit, Unit] {
     override type Node = TestNode
     override private[aperture] def rng = BaseWeightedApertureTest.this.rng
     override private[aperture] def minAperture = 12
@@ -85,7 +86,7 @@ abstract class BaseWeightedApertureTest()
     override protected def label: String = ""
     override private[loadbalancer] def panicMode: PanicMode = PanicMode.Paranoid
     override protected def emptyException: Throwable = new NoBrokersAvailableException
-    override protected def statsReceiver: StatsReceiver = new InMemoryStatsReceiver
+    override protected def statsReceiver: StatsReceiver = stats
     override protected def newNode(factory: EndpointFactory[Unit, Unit]): TestNode = TestNode(
       newFactory())
   }
@@ -479,5 +480,21 @@ abstract class BaseWeightedApertureTest()
 
     assert(wap.pdist.get(0) == endpoints(2))
     assert(wap.pdist.get(16) == endpoints(18))
+  }
+
+  test("p2c zero stats") {
+    val imsr = new InMemoryStatsReceiver
+    val endpoints = Vector.fill(20)(TestNode(newFactory()))
+    val bal = new WeightedAperture[Unit, Unit, TestNode](
+      aperture = new TestAperture(imsr),
+      endpoints = endpoints,
+      initAperture = 12,
+      coord = FromInstanceId(4, 20)
+    )
+
+    def p2cZeroCounter = imsr.counters(Seq("p2c", "zero"))
+    bal.pick()
+    bal.pick()
+    assert(p2cZeroCounter == 2)
   }
 }

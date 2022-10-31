@@ -3,6 +3,7 @@ package com.twitter.finagle.loadbalancer.aperture
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.Balancer
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.Logger
 import com.twitter.util.Closable
@@ -56,6 +57,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * comparison – since aperture uses p2c for selection.
    */
   private[aperture] def rng: Rng
+
+  /**
+   * The `statsReceiver` passed in to the `Balancer`.
+   */
+  private[aperture] def balancerStatsReceiver: StatsReceiver = self.statsReceiver
 
   /**
    * The minimum aperture as specified by the user config. Note this value is advisory

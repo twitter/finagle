@@ -2,7 +2,10 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.Status
 import com.twitter.finagle.loadbalancer.NodeT
-import com.twitter.logging.{Level, Logger}
+import com.twitter.finagle.stats.Counter
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
 
 /**
  * A node-picker object that uses the ideas behind the
@@ -58,7 +61,8 @@ private object WeightedP2CPick {
    */
   def pick[Node <: NodeT[_, _]](
     pdist: ProbabilityDistribution[Node],
-    logger: Logger = null
+    logger: Logger = null,
+    p2cZeroCounter: Counter = NullStatsReceiver.NullCounter
   ): Node = {
     val a = pdist.pickOne()
     val b = pdist.tryPickSecond(a)
@@ -67,6 +71,14 @@ private object WeightedP2CPick {
 
     val nodeA = pdist.get(a)
     val nodeB = pdist.get(b)
+
+    // We measure the effectiveness of our load metric by comparing the load of the
+    // two nodes. In cases like least loaded, an ineffective load metric, where the client
+    // lacks enough concurrency, would be zero for both nodes.
+    if (nodeA.load == 0 && nodeB.load == 0) {
+      p2cZeroCounter.incr()
+    }
+
     val picked = pick(nodeA, aw, nodeB, bw)
 
     if (logger != null && logger.isLoggable(Level.TRACE)) {

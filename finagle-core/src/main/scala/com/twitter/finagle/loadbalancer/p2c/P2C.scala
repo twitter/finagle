@@ -1,6 +1,8 @@
 package com.twitter.finagle.loadbalancer.p2c
 
-import com.twitter.finagle.loadbalancer.{Balancer, DistributorT}
+import com.twitter.finagle.loadbalancer.Balancer
+import com.twitter.finagle.loadbalancer.DistributorT
+import com.twitter.finagle.stats.Verbosity
 import com.twitter.finagle.util.Rng
 
 /**
@@ -30,9 +32,16 @@ private[loadbalancer] trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     // set of nodes changes (eg: some of the nodes were unannounced and restarted).
     def needsRebuild: Boolean = false
 
+    private[this] val p2cZeroCounter = self.statsReceiver.counter(
+      description = "counts the number of times p2c selects two nodes with a zero load",
+      Verbosity.ShortLived,
+      "p2c",
+      "zero"
+    )
+
     def pick(): Node = {
       if (vector.isEmpty) failingNode
-      else P2CPick.pick(vector, vector.size, self.rng)
+      else P2CPick.pick(vector, vector.size, self.rng, p2cZeroCounter)
     }
   }
 

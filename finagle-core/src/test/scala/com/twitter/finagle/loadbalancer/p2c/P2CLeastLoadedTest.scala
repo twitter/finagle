@@ -52,6 +52,7 @@ class P2CLeastLoadedTest extends AnyFunSuite with App with P2CSuite {
     def load = r.gauges.getOrElse(Seq("load"), zero)()
     def available = r.gauges.getOrElse(Seq("available"), zero)()
     def panicked: Long = r.counters.getOrElse(Seq("panicked"), 0L)
+    def p2cZero: Long = r.counters(Seq("p2c", "zero"))
   }
 
   test("Balances evenly") {
@@ -227,6 +228,19 @@ class P2CLeastLoadedTest extends AnyFunSuite with App with P2CSuite {
     assert(stats.adds == 2)
     assert(stats.removes == 0)
     assert(stats.available == 2)
+
+    // sequential requests
+    Await.result(bal()).close()
+    Await.result(bal()).close()
+    assert(stats.p2cZero == 2)
+
+    // concurrent requests
+    val sf0 = Await.result(bal())
+    assert(stats.p2cZero == 3)
+    val sf1 = Await.result(bal())
+    assert(stats.p2cZero == 3)
+    sf0.close()
+    sf1.close()
 
     vec()(0).stat = Status.Closed
     assert(stats.available == 1)

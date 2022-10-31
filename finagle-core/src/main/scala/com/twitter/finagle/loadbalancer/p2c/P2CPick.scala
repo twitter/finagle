@@ -3,6 +3,7 @@ package com.twitter.finagle.loadbalancer.p2c
 import com.twitter.finagle.Status
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.loadbalancer.NodeT
+import com.twitter.finagle.stats.Counter
 
 /**
  * A helper that uses the ideas behind the "power of 2 choices"
@@ -19,7 +20,12 @@ private[loadbalancer] object P2CPick {
    * selects between the two first by `status` and then by `load`. Effectively,
    * we want to select the most healthy, least loaded of the two.
    */
-  def pick[Node <: NodeT[_, _]](vec: IndexedSeq[Node], range: Int, rng: Rng): Node = {
+  def pick[Node <: NodeT[_, _]](
+    vec: IndexedSeq[Node],
+    range: Int,
+    rng: Rng,
+    p2cZeroCounter: Counter
+  ): Node = {
     assert(vec.nonEmpty)
 
     if (range == 1 || vec.size == 1) vec.head
@@ -42,6 +48,14 @@ private[loadbalancer] object P2CPick {
       // one. Otherwise we pick the one that's healthier.
       val aStatus = nodeA.status
       val bStatus = nodeB.status
+
+      // We measure the effectiveness of our load metric by comparing the load of the
+      // two nodes. In cases like least loaded, an ineffective load metric, where the client
+      // lacks enough concurrency, would be zero for both nodes.
+      if (nodeA.load == 0 && nodeB.load == 0) {
+        p2cZeroCounter.incr()
+      }
+
       if (aStatus == bStatus) {
         if (nodeA.load <= nodeB.load) nodeA else nodeB
       } else {
