@@ -7,16 +7,6 @@ import scala.collection.Map
 import scala.collection.mutable
 import scala.util.matching.Regex
 
-object format
-    extends GlobalFlag[String](
-      "commonsmetrics",
-      "Format style for metric names (ostrich|commonsmetrics|commonsstats)"
-    ) {
-  private[stats] val Ostrich = "ostrich"
-  private[stats] val CommonsMetrics = "commonsmetrics"
-  private[stats] val CommonsStats = "commonsstats"
-}
-
 /**
  * If a histogram has no data collected (its count is 0), it can be
  * beneficial to not export all the histogram details as there will
@@ -108,10 +98,10 @@ private[twitter] sealed trait StatsFormatter {
     s"${name}$histogramSeparator$component"
 
   /** Label applied for the number of times a histogram was reported */
-  private[twitter] final val labelCount: String = HistogramFormatter.labelCount
+  private[twitter] final val labelCount: String = HistogramFormatter.default.labelCount
 
   /** Label applied for sum of the reported values */
-  private[twitter] final val labelSum: String = HistogramFormatter.labelSum
+  private[twitter] final val labelSum: String = HistogramFormatter.default.labelSum
 
   /** Label applied for a given percentile, `p`, of a histogram */
   private[twitter] def labelPercentile(p: Double): String
@@ -144,10 +134,10 @@ private[twitter] object StatsFormatter {
    * See Commons Metrics' `Metrics.sample()`.
    */
   object CommonsMetrics extends StatsFormatter {
-    def labelPercentile(p: Double): String = HistogramFormatter.labelPercentile(p)
-    def labelMin: String = HistogramFormatter.labelMin
-    def labelMax: String = HistogramFormatter.labelMax
-    def labelAverage: String = HistogramFormatter.labelAverage
+    def labelPercentile(p: Double): String = HistogramFormatter.CommonsMetrics.labelPercentile(p)
+    def labelMin: String = HistogramFormatter.CommonsMetrics.labelMin
+    def labelMax: String = HistogramFormatter.CommonsMetrics.labelMax
+    def labelAverage: String = HistogramFormatter.CommonsMetrics.labelAverage
   }
 
   /**
@@ -156,25 +146,13 @@ private[twitter] object StatsFormatter {
    * See Ostrich's `Distribution.toMap`.
    */
   object Ostrich extends StatsFormatter {
-    def labelPercentile(p: Double): String = {
-      p match {
-        case 0.5d => "p50"
-        case 0.9d => "p90"
-        case 0.95d => "p95"
-        case 0.99d => "p99"
-        case 0.999d => "p999"
-        case 0.9999d => "p9999"
-        case _ =>
-          val padded = (p * 10000).toInt
-          s"p$padded"
-      }
-    }
+    def labelPercentile(p: Double): String = HistogramFormatter.Ostrich.labelPercentile(p)
 
-    def labelMin: String = "minimum"
+    def labelMin: String = HistogramFormatter.Ostrich.labelMin
 
-    def labelMax: String = "maximum"
+    def labelMax: String = HistogramFormatter.Ostrich.labelMax
 
-    def labelAverage: String = "average"
+    def labelAverage: String = HistogramFormatter.Ostrich.labelAverage
   }
 
   /**
@@ -218,13 +196,12 @@ private[twitter] object StatsFormatter {
 
     override val histogramSeparator: String = "_"
 
-    def labelPercentile(p: Double): String =
-      s"${p * 100}_percentile".replace(".", "_")
+    def labelPercentile(p: Double): String = HistogramFormatter.CommonsStats.labelPercentile(p)
 
-    def labelMin: String = "min"
+    def labelMin: String = HistogramFormatter.CommonsStats.labelMin
 
-    def labelMax: String = "max"
+    def labelMax: String = HistogramFormatter.CommonsStats.labelMax
 
-    def labelAverage: String = "avg"
+    def labelAverage: String = HistogramFormatter.CommonsStats.labelAverage
   }
 }
