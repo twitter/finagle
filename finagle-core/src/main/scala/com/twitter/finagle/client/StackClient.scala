@@ -504,7 +504,7 @@ object StackClient {
   /**
    * A set of ClientParamsInjectors for transforming client params.
    */
-  private[finagle] object DefaultInjectors extends ParamsInjectorCollection[ClientParamsInjector]
+  object DefaultInjectors extends ParamsInjectorCollection[ClientParamsInjector]
 }
 
 /**

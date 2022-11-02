@@ -14,6 +14,7 @@ New Features
   ``PHAB_ID=D974564`` 
 * finagle-core: Added helpers for local and peer ServiceIdentity to `SslSessionInfo`.
   ``PHAB_ID=D973030``
+* finagle-core: Expose `StackClient.DefaultInjectors`.  ``PHAB_ID=D1009348``
 * finagle-http: RequestBuilder's `c.t.f.http.FileElement` now has `isText` (default: false)
   attribute. When set to `true`, no `Content-Transfer-Encoding` header is populated on the request.
   ``PHAB_ID=D969859``
