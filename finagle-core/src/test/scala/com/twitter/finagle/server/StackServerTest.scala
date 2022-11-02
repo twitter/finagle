@@ -51,7 +51,7 @@ class StackServerTest extends AnyFunSuite with Eventually {
   }
 
   test("Deadline isn't changed until after it's recorded") {
-    val echo = ServiceFactory.const(Service.mk[Unit, Deadline] { unit =>
+    val echo = ServiceFactory.const(Service.mk[Unit, Deadline] { _ =>
       Future.value(Contexts.broadcast(Deadline))
     })
     val stack = StackServer.newStack[Unit, Deadline] ++ Stack.leaf(Endpoint, echo)
@@ -64,11 +64,11 @@ class StackServerTest extends AnyFunSuite with Eventually {
         ctl.advance(1.second)
         val result = svc(())
 
+        // The deadline inside the service's closure should be updated
+        assert(Await.result(result) == Deadline.ofTimeout(1.second))
+
         // we should be one second ahead
         assert(statsReceiver.stats(Seq("transit_latency_ms"))(0) == 1.second.inMilliseconds.toFloat)
-
-        // but the deadline inside the service's closure should be updated
-        assert(Await.result(result) == Deadline.ofTimeout(1.second))
       }
     }
   }

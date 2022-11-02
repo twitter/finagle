@@ -159,12 +159,19 @@ sealed class AnnotatingTracingFilter[Req, Rep](
 
       trace.record(before)
 
-      service(request).respond {
-        case Throw(e) =>
-          trace.record(afterFailure(s"${e.getClass.getName}: ${e.getMessage}"))
-          trace.record(after)
-        case _ =>
-          trace.record(after)
+      // We use transform to force ordering: using `.respond` won't necessarily
+      // ensure that we get our trace annotations in place before downstream interests
+      // may add their own, resulting in strange tracing annotation ordering like
+      // the client receive happening before the client wire receive.
+      service(request).transform { result =>
+        result match {
+          case Throw(e) =>
+            trace.record(afterFailure(s"${e.getClass.getName}: ${e.getMessage}"))
+            trace.record(after)
+          case _ =>
+            trace.record(after)
+        }
+        Future.const(result)
       }
     } else {
       service(request)

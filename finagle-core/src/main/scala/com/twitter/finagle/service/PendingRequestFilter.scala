@@ -60,8 +60,11 @@ object PendingRequestFilter {
       }
     }
 
-  val PendingRequestsLimitExceeded =
-    new RejectedExecutionException("Pending request limit exceeded")
+  val PendingRequestsLimitExceeded: Exception = {
+    val ex = new RejectedExecutionException("Pending request limit exceeded")
+    ex.setStackTrace(Array())
+    ex
+  }
 }
 
 /**
