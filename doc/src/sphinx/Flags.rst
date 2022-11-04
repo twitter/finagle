@@ -64,15 +64,16 @@ Common
   Minimum interval between recording stack traces for slow tasks (default: `20.seconds`).
 
 **com.twitter.finagle.offload.numWorkers** `int`
-  Experimental flag. Enables the offload filter using a thread pool with the specified number of threads.
-  When this flag is greater than zero, the execution of application code happens in an isolated pool and the netty threads are used only to handle the network channels. This behavior changes the assumptions regarding the scheduling of tasks in finagle applications. Traditionally, the recommendation is to execute CPU-intensive tasks using a `FuturePool` but, when this flag is enabled, CPU-intensive tasks don't require a `FuturePool`. Important: Blocking tasks should still use a `FuturePool`.
-  It's important to review the allocation of thread pools when this flag is enabled otherwise the application might create too many threads, which leads to more GC pressure and increases the risk of CPU throttling.
-
-**com.twitter.finagle.offload.queueSize** `int`
-  Experimental flag. When offload filter is enabled, its queue is bounded by this value (default:
-  "unbounded" or `Int.MaxValue`) Any excess work that can't be offloaded due to the queue overflow
-  is run on IO (Netty) threads instead. Thus, when set, this flag enforces the backpressure on the
-  link between "Netty (producer) and your application (consumer).
+  Experimental flag. Enables the offload filter using a thread pool with the specified number of
+  threads. When this flag is greater than zero, the execution of application code happens in an
+  isolated pool and the netty threads are used only to handle the network channels. This behavior
+  changes the assumptions regarding the scheduling of tasks in finagle applications. Traditionally,
+  the recommendation is to execute CPU-intensive tasks using a `FuturePool` but, when this flag is
+  enabled, CPU-intensive tasks don't require a `FuturePool`. Important: Blocking tasks should still
+  use a `FuturePool`.
+  It's important to review the allocation of thread pools when this flag is enabled otherwise the
+  application might create too many threads, which leads to more GC pressure and increases the risk
+  of CPU throttling.
 
 **com.twitter.finagle.offload.statsSampleInterval** `duration`
   When offload filter is enabled, sample additional offload queue stats (`delays_ms`) at this

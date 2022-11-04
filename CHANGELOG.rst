@@ -48,6 +48,8 @@ Breaking API Changes
 * finagle-core: Allow users of MethodBuilder.idempotent to specify non-retryable responses for
   idempotent methods. Previously these were overridden to be retryable.  ``PHAB_ID=D999969``
 
+* finagle-core: The `com.twitter.finagle.offload.queueSize` has been removed. ``PHAB_ID=D1011484``
+
 22.7.0
 ------
 * finagle-thrift: Changing visibility of InputBuffer and OutputBuffer from [finagle] to [twitter].

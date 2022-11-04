@@ -48,7 +48,7 @@ object OffloadFuturePool {
 
     workers.map { threads =>
       val stats = FinagleStatsReceiver.scope("offload_pool")
-      val pool = new OffloadFuturePool(OffloadThreadPool(threads, queueSize(), stats), stats)
+      val pool = new OffloadFuturePool(OffloadThreadPool(threads, stats), stats)
 
       // Start sampling the offload delay if the interval isn't Duration.Top.
       if (statsSampleInterval().isFinite && statsSampleInterval() > Duration.Zero) {

@@ -1,25 +1,24 @@
 package com.twitter.finagle.offload
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.stats.{Counter, StatsReceiver}
-import java.util.concurrent.{
-  ExecutorService,
-  LinkedBlockingQueue,
-  RejectedExecutionHandler,
-  ThreadPoolExecutor,
-  TimeUnit
-}
+import com.twitter.finagle.stats.Counter
+import com.twitter.finagle.stats.StatsReceiver
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.RejectedExecutionHandler
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 private object OffloadThreadPool {
 
   /** Construct an `ExecutorService` with the proper thread names and metrics */
-  def apply(poolSize: Int, queueSize: Int, stats: StatsReceiver): ExecutorService =
+  def apply(poolSize: Int, stats: StatsReceiver): ExecutorService =
     new ThreadPoolExecutor(
       poolSize /*corePoolSize*/,
       poolSize /*maximumPoolSize*/,
       0L /*keepAliveTime*/,
       TimeUnit.MILLISECONDS,
-      new LinkedBlockingQueue[Runnable](queueSize) /*workQueue*/,
+      new LinkedBlockingQueue[Runnable]() /*workQueue*/,
       new NamedPoolThreadFactory("finagle/offload", makeDaemons = true) /*threadFactory*/,
       new RunsOnNettyThread(stats.counter("not_offloaded_tasks")))
 
