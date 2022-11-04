@@ -1,7 +1,8 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Trace, Tracing}
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.Tracing
 import com.twitter.util.Future
 
 private[finagle] object HttpTracingFilter extends SimpleFilter[http.Request, http.Response] {
@@ -11,10 +12,9 @@ private[finagle] object HttpTracingFilter extends SimpleFilter[http.Request, htt
     service: Service[http.Request, http.Response]
   ): Future[http.Response] = {
     val tracing = Trace()
-    val rep = service(request)
     traceHttpRequest(request, tracing)
+    val rep = service(request)
     traceHttpResponse(rep, tracing)
-    rep
   }
 
   def traceHttpRequest(request: http.Request, tracing: Tracing): Unit = {
@@ -25,12 +25,13 @@ private[finagle] object HttpTracingFilter extends SimpleFilter[http.Request, htt
     }
   }
 
-  def traceHttpResponse(rep: Future[http.Response], tracing: Tracing): Unit = {
-    if (tracing.isActivelyTracing) {
-      rep.onSuccess { r =>
+  def traceHttpResponse(rep: Future[http.Response], tracing: Tracing): Future[http.Response] = {
+    if (!tracing.isActivelyTracing) rep
+    else
+      rep.flatMap { r =>
         tracing.recordBinary("http.status_code", r.statusCode)
+        Future.value(r)
       }
-    }
   }
 
   /**

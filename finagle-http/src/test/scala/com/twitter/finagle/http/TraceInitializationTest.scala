@@ -3,8 +3,11 @@ package com.twitter.finagle.http
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.Service
-import com.twitter.util.{Await, Closable, Future}
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.util.Await
+import com.twitter.util.Closable
+import com.twitter.util.Future
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import org.scalatest.funsuite.AnyFunSuite
 
 private object Svc extends Service[Request, Response] {
@@ -40,10 +43,10 @@ class TraceInitializationTest extends AnyFunSuite {
         Annotation.BinaryAnnotation("http.method", "GET"),
         Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
         Annotation.ServiceName("theServer"),
-        Annotation.ServerRecv,
         Annotation.Rpc("GET"),
         Annotation.BinaryAnnotation("http.method", "GET"),
         Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
+        Annotation.ServerRecv,
         Annotation.ServerSend,
         Annotation.BinaryAnnotation("http.status_code", 200),
         Annotation.BinaryAnnotation("http.status_code", 200),
