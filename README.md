@@ -75,3 +75,30 @@ for more details about how to contribute.
 Copyright 2010 Twitter, Inc.
 
 Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+
+## Local build
+
+### Create working directory
+```
+mkdir -p <HOME>/runner/work/finagle/finagle
+cd <HOME>/runner/work/finagle/finagle
+```
+### Clone repository
+```
+git clone <this> .
+```
+### Build dependencies
+```
+mkdir -p <HOME>/runner/bin
+curl -sL -o <HOME>/runner/bin/dodo https://raw.githubusercontent.com/twitter/dodo/develop/bin/build
+chmod 755 <HOME>/runner/bin/dodo
+cd <HOME>/runner/work/finagle/finagle
+IVY_HOME=<HOME>/runner <HOME>/runner/bin/dodo --branch develop --no-test --publish-m2 --verbose finagle
+```
+### Build Finagle
+```
+cd <HOME>/runner/work/finagle/finagle
+./sbt update
+./sbt compile
+```
