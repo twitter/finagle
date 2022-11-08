@@ -2,7 +2,6 @@
 
 owners:
   # CSL team
-  - attila
   - avargasmorawetz
   - banderson
   - roanta
@@ -10,7 +9,6 @@ owners:
 
   # Strato team
   - bnavetta
-  - rli
 
 watchers:
   - csl-team@twitter.com
