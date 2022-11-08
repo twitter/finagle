@@ -8,12 +8,14 @@ import com.twitter.finagle.netty4.http.handler.HeaderValidatorHandler
 import com.twitter.finagle.netty4.http.handler.UnpoolHttpHandler
 import com.twitter.finagle.netty4.http.handler.UriValidatorHandler
 import com.twitter.finagle.http.param._
+import com.twitter.finagle.netty4.haproxy.HAProxyProtocolDetector
 import com.twitter.finagle.netty4.http.handler.BadRequestHandler
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.TransportContext
 import io.netty.channel._
 import io.netty.handler.codec.http._
+
 import java.net.SocketAddress
 
 /**
@@ -151,6 +153,8 @@ package object http {
     val badRequestHandler = new BadRequestHandler(stats)
 
     { pipeline: ChannelPipeline =>
+      pipeline.addFirst(HAProxyProtocolDetector.HandlerName, new HAProxyProtocolDetector())
+
       compressionLevel match {
         case lvl if lvl > 0 =>
           pipeline.addLast("httpCompressor", new HttpContentCompressor(lvl))

@@ -12,6 +12,7 @@ scala_library(
         "3rdparty/jvm/io/netty:netty4",
         "3rdparty/jvm/io/netty:netty4-codec",
         "3rdparty/jvm/io/netty:netty4-codec-http",
+        "3rdparty/jvm/io/netty:netty4-codec-haproxy",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/io/netty:netty4-resolver-dns",
         "finagle/finagle-core/src/main",

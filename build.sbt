@@ -68,6 +68,7 @@ val netty4LibsTest = Seq(
 )
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
+val netty4HAProxy = "io.netty" % "netty-codec-haproxy" % netty4Version
 val opencensusVersion = "0.24.0"
 val jacksonVersion = "2.13.4"
 val jacksonLibs = Seq(
@@ -430,7 +431,8 @@ lazy val finagleNetty4 = Project(
       util("core"),
       util("codec"),
       util("lint"),
-      util("stats")
+      util("stats"),
+      netty4HAProxy
     ) ++ netty4Libs
   ).dependsOn(
     finagleCore % "compile->compile;test->test",
