@@ -9,6 +9,8 @@ owners:
   - roanta
   - vkostyukov
   - yufang
+  - mbezoyan
+  - mdickinson
 watchers:
   - csl-team:ldap
 

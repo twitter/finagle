@@ -8,5 +8,7 @@ owners:
   - sniemitz
   - vkostyukov
   - yufang
+  - mbezoyan
+  - mdickinson
 watchers:
   - csl-team:ldap

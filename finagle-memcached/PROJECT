@@ -11,8 +11,9 @@ owners:
   - mnakamura
   - roanta
   - vkostyukov
-  - yao
   - yufang
+  - mbezoyan
+  - mdickinson
 watchers:
   - csl-team:ldap
   - cache-team@twitter.com
