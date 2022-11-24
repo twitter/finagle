@@ -1,14 +1,9 @@
 # Experimental project developed in collaboration between multiple teams
 
 owners:
-  # CSL team
-  - avargasmorawetz
-  - banderson
-  - roanta
-  - vkostyukov
-
-  # Strato team
-  - bnavetta
+  - jillianc
+  - mbezoyan
+  - nvong
 
 watchers:
   - csl-team@twitter.com

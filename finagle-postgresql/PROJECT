@@ -2,14 +2,10 @@
 
 owners:
   - cockroachdb-admins:ldap
-  - banderson
-  - jbestourous
-  - mnakamura
-  - roanta
-  - vkostyukov
-  - yufang
+  - jillianc
   - mbezoyan
   - mdickinson
+  - nvong
 watchers:
   - csl-team:ldap
 

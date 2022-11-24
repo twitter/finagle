@@ -4,16 +4,10 @@
 # CSL team owns the library support and RTS team owns the functional changes (protocol, hashing algorithms etc) of the client.
 
 owners:
-  - banderson
-  - brobinson
-  - jbestourous
-  - jennyl
-  - mnakamura
-  - roanta
-  - vkostyukov
-  - yufang
+  - jillianc
   - mbezoyan
   - mdickinson
+  - nvong
 watchers:
   - csl-team:ldap
   - cache-team@twitter.com
