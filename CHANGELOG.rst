@@ -24,6 +24,8 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* util: Bump version of Jackson to 2.14.1. ``PHAB_ID=D1025778``
+
 * finagle-http: Remove DeadlineFilter from Server stack. ``PHAB_ID=D964479``
 
 * finagle-core: Ensure BackupRequestFilter respects maxExtraLoad. For low QPS finagle clients
