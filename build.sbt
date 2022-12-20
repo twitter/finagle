@@ -835,7 +835,7 @@ lazy val finagleBenchmarkThrift = Project(
   id = "finagle-benchmark-thrift",
   base = file("finagle-benchmark-thrift")
 ).settings(
-    sharedSettings
+    sharedSettings ++ Seq(Compile / scroogeLanguages := Seq("java", "scala"))
   ).settings(
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleThrift)
