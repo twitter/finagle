@@ -7,6 +7,9 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+22.12.0
+-------
+
 New Features
 ~~~~~~~~~~~~
 
