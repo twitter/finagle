@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-stats: A new implementation of BucketedHistogram that works better under high contention, but requires
+  more memory. ``PHAB_ID=D1028784``
+
 22.12.0
 -------
 

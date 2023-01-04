@@ -5,12 +5,32 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-class BucketedHistogramTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks with Matchers {
+class BucketedHistogramTest extends AbstractBucketedHistogramTest {
+  override protected def createNewHistogram(): AbstractBucketedHistogram = BucketedHistogram()
+}
+class LockFreeBucketedHistogramTest extends AbstractBucketedHistogramTest {
+  override protected def createNewHistogram(): AbstractBucketedHistogram =
+    new LockFreeBucketedHistogram(
+      BucketedHistogram.DefaultErrorPercent
+    )
+}
+
+abstract class AbstractBucketedHistogramTest
+    extends AnyFunSuite
+    with ScalaCheckDrivenPropertyChecks
+    with Matchers {
+
+  protected def createNewHistogram(): AbstractBucketedHistogram
+
   test("percentile when empty") {
-    val h = BucketedHistogram()
-    assert(h.percentile(0.0) == 0)
-    assert(h.percentile(0.5) == 0)
-    assert(h.percentile(1.0) == 0)
+    val h = createNewHistogram()
+    val snapshot = new BucketedHistogram.MutableSnapshot(
+      Array(0.0, 0.5, 1.0)
+    )
+    h.recompute(snapshot)
+    assert(snapshot.quantiles(0) == 0)
+    assert(snapshot.quantiles(1) == 0)
+    assert(snapshot.quantiles(2) == 0)
   }
 
   private def assertWithinError(ideal: Long, actual: Long): Unit = {
@@ -23,11 +43,15 @@ class BucketedHistogramTest extends AnyFunSuite with ScalaCheckDrivenPropertyChe
   }
 
   test("percentile 1 to 100000") {
-    val h = BucketedHistogram()
+    val h = createNewHistogram()
     val wantedPs = Array[Double](0.0, 0.5, 0.9, 0.99, 0.999, 0.9999, 1.0)
+    val snapshot = new BucketedHistogram.MutableSnapshot(
+      wantedPs
+    )
 
     def assertPercentiles(maxVal: Long): Unit = {
-      val actuals = h.getQuantiles(wantedPs)
+      h.recompute(snapshot)
+      val actuals = snapshot.quantiles
       actuals.zip(wantedPs).foreach {
         case (actual, wantedP) =>
           withClue(s"percentile=$wantedP") {
@@ -56,73 +80,105 @@ class BucketedHistogramTest extends AnyFunSuite with ScalaCheckDrivenPropertyChe
   }
 
   test("percentile edge cases") {
-    val max = BucketedHistogram()
-    max.add(Long.MaxValue)
-    assert(max.percentile(0.1) == 0)
-    assert(max.percentile(1.0) == Int.MaxValue)
+    val snapshot = new BucketedHistogram.MutableSnapshot(
+      Array(0.0, 0.5, 1.0)
+    )
 
-    val zero = BucketedHistogram()
+    val max = createNewHistogram()
+    max.add(Long.MaxValue)
+
+    max.recompute(snapshot)
+    assert(snapshot.quantiles(0) == 0)
+    assert(snapshot.quantiles(2) == Int.MaxValue)
+
+    val zero = createNewHistogram()
     zero.add(0)
-    assert(zero.percentile(0.0) == 0)
-    assert(zero.percentile(0.1) == 0)
-    assert(zero.percentile(1.0) == 0)
+
+    zero.recompute(snapshot)
+    assert(snapshot.quantiles(0) == 0)
+    assert(snapshot.quantiles(1) == 0)
+    assert(snapshot.quantiles(2) == 0)
   }
 
   test("clear") {
-    val h = BucketedHistogram()
-    assert(h.percentile(0.0) == 0)
-    assert(h.percentile(0.5) == 0)
-    assert(h.percentile(1.0) == 0)
+    val snapshot = new BucketedHistogram.MutableSnapshot(
+      Array(0.0, 0.5, 1.0)
+    )
+    val h = createNewHistogram()
+    h.recompute(snapshot)
+    assert(snapshot.quantiles(0) == 0)
+    assert(snapshot.quantiles(1) == 0)
+    assert(snapshot.quantiles(2) == 0)
 
     h.add(100)
-    assert(h.percentile(0.0) == 0)
-    assert(h.percentile(0.5) == 100)
-    assert(h.percentile(1.0) == 100)
+    h.recompute(snapshot)
+    assert(snapshot.quantiles(0) == 0)
+    assert(snapshot.quantiles(1) == 100)
+    assert(snapshot.quantiles(2) == 100)
 
     h.clear()
-    assert(h.percentile(0.0) == 0)
-    assert(h.percentile(0.5) == 0)
-    assert(h.percentile(1.0) == 0)
+    h.recompute(snapshot)
+    assert(snapshot.quantiles(0) == 0)
+    assert(snapshot.quantiles(1) == 0)
+    assert(snapshot.quantiles(2) == 0)
   }
 
   test("sum") {
-    val h = BucketedHistogram()
-    assert(h.sum == 0)
+    val snapshot = new BucketedHistogram.MutableSnapshot(
+      Array(0.0, 0.5, 1.0)
+    )
+    val h = createNewHistogram()
+    h.recompute(snapshot)
+    assert(snapshot.sum == 0)
 
     h.add(100)
     h.add(200)
-    assert(h.sum == 300)
+    h.recompute(snapshot)
+    assert(snapshot.sum == 300)
 
     h.clear()
-    assert(h.sum == 0)
+    h.recompute(snapshot)
+    assert(snapshot.sum == 0)
   }
 
   test("count") {
-    val h = BucketedHistogram()
-    assert(h.count == 0)
+    val snapshot = new BucketedHistogram.MutableSnapshot(
+      Array(0.0, 0.5, 1.0)
+    )
+    val h = createNewHistogram()
+    h.recompute(snapshot)
+    assert(snapshot.count == 0)
 
     h.add(100)
     h.add(200)
-    assert(h.count == 2)
+    h.recompute(snapshot)
+    assert(snapshot.count == 2)
 
     h.clear()
-    assert(h.count == 0)
+    h.recompute(snapshot)
+    assert(snapshot.count == 0)
   }
 
   test("average") {
-    val h = BucketedHistogram()
-    assert(h.average == 0.0)
+    val snapshot = new BucketedHistogram.MutableSnapshot(
+      Array(0.0, 0.5, 1.0)
+    )
+    val h = createNewHistogram()
+    h.recompute(snapshot)
+    assert(snapshot.avg == 0.0)
 
     h.add(100)
     h.add(200)
-    assert(h.average == 150.0)
+    h.recompute(snapshot)
+    assert(snapshot.avg == 150.0)
 
     h.clear()
-    assert(h.average == 0)
+    h.recompute(snapshot)
+    assert(snapshot.avg == 0)
   }
 
   test("outliers are handled") {
-    val h = BucketedHistogram()
+    val h = createNewHistogram()
     h.add(2137204091L)
     h.add(-1)
     h.add(Long.MinValue)
@@ -130,12 +186,12 @@ class BucketedHistogramTest extends AnyFunSuite with ScalaCheckDrivenPropertyChe
   }
 
   test("exporting counts starts empty") {
-    val h = BucketedHistogram()
+    val h = createNewHistogram()
     assert(h.bucketAndCounts == Seq.empty)
   }
 
   test("exporting counts tracks negative and extreme values") {
-    val h = BucketedHistogram()
+    val h = createNewHistogram()
     h.add(-1)
     h.add(0)
     h.add(1)
@@ -153,19 +209,23 @@ class BucketedHistogramTest extends AnyFunSuite with ScalaCheckDrivenPropertyChe
   }
 
   test("negative values are treated as 0s") {
-    val h = BucketedHistogram()
+    val snapshot = new BucketedHistogram.MutableSnapshot(
+      Array(0.0, 0.5, 1.0)
+    )
+    val h = createNewHistogram()
     h.add(-10)
     h.add(10)
     h.add(20)
-    assert(h.minimum == 0)
-    assert(h.maximum == 20)
-    assert(h.count == 3)
-    assert(h.average == 10)
-    assert(h.sum == 30)
+    h.recompute(snapshot)
+    assert(snapshot.min == 0)
+    assert(snapshot.max == 20)
+    assert(snapshot.count == 3)
+    assert(snapshot.avg == 10)
+    assert(snapshot.sum == 30)
   }
 
   test("exporting counts responds to clear") {
-    val h = BucketedHistogram()
+    val h = createNewHistogram()
     h.add(-1)
     h.add(0)
     h.add(1)
@@ -190,18 +250,21 @@ class BucketedHistogramTest extends AnyFunSuite with ScalaCheckDrivenPropertyChe
         //        arg0 = (List(-1),0.9370612091967268) // 33 shrinks
         //
         whenever(samples.nonEmpty && samples.forall(_ >= 0)) {
-          val h = BucketedHistogram()
+          val snapshot = new BucketedHistogram.MutableSnapshot(
+            Array(p)
+          )
+          val h = createNewHistogram()
           samples.foreach { s => h.add(s.toLong) }
-
+          h.recompute(snapshot)
           val sorted = samples.sorted.toIndexedSeq
           val index = (Math.round(sorted.size * p).toInt - 1).max(0)
           val ideal = sorted(index).toLong
-          val actual = h.percentile(p)
+          val actual = snapshot.quantiles(0)
           assertWithinError(ideal, actual)
 
           // check min and max too
-          assertWithinError(sorted.head, h.minimum)
-          assertWithinError(sorted.last, h.maximum)
+          assertWithinError(sorted.head, snapshot.min)
+          assertWithinError(sorted.last, snapshot.max)
         }
     }
   }

@@ -75,6 +75,7 @@ junit_tests(
         "finagle/finagle-core/src/main",
         "finagle/finagle-core/src/test/resources",
         "finagle/finagle-netty4",
+        "finagle/finagle-stats-core/src/main/scala",
         "finagle/finagle-toggle/src/main/scala",
         "util/util-app/src/main/scala",
         "util/util-core:scala",

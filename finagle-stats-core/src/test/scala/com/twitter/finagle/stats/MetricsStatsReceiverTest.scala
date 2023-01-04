@@ -10,6 +10,8 @@ import com.twitter.finagle.stats.exp.Expression
 import com.twitter.finagle.stats.exp.ExpressionSchema
 import com.twitter.finagle.stats.exp.ExpressionSchemaKey
 import com.twitter.finagle.stats.exp.HistogramComponent
+import com.twitter.conversions.DurationOps._
+import com.twitter.util.Time
 import org.scalatest.funsuite.AnyFunSuite
 
 object MetricsStatsReceiverTest {
@@ -67,19 +69,19 @@ object MetricsStatsReceiverTest {
       statsReceiver: StatsReceiver,
       name: Seq[String]
     ) =
-      statsReceiver.counter(statsReceiver.metricBuilder(CounterType).withName(name: _*))
+      statsReceiver.counter(MetricBuilder.newBuilder(CounterType).withName(name: _*))
     def addGauge(
       statsReceiver: StatsReceiver,
       name: Seq[String]
     )(
       f: => Float
     ) =
-      statsReceiver.addGauge(statsReceiver.metricBuilder(GaugeType).withName(name: _*))(f)
+      statsReceiver.addGauge(MetricBuilder.newBuilder(GaugeType).withName(name: _*))(f)
     def addHisto(
       statsReceiver: StatsReceiver,
       name: Seq[String]
     ) =
-      statsReceiver.stat(statsReceiver.metricBuilder(HistogramType).withName(name: _*))
+      statsReceiver.stat(MetricBuilder.newBuilder(HistogramType).withName(name: _*))
   }
 }
 
@@ -91,6 +93,32 @@ class MetricsStatsReceiverTest extends AnyFunSuite {
     assert("MetricsStatsReceiver" == sr.toString)
     assert("MetricsStatsReceiver/s1" == sr.scope("s1").toString)
     assert("MetricsStatsReceiver/s1/s2" == sr.scope("s1").scope("s2").toString)
+  }
+
+  test("testLockFreeStats") {
+    val metrics = Metrics.createDetached()
+    val sr = new MetricsStatsReceiver(metrics)
+    val stat1 = sr.stat(
+      MetricBuilder.forStat
+        .withName("name1"))
+    val stat2 = sr.stat(
+      MetricBuilder.forStat
+        .withName("name2")
+        .withMetricUsageHints(Set(MetricUsageHint.HighContention)))
+
+    val histograms = Time.withCurrentTimeFrozen { tc =>
+      metrics.histograms
+      stat1.add(2)
+      stat2.add(2)
+      tc.advance(60.seconds)
+      metrics.histograms
+    }
+
+    assertResult(2)(histograms.size)
+    histograms.foreach { histogram =>
+      assertResult(1)(histogram.value.count)
+      assertResult(2)(histogram.value.sum)
+    }
   }
 
   def testMetricsStatsReceiver(ctx: TestCtx): Unit = {

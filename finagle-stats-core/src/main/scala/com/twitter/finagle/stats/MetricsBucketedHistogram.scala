@@ -2,7 +2,8 @@ package com.twitter.finagle.stats
 
 import com.twitter.concurrent.Once
 import com.twitter.conversions.DurationOps._
-import com.twitter.util.{Duration, Time}
+import com.twitter.util.Duration
+import com.twitter.util.Time
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -19,14 +20,18 @@ import java.util.concurrent.atomic.AtomicReference
 class MetricsBucketedHistogram(
   name: String,
   percentiles: IndexedSeq[Double] = BucketedHistogram.DefaultQuantiles,
-  latchPeriod: Duration = MetricsBucketedHistogram.DefaultLatchPeriod)
+  latchPeriod: Duration = MetricsBucketedHistogram.DefaultLatchPeriod,
+  useLockFreeBucketedHistogram: Boolean = false)
     extends MetricsHistogram {
   import MetricsBucketedHistogram.HistogramCountsSnapshot
   assert(name.length > 0)
 
   private[this] val nextSnapAfter = new AtomicReference(Time.Undefined)
 
-  private[this] val current = BucketedHistogram()
+  private[this] val current: AbstractBucketedHistogram = {
+    if (useLockFreeBucketedHistogram) new LockFreeBucketedHistogram()
+    else BucketedHistogram()
+  }
   private[this] val snap = new BucketedHistogram.MutableSnapshot(percentiles)
   private[this] val histogramCountsSnap = new HistogramCountsSnapshot
   // If histograms counts haven't been requested we don't want to be
@@ -99,12 +104,15 @@ class MetricsBucketedHistogram(
       val _max = snap.max
       val _min = snap.min
       val _avg = snap.avg
-      val ps = new Array[Snapshot.Percentile](MetricsBucketedHistogram.this.percentiles.length)
-      var i = 0
-      while (i < ps.length) {
-        ps(i) =
-          new Snapshot.Percentile(MetricsBucketedHistogram.this.percentiles(i), snap.quantiles(i))
-        i += 1
+      val ps = {
+        val ps = new Array[Snapshot.Percentile](MetricsBucketedHistogram.this.percentiles.length)
+        var i = 0
+        while (i < ps.length) {
+          ps(i) =
+            new Snapshot.Percentile(MetricsBucketedHistogram.this.percentiles(i), snap.quantiles(i))
+          i += 1
+        }
+        ps
       }
       def count: Long = _count
       def max: Long = _max
@@ -137,7 +145,7 @@ private object MetricsBucketedHistogram {
   private final class HistogramCountsSnapshot {
     @volatile private[stats] var counts: Seq[BucketAndCount] = Nil
 
-    def recomputeFrom(histo: BucketedHistogram): Unit =
+    def recomputeFrom(histo: AbstractBucketedHistogram): Unit =
       counts = histo.bucketAndCounts
   }
 

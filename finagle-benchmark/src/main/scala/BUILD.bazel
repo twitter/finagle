@@ -50,6 +50,23 @@ scala_benchmark_jmh(
 )
 
 jvm_binary(
+    name = "jmh-jvm",
+    deps = [
+        "@io_bazel_rules_scala//jmh:jmh_classpath",
+        ":jmh_compiled_benchmark_lib",
+    ],
+    main_class = "org.openjdk.jmh.Main",
+    unused_dependency_checker_mode = "off",
+)
+
+jvm_app(
+    name = "jmh-bundle",
+    basename = "finagle-benchmark-dist",
+    binary = ":jmh-jvm",
+    tags = ["bazel-compatible"],
+)
+
+jvm_binary(
     name = "lbsim",
     main = "com.twitter.finagle.balancersim.Simulation",
     sources = ["**/balancersim/*.scala"],

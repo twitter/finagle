@@ -23,10 +23,15 @@ object Metrics {
 
   private val log = Logger.get()
 
-  private def defaultHistogramFactory(
-    name: String,
-    percentiles: IndexedSeq[Double]
-  ): MetricsHistogram = new MetricsBucketedHistogram(name, percentiles)
+  private val defaultHistogramFactory = (
+    params: MetricsHistogramFactory.Params
+  ) => {
+    new MetricsBucketedHistogram(
+      name = params.name,
+      percentiles = params.percentiles,
+      useLockFreeBucketedHistogram = params.hints.contains(MetricUsageHint.HighContention)
+    )
+  }
 
   // represents a real instance of a gauge or a counter
   private sealed trait Repr
@@ -41,6 +46,12 @@ object Metrics {
    */
   def createDetached(
     mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
+    separator: String
+  ): Metrics =
+    new Metrics(mkHistogram, separator, newMetricsMaps)
+
+  def createDetached(
+    mkHistogram: MetricsHistogramFactory.Type,
     separator: String
   ): Metrics =
     new Metrics(mkHistogram, separator, newMetricsMaps)
@@ -137,12 +148,21 @@ private[stats] class MetricCollisionException(msg: String) extends IllegalArgume
  *       [[Metrics.MetricsMaps]], create the instance using `Metrics.createDetached`.
  */
 private[finagle] class Metrics private (
-  mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
+  histogramFactory: MetricsHistogramFactory.Type,
   separator: String,
   metricsMaps: Metrics.MetricsMaps)
     extends MetricsStore
     with MetricsView {
 
+  def this(
+    mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
+    separator: String,
+    metricsMaps: Metrics.MetricsMaps
+  ) = this(
+    params => mkHistogram(params.name, params.percentiles),
+    separator,
+    metricsMaps
+  )
   def this() = this(Metrics.defaultHistogramFactory, scopeSeparator(), Metrics.DefaultMetricsMaps)
 
   def this(mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram, separator: String) =
@@ -209,7 +229,12 @@ private[finagle] class Metrics private (
   private def createStat(metricBuilder: MetricBuilder): MetricsStore.StoreStat = {
     val formatted = formatHierarchicalName(metricBuilder)
     val doLog = loggedStats.contains(formatted)
-    val histogram = mkHistogram(formatted, metricBuilder.percentiles)
+    val histogram = histogramFactory.apply(
+      MetricsHistogramFactory.Params(
+        name = formatted,
+        percentiles = metricBuilder.percentiles,
+        hints = metricBuilder.metricUsageHints
+      ))
 
     histogram match {
       case histo: MetricsBucketedHistogram =>
