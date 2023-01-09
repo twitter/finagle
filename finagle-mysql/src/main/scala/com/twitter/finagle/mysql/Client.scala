@@ -238,7 +238,7 @@ trait Transactions {
    * committed.
    *
    * @example {{{
-   *   client.transaction[Foo](IsolationLevel.RepeatableRead) { c =>
+   *   client.transactionWithIsolation[Foo](IsolationLevel.RepeatableRead) { c =>
    *    for {
    *       r0 <- c.query(q0)
    *       r1 <- c.query(q1)
