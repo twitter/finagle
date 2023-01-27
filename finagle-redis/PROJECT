@@ -4,7 +4,6 @@ owners:
   - jillianc
   - mbezoyan
   - mdickinson
-  - nvong
 watchers:
   - csl-team:ldap
   - cache-team@twitter.com
