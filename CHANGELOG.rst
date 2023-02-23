@@ -13,6 +13,12 @@ New Features
 * finagle-stats: A new implementation of BucketedHistogram that works better under high contention, but requires
   more memory. ``PHAB_ID=D1028784``
 
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Bump version of Jackson to 2.14.2. ``PHAB_ID=D1049772``
+
 22.12.0
 -------
 
