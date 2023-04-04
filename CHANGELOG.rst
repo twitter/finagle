@@ -21,6 +21,8 @@ Runtime Behavior Changes
 
 * finagle: Update JSqlParser to version 4.6 ``PHAB_ID=D1054717``
 
+* finagle: Bump Netty version to 4.1.86.Final ``PHAB_ID=D1054716``
+
 22.12.0
 -------
 
