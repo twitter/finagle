@@ -21,6 +21,8 @@ Runtime Behavior Changes
 
 * finagle: Update JSqlParser to version 4.6 ``PHAB_ID=D1054717``
 
+* finagle: Bump version of Jackson to 2.14.3. ``PHAB_ID=D1069160``
+
 22.12.0
 -------
 
