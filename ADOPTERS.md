@@ -45,6 +45,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Pellucid Analytics](https://www.pellucid.com/)
 * [Pinterest](https://www.pinterest.com/)
   * ["How we make pins more useful"][3]
+* [PITS Global Data Recovery Services](https://www.pitsdatarecovery.net/)
 * [Quanttus](https://www.Quanttus.com/)
 * [Qubit](https://www.qubitproducts.com/)
 * [QuizUp](https://www.quizup.com/)
