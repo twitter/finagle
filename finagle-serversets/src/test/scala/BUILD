@@ -66,7 +66,10 @@ junit_tests(
         "com/twitter/finagle/zookeeper/*.scala",
     ],
     platform = "java8",
-    tags = ["bazel-compatible"],
+    tags = [
+        "bazel-compatible",
+        "known-to-fail-jira:CSL-12413",
+    ],
     dependencies = [
         ":core",
         "3rdparty/jvm/com/google/inject:guice",
