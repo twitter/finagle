@@ -1,6 +1,10 @@
 package com.twitter.finagle.http2.transport.client
 
 import com.twitter.finagle.http2.DeadConnectionException
+import com.twitter.finagle.http2.param.{
+  MaxConcurrentStreams,
+  MaxRequestsPerSession
+}
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.transport.Transport
@@ -30,7 +34,8 @@ private final class ClientSessionImpl(
   failureDetectorStatus: () => Status)
     extends ClientSession {
 
-  import ClientSessionImpl.StreamHighWaterMark
+  import ClientSessionImpl.DefaultStreamHighWaterMark
+  import ClientSessionImpl.DefaultMaxConcurrentStreams
 
   // For the client we want to consider the status of the session.
   private[this] final class ChildTransport(ch: Channel) extends StreamChannelTransport(ch) {
@@ -48,6 +53,13 @@ private final class ClientSessionImpl(
       )
     }
     codec
+  }
+
+  private[this] val streamHighWaterMark: Long = {
+    val maxConcurrentStreams: Long = params[MaxConcurrentStreams].maxConcurrentStreams.getOrElse(DefaultMaxConcurrentStreams)
+    val streamHighWaterMark: Long = params[MaxRequestsPerSession].maxRequestsPerSession.map(r => r * 2).getOrElse(DefaultStreamHighWaterMark)
+
+    streamHighWaterMark - 2 * maxConcurrentStreams
   }
 
   private[this] val bootstrap: Http2StreamChannelBootstrap = {
@@ -96,9 +108,9 @@ private final class ClientSessionImpl(
     // However, since `status` is racy anyway we tolerate it as fixing it would be much
     // more complex.
     if (!channel.isOpen) Status.Closed
-    // We're nearly out of stream ID's so signal closed so that the pooling layers will
-    // shut us down and start up a new session.
-    else if (codec.connection.local.lastStreamCreated > StreamHighWaterMark) Status.Closed
+    // We've reached the stream high watermark for this session. Signal closed so that
+    // the pooling layers will shut us down and start up a new session.
+    else if (codec.connection.local.lastStreamCreated > streamHighWaterMark) Status.Closed
     // If we've received a GOAWAY frame we shouldn't attempt to open any new streams.
     else if (codec.connection.goAwayReceived) Status.Closed
     // If we can't open a stream that means that the maximum number of outstanding
@@ -179,9 +191,11 @@ private final class ClientSessionImpl(
 
 private object ClientSessionImpl {
 
-  // The max stream id is the maximum possible 31-bit unsigned integer. We want to
-  // close before that to avoid races so we've arbitrarily picked 50 remaining
+  // The default max stream id is the maximum possible 31-bit unsigned integer. We want to
+  // close before that
+  private val DefaultStreamHighWaterMark: Int = Int.MaxValue
+  // To avoid races so we've arbitrarily picked 50 remaining
   // streams (client initiated stream id's are odd numbered so we multiply by 2) as
   // the high water mark before we signal that this session is closed for business.
-  private val StreamHighWaterMark: Int = Int.MaxValue - 100
+  private val DefaultMaxConcurrentStreams: Int = 50
 }

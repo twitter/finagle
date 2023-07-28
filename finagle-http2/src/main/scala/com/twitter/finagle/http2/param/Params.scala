@@ -97,6 +97,20 @@ object MaxFrameSize {
   implicit val param = Stack.Param(MaxFrameSize(None))
 }
 
+/*
+ * A class for configuring the maximum number of requests per connection
+ * MaxConcurrentStreams will be deducted from this number to allow requests
+ * in flight up to this number.
+ */
+case class MaxRequestsPerSession(maxRequestsPerSession: Option[Long]) {
+  def mk(): (MaxRequestsPerSession, Stack.Param[MaxRequestsPerSession]) =
+    (this, MaxRequestsPerSession.param)
+}
+
+object MaxRequestsPerSession {
+  implicit val param: Stack.Param[MaxRequestsPerSession] = Stack.Param(MaxRequestsPerSession(None))
+}
+
 /**
  * A class for configuring overrides to the default maxHeaderListSize setting.
  */
