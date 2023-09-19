@@ -1,7 +1,9 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.Backoff.{DecorrelatedJittered, EqualJittered, ExponentialJittered}
+import com.twitter.finagle.Backoff.DecorrelatedJittered
+import com.twitter.finagle.Backoff.EqualJittered
+import com.twitter.finagle.Backoff.ExponentialJittered
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Duration
 import org.scalacheck.Gen
@@ -184,11 +186,14 @@ class BackoffTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
   test("takeUntil") {
     var backoff: Backoff = Backoff.linear(1.second, 1.second).takeUntil(9.seconds)
     var sumBackoff: Duration = Duration.Zero
+    val backoffs: ArrayBuffer[Duration] = ArrayBuffer.empty[Duration]
     while (sumBackoff < 9.seconds) {
+      assert(!backoff.isExhausted)
       sumBackoff += backoff.duration
+      backoffs += backoff.duration
       backoff = backoff.next
     }
-    assert(sumBackoff == 9.seconds)
+    assert(backoffs == ArrayBuffer[Duration](1.seconds, 2.seconds, 3.seconds, 4.seconds))
     assert(backoff.isExhausted)
   }
 

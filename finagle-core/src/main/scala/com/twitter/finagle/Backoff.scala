@@ -359,7 +359,7 @@ object Backoff {
       else Backoff.empty.duration
     def next: Backoff =
       if (count < maxCumulativeBackoff)
-        new TakeWhile(backoff, count + duration, maxCumulativeBackoff)
+        new TakeWhile(backoff.next, count + duration, maxCumulativeBackoff)
       else Backoff.empty.next
     def isExhausted: Boolean = if (count < maxCumulativeBackoff) false else true
   }
