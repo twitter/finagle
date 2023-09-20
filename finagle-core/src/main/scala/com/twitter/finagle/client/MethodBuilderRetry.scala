@@ -105,7 +105,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
 private[client] object MethodBuilderRetry {
   private[this] val DefaultMaxRetries = 2
 
-  private val Disabled: ResponseClassifier =
+  private[client] val Disabled: ResponseClassifier =
     ResponseClassifier.named("Disabled")(PartialFunction.empty)
 
   private def shouldRetry[Req, Rep](

@@ -104,7 +104,7 @@ object Retries {
    * the calls to `RetryBudget.request()` to count. This allows for
    * swallowing the call to `request` in the second filter.
    */
-  private class WithdrawOnlyRetryBudget(underlying: RetryBudget) extends RetryBudget {
+  private[finagle] class WithdrawOnlyRetryBudget(underlying: RetryBudget) extends RetryBudget {
     def deposit(): Unit = ()
     def tryWithdraw(): Boolean = underlying.tryWithdraw()
     def balance: Long = underlying.balance

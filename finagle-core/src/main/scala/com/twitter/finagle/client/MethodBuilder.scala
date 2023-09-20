@@ -2,10 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
-import com.twitter.finagle.service.Filterable
-import com.twitter.finagle.service.ResponseClass
-import com.twitter.finagle.service.ResponseClassifier
-import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.service.{Filterable, ResponseClass, ResponseClassifier, Retries, RetryBudget, TimeoutFilter}
 import com.twitter.finagle.stats.LazyStatsReceiver
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
@@ -16,8 +13,10 @@ import com.twitter.finagle.Name
 import com.twitter.finagle.Service
 import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.Stack
+import com.twitter.finagle.Stack.Param
 import com.twitter.finagle.param
 import com.twitter.finagle._
+import com.twitter.finagle.service.Retries.WithdrawOnlyRetryBudget
 import com.twitter.util.tunable.Tunable
 import com.twitter.util.Closable
 import com.twitter.util.CloseOnce
@@ -539,6 +538,14 @@ final class MethodBuilder[Req, Rep] private[finagle] (
   }
 
   private[this] def materialize(): Unit = {
+    val params = if (this.config.retry.responseClassifier eq MethodBuilderRetry.Disabled) {
+      this.params
+    } else {
+      // add a withdrawonlybudget in the stack to prevent double deposit when retries are enabled on the methodbuilder
+      val currentBudget = this.params[Retries.Budget]
+      val wrappedBudget: RetryBudget = new WithdrawOnlyRetryBudget(currentBudget.retryBudget)
+      this.params + Retries.Budget(wrappedBudget, currentBudget.requeueBackoffs)
+    }
     methodPool.materialize(params)
   }
 
