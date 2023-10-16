@@ -17,6 +17,8 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Bump netty to 4.1.100 and netty-tcnative to 2.0.61.Final. ``PHAB_ID=D1104016``
+
 * finagle: Bump version of Jackson to 2.14.2. ``PHAB_ID=D1049772``
 
 * finagle: Update JSqlParser to version 4.6 ``PHAB_ID=D1054717``
