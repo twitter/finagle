@@ -25,6 +25,14 @@ Runtime Behavior Changes
 
 * finagle: Bump version of Jackson to 2.14.3. ``PHAB_ID=D1069160``
 
+Bug Fixes
+~~~~~~~~~~
+
+* finagle-core: Failed recvAddress on Linux due to the remote peer resetting connection should now
+  be properly seen as a `c.t.f.ChannelClosedException` instead of a
+  `c.t.f.UnknownChannelException`. ``PHAB_ID=`D1104650`
+
+
 22.12.0
 -------
 

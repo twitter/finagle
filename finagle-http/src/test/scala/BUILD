@@ -4,7 +4,6 @@ junit_tests(
     platform = "java8",
     tags = [
         "bazel-compatible",
-        "known-to-fail-jira:CSL-12408",
     ],
     dependencies = [
         "3rdparty/jvm/com/google/code/findbugs:jsr305",

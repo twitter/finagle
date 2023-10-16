@@ -11,7 +11,8 @@ private[finagle] object IOExceptionStrings {
     "readAddress(..) failed: Connection reset by peer", // Found on linux w/ native epoll
     "writeAddress(..) failed: Connection reset by peer", // Found on linux w/ native epoll
     "writevAddresses(..) failed: Connection reset by peer", // Found on linux w/ native epoll
-    "writevAddresses(..) failed: Broken pipe" // Found on linux w/ native epoll
+    "writevAddresses(..) failed: Broken pipe", // Found on linux w/ native epoll
+    "recvAddress(..) failed: Connection reset by peer" // Found on linux
   )
 
   /** Strings that commonly signal failure to establish a socket connection */
