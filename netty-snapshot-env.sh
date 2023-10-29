@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 print_env () {
   echo "FINAGLE_USE_NETTY_4_SNAPSHOT=$FINAGLE_USE_NETTY_4_SNAPSHOT"
