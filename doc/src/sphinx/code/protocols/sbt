@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 sbtver=1.3.10
 sbtjar=sbt-launch.jar

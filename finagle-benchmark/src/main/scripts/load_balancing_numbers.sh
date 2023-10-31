@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ./sbt 'project finagle-benchmark' \
       'run-main com.twitter.finagle.loadbalancer.Simulation -dur=60.seconds -bal=rr -qps=1000 -showprogress=false -showsummary=false -coldstart=false' 2>&1 |gawk 'match($0, /BinaryAnnotation\(balancer,([0-9]+).*\)/, a){print a[1]}' > all_good_1000_rr.txt
