@@ -13,6 +13,8 @@ New Features
 * finagle-stats: A new implementation of BucketedHistogram that works better under high contention, but requires
   more memory. ``PHAB_ID=D1028784``
 
+* finagle-http2: Add a per session request limit option to http2. ``PHAB_ID=D1107613``
+
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
