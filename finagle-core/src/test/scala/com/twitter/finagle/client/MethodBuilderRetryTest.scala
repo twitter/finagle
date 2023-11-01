@@ -2,10 +2,13 @@ package com.twitter.finagle.client
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client.MethodBuilderTest.TestStackClient
-import com.twitter.finagle.service.{ReqRep, ResponseClass, _}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
-import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
-import com.twitter.util.{Await, Future, Throw}
+import com.twitter.finagle.service._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle._
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Throw
 import org.scalatest.funsuite.AnyFunSuite
 
 class MethodBuilderRetryTest extends AnyFunSuite {
@@ -161,5 +164,63 @@ class MethodBuilderRetryTest extends AnyFunSuite {
     }
     assert(ex.isFlagged(FailureFlags.Retryable))
     assert(stats.stat(clientName, "client", "retries")() == Seq(0))
+  }
+
+  test("retries and requeues do not double deposit RetryBudget") {
+    val stats = new InMemoryStatsReceiver()
+    val budget = Retries.Budget(RetryBudget(ttl = 10.seconds, 10, 0.1))
+
+    val svc = Service.mk[Int, Int] { _ =>
+      Future.value(1)
+    }
+
+    val stack = Retries
+      .moduleRequeueable[Int, Int]
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+    val ps =
+      Stack.Params.empty +
+        param.Label(clientName) +
+        param.Stats(stats) +
+        budget
+    val stackClient = TestStackClient(stack, ps)
+
+    val methodBuilder = MethodBuilder.from("retry_it", stackClient)
+    val client = methodBuilder
+      .newService("client")
+
+    assert(budget.retryBudget.balance == 100)
+    (1 to 10).foreach(_ => Await.result(client(1), 5.seconds))
+    assert(budget.retryBudget.balance == 101)
+
+    assert(stats.stat(clientName, "client", "retries")() == Seq.fill(10)(0))
+  }
+
+  test("MethodBuilder withRetry.disabled should allow RequeueFilter to deposit RetryBudget") {
+    val stats = new InMemoryStatsReceiver()
+    val budget = Retries.Budget(RetryBudget(ttl = 10.seconds, 10, 0.1))
+
+    val svc = Service.mk[Int, Int] { _ =>
+      Future.value(1)
+    }
+
+    val stack = Retries
+      .moduleRequeueable[Int, Int]
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+    val ps =
+      Stack.Params.empty +
+        param.Label(clientName) +
+        param.Stats(stats) +
+        budget
+    val stackClient = TestStackClient(stack, ps)
+
+    val methodBuilder = MethodBuilder.from("retry_it", stackClient)
+    val client = methodBuilder.withRetry.disabled
+      .newService("client")
+
+    assert(budget.retryBudget.balance == 100)
+    (1 to 10).foreach(_ => Await.result(client(1), 5.seconds))
+    assert(budget.retryBudget.balance == 101)
+
+    assert(stats.stat(clientName, "client", "retries")() == List()) // does not exist
   }
 }

@@ -32,6 +32,8 @@ Bug Fixes
   be properly seen as a `c.t.f.ChannelClosedException` instead of a
   `c.t.f.UnknownChannelException`. ``PHAB_ID=`D1104650`
 
+* finagle: Deposit budget once in MethodBuilder ``PHAB_ID=D1107653``
+
 
 22.12.0
 -------
