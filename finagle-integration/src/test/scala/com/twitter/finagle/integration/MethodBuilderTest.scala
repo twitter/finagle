@@ -9,10 +9,14 @@ import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.mux
 import com.twitter.finagle._
+import com.twitter.finagle.service.TimeoutFilter.PropagateDeadlines
 import com.twitter.util.Await
 import com.twitter.util.Future
+
 import java.net.InetSocketAddress
 import org.scalatest.funsuite.AnyFunSuite
+
+import java.util.concurrent.atomic.AtomicBoolean
 
 class MethodBuilderTest extends AnyFunSuite {
 
@@ -153,4 +157,38 @@ class MethodBuilderTest extends AnyFunSuite {
     mux.Request.empty,
     mux.Response.empty
   )
+
+  test("Methodbuilder client does not propagate Deadlines") {
+    val deadlinePresent = new AtomicBoolean(true)
+    val service = Service.mk { request: http.Request =>
+      deadlinePresent.set(
+        request.headerMap.get("Finagle-Ctx-com.twitter.finagle.Deadline").isDefined)
+      Future.value(http.Response())
+    }
+
+    val server = Http.server
+      .serve("localhost:*", service)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+
+    val noPropagationClient = Http.client
+      .withLabel("backend-noprop")
+      .configured(PropagateDeadlines(false).mk())
+      .methodBuilder(s"${addr.getHostName}:${addr.getPort}")
+      .newService
+
+    val defaultClient = Http.client
+      .withLabel("backend")
+      .methodBuilder(s"${addr.getHostName}:${addr.getPort}")
+      .newService
+
+    await(noPropagationClient(http.Request("/")))
+    assert(!deadlinePresent.get())
+    await(defaultClient(http.Request("/")))
+    assert(deadlinePresent.get())
+
+    await(server.close())
+    await(noPropagationClient.close())
+    await(defaultClient.close())
+  }
+
 }

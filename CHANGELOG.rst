@@ -36,6 +36,8 @@ Bug Fixes
 
 * finagle: Deposit budget once in MethodBuilder ``PHAB_ID=D1107653``
 
+* finagle: Pass through configured deadline params rather than use default ``PHAB_ID=D1107765``
+
 
 22.12.0
 -------

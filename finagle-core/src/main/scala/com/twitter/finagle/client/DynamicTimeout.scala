@@ -95,31 +95,38 @@ object DynamicTimeout {
    * @see [[LatencyCompensation]]
    */
   def perRequestModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[
-      TimeoutFilter.Param,
-      param.Timer,
-      LatencyCompensation.Compensation,
+    new Stack.ModuleParams[
       ServiceFactory[Req, Rep]
     ] {
       val role: Stack.Role = TimeoutFilter.role
       val description: String =
         "Apply a dynamic timeout-derived deadline to request"
 
-      def make(
-        defaultTimeout: TimeoutFilter.Param,
-        timer: param.Timer,
-        compensation: LatencyCompensation.Compensation,
+      val parameters = Seq(
+        implicitly[Stack.Param[TimeoutFilter.Param]],
+        implicitly[Stack.Param[param.Timer]],
+        implicitly[Stack.Param[LatencyCompensation.Compensation]],
+        implicitly[Stack.Param[TimeoutFilter.PropagateDeadlines]],
+        implicitly[Stack.Param[TimeoutFilter.PreferDeadlineOverTimeout]]
+      )
+
+      override def make(
+        params: Stack.Params,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
+
         val filter = new TimeoutFilter[Req, Rep](
           timeoutFn(
             PerRequestKey,
-            defaultTimeout.tunableTimeout,
+            params[TimeoutFilter.Param].tunableTimeout,
             TimeoutFilter.Param.Default, // tunableTimeout() should always produce a value,
-            compensation.howlong // but we fall back on the default if not
+            params[
+              LatencyCompensation.Compensation].howlong // but we fall back on the default if not
           ),
           duration => new IndividualRequestTimeoutException(duration),
-          timer.timer
+          params[param.Timer].timer,
+          params[TimeoutFilter.PropagateDeadlines].enabled,
+          params[TimeoutFilter.PreferDeadlineOverTimeout].enabled
         )
         filter.andThen(next)
       }
