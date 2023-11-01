@@ -2,8 +2,11 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.tracing.{Annotation, Trace, TraceId}
-import com.twitter.finagle.{context, _}
+import com.twitter.finagle.tracing.Annotation
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.TraceId
+import com.twitter.finagle.context
+import com.twitter.finagle._
 import com.twitter.util._
 
 /**
@@ -66,7 +69,7 @@ private[finagle] class RequeueFilter[Req, Rep](
     retriesRemaining: Int,
     backoffs: Backoff
   ): Future[Rep] = {
-    Contexts.broadcast.let(context.Retries, context.Retries(attempt)) {
+    Contexts.broadcast.let(context.Requeues, context.Requeues(attempt)) {
       val trace = Trace()
       val shouldTrace = attempt > 0 && trace.isActivelyTracing
       if (shouldTrace) {

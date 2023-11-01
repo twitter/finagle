@@ -1,10 +1,14 @@
 package com.twitter.finagle.http.codec.context
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.http.{HeaderMap, Message}
+import com.twitter.finagle.http.HeaderMap
+import com.twitter.finagle.http.Message
 import com.twitter.finagle.util.LoadService
-import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Return, Throw, Try}
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
 import scala.collection.mutable
 import scala.util.control.NonFatal
 
@@ -47,7 +51,7 @@ object HttpContext {
   private[this] val knownContextTypes: Array[HttpContext] = {
     Array[HttpContext](
       HttpDeadline,
-      HttpRetries,
+      HttpRequeues,
       HttpBackupRequest
     )
   }

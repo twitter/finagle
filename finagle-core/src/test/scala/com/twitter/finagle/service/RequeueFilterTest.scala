@@ -2,9 +2,11 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Trace, TraceId}
+import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.TraceId
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util._
 import java.io.IOException
 import org.scalatest.funsuite.AnyFunSuite
@@ -169,7 +171,7 @@ class RequeueFilterTest extends AnyFunSuite {
 
     val svcFactory = ServiceFactory.const(
       filter.andThen(Service.mk[Throwable, Int] { req =>
-        context.Retries.current.foreach { retries => retriesStat.add(retries.attempt) }
+        context.Requeues.current.foreach { retries => retriesStat.add(retries.attempt) }
         Future.exception(req)
       })
     )

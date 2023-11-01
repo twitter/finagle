@@ -2,9 +2,12 @@ package com.twitter.finagle.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.context.{Contexts, Retries}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Requeues
 import com.twitter.finagle.stack.nilStack
-import com.twitter.util.{Promise, Await, Future}
+import com.twitter.util.Promise
+import com.twitter.util.Await
+import com.twitter.util.Future
 import org.scalatest.funsuite.AnyFunSuite
 
 class ClearContextValueFilterTest extends AnyFunSuite {
@@ -20,8 +23,8 @@ class ClearContextValueFilterTest extends AnyFunSuite {
         def make(next: ServiceFactory[Unit, Unit]) =
           new SimpleFilter[Unit, Unit] {
             def apply(req: Unit, service: Service[Unit, Unit]): Future[Unit] = {
-              Contexts.broadcast.let(Retries, Retries(5)) {
-                assert(Retries.current == Some(Retries(5)))
+              Contexts.broadcast.let(Requeues, Requeues(5)) {
+                assert(Requeues.current == Some(Requeues(5)))
                 setContextFilterCalled.setDone()
                 service(req)
               }
@@ -29,7 +32,7 @@ class ClearContextValueFilterTest extends AnyFunSuite {
           }.andThen(next)
       }
 
-    val clearContextFilter = ClearContextValueFilter.module[Unit, Unit](Retries)
+    val clearContextFilter = ClearContextValueFilter.module[Unit, Unit](Requeues)
 
     val verifyContextClearedFilter =
       new Stack.Module0[ServiceFactory[Unit, Unit]] {
@@ -38,7 +41,7 @@ class ClearContextValueFilterTest extends AnyFunSuite {
         def make(next: ServiceFactory[Unit, Unit]) =
           new SimpleFilter[Unit, Unit] {
             def apply(req: Unit, service: Service[Unit, Unit]): Future[Unit] = {
-              assert(Retries.current == None)
+              assert(Requeues.current == None)
               verifyContextClearedFilterCalled.setDone()
               service(req)
             }

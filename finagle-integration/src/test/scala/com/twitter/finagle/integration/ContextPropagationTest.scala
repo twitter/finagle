@@ -3,14 +3,21 @@ package com.twitter.finagle.integration
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Response
+import com.twitter.finagle.http.Status
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.thrift.{Protocols, RichServerParam, ThriftUtil}
+import com.twitter.finagle.thrift.Protocols
+import com.twitter.finagle.thrift.RichServerParam
+import com.twitter.finagle.thrift.ThriftUtil
 import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, Return}
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.util.Await
+import com.twitter.util.Future
+import com.twitter.util.Return
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -202,7 +209,7 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
     }
   }
 
-  test("thriftmux server + thriftmux client: server sees Retries set by client") {
+  test("thriftmux server + thriftmux client: server sees Requeues set by client") {
     val iface = new TestService.MethodPerEndpoint {
       def query(x: String) = Future.value(x)
       def question(y: String): Future[String] = Future.value(y)
@@ -219,16 +226,16 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
       )
     )
 
-    val assertRetriesFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
+    val assertRequeuesFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
       def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
-        assert(context.Retries.current == Some(context.Retries(0)))
+        assert(context.Requeues.current == Some(context.Requeues(0)))
         service(request)
       }
     }
 
     val server = ThriftMux.server.serve(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      assertRetriesFilter.andThen(service)
+      assertRequeuesFilter.andThen(service)
     )
 
     val client = Thrift.client
@@ -241,12 +248,12 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
   }
 
   test(
-    "thriftmux server + thriftmux client: server does not see Retries " +
+    "thriftmux server + thriftmux client: server does not see Requeues " +
       "set by another client if client removed RequeueFilter"
   ) {
-    val assertRetriesFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
+    val assertRequeuesFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
       def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
-        assert(context.Retries.current == None)
+        assert(context.Requeues.current == None)
         service(request)
       }
     }
@@ -273,7 +280,7 @@ class ContextPropagationTest extends AnyFunSuite with MockitoSugar {
     val serverB = ThriftMux.server
       .serve(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        assertRetriesFilter.andThen(serviceB)
+        assertRequeuesFilter.andThen(serviceB)
       )
 
     val clientB = Thrift.client

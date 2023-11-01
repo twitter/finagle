@@ -32,7 +32,14 @@ Bug Fixes
 
 * finagle-core: Failed recvAddress on Linux due to the remote peer resetting connection should now
   be properly seen as a `c.t.f.ChannelClosedException` instead of a
-  `c.t.f.UnknownChannelException`. ``PHAB_ID=`D1104650`
+  `c.t.f.UnknownChannelException`. ``PHAB_ID=`D1104650``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: The `c.t.f.context.Retries` context has been renamed to `c.t.f.context.Requeues` to reflect what it
+  actually contains -- the number of requeues a request has had (on the client immediately upstream). Requeues are
+  retries on write exceptions (i.e. the original request was never sent to the server). ``PHAB_ID=`D1104878``
 
 * finagle: Deposit budget once in MethodBuilder ``PHAB_ID=D1107653``
 

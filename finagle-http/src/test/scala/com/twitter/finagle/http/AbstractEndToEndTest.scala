@@ -7,7 +7,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.Deadline
-import com.twitter.finagle.context.Retries
+import com.twitter.finagle.context.Requeues
 import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.http.codec.context.LoadableHttpContext
 import com.twitter.finagle.http.service.HttpResponseClassifier
@@ -467,8 +467,7 @@ abstract class AbstractEndToEndTest
           val deadline = Deadline.current.get
           assert(deadline.deadline == writtenDeadline.deadline)
 
-          val retries = Retries.current.get
-          assert(retries == Retries(0))
+          assert(Requeues.current.get == Requeues(0))
 
           val response = Response(request)
           Future.value(response)

@@ -380,7 +380,7 @@ object StackClient {
     stk.push(PrepFactory.module)
     stk.push(FactoryToService.module)
     stk.push(Retries.moduleRequeueable)
-    stk.push(ClearContextValueFilter.module(context.Retries))
+    stk.push(ClearContextValueFilter.module(context.Requeues))
     stk.push(ExceptionSourceFilter.module)
 
     /*

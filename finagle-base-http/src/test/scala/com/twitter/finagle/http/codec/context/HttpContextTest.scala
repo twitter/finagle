@@ -1,8 +1,14 @@
 package com.twitter.finagle.http.codec.context
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.context.{BackupRequest, Contexts, Deadline, Retries}
-import com.twitter.finagle.http.{Message, Method, Request, Version}
+import com.twitter.finagle.context.BackupRequest
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.Deadline
+import com.twitter.finagle.context.Requeues
+import com.twitter.finagle.http.Message
+import com.twitter.finagle.http.Method
+import com.twitter.finagle.http.Request
+import com.twitter.finagle.http.Version
 import com.twitter.io.Buf
 import com.twitter.util.Try
 import org.scalatest.funsuite.AnyFunSuite
@@ -89,21 +95,21 @@ class HttpContextTest extends AnyFunSuite {
     }
   }
 
-  test("written request retries matches read request retries") {
+  test("written request requeues matches read request requeues") {
     val m = newMsg()
-    val writtenRetries = Retries(5)
-    Contexts.broadcast.let(Retries, writtenRetries) {
+    val writtenRequeues = Requeues(5)
+    Contexts.broadcast.let(Requeues, writtenRequeues) {
       HttpContext.write(m)
 
-      // Clear Retries in the Context
-      Contexts.broadcast.letClear(Retries) {
+      // Clear Requeues in the Context
+      Contexts.broadcast.letClear(Requeues) {
 
-        // Ensure the Retries was cleared
-        assert(Retries.current == None)
+        // Ensure the Requeues was cleared
+        assert(Requeues.current == None)
 
         HttpContext.read(m) {
-          val readRetries = Retries.current.get
-          assert(writtenRetries == readRetries)
+          val readRequeues = Requeues.current.get
+          assert(writtenRequeues == readRequeues)
         }
       }
     }
@@ -111,26 +117,26 @@ class HttpContextTest extends AnyFunSuite {
 
   test("headers are set/replaced, not added") {
     val m = newMsg()
-    Contexts.broadcast.let(Retries, Retries(5)) {
+    Contexts.broadcast.let(Requeues, Requeues(5)) {
       HttpContext.write(m)
     }
 
-    assert(m.headerMap.getAll(HttpRetries.headerKey).size == 1)
+    assert(m.headerMap.getAll(HttpRequeues.headerKey).size == 1)
     HttpContext.read(m) {
-      assert(Contexts.broadcast.get(HttpRetries.key) == Some(Retries(5)))
+      assert(Contexts.broadcast.get(HttpRequeues.key) == Some(Requeues(5)))
     }
 
     // and again...
-    Contexts.broadcast.let(Retries, Retries(4)) {
+    Contexts.broadcast.let(Requeues, Requeues(4)) {
       HttpContext.write(m)
     }
 
     // Still just 1...
-    assert(m.headerMap.getAll(HttpRetries.headerKey).size == 1)
+    assert(m.headerMap.getAll(HttpRequeues.headerKey).size == 1)
 
     // Should be the last entry written
     HttpContext.read(m) {
-      assert(Contexts.broadcast.get(HttpRetries.key) == Some(Retries(4)))
+      assert(Contexts.broadcast.get(HttpRequeues.key) == Some(Requeues(4)))
     }
   }
 
