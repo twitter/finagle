@@ -179,6 +179,7 @@ object Parameter {
     type A = Null
     def value: Null = null
     def evidence: CanBeParameter[Null] = CanBeParameter.nullCanBeParameter
+    override def toString: String = "Parameter(null)"
   }
 }
 
