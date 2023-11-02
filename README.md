@@ -5,7 +5,7 @@
 
 # Finagle
 
-[![Build Status](https://github.com/twitter/finagle/workflows/continuous%20integration/badge.svg?branch=release)](https://github.com/twitter/finagle/actions?query=workflow%3A%22continuous+integration%22+branch%3Arelease)
+[![Build Status](https://github.com/twitter/finagle/workflows/continuous%20integration/badge.svg?branch=develop)](https://github.com/twitter/finagle/actions?query=workflow%3A%22continuous+integration%22+branch%3Adevelop)
 [![Project status](https://img.shields.io/badge/status-active-brightgreen.svg)](#status)
 [![Gitter](https://badges.gitter.im/twitter/finagle.svg)](https://gitter.im/twitter/finagle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12)
