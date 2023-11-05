@@ -189,8 +189,11 @@ class MethodBuilderTest extends AnyFunSuite with Eventually {
 
     toggleOnCtx {
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(5.millis)) {
-        // short deadline should fire
-        intercept[GlobalRequestTimeoutException] {
+        // short deadline should fire. Note that the RequestTimeoutException that fires could be either
+        // an [[IndividualRequestTimeoutException]] or a [[GlobalRequestTimeoutException]], due to racing
+        // interrupts, since the global and individual filters have a very similar timeout after applying
+        // our deadline.
+        intercept[RequestTimeoutException] {
           await(shortTimeoutSvcPerEndpoint(TestService.Query.Args("shorty")))
         }
       }
