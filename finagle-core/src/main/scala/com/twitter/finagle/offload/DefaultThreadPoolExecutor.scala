@@ -9,13 +9,16 @@ import java.util.concurrent.RejectedExecutionHandler
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-private[twitter] class DefaultThreadPoolExecutor(poolSize: Int, stats: StatsReceiver)
+private[twitter] class DefaultThreadPoolExecutor(
+  poolSize: Int,
+  maxQueueLen: Int,
+  stats: StatsReceiver)
     extends ThreadPoolExecutor(
       poolSize /*corePoolSize*/,
       poolSize /*maximumPoolSize*/,
       0L /*keepAliveTime*/,
       TimeUnit.MILLISECONDS,
-      new LinkedBlockingQueue[Runnable]() /*workQueue*/,
+      new LinkedBlockingQueue[Runnable](maxQueueLen) /*workQueue*/,
       new NamedPoolThreadFactory("finagle/offload", makeDaemons = true) /*threadFactory*/,
       new RunsOnNettyThread(stats.counter("not_offloaded_tasks")))
 

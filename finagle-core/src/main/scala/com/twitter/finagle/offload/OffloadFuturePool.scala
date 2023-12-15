@@ -45,10 +45,11 @@ object OffloadFuturePool {
   lazy val configuredPool: Option[FuturePool] = {
     val workers =
       numWorkers.get.orElse(if (auto()) Some(com.twitter.jvm.numProcs().ceil.toInt) else None)
+    val maxQueueLen = maxQueueLength()
 
     workers.map { threads =>
       val stats = FinagleStatsReceiver.scope("offload_pool")
-      val pool = new OffloadFuturePool(OffloadThreadPool(threads, stats), stats)
+      val pool = new OffloadFuturePool(OffloadThreadPool(threads, maxQueueLen, stats), stats)
 
       // Start sampling the offload delay if the interval isn't Duration.Top.
       if (statsSampleInterval().isFinite && statsSampleInterval() > Duration.Zero) {

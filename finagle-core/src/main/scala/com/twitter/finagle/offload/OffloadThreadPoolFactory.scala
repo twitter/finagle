@@ -14,12 +14,14 @@ abstract class OffloadThreadPoolFactory {
 
   /** Construct a new `ExecutorService`
    *
-   * @param poolSize The size of the pool as configured by the finagle flags
-   *                 `com.twitter.finagle.offload.numWorkers` and `com.twitter.finagle.offload.auto`
-   * @param stats `StatsReceiver` to use for observability.
+   * @param poolSize    The size of the pool as configured by the finagle flags
+   *                    `com.twitter.finagle.offload.numWorkers` and `com.twitter.finagle.offload.auto`
+   * @param maxQueueLen The maximum length of the queue in the pool as configured by the finagle flag
+   *                    `com.twitter.finagle.offload.maxQueueLen`
+   * @param stats    `StatsReceiver` to use for observability.
    */
 
-  def newPool(poolSize: Int, stats: StatsReceiver): ExecutorService
+  def newPool(poolSize: Int, maxQueueLen: Int, stats: StatsReceiver): ExecutorService
 
   /** Implementors should make the `toString` method meaningful and it will be used in log entries */
   override def toString: String
