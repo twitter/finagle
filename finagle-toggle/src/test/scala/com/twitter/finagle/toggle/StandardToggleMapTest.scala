@@ -1,8 +1,10 @@
 package com.twitter.finagle.toggle
 
 import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import scala.collection.JavaConverters._
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -37,10 +39,23 @@ class StandardToggleMapTest extends AnyFunSuite {
   test("apply returns the same instance for a given libraryName") {
     val name = "com.twitter.Test"
     val registry = newRegistry()
+    val duplicateHandling = JsonToggleMap.FailParsingOnDuplicateId
     val tm0 =
-      StandardToggleMap(name, NullStatsReceiver, ToggleMap.newMutable(), ServerInfo(), registry)
+      StandardToggleMap(
+        name,
+        NullStatsReceiver,
+        ToggleMap.newMutable(),
+        ServerInfo(),
+        registry,
+        duplicateHandling)
     val tm1 =
-      StandardToggleMap(name, NullStatsReceiver, ToggleMap.newMutable(), ServerInfo(), registry)
+      StandardToggleMap(
+        name,
+        NullStatsReceiver,
+        ToggleMap.newMutable(),
+        ServerInfo(),
+        registry,
+        duplicateHandling)
     assert(tm0 eq tm1)
   }
 
@@ -79,7 +94,8 @@ class StandardToggleMapTest extends AnyFunSuite {
       NullStatsReceiver,
       ToggleMap.newMutable(),
       ServerInfo.Empty,
-      newRegistry()
+      newRegistry(),
+      JsonToggleMap.FailParsingOnDuplicateId
     )
 
     val togs = togMap.iterator.toSeq
@@ -110,7 +126,8 @@ class StandardToggleMapTest extends AnyFunSuite {
       NullStatsReceiver,
       ToggleMap.newMutable(),
       serverInfo,
-      newRegistry()
+      newRegistry(),
+      JsonToggleMap.FailParsingOnDuplicateId
     )
 
     val togs = togMap.iterator.toSeq
@@ -180,7 +197,8 @@ class StandardToggleMapTest extends AnyFunSuite {
       NullStatsReceiver,
       inMem,
       ServerInfo.Empty,
-      newRegistry()
+      newRegistry(),
+      JsonToggleMap.FailParsingOnDuplicateId
     )
     flag.overrides.letClear("com.toggle.a") {
       // start without the flag or in-memory, and only the service loaded
@@ -217,7 +235,14 @@ class StandardToggleMapTest extends AnyFunSuite {
     // start with the toggle turned on.
     inMem.put(toggleName, 1.0)
 
-    val togMap = StandardToggleMap(libraryName, stats, inMem, ServerInfo.Empty, newRegistry())
+    val togMap = StandardToggleMap(
+      libraryName,
+      stats,
+      inMem,
+      ServerInfo.Empty,
+      newRegistry(),
+      JsonToggleMap.FailParsingOnDuplicateId
+    )
     val gauge = stats.gauges(Seq("toggles", libraryName, "checksum"))
     val initial = gauge()
 
@@ -233,7 +258,8 @@ class StandardToggleMapTest extends AnyFunSuite {
       NullStatsReceiver,
       inMem,
       ServerInfo.Empty,
-      newRegistry()
+      newRegistry(),
+      JsonToggleMap.FailParsingOnDuplicateId
     )
 
     val components = ToggleMap.components(togMap)
@@ -248,7 +274,8 @@ class StandardToggleMapTest extends AnyFunSuite {
       NullStatsReceiver,
       inMem,
       ServerInfo.Empty,
-      newRegistry()
+      newRegistry(),
+      JsonToggleMap.FailParsingOnDuplicateId
     )
 
     assert(togMap("com.twitter.foo").isUndefined)

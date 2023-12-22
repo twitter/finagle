@@ -1,6 +1,8 @@
 package com.twitter.finagle.toggle
 
-import com.twitter.util.{Return, Throw, Try}
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.collection.JavaConverters._
@@ -8,7 +10,10 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class JsonToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks {
 
-  import JsonToggleMap.{DescriptionIgnored, DescriptionRequired}
+  import JsonToggleMap.DescriptionIgnored
+  import JsonToggleMap.DescriptionRequired
+  import JsonToggleMap.FailParsingOnDuplicateId
+  import JsonToggleMap.KeepFirstOnDuplicateId
 
   private def assertParseFails(input: String): Unit = {
     assertParseFails(input, DescriptionIgnored)
@@ -17,9 +22,10 @@ class JsonToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks 
 
   private def assertParseFails(
     input: String,
-    descriptionMode: JsonToggleMap.DescriptionMode
+    descriptionMode: JsonToggleMap.DescriptionMode,
+    duplicateHandling: JsonToggleMap.DuplicateHandling = JsonToggleMap.FailParsingOnDuplicateId
   ): Unit =
-    JsonToggleMap.parse(input, descriptionMode) match {
+    JsonToggleMap.parse(input, descriptionMode, duplicateHandling) match {
       case Return(_) => fail(s"Parsing should not succeed for $input")
       case Throw(_) => // expected
     }
@@ -38,19 +44,36 @@ class JsonToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks 
       |}""".stripMargin)
   }
 
+  val jsonWithDuplicates =
+    """
+      |{
+      |"toggles": [
+      |  {
+      |    "id": "com.twitter.duplicate",
+      |    "description": "cannot have duplicate ids even if other fields differ",
+      |    "fraction": 1.0
+      |  },
+      |  {
+      |    "id": "com.twitter.duplicate",
+      |    "description": "this is a duplicate",
+      |    "fraction": 0.1
+      |  }
+      |]
+      |}""".stripMargin
+
   test("parse invalid JSON string with duplicate ids") {
-    assertParseFails("""
-      |{"toggles": [
-      |    { "id": "com.twitter.duplicate",
-      |      "description": "cannot have duplicate ids even if other fields differ",
-      |      "fraction": 0.0
-      |    },
-      |    { "id": "com.twitter.duplicate",
-      |      "description": "this is a duplicate",
-      |      "fraction": 1.0
-      |    }
-      |  ]
-      |}""".stripMargin)
+    assertParseFails(jsonWithDuplicates)
+  }
+
+  test("parse JSON string with duplicate ids and keep first when KeepFirstOnDuplicateId is set") {
+    JsonToggleMap.parse(jsonWithDuplicates, DescriptionIgnored, KeepFirstOnDuplicateId) match {
+      case Throw(t) =>
+        fail(t)
+      case Return(tm) =>
+        assert(tm.iterator.size == 1)
+        assert(tm.apply("com.twitter.duplicate").isDefined)
+        assert(tm.apply("com.twitter.duplicate").isEnabled(1))
+    }
   }
 
   test("parse invalid JSON string with empty description") {
@@ -76,11 +99,11 @@ class JsonToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks 
       |}""".stripMargin
 
   test("parse JSON string with no description and is required") {
-    assertParseFails(jsonWithNoDescription, DescriptionRequired)
+    assertParseFails(jsonWithNoDescription, DescriptionRequired, FailParsingOnDuplicateId)
   }
 
   test("parse JSON string with no description and is ignored") {
-    JsonToggleMap.parse(jsonWithNoDescription, DescriptionIgnored) match {
+    JsonToggleMap.parse(jsonWithNoDescription, DescriptionIgnored, FailParsingOnDuplicateId) match {
       case Throw(t) =>
         fail(t)
       case Return(tm) =>
@@ -151,8 +174,10 @@ class JsonToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks 
   }
 
   test("parse valid JSON String") {
-    validateParsedJson(JsonToggleMap.parse(validInput, DescriptionIgnored))
-    validateParsedJson(JsonToggleMap.parse(validInput, DescriptionRequired))
+    validateParsedJson(
+      JsonToggleMap.parse(validInput, DescriptionIgnored, FailParsingOnDuplicateId))
+    validateParsedJson(
+      JsonToggleMap.parse(validInput, DescriptionRequired, FailParsingOnDuplicateId))
   }
 
   test("parse valid JSON String with empty toggles") {
@@ -160,7 +185,7 @@ class JsonToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks 
         |{
         |  "toggles": [ ]
         |}""".stripMargin
-    JsonToggleMap.parse(in, DescriptionRequired) match {
+    JsonToggleMap.parse(in, DescriptionRequired, FailParsingOnDuplicateId) match {
       case Throw(t) =>
         fail(t)
       case Return(map) =>
@@ -177,8 +202,9 @@ class JsonToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks 
       .toSeq
 
     assert(1 == rscs.size)
-    validateParsedJson(JsonToggleMap.parse(rscs.head, DescriptionIgnored))
-    validateParsedJson(JsonToggleMap.parse(rscs.head, DescriptionRequired))
+    validateParsedJson(JsonToggleMap.parse(rscs.head, DescriptionIgnored, FailParsingOnDuplicateId))
+    validateParsedJson(
+      JsonToggleMap.parse(rscs.head, DescriptionRequired, FailParsingOnDuplicateId))
   }
 
   test("parse invalid JSON resource file") {
@@ -192,7 +218,7 @@ class JsonToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks 
       .toSeq
 
     assert(1 == rscs.size)
-    JsonToggleMap.parse(rscs.head, DescriptionIgnored) match {
+    JsonToggleMap.parse(rscs.head, DescriptionIgnored, FailParsingOnDuplicateId) match {
       case Return(_) => fail(s"Parsing should not succeed")
       case Throw(_) => // expected
     }

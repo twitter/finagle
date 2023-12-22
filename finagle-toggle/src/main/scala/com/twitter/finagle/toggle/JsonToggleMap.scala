@@ -2,8 +2,10 @@ package com.twitter.finagle.toggle
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.core.util.{DefaultIndenter, DefaultPrettyPrinter}
-import com.fasterxml.jackson.databind.{MappingJsonFactory, ObjectMapper}
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.MappingJsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.util.Try
 import java.net.URL
@@ -104,6 +106,25 @@ object JsonToggleMap {
    */
   object DescriptionIgnored extends DescriptionMode
 
+  /**
+   * How to treat the duplicate ids in arrays of toggles.
+   *
+   * @see [[FailParsingOnDuplicateId]] and [[KeepFirstOnDuplicateId]].
+   */
+  sealed abstract class DuplicateHandling
+
+  /**
+   * Requires toggles to have unique id field. Otherwise fail parsing.
+   */
+  object FailParsingOnDuplicateId extends DuplicateHandling
+
+  /**
+   * Keep the first and drop rest to remove duplicates. This is useful
+   * to preserve existing behavior when new duplicate entry is added to the end
+   * of a JSON file
+   */
+  object KeepFirstOnDuplicateId extends DuplicateHandling
+
   private[this] case class JsonToggle(
     @JsonProperty(required = true) id: String,
     @JsonProperty(required = true) fraction: Double,
@@ -112,7 +133,11 @@ object JsonToggleMap {
 
   private[this] case class JsonToggles(@JsonProperty(required = true) toggles: Seq[JsonToggle]) {
 
-    def toToggleMap(source: String, descriptionMode: DescriptionMode): ToggleMap = {
+    def toToggleMap(
+      source: String,
+      descriptionMode: DescriptionMode,
+      duplicateHandling: DuplicateHandling = FailParsingOnDuplicateId
+    ): ToggleMap = {
       val invalid = toggles.find { md =>
         descriptionMode match {
           case DescriptionRequired => md.description.isEmpty
@@ -137,9 +162,17 @@ object JsonToggleMap {
       val ids = metadata.map(_.id)
       val uniqueIds = ids.distinct
       if (ids.size != uniqueIds.size) {
-        throw new IllegalArgumentException(s"Duplicate Toggle ids found: ${ids.mkString(",")}")
+        duplicateHandling match {
+          case FailParsingOnDuplicateId =>
+            throw new IllegalArgumentException(s"Duplicate Toggle ids found: ${ids.mkString(",")}")
+          case KeepFirstOnDuplicateId =>
+            // Group by id and take the first entry of each group
+            val filteredMetadata = metadata.groupBy(_.id).values.map(_.head).toList
+            new ToggleMap.Immutable(filteredMetadata)
+        }
+      } else {
+        new ToggleMap.Immutable(metadata)
       }
-      new ToggleMap.Immutable(metadata)
     }
   }
 
@@ -151,10 +184,15 @@ object JsonToggleMap {
    * $example
    *
    * @param descriptionMode how to treat the "description" field for a toggle.
+   * @param duplicateHandling how to handle duplicates for a toggle in same file.
    */
-  def parse(json: String, descriptionMode: DescriptionMode): Try[ToggleMap] = Try {
+  def parse(
+    json: String,
+    descriptionMode: DescriptionMode,
+    duplicateHandling: DuplicateHandling
+  ): Try[ToggleMap] = Try {
     val jsonToggles = mapper.readValue(json, classOf[JsonToggles])
-    jsonToggles.toToggleMap("JSON String", descriptionMode)
+    jsonToggles.toToggleMap("JSON String", descriptionMode, duplicateHandling)
   }
 
   /**
@@ -167,10 +205,15 @@ object JsonToggleMap {
    * $example
    *
    * @param descriptionMode how to treat the "description" field for a toggle.
+   * @param duplicateHandling how to handle duplicates for a toggle in same file.
    */
-  def parse(url: URL, descriptionMode: DescriptionMode): Try[ToggleMap] = Try {
+  def parse(
+    url: URL,
+    descriptionMode: DescriptionMode,
+    duplicateHandling: DuplicateHandling
+  ): Try[ToggleMap] = Try {
     val jsonToggles = mapper.readValue(url, classOf[JsonToggles])
-    jsonToggles.toToggleMap(url.toString, descriptionMode)
+    jsonToggles.toToggleMap(url.toString, descriptionMode, duplicateHandling)
   }
 
   private case class Component(source: String, fraction: Double)

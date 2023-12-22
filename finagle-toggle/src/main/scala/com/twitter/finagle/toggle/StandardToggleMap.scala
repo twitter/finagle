@@ -3,10 +3,13 @@ package com.twitter.finagle.toggle
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{Return, Throw}
+import com.twitter.util.Return
+import com.twitter.util.Throw
 import java.net.URL
-import java.security.{DigestInputStream, MessageDigest}
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
+import java.security.DigestInputStream
+import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import scala.collection.JavaConverters._
 
 /**
@@ -76,13 +79,18 @@ object StandardToggleMap {
    *                      usage this should not be scoped so that the metrics
    *                      always end up scoped to "toggles/\$libraryName".
    */
-  def apply(libraryName: String, statsReceiver: StatsReceiver): ToggleMap.Mutable =
+  def apply(
+    libraryName: String,
+    statsReceiver: StatsReceiver,
+    duplicateHandling: JsonToggleMap.DuplicateHandling = JsonToggleMap.FailParsingOnDuplicateId
+  ): ToggleMap.Mutable =
     apply(
       libraryName,
       statsReceiver,
       ToggleMap.newMutable(s"Mutable($libraryName)"),
       ServerInfo(),
-      libs
+      libs,
+      duplicateHandling = duplicateHandling
     )
 
   /** exposed for testing */
@@ -91,13 +99,22 @@ object StandardToggleMap {
     statsReceiver: StatsReceiver,
     mutable: ToggleMap.Mutable,
     serverInfo: ServerInfo,
-    registry: ConcurrentMap[String, ToggleMap.Mutable]
+    registry: ConcurrentMap[String, ToggleMap.Mutable],
+    duplicateHandling: JsonToggleMap.DuplicateHandling
   ): ToggleMap.Mutable = {
     Toggle.validateId(libraryName)
 
     val svcsJson =
-      loadJsonConfig(s"$libraryName-service", serverInfo, JsonToggleMap.DescriptionIgnored)
-    val libsJson = loadJsonConfig(libraryName, serverInfo, JsonToggleMap.DescriptionRequired)
+      loadJsonConfig(
+        s"$libraryName-service",
+        serverInfo,
+        JsonToggleMap.DescriptionIgnored,
+        JsonToggleMap.FailParsingOnDuplicateId)
+    val libsJson = loadJsonConfig(
+      libraryName,
+      serverInfo,
+      JsonToggleMap.DescriptionRequired,
+      JsonToggleMap.FailParsingOnDuplicateId)
 
     val stacked = ToggleMap.of(
       mutable,
@@ -122,13 +139,14 @@ object StandardToggleMap {
   private[this] def loadJsonConfig(
     configName: String,
     serverInfo: ServerInfo,
-    descriptionMode: JsonToggleMap.DescriptionMode
+    descriptionMode: JsonToggleMap.DescriptionMode,
+    duplicateHandling: JsonToggleMap.DuplicateHandling
   ): ToggleMap = {
-    val withoutEnv = loadJsonConfigWithEnv(configName, descriptionMode)
+    val withoutEnv = loadJsonConfigWithEnv(configName, descriptionMode, duplicateHandling)
     val withEnv = serverInfo.environment match {
       case Some(env) =>
         val e = env.toString.toLowerCase
-        loadJsonConfigWithEnv(s"$configName-$e", descriptionMode)
+        loadJsonConfigWithEnv(s"$configName-$e", descriptionMode, duplicateHandling)
       case None =>
         NullToggleMap
     }
@@ -173,7 +191,8 @@ object StandardToggleMap {
 
   private[finagle] def loadJsonConfigWithEnv(
     configName: String,
-    descriptionMode: JsonToggleMap.DescriptionMode
+    descriptionMode: JsonToggleMap.DescriptionMode,
+    duplicateHandling: JsonToggleMap.DuplicateHandling
   ): ToggleMap = {
     val classLoader = getClass.getClassLoader
     val rscPath = s"com/twitter/toggles/configs/$configName.json"
@@ -184,7 +203,7 @@ object StandardToggleMap {
     } else {
       val rsc = selectResource(configName, rscs)
       log.debug(s"Toggle config resources found for $configName, using $rsc")
-      JsonToggleMap.parse(rsc, descriptionMode) match {
+      JsonToggleMap.parse(rsc, descriptionMode, duplicateHandling) match {
         case Throw(t) =>
           throw new IllegalArgumentException(
             s"Failure parsing Toggle config resources for $configName, from $rsc",
