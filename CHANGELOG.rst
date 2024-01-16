@@ -7,6 +7,11 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~~
+
+* finagle-core: Fix for DeadlineFilter takes rejectWithdrawal regardless of passed Deadline. ``PHAB_ID=D1120240``
+
 23.11.0
 -------
 

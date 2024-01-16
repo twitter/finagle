@@ -280,9 +280,6 @@ class DeadlineFilter[Req, Rep](
 
         val now = Time.now
         val difference: Duration = deadline - now
-        val reject = rejectBucket.tryGet(rejectWithdrawal)
-
-        trace(tracing, deadline, difference, reject)
 
         // If the difference is negative, we've exceeded the deadline
         if (difference.inMillis < 0l) {
@@ -291,6 +288,8 @@ class DeadlineFilter[Req, Rep](
           expiredTimeStat.add(exceeded.inMillis)
 
           // There are enough tokens to reject the request
+          val reject = rejectBucket.tryGet(rejectWithdrawal)
+          trace(tracing, deadline, difference, reject)
           if (reject) {
             rejectedCounter.incr()
             if (isDarkMode)
@@ -304,6 +303,7 @@ class DeadlineFilter[Req, Rep](
             service(request)
           }
         } else {
+          trace(tracing, deadline, difference, false)
           rejectBucket.put(serviceDeposit)
           val remaining = difference
           remainingTimeStat.add(remaining.inMillis)
