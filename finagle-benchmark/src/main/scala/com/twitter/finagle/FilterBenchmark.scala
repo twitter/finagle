@@ -9,7 +9,7 @@ import org.openjdk.jmh.annotations._
 class FilterBenchmark extends StdBenchAnnotations {
   import FilterBenchmark._
 
-  @Param(Array("10"))
+  @Param(Array("20", "50"))
   var numAndThens: Int = _
 
   val mutable = new Mutable(0)

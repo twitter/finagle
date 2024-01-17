@@ -1,6 +1,8 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Future, Time}
+import com.twitter.util.Future
+import com.twitter.util.Time
+
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.util.control.NonFatal
 
@@ -31,6 +33,8 @@ import scala.util.control.NonFatal
 abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     extends ((ReqIn, Service[ReqOut, RepIn]) => Future[RepOut]) {
   import Filter.AndThen
+  import Filter.Adapter
+  import Filter.SafeService
 
   /**
    * This is the method to override/implement to create your own Filter.
@@ -82,25 +86,18 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   def andThen(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
     // wrap user-supplied Services such that NonFatal exceptions thrown synchronously
     // in their `Service.apply` method are lifted into a `Future.exception`.
-    val rescued = Service.rescue(service)
+    val rescued = service match {
+      case _: SafeService[_, _] =>
+        service
+      case _ =>
+        Service.rescue(service)
+    }
     andThenService(rescued)
   }
 
-  private def andThenService(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
-    new Service[ReqIn, RepOut] {
-      def apply(request: ReqIn): Future[RepOut] = {
-        // wrap the user-supplied `Filter.apply`, lifting synchronous exceptions into Futures.
-        try Filter.this.apply(request, service)
-        catch {
-          case NonFatal(e) => Future.exception(e)
-        }
-      }
-      override def close(deadline: Time): Future[Unit] = service.close(deadline)
-      override def status: Status = service.status
-      override def toString: String = {
-        s"${Filter.this.toString}.andThen(${service.toString})"
-      }
-    }
+  private[twitter] def andThenService(next: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
+    val filter: Filter[ReqIn, RepOut, ReqOut, RepIn] = Filter.this
+    new Adapter(filter, next)
   }
 
   /**
@@ -221,6 +218,34 @@ object Filter {
       val unrolledTail: Seq[String] = unrolled.tail
       s"${unrolled.head}${if (unrolledTail.nonEmpty) unrolledTail.mkString(".andThen(", ").andThen(", ")")
       else ""}"
+    }
+  }
+
+  /**
+   * A marker interface indicating that it's safe to call .apply without wrapping with .rescue
+   * @tparam Req
+   * @tparam Rep
+   */
+  private[twitter] trait SafeService[Req, Rep] extends Service[Req, Rep] {}
+
+  private class Adapter[ReqIn, RepOut, ReqOut, RepIn](
+    filter: Filter[ReqIn, RepOut, ReqOut, RepIn],
+    next: Service[ReqOut, RepIn])
+      extends SafeService[ReqIn, RepOut] {
+    def apply(request: ReqIn): Future[RepOut] = {
+      // wrap the user-supplied `Filter.apply`, lifting synchronous exceptions into Futures.
+      try filter.apply(request, next)
+      catch {
+        case NonFatal(e) => Future.exception(e)
+      }
+    }
+
+    override def close(deadline: Time): Future[Unit] = next.close(deadline)
+
+    override def status: Status = next.status
+
+    override def toString: String = {
+      s"${filter.toString}.andThen(${next.toString})"
     }
   }
 
