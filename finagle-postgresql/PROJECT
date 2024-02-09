@@ -4,7 +4,7 @@ owners:
   - cockroachdb-admins:ldap
   - jillianc
   - mbezoyan
-  - mdickinson
+  - tapans
 watchers:
   - csl-team:ldap
 
