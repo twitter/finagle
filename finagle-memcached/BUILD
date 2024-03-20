@@ -2,6 +2,7 @@ target(
     tags = ["bazel-compatible"],
     dependencies = [
         "finagle/finagle-memcached/src/main/java",
+        "finagle/finagle-memcached/src/main/resources",
         "finagle/finagle-memcached/src/main/scala",
     ],
 )

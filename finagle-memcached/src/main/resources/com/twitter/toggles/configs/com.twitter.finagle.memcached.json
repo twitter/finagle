@@ -1,0 +1,9 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.finagle.filter.CompressingMemcached",
+      "description": "Enable compressing filter for memcached values",
+      "fraction": 1.0
+    }
+  ]
+}

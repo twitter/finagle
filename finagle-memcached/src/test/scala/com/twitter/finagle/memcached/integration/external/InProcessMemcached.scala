@@ -4,11 +4,15 @@ import _root_.java.net.SocketAddress
 import com.twitter.finagle.Memcached.Server
 import com.twitter.finagle.memcached.integration.external.InProcessMemcached.initialMaps
 import com.twitter.finagle.memcached.util.AtomicMap
-import com.twitter.finagle.memcached.{Entry, Interpreter, InterpreterService}
-import com.twitter.finagle.{ListeningServer, Memcached}
+import com.twitter.finagle.memcached.Entry
+import com.twitter.finagle.memcached.Interpreter
+import com.twitter.finagle.memcached.InterpreterService
+import com.twitter.finagle.ListeningServer
+import com.twitter.finagle.Memcached
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import java.util.{Collections, LinkedHashMap}
+import java.util.Collections
+import java.util.LinkedHashMap
 import scala.collection.JavaConverters._
 
 object InProcessMemcached {
@@ -36,7 +40,7 @@ object InProcessMemcached {
 class InProcessMemcached(address: SocketAddress) {
   val maps = initialMaps.map(_.clone())
 
-  private[this] val service: InterpreterService = {
+  val service: InterpreterService = {
     val interpreter = new Interpreter(new AtomicMap(maps))
     new InterpreterService(interpreter)
   }

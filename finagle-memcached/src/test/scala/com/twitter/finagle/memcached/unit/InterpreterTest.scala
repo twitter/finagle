@@ -3,7 +3,8 @@ package com.twitter.finagle.memcached.unit
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.AtomicMap
-import com.twitter.finagle.memcached.{Entry, Interpreter}
+import com.twitter.finagle.memcached.Entry
+import com.twitter.finagle.memcached.Interpreter
 import com.twitter.io.Buf
 import com.twitter.util.Time
 import scala.collection.mutable
@@ -14,6 +15,7 @@ class InterpreterTest extends AnyFunSuite {
   val map = mutable.Map[Buf, Entry]()
   val atomicMap = new AtomicMap(Seq(map))
   val interpreter = new Interpreter(atomicMap)
+  val emptyFlags = Some(Buf.Utf8("0"))
 
   test("correctly perform the GET & SET commands") {
     val key = Buf.Utf8("foo")
@@ -21,7 +23,7 @@ class InterpreterTest extends AnyFunSuite {
     interpreter(Delete(key))
     interpreter(Set(key, 0, Time.epoch, value))
 
-    assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value))))
+    assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value, None, emptyFlags))))
   }
 
   test("correctly perform the GETS & CAS commands") {
@@ -30,13 +32,13 @@ class InterpreterTest extends AnyFunSuite {
     val value2 = Buf.Utf8("value2")
     val value3 = Buf.Utf8("value3")
     interpreter(Set(key, 0, Time.epoch, value1))
-    assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value1))))
+    assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value1, None, emptyFlags))))
     val hashValue1 = interpreter(Gets(Seq(key)))
       .asInstanceOf[Values]
       .values
       .last
       .casUnique
-    assert(interpreter(Gets(Seq(key))) == Values(Seq(Value(key, value1, hashValue1))))
+    assert(interpreter(Gets(Seq(key))) == Values(Seq(Value(key, value1, hashValue1, emptyFlags))))
 
     assert(interpreter(Cas(key, 0, Time.epoch, value2, hashValue1.get)) == Stored)
     assert(interpreter(Cas(key, 0, Time.epoch, value3, hashValue1.get)) == NotStored)
@@ -59,8 +61,9 @@ class InterpreterTest extends AnyFunSuite {
 
       info("verify we can retrieve it up until the expiry")
       control.advance(9.seconds)
-      assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value))))
-      assert(interpreter(Get(Seq(noExpiry))) == Values(Seq(Value(noExpiry, value))))
+      assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value, None, emptyFlags))))
+      assert(
+        interpreter(Get(Seq(noExpiry))) == Values(Seq(Value(noExpiry, value, None, emptyFlags))))
 
       info("verify it's not accessible after the expiry")
       control.advance(1.second)
@@ -71,7 +74,8 @@ class InterpreterTest extends AnyFunSuite {
 
       info("but the value without an expiry should still be accessible (even minutes later)")
       control.advance(1.hour)
-      assert(interpreter(Get(Seq(noExpiry))) == Values(Seq(Value(noExpiry, value))))
+      assert(
+        interpreter(Get(Seq(noExpiry))) == Values(Seq(Value(noExpiry, value, None, emptyFlags))))
     }
   }
 }

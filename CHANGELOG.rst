@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-memcached: Implement compressing cache using lz4 compression filter. ``PHAB_ID=D1130236``
+* finagle-core: Implement Toggle aware SimpleFilter. ``PHAB_ID=D1130236``
+
 Bug Fixes
 ~~~~~~~~~~
 

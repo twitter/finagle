@@ -12,6 +12,8 @@ import com.twitter.finagle.loadbalancer.Balancers
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.compressing.WithCompressionScheme
+import com.twitter.finagle.memcached.compressing.scheme.CompressionScheme
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.transport.MemcachedNetty4ClientPipelineInit
@@ -184,6 +186,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       .replace(StackClient.Role.protoTracing, MemcachedTracingFilter.memcachedTracingModule)
       // we place this module at a point where the endpoint is resolved in the stack.
       .insertBefore(ClientDestTracingFilter.role, MemcachedTracingFilter.shardIdTracingModule)
+      .prepend(CompressingMemcachedFilter.memcachedCompressingModule)
 
     /**
      * The memcached client should be using fixed hosts that do not change
@@ -219,6 +222,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     params: Stack.Params = Client.params)
       extends PushStackClient[Command, Response, Client]
       with WithPartitioningStrategy[Client]
+      with WithCompressionScheme[Client]
       with MemcachedRichClient {
 
     protected type In = Response
@@ -358,6 +362,9 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Command, Response, Command, Response]): Client =
       super.filtered(filter)
+
+    override def withCompressionScheme(scheme: CompressionScheme): Client = super
+      .withCompressionScheme(scheme)
   }
 
   def client: Memcached.Client = Client()

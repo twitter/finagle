@@ -2,9 +2,11 @@ package com.twitter.finagle.memcached
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.util.{AtomicMap, ParserUtils}
+import com.twitter.finagle.memcached.util.AtomicMap
+import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
-import com.twitter.util.{Future, Time}
+import com.twitter.util.Future
+import com.twitter.util.Time
 import scala.util.hashing.MurmurHash3
 
 /**
@@ -18,7 +20,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
     command match {
       case Set(key, flags, expiry, value) =>
         map.lock(key) { data =>
-          data(key) = Entry(value, expiry)
+          data(key) = Entry(value, expiry, flags)
           Stored
         }
       case Add(key, flags, expiry, value) =>
@@ -28,7 +30,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
             case Some(entry) if entry.valid =>
               NotStored
             case _ =>
-              data(key) = Entry(value, expiry)
+              data(key) = Entry(value, expiry, flags)
               Stored
           }
         }
@@ -37,7 +39,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              data(key) = Entry(value, expiry)
+              data(key) = Entry(value, expiry, flags)
               Stored
             case Some(_) =>
               data.remove(key) // expired
@@ -51,7 +53,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              data(key) = Entry(entry.value.concat(value), expiry)
+              data(key) = Entry(entry.value.concat(value), expiry, flags)
               Stored
             case Some(_) =>
               data.remove(key) // expired
@@ -67,7 +69,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
             case Some(entry) if entry.valid =>
               val currentValue = entry.value
               if (casUnique.equals(generateCasUnique(currentValue))) {
-                data(key) = Entry(value, expiry)
+                data(key) = Entry(value, expiry, flags)
                 Stored
               } else {
                 NotStored
@@ -81,7 +83,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              data(key) = Entry(value.concat(entry.value), expiry)
+              data(key) = Entry(value.concat(entry.value), expiry, flags)
               Stored
             case Some(_) =>
               data.remove(key) // expired
@@ -99,7 +101,9 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
                   if (!entry.valid)
                     data.remove(key) // expired
                   entry.valid
-                }.map { entry => Value(key, entry.value) }
+                }.map { entry =>
+                  Value(key, entry.value, flags = Some(Buf.Utf8(entry.flags.toString)))
+                }
             }
           }
         )
@@ -126,7 +130,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
                 else existingString.toLong
 
               val result: Long = existingValue + delta
-              data(key) = Entry(Buf.Utf8(result.toString), entry.expiry)
+              data(key) = Entry(Buf.Utf8(result.toString), entry.expiry, 0)
 
               Number(result)
             case Some(_) =>
@@ -152,7 +156,11 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
             .filter { entry => entry.valid }
             .map { entry =>
               val value = entry.value
-              Value(key, value, Some(generateCasUnique(value)))
+              Value(
+                key,
+                value,
+                Some(generateCasUnique(value)),
+                flags = Some(Buf.Utf8(entry.flags.toString)))
             }
         }
       }
@@ -177,7 +185,7 @@ private[memcached] object Interpreter {
   }
 }
 
-case class Entry(value: Buf, expiry: Time) {
+case class Entry(value: Buf, expiry: Time, flags: Int) {
 
   /**
    * Whether or not the cache entry has expired
