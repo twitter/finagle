@@ -37,7 +37,7 @@ val nettyVersionInfo = settingKey[String]("A setting reference for printing the 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.6"
 
-val scalaCollectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"
+val scalaCollectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.9.3"
 val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.11"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
@@ -142,22 +142,47 @@ def jdk11GcJavaOptions: Seq[String] = {
   )
 }
 
-val sharedSettings = Seq(
+val scalacBaseOptions = Seq(
+  "-deprecation",
+  "-unchecked",
+  "-feature",
+  "-language:_",
+  "-encoding",
+  "utf8"
+)
+val scalac2Options = scalacBaseOptions ++ Seq(
+  "-target:jvm-1.8",
+  "-Xlint:-missing-interpolator",
+  "-Ypatmat-exhaust-depth",
+  "40"
+)
+val scalac3Options = scalacBaseOptions ++ Seq(
+  "-Xtarget:8",
+)
+
+val scalaDependencies = Seq(
+  // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
+  "com.novocode" % "junit-interface" % "0.11" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.15.4" % "test",
+  scalaCollectionCompat
+)
+val scala2Dependencies = scalaDependencies ++ Seq(
+  "org.scalatest" %% "scalatest" % "3.1.1" % "test",
+  "org.scalatestplus" %% "junit-4-12" % "3.1.2.0" % "test",
+)
+val scala3Dependencies = scalaDependencies ++ Seq(
+  "org.scalatest" %% "scalatest" % "3.2.9" % "test",
+  "org.scalatestplus" %% "junit-4-13" % "3.2.9.0" % "test",
+  "org.scalatestplus" %% "mockito-3-4" % "3.2.9.0" % "test",
+  "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % "test",
+)
+
+val baseSettings = Seq(
   version := releaseVersion,
   organization := "com.twitter",
   scalaVersion := "2.13.6",
   crossScalaVersions := Seq("2.12.12", "2.13.6"),
   Test / fork := true, // We have to fork to get the JavaOptions
-  libraryDependencies ++= Seq(
-    // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
-    "com.novocode" % "junit-interface" % "0.11" % "test",
-    "org.scalacheck" %% "scalacheck" % "1.15.4" % "test",
-    "org.scalatest" %% "scalatest" % "3.1.1" % "test",
-    "org.scalatestplus" %% "junit-4-12" % "3.1.2.0" % "test",
-    "org.scalatestplus" %% "mockito-3-3" % "3.1.2.0" % "test",
-    "org.scalatestplus" %% "scalacheck-1-14" % "3.1.2.0" % "test",
-    scalaCollectionCompat
-  ),
   // Workaround for cross building Dtab.scala, which is not compatible between
   // 2.12- with 2.13+.
   Compile / unmanagedSourceDirectories += {
@@ -174,18 +199,11 @@ val sharedSettings = Seq(
       <exclude org="com.sun.jdmk" module="jmxtools" />
       <exclude org="javax.jms" module="jms" />
     </dependencies>,
-  scalacOptions := Seq(
-    "-target:jvm-1.8",
-    "-deprecation",
-    "-unchecked",
-    "-feature",
-    "-language:_",
-    "-encoding",
-    "utf8",
-    "-Xlint:-missing-interpolator",
-    "-Ypatmat-exhaust-depth",
-    "40"
-  ),
+  // We have to switch compiler options like this or sbt has problems selecting the right settings when using
+  // cross commands like "+test"
+  scalacOptions := {
+    if (scalaVersion.value.startsWith("2.")) scalac2Options else scalac3Options
+  },
   javacOptions ++= Seq(
     "-Xlint:unchecked",
     "-source",
@@ -263,6 +281,17 @@ val sharedSettings = Seq(
     Seq(file)
   }
 )
+
+val sharedSettings = baseSettings ++
+  Seq(
+    libraryDependencies ++= scala2Dependencies,
+  )
+
+val sharedScala3EnabledSettings = baseSettings ++
+  Seq(
+    libraryDependencies ++= scala3Dependencies,
+    crossScalaVersions := crossScalaVersions.value ++ Seq("3.2.2"),
+  )
 
 val jmockSettings = Seq(
   libraryDependencies ++= Seq(
@@ -379,7 +408,7 @@ lazy val finagleInit = Project(
   id = "finagle-init",
   base = file("finagle-init")
 ).settings(
-    sharedSettings
+  sharedScala3EnabledSettings
   ).settings(
     name := "finagle-init"
   )
