@@ -59,7 +59,7 @@ case class Lz4MemcachedCompression(statsReceiver: StatsReceiver) extends Memcach
     val totalCompressedSize = 4 + out.limit()
     if (totalCompressedSize < remaining) {
       stats.compressionBytesSavedStat.add(remaining - totalCompressedSize)
-      stats.compressionRatioStat.add(100f * (totalCompressedSize.toFloat / remaining.toFloat))
+      stats.compressionRatioStat.add(remaining.toFloat / totalCompressedSize.toFloat)
       (Lz4.compressionFlags, Buf(Seq(Buf.ByteBuffer.Owned(lengthBuf), Buf.ByteBuffer.Owned(out))))
     } else {
       // It's not worth it to compress this block. Just return the original
@@ -94,7 +94,7 @@ case class Lz4MemcachedCompression(statsReceiver: StatsReceiver) extends Memcach
 
         Stats.decompressionAttemptedCounter.incr()
         Stats.decompressionBytesSavedStat.add(uncompressedLength - buf.length)
-        Stats.decompressionRatioStat.add(100f * (buf.length.toFloat / uncompressedLength.toFloat))
+        Stats.decompressionRatioStat.add(uncompressedLength.toFloat / buf.length.toFloat)
         Buf.ByteBuffer.Owned(dest)
       case compressionScheme =>
         throw new IllegalStateException(
