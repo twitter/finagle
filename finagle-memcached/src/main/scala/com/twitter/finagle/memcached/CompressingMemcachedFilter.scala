@@ -18,9 +18,7 @@ import com.twitter.finagle.memcached.protocol.StorageCommand
 import com.twitter.finagle.memcached.protocol.Value
 import com.twitter.finagle.memcached.protocol.Values
 import com.twitter.finagle.memcached.protocol.ValuesAndErrors
-import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.toggle.Toggle
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import com.twitter.util.Return
@@ -59,14 +57,10 @@ private[finagle] final class CompressingMemcachedFilter(
   private final val compressionFactory =
     CompressionProvider(compressionScheme, statsReceiver)
 
-  private val toggle: Toggle = Toggles("com.twitter.finagle.filter.CompressingMemcached")
-
-  private val serverInfo = ServerInfo()
-
   override def apply(command: Command, service: Service[Command, Response]): Future[Response] = {
     command match {
       case storageCommand: StorageCommand =>
-        if (compressionScheme == Uncompressed || !toggle.isEnabled(serverInfo.id.hashCode)) {
+        if (compressionScheme == Uncompressed) {
           service(storageCommand)
         } else { service(compress(storageCommand)) }
       case nonStorageCommand: NonStorageCommand =>

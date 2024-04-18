@@ -26,7 +26,6 @@ class MemcachedCompressingClientTest extends AnyFunSuite with BeforeAndAfter {
   val clientName = "test_client"
   val Timeout: Duration = 15.seconds
   val stats = new InMemoryStatsReceiver
-  private val useCompressionFilerToggleKey = "com.twitter.finagle.filter.CompressingMemcached"
 
   def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, Timeout)
 
@@ -49,108 +48,53 @@ class MemcachedCompressingClientTest extends AnyFunSuite with BeforeAndAfter {
 
   test("withCompressionScheme Lz4 and toggled on") {
 
-    com.twitter.finagle.toggle.flag.overrides.let(useCompressionFilerToggleKey, 1) {
-      val server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-      val address = Address(server.start().boundAddress.asInstanceOf[InetSocketAddress])
+    val server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
+    val address = Address(server.start().boundAddress.asInstanceOf[InetSocketAddress])
 
-      val client = Memcached.client
-        .configured(param.KeyHasher(KeyHasher.FNV1_32))
-        .connectionsPerEndpoint(1)
-        .withStatsReceiver(stats)
-        .withCompressionScheme(Lz4)
-        .newRichClient(Name.bound(address), clientName)
+    val client = Memcached.client
+      .configured(param.KeyHasher(KeyHasher.FNV1_32))
+      .connectionsPerEndpoint(1)
+      .withStatsReceiver(stats)
+      .withCompressionScheme(Lz4)
+      .newRichClient(Name.bound(address), clientName)
 
-      awaitResult(client.set("foobar", alwaysCompressedData)) // will be compressed
-      awaitResult(client.set("baz", neverCompressedData)) // won't be compressed
+    awaitResult(client.set("foobar", alwaysCompressedData)) // will be compressed
+    awaitResult(client.set("baz", neverCompressedData)) // won't be compressed
 
-      val alwaysCompressedServiceResponse: Response =
-        awaitResult[Response](server.service(Gets(Seq(Buf.Utf8("foobar")))))
-      val neverCompressedServiceResponse = awaitResult(server.service(Gets(Seq(Buf.Utf8("baz")))))
+    val alwaysCompressedServiceResponse: Response =
+      awaitResult[Response](server.service(Gets(Seq(Buf.Utf8("foobar")))))
+    val neverCompressedServiceResponse = awaitResult(server.service(Gets(Seq(Buf.Utf8("baz")))))
 
-      val alwaysCompressedServiceData = getResponseBuf(alwaysCompressedServiceResponse).head
-      val neverCompressedServiceData = getResponseBuf(neverCompressedServiceResponse).head
+    val alwaysCompressedServiceData = getResponseBuf(alwaysCompressedServiceResponse).head
+    val neverCompressedServiceData = getResponseBuf(neverCompressedServiceResponse).head
 
-      val results = awaitResult(
-        client.gets(Seq("foobar", "baz"))
-      ).flatMap {
-        case (key, (value1, _)) =>
-          Map((key, value1))
-      }
-
-      val deletedResult = awaitResult {
-        for {
-          _ <- client.delete("foobar")
-          _ <- client.delete("baz")
-          r <- client.gets(Seq("foobar", "baz"))
-        } yield r
-      }
-
-      assert(results("foobar") === alwaysCompressedData)
-      assert(results("baz") === neverCompressedData)
-      assert(deletedResult.isEmpty)
-      assert(alwaysCompressedData.length > alwaysCompressedServiceData.length)
-      assert(neverCompressedData.length == neverCompressedServiceData.length)
-
-      assert(stats.counters(Seq(clientName, "lz4", "decompression", "attempted")) == 1)
-      assert(stats.counters(Seq(clientName, "lz4", "compression", "attempted")) == 1)
-      assert(stats.counters(Seq(clientName, "lz4", "compression", "skipped")) == 1)
-
-      client.close()
-      server.stop()
+    val results = awaitResult(
+      client.gets(Seq("foobar", "baz"))
+    ).flatMap {
+      case (key, (value1, _)) =>
+        Map((key, value1))
     }
-  }
 
-  test("withCompressionScheme Lz4 and toggled off") {
-
-    com.twitter.finagle.toggle.flag.overrides.let(useCompressionFilerToggleKey, 0) {
-      val server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-      val address = Address(server.start().boundAddress.asInstanceOf[InetSocketAddress])
-
-      val client = Memcached.client
-        .configured(param.KeyHasher(KeyHasher.FNV1_32))
-        .connectionsPerEndpoint(1)
-        .withStatsReceiver(stats)
-        .withCompressionScheme(Lz4)
-        .newRichClient(Name.bound(address), clientName)
-
-      awaitResult(client.set("foobar", alwaysCompressedData)) // will be compressed
-      awaitResult(client.set("baz", neverCompressedData)) // won't be compressed
-
-      val alwaysCompressedServiceResponse: Response =
-        awaitResult[Response](server.service(Gets(Seq(Buf.Utf8("foobar")))))
-      val neverCompressedServiceResponse = awaitResult(server.service(Gets(Seq(Buf.Utf8("baz")))))
-
-      val alwaysCompressedServiceData = getResponseBuf(alwaysCompressedServiceResponse).head
-      val neverCompressedServiceData = getResponseBuf(neverCompressedServiceResponse).head
-
-      val results = awaitResult(
-        client.gets(Seq("foobar", "baz"))
-      ).flatMap {
-        case (key, (value1, _)) =>
-          Map((key, value1))
-      }
-
-      val deletedResult = awaitResult {
-        for {
-          _ <- client.delete("foobar")
-          _ <- client.delete("baz")
-          r <- client.gets(Seq("foobar", "baz"))
-        } yield r
-      }
-
-      assert(results("foobar") === alwaysCompressedData)
-      assert(results("baz") === neverCompressedData)
-      assert(deletedResult.isEmpty)
-      assert(alwaysCompressedData.length == alwaysCompressedServiceData.length)
-      assert(neverCompressedData.length == neverCompressedServiceData.length)
-
-      assert(stats.counters(Seq(clientName, "lz4", "decompression", "attempted")) == 0)
-      assert(stats.counters(Seq(clientName, "lz4", "compression", "attempted")) == 0)
-      assert(stats.counters(Seq(clientName, "lz4", "compression", "skipped")) == 0)
-
-      client.close()
-      server.stop()
+    val deletedResult = awaitResult {
+      for {
+        _ <- client.delete("foobar")
+        _ <- client.delete("baz")
+        r <- client.gets(Seq("foobar", "baz"))
+      } yield r
     }
+
+    assert(results("foobar") === alwaysCompressedData)
+    assert(results("baz") === neverCompressedData)
+    assert(deletedResult.isEmpty)
+    assert(alwaysCompressedData.length > alwaysCompressedServiceData.length)
+    assert(neverCompressedData.length == neverCompressedServiceData.length)
+
+    assert(stats.counters(Seq(clientName, "lz4", "decompression", "attempted")) == 1)
+    assert(stats.counters(Seq(clientName, "lz4", "compression", "attempted")) == 1)
+    assert(stats.counters(Seq(clientName, "lz4", "compression", "skipped")) == 1)
+
+    client.close()
+    server.stop()
   }
 
   test("withCompressionScheme Uncompressed") {
@@ -207,51 +151,49 @@ class MemcachedCompressingClientTest extends AnyFunSuite with BeforeAndAfter {
 
   test("Clients with different compression schemes can decompress each other's values") {
 
-    com.twitter.finagle.toggle.flag.overrides.let(useCompressionFilerToggleKey, 1) {
-      val server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-      val address = Address(server.start().boundAddress.asInstanceOf[InetSocketAddress])
+    val server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
+    val address = Address(server.start().boundAddress.asInstanceOf[InetSocketAddress])
 
-      val compressionClient = Memcached.client
-        .configured(param.KeyHasher(KeyHasher.FNV1_32))
-        .connectionsPerEndpoint(1)
-        .withStatsReceiver(stats)
-        .withCompressionScheme(Lz4)
-        .newRichClient(Name.bound(address), clientName)
+    val compressionClient = Memcached.client
+      .configured(param.KeyHasher(KeyHasher.FNV1_32))
+      .connectionsPerEndpoint(1)
+      .withStatsReceiver(stats)
+      .withCompressionScheme(Lz4)
+      .newRichClient(Name.bound(address), clientName)
 
-      val uncompressedClient = Memcached.client
-        .configured(param.KeyHasher(KeyHasher.FNV1_32))
-        .connectionsPerEndpoint(1)
-        .withStatsReceiver(stats)
-        .newRichClient(Name.bound(address), clientName)
+    val uncompressedClient = Memcached.client
+      .configured(param.KeyHasher(KeyHasher.FNV1_32))
+      .connectionsPerEndpoint(1)
+      .withStatsReceiver(stats)
+      .newRichClient(Name.bound(address), clientName)
 
-      awaitResult(uncompressedClient.set("foobar", alwaysCompressedData))
-      awaitResult(uncompressedClient.set("baz", neverCompressedData))
+    awaitResult(uncompressedClient.set("foobar", alwaysCompressedData))
+    awaitResult(uncompressedClient.set("baz", neverCompressedData))
 
-      awaitResult(compressionClient.set("foo", alwaysCompressedData))
-      awaitResult(compressionClient.set("bazbar", neverCompressedData))
+    awaitResult(compressionClient.set("foo", alwaysCompressedData))
+    awaitResult(compressionClient.set("bazbar", neverCompressedData))
 
-      val compressionClientResults = awaitResult(
-        compressionClient.gets(Seq("foobar", "baz"))
-      ).flatMap {
-        case (key, (value1, _)) =>
-          Map((key, value1))
-      }
-
-      val clientResults = awaitResult(
-        uncompressedClient.gets(Seq("foo", "bazbar"))
-      ).flatMap {
-        case (key, (value1, _)) =>
-          Map((key, value1))
-      }
-
-      assert(compressionClientResults("foobar") === alwaysCompressedData)
-      assert(compressionClientResults("baz") === neverCompressedData)
-      assert(clientResults("foo") === alwaysCompressedData)
-      assert(clientResults("bazbar") === neverCompressedData)
-
-      uncompressedClient.close()
-      compressionClient.close()
-      server.stop()
+    val compressionClientResults = awaitResult(
+      compressionClient.gets(Seq("foobar", "baz"))
+    ).flatMap {
+      case (key, (value1, _)) =>
+        Map((key, value1))
     }
+
+    val clientResults = awaitResult(
+      uncompressedClient.gets(Seq("foo", "bazbar"))
+    ).flatMap {
+      case (key, (value1, _)) =>
+        Map((key, value1))
+    }
+
+    assert(compressionClientResults("foobar") === alwaysCompressedData)
+    assert(compressionClientResults("baz") === neverCompressedData)
+    assert(clientResults("foo") === alwaysCompressedData)
+    assert(clientResults("bazbar") === neverCompressedData)
+
+    uncompressedClient.close()
+    compressionClient.close()
+    server.stop()
   }
 }

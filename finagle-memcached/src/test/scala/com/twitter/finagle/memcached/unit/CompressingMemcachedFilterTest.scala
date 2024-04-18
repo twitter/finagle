@@ -29,7 +29,6 @@ class CompressingMemcachedFilterTest
     with ScalaCheckPropertyChecks {
 
   val TimeOut = 15.seconds
-  private val useCompressionFilerToggleKey = "com.twitter.finagle.filter.CompressingMemcached"
 
   private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, TimeOut)
 
@@ -43,7 +42,6 @@ class CompressingMemcachedFilterTest
     stats.clear()
   }
 
-  com.twitter.finagle.toggle.flag.overrides.let(useCompressionFilerToggleKey, 1) {
 
     test("Add is correctly processed and compressed") {
 
@@ -323,5 +321,4 @@ class CompressingMemcachedFilterTest
         }
       }
     }
-  }
 }
