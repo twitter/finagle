@@ -45,6 +45,11 @@ class CapabilityTest extends AnyFunSuite {
     assert(withFoundRows.has(Capability.FoundRows))
     val withoutFoundRows = c.set(false, Capability.FoundRows)
     assert(!withoutFoundRows.has(Capability.FoundRows))
+
+    val withInteractive = c.set(true, Capability.Interactive)
+    assert(withInteractive.has(Capability.Interactive))
+    val withoutInteractive = c.set(false, Capability.Interactive)
+    assert(!withoutInteractive.has(Capability.Interactive))
   }
 
   test("toString lists capabilities") {

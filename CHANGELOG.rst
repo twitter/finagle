@@ -10,8 +10,13 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
-* finagle-memcached: Implement compressing cache using lz4 compression filter. ``PHAB_ID=D1130236``
 * finagle-core: Implement Toggle aware SimpleFilter. ``PHAB_ID=D1130236``
+
+* finagle-memcached: Implement compressing cache using lz4 compression filter. ``PHAB_ID=D1130236``
+
+* finagle-mysql: Add a param `c.t.f.mysql.param.Interactive` for configuring whether the finagle-mysql
+  client is interactive. It is true by default (the existing behaviour).``PHAB_ID=D1138775``
+
 
 Bug Fixes
 ~~~~~~~~~~

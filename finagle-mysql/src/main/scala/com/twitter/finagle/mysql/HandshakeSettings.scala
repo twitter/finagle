@@ -3,15 +3,14 @@ package com.twitter.finagle.mysql
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.mysql.MysqlCharset.Utf8_general_ci
-import com.twitter.finagle.mysql.param.{
-  CachingSha2PasswordAuth,
-  CachingSha2PasswordMissServerCache,
-  Charset,
-  Credentials,
-  Database,
-  FoundRows,
-  PathToServerRsaPublicKey
-}
+import com.twitter.finagle.mysql.param.CachingSha2PasswordAuth
+import com.twitter.finagle.mysql.param.CachingSha2PasswordMissServerCache
+import com.twitter.finagle.mysql.param.Charset
+import com.twitter.finagle.mysql.param.Credentials
+import com.twitter.finagle.mysql.param.Database
+import com.twitter.finagle.mysql.param.FoundRows
+import com.twitter.finagle.mysql.param.Interactive
+import com.twitter.finagle.mysql.param.PathToServerRsaPublicKey
 import com.twitter.util.StorageUnit
 
 /**
@@ -31,6 +30,11 @@ import com.twitter.util.StorageUnit
  * @param enableFoundRows if the server should return the number
  * of found (matched) rows, not the number of changed rows for
  * UPDATE and INSERT ... ON DUPLICATE KEY UPDATE statements.
+ *
+ * @param interactive if the client is interactive or not. If the client
+ * is interactive, System_variables::net_interactive_timeout is used for the
+ * wait_timeout. If the client is not interactive, System_variables::net_wait_timeout
+ * is used.
  *
  * @param maxPacketSize max size of a command packet that the
  * client intends to send to the server. The largest possible
@@ -55,6 +59,7 @@ private[mysql] final case class HandshakeSettings(
   clientCapabilities: Capability = Capability.baseCapabilities,
   charset: Short = Utf8_general_ci,
   enableFoundRows: Boolean = true,
+  interactive: Boolean = true,
   maxPacketSize: StorageUnit = 1.gigabyte,
   enableCachingSha2PasswordAuth: Boolean = false,
   pathToServerRsaPublicKey: String = "",
@@ -63,10 +68,10 @@ private[mysql] final case class HandshakeSettings(
   require(maxPacketSize <= 1.gigabyte, s"Max packet size ($maxPacketSize) cannot exceed 1 gigabyte")
 
   /**
-   * Optionally adds either or both the `ConnectWithDB` and
-   * `FoundRows` capabilities to the initial `clientCapabilities`
-   * based on the `database` and `enableFoundRows` values
-   * passed in to the constructor.
+   * Optionally adds the `ConnectWithDB`, `FoundRows` `PluginAuth`, and `Interactive`
+   * capabilities to the initial `clientCapabilities`, based on the `database`,
+   * `enableFoundRows`, `enableCachingSha2PasswordAuth`, and  `interactive` values
+   * passed in to the constructor respectively.
    *
    * @note This method does not include the `SSL` capability
    * by default. For one that does, see `sslCalculatedClientCapabilities`.
@@ -76,6 +81,7 @@ private[mysql] final case class HandshakeSettings(
       .set(database.isDefined, Capability.ConnectWithDB)
       .set(enableFoundRows, Capability.FoundRows)
       .set(enableCachingSha2PasswordAuth, Capability.PluginAuth)
+      .set(interactive, Capability.Interactive)
 
   /**
    * Adds the `SSL` capability to the `calculatedClientCapabilities`.
@@ -97,6 +103,7 @@ private[mysql] object HandshakeSettings {
       database = prms[Database].db,
       charset = prms[Charset].charset,
       enableFoundRows = prms[FoundRows].enabled,
+      interactive = prms[Interactive].enabled,
       enableCachingSha2PasswordAuth = prms[CachingSha2PasswordAuth].enabled,
       pathToServerRsaPublicKey = prms[PathToServerRsaPublicKey].path,
       causeAuthCacheMiss = prms[CachingSha2PasswordMissServerCache].causeMiss

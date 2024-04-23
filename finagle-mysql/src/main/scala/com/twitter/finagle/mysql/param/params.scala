@@ -48,6 +48,17 @@ object FoundRows {
 }
 
 /**
+ * A class eligible for configuring a mysql client's CLIENT_INTERACTIVE flag
+ * during the Handshake phase. If the client is interactive,
+ * System_variables::net_interactive_timeout is used for the wait_timeout. If the client is not
+ * interactive, System_variables::net_wait_timeout is used.
+ */
+case class Interactive(enabled: Boolean)
+object Interactive {
+  implicit val param: Stack.Param[Interactive] = Stack.Param(Interactive(true))
+}
+
+/**
  * A class eligible for configuring the maximum number of prepare
  * statements.  After creating `num` prepare statements, we'll start purging
  * old ones.
