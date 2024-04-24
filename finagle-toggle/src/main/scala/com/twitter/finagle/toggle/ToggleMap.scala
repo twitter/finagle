@@ -11,7 +11,8 @@ import java.util.{function => juf}
 import java.{lang => jl}
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
-import scala.collection.{immutable, mutable}
+import scala.collection.immutable
+import scala.collection.mutable
 import scala.util.hashing.MurmurHash3
 
 /**
@@ -169,6 +170,9 @@ object ToggleMap {
           crc32.update((0xff & (f >> 56)).toInt)
         }
         crc32.getValue.toFloat
+      }
+      private[this] val toggleValue = statsReceiver.addGauge("fraction") {
+        iterator.toIndexedSeq.headOption.map(_.fraction.toFloat).getOrElse(0)
       }
 
       def underlying: ToggleMap = toggleMap

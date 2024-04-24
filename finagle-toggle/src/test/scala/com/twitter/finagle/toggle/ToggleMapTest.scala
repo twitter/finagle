@@ -1,7 +1,11 @@
 package com.twitter.finagle.toggle
 
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.logging.BareFormatter
+import com.twitter.logging.Level
+import com.twitter.logging.Logger
+import com.twitter.logging.StringHandler
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -42,6 +46,32 @@ class ToggleMapTest extends AnyFunSuite with ScalaCheckDrivenPropertyChecks with
     inMem.put(toggleName, 0.1)
     assert(state2 == gauge())
     assert(state2 == gauge())
+  }
+
+  test("ToggleMap.observed produces a toggleValue summary") {
+    val stats = new InMemoryStatsReceiver()
+    val inMem = ToggleMap.newMutable()
+    val map = ToggleMap.observed(inMem, stats)
+
+    val gauge: () => Float = stats.gauges(Seq("fraction"))
+
+    val initial = 0f
+    val state1 = 0.5f
+    val state2 = 0.1f
+
+    // without changes
+    assert(initial == gauge())
+
+    val toggleName = "com.id"
+
+    // validate fraction changes after an add
+    inMem.put(toggleName, 0.5)
+    assert(state1 == gauge())
+
+    // validate fraction changes after an update
+    inMem.put(toggleName, 0.1)
+    assert(state2 == gauge())
+
   }
 
   test("ToggleMap.observed produces Toggle.Captured") {
