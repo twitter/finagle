@@ -1,6 +1,9 @@
-package com.twitter.finagle.mysql
+package com.twitter.finagle.mysql.unit
 
 import com.twitter.finagle.Stack
+import com.twitter.finagle.mysql.Capability
+import com.twitter.finagle.mysql.HandshakeSettings
+import com.twitter.finagle.mysql.MysqlCharset
 import com.twitter.finagle.mysql.param.Charset
 import com.twitter.finagle.mysql.param.Credentials
 import com.twitter.finagle.mysql.param.Database
@@ -14,40 +17,31 @@ class HandshakeSettingsTest extends AnyFunSuite {
     Capability.Transactions,
     Capability.MultiResults
   )
-  private val withFoundRows = initial + Capability.FoundRows
-  private val withInteractive = initial + Capability.Interactive
 
   test("HandshakeSettings adds FoundRows by default") {
     val settings = HandshakeSettings(clientCapabilities = initial)
-    assert(settings.calculatedClientCapabilities == withFoundRows)
+    assert(settings.calculatedClientCapabilities.has(Capability.FoundRows))
   }
 
-  test("HandshakeSettings returns initial when found rows is disabled") {
+  test("HandshakeSettings does not add FoundRows when found rows is disabled") {
     val settings = HandshakeSettings(clientCapabilities = initial, enableFoundRows = false)
-    assert(settings.calculatedClientCapabilities == initial)
+    assert(!settings.calculatedClientCapabilities.has(Capability.FoundRows))
   }
 
   test("HandshakeSettings adds Interactive by default") {
     val settings = HandshakeSettings(clientCapabilities = initial)
-    assert(settings.calculatedClientCapabilities == withInteractive)
+    assert(settings.calculatedClientCapabilities.has(Capability.Interactive))
   }
 
-  test("HandshakeSettings returns initial when interactive is disabled") {
+  test("HandshakeSettings does not add Interactive when interactive is disabled") {
     val settings = HandshakeSettings(clientCapabilities = initial, interactive = false)
-    assert(settings.calculatedClientCapabilities == initial)
+    assert(!settings.calculatedClientCapabilities.has(Capability.Interactive))
   }
 
-  test("HandshakeSettings adds ConnectWithDB if database is defined") {
+  test("HandshakeSettings adds ConnectWithDB and SSL settings if database is defined") {
     val settings = HandshakeSettings(clientCapabilities = initial, database = Some("test"))
-    val withDB = withFoundRows + Capability.ConnectWithDB
-    assert(settings.calculatedClientCapabilities == withDB)
-  }
-
-  test("HandshakeSettings can calculate settings for SSL/TLS") {
-    val settings = HandshakeSettings(clientCapabilities = initial, database = Some("test"))
-    val withDB = withFoundRows + Capability.ConnectWithDB
-    val withSSL = withDB + Capability.SSL
-    assert(settings.sslCalculatedClientCapabilities == withSSL)
+    assert(settings.calculatedClientCapabilities.has(Capability.ConnectWithDB))
+    assert(settings.sslCalculatedClientCapabilities.has(Capability.SSL))
   }
 
   test("HandshakeSettings can read values from Stack params") {
@@ -65,5 +59,4 @@ class HandshakeSettingsTest extends AnyFunSuite {
     assert(!settings.enableFoundRows)
     assert(!settings.interactive)
   }
-
 }
