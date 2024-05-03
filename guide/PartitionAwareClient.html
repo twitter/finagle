@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ThriftMux Partition Aware Client &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>ThriftMux Partition Aware Client &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -41,7 +40,8 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ThriftMux Partition Aware Client</a></li> 
       </ul>
     </div>  
 
@@ -50,75 +50,66 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="thriftmux-partition-aware-client">
+  <section id="thriftmux-partition-aware-client">
 <span id="partitionawareclient"></span><h1>ThriftMux Partition Aware Client<a class="headerlink" href="#thriftmux-partition-aware-client" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This set of APIs are currently experimental.</p>
+<p class="admonition-title">Note</p>
+<p>This set of APIs are currently experimental.</p>
 </div>
 <p>This page demonstrates how to enable partition aware routing for ThriftMux/Thrift Client.</p>
-<div class="section" id="terms">
+<section id="terms">
 <h2>Terms<a class="headerlink" href="#terms" title="Permalink to this headline">¶</a></h2>
-<dl class="glossary docutils">
+<dl class="glossary simple">
 </dl>
-<dl class="docutils">
-<dt>Partition</dt>
-<dd>A partition represents a logical entity that processes data.
+<dl class="simple">
+<dt>Partition</dt><dd><p>A partition represents a logical entity that processes data.
 It could be a single physical instance or a set of physical instances, each instance
 in a partition can be treated as equivalent over the data that the partition is responsible
-for. Partitions can overlap, instances can belong to different partitions.</dd>
-<dt>Shard / Instance</dt>
-<dd>A physical instance.</dd>
+for. Partitions can overlap, instances can belong to different partitions.</p>
+</dd>
+<dt>Shard / Instance</dt><dd><p>A physical instance.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="enable-partition-awareness">
+</section>
+<section id="enable-partition-awareness">
 <h2>Enable Partition Awareness<a class="headerlink" href="#enable-partition-awareness" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="thrift-thriftmux-client">
+<section id="thrift-thriftmux-client">
 <h3>Thrift/ThriftMux Client<a class="headerlink" href="#thrift-thriftmux-client" title="Permalink to this headline">¶</a></h3>
 <p>The set of APIs to configure a client with partitioning is at <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningParams.scala">PartitioningParams</a>.</p>
 <ul class="simple">
-<li><cite>.strategy(partitioningStrategy: PartitioningStrategy)</cite> configures the client with a
-PartitioningStrategy; it could be either a CustomPartitioningStrategy or a HashingPartitioningStrategy.</li>
-<li>Params only for HashingPartitioningStrategy<ul>
-<li><cite>.ejectFailedHost(eject: Boolean)</cite> partitions are placed on a
+<li><p><cite>.strategy(partitioningStrategy: PartitioningStrategy)</cite> configures the client with a
+PartitioningStrategy; it could be either a CustomPartitioningStrategy or a HashingPartitioningStrategy.</p></li>
+<li><p>Params only for HashingPartitioningStrategy</p>
+<ul>
+<li><p><cite>.ejectFailedHost(eject: Boolean)</cite> partitions are placed on a
 hash ring, when failure accrual marks partitions as unhealthy,
 this param is for deciding whether to eject the failing
-partitions from the hash ring. By default, this is off.</li>
-<li><cite>.keyHasher(hasher:KeyHasher)</cite>, defines the hash function to use
-for partitioned clients when mapping keys to partitions.</li>
-<li><cite>.numReps(reps: Int)</cite>, duplicate each node across the hash ring according to reps,
+partitions from the hash ring. By default, this is off.</p></li>
+<li><p><cite>.keyHasher(hasher:KeyHasher)</cite>, defines the hash function to use
+for partitioned clients when mapping keys to partitions.</p></li>
+<li><p><cite>.numReps(reps: Int)</cite>, duplicate each node across the hash ring according to reps,
 this will adjust the distribution of partition nodes on the hash ring, higher value
-means more even. The default value is 160.</li>
+means more even. The default value is 160.</p></li>
 </ul>
 </li>
 </ul>
 <p>Use the following code snippet to enable partition awareness for a Finagle client of a hashing
 strategy and custom strategy respectively:</p>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.exp.partitioning.</span><span class="o">{</span><span class="nc">ClientCustomStrategy</span><span class="o">,</span> <span class="nc">ClientHashingStrategy</span><span class="o">}</span>
-
-<span class="k">val</span> <span class="n">hashingPartitioningStrategy</span><span class="k">:</span> <span class="kt">ClientHashingStrategy</span> <span class="o">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">clientWithHashing</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withPartitioning</span><span class="o">.</span><span class="n">strategy</span><span class="o">(</span><span class="n">hashingPartitioningStrategy</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withPartitioning</span><span class="o">.</span><span class="n">ejectFailedHost</span><span class="o">(</span><span class="kc">false</span><span class="o">)</span>
-
-<span class="k">val</span> <span class="n">customPartitioningStrategy</span><span class="k">:</span> <span class="kt">ClientCustomStrategy</span> <span class="o">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">clientWithHashing</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withPartitioning</span><span class="o">.</span><span class="n">strategy</span><span class="o">(</span><span class="n">customPartitioningStrategy</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">ThriftMux</span>
+<span class="linenos"> 2</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thrift</span><span class="p">.</span><span class="nn">exp</span><span class="p">.</span><span class="nn">partitioning</span><span class="p">.{</span><span class="nc">ClientCustomStrategy</span><span class="p">,</span> <span class="nc">ClientHashingStrategy</span><span class="p">}</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kd">val</span> <span class="n">hashingPartitioningStrategy</span><span class="p">:</span> <span class="nc">ClientHashingStrategy</span> <span class="o">=</span> <span class="o">???</span>
+<span class="linenos"> 5</span><span class="kd">val</span> <span class="n">clientWithHashing</span> <span class="o">=</span> <span class="nc">ThriftMux</span><span class="p">.</span><span class="n">client</span>
+<span class="linenos"> 6</span>  <span class="p">.</span><span class="n">withPartitioning</span><span class="p">.</span><span class="n">strategy</span><span class="p">(</span><span class="n">hashingPartitioningStrategy</span><span class="p">)</span>
+<span class="linenos"> 7</span>  <span class="p">.</span><span class="n">withPartitioning</span><span class="p">.</span><span class="n">ejectFailedHost</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="kd">val</span> <span class="n">customPartitioningStrategy</span><span class="p">:</span> <span class="nc">ClientCustomStrategy</span> <span class="o">=</span> <span class="o">???</span>
+<span class="linenos">10</span><span class="kd">val</span> <span class="n">clientWithHashing</span> <span class="o">=</span> <span class="nc">ThriftMux</span><span class="p">.</span><span class="n">client</span>
+<span class="linenos">11</span>  <span class="p">.</span><span class="n">withPartitioning</span><span class="p">.</span><span class="n">strategy</span><span class="p">(</span><span class="n">customPartitioningStrategy</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
 </div>
-<div class="section" id="thriftmux-methodbuilder">
+</section>
+<section id="thriftmux-methodbuilder">
 <h3>ThriftMux MethodBuilder<a class="headerlink" href="#thriftmux-methodbuilder" title="Permalink to this headline">¶</a></h3>
 <p>MethodBuilder is constructed at a higher level than Finagle 6 APIs and is designed for
 customizing each endpoint. Partitioning configuration can be specified for each endpoint.
@@ -132,26 +123,26 @@ are customized for each endpoint, so that partitioning strategy applied only nee
 of one endpoint while the latter has to take all endpoints into consideration by using
 PartialFunction. Below we demonstrate use cases based on Finagle client stack and the
 MethodBuilder examples can be found in Appendix.</p>
-</div>
-</div>
-<div class="section" id="which-partitioning-strategy-to-choose">
+</section>
+</section>
+<section id="which-partitioning-strategy-to-choose">
 <h2>Which Partitioning Strategy to choose?<a class="headerlink" href="#which-partitioning-strategy-to-choose" title="Permalink to this headline">¶</a></h2>
 <p>To configure a ThriftMux Partition Aware Client, Finagle provides two abstractions,
 CustomPartitioningStrategy and HashingPartitioningStrategy, for applications to choose.</p>
 <ul class="simple">
-<li><strong>HashingPartitioningStrategy</strong> is equipped with a consistent hashing algorithm
+<li><p><strong>HashingPartitioningStrategy</strong> is equipped with a consistent hashing algorithm
 underlying to distribute partitions on a hash ring. It applies hashing functions to
 each request and routes the request to the destination node. HashingPartitioningStrategy
 can free service operators to manage the partitioning topology. Besides, unlike custom
 partitioning strategy, this supports scaling natively by minimizing the load change
 when scaling up or down. Although the hashing strategy has these mechanisms built in,
-they are not sensitive to your workload and may or may not work for your topology perfectly.</li>
-<li><strong>CustomPartitioningStrategy</strong> provides more flexibility to define the partitioning topology,
+they are not sensitive to your workload and may or may not work for your topology perfectly.</p></li>
+<li><p><strong>CustomPartitioningStrategy</strong> provides more flexibility to define the partitioning topology,
 since the client configuration takes full control of the requests distribution.
 This expects a careful implementor to handle hot shards properly by anticipating and
 coordinating traffic flows. An example use case of custom partitioning is the key range
 strategy, which is dividing the entire keyset into continuous ranges and assigning each
-range to a partition.</li>
+range to a partition.</p></li>
 </ul>
 <p>This set of partitioning APIs is experimental and the <cite>CustomPartitioningStrategy</cite> comes with
 dynamic resharding support. They provide plenty of flexibility for services with different
@@ -159,73 +150,47 @@ scenarios, aside from choosing between custom and hashing strategies, whether th
 <a class="reference external" href="https://en.wikipedia.org/wiki/Vectored_I/O">scatter/gather (fan-out)</a>, and if the partitioning
 service needs to implement dynamic resharding, we will talk about setups for each scenario listed
 below.</p>
-<div class="section" id="how-to-implement-a-hashing-strategy">
+<section id="how-to-implement-a-hashing-strategy">
 <h3>How to implement a hashing strategy?<a class="headerlink" href="#how-to-implement-a-hashing-strategy" title="Permalink to this headline">¶</a></h3>
 <p>Example thrift service: deliveryService.thrift</p>
 <div class="literal-block-wrapper docutils container" id="deliveryservice-thrift">
 <div class="code-block-caption"><span class="caption-text">deliveryService.thrift</span><a class="headerlink" href="#deliveryservice-thrift" title="Permalink to this code">¶</a></div>
-<div class="highlight-thrift notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">namespace</span><span class="w"> </span><span class="nn">java</span><span class="w"> </span><span class="n">com.twitter.delivery.thriftjava</span><span class="w"></span>
-<span class="c">#@namespace scala com.twitter.delivery.thriftscala</span><span class="w"></span>
-
-<span class="kd">exception</span><span class="w"> </span><span class="nc">AException</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w"> </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="n">errorCode</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-
-<span class="kd">service</span><span class="w"> </span><span class="nc">DeliveryService</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="c">// non-fanout message</span>
-<span class="w">  </span><span class="n">Box</span><span class="w"> </span><span class="nf">getBox</span><span class="o">(</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AddrInfo</span><span class="w"> </span><span class="n">addrInfo</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="n">i8</span><span class="w"> </span><span class="n">passcode</span><span class="p">)</span><span class="w"> </span><span class="k">throws</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<span class="w">    </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AException</span><span class="w"> </span><span class="n">ex</span><span class="w"></span>
-<span class="w">  </span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="c">// fan-out message, easy to merge</span>
-<span class="w">  </span><span class="kt">list</span><span class="p">&lt;</span><span class="n">Box</span><span class="p">&gt;</span><span class="w"> </span><span class="nf">getBoxes</span><span class="o">(</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="kt">list</span><span class="p">&lt;</span><span class="n">AddrInfo</span><span class="p">&gt;</span><span class="w"> </span><span class="n">listAddrInfo</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="n">i8</span><span class="w"> </span><span class="n">passcode</span><span class="p">)</span><span class="w"> </span><span class="k">throws</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<span class="w">    </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AException</span><span class="w"> </span><span class="n">ex</span><span class="w"></span>
-<span class="w">  </span><span class="p">)</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-
-<span class="kd">struct</span><span class="w"> </span><span class="nc">AddrInfo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="n">zipCode</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-
-<span class="kd">struct</span><span class="w"> </span><span class="nc">Box</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AddrInfo</span><span class="w"> </span><span class="n">addrInfo</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">item</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-thrift notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">namespace</span><span class="w"> </span><span class="nn">java</span><span class="w"> </span><span class="n">com.twitter.delivery.thriftjava</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="c">#@namespace scala com.twitter.delivery.thriftscala</span><span class="w"></span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kd">exception</span><span class="w"> </span><span class="nc">AException</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w"> </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="n">errorCode</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="kd">service</span><span class="w"> </span><span class="nc">DeliveryService</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">  </span><span class="c">// non-fanout message</span>
+<span class="linenos">10</span><span class="w">  </span><span class="n">Box</span><span class="w"> </span><span class="nf">getBox</span><span class="o">(</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AddrInfo</span><span class="w"> </span><span class="n">addrInfo</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="n">i8</span><span class="w"> </span><span class="n">passcode</span><span class="p">)</span><span class="w"> </span><span class="k">throws</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">    </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AException</span><span class="w"> </span><span class="n">ex</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">  </span><span class="p">)</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">  </span><span class="c">// fan-out message, easy to merge</span>
+<span class="linenos">14</span><span class="w">  </span><span class="kt">list</span><span class="p">&lt;</span><span class="n">Box</span><span class="p">&gt;</span><span class="w"> </span><span class="nf">getBoxes</span><span class="o">(</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="kt">list</span><span class="p">&lt;</span><span class="n">AddrInfo</span><span class="p">&gt;</span><span class="w"> </span><span class="n">listAddrInfo</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="n">i8</span><span class="w"> </span><span class="n">passcode</span><span class="p">)</span><span class="w"> </span><span class="k">throws</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="linenos">15</span><span class="w">    </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AException</span><span class="w"> </span><span class="n">ex</span><span class="w"></span>
+<span class="linenos">16</span><span class="w">  </span><span class="p">)</span><span class="w"></span>
+<span class="linenos">17</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="kd">struct</span><span class="w"> </span><span class="nc">AddrInfo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">20</span><span class="w">  </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">  </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="n">zipCode</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">22</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="kd">struct</span><span class="w"> </span><span class="nc">Box</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">  </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="n">AddrInfo</span><span class="w"> </span><span class="n">addrInfo</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">  </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">item</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">27</span><span class="p">}</span><span class="w"></span>
 </pre></div>
-</td></tr></table></div>
+</div>
 </div>
 <p id="mergeable">Note that this example has the <cite>getBoxes</cite> endpoint to demonstrate how to do messaging
 fan-out. Fan-out requests and responses should be in mergeable formats, which means
 they can be split and merge programmably, such as an array type variable. Users need to
 implement the request splitting and request/response merging functions, see fan-out
 sections for details.</p>
-<div class="section" id="clients-dont-fan-out">
+<section id="clients-dont-fan-out">
 <h4>Clients don’t fan-out<a class="headerlink" href="#clients-dont-fan-out" title="Permalink to this headline">¶</a></h4>
 <p>Users need to implement a concrete <cite>getHashingKeyAndRequest</cite> method. It is a PartialFunction
 that takes a Thrift request and returns a Map of hash keys to Thrift requests. The non-fanout
@@ -234,27 +199,18 @@ user-specified hash key and the Thrift request.</p>
 <p>Turning the example into code:</p>
 <div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.delivery.thriftscala.Box</span>
-<span class="k">import</span> <span class="nn">com.twitter.delivery.thriftscala.DeliveryService._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.exp.partitioning.ClientHashingStrategy</span>
-
-<span class="k">val</span> <span class="n">getHashingKeyAndRequest</span><span class="k">:</span> <span class="kt">ClientHashingStrategy.ToPartitionedMap</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="c1">// specify the AddrInfo.name as the hash key</span>
-  <span class="k">case</span> <span class="n">getBox</span><span class="k">:</span> <span class="kt">GetBox.Args</span> <span class="o">=&gt;</span> <span class="nc">Map</span><span class="o">(</span><span class="n">getBox</span><span class="o">.</span><span class="n">addrInfo</span><span class="o">.</span><span class="n">name</span> <span class="o">-&gt;</span> <span class="n">getBox</span><span class="o">)</span>
-<span class="o">}</span>
-
-<span class="k">val</span> <span class="n">hashingPartitioningStrategy</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ClientHashingStrategy</span><span class="o">(</span><span class="n">getHashingKeyAndRequest</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">delivery</span><span class="p">.</span><span class="nn">thriftscala</span><span class="p">.</span><span class="nc">Box</span>
+<span class="linenos"> 2</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">delivery</span><span class="p">.</span><span class="nn">thriftscala</span><span class="p">.</span><span class="nc">DeliveryService</span><span class="p">.</span><span class="n">_</span>
+<span class="linenos"> 3</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thrift</span><span class="p">.</span><span class="nn">exp</span><span class="p">.</span><span class="nn">partitioning</span><span class="p">.</span><span class="nc">ClientHashingStrategy</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kd">val</span> <span class="n">getHashingKeyAndRequest</span><span class="p">:</span> <span class="nc">ClientHashingStrategy</span><span class="p">.</span><span class="nc">ToPartitionedMap</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos"> 6</span>  <span class="c1">// specify the AddrInfo.name as the hash key</span>
+<span class="linenos"> 7</span>  <span class="k">case</span> <span class="n">getBox</span><span class="p">:</span> <span class="nc">GetBox</span><span class="p">.</span><span class="nc">Args</span> <span class="o">=&gt;</span> <span class="nc">Map</span><span class="p">(</span><span class="n">getBox</span><span class="p">.</span><span class="n">addrInfo</span><span class="p">.</span><span class="n">name</span> <span class="o">-&gt;</span> <span class="n">getBox</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="p">}</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="kd">val</span> <span class="n">hashingPartitioningStrategy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClientHashingStrategy</span><span class="p">(</span><span class="n">getHashingKeyAndRequest</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 </div>
 <p>The PartialFunction allows a single partitioning strategy to work differently for various
 Thrift endpoints (methods) of a service. The unspecified methods will fall into the built-in
@@ -263,38 +219,27 @@ of a service. Un-specified endpoints should not be called from this client, if c
 the client throws <cite>NoPartitioningKeys</cite> exceptions. If the client is using MethodBuilder,
 which is a per-endpoint setup, <cite>getHashingKeyAndRequest</cite> is a function instead of a partial
 function.</p>
-</div>
-<div class="section" id="clients-do-messaging-fan-out">
+</section>
+<section id="clients-do-messaging-fan-out">
 <h4>Clients do messaging fan-out<a class="headerlink" href="#clients-do-messaging-fan-out" title="Permalink to this headline">¶</a></h4>
 <p>Expanding from the example above, fan-out requests need to implement the <cite>getHashingKeyAndRequest</cite>
 with a map of hash keys to sub-requests. It needs to reconstruct the split Thrift requests:</p>
 <div class="literal-block-wrapper docutils container" id="id4">
 <div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.delivery.thriftscala.DeliveryService._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.exp.partitioning.ClientHashingStrategy</span>
-
-<span class="k">val</span> <span class="n">getHashingKeyAndRequest</span><span class="k">:</span> <span class="kt">ClientHashingStrategy.ToPartitionedMap</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">case</span> <span class="n">getBoxes</span><span class="k">:</span> <span class="kt">GetBoxes.Args</span> <span class="o">=&gt;</span>
-    <span class="n">getBoxes</span><span class="o">.</span><span class="n">listAddrInfo</span>
-      <span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">name</span><span class="o">).</span><span class="n">map</span> <span class="o">{</span>
-        <span class="k">case</span> <span class="o">(</span><span class="n">hashingKey</span><span class="o">,</span> <span class="n">subListAddrInfo</span><span class="o">)</span> <span class="k">=&gt;</span>
-          <span class="n">hashingKey</span> <span class="o">-&gt;</span> <span class="nc">GetBoxes</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="n">subListAddrInfo</span><span class="o">,</span> <span class="n">getBoxes</span><span class="o">.</span><span class="n">passcode</span><span class="o">)</span>
-      <span class="o">}</span>
-<span class="o">}</span>
-<span class="k">val</span> <span class="n">hashingPartitioningStrategy</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ClientHashingStrategy</span><span class="o">(</span><span class="n">getHashingKeyAndRequest</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">delivery</span><span class="p">.</span><span class="nn">thriftscala</span><span class="p">.</span><span class="nc">DeliveryService</span><span class="p">.</span><span class="n">_</span>
+<span class="linenos"> 2</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thrift</span><span class="p">.</span><span class="nn">exp</span><span class="p">.</span><span class="nn">partitioning</span><span class="p">.</span><span class="nc">ClientHashingStrategy</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kd">val</span> <span class="n">getHashingKeyAndRequest</span><span class="p">:</span> <span class="nc">ClientHashingStrategy</span><span class="p">.</span><span class="nc">ToPartitionedMap</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos"> 5</span>  <span class="k">case</span> <span class="n">getBoxes</span><span class="p">:</span> <span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span> <span class="o">=&gt;</span>
+<span class="linenos"> 6</span>    <span class="n">getBoxes</span><span class="p">.</span><span class="n">listAddrInfo</span>
+<span class="linenos"> 7</span>      <span class="p">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">_</span><span class="p">.</span><span class="n">name</span><span class="p">).</span><span class="n">map</span> <span class="p">{</span>
+<span class="linenos"> 8</span>        <span class="k">case</span> <span class="p">(</span><span class="n">hashingKey</span><span class="p">,</span> <span class="n">subListAddrInfo</span><span class="p">)</span> <span class="o">=&gt;</span>
+<span class="linenos"> 9</span>          <span class="n">hashingKey</span> <span class="o">-&gt;</span> <span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span><span class="p">(</span><span class="n">subListAddrInfo</span><span class="p">,</span> <span class="n">getBoxes</span><span class="p">.</span><span class="n">passcode</span><span class="p">)</span>
+<span class="linenos">10</span>      <span class="p">}</span>
+<span class="linenos">11</span><span class="p">}</span>
+<span class="linenos">12</span><span class="kd">val</span> <span class="n">hashingPartitioningStrategy</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClientHashingStrategy</span><span class="p">(</span><span class="n">getHashingKeyAndRequest</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 </div>
 <p>Because of the nature of consistent hashing, multiple hash keys can fall on the same partition.
 Users need to instruct the Finagle partitioning layer to merge requests properly.
@@ -303,15 +248,12 @@ requests and returns a single request, the Thrift requests should be
 in <a class="reference internal" href="#mergeable">mergeable</a> formats.</p>
 <div class="literal-block-wrapper docutils container" id="id5">
 <div class="code-block-caption"><span class="caption-text">Set the request merging function</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.RequestMerger</span>
-
-<span class="k">val</span> <span class="n">getBoxesReqMerger</span><span class="k">:</span> <span class="kt">RequestMerger</span><span class="o">[</span><span class="kt">GetBoxes.Args</span><span class="o">]</span> <span class="k">=</span> <span class="n">listGetBoxes</span> <span class="k">=&gt;</span>
-  <span class="nc">GetBoxes</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="n">listGetBoxes</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">listAddrInfo</span><span class="o">).</span><span class="n">flatten</span><span class="o">,</span> <span class="n">listGetBoxes</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">passcode</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thrift</span><span class="p">.</span><span class="nn">exp</span><span class="p">.</span><span class="nn">partitioning</span><span class="p">.</span><span class="nc">PartitioningStrategy</span><span class="p">.</span><span class="nc">RequestMerger</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="kd">val</span> <span class="n">getBoxesReqMerger</span><span class="p">:</span> <span class="nc">RequestMerger</span><span class="p">[</span><span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span><span class="p">]</span> <span class="o">=</span> <span class="n">listGetBoxes</span> <span class="o">=&gt;</span>
+<span class="linenos">4</span>  <span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span><span class="p">(</span><span class="n">listGetBoxes</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">_</span><span class="p">.</span><span class="n">listAddrInfo</span><span class="p">).</span><span class="n">flatten</span><span class="p">,</span> <span class="n">listGetBoxes</span><span class="p">.</span><span class="n">head</span><span class="p">.</span><span class="n">passcode</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 </div>
 <p>Fan-out messages mean the client receives responses from a set of partitions.
 A <cite>ResponseMerger</cite> also needs to be defined to handle batched successes and failures.
@@ -319,19 +261,14 @@ A <cite>ResponseMerger</cite> also needs to be defined to handle batched success
 <cite>Try[ResponseType]`</cite>:</p>
 <div class="literal-block-wrapper docutils container" id="id6">
 <div class="code-block-caption"><span class="caption-text">Set the response merging function</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Return</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">}</span>
-
-<span class="k">val</span> <span class="n">getBoxesRepMerger</span><span class="k">:</span> <span class="kt">ResponseMerger</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Box</span><span class="o">]]</span> <span class="k">=</span> <span class="o">(</span><span class="n">successes</span><span class="o">,</span> <span class="n">failures</span><span class="o">)</span> <span class="k">=&gt;</span>
-  <span class="k">if</span> <span class="o">(</span><span class="n">successes</span><span class="o">.</span><span class="n">nonEmpty</span><span class="o">)</span> <span class="nc">Return</span><span class="o">(</span><span class="n">successes</span><span class="o">.</span><span class="n">flatten</span><span class="o">)</span>
-  <span class="k">else</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">failures</span><span class="o">.</span><span class="n">head</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thrift</span><span class="p">.</span><span class="nn">exp</span><span class="p">.</span><span class="nn">partitioning</span><span class="p">.</span><span class="nc">PartitioningStrategy</span><span class="p">.</span><span class="nc">ResponseMerger</span>
+<span class="linenos">2</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.{</span><span class="nc">Return</span><span class="p">,</span> <span class="nc">Throw</span><span class="p">}</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kd">val</span> <span class="n">getBoxesRepMerger</span><span class="p">:</span> <span class="nc">ResponseMerger</span><span class="p">[</span><span class="nc">Seq</span><span class="p">[</span><span class="nc">Box</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">successes</span><span class="p">,</span> <span class="n">failures</span><span class="p">)</span> <span class="o">=&gt;</span>
+<span class="linenos">5</span>  <span class="k">if</span> <span class="p">(</span><span class="n">successes</span><span class="p">.</span><span class="n">nonEmpty</span><span class="p">)</span> <span class="nc">Return</span><span class="p">(</span><span class="n">successes</span><span class="p">.</span><span class="n">flatten</span><span class="p">)</span>
+<span class="linenos">6</span>  <span class="k">else</span> <span class="nc">Throw</span><span class="p">(</span><span class="n">failures</span><span class="p">.</span><span class="n">head</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 </div>
 <p>The last step is to register the defined <cite>RequestMerger</cite> and <cite>ResponseMerger</cite> with
 the <cite>ThriftMethod</cite> within the partitioning strategy by adding mergers
@@ -339,15 +276,14 @@ through <cite>requestMergerRegistry</cite> and <cite>responseMergerRegistry</cit
 Note that multiple <cite>ThriftMethod</cite> s can be cascaded to the registries.</p>
 <div class="literal-block-wrapper docutils container" id="id7">
 <div class="code-block-caption"><span class="caption-text">Register the Merging functions</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">hashingPartitioningStrategy</span><span class="o">.</span><span class="n">requestMergerRegistry</span><span class="o">.</span><span class="n">add</span><span class="o">(</span><span class="nc">GetBoxes</span><span class="o">,</span> <span class="n">getBoxesReqMerger</span><span class="o">)</span>
-<span class="n">hashingPartitioningStrategy</span><span class="o">.</span><span class="n">responseMergerRegistry</span><span class="o">.</span><span class="n">add</span><span class="o">(</span><span class="nc">GetBoxes</span><span class="o">,</span> <span class="n">getBoxesRepMerger</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">hashingPartitioningStrategy</span><span class="p">.</span><span class="n">requestMergerRegistry</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="nc">GetBoxes</span><span class="p">,</span> <span class="n">getBoxesReqMerger</span><span class="p">)</span>
+<span class="linenos">2</span><span class="n">hashingPartitioningStrategy</span><span class="p">.</span><span class="n">responseMergerRegistry</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="nc">GetBoxes</span><span class="p">,</span> <span class="n">getBoxesRepMerger</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
 </div>
 </div>
-</div>
-<div class="section" id="how-to-implement-a-custom-strategy">
+</section>
+</section>
+<section id="how-to-implement-a-custom-strategy">
 <h3>How to implement a custom strategy?<a class="headerlink" href="#how-to-implement-a-custom-strategy" title="Permalink to this headline">¶</a></h3>
 <p>Custom strategy shares the same matrix of fan-out/non-fan-out as hashing strategy.
 Furthermore, it provides more flexibility to manage the backend partitioning topology.
@@ -355,30 +291,30 @@ It lets group many shards to one logical partition and one shard to belong to mu
 Custom partition also supports dynamic re-sharding by observing a user-provided state.
 There are three sets of APIs to use based on different resharding needs.</p>
 <ul class="simple">
-<li><strong>noResharding</strong>: no dynamic resharding, the backend partitioning
-topology stays static.</li>
-<li><strong>resharding</strong>: lets the client be aware of the backend dynamic
+<li><p><strong>noResharding</strong>: no dynamic resharding, the backend partitioning
+topology stays static.</p></li>
+<li><p><strong>resharding</strong>: lets the client be aware of the backend dynamic
 resharding by providing the fully described state of resharding. The
 partitioning schema needs to be configured to react to each state,
 and it needs to be a <a class="reference external" href="https://en.wikipedia.org/wiki/Pure_function">pure
 function</a>. When the
 state gets successfully updated, the partitioning strategy will move
-to the new schema.</li>
-<li><strong>clusterResharding</strong>: a semi-implemented version of resharding, which
+to the new schema.</p></li>
+<li><p><strong>clusterResharding</strong>: a semi-implemented version of resharding, which
 is appropriate when only cluster information needs to be observed in
 order to reshard. For example, if you want to be able to add or
-remove capacity safely.</li>
+remove capacity safely.</p></li>
 </ul>
 <p>We will show examples of implementing a noResharding strategy, as it shares the fundamental
 ideas with the others. Taking the same example <a class="reference internal" href="#deliveryservice-thrift">deliveryService-thrift</a>:</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>For resharding strategy, check <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.scala#L445">API docs</a>
 and <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/test/scala/com/twitter/finagle/thrift/exp/partitioning/PartitionAwareClientEndtoEndTest.scala#L359">test example</a>.</p>
-<p class="last">For clusterResharding strategy, check <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.scala#L369">API docs</a>
+<p>For clusterResharding strategy, check <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/main/scala/com/twitter/finagle/thrift/exp/partitioning/PartitioningStrategy.scala#L369">API docs</a>
 and <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-thrift/src/test/scala/com/twitter/finagle/thrift/exp/partitioning/PartitionAwareClientEndtoEndTest.scala#L422">test example</a>.</p>
 </div>
-<div class="section" id="id1">
+<section id="id1">
 <h4>Clients don’t fan-out<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <p>Users need to implement a concrete <cite>getPartitionIdAndRequest</cite> method. It is a PartialFunction
 that takes a Thrift request and returns a Future of Map(partition Id -&gt; Thrift request).
@@ -391,43 +327,26 @@ fetched from an RPC call.</p>
 <p>Turning the example into code:</p>
 <div class="literal-block-wrapper docutils container" id="id8">
 <div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.delivery.thriftscala.AddrInfo</span>
-<span class="k">import</span> <span class="nn">com.twitter.delivery.thriftscala.DeliveryService._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.exp.partitioning.ClientCustomStrategy</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
-
-<span class="k">def</span> <span class="n">lookUp</span><span class="o">(</span><span class="n">addrInfo</span><span class="k">:</span> <span class="kt">AddrInfo</span><span class="o">)</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="n">addrInfo</span><span class="o">.</span><span class="n">name</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="s">&quot;name1&quot;</span> <span class="o">|</span> <span class="s">&quot;name2&quot;</span> <span class="k">=&gt;</span> <span class="mi">0</span> <span class="c1">// partition 0</span>
-    <span class="k">case</span> <span class="s">&quot;name3&quot;</span> <span class="k">=&gt;</span> <span class="mi">1</span> <span class="c1">// partition 1</span>
-  <span class="o">}</span>
-<span class="o">}</span>
-
-<span class="k">val</span> <span class="n">getPartitionIdAndRequest</span><span class="k">:</span> <span class="kt">ClientCustomStrategy.ToPartitionedMap</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">case</span> <span class="n">getBox</span><span class="k">:</span> <span class="kt">GetBox.Args</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="nc">Map</span><span class="o">(</span><span class="n">lookUp</span><span class="o">(</span><span class="n">getBox</span><span class="o">.</span><span class="n">addrInfo</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">getBox</span><span class="o">))</span>
-<span class="o">}</span>
-
-<span class="k">val</span> <span class="n">customPartitioningStrategy</span> <span class="k">=</span>
-  <span class="nc">ClientCustomStrategy</span><span class="o">.</span><span class="n">noResharding</span><span class="o">(</span><span class="n">getPartitionIdAndRequest</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">delivery</span><span class="p">.</span><span class="nn">thriftscala</span><span class="p">.</span><span class="nc">AddrInfo</span>
+<span class="linenos"> 2</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">delivery</span><span class="p">.</span><span class="nn">thriftscala</span><span class="p">.</span><span class="nc">DeliveryService</span><span class="p">.</span><span class="n">_</span>
+<span class="linenos"> 3</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thrift</span><span class="p">.</span><span class="nn">exp</span><span class="p">.</span><span class="nn">partitioning</span><span class="p">.</span><span class="nc">ClientCustomStrategy</span>
+<span class="linenos"> 4</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="k">def</span> <span class="nf">lookUp</span><span class="p">(</span><span class="n">addrInfo</span><span class="p">:</span> <span class="nc">AddrInfo</span><span class="p">):</span> <span class="nc">Int</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos"> 7</span>  <span class="n">addrInfo</span><span class="p">.</span><span class="n">name</span> <span class="k">match</span> <span class="p">{</span>
+<span class="linenos"> 8</span>    <span class="k">case</span> <span class="s">&quot;name1&quot;</span> <span class="o">|</span> <span class="s">&quot;name2&quot;</span> <span class="o">=&gt;</span> <span class="mi">0</span> <span class="c1">// partition 0</span>
+<span class="linenos"> 9</span>    <span class="k">case</span> <span class="s">&quot;name3&quot;</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="c1">// partition 1</span>
+<span class="linenos">10</span>  <span class="p">}</span>
+<span class="linenos">11</span><span class="p">}</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="kd">val</span> <span class="n">getPartitionIdAndRequest</span><span class="p">:</span> <span class="nc">ClientCustomStrategy</span><span class="p">.</span><span class="nc">ToPartitionedMap</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos">14</span>  <span class="k">case</span> <span class="n">getBox</span><span class="p">:</span> <span class="nc">GetBox</span><span class="p">.</span><span class="nc">Args</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="nc">Map</span><span class="p">(</span><span class="n">lookUp</span><span class="p">(</span><span class="n">getBox</span><span class="p">.</span><span class="n">addrInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">getBox</span><span class="p">))</span>
+<span class="linenos">15</span><span class="p">}</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="kd">val</span> <span class="n">customPartitioningStrategy</span> <span class="o">=</span>
+<span class="linenos">18</span>  <span class="nc">ClientCustomStrategy</span><span class="p">.</span><span class="n">noResharding</span><span class="p">(</span><span class="n">getPartitionIdAndRequest</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 </div>
 <p>The PartialFunction allows the partitioning strategy to arrange multiple Thrift request
 types of one Thrift service for different endpoints(methods) of a service.
@@ -440,55 +359,38 @@ which is per-endpoint, <cite>getPartitionIdAndRequest</cite> is a function.</p>
 which groups a set of shards to one partition, and one shard performs in multiple partitions.</p>
 <div class="literal-block-wrapper docutils container" id="id9">
 <div class="code-block-caption"><span class="caption-text">Set up the logical partition mapping</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10</pre></div></td><td class="code"><div class="highlight"><pre><span></span>// group instances to logical partition
-// partition0 (instance 0 - 9), partition1(instance 0 - 19) partition3(instance 20 - 29)
-val getLogicalPartition: Int =&gt; Seq[Int] = {
-  case a if Range(0, 10).contains(a) =&gt; Seq(0, 1)
-  case b if Range(10, 20).contains(b) =&gt; Seq(1)
-  case c if Range(20, 30).contains(c) =&gt; Seq(2)
-  case _ =&gt; throw new Exception(“out of index”)
-}
-
-val customPartitioningStrategy = ClientCustomStrategy.noResharding(getPartitionIdAndRequest, getLogicalPartition)
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>// group instances to logical partition
+<span class="linenos"> 2</span>// partition0 (instance 0 - 9), partition1(instance 0 - 19) partition3(instance 20 - 29)
+<span class="linenos"> 3</span>val getLogicalPartition: Int =&gt; Seq[Int] = {
+<span class="linenos"> 4</span>  case a if Range(0, 10).contains(a) =&gt; Seq(0, 1)
+<span class="linenos"> 5</span>  case b if Range(10, 20).contains(b) =&gt; Seq(1)
+<span class="linenos"> 6</span>  case c if Range(20, 30).contains(c) =&gt; Seq(2)
+<span class="linenos"> 7</span>  case _ =&gt; throw new Exception(“out of index”)
+<span class="linenos"> 8</span>}
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>val customPartitioningStrategy = ClientCustomStrategy.noResharding(getPartitionIdAndRequest, getLogicalPartition)
 </pre></div>
-</td></tr></table></div>
 </div>
 </div>
-<div class="section" id="id2">
+</section>
+<section id="id2">
 <h4>Clients do messaging fan-out<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
 <p>Expanding from non fan-out setup above, fan-out requests need to implement the
 <cite>getPartitionIdAndRequest</cite> with a Future Map of partition Ids to sub-requests. It needs to
 reconstruct the split Thrift requests:</p>
 <div class="literal-block-wrapper docutils container" id="id10">
 <div class="code-block-caption"><span class="caption-text">Configure the request routing function</span><a class="headerlink" href="#id10" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">getPartitionIdAndRequest</span><span class="k">:</span> <span class="kt">ClientCustomStrategy.ToPartitionedMap</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">case</span> <span class="n">getBoxes</span><span class="k">:</span> <span class="kt">GetBoxes.Args</span> <span class="o">=&gt;</span>
-    <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">getBoxes</span><span class="o">.</span><span class="n">listAddrInfo</span><span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="n">lookUp</span><span class="o">).</span><span class="n">map</span> <span class="o">{</span>
-      <span class="k">case</span> <span class="o">(</span><span class="n">partitionId</span><span class="o">,</span> <span class="n">listAddrInfo</span><span class="o">)</span> <span class="k">=&gt;</span>
-        <span class="n">partitionId</span> <span class="o">-&gt;</span> <span class="nc">GetBoxes</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="n">listAddrInfo</span><span class="o">,</span> <span class="n">getBoxes</span><span class="o">.</span><span class="n">passcode</span><span class="o">)</span>
-    <span class="o">})</span>
-<span class="o">}</span>
-
-<span class="k">val</span> <span class="n">customPartitioningStrategy</span> <span class="k">=</span> <span class="nc">ClientCustomStrategy</span><span class="o">.</span><span class="n">noResharding</span><span class="o">(</span><span class="n">getPartitionIdAndRequest</span><span class="o">,</span> <span class="n">getLogicalPartition</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kd">val</span> <span class="n">getPartitionIdAndRequest</span><span class="p">:</span> <span class="nc">ClientCustomStrategy</span><span class="p">.</span><span class="nc">ToPartitionedMap</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos">2</span>  <span class="k">case</span> <span class="n">getBoxes</span><span class="p">:</span> <span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span> <span class="o">=&gt;</span>
+<span class="linenos">3</span>    <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="n">getBoxes</span><span class="p">.</span><span class="n">listAddrInfo</span><span class="p">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">lookUp</span><span class="p">).</span><span class="n">map</span> <span class="p">{</span>
+<span class="linenos">4</span>      <span class="k">case</span> <span class="p">(</span><span class="n">partitionId</span><span class="p">,</span> <span class="n">listAddrInfo</span><span class="p">)</span> <span class="o">=&gt;</span>
+<span class="linenos">5</span>        <span class="n">partitionId</span> <span class="o">-&gt;</span> <span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span><span class="p">(</span><span class="n">listAddrInfo</span><span class="p">,</span> <span class="n">getBoxes</span><span class="p">.</span><span class="n">passcode</span><span class="p">)</span>
+<span class="linenos">6</span>    <span class="p">})</span>
+<span class="linenos">7</span><span class="p">}</span>
+<span class="linenos">8</span>
+<span class="linenos">9</span><span class="kd">val</span> <span class="n">customPartitioningStrategy</span> <span class="o">=</span> <span class="nc">ClientCustomStrategy</span><span class="p">.</span><span class="n">noResharding</span><span class="p">(</span><span class="n">getPartitionIdAndRequest</span><span class="p">,</span> <span class="n">getLogicalPartition</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 </div>
 <p>Fan-out messages means the client receives responses from a set of partitions.
 A <cite>ResponseMerger</cite> also needs to be defined to handle successes and failures separately.
@@ -499,122 +401,118 @@ partitioning strategy by adding mergers through <cite>responseMergerRegistry</ci
 <cite>ThriftMethod</cite> s can be cascaded.</p>
 <div class="literal-block-wrapper docutils container" id="id11">
 <div class="code-block-caption"><span class="caption-text">Set the Response mergers and register the Merging functions</span><a class="headerlink" href="#id11" title="Permalink to this code">¶</a></div>
-<div class="highlight-scala notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.exp.partitioning.PartitioningStrategy.ResponseMerger</span>
-
-<span class="k">val</span> <span class="n">getBoxesRepMerger</span><span class="k">:</span> <span class="kt">ResponseMerger</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Box</span><span class="o">]]</span> <span class="k">=</span> <span class="o">(</span><span class="n">successes</span><span class="o">,</span> <span class="n">failures</span><span class="o">)</span> <span class="k">=&gt;</span>
-  <span class="k">if</span> <span class="o">(</span><span class="n">successes</span><span class="o">.</span><span class="n">nonEmpty</span><span class="o">)</span> <span class="nc">Return</span><span class="o">(</span><span class="n">successes</span><span class="o">.</span><span class="n">flatten</span><span class="o">)</span>
-  <span class="k">else</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">failures</span><span class="o">.</span><span class="n">head</span><span class="o">)</span>
-<span class="n">customPartitioningStrategy</span><span class="o">.</span><span class="n">responseMergerRegistry</span><span class="o">.</span><span class="n">add</span><span class="o">(</span><span class="nc">GetBoxes</span><span class="o">,</span> <span class="n">getBoxesRepMerger</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thrift</span><span class="p">.</span><span class="nn">exp</span><span class="p">.</span><span class="nn">partitioning</span><span class="p">.</span><span class="nc">PartitioningStrategy</span><span class="p">.</span><span class="nc">ResponseMerger</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="kd">val</span> <span class="n">getBoxesRepMerger</span><span class="p">:</span> <span class="nc">ResponseMerger</span><span class="p">[</span><span class="nc">Seq</span><span class="p">[</span><span class="nc">Box</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">successes</span><span class="p">,</span> <span class="n">failures</span><span class="p">)</span> <span class="o">=&gt;</span>
+<span class="linenos">4</span>  <span class="k">if</span> <span class="p">(</span><span class="n">successes</span><span class="p">.</span><span class="n">nonEmpty</span><span class="p">)</span> <span class="nc">Return</span><span class="p">(</span><span class="n">successes</span><span class="p">.</span><span class="n">flatten</span><span class="p">)</span>
+<span class="linenos">5</span>  <span class="k">else</span> <span class="nc">Throw</span><span class="p">(</span><span class="n">failures</span><span class="p">.</span><span class="n">head</span><span class="p">)</span>
+<span class="linenos">6</span><span class="n">customPartitioningStrategy</span><span class="p">.</span><span class="n">responseMergerRegistry</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="nc">GetBoxes</span><span class="p">,</span> <span class="n">getBoxesRepMerger</span><span class="p">)</span>
 </pre></div>
-</td></tr></table></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="metrics">
+</section>
+</section>
+</section>
+<section id="metrics">
 <h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
 <p>Partitioning metrics are under <strong>clnt/&lt;server_label&gt;/partitioner/</strong> scope given insights
 into how client stack manages partition nodes.</p>
-<div class="section" id="hashingpartitioningstrategy">
+<section id="hashingpartitioningstrategy">
 <h3>HashingPartitioningStrategy<a class="headerlink" href="#hashingpartitioningstrategy" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>redistributes</dt>
-<dd>A counter of the times the nodes on the hash ring have been redistributed.</dd>
-<dt>joins</dt>
-<dd>A counter of the times a new node joins the hash ring, indicating a new partition
-joins the cluster.</dd>
-<dt>leaves</dt>
-<dd>A counter of the times a node leaves the hash ring, indicating service discovery
-detects a node leave.</dd>
-<dt>ejections</dt>
-<dd>A counter of the times an unhealthy node marked by ConsistentHashingFailureAccrual
+<dl class="simple">
+<dt>redistributes</dt><dd><p>A counter of the times the nodes on the hash ring have been redistributed.</p>
+</dd>
+<dt>joins</dt><dd><p>A counter of the times a new node joins the hash ring, indicating a new partition
+joins the cluster.</p>
+</dd>
+<dt>leaves</dt><dd><p>A counter of the times a node leaves the hash ring, indicating service discovery
+detects a node leave.</p>
+</dd>
+<dt>ejections</dt><dd><p>A counter of the times an unhealthy node marked by ConsistentHashingFailureAccrual
 has been removed from the hash ring. <em>leaves</em> and <em>joins</em> indicate service discovery updates,
-while <em>ejections</em> and <em>revivals</em> indicate the code health status.</dd>
-<dt>revivals</dt>
-<dd>A counter of the times an ejected node has been marked as live on the hash ring. <em>leaves</em>
+while <em>ejections</em> and <em>revivals</em> indicate the code health status.</p>
+</dd>
+<dt>revivals</dt><dd><p>A counter of the times an ejected node has been marked as live on the hash ring. <em>leaves</em>
 and <em>joins</em> indicate service discovery updates, while <em>ejections</em> and <em>revivals</em> indicate
-node health status.</dd>
-<dt>live_nodes</dt>
-<dd>A gauge of the current total number of healthy partitions.</dd>
-<dt>dead_nodes</dt>
-<dd>A gauge of the current total number of unhealthy partitions marked by
-ConsistentHashingFailureAccrual.</dd>
+node health status.</p>
+</dd>
+<dt>live_nodes</dt><dd><p>A gauge of the current total number of healthy partitions.</p>
+</dd>
+<dt>dead_nodes</dt><dd><p>A gauge of the current total number of unhealthy partitions marked by
+ConsistentHashingFailureAccrual.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="custompartitioningstrategy-thriftmux">
+</section>
+<section id="custompartitioningstrategy-thriftmux">
 <h3>CustomPartitioningStrategy (ThriftMux)<a class="headerlink" href="#custompartitioningstrategy-thriftmux" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>nodes</dt>
-<dd>A gauge of the current total number of logical partitions.</dd>
+<dl class="simple">
+<dt>nodes</dt><dd><p>A gauge of the current total number of logical partitions.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="appendix">
+</section>
+</section>
+<section id="appendix">
 <h2>Appendix<a class="headerlink" href="#appendix" title="Permalink to this headline">¶</a></h2>
 <p>Example of using MethodBuilder custom partitioning strategy:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">lookUp</span><span class="o">(</span><span class="n">addrInfo</span><span class="k">:</span> <span class="kt">AddrInfo</span><span class="o">)</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="n">addrInfo</span><span class="o">.</span><span class="n">name</span> <span class="k">match</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="s">&quot;name1&quot;</span> <span class="o">|</span> <span class="s">&quot;name2&quot;</span> <span class="k">=&gt;</span> <span class="mi">0</span> <span class="c1">// partition 0</span>
-    <span class="k">case</span> <span class="s">&quot;name3&quot;</span> <span class="k">=&gt;</span> <span class="mi">1</span> <span class="c1">// partition 1</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">lookUp</span><span class="p">(</span><span class="n">addrInfo</span><span class="p">:</span> <span class="nc">AddrInfo</span><span class="p">):</span> <span class="nc">Int</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="n">addrInfo</span><span class="p">.</span><span class="n">name</span> <span class="k">match</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="s">&quot;name1&quot;</span> <span class="o">|</span> <span class="s">&quot;name2&quot;</span> <span class="o">=&gt;</span> <span class="mi">0</span> <span class="c1">// partition 0</span>
+    <span class="k">case</span> <span class="s">&quot;name3&quot;</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="c1">// partition 1</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
 <span class="c1">// group instances to logical partition</span>
 <span class="c1">// partition0 (instance 0 - 9), partition1(instance 0 - 19) partition3(instance 20 - 29)</span>
-<span class="k">val</span> <span class="n">getLogicalPartition</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=&gt;</span> <span class="nc">Seq</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-  <span class="k">case</span> <span class="n">a</span> <span class="k">if</span> <span class="nc">Range</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">10</span><span class="o">).</span><span class="n">contains</span><span class="o">(</span><span class="n">a</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Seq</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span>
-  <span class="k">case</span> <span class="n">b</span> <span class="k">if</span> <span class="nc">Range</span><span class="o">(</span><span class="mi">10</span><span class="o">,</span> <span class="mi">20</span><span class="o">).</span><span class="n">contains</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
-  <span class="k">case</span> <span class="n">c</span> <span class="k">if</span> <span class="nc">Range</span><span class="o">(</span><span class="mi">20</span><span class="o">,</span> <span class="mi">30</span><span class="o">).</span><span class="n">contains</span><span class="o">(</span><span class="n">c</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Seq</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
-  <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">Exception</span><span class="o">(</span><span class="s">&quot;out of index&quot;</span><span class="o">)</span>
-<span class="o">}</span>
+<span class="kd">val</span> <span class="n">getLogicalPartition</span><span class="p">:</span> <span class="nc">Int</span> <span class="o">=&gt;</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="n">a</span> <span class="k">if</span> <span class="nc">Range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">).</span><span class="n">contains</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nc">Seq</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="k">case</span> <span class="n">b</span> <span class="k">if</span> <span class="nc">Range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">).</span><span class="n">contains</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nc">Seq</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">case</span> <span class="n">c</span> <span class="k">if</span> <span class="nc">Range</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">).</span><span class="n">contains</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nc">Seq</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+  <span class="k">case</span> <span class="n">_</span> <span class="o">=&gt;</span> <span class="k">throw</span> <span class="k">new</span> <span class="nc">Exception</span><span class="p">(</span><span class="s">&quot;out of index&quot;</span><span class="p">)</span>
+<span class="p">}</span>
 
 <span class="c1">// response merger functions</span>
-<span class="k">val</span> <span class="n">getBoxesRepMerger</span><span class="k">:</span> <span class="kt">ResponseMerger</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Box</span><span class="o">]]</span> <span class="k">=</span> <span class="o">(</span><span class="n">successes</span><span class="o">,</span> <span class="n">failures</span><span class="o">)</span> <span class="k">=&gt;</span>
-  <span class="k">if</span> <span class="o">(</span><span class="n">successes</span><span class="o">.</span><span class="n">nonEmpty</span><span class="o">)</span> <span class="nc">Return</span><span class="o">(</span><span class="n">successes</span><span class="o">.</span><span class="n">flatten</span><span class="o">)</span>
-  <span class="k">else</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">failures</span><span class="o">.</span><span class="n">head</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">getBoxesRepMerger</span><span class="p">:</span> <span class="nc">ResponseMerger</span><span class="p">[</span><span class="nc">Seq</span><span class="p">[</span><span class="nc">Box</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">successes</span><span class="p">,</span> <span class="n">failures</span><span class="p">)</span> <span class="o">=&gt;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">successes</span><span class="p">.</span><span class="n">nonEmpty</span><span class="p">)</span> <span class="nc">Return</span><span class="p">(</span><span class="n">successes</span><span class="p">.</span><span class="n">flatten</span><span class="p">)</span>
+  <span class="k">else</span> <span class="nc">Throw</span><span class="p">(</span><span class="n">failures</span><span class="p">.</span><span class="n">head</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">methodBuilderStrategy1</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MethodBuilderCustomStrategy</span><span class="o">[</span><span class="kt">GetBoxes.Args</span>, <span class="kt">Seq</span><span class="o">[</span><span class="kt">Box</span><span class="o">]](</span>
-  <span class="o">{</span> <span class="n">getBoxes</span><span class="k">:</span> <span class="kt">GetBoxes.Args</span> <span class="o">=&gt;</span>
-    <span class="k">val</span> <span class="n">partitionIdAndRequest</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[</span><span class="kt">Int</span>, <span class="kt">GetBoxes.Args</span><span class="o">]</span> <span class="k">=</span>
-      <span class="n">getBoxes</span><span class="o">.</span><span class="n">listAddrInfo</span><span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="n">lookUp</span><span class="o">).</span><span class="n">map</span> <span class="o">{</span>
-        <span class="k">case</span> <span class="o">(</span><span class="n">partitionId</span><span class="o">,</span> <span class="n">listAddrInfo</span><span class="o">)</span> <span class="k">=&gt;</span>
-          <span class="n">partitionId</span> <span class="o">-&gt;</span> <span class="nc">GetBoxes</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="n">listAddrInfo</span><span class="o">,</span> <span class="n">getBoxes</span><span class="o">.</span><span class="n">passcode</span><span class="o">)</span>
-      <span class="o">}</span>
-    <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">partitionIdAndRequest</span><span class="o">)</span>
-  <span class="o">},</span>
-  <span class="n">getLogicalPartition</span><span class="o">,</span>
-  <span class="nc">Some</span><span class="o">(</span><span class="n">getBoxesRepMerger</span><span class="o">)</span>
-<span class="o">)</span>
+<span class="kd">val</span> <span class="n">methodBuilderStrategy1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MethodBuilderCustomStrategy</span><span class="p">[</span><span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">Box</span><span class="p">]](</span>
+  <span class="p">{</span> <span class="n">getBoxes</span><span class="p">:</span> <span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span> <span class="o">=&gt;</span>
+    <span class="kd">val</span> <span class="n">partitionIdAndRequest</span><span class="p">:</span> <span class="nc">Map</span><span class="p">[</span><span class="nc">Int</span><span class="p">,</span> <span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span><span class="p">]</span> <span class="o">=</span>
+      <span class="n">getBoxes</span><span class="p">.</span><span class="n">listAddrInfo</span><span class="p">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">lookUp</span><span class="p">).</span><span class="n">map</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="p">(</span><span class="n">partitionId</span><span class="p">,</span> <span class="n">listAddrInfo</span><span class="p">)</span> <span class="o">=&gt;</span>
+          <span class="n">partitionId</span> <span class="o">-&gt;</span> <span class="nc">GetBoxes</span><span class="p">.</span><span class="nc">Args</span><span class="p">(</span><span class="n">listAddrInfo</span><span class="p">,</span> <span class="n">getBoxes</span><span class="p">.</span><span class="n">passcode</span><span class="p">)</span>
+      <span class="p">}</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="n">partitionIdAndRequest</span><span class="p">)</span>
+  <span class="p">},</span>
+  <span class="n">getLogicalPartition</span><span class="p">,</span>
+  <span class="nc">Some</span><span class="p">(</span><span class="n">getBoxesRepMerger</span><span class="p">)</span>
+<span class="p">)</span>
 
-<span class="k">val</span> <span class="n">methodBuilderStrategy2</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MethodBuilderCustomStrategy</span><span class="o">[</span><span class="kt">GetBox.Args</span>, <span class="kt">Box</span><span class="o">](</span>
-  <span class="o">{</span> <span class="n">getBox</span><span class="k">:</span> <span class="kt">GetBox.Args</span> <span class="o">=&gt;</span>
-    <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="nc">Map</span><span class="o">(</span><span class="n">lookUp</span><span class="o">(</span><span class="n">getBox</span><span class="o">.</span><span class="n">addrInfo</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">getBox</span><span class="o">))</span>
-  <span class="o">},</span>
+<span class="kd">val</span> <span class="n">methodBuilderStrategy2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MethodBuilderCustomStrategy</span><span class="p">[</span><span class="nc">GetBox</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">Box</span><span class="p">](</span>
+  <span class="p">{</span> <span class="n">getBox</span><span class="p">:</span> <span class="nc">GetBox</span><span class="p">.</span><span class="nc">Args</span> <span class="o">=&gt;</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="nc">Map</span><span class="p">(</span><span class="n">lookUp</span><span class="p">(</span><span class="n">getBox</span><span class="p">.</span><span class="n">addrInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">getBox</span><span class="p">))</span>
+  <span class="p">},</span>
   <span class="n">getLogicalPartition</span>
-<span class="o">)</span>
+<span class="p">)</span>
 
-<span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(???)</span>
+<span class="kd">val</span> <span class="n">builder</span> <span class="o">=</span> <span class="nc">ThriftMux</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="n">methodBuilder</span><span class="p">(</span><span class="o">???</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">getBoxesEndpoint</span> <span class="k">=</span> <span class="n">builder</span>
-  <span class="o">.</span><span class="n">withPartitioningStrategy</span><span class="o">(</span><span class="n">methodBuilderStrategy1</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">DeliveryService.ServicePerEndpoint</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;getBoxes&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">getBoxes</span>
+<span class="kd">val</span> <span class="n">getBoxesEndpoint</span> <span class="o">=</span> <span class="n">builder</span>
+  <span class="p">.</span><span class="n">withPartitioningStrategy</span><span class="p">(</span><span class="n">methodBuilderStrategy1</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">servicePerEndpoint</span><span class="p">[</span><span class="nc">DeliveryService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span><span class="p">](</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;getBoxes&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">getBoxes</span>
 
-<span class="k">val</span> <span class="n">getBoxEndpoint</span> <span class="k">=</span> <span class="n">builder</span>
-  <span class="o">.</span><span class="n">withPartitioningStrategy</span><span class="o">(</span><span class="n">methodBuilderStrategy2</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">DeliveryService.ServicePerEndpoint</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;getBox&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">getBox</span>
+<span class="kd">val</span> <span class="n">getBoxEndpoint</span> <span class="o">=</span> <span class="n">builder</span>
+  <span class="p">.</span><span class="n">withPartitioningStrategy</span><span class="p">(</span><span class="n">methodBuilderStrategy2</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">servicePerEndpoint</span><span class="p">[</span><span class="nc">DeliveryService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span><span class="p">](</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;getBox&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">getBox</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -684,7 +582,7 @@ ConsistentHashingFailureAccrual.</dd>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

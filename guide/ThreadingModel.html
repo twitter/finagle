@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Threading Model &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Threading Model &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="Clients.html" title="Clients"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Threading Model</a></li> 
       </ul>
     </div>  
 
@@ -58,7 +58,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="threading-model">
+  <section id="threading-model">
 <h1>Threading Model<a class="headerlink" href="#threading-model" title="Permalink to this headline">¶</a></h1>
 <p>Similar to other non-blocking event-driven frameworks, Finagle leverages a fixed size thread pool
 (I/O worker pool) shared between all clients and servers running within the same JVM process. While
@@ -72,10 +72,10 @@ even one of them may affect multiple clients and servers. While it’s recommend
 defaults (numerous experiments showed they are good), it’s possible to override the worker pool size
 with a command line flag.</p>
 <p>The following sets the worker pool size to 24.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">24</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="p">.</span><span class="n">twitter</span><span class="p">.</span><span class="n">finagle</span><span class="p">.</span><span class="n">netty4</span><span class="p">.</span><span class="n">numWorkers</span><span class="o">=</span><span class="mi">24</span>
 </pre></div>
 </div>
-<div class="section" id="i-o-thread-affinity">
+<section id="i-o-thread-affinity">
 <h2>I/O Thread Affinity<a class="headerlink" href="#i-o-thread-affinity" title="Permalink to this headline">¶</a></h2>
 <p>As evident by the flag name, Finagle’s I/O threads are allocated and managed within its underlying
 networking library, <a class="reference external" href="https://netty.io/">Netty</a>. Built on top of native non-blocking I/O APIs (<a class="reference external" href="https://en.wikipedia.org/wiki/Epoll">epoll</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Kqueue">kqueue</a>), Netty
@@ -83,8 +83,8 @@ dictates an affinity between I/O threads and the list of opened file descriptors
 they are watching over. Once a network connection is established, it’s assigned a serving I/O thread
 that can never be reassigned. This is why blocking even a single I/O thread halts progress in
 multiple independent connections (clients, servers).</p>
-</div>
-<div class="section" id="i-o-threads-and-user-code">
+</section>
+<section id="i-o-threads-and-user-code">
 <h2>I/O Threads and User Code<a class="headerlink" href="#i-o-threads-and-user-code" title="Permalink to this headline">¶</a></h2>
 <p>Although not immediately obvious, all users’ code that’s triggered by receiving a message is run on
 Finagle I/O threads, unless explicitly executed somewhere else (e.g., application’s own thread pool, a
@@ -97,8 +97,8 @@ which are purely a coordination mechanism that does not describe any execution e
 satisfy promises (pending future RPC responses), they are also on the hook for running promises’
 callbacks. Sticking with the caller thread reduces context switches at the expense of making I/O
 threads vulnerable to users blocking (or just slow) code.</p>
-</div>
-<div class="section" id="blocking-examples">
+</section>
+<section id="blocking-examples">
 <h2>Blocking Examples<a class="headerlink" href="#blocking-examples" title="Permalink to this headline">¶</a></h2>
 <p>Not only blocking I/O (e.g., calling a JDBC driver, using the JDK’s File API) can block Finagle
 threads. CPU intensive computations are equally dangerous: keeping I/O threads busy processing
@@ -108,51 +108,51 @@ complexity. Scala’s <cite>permutations</cite> operation can serve a good examp
 running time. As implemented below, such a server would have a hard time staying responsive as its
 I/O threads would be constantly busy (blocked) calculating permutations as opposed to serving
 networking events.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Service</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">http</span><span class="p">.{</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">class</span> <span class="nc">MyHttpService</span> <span class="k">extends</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">rep</span> <span class="k">=</span> <span class="nc">Response</span><span class="o">()</span>
-    <span class="n">rep</span><span class="o">.</span><span class="n">contentString</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">contentString</span><span class="o">.</span><span class="n">permutations</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;\n&quot;</span><span class="o">)</span>
+<span class="k">class</span> <span class="nc">MyHttpService</span> <span class="k">extends</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="nc">Request</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">rep</span> <span class="o">=</span> <span class="nc">Response</span><span class="p">()</span>
+    <span class="n">rep</span><span class="p">.</span><span class="n">contentString</span> <span class="o">=</span> <span class="n">req</span><span class="p">.</span><span class="n">contentString</span><span class="p">.</span><span class="n">permutations</span><span class="p">.</span><span class="n">mkString</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
 
-    <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">rep</span><span class="o">)</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>A comparably bad thing can happen to clients too. Running <cite>permutations</cite> as part of any callback
 (<cite>flatMap</cite>, <cite>onSuccess</cite>, <cite>onFailure</cite>, etc)  on a <cite>Future</cite> returned from a client has the exact same
 effect - it saturates an I/O thread.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Service</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">http</span><span class="p">.{</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">}</span>
 
-<span class="k">def</span> <span class="n">process</span><span class="o">(</span><span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">client</span><span class="o">(</span><span class="nc">Request</span><span class="o">()).</span><span class="n">map</span><span class="o">(</span><span class="n">rep</span> <span class="k">=&gt;</span> <span class="n">rep</span><span class="o">.</span><span class="n">contentString</span><span class="o">.</span><span class="n">permutations</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;\n&quot;</span><span class="o">))</span>
+<span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">]):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">client</span><span class="p">(</span><span class="nc">Request</span><span class="p">()).</span><span class="n">map</span><span class="p">(</span><span class="n">rep</span> <span class="o">=&gt;</span> <span class="n">rep</span><span class="p">.</span><span class="n">contentString</span><span class="p">.</span><span class="n">permutations</span><span class="p">.</span><span class="n">mkString</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="identifying-blocking">
+</section>
+<section id="identifying-blocking">
 <h2>Identifying Blocking<a class="headerlink" href="#identifying-blocking" title="Permalink to this headline">¶</a></h2>
 <p>General-purpose JVM profilers and even <a class="reference external" href="https://docs.oracle.com/javase/7/docs/technotes/tools/share/jstack.html">jstack</a> can be quite effective in identifying bottlenecks on
 the request path (within I/O threads). There are, however, two metrics that can provide a valuable
 insight with no need for external tools.</p>
 <ul class="simple">
-<li><cite>blocking_ms</cite> - a counter of total time spent in <cite>Await.result</cite> and <cite>Await.ready</cite> blocking an I/O
+<li><p><cite>blocking_ms</cite> - a counter of total time spent in <cite>Await.result</cite> and <cite>Await.ready</cite> blocking an I/O
 thread. Refer to <a class="reference external" href="https://finagle.github.io/blog/2016/09/01/block-party/">this blog post</a>  on
-what to do when this counter is not zero.</li>
-<li><cite>pending_io_events</cite> - a gauge of the number of pending I/O events enqueued in all event loops
+what to do when this counter is not zero.</p></li>
+<li><p><cite>pending_io_events</cite> - a gauge of the number of pending I/O events enqueued in all event loops
 serving this client or server. When this metric climbs up, it indicates I/O queues are clogged
-and I/O threads overloaded.</li>
+and I/O threads overloaded.</p></li>
 </ul>
 <p>Whereas getting rid of <cite>Await</cite> on the request path is generally advised, there is no guidance that
 could be provided with regards to what is a healthy number of pending I/O events. Clearly, striving
 for “zero” or “near zero” might be a reasonable strategy if taken not as the gold standard but a
 friendly recommendation. Depending on the workload, even double-digit values could be acceptable for
 some applications.</p>
-</div>
-<div class="section" id="offloading">
+</section>
+<section id="offloading">
 <h2>Offloading<a class="headerlink" href="#offloading" title="Permalink to this headline">¶</a></h2>
 <p>Shifting users’ work off of I/O threads can go a long way in improving an application’s
 responsiveness, minding the increase in context switches as well as associated cost of managing
@@ -162,54 +162,55 @@ service given its traffic profile and resource allocation.</p>
 that’s scheduled in the underlying <a class="reference external" href="https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ExecutorService.html">ExecutorService</a>. They come in handy for offloading the I/O
 threads in Finagle while preserving the first-class support to Twitter Futures (interrupts, locals).</p>
 <p>Offloading can be done on per-method (endpoint) basis:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Future</span><span class="o">,</span> <span class="nc">FuturePool</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.{</span><span class="nc">Future</span><span class="p">,</span> <span class="nc">FuturePool</span><span class="p">}</span>
 
-<span class="k">def</span> <span class="n">offloadedPermutations</span><span class="o">(</span><span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">pool</span><span class="k">:</span> <span class="kt">FuturePool</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">pool</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="n">permutations</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;\n&quot;</span><span class="o">))</span>
+<span class="k">def</span> <span class="nf">offloadedPermutations</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span> <span class="n">pool</span><span class="p">:</span> <span class="nc">FuturePool</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">pool</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">permutations</span><span class="p">.</span><span class="n">mkString</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>As well as per entire client or server:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.FuturePool</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">FuturePool</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
 
-<span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">Http.Server</span> <span class="o">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
-  <span class="o">.</span><span class="n">withExecutionOffloaded</span><span class="o">(</span><span class="nc">FuturePool</span><span class="o">.</span><span class="n">unboundedPool</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">server</span><span class="p">:</span> <span class="nc">Http</span><span class="p">.</span><span class="nc">Server</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">server</span>
+  <span class="p">.</span><span class="n">withExecutionOffloaded</span><span class="p">(</span><span class="nc">FuturePool</span><span class="p">.</span><span class="n">unboundedPool</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Http.Client</span> <span class="o">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withExecutionOffloaded</span><span class="o">(</span><span class="nc">FuturePool</span><span class="o">.</span><span class="n">unboundedPool</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">client</span><span class="p">:</span> <span class="nc">Http</span><span class="p">.</span><span class="nc">Client</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withExecutionOffloaded</span><span class="p">(</span><span class="nc">FuturePool</span><span class="p">.</span><span class="n">unboundedPool</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Or per entire application (JVM process), using the command-line flag:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">auto</span><span class="k">=</span><span class="kc">true</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="p">.</span><span class="n">twitter</span><span class="p">.</span><span class="n">finagle</span><span class="p">.</span><span class="n">offload</span><span class="p">.</span><span class="n">auto</span><span class="o">=</span><span class="kc">true</span>
 </pre></div>
 </div>
 <p>Or to enable  with a manually tuned threading configuration:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">14</span> <span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">10</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="p">.</span><span class="n">twitter</span><span class="p">.</span><span class="n">finagle</span><span class="p">.</span><span class="n">offload</span><span class="p">.</span><span class="n">numWorkers</span><span class="o">=</span><span class="mi">14</span> <span class="o">-</span><span class="n">com</span><span class="p">.</span><span class="n">twitter</span><span class="p">.</span><span class="n">finagle</span><span class="p">.</span><span class="n">netty4</span><span class="p">.</span><span class="n">numWorkers</span><span class="o">=</span><span class="mi">10</span>
 </pre></div>
 </div>
-<div class="section" id="offload-admission-control">
+<section id="offload-admission-control">
 <h3>Offload Admission Control<a class="headerlink" href="#offload-admission-control" title="Permalink to this headline">¶</a></h3>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This AC mechanism can only work if global offloading is enabled.</p>
+<p class="admonition-title">Note</p>
+<p>This AC mechanism can only work if global offloading is enabled.</p>
 </div>
 <p>Using system-wide offloading opens the door to an experimental form of admission control. This
 admission control mechanism, referred to as Offload AC, uses the behavior of the work queue to
 determine when to reject work. The default behavior is to reject work when there is a 20ms wait in
 the queue.</p>
 <p>This can be enabled using the flag:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">admissionControl</span><span class="k">=</span><span class="n">enabled</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="p">.</span><span class="n">twitter</span><span class="p">.</span><span class="n">finagle</span><span class="p">.</span><span class="n">offload</span><span class="p">.</span><span class="n">admissionControl</span><span class="o">=</span><span class="n">enabled</span>
 </pre></div>
 </div>
 <p>Or to manually tune the allowable delay:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">offload</span><span class="o">.</span><span class="n">admissionControl</span><span class="k">=</span><span class="mf">50.</span><span class="n">milliseconds</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="p">.</span><span class="n">twitter</span><span class="p">.</span><span class="n">finagle</span><span class="p">.</span><span class="n">offload</span><span class="p">.</span><span class="n">admissionControl</span><span class="o">=</span><span class="mi">50</span><span class="p">.</span><span class="n">milliseconds</span>
 </pre></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -264,7 +265,7 @@ the queue.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

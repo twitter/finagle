@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Protocols &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Protocols &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="Names.html" title="Names and Naming in Finagle"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Protocols</a></li> 
       </ul>
     </div>  
 
@@ -58,14 +58,14 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="protocols">
+  <section id="protocols">
 <h1>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h1>
 <p>The core of Finagle is protocol-agnostic, meaning its internals provide an
 extensible RPC subsystem without defining any details of specific
 client-server protocols. Thus in order to provide usable APIs for clients and
 servers, there are a number of Finagle subprojects that implement common
 protocols. A few of these protocol implementations are documented below.</p>
-<div class="section" id="thrift">
+<section id="thrift">
 <span id="thrift-and-scrooge"></span><h2>Thrift<a class="headerlink" href="#thrift" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://thrift.apache.org/">Apache Thrift</a> is an interface definition
 language. With its associated code generator(s) and binary communication
@@ -89,9 +89,10 @@ perform protocol negotiation upon connection and will downgrade to raw TBinary
 Thrift if servers are not using the upgraded protocol. By default, <cite>finagle-thrift</cite>
 uses the Thrift framed codec and the binary protocol for serialization.</p>
 <blockquote>
-<div>negotiation well. If your client should run into this, you can disable
-it by calling <code class="docutils literal notranslate"><span class="pre">Thrift.client.withNoAttemptTTwitterUpgrade</span></code>.</div></blockquote>
-<div class="section" id="using-finagle-thrift">
+<div><p>negotiation well. If your client should run into this, you can disable
+it by calling <code class="docutils literal notranslate"><span class="pre">Thrift.client.withNoAttemptTTwitterUpgrade</span></code>.</p>
+</div></blockquote>
+<section id="using-finagle-thrift">
 <h3>Using finagle-thrift<a class="headerlink" href="#using-finagle-thrift" title="Permalink to this headline">¶</a></h3>
 <p>At Twitter, we use our open-source Thrift code-generator called
 <a class="reference external" href="https://twitter.github.io/scrooge/">Scrooge</a>. Scrooge is written in Scala and
@@ -105,101 +106,101 @@ can generate source code in Scala or Java. Given the following IDL:</p>
 <p>Scrooge will generate code that can be used by <cite>finagle-thrift</cite> with the
 following rich APIs:</p>
 <p id="finagle-thrift-server">Serving the IDL:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">ListeningServer</span> <span class="o">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">serveIface</span><span class="o">(</span>
-  <span class="s">&quot;localhost:1234&quot;</span><span class="o">,</span>
-  <span class="k">new</span> <span class="nc">LoggerService</span><span class="o">.</span><span class="nc">MethodPerEndpoint</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="n">log</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">logLevel</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-      <span class="n">println</span><span class="o">(</span><span class="s">s&quot;[</span><span class="si">$logLevel</span><span class="s">] Server received: &#39;</span><span class="si">$message</span><span class="s">&#39;&quot;</span><span class="o">)</span>
-      <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="s">s&quot;You&#39;ve sent: (&#39;</span><span class="si">$message</span><span class="s">&#39;, </span><span class="si">$logLevel</span><span class="s">)&quot;</span><span class="o">)</span>
-    <span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">server</span><span class="p">:</span> <span class="nc">ListeningServer</span> <span class="o">=</span> <span class="nc">Thrift</span><span class="p">.</span><span class="n">server</span><span class="p">.</span><span class="n">serveIface</span><span class="p">(</span>
+  <span class="s">&quot;localhost:1234&quot;</span><span class="p">,</span>
+  <span class="k">new</span> <span class="nc">LoggerService</span><span class="p">.</span><span class="nc">MethodPerEndpoint</span> <span class="p">{</span>
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span> <span class="n">logLevel</span><span class="p">:</span> <span class="nc">Int</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="n">println</span><span class="p">(</span><span class="s">s&quot;[</span><span class="si">$</span><span class="n">logLevel</span><span class="s">] Server received: &#39;</span><span class="si">$</span><span class="n">message</span><span class="s">&#39;&quot;</span><span class="p">)</span>
+      <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="s">s&quot;You&#39;ve sent: (&#39;</span><span class="si">$</span><span class="n">message</span><span class="s">&#39;, </span><span class="si">$</span><span class="n">logLevel</span><span class="s">)&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
 
-    <span class="k">var</span> <span class="n">counter</span> <span class="k">=</span> <span class="mi">0</span>
+    <span class="kd">var</span> <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1">// getLogSize throws ReadExceptions every other request.</span>
-    <span class="k">def</span> <span class="n">getLogSize</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="nf">getLogSize</span><span class="p">():</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
       <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="k">if</span> <span class="o">(</span><span class="n">counter</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Server: getLogSize ReadException&quot;</span><span class="o">)</span>
-        <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="k">new</span> <span class="nc">ReadException</span><span class="o">())</span>
-      <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-        <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Server: getLogSize Success&quot;</span><span class="o">)</span>
-        <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
-      <span class="o">}</span>
-    <span class="o">}</span>
-  <span class="o">}</span>
-<span class="o">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">counter</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">println</span><span class="p">(</span><span class="s">s&quot;Server: getLogSize ReadException&quot;</span><span class="p">)</span>
+        <span class="nc">Future</span><span class="p">.</span><span class="n">exception</span><span class="p">(</span><span class="k">new</span> <span class="nc">ReadException</span><span class="p">())</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">println</span><span class="p">(</span><span class="s">s&quot;Server: getLogSize Success&quot;</span><span class="p">)</span>
+        <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 <p id="finagle-thrift-client">Construct a client:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">clientServicePerEndpoint</span><span class="k">:</span> <span class="kt">LoggerService.ServicePerEndpoint</span> <span class="o">=</span>
-  <span class="nc">Thrift</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">LoggerService.ServicePerEndpoint</span><span class="o">](</span>
-    <span class="s">&quot;localhost:1234&quot;</span><span class="o">,</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">clientServicePerEndpoint</span><span class="p">:</span> <span class="nc">LoggerService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span> <span class="o">=</span>
+  <span class="nc">Thrift</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="n">servicePerEndpoint</span><span class="p">[</span><span class="nc">LoggerService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span><span class="p">](</span>
+    <span class="s">&quot;localhost:1234&quot;</span><span class="p">,</span>
     <span class="s">&quot;thrift_client&quot;</span>
-  <span class="o">)</span>
+  <span class="p">)</span>
 </pre></div>
 </div>
 <p>A <cite>ServicePerEndpoint</cite> is a collection of <cite>Services</cite>, one for each Thrift method. Call the <cite>log</cite> method:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="n">clientServicePerEndpoint</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="nc">Log</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">))</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">result</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Log</span><span class="p">.</span><span class="nc">SuccessType</span><span class="p">]</span> <span class="o">=</span> <span class="n">clientServicePerEndpoint</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="nc">Log</span><span class="p">.</span><span class="nc">Args</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Thrift <cite>Services</cite> can be combined with <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Filter$">Filters</a>.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">uppercaseFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span>
-    <span class="n">req</span><span class="k">:</span> <span class="kt">Log.Args</span><span class="o">,</span>
-    <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span>
-  <span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">uppercaseRequest</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">message</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">toUpperCase</span><span class="o">)</span>
-    <span class="n">service</span><span class="o">(</span><span class="n">uppercaseRequest</span><span class="o">)</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">uppercaseFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="p">[</span><span class="nc">Log</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">Log</span><span class="p">.</span><span class="nc">SuccessType</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
+    <span class="n">req</span><span class="p">:</span> <span class="nc">Log</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span>
+    <span class="n">service</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Log</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">Log</span><span class="p">.</span><span class="nc">SuccessType</span><span class="p">]</span>
+  <span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Log</span><span class="p">.</span><span class="nc">SuccessType</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">uppercaseRequest</span> <span class="o">=</span> <span class="n">req</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="n">message</span> <span class="o">=</span> <span class="n">req</span><span class="p">.</span><span class="n">message</span><span class="p">.</span><span class="n">toUpperCase</span><span class="p">)</span>
+    <span class="n">service</span><span class="p">(</span><span class="n">uppercaseRequest</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">def</span> <span class="n">timeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](</span><span class="n">duration</span><span class="k">:</span> <span class="kt">Duration</span><span class="o">)</span> <span class="k">=</span> <span class="o">{</span>
-  <span class="k">val</span> <span class="n">exc</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">IndividualRequestTimeoutException</span><span class="o">(</span><span class="n">duration</span><span class="o">)</span>
-  <span class="k">val</span> <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span>
-  <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](</span><span class="n">duration</span><span class="o">,</span> <span class="n">exc</span><span class="o">,</span> <span class="n">timer</span><span class="o">)</span>
-<span class="o">}</span>
-<span class="k">val</span> <span class="n">filteredLog</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="n">timeoutFilter</span><span class="o">(</span><span class="mf">2.</span><span class="n">seconds</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">uppercaseFilter</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">clientServicePerEndpoint</span><span class="o">.</span><span class="n">log</span><span class="o">)</span>
+<span class="k">def</span> <span class="nf">timeoutFilter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">](</span><span class="n">duration</span><span class="p">:</span> <span class="nc">Duration</span><span class="p">)</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="kd">val</span> <span class="n">exc</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">IndividualRequestTimeoutException</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+  <span class="kd">val</span> <span class="n">timer</span> <span class="o">=</span> <span class="nc">DefaultTimer</span>
+  <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">](</span><span class="n">duration</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">timer</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kd">val</span> <span class="n">filteredLog</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Log</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">Log</span><span class="p">.</span><span class="nc">SuccessType</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeoutFilter</span><span class="p">(</span><span class="mi">2</span><span class="p">.</span><span class="n">seconds</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">andThen</span><span class="p">(</span><span class="n">uppercaseFilter</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">andThen</span><span class="p">(</span><span class="n">clientServicePerEndpoint</span><span class="p">.</span><span class="n">log</span><span class="p">)</span>
 
-<span class="n">filteredLog</span><span class="o">(</span><span class="nc">Log</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">))</span>
+<span class="n">filteredLog</span><span class="p">(</span><span class="nc">Log</span><span class="p">.</span><span class="nc">Args</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <span class="c1">// [2] Server received: &#39;HELLO&#39;</span>
 </pre></div>
 </div>
 <p>Here’s an example of a retry policy that retries on Thrift exceptions:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">retryPolicy</span><span class="k">:</span> <span class="kt">RetryPolicy</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]]</span> <span class="k">=</span>
-  <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span>
-    <span class="mi">3</span><span class="o">,</span>
-    <span class="o">{</span>
-      <span class="k">case</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">ex</span><span class="k">:</span> <span class="kt">ReadException</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="kc">true</span>
-    <span class="o">})</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">retryPolicy</span><span class="p">:</span> <span class="nc">RetryPolicy</span><span class="p">[</span><span class="nc">Try</span><span class="p">[</span><span class="nc">GetLogSize</span><span class="p">.</span><span class="nc">Result</span><span class="p">]]</span> <span class="o">=</span>
+  <span class="nc">RetryPolicy</span><span class="p">.</span><span class="n">tries</span><span class="p">[</span><span class="nc">Try</span><span class="p">[</span><span class="nc">GetLogSize</span><span class="p">.</span><span class="nc">Result</span><span class="p">]](</span>
+    <span class="mi">3</span><span class="p">,</span>
+    <span class="p">{</span>
+      <span class="k">case</span> <span class="nc">Throw</span><span class="p">(</span><span class="n">ex</span><span class="p">:</span> <span class="nc">ReadException</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="kc">true</span>
+    <span class="p">})</span>
 
-<span class="k">val</span> <span class="n">retriedGetLogSize</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">GetLogSize.Args</span>, <span class="kt">GetLogSize.SuccessType</span><span class="o">]</span> <span class="k">=</span>
-  <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">(</span><span class="n">retryPolicy</span><span class="o">,</span> <span class="nc">DefaultTimer</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">clientServicePerEndpoint</span><span class="o">.</span><span class="n">getLogSize</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">retriedGetLogSize</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">GetLogSize</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">GetLogSize</span><span class="p">.</span><span class="nc">SuccessType</span><span class="p">]</span> <span class="o">=</span>
+  <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="p">(</span><span class="n">retryPolicy</span><span class="p">,</span> <span class="nc">DefaultTimer</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">andThen</span><span class="p">(</span><span class="n">clientServicePerEndpoint</span><span class="p">.</span><span class="n">getLogSize</span><span class="p">)</span>
 
-<span class="n">retriedGetLogSize</span><span class="o">(</span><span class="nc">GetLogSize</span><span class="o">.</span><span class="nc">Args</span><span class="o">())</span>
+<span class="n">retriedGetLogSize</span><span class="p">(</span><span class="nc">GetLogSize</span><span class="p">.</span><span class="nc">Args</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>Another way to construct Thrift clients is using the <cite>MethodPerEndpoint</cite> interface:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">LoggerService.MethodPerEndpoint</span> <span class="o">=</span>
-  <span class="nc">Thrift</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">build</span><span class="o">[</span><span class="kt">LoggerService.MethodPerEndpoint</span><span class="o">](</span><span class="s">&quot;localhost:1234&quot;</span><span class="o">)</span>
-<span class="n">client</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;message&quot;</span><span class="o">,</span> <span class="mi">4</span><span class="o">).</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">response</span> <span class="k">=&gt;</span>
-  <span class="n">println</span><span class="o">(</span><span class="s">&quot;Client received response: &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">)</span>
-<span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">client</span><span class="p">:</span> <span class="nc">LoggerService</span><span class="p">.</span><span class="nc">MethodPerEndpoint</span> <span class="o">=</span>
+  <span class="nc">Thrift</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="n">build</span><span class="p">[</span><span class="nc">LoggerService</span><span class="p">.</span><span class="nc">MethodPerEndpoint</span><span class="p">](</span><span class="s">&quot;localhost:1234&quot;</span><span class="p">)</span>
+<span class="n">client</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;message&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">).</span><span class="n">onSuccess</span> <span class="p">{</span> <span class="n">response</span> <span class="o">=&gt;</span>
+  <span class="n">println</span><span class="p">(</span><span class="s">&quot;Client received response: &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>To convert the Service interface to the method interface use <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Thrift$">Thrift.Client.methodPerEndpoint</a>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">filteredMethodIface</span><span class="k">:</span> <span class="kt">LoggerService.MethodPerEndpoint</span> <span class="o">=</span>
-  <span class="nc">Thrift</span><span class="o">.</span><span class="nc">Client</span><span class="o">.</span><span class="n">methodPerEndpoint</span><span class="o">(</span><span class="n">clientServicePerEndpoint</span><span class="o">.</span><span class="n">withLog</span><span class="o">(</span><span class="n">filteredLog</span><span class="o">))</span>
-<span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">filteredMethodIface</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;ping&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="n">println</span><span class="o">))</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">filteredMethodIface</span><span class="p">:</span> <span class="nc">LoggerService</span><span class="p">.</span><span class="nc">MethodPerEndpoint</span> <span class="o">=</span>
+  <span class="nc">Thrift</span><span class="p">.</span><span class="nc">Client</span><span class="p">.</span><span class="n">methodPerEndpoint</span><span class="p">(</span><span class="n">clientServicePerEndpoint</span><span class="p">.</span><span class="n">withLog</span><span class="p">(</span><span class="n">filteredLog</span><span class="p">))</span>
+<span class="nc">Await</span><span class="p">.</span><span class="n">result</span><span class="p">(</span><span class="n">filteredMethodIface</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;ping&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="n">println</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>The complete example is at <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala">ThriftServicePerEndpointExample.scala</a>.
 Check out the <cite>finagle-thrift</cite> <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Thrift$">API</a>
 for more info.</p>
-</div>
-</div>
-<div class="section" id="mux">
+</section>
+</section>
+<section id="mux">
 <span id="id1"></span><h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
 <p><strong>What is Mux?</strong></p>
 <p>At its core, Mux is a generic RPC multiplexing protocol. Although its primary
@@ -218,11 +219,11 @@ code</a>.</p>
 <p><strong>Why is RPC multiplexing important?</strong></p>
 <p>Some important consequences of multiplexing at the RPC level:</p>
 <ul class="simple">
-<li>One network connection per client-server session</li>
-<li>Maximization of available bandwidth without incurring the cost of opening
-additional sockets</li>
-<li>Elimination of head-of-line blocking</li>
-<li>Explicit queue management</li>
+<li><p>One network connection per client-server session</p></li>
+<li><p>Maximization of available bandwidth without incurring the cost of opening
+additional sockets</p></li>
+<li><p>Elimination of head-of-line blocking</p></li>
+<li><p>Explicit queue management</p></li>
 </ul>
 <p><strong>Mux as a pure session-layer protocol</strong></p>
 <p>In OSI terminology, Mux is a pure
@@ -245,8 +246,8 @@ session.</p>
 <p>Mux enables servers to advertise availability on a per-window basis. This is
 useful for establishing explicit queueing policies, leading the way to
 intelligent back-pressure, slow start, and GC-avoidance.</p>
-</div>
-<div class="section" id="mysql">
+</section>
+<section id="mysql">
 <h2>Mysql<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h2>
 <p><em>finagle-mysql</em> is an asynchronous implementation of the MySQL protocol built on top of Finagle.
 The project provides a simple query API with support for prepared statements and
@@ -254,82 +255,82 @@ transactions while taking advantage of Finagle’s <a class="reference internal"
 connection pooling. The implementation supports both the MySQL binary and string protocols.</p>
 <p>A client can be constructed using the
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Mysql$">Mysql</a> protocol object:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withCredentials</span><span class="o">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="o">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withDatabase</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">DefaultPool</span>
-    <span class="o">.</span><span class="nc">Param</span><span class="o">(</span><span class="n">low</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">high</span> <span class="k">=</span> <span class="mi">10</span><span class="o">,</span> <span class="n">idleTime</span> <span class="k">=</span> <span class="mf">5.</span><span class="n">minutes</span><span class="o">,</span> <span class="n">bufferSize</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">maxWaiters</span> <span class="k">=</span> <span class="nc">Int</span><span class="o">.</span><span class="nc">MaxValue</span><span class="o">))</span>
-  <span class="o">.</span><span class="n">newClient</span><span class="o">(</span><span class="s">&quot;127.0.0.1:3306&quot;</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">client</span> <span class="o">=</span> <span class="nc">Mysql</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withCredentials</span><span class="p">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">withDatabase</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">configured</span><span class="p">(</span><span class="nc">DefaultPool</span>
+    <span class="p">.</span><span class="nc">Param</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">idleTime</span> <span class="o">=</span> <span class="mi">5</span><span class="p">.</span><span class="n">minutes</span><span class="p">,</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">maxWaiters</span> <span class="o">=</span> <span class="nc">Int</span><span class="p">.</span><span class="nc">MaxValue</span><span class="p">))</span>
+  <span class="p">.</span><span class="n">newClient</span><span class="p">(</span><span class="s">&quot;127.0.0.1:3306&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We configure the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/client/DefaultPool">client’s connection pool</a> to be
 compatible with our MySQL server. The constructor returns a Finagle <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span class="std std-ref">ServiceFactory</span></a>
 from <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Request">mysql.Request</a> to <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Result">mysql.Result</a>
 which we can use to query the db:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">client</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">service</span> <span class="k">=&gt;</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">product</span> <span class="o">=</span> <span class="n">client</span><span class="p">().</span><span class="n">flatMap</span> <span class="p">{</span> <span class="n">service</span> <span class="o">=&gt;</span>
   <span class="c1">// `service` is checked out from the pool.</span>
-  <span class="n">service</span><span class="o">(</span><span class="nc">QueryRequest</span><span class="o">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="o">))</span>
-    <span class="o">.</span><span class="n">map</span> <span class="o">{</span>
-      <span class="k">case</span> <span class="n">rs</span><span class="k">:</span> <span class="kt">ResultSet</span> <span class="o">=&gt;</span> <span class="n">rs</span><span class="o">.</span><span class="n">rows</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">processRow</span><span class="o">)</span>
-      <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">Seq</span><span class="o">.</span><span class="n">empty</span>
-    <span class="o">}.</span><span class="n">ensure</span> <span class="o">{</span>
+  <span class="n">service</span><span class="p">(</span><span class="nc">QueryRequest</span><span class="p">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="p">))</span>
+    <span class="p">.</span><span class="n">map</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="n">rs</span><span class="p">:</span> <span class="nc">ResultSet</span> <span class="o">=&gt;</span> <span class="n">rs</span><span class="p">.</span><span class="n">rows</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">processRow</span><span class="p">)</span>
+      <span class="k">case</span> <span class="n">_</span> <span class="o">=&gt;</span> <span class="nc">Seq</span><span class="p">.</span><span class="n">empty</span>
+    <span class="p">}.</span><span class="n">ensure</span> <span class="p">{</span>
       <span class="c1">// put `service` back into the pool.</span>
-      <span class="n">service</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
-    <span class="o">}</span>
-<span class="o">}</span>
+      <span class="n">service</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>A <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/ResultSet">ResultSet</a> makes it easy to extract
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Value">Values</a> based on column names. For example, we can
 implement the above <cite>processRow</cite> as a pattern match on expected values:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">processRow</span><span class="o">(</span><span class="n">row</span><span class="k">:</span> <span class="kt">Row</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">row</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="s">&quot;product&quot;</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">processRow</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="nc">Row</span><span class="p">):</span> <span class="nc">Option</span><span class="p">[</span><span class="nc">Long</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">row</span><span class="p">.</span><span class="n">getLong</span><span class="p">(</span><span class="s">&quot;product&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The ServiceFactory API gives you more fine-grained control over the pool. This isn’t always necessary
 - to simplify <em>finagle-mysql</em> offers a rich API that wraps the ServiceFactory returned from <cite>newClient</cite>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">richClient</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withCredentials</span><span class="o">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="o">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withDatabase</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">DefaultPool</span>
-    <span class="o">.</span><span class="nc">Param</span><span class="o">(</span><span class="n">low</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">high</span> <span class="k">=</span> <span class="mi">10</span><span class="o">,</span> <span class="n">idleTime</span> <span class="k">=</span> <span class="mf">5.</span><span class="n">minutes</span><span class="o">,</span> <span class="n">bufferSize</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">maxWaiters</span> <span class="k">=</span> <span class="nc">Int</span><span class="o">.</span><span class="nc">MaxValue</span><span class="o">))</span>
-  <span class="o">.</span><span class="n">newRichClient</span><span class="o">(</span><span class="s">&quot;127.0.0.1:3306&quot;</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">richClient</span> <span class="o">=</span> <span class="nc">Mysql</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withCredentials</span><span class="p">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">withDatabase</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">configured</span><span class="p">(</span><span class="nc">DefaultPool</span>
+    <span class="p">.</span><span class="nc">Param</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">idleTime</span> <span class="o">=</span> <span class="mi">5</span><span class="p">.</span><span class="n">minutes</span><span class="p">,</span> <span class="n">bufferSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">maxWaiters</span> <span class="o">=</span> <span class="nc">Int</span><span class="p">.</span><span class="nc">MaxValue</span><span class="p">))</span>
+  <span class="p">.</span><span class="n">newRichClient</span><span class="p">(</span><span class="s">&quot;127.0.0.1:3306&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>and we can select:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">richClient</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="o">)(</span><span class="n">processRow</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">product</span> <span class="o">=</span> <span class="n">richClient</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="p">)(</span><span class="n">processRow</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Note that <cite>select</cite> takes care of checking out the service and returning it to the pool. <cite>select</cite> and
 other useful methods are available on <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Client">mysql.Client</a> which is returned
 from the call to <cite>newRichClient</cite>.</p>
 <p>For a more involved example see the Finagle <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala">example project</a>.</p>
-</div>
-<div class="section" id="http">
+</section>
+<section id="http">
 <h2>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
 <p>Finagle supports both HTTP/1 and HTTP/2. Details can be found in <em>finagle-http</em> and <em>finagle-http2</em>.</p>
 <p><strong>Headers</strong></p>
 <p>Finagle sets certain request/response headers to transmit additional metadata.</p>
-<dl class="docutils">
-<dt><cite>Finagle-Ctx-com.twitter.finagle.Retries</cite></dt>
-<dd>The number of times this request has been retried. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></dd>
-<dt><cite>Finagle-Ctx-com.twitter.finagle.Deadline</cite></dt>
-<dd>The time by which this request must be satisfied. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></dd>
-<dt><cite>dtab-local</cite></dt>
-<dd><p class="first">A list of dtab overrides for this request. Note: if your server accepts requests from untrusted clients, you may want to restrict this header to
+<dl>
+<dt><cite>Finagle-Ctx-com.twitter.finagle.Retries</cite></dt><dd><p>The number of times this request has been retried. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></p>
+</dd>
+<dt><cite>Finagle-Ctx-com.twitter.finagle.Deadline</cite></dt><dd><p>The time by which this request must be satisfied. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></p>
+</dd>
+<dt><cite>dtab-local</cite></dt><dd><p>A list of dtab overrides for this request. Note: if your server accepts requests from untrusted clients, you may want to restrict this header to
 only trusted clients. This would prevent bad actors from redirecting requests to possibly unsafe locations. You can disable this behavior by
 removing the ServerDtabContextFilter from the server stack, or by adding your own module which removes these headers from untrusted requests.</p>
-<p class="last">See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpDtab.scala">HttpDtab.scala</a> and <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a>.</p>
+<p>See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpDtab.scala">HttpDtab.scala</a> and <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a>.</p>
 </dd>
-<dt><cite>finagle-http-nack</cite></dt>
-<dd>Makes finagle treat this reply as a retryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
-<dt><cite>finagle-http-nonretryable-nack</cite></dt>
-<dd>Makes finagle treat this reply as a nonretryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
+<dt><cite>finagle-http-nack</cite></dt><dd><p>Makes finagle treat this reply as a retryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></p>
+</dd>
+<dt><cite>finagle-http-nonretryable-nack</cite></dt><dd><p>Makes finagle treat this reply as a nonretryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></p>
+</dd>
 </dl>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -383,7 +384,7 @@ removing the ServerDtabContextFilter from the server stack, or by adding your ow
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

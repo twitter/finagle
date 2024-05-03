@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Servers &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Servers &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="ApertureLoadBalancers.html" title="Aperture Load Balancers"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Servers</a></li> 
       </ul>
     </div>  
 
@@ -58,39 +58,39 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="servers">
+  <section id="servers">
 <span id="finagle-servers"></span><h1>Servers<a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h1>
 <p>Finagle servers implement a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Server.scala">interface:</a></p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">serve</span><span class="o">(</span>
-  <span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">,</span>
-  <span class="n">factory</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
-<span class="o">)</span><span class="k">:</span> <span class="kt">ListeningServer</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">serve</span><span class="p">(</span>
+  <span class="n">addr</span><span class="p">:</span> <span class="nc">SocketAddress</span><span class="p">,</span>
+  <span class="n">factory</span><span class="p">:</span> <span class="nc">ServiceFactory</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]</span>
+<span class="p">):</span> <span class="nc">ListeningServer</span>
 </pre></div>
 </div>
 <p>When given a <code class="docutils literal notranslate"><span class="pre">SocketAddress</span></code> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span class="std std-ref">ServiceFactory</span></a>, a server returns a
 <code class="docutils literal notranslate"><span class="pre">ListeningServer</span></code>. The <code class="docutils literal notranslate"><span class="pre">ListeningServer</span></code> allows for management of server resources. The interface
 comes with variants that allow for serving a simple <code class="docutils literal notranslate"><span class="pre">Service</span></code> as well. Typical usage takes the form
 <code class="docutils literal notranslate"><span class="pre">Protocol.serve(...)</span></code>, for example:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Service</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">http</span><span class="p">.{</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.{</span><span class="nc">Await</span><span class="p">,</span> <span class="nc">Future</span><span class="p">}</span>
 
-<span class="k">val</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="nc">Response</span><span class="o">())</span>
-<span class="o">}</span>
+<span class="kd">val</span> <span class="n">service</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="nc">Request</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="nc">Response</span><span class="p">())</span>
+<span class="p">}</span>
 
-<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
-<span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span> <span class="c1">// waits until the server resources are released</span>
+<span class="kd">val</span> <span class="n">server</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">server</span><span class="p">.</span><span class="n">serve</span><span class="p">(</span><span class="s">&quot;:8080&quot;</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
+<span class="nc">Await</span><span class="p">.</span><span class="n">ready</span><span class="p">(</span><span class="n">server</span><span class="p">)</span> <span class="c1">// waits until the server resources are released</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last"><cite>finagle-thrift</cite> servers expose a rich API because their interfaces are defined
+<p class="admonition-title">Note</p>
+<p><cite>finagle-thrift</cite> servers expose a rich API because their interfaces are defined
 via a Thrift IDL. See the protocols section on <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">Thrift</span></a>
 for more details.</p>
 </div>
-<div class="section" id="server-modules">
+<section id="server-modules">
 <span id="id1"></span><h2>Server Modules<a class="headerlink" href="#server-modules" title="Permalink to this headline">¶</a></h2>
 <p>Finagle servers are simple; they are designed to serve requests quickly. As such,
 Finagle minimally furnishes servers with additional behavior. More sophisticated
@@ -172,11 +172,11 @@ Requests flow from left to right.</p>
 static property) whether this server can handle the incoming request while maintaining some SLO (Service Level
 Objective).</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">An <cite>Endpoint</cite> module represents a user-defined <code class="docutils literal notranslate"><span class="pre">Service</span></code> passed to the <code class="docutils literal notranslate"><span class="pre">Server.serve(...)</span></code>
+<p class="admonition-title">Note</p>
+<p>An <cite>Endpoint</cite> module represents a user-defined <code class="docutils literal notranslate"><span class="pre">Service</span></code> passed to the <code class="docutils literal notranslate"><span class="pre">Server.serve(...)</span></code>
 method.</p>
 </div>
-<div class="section" id="observability">
+<section id="observability">
 <h3>Observability<a class="headerlink" href="#observability" title="Permalink to this headline">¶</a></h3>
 <p>A Finagle server comes with some useful modules to help owners observe and debug
 their servers. This includes <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">Monitoring</a>,
@@ -185,9 +185,9 @@ and <a class="reference external" href="https://github.com/twitter/finagle/blob/
 <p>All the unhandled exceptions from a user-defined service flow through the <code class="docutils literal notranslate"><span class="pre">Monitor</span></code> object
 used by the given Finagle server. See <a class="reference internal" href="Clients.html#configuring-monitors"><span class="std std-ref">this example</span></a> on how to
 override the default instance that simply logs exceptions onto a the standard output.</p>
-</div>
-</div>
-<div class="section" id="response-classification">
+</section>
+</section>
+<section id="response-classification">
 <h2>Response Classification<a class="headerlink" href="#response-classification" title="Permalink to this headline">¶</a></h2>
 <p>To give Finagle visibility into application level success and failure
 developers can provide classification of responses on clients and servers by using
@@ -201,21 +201,21 @@ clients and servers you may want to use <code class="docutils literal notranslat
 which classifies any deserialized Thrift Exception as a failure. For a large set of
 use cases these should suffice. Classifiers get wired up to your client and server in a
 straightforward manner, for example, in a ThriftMux client:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.service.ThriftResponseClassifier</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">ThriftMux</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thrift</span><span class="p">.</span><span class="nn">service</span><span class="p">.</span><span class="nc">ThriftResponseClassifier</span>
 
-<span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">...</span>
-  <span class="o">.</span><span class="n">withResponseClassifier</span><span class="o">(</span><span class="nc">ThriftResponseClassifier</span><span class="o">.</span><span class="nc">ThriftExceptionsAsFailures</span><span class="o">)</span>
+<span class="nc">ThriftMux</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">...</span>
+  <span class="p">.</span><span class="n">withResponseClassifier</span><span class="p">(</span><span class="nc">ThriftResponseClassifier</span><span class="p">.</span><span class="nc">ThriftExceptionsAsFailures</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In an HTTP server:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http.service.HttpResponseClassifier</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">http</span><span class="p">.</span><span class="nn">service</span><span class="p">.</span><span class="nc">HttpResponseClassifier</span>
 
-<span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
-  <span class="o">...</span>
-  <span class="o">.</span><span class="n">withResponseClassifier</span><span class="o">(</span><span class="nc">HttpResponseClassifier</span><span class="o">.</span><span class="nc">ServerErrorsAsFailures</span><span class="o">)</span>
+<span class="nc">Http</span><span class="p">.</span><span class="n">server</span>
+  <span class="p">...</span>
+  <span class="p">.</span><span class="n">withResponseClassifier</span><span class="p">(</span><span class="nc">HttpResponseClassifier</span><span class="p">.</span><span class="nc">ServerErrorsAsFailures</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If a classifier is not specified on a client or server or if a user’s classifier isn’t
@@ -228,10 +228,10 @@ constitutes a failed outcome, and also what to do about it. Users define
 classifiers in terms of <code class="docutils literal notranslate"><span class="pre">ReqRep</span></code> and <code class="docutils literal notranslate"><span class="pre">Try</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">rc</span></code>, defined below, is a classifier that tells Finagle that <code class="docutils literal notranslate"><span class="pre">Throw</span></code> means
 failure, and <code class="docutils literal notranslate"><span class="pre">Return</span></code> means success.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">rc</span><span class="k">:</span> <span class="kt">ResponseClassifier</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="n">req</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">exc</span><span class="o">))</span> <span class="k">=&gt;</span> <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
-  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="n">req</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">rep</span><span class="o">))</span> <span class="k">=&gt;</span> <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">Success</span>
-<span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">rc</span><span class="p">:</span> <span class="nc">ResponseClassifier</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="nc">Throw</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span> <span class="o">=&gt;</span> <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">RetryableFailure</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="nc">Return</span><span class="p">(</span><span class="n">rep</span><span class="p">))</span> <span class="o">=&gt;</span> <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">Success</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>A <code class="docutils literal notranslate"><span class="pre">ReqRep</span></code> is a request-response pair. This is so that classifiers can make
@@ -242,9 +242,9 @@ respond to failed outcomes with some nuance, for example, it may retry the
 operation.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ResponseClass</span></code> defines three classes of failure:</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">NonRetryableFailure</span></code>: Something went wrong, don’t retry.</li>
-<li><code class="docutils literal notranslate"><span class="pre">RetryableFailure</span></code>: Something went wrong, consider retrying the operation.</li>
-<li><code class="docutils literal notranslate"><span class="pre">Ignorable</span></code>: Something went wrong, but it can be ignored.</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NonRetryableFailure</span></code>: Something went wrong, don’t retry.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RetryableFailure</span></code>: Something went wrong, consider retrying the operation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Ignorable</span></code>: Something went wrong, but it can be ignored.</p></li>
 </ul>
 <p>And, of course, <code class="docutils literal notranslate"><span class="pre">Success</span></code> means that the operation succeeded.
 <code class="docutils literal notranslate"><span class="pre">Ignorable</span></code> does not apply to <code class="docutils literal notranslate"><span class="pre">Success</span></code> because it is a mapping from
@@ -257,14 +257,14 @@ Similarly, just because a classifier emits <code class="docutils literal notrans
 the caller will retry the operation.</p>
 <p>Now that we’ve covered the basics, let’s look at an example in HTTP. Here is
 an example that counts HTTP 503s as failures:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="n">http</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">service</span><span class="p">.{</span><span class="nc">ReqRep</span><span class="p">,</span> <span class="nc">ResponseClass</span><span class="p">,</span> <span class="nc">ResponseClassifier</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Return</span>
 
-<span class="k">val</span> <span class="n">classifier</span><span class="k">:</span> <span class="kt">ResponseClassifier</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">r</span><span class="k">:</span> <span class="kt">http.Response</span><span class="o">))</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">statusCode</span> <span class="o">==</span> <span class="mi">503</span> <span class="k">=&gt;</span>
-    <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">NonRetryableFailure</span>
-<span class="o">}</span>
+<span class="kd">val</span> <span class="n">classifier</span><span class="p">:</span> <span class="nc">ResponseClassifier</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="nc">Return</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">))</span> <span class="k">if</span> <span class="n">r</span><span class="p">.</span><span class="n">statusCode</span> <span class="o">==</span> <span class="mi">503</span> <span class="o">=&gt;</span>
+    <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">NonRetryableFailure</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Note that this <code class="docutils literal notranslate"><span class="pre">PartialFunction</span></code> isn’t total which is ok due to Finagle
@@ -292,25 +292,25 @@ service SocialGraph {
 </pre></div>
 </div>
 <p>One possible classifier would be:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">service</span><span class="p">.{</span><span class="nc">ReqRep</span><span class="p">,</span> <span class="nc">ResponseClass</span><span class="p">,</span> <span class="nc">ResponseClassifier</span><span class="p">}</span>
 
-<span class="k">val</span> <span class="n">classifier</span><span class="k">:</span> <span class="kt">ResponseClassifier</span> <span class="o">=</span> <span class="o">{</span>
+<span class="kd">val</span> <span class="n">classifier</span><span class="p">:</span> <span class="nc">ResponseClassifier</span> <span class="o">=</span> <span class="p">{</span>
   <span class="c1">// #1</span>
-  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="k">_:</span> <span class="kt">NotFoundException</span><span class="o">))</span> <span class="k">=&gt;</span>
-    <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">NonRetryableFailure</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="nc">Throw</span><span class="p">(</span><span class="n">_:</span> <span class="nc">NotFoundException</span><span class="p">))</span> <span class="o">=&gt;</span>
+    <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">NonRetryableFailure</span>
 
   <span class="c1">// #2</span>
-  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Int</span><span class="o">))</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">=&gt;</span>
-    <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">NonRetryableFailure</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="nc">Return</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nc">Int</span><span class="p">))</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">=&gt;</span>
+    <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">NonRetryableFailure</span>
 
   <span class="c1">// #3 *Caution*</span>
-  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="nc">SocialGraph</span><span class="o">.</span><span class="nc">Follow</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span> <span class="k">_</span><span class="o">)</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">=&gt;</span>
-    <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">NonRetryableFailure</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="nc">SocialGraph</span><span class="p">.</span><span class="nc">Follow</span><span class="p">.</span><span class="nc">Args</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">_</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">=&gt;</span>
+    <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">NonRetryableFailure</span>
 
   <span class="c1">// #4</span>
-  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="k">_:</span> <span class="kt">InvalidQueryException</span><span class="o">))</span> <span class="k">=&gt;</span>
-    <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">Success</span>
-<span class="o">}</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="nc">Throw</span><span class="p">(</span><span class="n">_:</span> <span class="nc">InvalidQueryException</span><span class="p">))</span> <span class="o">=&gt;</span>
+    <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">Success</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>If you examine that classifier you’ll note a few things. First (#1), the
@@ -330,7 +330,7 @@ the <code class="docutils literal notranslate"><span class="pre">StatsFilter</sp
 in the <code class="docutils literal notranslate"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
 <a class="reference external" href="https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
 for more details.</p>
-<div class="section" id="concurrency-limit">
+<section id="concurrency-limit">
 <h3>Concurrency Limit<a class="headerlink" href="#concurrency-limit" title="Permalink to this headline">¶</a></h3>
 <p>The <cite>Concurrency Limit</cite> module is implemented by both
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/filter/RequestSemaphoreFilter.scala">RequestSemaphoreFilter</a> and
@@ -338,34 +338,34 @@ for more details.</p>
 the <cite>concurrency</cite> of the Finagle server.</p>
 <p>By default, this module is disabled, which means a Finagle server’s requests concurrency is unbounded.
 To enable the <cite>Concurrency Limit</cite> module and put some bounds in terms of maximum number of requests
-that might be handled concurrently by your server, use the following example <a class="footnote-reference" href="#example" id="id2">[2]</a>.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+that might be handled concurrently by your server, use the following example <a class="footnote-reference brackets" href="#example" id="id2">2</a>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
 
-<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
-  <span class="o">.</span><span class="n">withAdmissionControl</span><span class="o">.</span><span class="n">concurrencyLimit</span><span class="o">(</span>
-    <span class="n">maxConcurrentRequests</span> <span class="k">=</span> <span class="mi">10</span><span class="o">,</span>
-    <span class="n">maxWaiters</span> <span class="k">=</span> <span class="mi">0</span>
-  <span class="o">)</span>
-  <span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">server</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">server</span>
+  <span class="p">.</span><span class="n">withAdmissionControl</span><span class="p">.</span><span class="n">concurrencyLimit</span><span class="p">(</span>
+    <span class="n">maxConcurrentRequests</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">maxWaiters</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="p">)</span>
+  <span class="p">.</span><span class="n">serve</span><span class="p">(</span><span class="s">&quot;:8080&quot;</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The <cite>Concurrency Limit</cite> module is configured with two parameters:</p>
 <ol class="arabic simple">
-<li><cite>maxConcurrentRequests</cite> - the number of requests allowed to be handled concurrently</li>
-<li><dl class="first docutils">
-<dt><cite>maxWaiters</cite> - the number of requests (on top of <cite>maxConcurrentRequests</cite>) allowed to be queued.</dt>
-<dd>The value of this parameter determines which filter is used; if <cite>maxWaiters</cite> is 0, <cite>PendingRequestFilter</cite>
+<li><p><cite>maxConcurrentRequests</cite> - the number of requests allowed to be handled concurrently</p></li>
+<li><dl class="simple">
+<dt><cite>maxWaiters</cite> - the number of requests (on top of <cite>maxConcurrentRequests</cite>) allowed to be queued.</dt><dd><p>The value of this parameter determines which filter is used; if <cite>maxWaiters</cite> is 0, <cite>PendingRequestFilter</cite>
 is used (saving the overhead of the waiters queue in AsyncSemaphore); otherwise,
-<cite>RequestSemaphoreFilter</cite> is used.</dd>
+<cite>RequestSemaphoreFilter</cite> is used.</p>
+</dd>
 </dl>
 </li>
 </ol>
 <p>All the incoming requests on top of <code class="docutils literal notranslate"><span class="pre">(maxConcurrentRequests</span> <span class="pre">+</span> <span class="pre">maxWaiters)</span></code> will be
-<cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id3">[1]</a> by the server. That said, the <cite>Concurrency Limit</cite> module acts as
+<cite>rejected</cite> <a class="footnote-reference brackets" href="#nack" id="id3">1</a> by the server. That said, the <cite>Concurrency Limit</cite> module acts as
 <cite>static admission controller</cite> monitoring the current concurrency level of the incoming requests.</p>
 <p>See <a class="reference internal" href="Metrics.html#requests-concurrency-limit"><span class="std std-ref">Requests Concurrency metrics</span></a> for more details.</p>
-</div>
-<div class="section" id="rejecting-requests">
+</section>
+<section id="rejecting-requests">
 <h3>Rejecting Requests<a class="headerlink" href="#rejecting-requests" title="Permalink to this headline">¶</a></h3>
 <p>A service may explicitly reject requests on a case-by-case basis. To generate a rejection response,
 have the server return a Future.exception of <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> with
@@ -375,15 +375,15 @@ also sets the <cite>Restartable</cite> flag which indicates the failure is safe 
 failures.
 For requests that should not be retried, the server should return a <cite>Failure</cite> with the <cite>NonRetryable</cite>
 flag set.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Failure</span>
 
-<span class="k">val</span> <span class="n">rejection</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="nc">Failure</span><span class="o">.</span><span class="n">rejected</span><span class="o">(</span><span class="s">&quot;busy&quot;</span><span class="o">))</span>
-<span class="k">val</span> <span class="n">nonRetryable</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="nc">Failure</span><span class="o">(</span><span class="s">&quot;Don&#39;t try again&quot;</span><span class="o">,</span> <span class="nc">Failure</span><span class="o">.</span><span class="nc">Rejected</span><span class="o">|</span><span class="nc">Failure</span><span class="o">.</span><span class="nc">NonRetryable</span><span class="o">))</span>
+<span class="kd">val</span> <span class="n">rejection</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">exception</span><span class="p">(</span><span class="nc">Failure</span><span class="p">.</span><span class="n">rejected</span><span class="p">(</span><span class="s">&quot;busy&quot;</span><span class="p">))</span>
+<span class="kd">val</span> <span class="n">nonRetryable</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">exception</span><span class="p">(</span><span class="nc">Failure</span><span class="p">(</span><span class="s">&quot;Don&#39;t try again&quot;</span><span class="p">,</span> <span class="nc">Failure</span><span class="p">.</span><span class="nc">Rejected</span><span class="o">|</span><span class="nc">Failure</span><span class="p">.</span><span class="nc">NonRetryable</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>These responses will be considered <cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id4">[1]</a> by Finagle.</p>
-</div>
-<div class="section" id="request-timeout">
+<p>These responses will be considered <cite>rejected</cite> <a class="footnote-reference brackets" href="#nack" id="id4">1</a> by Finagle.</p>
+</section>
+<section id="request-timeout">
 <h3>Request Timeout<a class="headerlink" href="#request-timeout" title="Permalink to this headline">¶</a></h3>
 <p>The <cite>Request Timeout</cite> module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a> and simply <cite>fails</cite> all the
@@ -391,58 +391,55 @@ requests that a given server hasn’t be able to handle in the given amount of t
 Finagle clients, this module is disabled by default (the timeout is unbounded). See
 <a class="reference internal" href="Clients.html#configuring-timeouts"><span class="std std-ref">this example</span></a> to override this behaviour.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The <cite>Request Timeout</cite> module doesn’t <cite>reject</cite> the incoming request, but <cite>fails</cite> it. This
+<p class="admonition-title">Note</p>
+<p>The <cite>Request Timeout</cite> module doesn’t <cite>reject</cite> the incoming request, but <cite>fails</cite> it. This
 means it won’t by default be retried by a remote client given it’s not known whether
 the request has been timed out being in the queue (waiting for processing) or being
 processed.</p>
 </div>
 <p class="rubric">Footnotes</p>
-<table class="docutils footnote" frame="void" id="nack" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id3">1</a>, <a class="fn-backref" href="#id4">2</a>)</em> Depending on the protocol, a rejected request might be transformed into a <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nack</span></a>
-(currently supported in HTTP/1.1 and Mux) message.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="example" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id5">2</a>)</em> Configuration parameters/values provided in this example are only demonstrate
+<dl class="footnote brackets">
+<dt class="label" id="nack"><span class="brackets">1</span><span class="fn-backref">(<a href="#id3">1</a>,<a href="#id4">2</a>)</span></dt>
+<dd><p>Depending on the protocol, a rejected request might be transformed into a <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nack</span></a>
+(currently supported in HTTP/1.1 and Mux) message.</p>
+</dd>
+<dt class="label" id="example"><span class="brackets">2</span><span class="fn-backref">(<a href="#id2">1</a>,<a href="#id5">2</a>)</span></dt>
+<dd><p>Configuration parameters/values provided in this example are only demonstrate
 the API usage, not the real world values. We do not recommend blindly applying those values
-to production systems.</td></tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="session-expiration">
+to production systems.</p>
+</dd>
+</dl>
+</section>
+<section id="session-expiration">
 <h3>Session Expiration<a class="headerlink" href="#session-expiration" title="Permalink to this headline">¶</a></h3>
 <p>In certain cases, it may be useful for the server to control its resources via bounding
 the lifetime of a session. The <cite>Session Expiration</cite> module is attached at the connection level
 and expires a service/session after a certain amount of idle time. The module is
 implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p>The default setting for the <cite>Expiration</cite> module is to never expire a session. Here is how
-it can be configured <a class="footnote-reference" href="#example" id="id5">[2]</a>.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+it can be configured <a class="footnote-reference brackets" href="#example" id="id5">2</a>.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">conversions</span><span class="p">.</span><span class="nc">DurationOps</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
 
-<span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
-  <span class="o">.</span><span class="n">withSession</span><span class="o">.</span><span class="n">maxLifeTime</span><span class="o">(</span><span class="mf">20.</span><span class="n">seconds</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withSession</span><span class="o">.</span><span class="n">maxIdleTime</span><span class="o">(</span><span class="mf">10.</span><span class="n">seconds</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">twitter</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">server</span>
+  <span class="p">.</span><span class="n">withSession</span><span class="p">.</span><span class="n">maxLifeTime</span><span class="p">(</span><span class="mi">20</span><span class="p">.</span><span class="n">seconds</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">withSession</span><span class="p">.</span><span class="n">maxIdleTime</span><span class="p">(</span><span class="mi">10</span><span class="p">.</span><span class="n">seconds</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="s">&quot;twitter.com&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The <cite>Expiration</cite> module takes two parameters:</p>
 <ol class="arabic simple">
-<li><cite>maxLifeTime</cite> - the maximum duration for which a session is considered alive</li>
-<li><cite>maxIdleTime</cite> - the maximum duration for which a session is allowed to idle
-(not sending any requests)</li>
+<li><p><cite>maxLifeTime</cite> - the maximum duration for which a session is considered alive</p></li>
+<li><p><cite>maxIdleTime</cite> - the maximum duration for which a session is allowed to idle
+(not sending any requests)</p></li>
 </ol>
 <p>See <a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><span class="std std-ref">Expiration metrics</span></a> for more details.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -500,7 +497,7 @@ it can be configured <a class="footnote-reference" href="#example" id="id5">[2]<
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

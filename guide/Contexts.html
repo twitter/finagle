@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Contexts &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Contexts &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="ThreadingModel.html" title="Threading Model"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Contexts</a></li> 
       </ul>
     </div>  
 
@@ -58,7 +58,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="contexts">
+  <section id="contexts">
 <h1>Contexts<a class="headerlink" href="#contexts" title="Permalink to this headline">¶</a></h1>
 <p>Finagle uses <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/context/Contexts.scala">Contexts</a>, which give you something akin to Java’s <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html">ThreadLocals</a>
 across <a class="reference internal" href="Futures.html"><span class="doc">asynchronous</span></a> code.
@@ -101,34 +101,35 @@ scala&gt; println(s&quot;Timer saw: &#39;${Await.result(clientIdInTimer)}&#39;&q
 Timer saw: &#39;test-client&#39;
 </pre></div>
 </div>
-<div class="section" id="commonly-used-instances">
+<section id="commonly-used-instances">
 <h2>Commonly used instances<a class="headerlink" href="#commonly-used-instances" title="Permalink to this headline">¶</a></h2>
 <p>Because <code class="docutils literal notranslate"><span class="pre">Context</span></code>s are not passed directly into methods, discovery of which
 ones exist is challenging.
 To aid with this, here is a listing of some commonly used instances that Finagle
 makes available:</p>
-<div class="section" id="current-trace-id">
+<section id="current-trace-id">
 <h3>Current trace id<a class="headerlink" href="#current-trace-id" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.tracing.Trace.id</span></code> —
 A broadcast <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents this request’s distributed tracing <code class="docutils literal notranslate"><span class="pre">TraceId</span></code>.</p>
-</div>
-<div class="section" id="current-client-id">
+</section>
+<section id="current-client-id">
 <h3>Current client id<a class="headerlink" href="#current-client-id" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.thrift.ClientId.current</span></code> —
 A broadcast <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents the client identifier of a request.</p>
-</div>
-<div class="section" id="current-request-deadline">
+</section>
+<section id="current-request-deadline">
 <h3>Current request deadline<a class="headerlink" href="#current-request-deadline" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.context.Deadline.current</span></code> —
 A broadcast <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents when the request should be completed by.</p>
-</div>
-<div class="section" id="current-retry-attempt">
-<h3>Current retry attempt<a class="headerlink" href="#current-retry-attempt" title="Permalink to this headline">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.context.Retries.current</span></code> —
-A broadcast <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents which retry attempt this request is.
-Will have <code class="docutils literal notranslate"><span class="pre">attempt</span></code> set to 0 if the request is not a retry.</p>
-</div>
-<div class="section" id="current-tls-session">
+</section>
+<section id="current-requeue-attempt">
+<h3>Current requeue attempt<a class="headerlink" href="#current-requeue-attempt" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.context.Requeues.current</span></code> —
+A broadcast <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents which requeue attempt this request is.
+Requeues are retries on write exceptions (i.e. the original request was never sent to the server).
+Will have <code class="docutils literal notranslate"><span class="pre">attempt</span></code> set to 0 if the request is not a requeue.</p>
+</section>
+<section id="current-tls-session">
 <h3>Current TLS session<a class="headerlink" href="#current-tls-session" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.transport.Transport.sslSessionInfo</span></code> _
 A local <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents the <code class="docutils literal notranslate"><span class="pre">Transport</span></code>s
@@ -139,21 +140,21 @@ is an encompassing replacement for <code class="docutils literal notranslate"><s
 <p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.transport.Transport.peerCertificate</span></code> —
 A local <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents the <code class="docutils literal notranslate"><span class="pre">Transport</span></code>s
 <code class="docutils literal notranslate"><span class="pre">java.security.cert.Certificate</span></code> if a TLS session is established.</p>
-</div>
-<div class="section" id="upstream-address">
+</section>
+<section id="upstream-address">
 <h3>Upstream Address<a class="headerlink" href="#upstream-address" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.context.RemoteInfo.Upstream.addr</span></code> —
 A local <code class="docutils literal notranslate"><span class="pre">Context</span></code> that represents the upstream (ingress)
 <code class="docutils literal notranslate"><span class="pre">java.net.SocketAddress</span></code> of the current request.</p>
-</div>
-<div class="section" id="backup-request-indicator">
+</section>
+<section id="backup-request-indicator">
 <h3>Backup request indicator<a class="headerlink" href="#backup-request-indicator" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.context.BackupRequest.wasInitiated</span></code> —
 A broadcast <code class="docutils literal notranslate"><span class="pre">Context</span></code> that indicates if the request was initiated by a backup
 request.</p>
-</div>
-</div>
-<div class="section" id="creating-new-contexts">
+</section>
+</section>
+<section id="creating-new-contexts">
 <h2>Creating new Contexts<a class="headerlink" href="#creating-new-contexts" title="Permalink to this headline">¶</a></h2>
 <p>Instances should be immutable or must provide proper memory visibility
 so that changes will be seen across thread boundaries.</p>
@@ -161,10 +162,11 @@ so that changes will be seen across thread boundaries.</p>
 will be sent across the entire downstream request graph. Considerations
 should include serialization/deserialization costs, serialized size, and
 schema evolution.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -188,7 +190,7 @@ schema evolution.</p>
 <li><a class="reference internal" href="#current-trace-id">Current trace id</a></li>
 <li><a class="reference internal" href="#current-client-id">Current client id</a></li>
 <li><a class="reference internal" href="#current-request-deadline">Current request deadline</a></li>
-<li><a class="reference internal" href="#current-retry-attempt">Current retry attempt</a></li>
+<li><a class="reference internal" href="#current-requeue-attempt">Current requeue attempt</a></li>
 <li><a class="reference internal" href="#current-tls-session">Current TLS session</a></li>
 <li><a class="reference internal" href="#upstream-address">Upstream Address</a></li>
 <li><a class="reference internal" href="#backup-request-indicator">Backup request indicator</a></li>
@@ -222,7 +224,7 @@ schema evolution.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

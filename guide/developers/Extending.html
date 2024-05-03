@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Extending Finagle &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Extending Finagle &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/finagle.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="../Glossary.html" title="Glossary of Terms"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Extending Finagle</a></li> 
       </ul>
     </div>  
 
@@ -58,7 +58,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="extending-finagle">
+  <section id="extending-finagle">
 <h1>Extending Finagle<a class="headerlink" href="#extending-finagle" title="Permalink to this headline">¶</a></h1>
 <p>In this section we’ll examine the internals of Finagle by implementing
 a client and server for a simple newline-delimited, string-based
@@ -78,7 +78,7 @@ $ cd finagle/doc/src/sphinx/code/client-server-anatomy
 $ ./sbt run
 </pre></div>
 </div>
-<div class="section" id="stack">
+<section id="stack">
 <h2>Stack<a class="headerlink" href="#stack" title="Permalink to this headline">¶</a></h2>
 <p>Finagle’s clients and servers comprise many relatively simple
 components, arranged together in a stack. Each component is a
@@ -96,14 +96,14 @@ fashion—for example, by building it bottoms-up, passing each
 <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code> into the constructor of the next—this technique quickly
 becomes onerous; it become very difficult to:</p>
 <ul class="simple">
-<li>parameterize each component, for example to set the sizes of
-connection pools</li>
-<li>inject dependencies such as
-<a class="reference external" href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver">StatsReceiver</a> implementations</li>
-<li>rearrange any part of the stack, for example to remove an
-unused timeout filter</li>
-<li>modify the stack for a specific use, for example to replace
-the connection pooling implementation or the load balancer</li>
+<li><p>parameterize each component, for example to set the sizes of
+connection pools</p></li>
+<li><p>inject dependencies such as
+<a class="reference external" href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver">StatsReceiver</a> implementations</p></li>
+<li><p>rearrange any part of the stack, for example to remove an
+unused timeout filter</p></li>
+<li><p>modify the stack for a specific use, for example to replace
+the connection pooling implementation or the load balancer</p></li>
 </ul>
 <p>Traditionally, the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/builder/ClientBuilder">ClientBuilder</a> and <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/builder/ServerBuilder">ServerBuilder</a> performed this duty in
 the manner just described. While it worked well for a while, it
@@ -129,17 +129,17 @@ we simply call <code class="docutils literal notranslate"><span class="pre">stac
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/client/StackClient$#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">clients</a> and
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/server/StackServer$#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">servers</a>.</p>
 <p>We’ll now discuss the constituent parts of Finagle’s clients and servers.</p>
-</div>
-<div class="section" id="transport-layer">
+</section>
+<section id="transport-layer">
 <span id="transport-interface"></span><h2>Transport Layer<a class="headerlink" href="#transport-layer" title="Permalink to this headline">¶</a></h2>
 <p>Finagle represents the OSI transport layer as a typed stream that may
 be read from and written to asynchronously. The noteworthy methods in
 the interface are defined as such:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Transport</span><span class="o">[</span><span class="kt">In</span>, <span class="kt">Out</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">read</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Out</span><span class="o">]</span>
-  <span class="k">def</span> <span class="n">write</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">In</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span>
-  <span class="o">...</span>
-<span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Transport</span><span class="p">[</span><span class="nc">In</span><span class="p">,</span> <span class="nc">Out</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">read</span><span class="p">():</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Out</span><span class="p">]</span>
+  <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="nc">In</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Unit</span><span class="p">]</span>
+  <span class="p">...</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Most Transports are implemented using <a class="reference external" href="https://netty.io">Netty</a>
@@ -149,8 +149,8 @@ for your protocol implementation. As we have migrated our existing protocols
 to Netty 4, (which is currently in beta and should be considered experimental),
 our best-practice recommendations have evolved, and those will be covered in the
 following section.</p>
-</div>
-<div class="section" id="decoding-in-the-transport">
+</section>
+<section id="decoding-in-the-transport">
 <h2>Decoding in the Transport<a class="headerlink" href="#decoding-in-the-transport" title="Permalink to this headline">¶</a></h2>
 <p>In the following <a class="reference internal" href="#server-protocol"><span class="std std-ref">sections</span></a>, we use Netty-provided
 encoders/decoders in the <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code>, but it would be possible to have an empty
@@ -169,16 +169,16 @@ for Netty 3 and <a class="reference external" href="https://netty.io/4.0/api/io/
 from/to the buffer type used in Finagle, <a class="reference external" href="https://github.com/twitter/util/blob/release/util-core/src/main/scala/com/twitter/io/Buf.scala">Buf</a>,
 and a framer (or framing could happen in the <code class="docutils literal notranslate"><span class="pre">Transport</span></code>).</p>
 <p>On the client side, the <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> would look like:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.netty4.codec.BufCodec</span>
-<span class="k">import</span> <span class="nn">io.netty.channel.ChannelPipeline</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">netty4</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nc">BufCodec</span>
+<span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">channel</span><span class="p">.</span><span class="nc">ChannelPipeline</span>
 
-<span class="k">object</span> <span class="nc">ClientPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">getPipeline</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="nc">Channels</span><span class="o">.</span><span class="n">pipeline</span><span class="o">()</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;bufCodec&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">BufCodec</span><span class="o">)</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;framer&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">MyFramer</span><span class="o">)</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+<span class="k">object</span> <span class="nc">ClientPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">getPipeline</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">pipeline</span> <span class="o">=</span> <span class="nc">Channels</span><span class="p">.</span><span class="n">pipeline</span><span class="p">()</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;bufCodec&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">BufCodec</span><span class="p">)</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;framer&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">MyFramer</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>We’ll cover two different approaches to decoding in the <code class="docutils literal notranslate"><span class="pre">Transport</span></code>.</p>
@@ -187,18 +187,18 @@ has a one-to-one mapping with the frames received. If your client or server can 
 one frame into one message, without knowing anything about the previous or next
 frame, this approach will work for you.</p>
 <p>On your message type object (in this case, <code class="docutils literal notranslate"><span class="pre">Message</span></code>), define encoding and decoding methods:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">object</span> <span class="nc">Message</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">encode</span><span class="o">(</span><span class="n">msg</span><span class="k">:</span> <span class="kt">Message</span><span class="o">)</span><span class="k">:</span> <span class="kt">Buf</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">object</span> <span class="nc">Message</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span> <span class="nc">Message</span><span class="p">):</span> <span class="nc">Buf</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="p">}</span>
 
-  <span class="k">def</span> <span class="n">decode</span><span class="o">(</span><span class="n">buf</span><span class="k">:</span> <span class="kt">Buf</span><span class="o">)</span><span class="k">:</span> <span class="kt">Message</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="o">...</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="n">buf</span><span class="p">:</span> <span class="nc">Buf</span><span class="p">):</span> <span class="nc">Message</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">class</span> <span class="nc">Message</span> <span class="o">{</span>
-  <span class="o">...</span>
-<span class="o">}</span>
+<span class="k">class</span> <span class="nc">Message</span> <span class="p">{</span>
+  <span class="p">...</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Then, on the client side, we can simply map over the
@@ -206,9 +206,9 @@ frame, this approach will work for you.</p>
 functions to produce a new <code class="docutils literal notranslate"><span class="pre">Transport</span></code> that will do decoding and encoding
 for us (to do the same thing on the server side, we’d use a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/dispatch/ServerDispatcher.scala">ServerDispatcher</a> ).</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span>
-    <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">ChannelBuffer</span>, <span class="kt">ChannelBuffer</span><span class="o">])</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Message</span>, <span class="kt">Message</span><span class="o">]</span> <span class="k">=</span>
-  <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="nc">Message</span><span class="o">.</span><span class="n">encode</span><span class="o">,</span> <span class="nc">Message</span><span class="o">.</span><span class="n">decode</span><span class="o">))</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">protected</span> <span class="k">def</span> <span class="nf">newDispatcher</span><span class="p">(</span>
+    <span class="n">transport</span><span class="p">:</span> <span class="nc">Transport</span><span class="p">[</span><span class="nc">ChannelBuffer</span><span class="p">,</span> <span class="nc">ChannelBuffer</span><span class="p">]):</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Message</span><span class="p">,</span> <span class="nc">Message</span><span class="p">]</span> <span class="o">=</span>
+  <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="p">(</span><span class="n">transport</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="nc">Message</span><span class="p">.</span><span class="n">encode</span><span class="p">,</span> <span class="nc">Message</span><span class="p">.</span><span class="n">decode</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>The second approach to doing decoding in the <code class="docutils literal notranslate"><span class="pre">Transport</span></code> applies if your client or server
@@ -219,35 +219,35 @@ needs to maintain some state when decoding. In that case, you can use a
 <p>A custom client transport might look like the following; where a Decoder class
 maintains state and returns a <code class="docutils literal notranslate"><span class="pre">Message</span></code> when sufficient frames have been read,
 or null otherwise.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ClientTransport</span><span class="o">(</span>
-  <span class="n">underlying</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">Buf</span>, <span class="kt">Buf</span><span class="o">]</span>
-<span class="o">)</span> <span class="k">extends</span> <span class="nc">TransportProxy</span> <span class="o">{</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ClientTransport</span><span class="p">(</span>
+  <span class="n">underlying</span><span class="p">:</span> <span class="nc">Transport</span><span class="p">[</span><span class="nc">Buf</span><span class="p">,</span> <span class="nc">Buf</span><span class="p">]</span>
+<span class="p">)</span> <span class="k">extends</span> <span class="nc">TransportProxy</span> <span class="p">{</span>
 
-  <span class="k">val</span> <span class="n">decoder</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MyDecoder</span><span class="o">()</span>
-  <span class="k">val</span> <span class="n">encoder</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MyEncoder</span><span class="o">()</span>
+  <span class="kd">val</span> <span class="n">decoder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MyDecoder</span><span class="p">()</span>
+  <span class="kd">val</span> <span class="n">encoder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MyEncoder</span><span class="p">()</span>
 
-  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">decode</span><span class="k">:</span> <span class="kt">Buf</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">Message</span><span class="o">]</span> <span class="k">=</span> <span class="n">buf</span> <span class="k">=&gt;</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">msg</span><span class="k">:</span> <span class="kt">Message</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="o">(</span><span class="n">buf</span><span class="o">)</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">msg</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">private</span><span class="p">[</span><span class="bp">this</span><span class="p">]</span> <span class="kd">val</span> <span class="n">decode</span><span class="p">:</span> <span class="nc">Buf</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Message</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">msg</span><span class="p">:</span> <span class="nc">Message</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">.</span><span class="n">decode</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">msg</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
       <span class="n">msg</span>
-    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-      <span class="n">readLoop</span><span class="o">()</span>
-    <span class="o">}</span>
-  <span class="o">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="n">readLoop</span><span class="p">()</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
 
-  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">def</span> <span class="n">readLoop</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Message</span><span class="o">]</span> <span class="k">=</span> <span class="n">underlying</span><span class="o">.</span><span class="n">read</span><span class="o">().</span><span class="n">flatMap</span><span class="o">(</span><span class="n">decode</span><span class="o">)</span>
+  <span class="k">private</span><span class="p">[</span><span class="bp">this</span><span class="p">]</span> <span class="k">def</span> <span class="nf">readLoop</span><span class="p">():</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Message</span><span class="p">]</span> <span class="o">=</span> <span class="n">underlying</span><span class="p">.</span><span class="n">read</span><span class="p">().</span><span class="n">flatMap</span><span class="p">(</span><span class="n">decode</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="n">read</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">readLoop</span><span class="o">()</span>
+  <span class="k">def</span> <span class="nf">read</span><span class="p">():</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">readLoop</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="n">write</span><span class="o">(</span><span class="n">msg</span><span class="k">:</span> <span class="kt">Message</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">buf</span><span class="k">:</span> <span class="kt">Buf</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">encode</span><span class="o">(</span><span class="n">msg</span><span class="o">)</span>
-    <span class="n">underlying</span><span class="o">.</span><span class="n">write</span><span class="o">(</span><span class="n">buf</span><span class="o">)</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span> <span class="nc">Message</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Unit</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">buf</span><span class="p">:</span> <span class="nc">Buf</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">underlying</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="server-protocol">
+</section>
+<section id="server-protocol">
 <span id="id1"></span><h2>Server Protocol<a class="headerlink" href="#server-protocol" title="Permalink to this headline">¶</a></h2>
 <p>To frame data received over the network with respect to our
 protocol, we use a Netty Channel Pipeline. Our server pipeline defines a UTF-8
@@ -257,41 +257,41 @@ and <a class="reference external" href="https://netty.io/4.0/api/io/netty/handle
 we’ll put this decoding in the Pipeline). The types have different namespaces but look
 much the same in Netty 3 and Netty 4.</p>
 <p>Using a Netty 3 <a class="reference external" href="https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.jboss.netty.handler.codec.string.</span><span class="o">{</span><span class="nc">StringEncoder</span><span class="o">,</span> <span class="nc">StringDecoder</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">org.jboss.netty.channel._</span>
-<span class="k">import</span> <span class="nn">org.jboss.netty.handler.codec.frame.</span><span class="o">{</span><span class="nc">Delimiters</span><span class="o">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">org.jboss.netty.util.CharsetUtil</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org</span><span class="p">.</span><span class="nn">jboss</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">handler</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nn">string</span><span class="p">.{</span><span class="nc">StringEncoder</span><span class="p">,</span> <span class="nc">StringDecoder</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">org</span><span class="p">.</span><span class="nn">jboss</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">channel</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">org</span><span class="p">.</span><span class="nn">jboss</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">handler</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nn">frame</span><span class="p">.{</span><span class="nc">Delimiters</span><span class="p">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">org</span><span class="p">.</span><span class="nn">jboss</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">CharsetUtil</span>
 
-<span class="k">object</span> <span class="nc">StringServerPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">getPipeline</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="nc">Channels</span><span class="o">.</span><span class="n">pipeline</span><span class="o">()</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;line&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">(</span><span class="mi">100</span><span class="o">,</span> <span class="nc">Delimiters</span><span class="o">.</span><span class="n">lineDelimiter</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">))</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringDecoder&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringEncoder&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
+<span class="k">object</span> <span class="nc">StringServerPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">getPipeline</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">pipeline</span> <span class="o">=</span> <span class="nc">Channels</span><span class="p">.</span><span class="n">pipeline</span><span class="p">()</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;line&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="nc">Delimiters</span><span class="p">.</span><span class="n">lineDelimiter</span><span class="p">:</span> <span class="n">_*</span><span class="p">))</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;stringDecoder&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="p">(</span><span class="nc">CharsetUtil</span><span class="p">.</span><span class="nc">UTF_8</span><span class="p">))</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;stringEncoder&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="p">(</span><span class="nc">CharsetUtil</span><span class="p">.</span><span class="nc">UTF_8</span><span class="p">))</span>
     <span class="n">pipeline</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Using a Netty 4 <a class="reference external" href="https://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">io.netty.handler.codec.string.</span><span class="o">{</span><span class="nc">StringEncoder</span><span class="o">,</span> <span class="nc">StringDecoder</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">io.netty.channel._</span>
-<span class="k">import</span> <span class="nn">io.netty.handler.codec.frame.</span><span class="o">{</span><span class="nc">Delimiters</span><span class="o">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">io.netty.util.CharsetUtil</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">handler</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nn">string</span><span class="p">.{</span><span class="nc">StringEncoder</span><span class="p">,</span> <span class="nc">StringDecoder</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">channel</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">handler</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nn">frame</span><span class="p">.{</span><span class="nc">Delimiters</span><span class="p">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">CharsetUtil</span>
 
-<span class="k">object</span> <span class="nc">StringServerPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">getPipeline</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="nc">Channels</span><span class="o">.</span><span class="n">pipeline</span><span class="o">()</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;line&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">(</span><span class="mi">100</span><span class="o">,</span> <span class="nc">Delimiters</span><span class="o">.</span><span class="n">lineDelimiter</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">))</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringDecoder&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringEncoder&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
+<span class="k">object</span> <span class="nc">StringServerPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">getPipeline</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">pipeline</span> <span class="o">=</span> <span class="nc">Channels</span><span class="p">.</span><span class="n">pipeline</span><span class="p">()</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;line&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="nc">Delimiters</span><span class="p">.</span><span class="n">lineDelimiter</span><span class="p">:</span> <span class="n">_*</span><span class="p">))</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;stringDecoder&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="p">(</span><span class="nc">CharsetUtil</span><span class="p">.</span><span class="nc">UTF_8</span><span class="p">))</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;stringEncoder&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="p">(</span><span class="nc">CharsetUtil</span><span class="p">.</span><span class="nc">UTF_8</span><span class="p">))</span>
     <span class="n">pipeline</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="listener">
+</section>
+<section id="listener">
 <h2>Listener<a class="headerlink" href="#listener" title="Permalink to this headline">¶</a></h2>
 <p>The mechanics of listening over a network socket and
 translating our pipeline into a typed transport are defined by the
@@ -300,24 +300,24 @@ Netty Listener. Finagle provides a
 and <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Listener.scala">Netty4Listener</a>.</p>
 <p>Here we define a <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Listener.scala">Netty4Listener</a>
 in our server implementation:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">protected</span> <span class="k">def</span> <span class="n">newListener</span><span class="o">()</span><span class="k">:</span> <span class="kt">Listener</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-  <span class="nc">Netty4Listener</span><span class="o">(</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">protected</span> <span class="k">def</span> <span class="nf">newListener</span><span class="p">():</span> <span class="nc">Listener</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span> <span class="o">=</span>
+  <span class="nc">Netty4Listener</span><span class="p">(</span><span class="nc">StringServerPipeline</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This implements the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/server/Listener.scala">Listener</a>
 interface that exposes a <code class="docutils literal notranslate"><span class="pre">listen</span></code> method:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">listen</span><span class="o">(</span><span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">)(</span><span class="n">serveTransport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">In</span>, <span class="kt">Out</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="nc">Unit</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">listen</span><span class="p">(</span><span class="n">addr</span><span class="p">:</span> <span class="nc">SocketAddress</span><span class="p">)(</span><span class="n">serveTransport</span><span class="p">:</span> <span class="nc">Transport</span><span class="p">[</span><span class="nc">In</span><span class="p">,</span> <span class="nc">Out</span><span class="p">]</span> <span class="o">=&gt;</span> <span class="nc">Unit</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>That is, given a socket address to bind and listen, <code class="docutils literal notranslate"><span class="pre">serveTransport</span></code> is dispatched
 for each new connection established.</p>
 <p>For example, here is a simple echo server using a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Listener.scala">Netty4Listener</a>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">address</span> <span class="k">=</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">listener</span> <span class="k">=</span> <span class="nc">Netty4Listener</span><span class="o">(</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">echoServer</span> <span class="k">=</span> <span class="n">listener</span><span class="o">.</span><span class="n">listen</span><span class="o">(</span><span class="n">address</span><span class="o">)</span> <span class="o">{</span> <span class="n">transport</span> <span class="k">=&gt;</span>
-   <span class="n">transport</span><span class="o">.</span><span class="n">read</span><span class="o">()</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="o">(</span><span class="k">_</span><span class="o">)</span> <span class="o">}</span> <span class="n">ensure</span> <span class="n">transport</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
- <span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">address</span> <span class="o">=</span> <span class="k">new</span> <span class="n">java</span><span class="p">.</span><span class="n">net</span><span class="p">.</span><span class="nc">InetSocketAddress</span><span class="p">(</span><span class="s">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">8080</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">listener</span> <span class="o">=</span> <span class="nc">Netty4Listener</span><span class="p">(</span><span class="nc">StringServerPipeline</span><span class="p">,</span> <span class="nc">StackServer</span><span class="p">.</span><span class="n">defaultParams</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">echoServer</span> <span class="o">=</span> <span class="n">listener</span><span class="p">.</span><span class="n">listen</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="p">{</span> <span class="n">transport</span> <span class="o">=&gt;</span>
+   <span class="n">transport</span><span class="p">.</span><span class="n">read</span><span class="p">()</span> <span class="n">flatMap</span> <span class="p">{</span> <span class="n">transport</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="p">}</span> <span class="n">ensure</span> <span class="n">transport</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+ <span class="p">}</span>
 </pre></div>
 </div>
 <p>We can now send requests over this socket and have them echoed back:</p>
@@ -328,8 +328,8 @@ for each new connection established.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">serveTransport</span></code> function defined above is primitive. For example,
 it closes each connection after one read and write. Finagle provides tools
 to provision a transport with more sophisticated behavior.</p>
-</div>
-<div class="section" id="server-dispatcher">
+</section>
+<section id="server-dispatcher">
 <h2>Server Dispatcher<a class="headerlink" href="#server-dispatcher" title="Permalink to this headline">¶</a></h2>
 <p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/dispatch/ServerDispatcher.scala">server dispatcher</a>
 queues concurrent incoming requests and serially dispatches
@@ -340,20 +340,20 @@ server dispatcher drains existing requests before
 closing a <code class="docutils literal notranslate"><span class="pre">Transport</span></code>.</p>
 <p>We could translate our <code class="docutils literal notranslate"><span class="pre">serveTransport</span></code> function to use this facility.</p>
 <p>Using Netty 4:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
-<span class="o">}</span>
-<span class="k">val</span> <span class="n">serveTransport</span> <span class="k">=</span> <span class="o">(</span><span class="n">t</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span> <span class="k">=&gt;</span> <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">listener</span> <span class="k">=</span> <span class="nc">Netty4Listener</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="n">listener</span><span class="o">.</span><span class="n">listen</span><span class="o">(</span><span class="n">address</span><span class="o">)</span> <span class="o">{</span> <span class="n">serveTransport</span><span class="o">(</span><span class="k">_</span><span class="o">)</span> <span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">service</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kd">val</span> <span class="n">serveTransport</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="nc">Transport</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">])</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">listener</span> <span class="o">=</span> <span class="nc">Netty4Listener</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">](</span><span class="nc">StringServerPipeline</span><span class="p">,</span> <span class="nc">StackServer</span><span class="p">.</span><span class="n">defaultParams</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">server</span> <span class="o">=</span> <span class="n">listener</span><span class="p">.</span><span class="n">listen</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="p">{</span> <span class="n">serveTransport</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="p">}</span>
 </pre></div>
 </div>
 <p>A nice consequence of using a <a class="reference internal" href="../ServicesAndFilters.html#services"><span class="std std-ref">Service</span></a> to process
 data received over the transport is the ability to furnish our server with
 additional behavior via <span class="xref std std-doc">Filters</span>. This is exactly
 what Finagle’s default server implementation does.</p>
-</div>
-<div class="section" id="stdstackserver">
+</section>
+<section id="stdstackserver">
 <h2>StdStackServer<a class="headerlink" href="#stdstackserver" title="Permalink to this headline">¶</a></h2>
 <p>Finagle’s <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/server/StackServer.scala">StdStackServer</a> provides appropriate
 features for building a robust server. It puts together a <code class="docutils literal notranslate"><span class="pre">Listener</span></code>
@@ -368,102 +368,102 @@ The abstract type parameters <code class="docutils literal notranslate"><span cl
 <code class="docutils literal notranslate"><span class="pre">Listener</span></code> differs from the type of <code class="docutils literal notranslate"><span class="pre">Server</span></code>. This is common when some protocol
 processing is done in the <code class="docutils literal notranslate"><span class="pre">Dispatcher</span></code>.</p>
 <p>We’ll create a server that uses Netty 4:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Server</span><span class="o">(</span>
-  <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
-  <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
-    <span class="k">extends</span> <span class="nc">StdStackServer</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">Server</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">protected</span> <span class="k">type</span> <span class="kt">In</span> <span class="o">=</span> <span class="nc">String</span>
-  <span class="k">protected</span> <span class="k">type</span> <span class="kt">Out</span> <span class="o">=</span> <span class="nc">String</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Server</span><span class="p">(</span>
+  <span class="n">stack</span><span class="p">:</span> <span class="nc">Stack</span><span class="p">[</span><span class="nc">ServiceFactory</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]]</span> <span class="o">=</span> <span class="nc">StackServer</span><span class="p">.</span><span class="n">newStack</span><span class="p">,</span>
+  <span class="n">params</span><span class="p">:</span> <span class="nc">Stack</span><span class="p">.</span><span class="nc">Params</span> <span class="o">=</span> <span class="nc">StackServer</span><span class="p">.</span><span class="n">defaultParams</span><span class="p">)</span>
+    <span class="k">extends</span> <span class="nc">StdStackServer</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">,</span> <span class="nc">Server</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">protected</span> <span class="k">type</span> <span class="nc">In</span> <span class="o">=</span> <span class="nc">String</span>
+  <span class="k">protected</span> <span class="k">type</span> <span class="nc">Out</span> <span class="o">=</span> <span class="nc">String</span>
 
-  <span class="k">protected</span> <span class="k">def</span> <span class="n">copy1</span><span class="o">(</span>
-    <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="k">this</span><span class="o">.</span><span class="n">stack</span><span class="o">,</span>
-    <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="n">params</span>
-  <span class="o">)</span><span class="k">:</span> <span class="kt">Server</span> <span class="o">=</span> <span class="n">copy</span><span class="o">(</span><span class="n">stack</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
+  <span class="k">protected</span> <span class="k">def</span> <span class="nf">copy1</span><span class="p">(</span>
+    <span class="n">stack</span><span class="p">:</span> <span class="nc">Stack</span><span class="p">[</span><span class="nc">ServiceFactory</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">this</span><span class="p">.</span><span class="n">stack</span><span class="p">,</span>
+    <span class="n">params</span><span class="p">:</span> <span class="nc">Stack</span><span class="p">.</span><span class="nc">Params</span> <span class="o">=</span> <span class="bp">this</span><span class="p">.</span><span class="n">params</span>
+  <span class="p">):</span> <span class="nc">Server</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
-  <span class="k">protected</span> <span class="k">def</span> <span class="n">newListener</span><span class="o">()</span><span class="k">:</span> <span class="kt">Listener</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">Netty4Listener</span><span class="o">(</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
+  <span class="k">protected</span> <span class="k">def</span> <span class="nf">newListener</span><span class="p">():</span> <span class="nc">Listener</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span> <span class="o">=</span>
+    <span class="nc">Netty4Listener</span><span class="p">(</span><span class="nc">StringServerPipeline</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
-  <span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span>
-    <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">],</span>
-    <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
-  <span class="o">)</span> <span class="k">=</span>
-    <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
-<span class="o">}</span>
+  <span class="k">protected</span> <span class="k">def</span> <span class="nf">newDispatcher</span><span class="p">(</span>
+    <span class="n">transport</span><span class="p">:</span> <span class="nc">Transport</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">],</span>
+    <span class="n">service</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span>
+  <span class="p">)</span> <span class="o">=</span>
+    <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="p">(</span><span class="n">transport</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Finally, we make use of our service:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
-<span class="o">}</span>
-<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Echo</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
-<span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">server</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">service</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kd">val</span> <span class="n">server</span> <span class="o">=</span> <span class="nc">Echo</span><span class="p">.</span><span class="n">serve</span><span class="p">(</span><span class="s">&quot;:8080&quot;</span><span class="p">,</span> <span class="n">service</span><span class="p">)</span>
+<span class="nc">Await</span><span class="p">.</span><span class="n">result</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To create a server that uses Netty 3, use a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Listener.scala">Netty3Listener</a>
 and a Netty 3 <a class="reference external" href="https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>.</p>
-</div>
-<div class="section" id="client-protocol">
+</section>
+<section id="client-protocol">
 <h2>Client Protocol<a class="headerlink" href="#client-protocol" title="Permalink to this headline">¶</a></h2>
 <p>Again, we’ll use a Netty Channel Pipeline to frame our network traffic.
 Our client pipeline defines a UTF-8 newline delimited protocol. As with the server
 pipeline, the types have different namespaces but look much the same in Netty 3 and Netty 4.</p>
 <p>Netty 3 <a class="reference external" href="https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.jboss.netty.handler.codec.string.</span><span class="o">{</span><span class="nc">StringEncoder</span><span class="o">,</span> <span class="nc">StringDecoder</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">org.jboss.netty.channel._</span>
-<span class="k">import</span> <span class="nn">org.jboss.netty.handler.codec.frame.</span><span class="o">{</span><span class="nc">Delimiters</span><span class="o">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">org.jboss.netty.util.CharsetUtil</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org</span><span class="p">.</span><span class="nn">jboss</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">handler</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nn">string</span><span class="p">.{</span><span class="nc">StringEncoder</span><span class="p">,</span> <span class="nc">StringDecoder</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">org</span><span class="p">.</span><span class="nn">jboss</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">channel</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">org</span><span class="p">.</span><span class="nn">jboss</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">handler</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nn">frame</span><span class="p">.{</span><span class="nc">Delimiters</span><span class="p">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">org</span><span class="p">.</span><span class="nn">jboss</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">CharsetUtil</span>
 
-<span class="k">object</span> <span class="nc">StringClientPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">getPipeline</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="nc">Channels</span><span class="o">.</span><span class="n">pipeline</span><span class="o">()</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringEncode&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringDecode&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;line&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">DelimEncoder</span><span class="o">(</span><span class="sc">&#39;\n&#39;</span><span class="o">))</span>
+<span class="k">object</span> <span class="nc">StringClientPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">getPipeline</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">pipeline</span> <span class="o">=</span> <span class="nc">Channels</span><span class="p">.</span><span class="n">pipeline</span><span class="p">()</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;stringEncode&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="p">(</span><span class="nc">CharsetUtil</span><span class="p">.</span><span class="nc">UTF_8</span><span class="p">))</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;stringDecode&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="p">(</span><span class="nc">CharsetUtil</span><span class="p">.</span><span class="nc">UTF_8</span><span class="p">))</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;line&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">DelimEncoder</span><span class="p">(</span><span class="sc">&#39;</span><span class="se">\n</span><span class="sc">&#39;</span><span class="p">))</span>
     <span class="n">pipeline</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">class</span> <span class="nc">DelimEncoder</span><span class="o">(</span><span class="n">delim</span><span class="k">:</span> <span class="kt">Char</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">SimpleChannelHandler</span> <span class="o">{</span>
-  <span class="k">override</span> <span class="k">def</span> <span class="n">writeRequested</span><span class="o">(</span><span class="n">ctx</span><span class="k">:</span> <span class="kt">ChannelHandlerContext</span><span class="o">,</span> <span class="n">evt</span><span class="k">:</span> <span class="kt">MessageEvent</span><span class="o">)</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">newMessage</span> <span class="k">=</span> <span class="n">evt</span><span class="o">.</span><span class="n">getMessage</span> <span class="k">match</span> <span class="o">{</span>
-      <span class="k">case</span> <span class="n">m</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=&gt;</span> <span class="n">m</span> <span class="o">+</span> <span class="n">delim</span>
-      <span class="k">case</span> <span class="n">m</span> <span class="k">=&gt;</span> <span class="n">m</span>
-    <span class="o">}</span>
-    <span class="nc">Channels</span><span class="o">.</span><span class="n">write</span><span class="o">(</span><span class="n">ctx</span><span class="o">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">getFuture</span><span class="o">,</span> <span class="n">newMessage</span><span class="o">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">getRemoteAddress</span><span class="o">)</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+<span class="k">class</span> <span class="nc">DelimEncoder</span><span class="p">(</span><span class="n">delim</span><span class="p">:</span> <span class="nc">Char</span><span class="p">)</span> <span class="k">extends</span> <span class="nc">SimpleChannelHandler</span> <span class="p">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="nf">writeRequested</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="nc">ChannelHandlerContext</span><span class="p">,</span> <span class="n">evt</span><span class="p">:</span> <span class="nc">MessageEvent</span><span class="p">)</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">newMessage</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="n">getMessage</span> <span class="k">match</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="n">m</span><span class="p">:</span> <span class="nc">String</span> <span class="o">=&gt;</span> <span class="n">m</span> <span class="o">+</span> <span class="n">delim</span>
+      <span class="k">case</span> <span class="n">m</span> <span class="o">=&gt;</span> <span class="n">m</span>
+    <span class="p">}</span>
+    <span class="nc">Channels</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">evt</span><span class="p">.</span><span class="n">getFuture</span><span class="p">,</span> <span class="n">newMessage</span><span class="p">,</span> <span class="n">evt</span><span class="p">.</span><span class="n">getRemoteAddress</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Netty 4 <a class="reference external" href="https://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">io.netty.handler.codec.string.</span><span class="o">{</span><span class="nc">StringEncoder</span><span class="o">,</span> <span class="nc">StringDecoder</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">io.netty.channel._</span>
-<span class="k">import</span> <span class="nn">io.netty.handler.codec.frame.</span><span class="o">{</span><span class="nc">Delimiters</span><span class="o">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">io.netty.util.CharsetUtil</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">handler</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nn">string</span><span class="p">.{</span><span class="nc">StringEncoder</span><span class="p">,</span> <span class="nc">StringDecoder</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">channel</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">handler</span><span class="p">.</span><span class="nn">codec</span><span class="p">.</span><span class="nn">frame</span><span class="p">.{</span><span class="nc">Delimiters</span><span class="p">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">io</span><span class="p">.</span><span class="nn">netty</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">CharsetUtil</span>
 
-<span class="k">object</span> <span class="nc">StringClientPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">getPipeline</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="nc">Channels</span><span class="o">.</span><span class="n">pipeline</span><span class="o">()</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringEncode&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringDecode&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
-    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;line&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">DelimEncoder</span><span class="o">(</span><span class="sc">&#39;\n&#39;</span><span class="o">))</span>
+<span class="k">object</span> <span class="nc">StringClientPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">getPipeline</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">pipeline</span> <span class="o">=</span> <span class="nc">Channels</span><span class="p">.</span><span class="n">pipeline</span><span class="p">()</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;stringEncode&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="p">(</span><span class="nc">CharsetUtil</span><span class="p">.</span><span class="nc">UTF_8</span><span class="p">))</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;stringDecode&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="p">(</span><span class="nc">CharsetUtil</span><span class="p">.</span><span class="nc">UTF_8</span><span class="p">))</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">addLast</span><span class="p">(</span><span class="s">&quot;line&quot;</span><span class="p">,</span> <span class="k">new</span> <span class="nc">DelimEncoder</span><span class="p">(</span><span class="sc">&#39;</span><span class="se">\n</span><span class="sc">&#39;</span><span class="p">))</span>
     <span class="n">pipeline</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">class</span> <span class="nc">DelimEncoder</span><span class="o">(</span><span class="n">delim</span><span class="k">:</span> <span class="kt">Char</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">SimpleChannelHandler</span> <span class="o">{</span>
-  <span class="k">override</span> <span class="k">def</span> <span class="n">writeRequested</span><span class="o">(</span><span class="n">ctx</span><span class="k">:</span> <span class="kt">ChannelHandlerContext</span><span class="o">,</span> <span class="n">evt</span><span class="k">:</span> <span class="kt">MessageEvent</span><span class="o">)</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">newMessage</span> <span class="k">=</span> <span class="n">evt</span><span class="o">.</span><span class="n">getMessage</span> <span class="k">match</span> <span class="o">{</span>
-      <span class="k">case</span> <span class="n">m</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=&gt;</span> <span class="n">m</span> <span class="o">+</span> <span class="n">delim</span>
-      <span class="k">case</span> <span class="n">m</span> <span class="k">=&gt;</span> <span class="n">m</span>
-    <span class="o">}</span>
-    <span class="nc">Channels</span><span class="o">.</span><span class="n">write</span><span class="o">(</span><span class="n">ctx</span><span class="o">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">getFuture</span><span class="o">,</span> <span class="n">newMessage</span><span class="o">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">getRemoteAddress</span><span class="o">)</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+<span class="k">class</span> <span class="nc">DelimEncoder</span><span class="p">(</span><span class="n">delim</span><span class="p">:</span> <span class="nc">Char</span><span class="p">)</span> <span class="k">extends</span> <span class="nc">SimpleChannelHandler</span> <span class="p">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="nf">writeRequested</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="nc">ChannelHandlerContext</span><span class="p">,</span> <span class="n">evt</span><span class="p">:</span> <span class="nc">MessageEvent</span><span class="p">)</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">newMessage</span> <span class="o">=</span> <span class="n">evt</span><span class="p">.</span><span class="n">getMessage</span> <span class="k">match</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="n">m</span><span class="p">:</span> <span class="nc">String</span> <span class="o">=&gt;</span> <span class="n">m</span> <span class="o">+</span> <span class="n">delim</span>
+      <span class="k">case</span> <span class="n">m</span> <span class="o">=&gt;</span> <span class="n">m</span>
+    <span class="p">}</span>
+    <span class="nc">Channels</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">evt</span><span class="p">.</span><span class="n">getFuture</span><span class="p">,</span> <span class="n">newMessage</span><span class="p">,</span> <span class="n">evt</span><span class="p">.</span><span class="n">getRemoteAddress</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="transporter">
+</section>
+<section id="transporter">
 <h2>Transporter<a class="headerlink" href="#transporter" title="Permalink to this headline">¶</a></h2>
 <p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/Transporter.scala">Transporter</a> is responsible for connecting
 a <a class="reference internal" href="#transport-interface"><span class="std std-ref">Transport</span></a> to a peer; it establishes a session. Finagle provides
@@ -471,50 +471,49 @@ a <a class="reference external" href="https://github.com/twitter/finagle/blob/re
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Transporter.scala">Netty4Transporter</a>,
 however the use of other Transporters is fully supported.</p>
 <p>Using a <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Transporter.scala">Netty4Transporter</a>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">protected</span> <span class="k">def</span> <span class="n">newTransporter</span><span class="o">(</span><span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">)</span><span class="k">:</span> <span class="kt">Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-  <span class="nc">Netty4Transporter</span><span class="o">.</span><span class="n">rawTransporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">addr</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">protected</span> <span class="k">def</span> <span class="nf">newTransporter</span><span class="p">(</span><span class="n">addr</span><span class="p">:</span> <span class="nc">SocketAddress</span><span class="p">):</span> <span class="nc">Transporter</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span> <span class="o">=</span>
+  <span class="nc">Netty4Transporter</span><span class="p">.</span><span class="n">rawTransporter</span><span class="p">(</span><span class="nc">StringClientPipeline</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="client-dispatcher">
+</section>
+<section id="client-dispatcher">
 <h2>Client Dispatcher<a class="headerlink" href="#client-dispatcher" title="Permalink to this headline">¶</a></h2>
 <p>A client dispatcher turns a Transport (a stream of objects) into a Service
 (request-response pairs). It must manage all outstanding requests,
 pairing incoming responses to their respective requests.
 The simplest kind of dispatcher is called a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/dispatch/ClientDispatcher.scala">SerialClientDispatcher</a>,
-which allows only a single outstanding request (concurrent requests are queued) <a class="footnote-reference" href="#id7" id="id6">[1]</a>.</p>
+which allows only a single outstanding request (concurrent requests are queued) <a class="footnote-reference brackets" href="#id7" id="id6">1</a>.</p>
 <p>Our client will employ the SerialClientDispatcher.</p>
-<table class="docutils footnote" frame="void" id="id7" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[1]</a></td><td>Note that Finagle also includes a dispatcher that can
+<dl class="footnote brackets">
+<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id6">1</a></span></dt>
+<dd><p>Note that Finagle also includes a dispatcher that can
 pipeline requests, i.e., allow more than one outstanding request.
 It’s possible to create a custom dispatcher as well. For example,
 <span class="xref std std-doc">Mux</span>, which support true multiplexing,
-defines a custom dispatcher.</td></tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="a-basic-client">
+defines a custom dispatcher.</p>
+</dd>
+</dl>
+</section>
+<section id="a-basic-client">
 <h2>A Basic Client<a class="headerlink" href="#a-basic-client" title="Permalink to this headline">¶</a></h2>
 <p>Given a defined transporter and request dispatching strategy, we can compose the
 two and create a client. We’ll create a client that uses Netty 4:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">addr</span> <span class="k">=</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">transporter</span> <span class="k">=</span>
-  <span class="nc">Netty4Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">addr</span><span class="o">,</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">addr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">java</span><span class="p">.</span><span class="n">net</span><span class="p">.</span><span class="nc">InetSocketAddress</span><span class="p">(</span><span class="s">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">8080</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">transporter</span> <span class="o">=</span>
+  <span class="nc">Netty4Transporter</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">](</span><span class="nc">StringClientPipeline</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="nc">StackClient</span><span class="p">.</span><span class="n">defaultParams</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">bridge</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span>
-  <span class="n">transporter</span><span class="o">(</span><span class="n">addr</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">transport</span> <span class="k">=&gt;</span> <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">)</span> <span class="o">}</span>
+<span class="kd">val</span> <span class="n">bridge</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Service</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]]</span> <span class="o">=</span>
+  <span class="n">transporter</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span> <span class="n">map</span> <span class="p">{</span> <span class="n">transport</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="p">(</span><span class="n">transport</span><span class="p">)</span> <span class="p">}</span>
 
-<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="n">bridge</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">svc</span> <span class="k">=&gt;</span> <span class="n">svc</span><span class="o">(</span><span class="n">req</span><span class="o">)</span> <span class="n">ensure</span> <span class="n">svc</span><span class="o">.</span><span class="n">close</span><span class="o">()</span> <span class="o">}</span>
-<span class="o">}</span>
+<span class="kd">val</span> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="o">=</span> <span class="n">bridge</span> <span class="n">flatMap</span> <span class="p">{</span> <span class="n">svc</span> <span class="o">=&gt;</span> <span class="n">svc</span><span class="p">(</span><span class="n">req</span><span class="p">)</span> <span class="n">ensure</span> <span class="n">svc</span><span class="p">.</span><span class="n">close</span><span class="p">()</span> <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Finally, we can dispatch requests over our client.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">)</span>
-<span class="n">println</span><span class="o">(</span><span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">result</span><span class="o">))</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="nc">Await</span><span class="p">.</span><span class="n">result</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Assuming we have a server willing to listen, we can expect a response:</p>
@@ -524,53 +523,52 @@ two and create a client. We’ll create a client that uses Netty 4:</p>
 </div>
 <p>To create a client that uses Netty 4, use a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Transporter.scala">Netty4Transporter</a>.</p>
-</div>
-<div class="section" id="a-robust-client">
+</section>
+<section id="a-robust-client">
 <h2>A Robust Client<a class="headerlink" href="#a-robust-client" title="Permalink to this headline">¶</a></h2>
 <p>Our client is a <code class="docutils literal notranslate"><span class="pre">Service</span></code>, so we can supply additional
 behavior to make our client more robust using
 filters:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">retry</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
-  <span class="n">retryPolicy</span> <span class="k">=</span> <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">(</span><span class="mi">3</span><span class="o">),</span>
-  <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span>
-<span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">retry</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">](</span>
+  <span class="n">retryPolicy</span> <span class="o">=</span> <span class="nc">RetryPolicy</span><span class="p">.</span><span class="n">tries</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+  <span class="n">timer</span> <span class="o">=</span> <span class="nc">DefaultTimer</span><span class="p">.</span><span class="n">twitter</span>
+<span class="p">)</span>
 
-<span class="k">val</span> <span class="n">timeout</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
-  <span class="n">timeout</span> <span class="k">=</span> <span class="mf">3.</span><span class="n">seconds</span><span class="o">,</span>
-  <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span>
-<span class="o">)</span>
+<span class="kd">val</span> <span class="n">timeout</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">](</span>
+  <span class="n">timeout</span> <span class="o">=</span> <span class="mi">3</span><span class="p">.</span><span class="n">seconds</span><span class="p">,</span>
+  <span class="n">timer</span> <span class="o">=</span> <span class="nc">DefaultTimer</span><span class="p">.</span><span class="n">twitter</span>
+<span class="p">)</span>
 
-<span class="k">val</span> <span class="n">maskCancel</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MaskCancelFilter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
+<span class="kd">val</span> <span class="n">maskCancel</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MaskCancelFilter</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Composing these filters <a class="footnote-reference" href="#id9" id="id8">[2]</a> with our basic client demonstrates
+<p>Composing these filters <a class="footnote-reference brackets" href="#id9" id="id8">2</a> with our basic client demonstrates
 the composable components used throughout finagle.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">newClient</span> <span class="k">=</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">newClient</span> <span class="o">=</span>
   <span class="n">retry</span> <span class="n">andThen</span>
     <span class="n">timeout</span> <span class="n">andThen</span>
     <span class="n">maskCancel</span> <span class="n">andThen</span> <span class="n">client</span>
 
-<span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">newClient</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">)</span>
-<span class="n">println</span><span class="o">(</span><span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">result</span><span class="o">))</span>
+<span class="kd">val</span> <span class="n">result</span> <span class="o">=</span> <span class="n">newClient</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="nc">Await</span><span class="p">.</span><span class="n">result</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>This client is a good start, but we cannot dispatch concurrent requests
 to a single host, nor load balance over multiple hosts. A typical Finagle client
 affords us the ability to dispatch a large number of concurrent requests.</p>
-<table class="docutils footnote" frame="void" id="id9" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id8">[2]</a></td><td>The use of the MaskCancelFilter in the example filter stack
+<dl class="footnote brackets">
+<dt class="label" id="id9"><span class="brackets"><a class="fn-backref" href="#id8">2</a></span></dt>
+<dd><p>The use of the MaskCancelFilter in the example filter stack
 ensures that timeout exceptions don’t propagate to our
 bottom most service which, in this case, represents a dispatcher.
 Without this guarantee, the service would be closed after the first
 timeout exception. This becomes unnecessary when we use a StdStackClient
 because the semantics of Service#close() change
-with respect to Finagle’s connection pool.</td></tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="stdstackclient">
+with respect to Finagle’s connection pool.</p>
+</dd>
+</dl>
+</section>
+<section id="stdstackclient">
 <h2>StdStackClient<a class="headerlink" href="#stdstackclient" title="Permalink to this headline">¶</a></h2>
 <p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/StackClient.scala">StdStackClient</a>
 combines a <cite>Transporter</cite>, a <cite>Dispatcher</cite>, and a <cite>Stack</cite> to provide a robust,
@@ -580,41 +578,42 @@ features including
 and <a class="reference internal" href="../Clients.html#watermark-pool"><span class="std std-ref">connection pooling</span></a> per host. See the section
 on <a class="reference internal" href="../Clients.html#client-modules"><span class="std std-ref">client modules</span></a> for more details.</p>
 <p>Putting together a <code class="docutils literal notranslate"><span class="pre">StdStackClient</span></code> is simple:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Client</span><span class="o">(</span>
-  <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
-  <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
-    <span class="k">extends</span> <span class="nc">StdStackClient</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">Client</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">protected</span> <span class="k">type</span> <span class="kt">In</span> <span class="o">=</span> <span class="nc">String</span>
-  <span class="k">protected</span> <span class="k">type</span> <span class="kt">Out</span> <span class="o">=</span> <span class="nc">String</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Client</span><span class="p">(</span>
+  <span class="n">stack</span><span class="p">:</span> <span class="nc">Stack</span><span class="p">[</span><span class="nc">ServiceFactory</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]]</span> <span class="o">=</span> <span class="nc">StackClient</span><span class="p">.</span><span class="n">newStack</span><span class="p">,</span>
+  <span class="n">params</span><span class="p">:</span> <span class="nc">Stack</span><span class="p">.</span><span class="nc">Params</span> <span class="o">=</span> <span class="nc">StackClient</span><span class="p">.</span><span class="n">defaultParams</span><span class="p">)</span>
+    <span class="k">extends</span> <span class="nc">StdStackClient</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">,</span> <span class="nc">Client</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">protected</span> <span class="k">type</span> <span class="nc">In</span> <span class="o">=</span> <span class="nc">String</span>
+  <span class="k">protected</span> <span class="k">type</span> <span class="nc">Out</span> <span class="o">=</span> <span class="nc">String</span>
 
-  <span class="k">protected</span> <span class="k">def</span> <span class="n">copy1</span><span class="o">(</span>
-    <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]],</span>
-    <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span>
-  <span class="o">)</span><span class="k">:</span> <span class="kt">Client</span> <span class="o">=</span>
-    <span class="n">copy</span><span class="o">(</span><span class="n">stack</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
+  <span class="k">protected</span> <span class="k">def</span> <span class="nf">copy1</span><span class="p">(</span>
+    <span class="n">stack</span><span class="p">:</span> <span class="nc">Stack</span><span class="p">[</span><span class="nc">ServiceFactory</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]],</span>
+    <span class="n">params</span><span class="p">:</span> <span class="nc">Stack</span><span class="p">.</span><span class="nc">Params</span>
+  <span class="p">):</span> <span class="nc">Client</span> <span class="o">=</span>
+    <span class="n">copy</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
-  <span class="k">protected</span> <span class="k">def</span> <span class="n">newTransporter</span><span class="o">(</span><span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">)</span><span class="k">:</span> <span class="kt">Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">Netty4Transporter</span><span class="o">.</span><span class="n">rawTransporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">addr</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
+  <span class="k">protected</span> <span class="k">def</span> <span class="nf">newTransporter</span><span class="p">(</span><span class="n">addr</span><span class="p">:</span> <span class="nc">SocketAddress</span><span class="p">):</span> <span class="nc">Transporter</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span> <span class="o">=</span>
+    <span class="nc">Netty4Transporter</span><span class="p">.</span><span class="n">rawTransporter</span><span class="p">(</span><span class="nc">StringClientPipeline</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
-  <span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-    <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">)</span>
-<span class="o">}</span>
+  <span class="k">protected</span> <span class="k">def</span> <span class="nf">newDispatcher</span><span class="p">(</span><span class="n">transport</span><span class="p">:</span> <span class="nc">Transport</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]):</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span> <span class="o">=</span>
+    <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="p">(</span><span class="n">transport</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Armed with this new client, we can connect to a destination <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Name.scala">Name</a>, representing multiple hosts:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">dest</span> <span class="k">=</span> <span class="nc">Resolver</span><span class="o">.</span><span class="n">eval</span><span class="o">(</span>
-  <span class="s">&quot;localhost:8080,localhost:8081,localhost:8082&quot;</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">dest</span> <span class="o">=</span> <span class="nc">Resolver</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span>
+  <span class="s">&quot;localhost:8080,localhost:8081,localhost:8082&quot;</span><span class="p">)</span>
 
-<span class="n">client</span><span class="o">.</span><span class="n">newClient</span><span class="o">(</span><span class="n">dest</span><span class="o">)</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
+<span class="n">client</span><span class="p">.</span><span class="n">newClient</span><span class="p">(</span><span class="n">dest</span><span class="p">):</span> <span class="nc">ServiceFactory</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span> <span class="nc">String</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Requests sent to this client are load balanced across these
 hosts and each host maintains a connection pool, thus
 allowing concurrent dispatches.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -674,7 +673,7 @@ allowing concurrent dispatches.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

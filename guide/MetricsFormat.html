@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Metrics Format &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Flags" href="Flags.html" />
+    <link rel="prev" title="Metrics" href="Metrics.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head><body>
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Flags.html" title="Flags"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Metrics.html" title="Metrics"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="Metrics.html" accesskey="U">Metrics</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Metrics Format</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="metrics-format">
+<span id="format"></span><h1>Metrics Format<a class="headerlink" href="#metrics-format" title="Permalink to this headline">¶</a></h1>
+<p>This guideline is for the <cite>finagle-stats</cite> implementation of metrics only. The
+format of metrics that Finagle exports may differ for other metrics implementations.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>See <a class="reference external" href="Metrics.html">this list</a> for a comprehensive view of all the metrics from finagle-core.</p>
+</div>
+<section id="verbosity">
+<h2>Verbosity<a class="headerlink" href="#verbosity" title="Permalink to this headline">¶</a></h2>
+<p>Finagle leverages <a class="reference external" href="https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels">verbosity levels</a> and defines some of its low-utility metrics as “debug”.
+Unless explicitly stated, assume <code class="docutils literal notranslate"><span class="pre">Verbosity.Default</span></code> is used to define a given metric.</p>
+</section>
+<section id="scope-separator">
+<h2>Scope Separator<a class="headerlink" href="#scope-separator" title="Permalink to this headline">¶</a></h2>
+<p>The default separator for each scope of the metric is <cite>/</cite>. For example,
+“clnt/foo/requests”. Change the scope separator with the flag
+<cite>com.twitter.finagle.stats.scopeSeparator</cite>.</p>
+</section>
+<section id="types-of-metrics">
+<h2>Types of Metrics<a class="headerlink" href="#types-of-metrics" title="Permalink to this headline">¶</a></h2>
+<p>Finagle exports three different types of metrics: counters, gauges, and histograms.</p>
+<section id="counters">
+<h3>Counters<a class="headerlink" href="#counters" title="Permalink to this headline">¶</a></h3>
+<p>Counters are <strong>unlatched</strong> by default, which means that the absolute value of the
+counter is exported. The counter does not reset to zero after sampling. To
+calculate how much the counter incremented per second, use a metric collection
+system that samples every second and subtract the value of the counter between
+two consecutive seconds.</p>
+<p>Latched counters can be enabled with the flag <cite>com.twitter.finagle.stats.useCounterDeltas</cite>.
+The delta for the counter is exported instead of the absolute value.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;requests&quot;</span><span class="o">:</span> <span class="mf">10</span>
+</pre></div>
+</div>
+</section>
+<section id="gauges">
+<h3>Gauges<a class="headerlink" href="#gauges" title="Permalink to this headline">¶</a></h3>
+<p>The value of a gauge is a float.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;pending&quot;</span><span class="o">:</span> <span class="mf">200.0</span>
+</pre></div>
+</div>
+</section>
+<section id="histogram">
+<h3>Histogram<a class="headerlink" href="#histogram" title="Permalink to this headline">¶</a></h3>
+<p>For <cite>finagle-stats</cite>, there is a trailing 0 in .p9990.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;request_latency_ms.avg&quot;</span><span class="o">:</span> <span class="mf">4.9</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.count&quot;</span><span class="o">:</span> <span class="mf">83</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.max&quot;</span><span class="o">:</span> <span class="mf">14</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.min&quot;</span><span class="o">:</span> <span class="mf">2</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.p50&quot;</span><span class="o">:</span> <span class="mf">5</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.p90&quot;</span><span class="o">:</span> <span class="mf">7</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.p95&quot;</span><span class="o">:</span> <span class="mf">8</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.p99&quot;</span><span class="o">:</span> <span class="mf">9</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.p9990&quot;</span> <span class="o">:</span> <span class="mf">14</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.p9999&quot;</span> <span class="o">:</span> <span class="mf">14</span><span class="p">,</span>
+<span class="s2">&quot;request_latency_ms.sum&quot;</span> <span class="o">:</span> <span class="mf">409</span>
+</pre></div>
+</div>
+<p>If the histogram is empty, only the count is exported.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;request_latency_ms.count&quot;</span> <span class="o">:</span> <span class="mf">0</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="rollupstatsreceivers">
+<h2>RollupStatsReceivers<a class="headerlink" href="#rollupstatsreceivers" title="Permalink to this headline">¶</a></h2>
+<p>Finagle sometimes uses <code class="docutils literal notranslate"><span class="pre">RollupStatsReceivers</span></code> internally, which will take
+stats like “failures/twitter/TimeoutException” and roll them up, aggregating
+into “failures/twitter” and also “failures”. For example, if there are 3
+“failures/twitter/TimeoutException” counted, and 4
+“failures/twitter/ConnectTimeoutException”, then it will count 7 for
+“failures/twitter”.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Metrics Format</a><ul>
+<li><a class="reference internal" href="#verbosity">Verbosity</a></li>
+<li><a class="reference internal" href="#scope-separator">Scope Separator</a></li>
+<li><a class="reference internal" href="#types-of-metrics">Types of Metrics</a><ul>
+<li><a class="reference internal" href="#counters">Counters</a></li>
+<li><a class="reference internal" href="#gauges">Gauges</a></li>
+<li><a class="reference internal" href="#histogram">Histogram</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rollupstatsreceivers">RollupStatsReceivers</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="Metrics.html">Metrics</a><ul>
+      <li>Previous: <a href="Metrics.html" title="previous chapter">Metrics</a></li>
+      <li>Next: <a href="Flags.html" title="next chapter">Flags</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
+  
+  </body>
+</html>

@@ -1,24 +1,23 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Flags &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Flags &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
-    <link rel="prev" title="Metrics" href="Metrics.html" />
+    <link rel="prev" title="Metrics Format" href="MetricsFormat.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -47,9 +46,10 @@
           <a href="UnsuccessfulResponses.html" title="Unsuccessful Responses"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="Metrics.html" title="Metrics"
+          <a href="MetricsFormat.html" title="Metrics Format"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Flags</a></li> 
       </ul>
     </div>  
 
@@ -58,133 +58,138 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="flags">
+  <section id="flags">
 <h1>Flags<a class="headerlink" href="#flags" title="Permalink to this headline">¶</a></h1>
 <p>Finagle features that cannot be turned on/off on a per client/server basis are usually controlled
 via global command line flags. This document lists such flags along with their default values.</p>
 <p>Finagle’s global flags could be either passed as Java application flags (when run within
 Twitter Server) or as JVM properties.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">foo</span><span class="k">=</span><span class="n">bar</span>  <span class="c1">// Java application argument</span>
-<span class="o">-</span><span class="nc">Dcom</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">foo</span><span class="k">=</span><span class="n">bar</span> <span class="c1">// JVM arg/property</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="p">.</span><span class="n">twitter</span><span class="p">.</span><span class="n">finagle</span><span class="p">.</span><span class="n">foo</span><span class="o">=</span><span class="n">bar</span>  <span class="c1">// Java application argument</span>
+<span class="o">-</span><span class="nc">Dcom</span><span class="p">.</span><span class="n">twitter</span><span class="p">.</span><span class="n">finagle</span><span class="p">.</span><span class="n">foo</span><span class="o">=</span><span class="n">bar</span> <span class="c1">// JVM arg/property</span>
 </pre></div>
 </div>
-<div class="section" id="common">
+<section id="common">
 <h2>Common<a class="headerlink" href="#common" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt><strong>com.twitter.finagle.client.useNackAdmissionFilter</strong> <cite>bool</cite></dt>
-<dd>A global on/off switch for client-side nack admission control (default: <cite>true</cite>,
+<dl class="simple">
+<dt><strong>com.twitter.finagle.client.useNackAdmissionFilter</strong> <cite>bool</cite></dt><dd><p>A global on/off switch for client-side nack admission control (default: <cite>true</cite>,
 which opts clients into using nack admission control). This controller is designed
 to allow backends to recover when they overloaded. See
 <cite>com.twitter.finagle.filter.NackAdmissionFilter</cite> for more details. This value can
-also be set on per-client with <cite>$Client.configured(NackAdmissionFilter.Param)</cite>.</dd>
-<dt><strong>com.twitter.finagle.loadbalancer.defaultBalancer</strong> <cite>choice|heap|aperture|random_aperture</cite></dt>
-<dd>The default load balancer used in clients (default: <cite>choice</cite>). <cite>random_aperture</cite> should only
+also be set on per-client with <cite>$Client.configured(NackAdmissionFilter.Param)</cite>.</p>
+</dd>
+<dt><strong>com.twitter.finagle.loadbalancer.defaultBalancer</strong> <cite>choice|heap|aperture|random_aperture</cite></dt><dd><p>The default load balancer used in clients (default: <cite>choice</cite>). <cite>random_aperture</cite> should only
 be used in situations where subsetting is a firm requirement. An example of that is in a testing
 situation where p2c behavior isn’t acceptable. In other cases <cite>aperture</cite> will select between
-random aperture and deterministic aperture when appropriate.</dd>
-<dt><strong>com.twitter.finagle.loadbalancer.perHostStats</strong> <cite>bool</cite></dt>
-<dd>Enable/disable per-host granularity for stats (default: <cite>false</cite>). When enabled,the configured stats
-receiver will be used, or the loaded stats receiver if none given.</dd>
-<dt><strong>com.twitter.finagle.socks.socksProxyHost</strong> <cite>string</cite></dt>
-<dd>When non empty, enables SOCKS proxy on each Finagle client (default: empty string).</dd>
-<dt><strong>com.twitter.finagle.socks.socksProxyPort</strong> <cite>int</cite></dt>
-<dd>A port number for a SOCKS proxy (default: <cite>0</cite>).</dd>
-<dt><strong>com.twitter.finagle.socks.socksUsername</strong> <cite>string</cite></dt>
-<dd>A username for a SOCKS proxy (default: empty string).</dd>
-<dt><strong>com.twitter.finagle.socks.socksPassword</strong> <cite>string</cite></dt>
-<dd>A cleartext password for a SOCKS proxy (default: empty string).</dd>
-<dt><strong>com.twitter.finagle.tracing.enabled</strong> <cite>bool</cite></dt>
-<dd>When false, disables any tracing for this process (default: <cite>true</cite>). Note: it’s never recommended
-to disable tracing in production applications.</dd>
-<dt><strong>com.twitter.finagle.tracing.traceId128Bit</strong> <cite>bool</cite></dt>
-<dd>When true, new root spans will have 128-bit trace IDs (default: <cite>false</cite>, 64-bit IDs).</dd>
-<dt><strong>com.twitter.finagle.util.defaultTimerProbeSlowTasks</strong> <cite>bool</cite></dt>
-<dd>Enable reporting of slow timer tasks executing in the default timer (default: <cite>false</cite>).</dd>
-<dt><strong>com.twitter.finagle.util.defaultTimerSlowTaskMaxRuntime</strong> <cite>duration</cite></dt>
-<dd>Maximum runtime allowed for tasks before they are reported (default: <cite>2.seconds</cite>).</dd>
-<dt><strong>com.twitter.finagle.util.defaultTimerSlowTaskLogMinInterval</strong> <cite>duration</cite></dt>
-<dd>Minimum interval between recording stack traces for slow tasks (default: <cite>20.seconds</cite>).</dd>
-<dt><strong>com.twitter.finagle.offload.numWorkers</strong> <cite>int</cite></dt>
-<dd>Experimental flag. Enables the offload filter using a thread pool with the specified number of threads.
-When this flag is greater than zero, the execution of application code happens in an isolated pool and the netty threads are used only to handle the network channels. This behavior changes the assumptions regarding the scheduling of tasks in finagle applications. Traditionally, the recommendation is to execute CPU-intensive tasks using a <cite>FuturePool</cite> but, when this flag is enabled, CPU-intensive tasks don’t require a <cite>FuturePool</cite>. Important: Blocking tasks should still use a <cite>FuturePool</cite>.
-It’s important to review the allocation of thread pools when this flag is enabled otherwise the application might create too many threads, which leads to more GC pressure and increases the risk of CPU throttling.</dd>
-<dt><strong>com.twitter.finagle.offload.queueSize</strong> <cite>int</cite></dt>
-<dd>Experimental flag. When offload filter is enabled, its queue is bounded by this value (default:
-“unbounded” or <cite>Int.MaxValue</cite>) Any excess work that can’t be offloaded due to the queue overflow
-is run on IO (Netty) threads instead. Thus, when set, this flag enforces the backpressure on the
-link between “Netty (producer) and your application (consumer).</dd>
-<dt><strong>com.twitter.finagle.offload.statsSampleInterval</strong> <cite>duration</cite></dt>
-<dd>When offload filter is enabled, sample additional offload queue stats (<cite>delays_ms</cite>) at this
+random aperture and deterministic aperture when appropriate.</p>
+</dd>
+<dt><strong>com.twitter.finagle.loadbalancer.perHostStats</strong> <cite>bool</cite></dt><dd><p>Enable/disable per-host granularity for stats (default: <cite>false</cite>). When enabled,the configured stats
+receiver will be used, or the loaded stats receiver if none given.</p>
+</dd>
+<dt><strong>com.twitter.finagle.loadbalancer.aperture.minDeterministicAperture</strong> <cite>int</cite></dt><dd><p>Set the lower bound of the aperture size when using the determistic aperture load balancer (default: 12).</p>
+</dd>
+<dt><strong>com.twitter.finagle.socks.socksProxyHost</strong> <cite>string</cite></dt><dd><p>When non empty, enables SOCKS proxy on each Finagle client (default: empty string).</p>
+</dd>
+<dt><strong>com.twitter.finagle.socks.socksProxyPort</strong> <cite>int</cite></dt><dd><p>A port number for a SOCKS proxy (default: <cite>0</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.socks.socksUsername</strong> <cite>string</cite></dt><dd><p>A username for a SOCKS proxy (default: empty string).</p>
+</dd>
+<dt><strong>com.twitter.finagle.socks.socksPassword</strong> <cite>string</cite></dt><dd><p>A cleartext password for a SOCKS proxy (default: empty string).</p>
+</dd>
+<dt><strong>com.twitter.finagle.tracing.enabled</strong> <cite>bool</cite></dt><dd><p>When false, disables any tracing for this process (default: <cite>true</cite>). Note: it’s never recommended
+to disable tracing in production applications.</p>
+</dd>
+<dt><strong>com.twitter.finagle.tracing.traceId128Bit</strong> <cite>bool</cite></dt><dd><p>When true, new root spans will have 128-bit trace IDs (default: <cite>false</cite>, 64-bit IDs).</p>
+</dd>
+<dt><strong>com.twitter.finagle.util.defaultTimerProbeSlowTasks</strong> <cite>bool</cite></dt><dd><p>Enable reporting of slow timer tasks executing in the default timer (default: <cite>false</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.util.defaultTimerSlowTaskMaxRuntime</strong> <cite>duration</cite></dt><dd><p>Maximum runtime allowed for tasks before they are reported (default: <cite>2.seconds</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.util.defaultTimerSlowTaskLogMinInterval</strong> <cite>duration</cite></dt><dd><p>Minimum interval between recording stack traces for slow tasks (default: <cite>20.seconds</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.offload.numWorkers</strong> <cite>int</cite></dt><dd><p>Experimental flag. Enables the offload filter using a thread pool with the specified number of
+threads. When this flag is greater than zero, the execution of application code happens in an
+isolated pool and the netty threads are used only to handle the network channels. This behavior
+changes the assumptions regarding the scheduling of tasks in finagle applications. Traditionally,
+the recommendation is to execute CPU-intensive tasks using a <cite>FuturePool</cite> but, when this flag is
+enabled, CPU-intensive tasks don’t require a <cite>FuturePool</cite>. Important: Blocking tasks should still
+use a <cite>FuturePool</cite>.
+It’s important to review the allocation of thread pools when this flag is enabled otherwise the
+application might create too many threads, which leads to more GC pressure and increases the risk
+of CPU throttling.</p>
+</dd>
+<dt><strong>com.twitter.finagle.offload.statsSampleInterval</strong> <cite>duration</cite></dt><dd><p>When offload filter is enabled, sample additional offload queue stats (<cite>delays_ms</cite>) at this
 interval (default: <cite>100.milliseconds</cite>). Only finite and positive values are accepted, everything
-else disables the stats.</dd>
-<dt><strong>com.twitter.finagle.offload.auto</strong> <cite>bool</cite></dt>
-<dd>Experimental flag.
+else disables the stats.</p>
+</dd>
+<dt><strong>com.twitter.finagle.offload.auto</strong> <cite>bool</cite></dt><dd><p>Experimental flag.
 When enabled the offload filter will be enabled and the worker pool sizes of both the application
-pool and underlying I/O system will be set to reasonable values (default: <cite>false</cite>).</dd>
-<dt><strong>com.twitter.finagle.offload.admissionControl</strong> <cite>none|default|enabled|duration</cite></dt>
-<dd>Experimental flag.
+pool and underlying I/O system will be set to reasonable values (default: <cite>false</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.offload.admissionControl</strong> <cite>none|default|enabled|duration</cite></dt><dd><p>Experimental flag.
 When this flag is used in conjunction with flags that enable the offload filter it will also
 enable offload-based admission control. Offload admission control is based on the worker pools
 work queue latency, an estimation of how long a task is expected to wait in the work queue before
 it will be processed. When using <cite>enabled</cite> a reasonable default will be used for the maximum
 acceptable work queue delay. Tuning can be accomplished by setting the flag to a duration, for
 example, <cite>50.milliseconds</cite>. A value of <cite>default</cite> currently has the same meaning as <cite>none</cite>, which
-is to disable offload admission control.</dd>
+is to disable offload admission control.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="netty-4">
+</section>
+<section id="netty-4">
 <h2>Netty 4<a class="headerlink" href="#netty-4" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt><strong>com.twitter.finagle.netty4.numWorkers</strong> <cite>int</cite></dt>
-<dd>The number of Netty 4 worker threads in the shared even pool (default: <cite>CPUs * 2</cite>)</dd>
-<dt><strong>com.twitter.finagle.netty4.trackReferenceLeaks</strong> <cite>bool</cite></dt>
-<dd>Enable reference leak tracking in Netty 4 and export a counter at <cite>finagle/netty4/reference_leaks</cite>
-(default: <cite>false</cite>).</dd>
-<dt><strong>com.twitter.finagle.netty4.timerTicksPerWheel</strong> <cite>int</cite></dt>
-<dd>Netty 4 timer ticks per wheel (default: <cite>512</cite>).</dd>
-<dt><strong>com.twitter.finagle.netty4.timerTickDuration</strong> <cite>duration</cite></dt>
-<dd>Netty 4 timer tick duration (default: <cite>10.milliseconds</cite>).</dd>
-<dt><strong>com.twitter.finagle.netty4.useNativeEpoll</strong> <cite>bool</cite></dt>
-<dd>When available, use Linux’s native epoll transport directly instead of bouncing through JDK
-(default: <cite>true</cite>).</dd>
-<dt><strong>com.twitter.finagle.netty4.http.revalidateInboundHeaders</strong> <cite>bool</cite></dt>
-<dd>Validate headers when converting from Netty to Finagle. (default: <cite>false</cite>).</dd>
+<dl class="simple">
+<dt><strong>com.twitter.finagle.netty4.numWorkers</strong> <cite>int</cite></dt><dd><p>The number of Netty 4 worker threads in the shared even pool (default: <cite>CPUs * 2</cite>)</p>
+</dd>
+<dt><strong>com.twitter.finagle.netty4.trackReferenceLeaks</strong> <cite>bool</cite></dt><dd><p>Enable reference leak tracking in Netty 4 and export a counter at <cite>finagle/netty4/reference_leaks</cite>
+(default: <cite>false</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.netty4.timerTicksPerWheel</strong> <cite>int</cite></dt><dd><p>Netty 4 timer ticks per wheel (default: <cite>512</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.netty4.timerTickDuration</strong> <cite>duration</cite></dt><dd><p>Netty 4 timer tick duration (default: <cite>10.milliseconds</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.netty4.useNativeEpoll</strong> <cite>bool</cite></dt><dd><p>When available, use Linux’s native epoll transport directly instead of bouncing through JDK
+(default: <cite>true</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.netty4.http.revalidateInboundHeaders</strong> <cite>bool</cite></dt><dd><p>Validate headers when converting from Netty to Finagle. (default: <cite>false</cite>).</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="stats">
+</section>
+<section id="stats">
 <h2>Stats<a class="headerlink" href="#stats" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt><strong>com.twitter.finagle.stats.statsFilter</strong> <cite>string</cite></dt>
-<dd>Comma-separated list of regexes that indicate which metrics to filter out (default: empty string).</dd>
-<dt><strong>com.twitter.finagle.stats.statsFilterFile</strong> <cite>list of files</cite></dt>
-<dd>Comma-separated list of files of newline-separated regexes that indicate which metrics to filter
-out (default: empty list).</dd>
-<dt><strong>com.twitter.finagle.stats.useCounterDeltas</strong> <cite>bool</cite></dt>
-<dd>When true, export deltas for counters instead of absolute values (default: <cite>false</cite>).</dd>
-<dt><strong>com.twitter.finagle.stats.debugLoggedStatNames</strong> <cite>list of strings</cite></dt>
-<dd>Comma-separated stat names for logging observed values (default: empty list).</dd>
-<dt><strong>com.twitter.finagle.stats.scopeSeparator</strong> <cite>string</cite></dt>
-<dd>Override the default scope separator (default: <cite>/</cite>).</dd>
-<dt><strong>com.twitter.finagle.stats.format</strong> <cite>commonsmetrics|commonsstats|ostrich</cite></dt>
-<dd>Format style for stat names (default: <cite>commonmetrics</cite>).</dd>
-<dt><strong>com.twitter.finagle.stats.includeEmptyHistograms</strong> <cite>bool</cite></dt>
-<dd>Include full histogram details when there are no data points (default: <cite>false</cite>).</dd>
-<dt><strong>com.twitter.finagle.stats.verbose</strong> <cite>string</cite></dt>
-<dd>Comma-separated list of <a href="#id1"><span class="problematic" id="id2">*</span></a>-wildcard expressions to allowlist debug metrics that are not exported by
+<dl class="simple">
+<dt><strong>com.twitter.finagle.stats.statsFilter</strong> <cite>string</cite></dt><dd><p>Comma-separated list of regexes that indicate which metrics to filter out (default: empty string).</p>
+</dd>
+<dt><strong>com.twitter.finagle.stats.statsFilterFile</strong> <cite>list of files</cite></dt><dd><p>Comma-separated list of files of newline-separated regexes that indicate which metrics to filter
+out (default: empty list).</p>
+</dd>
+<dt><strong>com.twitter.finagle.stats.useCounterDeltas</strong> <cite>bool</cite></dt><dd><p>When true, export deltas for counters instead of absolute values (default: <cite>false</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.stats.debugLoggedStatNames</strong> <cite>list of strings</cite></dt><dd><p>Comma-separated stat names for logging observed values (default: empty list).</p>
+</dd>
+<dt><strong>com.twitter.finagle.stats.scopeSeparator</strong> <cite>string</cite></dt><dd><p>Override the default scope separator (default: <cite>/</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.stats.format</strong> <cite>commonsmetrics|commonsstats|ostrich</cite></dt><dd><p>Format style for stat names (default: <cite>commonmetrics</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.stats.includeEmptyHistograms</strong> <cite>bool</cite></dt><dd><p>Include full histogram details when there are no data points (default: <cite>false</cite>).</p>
+</dd>
+<dt><strong>com.twitter.finagle.stats.verbose</strong> <cite>string</cite></dt><dd><p>Comma-separated list of <a href="#id1"><span class="problematic" id="id2">*</span></a>-wildcard expressions to allowlist debug metrics that are not exported by
 default (default: undefined). A tunable, <cite>com.twitter.finagle.stats.verbose</cite> has a higher priority
-if defined.</dd>
+if defined.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="http">
+</section>
+<section id="http">
 <h2>Http<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt><strong>com.twitter.finagle.http.serverErrorsAsFailures</strong> <cite>bool</cite></dt>
-<dd>Treat responses with status codes in the 500s as failures (default: <cite>true</cite>).</dd>
+<dl class="simple">
+<dt><strong>com.twitter.finagle.http.serverErrorsAsFailures</strong> <cite>bool</cite></dt><dd><p>Treat responses with status codes in the 500s as failures (default: <cite>true</cite>).</p>
+</dd>
 </dl>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -214,7 +219,7 @@ if defined.</dd>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="Metrics.html" title="previous chapter">Metrics</a></li>
+      <li>Previous: <a href="MetricsFormat.html" title="previous chapter">Metrics Format</a></li>
       <li>Next: <a href="UnsuccessfulResponses.html" title="next chapter">Unsuccessful Responses</a></li>
   </ul></li>
 </ul>
@@ -235,7 +240,7 @@ if defined.</dd>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

@@ -643,6 +643,33 @@ The ``aperture`` factory method takes five arguments:
   The Aperture load balancer should rarely be configured and we are working to provide broadly
   applicable defaults.
 
+Panic Mode
+^^^^^^^^^^
+Panic mode is when the load balancer gives up trying to find a healthy node. The LB
+sends the request to the last pick even if the node is unhealthy. For a
+given request, panic mode is enabled when the percent of nodes that are
+unhealthy exceeds the panic threshold. This percent is approximate. For
+pick2-based load balancers (P2C* and Aperture*), interpret this as
+1% of requests or less will panic when the threshold is reached. When the
+percent of unhealthy nodes exceeds the threshold, the number of requests
+that panic increases exponentially. For round robin, this panic threshold
+percent does not apply because it is not a pick two based algorithm. Panic
+mode is disabled for heap LB.
+
+Please, note that this doesn't mean that 1% of requests will fail since
+Finagle clients have additional layers of requeues above the load balancer.
+
+Panic mode can be combined with any P2C or Aperture load balancer. The possible
+modes are: `TenPercentUnhealty`, `TwentyPercentUnhealthy`, `ThirtyPercentUnhealthy`,
+`FortyPercentUnhealthy`, `FiftyPercentUnhealthy` (default), and `MajorityUnhealthy`.
+
+.. code-block:: scala
+
+  import com.twitter.finagle.loadbalancer.PanicMode
+
+  val client = Http.client
+    .withLoadBalancer.panicMode(PanicMode.FortyPercentUnhealthy)
+
 Role of Balancers in Resiliency
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The balancer's primary goal is to attempt to optimize request latency. Coincidentally, to do this

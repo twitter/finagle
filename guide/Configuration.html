@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Configuration &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Configuration &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="ServicesAndFilters.html" title="Services &amp; Filters"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Configuration</a></li> 
       </ul>
     </div>  
 
@@ -58,9 +58,9 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="configuration">
+  <section id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="clients-and-servers">
+<section id="clients-and-servers">
 <h2>Clients and Servers<a class="headerlink" href="#clients-and-servers" title="Permalink to this headline">¶</a></h2>
 <p id="finagle6apis">Prior to <a class="reference internal" href="changelog.html"><span class="doc">version 6.0</span></a>, the <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal notranslate"><span class="pre">ServerBuilder</span></code> API was the
 primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a>
@@ -70,20 +70,20 @@ or <a class="reference internal" href="Servers.html#finagle-servers"><span class
 which is generally available via the <code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods. For example, the following
 code snippet creates a new HTTP client altered with two extra parameters: label and transport
 verbosity.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
 
-<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;my-http-client&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withTransport</span><span class="o">.</span><span class="n">verbose</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">client</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withLabel</span><span class="p">(</span><span class="s">&quot;my-http-client&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">withTransport</span><span class="p">.</span><span class="n">verbose</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>A <a class="reference internal" href="MethodBuilder.html#methodbuilder"><span class="std std-ref">higher-level client API</span></a>, <cite>MethodBuilder</cite>, builds on
 the client, providing logical success rate metrics, application-level retry
 policies, per-attempt timeouts, and total timeouts.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">All the examples in this user guide use the Finagle 6 API as a main configuration
+<p class="admonition-title">Note</p>
+<p>All the examples in this user guide use the Finagle 6 API as a main configuration
 method and we encourage all the Finagle users to follow this pattern given that
 the <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal notranslate"><span class="pre">ServerBuilder</span></code> API will eventually be deprecated.
 For help migrating, see <a class="reference internal" href="MethodBuilder.html#mb-cb-migration"><span class="std std-ref">MethodBuilder migration</span></a>,
@@ -96,56 +96,56 @@ parameters of Finagle clients and servers, there is an expert-level <cite>Stack 
 that takes a stack param: a value of arbitrary type for which there is an implicit instance
 of <code class="docutils literal notranslate"><span class="pre">Stack.Param</span></code> type-class available in the scope. For example, the following code
 demonstrates how to use <code class="docutils literal notranslate"><span class="pre">.configured</span></code> to override TCP socket options provided by default.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
-<span class="k">import</span> <span class="nn">com.twitter.transport.Transport</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">transport</span><span class="p">.</span><span class="nc">Transport</span>
 
-<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">Transport</span><span class="o">.</span><span class="nc">Options</span><span class="o">(</span><span class="n">noDelay</span> <span class="k">=</span> <span class="kc">false</span><span class="o">,</span> <span class="n">reuseAddr</span> <span class="k">=</span> <span class="kc">false</span><span class="o">))</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">client</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">configured</span><span class="p">(</span><span class="nc">Transport</span><span class="p">.</span><span class="nc">Options</span><span class="p">(</span><span class="n">noDelay</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span> <span class="n">reuseAddr</span> <span class="o">=</span> <span class="kc">false</span><span class="p">))</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The expert-level API requires deep knowledge of Finagle internals and
+<p class="admonition-title">Note</p>
+<p>The expert-level API requires deep knowledge of Finagle internals and
 it’s recommended to avoid it unless you’re sure of what
 you’re doing or the corresponding configuration has not yet
 been exposed through <code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods.</p>
 </div>
-<div class="section" id="design-principles">
+<section id="design-principles">
 <h3>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h3>
 <p>Finagle has many different components and we tried to faithfully model our configuration
 to help understand the constituents and the resulting behavior. For the sake of consistency,
 the current version of the <code class="docutils literal notranslate"><span class="pre">with</span></code> API is designed with the following principles in mind.</p>
 <ol class="arabic simple">
-<li><strong>Reasonable grouping of parameters</strong>: We target for the fine grained API so most of the
+<li><p><strong>Reasonable grouping of parameters</strong>: We target for the fine grained API so most of the
 <code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods take a single argument. Although, there is a common sense driven
 exception from this rule: some of the parameters only make sense when viewed as a group
 rather than separately (e.g. it makes no sense to specify SOCKS proxy credentials when
-the proxy itself is disabled).</li>
-<li><strong>No boolean flags (i.e., enabled, yesOrNo)</strong>: Boolean values are usually hard to
+the proxy itself is disabled).</p></li>
+<li><p><strong>No boolean flags (i.e., enabled, yesOrNo)</strong>: Boolean values are usually hard to
 reason about because their type doesn’t encode it’s mission in the domain (e.g. in
 most of the cases it’s impossible to tell what <code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code> means in a function
 call). Instead of boolean flags, we use a pair of methods <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">noX</span></code> to indicate
-whether the <code class="docutils literal notranslate"><span class="pre">x</span></code> feature is enabled or disabled.</li>
-<li><strong>Less primitive number types in the API</strong>: We promote a sane level of type-full
+whether the <code class="docutils literal notranslate"><span class="pre">x</span></code> feature is enabled or disabled.</p></li>
+<li><p><strong>Less primitive number types in the API</strong>: We promote a sane level of type-full
 programming, where a reasonable level of guarantees is encoded into a type-system.
 Thus, we never use primitive number types for durations and storage units given that
-there are utility types: <code class="docutils literal notranslate"><span class="pre">Duration</span></code> and <code class="docutils literal notranslate"><span class="pre">StorageUnit</span></code>.</li>
-<li><strong>No experimental and/or advanced features</strong>: While, it’s relatively safe to configure
+there are utility types: <code class="docutils literal notranslate"><span class="pre">Duration</span></code> and <code class="docutils literal notranslate"><span class="pre">StorageUnit</span></code>.</p></li>
+<li><p><strong>No experimental and/or advanced features</strong>: While, it’s relatively safe to configure
 parameters exposed via <code class="docutils literal notranslate"><span class="pre">with</span></code>-prefixed methods, you should never assume the same about
 the <cite>Stack API</cite> (i.e., <code class="docutils literal notranslate"><span class="pre">.configured</span></code>). It’s <em>easy</em> to configure basic parameters; it’s
-<em>possible</em> to configure expert-level parameters.</li>
+<em>possible</em> to configure expert-level parameters.</p></li>
 </ol>
-</div>
-</div>
-<div class="section" id="feature-toggles">
+</section>
+</section>
+<section id="feature-toggles">
 <span id="toggles"></span><h2>Feature Toggles<a class="headerlink" href="#feature-toggles" title="Permalink to this headline">¶</a></h2>
 <p>Feature toggles are a commonly used mechanism for modifying system behavior.
 For background, here is a <a class="reference external" href="https://martinfowler.com/articles/feature-toggles.html">detailed discussion</a>
 of the topic. As implemented in Finagle they provide a good balance of control between
 library and service owners which enables library owners to rollout functionality in a
 measured and controlled manner.</p>
-<div class="section" id="concepts">
+<section id="concepts">
 <h3>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h3>
 <p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/Toggle.scala">Toggle</a> is a total
 function from a type-<cite>Int</cite> to <cite>Boolean</cite>. These are used to decide whether a feature is
@@ -154,34 +154,34 @@ enabled or not for a given request or service configuration.</p>
 a collection of <cite>Int</cite>-typed <cite>Toggles</cite>. It provides a means of getting a <cite>Toggle</cite>
 for a given an identifier as well as an <cite>Iterator</cite> over the metadata for its <cite>Toggles</cite>.
 Various basic implementations exist on the <cite>ToggleMap</cite> companion object.</p>
-</div>
-<div class="section" id="usage">
+</section>
+<section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
 <p>If a <cite>Toggle</cite> is on the request path, it is recommended that it be stored in
 a member variable to avoid unnecessary overhead on the common path. If the <cite>Toggle</cite> is
 used only at startup this is unnecessary.</p>
 <p>Here is an example <a class="reference internal" href="ServicesAndFilters.html#filters"><span class="std std-ref">Filter</span></a> which uses a <cite>Toggle</cite> on the request path:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com</span><span class="p">.</span><span class="nn">example</span><span class="p">.</span><span class="n">service</span>
 
-<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">SimpleFilter</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.</span><span class="o">{</span><span class="nc">Toggle</span><span class="o">,</span> <span class="nc">ToggleMap</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.util.Rng</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="nc">Service</span><span class="p">,</span> <span class="nc">SimpleFilter</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">http</span><span class="p">.{</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">toggle</span><span class="p">.{</span><span class="nc">Toggle</span><span class="p">,</span> <span class="nc">ToggleMap</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Rng</span>
 
-<span class="k">class</span> <span class="nc">ExampleFilter</span><span class="o">(</span>
-    <span class="n">toggleMap</span><span class="k">:</span> <span class="kt">ToggleMap</span><span class="o">,</span>
-    <span class="n">newBackend</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span>
-  <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
+<span class="k">class</span> <span class="nc">ExampleFilter</span><span class="p">(</span>
+    <span class="n">toggleMap</span><span class="p">:</span> <span class="nc">ToggleMap</span><span class="p">,</span>
+    <span class="n">newBackend</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">])</span>
+  <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="p">[</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">]</span> <span class="p">{</span>
 
-  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">useNewBackend</span><span class="k">:</span> <span class="kt">Toggle</span> <span class="o">=</span> <span class="n">toggleMap</span><span class="o">(</span><span class="s">&quot;com.example.service.UseNewBackend&quot;</span><span class="o">)</span>
+  <span class="k">private</span><span class="p">[</span><span class="bp">this</span><span class="p">]</span> <span class="kd">val</span> <span class="n">useNewBackend</span><span class="p">:</span> <span class="nc">Toggle</span> <span class="o">=</span> <span class="n">toggleMap</span><span class="p">(</span><span class="s">&quot;com.example.service.UseNewBackend&quot;</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">useNewBackend</span><span class="o">(</span><span class="nc">Rng</span><span class="o">.</span><span class="n">threadLocal</span><span class="o">.</span><span class="n">nextInt</span><span class="o">()))</span>
-      <span class="n">newBackend</span><span class="o">(</span><span class="n">req</span><span class="o">)</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="nc">Request</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">]):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">useNewBackend</span><span class="p">(</span><span class="nc">Rng</span><span class="p">.</span><span class="n">threadLocal</span><span class="p">.</span><span class="n">nextInt</span><span class="p">()))</span>
+      <span class="n">newBackend</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
     <span class="k">else</span>
-      <span class="n">service</span><span class="o">(</span><span class="n">req</span><span class="o">)</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+      <span class="n">service</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Note that we pass a <cite>ToggleMap</cite> into the constructor and typically this would be
@@ -191,10 +191,10 @@ This allows for testing of the code with control of whether the <cite>Toggle</ci
 enabled or disabled by using <cite>ToggleMap.On</cite> or <cite>ToggleMap.Off</cite>. This could have also been
 achieved by passing the <cite>Toggle</cite> into the constructor and then using <cite>Toggle.on</cite> or
 <cite>Toggle.off</cite> in tests.</p>
-</div>
-<div class="section" id="setting-toggle-values">
+</section>
+<section id="setting-toggle-values">
 <h3>Setting Toggle Values<a class="headerlink" href="#setting-toggle-values" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="library-owners">
+<section id="library-owners">
 <h4>Library Owners<a class="headerlink" href="#library-owners" title="Permalink to this headline">¶</a></h4>
 <p>The base configuration for <cite>StandardToggles</cite> should be defined in a JSON
 configuration file at <cite>resources/com/twitter/toggles/configs/$libraryName.json</cite>.
@@ -203,19 +203,19 @@ allows for descriptions and comments.</p>
 <p>Dynamically changing the values across a cluster is specific to a particular deployment
 and can be wired in via a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ServiceLoadedToggleMap.scala">service-loaded ToggleMap</a>.</p>
-<p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>’s settings via
+<p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>'s settings via
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/flag/overrides.scala">flag overrides</a>
 using:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.flag</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">toggle</span><span class="p">.</span><span class="n">flag</span>
 
-<span class="n">flag</span><span class="o">.</span><span class="n">overrides</span><span class="o">.</span><span class="n">let</span><span class="o">(</span><span class="s">&quot;your.toggle.id.here&quot;</span><span class="o">,</span> <span class="n">fractionToUse</span><span class="o">)</span> <span class="o">{</span>
+<span class="n">flag</span><span class="p">.</span><span class="n">overrides</span><span class="p">.</span><span class="n">let</span><span class="p">(</span><span class="s">&quot;your.toggle.id.here&quot;</span><span class="p">,</span> <span class="n">fractionToUse</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// code that uses the flag in this block will have the</span>
   <span class="c1">// flag&#39;s fraction set to `fractionToUse`.</span>
-<span class="o">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="service-owners">
+</section>
+<section id="service-owners">
 <h4>Service Owners<a class="headerlink" href="#service-owners" title="Permalink to this headline">¶</a></h4>
 <p>At runtime, the in-process <cite>Toggle</cite> values can be modified using TwitterServer’s
 “/admin/toggles” <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-toggles">API endpoint</a>.
@@ -231,14 +231,14 @@ These environment-specific configs must be placed at
 where the <cite>environment</cite> from
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>
 is used to determine which one to load.</p>
-</div>
-</div>
-</div>
-<div class="section" id="tunables">
+</section>
+</section>
+</section>
+<section id="tunables">
 <span id="id1"></span><h2>Tunables<a class="headerlink" href="#tunables" title="Permalink to this headline">¶</a></h2>
 <p><cite>Tunables</cite> are a mechanism for service owners to dynamically change configuration
 parameters of clients and servers at runtime.</p>
-<div class="section" id="id2">
+<section id="id2">
 <h3>Concepts<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>A <a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/Tunable.scala">Tunable</a> is like a <cite>Function0</cite>;
 it produces a value when applied. Dynamic configuration facilitates this value changing
@@ -247,8 +247,8 @@ across invocations at runtime.</p>
 <a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>, which contains all the
 <cite>Tunables</cite> for a given id (ids are keys for distinguishing <cite>TunableMaps</cite>; each client might
 have a separate <cite>TunableMap</cite> that is used for configuration, and the id might be the client label).</p>
-</div>
-<div class="section" id="id3">
+</section>
+<section id="id3">
 <h3>Usage<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>Accessing the <cite>TunableMap</cite> for a given id is done via
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-tunable/src/main/scala/com/twitter/finagle/tunable/StandardTunableMap.scala">StandardTunableMap</a>,
@@ -256,45 +256,45 @@ using <cite>StandardTunableMap.apply(“myId”)</cite>.
 The returned map composes in-memory, service-loaded configurations and local files.</p>
 <p>Here is an example of configuring the <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a>
 on an HTTP client with a <cite>Tunable</cite>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com</span><span class="p">.</span><span class="nn">example</span><span class="p">.</span><span class="n">service</span>
 
-<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.tunable.StandardTunableMap</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Duration</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.tunable.</span><span class="o">{</span><span class="nc">Tunable</span><span class="o">,</span> <span class="nc">TunableMap</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">tunable</span><span class="p">.</span><span class="nc">StandardTunableMap</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Duration</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nn">tunable</span><span class="p">.{</span><span class="nc">Tunable</span><span class="p">,</span> <span class="nc">TunableMap</span><span class="p">}</span>
 
-<span class="k">val</span> <span class="n">clientId</span> <span class="k">=</span> <span class="s">&quot;exampleClient&quot;</span>
-<span class="k">val</span> <span class="n">timeoutTunableId</span> <span class="k">=</span> <span class="s">&quot;com.example.service.Timeout&quot;</span>
+<span class="kd">val</span> <span class="n">clientId</span> <span class="o">=</span> <span class="s">&quot;exampleClient&quot;</span>
+<span class="kd">val</span> <span class="n">timeoutTunableId</span> <span class="o">=</span> <span class="s">&quot;com.example.service.Timeout&quot;</span>
 
-<span class="k">val</span> <span class="n">tunables</span><span class="k">:</span> <span class="kt">TunableMap</span> <span class="o">=</span> <span class="nc">StandardTunableMap</span><span class="o">(</span><span class="n">clientId</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">timeoutTunable</span><span class="k">:</span> <span class="kt">Tunable</span><span class="o">[</span><span class="kt">Duration</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">tunables</span><span class="o">(</span><span class="nc">TunableMap</span><span class="o">.</span><span class="nc">Key</span><span class="o">[</span><span class="kt">Duration</span><span class="o">](</span><span class="n">timeoutTunableId</span><span class="o">))</span>
+<span class="kd">val</span> <span class="n">tunables</span><span class="p">:</span> <span class="nc">TunableMap</span> <span class="o">=</span> <span class="nc">StandardTunableMap</span><span class="p">(</span><span class="n">clientId</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">timeoutTunable</span><span class="p">:</span> <span class="nc">Tunable</span><span class="p">[</span><span class="nc">Duration</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">tunables</span><span class="p">(</span><span class="nc">TunableMap</span><span class="p">.</span><span class="nc">Key</span><span class="p">[</span><span class="nc">Duration</span><span class="p">](</span><span class="n">timeoutTunableId</span><span class="p">))</span>
 
-<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="n">clientId</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withRequestTimeout</span><span class="o">(</span><span class="n">timeoutTunable</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">client</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withLabel</span><span class="p">(</span><span class="n">clientId</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">withRequestTimeout</span><span class="p">(</span><span class="n">timeoutTunable</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="s">&quot;localhost:10000&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="id4">
+</section>
+<section id="id4">
 <h3>Configuration<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <p>The value of a given <cite>Tunable</cite> is the result of the composition of in-memory, service-loaded
 configurations and local files, in that order. If a configuration does not exist
 the value from the next configuration is used.</p>
 <p>For example, if a server starts up with a file-based configuration for a given id, those values will
 be used. If the in-memory configuration is then set, those new values will be used.</p>
-<div class="section" id="in-memory">
+<section id="in-memory">
 <h4>In-Memory<a class="headerlink" href="#in-memory" title="Permalink to this headline">¶</a></h4>
 <p>In-memory configuration is provided through a
 <a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>. The Tunable values used
 by a given instance can be modified using TwitterServer’s <cite>/admin/tunables</cite>
 <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-tunables">API endpoint</a>.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">map</span> <span class="k">=</span> <span class="nc">TunableMap</span><span class="o">.</span><span class="n">newMutable</span><span class="o">(</span><span class="n">source</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">map</span> <span class="o">=</span> <span class="nc">TunableMap</span><span class="p">.</span><span class="n">newMutable</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="file-based">
+</section>
+<section id="file-based">
 <h4>File-Based<a class="headerlink" href="#file-based" title="Permalink to this headline">¶</a></h4>
 <p>File-based configurations are defined in JSON files with the format specified in
 <a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/JsonTunableMapper.scala">JsonTunableMapper</a>.</p>
@@ -303,27 +303,28 @@ composed from files located at <cite>resources/com/twitter/tunables/</cite>
 (ensure that the <cite>resources</cite> directory is properly packaged with your application) in the following
 order:</p>
 <ol class="arabic simple">
-<li>$id/$env/instance-$instance.json</li>
-<li>$id/$env/instances.json</li>
-<li>$id/instance-$instance.json</li>
-<li>$id/instances.json</li>
+<li><p>$id/$env/instance-$instance.json</p></li>
+<li><p>$id/$env/instances.json</p></li>
+<li><p>$id/instance-$instance.json</p></li>
+<li><p>$id/instances.json</p></li>
 </ol>
 <p>Where $env and $instance are the environment and instance id given by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>.</p>
-</div>
-<div class="section" id="service-loaded">
+</section>
+<section id="service-loaded">
 <h4>Service-Loaded<a class="headerlink" href="#service-loaded" title="Permalink to this headline">¶</a></h4>
 <p>A service-loaded <cite>TunableMap</cite> is loaded through
 <a class="reference external" href="https://github.com/twitter/util/blob/release/util-app/src/main/scala/com/twitter/app/LoadService.scala">LoadService</a>. For a given id,
 <cite>StandardTunableMap</cite> uses <cite>LoadService</cite> to get a
 <a class="reference external" href="https://github.com/twitter/util/blob/release/util-tunable/src/main/scala/com/twitter/util/tunable/ServiceLoadedTunableMap.scala">ServiceLoadedTunableMap</a>
 with a matching id.</p>
-</div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -395,7 +396,7 @@ with a matching id.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

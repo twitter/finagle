@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Compression &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Compression &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="Tracing.html" title="Tracing"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Compression</a></li> 
       </ul>
     </div>  
 
@@ -58,7 +58,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="compression">
+  <section id="compression">
 <h1>Compression<a class="headerlink" href="#compression" title="Permalink to this headline">¶</a></h1>
 <p>Compression can allow us to make smart tradeoffs between IO and CPU.  This is
 necessarily protocol-specific, because different protocols use compression in
@@ -66,7 +66,7 @@ different ways.  Finagle’s approach to compression is that once it’s configu
 customers shouldn’t need to think about it–aside the configuration setup, and
 marking messages as compressed or not in some protocols, it should behave the
 same way as if you were sending uncompressed messages.</p>
-<div class="section" id="http">
+<section id="http">
 <h2>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
 <p>In HTTP, we compress messages according to the HTTP spec, using the
 <cite>Accept-Encoding</cite> and <cite>Content-Encoding</cite> headers.  However, the application
@@ -79,16 +79,16 @@ clients will decompress the messages it knows how to decompress automatically.</
 will only compress messages with text-like <a href="#id3"><span class="problematic" id="id4">`</span></a>Content-Type`s.  Although the HTTP
 spec does not officially support server-side decompression, some clients can
 send compressed HTTP requests, so we support that behavior.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="nc">Http</span><span class="p">,</span> <span class="nc">Service</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">http</span><span class="p">.{</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">}</span>
 
-<span class="k">def</span> <span class="n">bigPayloadService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
-  <span class="o">.</span><span class="n">withCompressionLevel</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">bigPayloadService</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withDecompression</span><span class="o">(</span><span class="n">enabled</span> <span class="k">=</span> <span class="kc">true</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">)</span>
+<span class="k">def</span> <span class="nf">bigPayloadService</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Request</span><span class="p">,</span> <span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">server</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">server</span>
+  <span class="p">.</span><span class="n">withCompressionLevel</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">serve</span><span class="p">(</span><span class="s">&quot;:8080&quot;</span><span class="p">,</span> <span class="n">bigPayloadService</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">client</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withDecompression</span><span class="p">(</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="s">&quot;:8080&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will set up a server, and a client that can talk to it.  When the client
@@ -107,8 +107,8 @@ will be dropped after the message is decoded, and will be preserved if the
 client does not decode it, whether it is because it is not configured to decode
 it or because it is unable to do so.</p>
 <p>Out of the box, Finagle supports “gzip” and “deflate”.</p>
-</div>
-<div class="section" id="thriftmux">
+</section>
+<section id="thriftmux">
 <h2>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h2>
 <p>ThriftMux supports a different kind of compression, which is for the entire
 ThriftMux session, not just an individual message.  This has significant
@@ -129,31 +129,32 @@ be) using the specified compression formats.</p>
 <p>The default configured compression format is <cite>Off</cite>, so enabling compression
 means that you need to configure it as <cite>Accepted</cite> or <cite>Desired</cite> as appropriate.
 Here’s what configuring it looks like:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.mux.transport.</span><span class="o">{</span><span class="nc">Compression</span><span class="o">,</span> <span class="nc">CompressionLevel</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">ThriftMux</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">mux</span><span class="p">.</span><span class="nn">transport</span><span class="p">.{</span><span class="nc">Compression</span><span class="p">,</span> <span class="nc">CompressionLevel</span><span class="p">}</span>
 
-<span class="k">val</span> <span class="n">compressor</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="nc">Compression</span><span class="o">.</span><span class="n">lz4Compressor</span><span class="o">(</span><span class="n">highCompression</span> <span class="k">=</span> <span class="kc">false</span><span class="o">))</span>
-<span class="k">val</span> <span class="n">decompressor</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="nc">Compression</span><span class="o">.</span><span class="n">lz4Decompressor</span><span class="o">())</span>
-<span class="k">val</span> <span class="n">compressionLevel</span> <span class="k">=</span> <span class="nc">CompressionLevel</span><span class="o">.</span><span class="nc">Desired</span>
+<span class="kd">val</span> <span class="n">compressor</span> <span class="o">=</span> <span class="nc">Seq</span><span class="p">(</span><span class="nc">Compression</span><span class="p">.</span><span class="n">lz4Compressor</span><span class="p">(</span><span class="n">highCompression</span> <span class="o">=</span> <span class="kc">false</span><span class="p">))</span>
+<span class="kd">val</span> <span class="n">decompressor</span> <span class="o">=</span> <span class="nc">Seq</span><span class="p">(</span><span class="nc">Compression</span><span class="p">.</span><span class="n">lz4Decompressor</span><span class="p">())</span>
+<span class="kd">val</span> <span class="n">compressionLevel</span> <span class="o">=</span> <span class="nc">CompressionLevel</span><span class="p">.</span><span class="nc">Desired</span>
 
-<span class="k">def</span> <span class="n">bigPayload</span><span class="k">:</span> <span class="kt">BigPayload.MethodPerEndpoint</span> <span class="o">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">server</span>
-  <span class="o">.</span><span class="n">withCompressionPreferences</span><span class="o">.</span><span class="n">compression</span><span class="o">(</span><span class="n">compressionLevel</span><span class="o">,</span> <span class="n">compressor</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withCompressionPreferences</span><span class="o">.</span><span class="n">decompression</span><span class="o">(</span><span class="n">compressionLevel</span><span class="o">,</span> <span class="n">decompressor</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">serveIface</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">bigPayload</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withCompressionPreferences</span><span class="o">.</span><span class="n">compression</span><span class="o">(</span><span class="n">compressionLevel</span><span class="o">,</span> <span class="n">compressor</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withCompressionPreferences</span><span class="o">.</span><span class="n">decompression</span><span class="o">(</span><span class="n">compressionLevel</span><span class="o">,</span> <span class="n">decompressor</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">build</span><span class="o">[</span><span class="kt">BigPayload.MethodPerEndpoint</span><span class="o">](</span><span class="s">&quot;:8080&quot;</span><span class="o">)</span>
+<span class="k">def</span> <span class="nf">bigPayload</span><span class="p">:</span> <span class="nc">BigPayload</span><span class="p">.</span><span class="nc">MethodPerEndpoint</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">server</span> <span class="o">=</span> <span class="nc">ThriftMux</span><span class="p">.</span><span class="n">server</span>
+  <span class="p">.</span><span class="n">withCompressionPreferences</span><span class="p">.</span><span class="n">compression</span><span class="p">(</span><span class="n">compressionLevel</span><span class="p">,</span> <span class="n">compressor</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">withCompressionPreferences</span><span class="p">.</span><span class="n">decompression</span><span class="p">(</span><span class="n">compressionLevel</span><span class="p">,</span> <span class="n">decompressor</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">serveIface</span><span class="p">(</span><span class="s">&quot;:8080&quot;</span><span class="p">,</span> <span class="n">bigPayload</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">client</span> <span class="o">=</span> <span class="nc">ThriftMux</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withCompressionPreferences</span><span class="p">.</span><span class="n">compression</span><span class="p">(</span><span class="n">compressionLevel</span><span class="p">,</span> <span class="n">compressor</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">withCompressionPreferences</span><span class="p">.</span><span class="n">decompression</span><span class="p">(</span><span class="n">compressionLevel</span><span class="p">,</span> <span class="n">decompressor</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">build</span><span class="p">[</span><span class="nc">BigPayload</span><span class="p">.</span><span class="nc">MethodPerEndpoint</span><span class="p">](</span><span class="s">&quot;:8080&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Currently, lz4 is the only supported compression format for ThriftMux.  If you
 would like to use compression, you should add a dependency on the
 <a class="reference external" href="https://github.com/lz4/lz4-java">lz4-java</a> library.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -202,7 +203,7 @@ would like to use compression, you should add a dependency on the
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

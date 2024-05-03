@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Weighted Aperture &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Weighted Aperture &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/finagle.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +40,8 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Weighted Aperture</a></li> 
       </ul>
     </div>  
 
@@ -50,7 +50,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="weighted-aperture">
+  <section id="weighted-aperture">
 <h1>Weighted Aperture<a class="headerlink" href="#weighted-aperture" title="Permalink to this headline">¶</a></h1>
 <p>The weighted “flavor” of aperture load balancers was introduced as a means to
 offer balancers more control over balancing traffic. Traditional aperture
@@ -66,39 +66,39 @@ aperture, that endpoint would simply occupy a smaller portion of the ring and
 therefore appear in fewer apertures.
 Though both Random and Deterministic Aperture can behave as weighted aperture balancers,
 their algorithms are slightly modified to account for this additional information.</p>
-<div class="section" id="weighted-deterministic-aperture">
+<section id="weighted-deterministic-aperture">
 <h2>Weighted Deterministic Aperture<a class="headerlink" href="#weighted-deterministic-aperture" title="Permalink to this headline">¶</a></h2>
 <p>With additional weight information, the ring model is no longer a simple abstraction
 for selecting endpoints to send traffic to. If endpoints can handle differing levels
 of traffic, they can’t take up equal portions of the ring. In other words, the
 “fair die” feature of the ring is abandoned. The ring in the examples above might look
 something like the following.</p>
-<div class="figure align-center">
+<figure class="align-center">
 <a class="reference internal image-reference" href="../_images/waperturering.png"><img alt="../_images/waperturering.png" src="../_images/waperturering.png" style="width: 60%;" /></a>
-</div>
+</figure>
 <p>Without some computation, it’s not immediately obvious which endpoints are within
 the aperture, nor is it easy to determine which endpoint a value between 0 and 1
 corresponds to, making random selection within an aperture equally difficult.</p>
 <p>Rather than representing the deterministic subsetting for weighted aperture as
 overlapping rings, we shift to a two dimensional model that represent the nodes
 within a given aperture as reorganized areas.</p>
-<div class="figure align-center">
+<figure class="align-center">
 <img alt="../_images/ring-to-area.gif" src="../_images/ring-to-area.gif" />
-</div>
+</figure>
 <p>Mathematically, this computation is completed via <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/util/Drv.scala">c.t.f.util.Drv</a>.
 By adding a second dimension, we’re able to equalize the widths of each endpoint while
 maintaining their weights in the form of areas. For example, an endpoint of weight 0.5
 would, rather than having a length around a ring of 0.5, have a width of 1 and a height
 of 0.5, resulting in an overall area of 0.5. Crucially, this reorganization retains
 the O(1) complexity of the original ring model by making indexing simple.</p>
-<div class="figure align-center">
+<figure class="align-center">
 <img alt="../_images/waperturearea.png" src="../_images/waperturearea.png" />
-</div>
+</figure>
 <p>For more information on how determinism is maintained in weighted aperture balancers,
 check out <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/util/Drv.scala">c.t.f.util.Drv</a>
 and <a class="reference external" href="https://www.keithschwarz.com/darts-dice-coins/">this explanation</a> of the probabilistic models.</p>
-</div>
-<div class="section" id="weighted-random-aperture">
+</section>
+<section id="weighted-random-aperture">
 <h2>Weighted Random Aperture<a class="headerlink" href="#weighted-random-aperture" title="Permalink to this headline">¶</a></h2>
 <p>Similarly for random aperture, the problem of identifying endpoints when they’re each
 of different widths (or lengths) isn’t as simple in the weighted pathway. As an added
@@ -110,16 +110,17 @@ search to determine which endpoint is selected by P2C. It’s important
 to note that this change results in a shift from O(1) endpoint selection to O(log(N)) selection
 complexity. This is a compromise made to ensure that the overall behavior of Random Aperture
 is maintained.</p>
-</div>
-<div class="section" id="key-metrics">
+</section>
+<section id="key-metrics">
 <h2>Key Metrics<a class="headerlink" href="#key-metrics" title="Permalink to this headline">¶</a></h2>
 <p>The key metrics for weighted apertures are the same as their traditional counterparts, with one
 exception. To determine if you’re running a weighted balancer, check for the <cite>_weighted</cite> suffix
 in the <cite>$clientName/loadbalancer/algorithm</cite> metric.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -167,7 +168,7 @@ in the <cite>$clientName/loadbalancer/algorithm</cite> metric.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

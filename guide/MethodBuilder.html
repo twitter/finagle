@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>MethodBuilder &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>MethodBuilder &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -41,7 +40,8 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">MethodBuilder</a></li> 
       </ul>
     </div>  
 
@@ -50,24 +50,24 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="methodbuilder">
+  <section id="methodbuilder">
 <span id="id1"></span><h1>MethodBuilder<a class="headerlink" href="#methodbuilder" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Currently there is <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.
+<p class="admonition-title">Note</p>
+<p>Currently there is <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.
 We are waiting on user interest before expanding to more protocols.</p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> is a collection of APIs for client configuration at a higher
 level than the  <a class="reference internal" href="Configuration.html#finagle6apis"><span class="std std-ref">Finagle 6 APIs</span></a> while improving upon the deprecated
 <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>. <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> provides:</p>
 <ul class="simple">
-<li><a class="reference internal" href="#mb-idempotency"><span class="std std-ref">Idempotent</span></a> classification providing a good default retry
+<li><p><a class="reference internal" href="#mb-idempotency"><span class="std std-ref">Idempotent</span></a> classification providing a good default retry
 policy. It also offers a single knob, max extra load, that can help reduce tail latency
-through <a class="reference internal" href="#mb-backup-requests"><span class="std std-ref">backup requests</span></a>.</li>
-<li><a class="reference internal" href="#mb-logical-req"><span class="std std-ref">Logical</span></a> success rate metrics.</li>
-<li>Retries based on application-level requests and responses (e.g. an HTTP
-503 response code or a Thrift exception).</li>
-<li>Configuration of per-attempt and total timeouts.</li>
+through <a class="reference internal" href="#mb-backup-requests"><span class="std std-ref">backup requests</span></a>.</p></li>
+<li><p><a class="reference internal" href="#mb-logical-req"><span class="std std-ref">Logical</span></a> success rate metrics.</p></li>
+<li><p>Retries based on application-level requests and responses (e.g. an HTTP
+503 response code or a Thrift exception).</p></li>
+<li><p>Configuration of per-attempt and total timeouts.</p></li>
 </ul>
 <p>All of these can be customized per method (or endpoint) while sharing a single
 underlying Finagle client. Concretely, a single service might offer both
@@ -81,70 +81,70 @@ file descriptors, and CPU.</p>
 <p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> can also be used without scoping to a <code class="docutils literal notranslate"><span class="pre">methodName</span></code>, allowing users to wrap
 an entire client with <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code>, as with <code class="docutils literal notranslate"><span class="pre">totalService</span></code> in the example below.</p>
 <p id="mb-example-http">Turning the example into code, first in Scala:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.PercentOps._</span>
-<span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">conversions</span><span class="p">.</span><span class="nc">PercentOps</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">conversions</span><span class="p">.</span><span class="nc">DurationOps</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="n">http</span><span class="p">,</span> <span class="nc">Http</span><span class="p">,</span> <span class="nc">Service</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">service</span><span class="p">.{</span><span class="nc">ReqRep</span><span class="p">,</span> <span class="nc">ResponseClass</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Return</span>
 
 <span class="c1">// other StackClient configuration done here, e.g. `withSessionQualifier`</span>
-<span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;example_client&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">stackClient</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withLabel</span><span class="p">(</span><span class="s">&quot;example_client&quot;</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="n">stackClient</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">builder</span> <span class="o">=</span> <span class="n">stackClient</span><span class="p">.</span><span class="n">methodBuilder</span><span class="p">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="p">)</span>
 
 <span class="c1">// a `Service` for &quot;GET statuses/show/:id&quot; with relatively tight timeouts</span>
 <span class="c1">// and a liberal retry policy.</span>
-<span class="k">val</span> <span class="n">statusesShow</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">builder</span>
+<span class="kd">val</span> <span class="n">statusesShow</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">builder</span>
   <span class="c1">// 25 millisecond timeout per attempt. this applies to the initial</span>
   <span class="c1">// attempt and each retry, if any.</span>
-  <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">25.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">withTimeoutPerRequest</span><span class="p">(</span><span class="mi">25</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
   <span class="c1">// 50 milliseconds timeout in total, including retries</span>
-  <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">50.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">withTimeoutTotal</span><span class="p">(</span><span class="mi">50</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
   <span class="c1">// retry all HTTP 4xx and 5xx responses</span>
-  <span class="o">.</span><span class="n">withRetryForClassifier</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">rep</span><span class="o">))</span> <span class="k">if</span> <span class="n">rep</span><span class="o">.</span><span class="n">statusCode</span> <span class="o">&gt;=</span> <span class="mi">400</span> <span class="o">&amp;&amp;</span> <span class="n">rep</span><span class="o">.</span><span class="n">statusCode</span> <span class="o">&lt;=</span> <span class="mi">599</span> <span class="k">=&gt;</span>
-      <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
-  <span class="o">}</span>
+  <span class="p">.</span><span class="n">withRetryForClassifier</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="nc">Return</span><span class="p">(</span><span class="n">rep</span><span class="p">))</span> <span class="k">if</span> <span class="n">rep</span><span class="p">.</span><span class="n">statusCode</span> <span class="o">&gt;=</span> <span class="mi">400</span> <span class="o">&amp;&amp;</span> <span class="n">rep</span><span class="p">.</span><span class="n">statusCode</span> <span class="o">&lt;=</span> <span class="mi">599</span> <span class="o">=&gt;</span>
+      <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">RetryableFailure</span>
+  <span class="p">}</span>
   <span class="c1">// can reduce tail latency by sending 1% extra load to the backend</span>
-  <span class="o">.</span><span class="n">idempotent</span><span class="o">(</span><span class="n">maxExtraLoad</span> <span class="k">=</span> <span class="mf">1.</span><span class="n">percent</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">idempotent</span><span class="p">(</span><span class="n">maxExtraLoad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">.</span><span class="n">percent</span><span class="p">)</span>
   <span class="c1">// build the service</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;get_statuses&quot;</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;get_statuses&quot;</span><span class="p">)</span>
 
 <span class="c1">// a `Service` for &quot;POST statuses/update&quot;, which is non-idempotent and has</span>
 <span class="c1">// relatively loose timeouts</span>
-<span class="k">val</span> <span class="n">statusesUpdate</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">builder</span>
+<span class="kd">val</span> <span class="n">statusesUpdate</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">builder</span>
   <span class="c1">// 200 millisecond timeouts per attempt. this applies to the initial</span>
   <span class="c1">// attempt and each retry, if any.</span>
-  <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">200.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">withTimeoutPerRequest</span><span class="p">(</span><span class="mi">200</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
   <span class="c1">// 500 milliseconds timeouts in total, including retries</span>
-  <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">500.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">withTimeoutTotal</span><span class="p">(</span><span class="mi">500</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
   <span class="c1">// no retries (except on write exceptions), and no backup requests</span>
-  <span class="o">.</span><span class="n">nonIdempotent</span>
+  <span class="p">.</span><span class="n">nonIdempotent</span>
   <span class="c1">// build the service</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;update_status&quot;</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;update_status&quot;</span><span class="p">)</span>
 
 <span class="c1">// A `Service` that is not scoped to a method</span>
-<span class="k">val</span> <span class="n">totalService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">builder</span>
-  <span class="o">.</span><span class="n">newService</span>
+<span class="kd">val</span> <span class="n">totalService</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">builder</span>
+  <span class="p">.</span><span class="n">newService</span>
 </pre></div>
 </div>
 <p>A similar example, for Java:</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.finagle.Http</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.finagle.Service</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Request</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Response</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.util.Duration</span><span class="o">;</span>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.finagle.Http</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.Service</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Request</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Response</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.util.Duration</span><span class="p">;</span>
 
-<span class="n">Service</span><span class="o">&lt;</span><span class="n">Request</span><span class="o">,</span> <span class="n">Response</span><span class="o">&gt;</span> <span class="n">exampleService</span> <span class="o">=</span>
-  <span class="n">Http</span><span class="o">.</span><span class="na">client</span><span class="o">().</span><span class="na">methodBuilder</span><span class="o">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">)</span>
-    <span class="o">.</span><span class="na">withTimeoutTotal</span><span class="o">(</span><span class="n">Duration</span><span class="o">.</span><span class="na">fromMilliseconds</span><span class="o">(</span><span class="mi">50</span><span class="o">))</span>
-    <span class="o">.</span><span class="na">withTimeoutPerRequest</span><span class="o">(</span><span class="n">Duration</span><span class="o">.</span><span class="na">fromMilliseconds</span><span class="o">(</span><span class="mi">25</span><span class="o">))</span>
-    <span class="o">.</span><span class="na">idempotent</span><span class="o">(</span><span class="mf">0.01</span><span class="o">)</span>
-    <span class="o">.</span><span class="na">newService</span><span class="o">(</span><span class="s">&quot;java_example&quot;</span><span class="o">);</span>
+<span class="n">Service</span><span class="o">&lt;</span><span class="n">Request</span><span class="p">,</span> <span class="n">Response</span><span class="o">&gt;</span> <span class="n">exampleService</span> <span class="o">=</span>
+  <span class="n">Http</span><span class="p">.</span><span class="na">client</span><span class="p">().</span><span class="na">methodBuilder</span><span class="p">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="na">withTimeoutTotal</span><span class="p">(</span><span class="n">Duration</span><span class="p">.</span><span class="na">fromMilliseconds</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="p">.</span><span class="na">withTimeoutPerRequest</span><span class="p">(</span><span class="n">Duration</span><span class="p">.</span><span class="na">fromMilliseconds</span><span class="p">(</span><span class="mi">25</span><span class="p">))</span>
+    <span class="p">.</span><span class="na">idempotent</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="p">.</span><span class="na">newService</span><span class="p">(</span><span class="s">&quot;java_example&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
-<div class="section" id="retries">
+<section id="retries">
 <h2>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> defaults to using the client’s <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a>
 to retry failures that are marked as retryable
@@ -168,8 +168,8 @@ unsuccessful requests.</p>
 handles retries, rendering them non-idempotent.  If you want to reclassify failures as
 successes or successes as failures as well as mark the endpoint as idempotent, set
 <code class="docutils literal notranslate"><span class="pre">withRetryForClassifier</span></code> before setting <code class="docutils literal notranslate"><span class="pre">idempotent</span></code>.</p>
-</div>
-<div class="section" id="mb-idempotency">
+</section>
+<section id="mb-idempotency">
 <span id="idempotency"></span><h2>Idempotency<a class="headerlink" href="#mb-idempotency" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> provides <code class="docutils literal notranslate"><span class="pre">idempotent</span></code> and <code class="docutils literal notranslate"><span class="pre">nonIdemptotent</span></code> methods for a client to signal
 whether it’s safe to resend requests that have already been sent.</p>
@@ -187,7 +187,7 @@ and replaced with the default
 on write exceptions (wherein the request was never sent to the server). Any configured
 <a class="reference internal" href="#mb-backup-requests"><span class="std std-ref">backup requests</span></a> are also disabled,
 since it’s not safe to reissue requests.</p>
-<div class="section" id="backup-requests">
+<section id="backup-requests">
 <span id="mb-backup-requests"></span><h3>Backup Requests<a class="headerlink" href="#backup-requests" title="Permalink to this headline">¶</a></h3>
 <p>Backup requests, or hedged requests, are a means of reducing the tail latency of
 requests that are known to be safe to issue multiple times. This is done by sending an extra
@@ -218,35 +218,35 @@ latencies to come in towards the p99 latency. For <cite>0.05</cite>, those laten
 towards your p95 latency. You should also ensure that your backend can tolerate the increased load.</p>
 <p>Here’s an example of how to send backup requests for one endpoint
 and disable them for another, first in Scala:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.PercentOps._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">conversions</span><span class="p">.</span><span class="nc">PercentOps</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="n">http</span><span class="p">,</span> <span class="nc">Http</span><span class="p">,</span> <span class="nc">Service</span><span class="p">}</span>
 
-<span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">builder</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="n">methodBuilder</span><span class="p">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">withBackups</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">builder</span>
-  <span class="o">.</span><span class="n">idempotent</span><span class="o">(</span><span class="n">maxExtraLoad</span> <span class="k">=</span> <span class="mf">1.</span><span class="n">percent</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;with_backups&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">withBackups</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">builder</span>
+  <span class="p">.</span><span class="n">idempotent</span><span class="p">(</span><span class="n">maxExtraLoad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">.</span><span class="n">percent</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;with_backups&quot;</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">noBackups</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">builder</span>
-  <span class="o">.</span><span class="n">idempotent</span><span class="o">(</span><span class="n">maxExtraLoad</span> <span class="k">=</span> <span class="mf">0.</span><span class="n">percent</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;no_backups&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">noBackups</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">builder</span>
+  <span class="p">.</span><span class="n">idempotent</span><span class="p">(</span><span class="n">maxExtraLoad</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="n">percent</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;no_backups&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>A similar example, for Java:</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.finagle.Http</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.finagle.Service</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Request</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Response</span><span class="o">;</span>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.finagle.Http</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.Service</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Request</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Response</span><span class="p">;</span>
 
-<span class="n">Service</span><span class="o">&lt;</span><span class="n">Request</span><span class="o">,</span> <span class="n">Response</span><span class="o">&gt;</span> <span class="n">withBackups</span> <span class="o">=</span>
-  <span class="n">Http</span><span class="o">.</span><span class="na">client</span><span class="o">().</span><span class="na">methodBuilder</span><span class="o">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">)</span>
-    <span class="o">.</span><span class="na">idempotent</span><span class="o">(</span><span class="mf">0.01</span><span class="o">)</span>
-    <span class="o">.</span><span class="na">newService</span><span class="o">(</span><span class="s">&quot;with_backups&quot;</span><span class="o">);</span>
+<span class="n">Service</span><span class="o">&lt;</span><span class="n">Request</span><span class="p">,</span> <span class="n">Response</span><span class="o">&gt;</span> <span class="n">withBackups</span> <span class="o">=</span>
+  <span class="n">Http</span><span class="p">.</span><span class="na">client</span><span class="p">().</span><span class="na">methodBuilder</span><span class="p">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="na">idempotent</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="p">.</span><span class="na">newService</span><span class="p">(</span><span class="s">&quot;with_backups&quot;</span><span class="p">);</span>
 
-<span class="n">Service</span><span class="o">&lt;</span><span class="n">Request</span><span class="o">,</span> <span class="n">Response</span><span class="o">&gt;</span> <span class="n">noBackups</span> <span class="o">=</span>
-  <span class="n">Http</span><span class="o">.</span><span class="na">client</span><span class="o">().</span><span class="na">methodBuilder</span><span class="o">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">)</span>
-    <span class="o">.</span><span class="na">idempotent</span><span class="o">(</span><span class="mf">0.0</span><span class="o">)</span>
-    <span class="o">.</span><span class="na">newService</span><span class="o">(</span><span class="s">&quot;no_backups&quot;</span><span class="o">);</span>
+<span class="n">Service</span><span class="o">&lt;</span><span class="n">Request</span><span class="p">,</span> <span class="n">Response</span><span class="o">&gt;</span> <span class="n">noBackups</span> <span class="o">=</span>
+  <span class="n">Http</span><span class="p">.</span><span class="na">client</span><span class="p">().</span><span class="na">methodBuilder</span><span class="p">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="na">idempotent</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="p">.</span><span class="na">newService</span><span class="p">(</span><span class="s">&quot;no_backups&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 <p id="mb-backups-requests-no-mb">While backup requests are integrated nicely with <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code>, this is not a requirement.
@@ -255,15 +255,15 @@ your other <cite>Filters</cite> and <cite>Services</cite>. Take a look at
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/BackupRequestFilter.scala">BackupRequestFilter</a>,
 but note there are subtleties regarding where it is placed and the retry budgets.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Backup requests were popularized by Google in Dean, J. and Barroso, L.A. (2013),
+<p class="admonition-title">Note</p>
+<p>Backup requests were popularized by Google in Dean, J. and Barroso, L.A. (2013),
 <a class="reference external" href="https://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext">The Tail at Scale</a>,
 Communications of the ACM, Vol. 56 No. 2, Pages 74-80.
 Non-paywalled slides <a class="reference external" href="https://static.googleusercontent.com/media/research.google.com/en//people/jeff/Berkeley-Latency-Mar2012.pdf">here</a>.</p>
 </div>
-</div>
-</div>
-<div class="section" id="timeouts">
+</section>
+</section>
+<section id="timeouts">
 <h2>Timeouts<a class="headerlink" href="#timeouts" title="Permalink to this headline">¶</a></h2>
 <p>For per-request timeouts the defaults come from the client’s configuration
 for <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter.Param</a>
@@ -281,8 +281,8 @@ Finagle will automatically issue a retry with 100 ms for its timeout.
 If this retry happens to time out, the application level retry policy on
 the <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> applies, and this retry will have 40 ms remaining (150 ms total
 - 10 ms - 100 ms).</p>
-</div>
-<div class="section" id="metrics">
+</section>
+<section id="metrics">
 <h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
 <p>Metrics are scoped to your client’s label and method name.</p>
 <p>The logical success and failure stats that are exported by the MethodBuilder are
@@ -306,69 +306,69 @@ followed by the last try, where there’s a successful service acquisition,
 and a successful request:</p>
 <img alt="_images/logicalstats.png" src="_images/logicalstats.png" />
 <ul class="simple">
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/requests</cite> — A counter of the total
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/requests</cite> — A counter of the total
 number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes and failures.
-This does not include any retries.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/success</cite> — A counter of the total
-number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures</cite> — A counter of the total
-number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> failures.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures/&lt;exception_name&gt;</cite> — A counter of the
-number of times a specific exception has caused a <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> failure.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/request_latency_ms</cite> — A histogram of
-the latency of the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/retries</cite> — A histogram of the number of times
-requests are retried.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/send_backup_after_ms</cite> - A histogram of the time,
+This does not include any retries.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/success</cite> — A counter of the total
+number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures</cite> — A counter of the total
+number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> failures.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures/&lt;exception_name&gt;</cite> — A counter of the
+number of times a specific exception has caused a <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> failure.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/request_latency_ms</cite> — A histogram of
+the latency of the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/retries</cite> — A histogram of the number of times
+requests are retried.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/send_backup_after_ms</cite> - A histogram of the time,
 in  milliseconds, after which a request will be re-issued (backup sent) if it has not yet
-completed. Present only if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_sent</cite> - A counter of the number of backup
-requests sent. Present only if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_won</cite> - A counter of the number of backup
+completed. Present only if <cite>idempotent</cite> is configured.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_sent</cite> - A counter of the number of backup
+requests sent. Present only if <cite>idempotent</cite> is configured.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_won</cite> - A counter of the number of backup
 requests that completed before the original, regardless of whether they succeeded. Present only
-if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/budget_exhausted</cite> - A counter of the number of times
+if <cite>idempotent</cite> is configured.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/budget_exhausted</cite> - A counter of the number of times
 the backup request budget (computed using the current value of the <cite>maxExtraLoad</cite> param) or client
 retry budget was exhausted, preventing a backup from being sent. Present only if <cite>idempotent</cite> is
-configured.</li>
+configured.</p></li>
 </ul>
 <p>For example:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.PercentOps._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">conversions</span><span class="p">.</span><span class="nc">PercentOps</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Http</span>
 
-<span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;example_client&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">idempotent</span><span class="o">(</span><span class="n">maxExtraLoad</span> <span class="k">=</span> <span class="mf">1.</span><span class="n">percent</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">statusesShow</span> <span class="k">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;get_statuses&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">builder</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withLabel</span><span class="p">(</span><span class="s">&quot;example_client&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">methodBuilder</span><span class="p">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">idempotent</span><span class="p">(</span><span class="n">maxExtraLoad</span> <span class="o">=</span> <span class="mi">1</span><span class="p">.</span><span class="n">percent</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">statusesShow</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;get_statuses&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Will produce the following metrics:</p>
 <ul class="simple">
-<li><cite>clnt/example_client/get_statuses/logical/requests</cite></li>
-<li><cite>clnt/example_client/get_statuses/logical/success</cite></li>
-<li><cite>clnt/example_client/get_statuses/logical/failures</cite></li>
-<li><cite>clnt/example_client/get_statuses/logical/failures/exception_name</cite></li>
-<li><cite>clnt/example_client/get_statuses/logical/request_latency_ms</cite></li>
-<li><cite>clnt/example_client/get_statuses/retries</cite></li>
-<li><cite>clnt/example_client/get_statuses/backups/send_backup_after_ms</cite></li>
-<li><cite>clnt/example_client/get_statuses/backups/backups_sent</cite></li>
-<li><cite>clnt/example_client/get_statuses/backups/backups_won</cite></li>
-<li><cite>clnt/example_client/get_statuses/backups/budget_exhausted</cite></li>
+<li><p><cite>clnt/example_client/get_statuses/logical/requests</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/logical/success</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/logical/failures</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/logical/failures/exception_name</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/logical/request_latency_ms</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/retries</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/backups/send_backup_after_ms</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/backups/backups_sent</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/backups/backups_won</cite></p></li>
+<li><p><cite>clnt/example_client/get_statuses/backups/budget_exhausted</cite></p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> adds itself into the process registry which allows
 for introspection of runtime configuration via TwitterServer’s <cite>/admin/registry.json</cite>
 <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-registry-json">endpoint</a>.</p>
-</div>
-<div class="section" id="logging">
+</section>
+<section id="logging">
 <span id="id2"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
 <p>Unsuccessful requests, as determined by the <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a>
 set by <code class="docutils literal notranslate"><span class="pre">withRetryForClassifier</span></code>, are logged at <code class="docutils literal notranslate"><span class="pre">com.twitter.logging.Level.DEBUG</span></code>
 level. Further details, including the request and response, are available at <code class="docutils literal notranslate"><span class="pre">TRACE</span></code>
 level. There is a <code class="docutils literal notranslate"><span class="pre">Logger</span></code> per method, named with the format
 <cite>“com.twitter.finagle.client.MethodBuilder.$clientName.$methodName”</cite>.</p>
-</div>
-<div class="section" id="lifecycle">
+</section>
+<section id="lifecycle">
 <h2>Lifecycle<a class="headerlink" href="#lifecycle" title="Permalink to this headline">¶</a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> is tied to a single logical destination via a
 <a class="reference internal" href="Names.html#finagle-names"><span class="std std-ref">Name</span></a>, though using <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a> allows
@@ -376,29 +376,29 @@ clients to talk to different physical locations.</p>
 <p>Because <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> is immutable, its methods chain together, and create
 new instances backed by the original underlying client. This allows for common
 customizations to be shared across endpoints:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">conversions</span><span class="p">.</span><span class="nc">DurationOps</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="n">http</span><span class="p">,</span> <span class="nc">Http</span><span class="p">,</span> <span class="nc">Service</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">service</span><span class="p">.{</span><span class="nc">ReqRep</span><span class="p">,</span> <span class="nc">ResponseClass</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Return</span>
 
 <span class="c1">// the `Services` below will use these settings unless they are</span>
 <span class="c1">// explicitly changed.</span>
-<span class="k">val</span> <span class="n">base</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withRetryDisabled</span>
-  <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">200.</span><span class="n">milliseconds</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">base</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="n">methodBuilder</span><span class="p">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">withRetryDisabled</span>
+  <span class="p">.</span><span class="n">withTimeoutPerRequest</span><span class="p">(</span><span class="mi">200</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">longerTimeout</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">base</span>
+<span class="kd">val</span> <span class="n">longerTimeout</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span>
   <span class="c1">// changes the timeout, while leaving retries disabled</span>
-  <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">500.</span><span class="n">milliseconds</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;longer_timeout&quot;</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">withTimeoutTotal</span><span class="p">(</span><span class="mi">500</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;longer_timeout&quot;</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">retryOn418s</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">base</span>
+<span class="kd">val</span> <span class="n">retryOn418s</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span>
   <span class="c1">// keeps the 200 ms timeout, while changing the retry policy</span>
-  <span class="o">.</span><span class="n">withRetryForClassifier</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">rep</span><span class="o">))</span> <span class="k">if</span> <span class="n">rep</span><span class="o">.</span><span class="n">statusCode</span> <span class="o">==</span> <span class="mi">418</span> <span class="k">=&gt;</span>
-      <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
-  <span class="o">}</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;retry_teapots&quot;</span><span class="o">)</span>
+  <span class="p">.</span><span class="n">withRetryForClassifier</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="nc">Return</span><span class="p">(</span><span class="n">rep</span><span class="p">))</span> <span class="k">if</span> <span class="n">rep</span><span class="p">.</span><span class="n">statusCode</span> <span class="o">==</span> <span class="mi">418</span> <span class="o">=&gt;</span>
+      <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">RetryableFailure</span>
+  <span class="p">}</span>
+  <span class="p">.</span><span class="n">newService</span><span class="p">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;retry_teapots&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>As a consequence of the Finagle client being shared, its underlying
@@ -411,8 +411,8 @@ as well. For most usage patterns this is unlikely to be an issue. In some cases,
 it may manifest as poor distribution of the different method’s requests across
 backends. Should it be an issue, we recommend creating and using
 separate Finagle clients for those methods.</p>
-</div>
-<div class="section" id="migrating-from-clientbuilder">
+</section>
+<section id="migrating-from-clientbuilder">
 <span id="mb-cb-migration"></span><h2>Migrating from ClientBuilder<a class="headerlink" href="#migrating-from-clientbuilder" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> is in part intended as a replacement for <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code> and
 as such there is relatively easy migration path. Users should prefer using the
@@ -420,30 +420,30 @@ Finagle 6 style <code class="docutils literal notranslate"><span class="pre">Sta
 work on migrating their code off of <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>.</p>
 <p>Notes and caveats:</p>
 <ul class="simple">
-<li>Metrics will be scoped to the <code class="docutils literal notranslate"><span class="pre">ClientBuilder.name</span></code> and then the method name.</li>
-<li>Total timeout defaults to using the <code class="docutils literal notranslate"><span class="pre">ClientBuilder.timeout</span></code> configuration.</li>
-<li>Per-request timeout defaults to using the <code class="docutils literal notranslate"><span class="pre">ClientBuilder.requestTimeout</span></code> configuration.</li>
-<li>The <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code> metrics scoped to “tries” are not included. These
-are superseded by the logical <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> metrics.</li>
-<li>The <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code> retry policy will <strong>not</strong> be applied and users must migrate
-to using <code class="docutils literal notranslate"><span class="pre">withRetryForClassifier</span></code>.</li>
-<li>The <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code> must have a destination set via one of
-<code class="docutils literal notranslate"><span class="pre">hosts</span></code>, <code class="docutils literal notranslate"><span class="pre">addrs</span></code>, <code class="docutils literal notranslate"><span class="pre">dest</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster</span></code>, or <code class="docutils literal notranslate"><span class="pre">group</span></code>.</li>
+<li><p>Metrics will be scoped to the <code class="docutils literal notranslate"><span class="pre">ClientBuilder.name</span></code> and then the method name.</p></li>
+<li><p>Total timeout defaults to using the <code class="docutils literal notranslate"><span class="pre">ClientBuilder.timeout</span></code> configuration.</p></li>
+<li><p>Per-request timeout defaults to using the <code class="docutils literal notranslate"><span class="pre">ClientBuilder.requestTimeout</span></code> configuration.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code> metrics scoped to “tries” are not included. These
+are superseded by the logical <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> metrics.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code> retry policy will <strong>not</strong> be applied and users must migrate
+to using <code class="docutils literal notranslate"><span class="pre">withRetryForClassifier</span></code>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code> must have a destination set via one of
+<code class="docutils literal notranslate"><span class="pre">hosts</span></code>, <code class="docutils literal notranslate"><span class="pre">addrs</span></code>, <code class="docutils literal notranslate"><span class="pre">dest</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster</span></code>, or <code class="docutils literal notranslate"><span class="pre">group</span></code>.</p></li>
 </ul>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.client.ClientBuilder</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">client</span><span class="p">.</span><span class="nc">ClientBuilder</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="n">http</span><span class="p">,</span> <span class="nc">Http</span><span class="p">}</span>
 
-<span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">()</span>
-<span class="k">val</span> <span class="n">clientBuilder</span> <span class="k">=</span> <span class="nc">ClientBuilder</span><span class="o">()</span>
-  <span class="o">.</span><span class="n">name</span><span class="o">(</span><span class="s">&quot;example_client&quot;</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">stack</span><span class="o">(</span><span class="n">stackClient</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">hosts</span><span class="o">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">stackClient</span> <span class="o">=</span> <span class="nc">Http</span><span class="p">.</span><span class="n">client</span><span class="p">()</span>
+<span class="kd">val</span> <span class="n">clientBuilder</span> <span class="o">=</span> <span class="nc">ClientBuilder</span><span class="p">()</span>
+  <span class="p">.</span><span class="n">name</span><span class="p">(</span><span class="s">&quot;example_client&quot;</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">stack</span><span class="p">(</span><span class="n">stackClient</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">hosts</span><span class="p">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">methodBuilder</span> <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">MethodBuilder</span><span class="o">.</span><span class="n">from</span><span class="o">(</span><span class="n">clientBuilder</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">methodBuilder</span> <span class="o">=</span> <span class="n">http</span><span class="p">.</span><span class="nc">MethodBuilder</span><span class="p">.</span><span class="n">from</span><span class="p">(</span><span class="n">clientBuilder</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="application-level-failure-handling">
+</section>
+<section id="application-level-failure-handling">
 <h2>Application-level failure handling<a class="headerlink" href="#application-level-failure-handling" title="Permalink to this headline">¶</a></h2>
 <p>While <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code> encourages developers to consider
 failure modes in the broadest sense through response classification,
@@ -454,8 +454,8 @@ gives you a standard <a class="reference internal" href="ServicesAndFilters.html
 to compose them with <a class="reference internal" href="ServicesAndFilters.html#filters"><span class="std std-ref">Filters</span></a> and/or transform the
 <code class="docutils literal notranslate"><span class="pre">Service</span></code>s returned <a class="reference internal" href="Futures.html#future-failure"><span class="std std-ref">Future</span></a> to handle more
 granular failures.</p>
-</div>
-<div class="section" id="using-with-thriftmux">
+</section>
+<section id="using-with-thriftmux">
 <h2>Using with ThriftMux<a class="headerlink" href="#using-with-thriftmux" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="#mb-example-http"><span class="std std-ref">Above</span></a> we saw an example using HTTP. Next
 let’s walk through a ThriftMux example, using a hypothetical
@@ -476,86 +476,87 @@ service GraphService {
 <p>We create <code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code>s which work on Scrooge’s generated
 Service-per-method, <code class="docutils literal notranslate"><span class="pre">ServicePerEndpoint</span></code>.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Scrooge does not yet generate <code class="docutils literal notranslate"><span class="pre">ServicePerEndpoint</span></code> for Java users,
+<p class="admonition-title">Note</p>
+<p>Scrooge does not yet generate <code class="docutils literal notranslate"><span class="pre">ServicePerEndpoint</span></code> for Java users,
 so this is limited to Scala.</p>
 </div>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Throw</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">conversions</span><span class="p">.</span><span class="nc">DurationOps</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="nc">Service</span><span class="p">,</span> <span class="nc">ThriftMux</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">example</span><span class="p">.</span><span class="nn">graph</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">service</span><span class="p">.{</span><span class="nc">ReqRep</span><span class="p">,</span> <span class="nc">ResponseClass</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">thriftmux</span><span class="p">.</span><span class="nn">service</span><span class="p">.</span><span class="nc">ThriftMuxResponseClassifier</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Throw</span>
 
-<span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;thriftmux_example&quot;</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="n">stackClient</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8989&quot;</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">stackClient</span> <span class="o">=</span> <span class="nc">ThriftMux</span><span class="p">.</span><span class="n">client</span>
+  <span class="p">.</span><span class="n">withLabel</span><span class="p">(</span><span class="s">&quot;thriftmux_example&quot;</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">builder</span> <span class="o">=</span> <span class="n">stackClient</span><span class="p">.</span><span class="n">methodBuilder</span><span class="p">(</span><span class="s">&quot;inet!localhost:8989&quot;</span><span class="p">)</span>
 
 <span class="c1">// `Service` for &quot;followers&quot; with tight timeouts and liberal retry policy</span>
-<span class="k">val</span> <span class="n">followers</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">GraphService.Followers.Args</span>, <span class="kt">Int</span><span class="o">]</span> <span class="k">=</span>
+<span class="kd">val</span> <span class="n">followers</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">GraphService</span><span class="p">.</span><span class="nc">Followers</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">Int</span><span class="p">]</span> <span class="o">=</span>
   <span class="n">builder</span>
-    <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">20.</span><span class="n">milliseconds</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">50.</span><span class="n">milliseconds</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">withRetryForClassifier</span><span class="o">(</span><span class="nc">ThriftMuxResponseClassifier</span><span class="o">.</span><span class="nc">ThriftExceptionsAsFailures</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">GraphService.ServicePerEndpoint</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;followers&quot;</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">followers</span>
+    <span class="p">.</span><span class="n">withTimeoutPerRequest</span><span class="p">(</span><span class="mi">20</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">withTimeoutTotal</span><span class="p">(</span><span class="mi">50</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">withRetryForClassifier</span><span class="p">(</span><span class="nc">ThriftMuxResponseClassifier</span><span class="p">.</span><span class="nc">ThriftExceptionsAsFailures</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">servicePerEndpoint</span><span class="p">[</span><span class="nc">GraphService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span><span class="p">](</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;followers&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">followers</span>
 
 <span class="c1">// `Service` for &quot;follow&quot;</span>
-<span class="k">val</span> <span class="n">follow</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">GraphService.Follow.Args</span>, <span class="kt">Int</span><span class="o">]</span> <span class="k">=</span>
+<span class="kd">val</span> <span class="n">follow</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">GraphService</span><span class="p">.</span><span class="nc">Follow</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">Int</span><span class="p">]</span> <span class="o">=</span>
   <span class="n">builder</span>
-    <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">200.</span><span class="n">milliseconds</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">300.</span><span class="n">milliseconds</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">withRetryForClassifier</span> <span class="o">{</span>
-      <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="nc">NotFoundException</span><span class="o">(</span><span class="n">code</span><span class="o">)))</span> <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">5</span> <span class="k">=&gt;</span>
-        <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
-    <span class="o">}</span>
-    <span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">GraphService.ServicePerEndpoint</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;follow&quot;</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">follow</span>
+    <span class="p">.</span><span class="n">withTimeoutPerRequest</span><span class="p">(</span><span class="mi">200</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">withTimeoutTotal</span><span class="p">(</span><span class="mi">300</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">withRetryForClassifier</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="nc">ReqRep</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="nc">Throw</span><span class="p">(</span><span class="nc">NotFoundException</span><span class="p">(</span><span class="n">code</span><span class="p">)))</span> <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">5</span> <span class="o">=&gt;</span>
+        <span class="nc">ResponseClass</span><span class="p">.</span><span class="nc">RetryableFailure</span>
+    <span class="p">}</span>
+    <span class="p">.</span><span class="n">servicePerEndpoint</span><span class="p">[</span><span class="nc">GraphService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span><span class="p">](</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;follow&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">follow</span>
 </pre></div>
 </div>
 <p>If you are working with code that prefers Scrooge’s <code class="docutils literal notranslate"><span class="pre">MethodPerEndpoint</span></code>
 or <code class="docutils literal notranslate"><span class="pre">FutureIface</span></code> you can convert from a <code class="docutils literal notranslate"><span class="pre">ServicePerEndpoint</span></code> by wrapping it
 with a <code class="docutils literal notranslate"><span class="pre">MethodPerEndpoint</span></code>.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Filter</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">conversions</span><span class="p">.</span><span class="nc">DurationOps</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="nc">Filter</span><span class="p">,</span> <span class="nc">ThriftMux</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">example</span><span class="p">.</span><span class="nn">graph</span><span class="p">.</span><span class="n">_</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;thriftmux_example&quot;</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">servicePerEndpoint</span><span class="k">:</span> <span class="kt">GraphService.ServicePerEndpoint</span> <span class="o">=</span>
+<span class="kd">val</span> <span class="n">stackClient</span> <span class="o">=</span> <span class="nc">ThriftMux</span><span class="p">.</span><span class="n">client</span><span class="p">.</span><span class="n">withLabel</span><span class="p">(</span><span class="s">&quot;thriftmux_example&quot;</span><span class="p">)</span>
+<span class="kd">val</span> <span class="n">servicePerEndpoint</span><span class="p">:</span> <span class="nc">GraphService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span> <span class="o">=</span>
   <span class="n">stackClient</span>
-    <span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8989&quot;</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">20.</span><span class="n">milliseconds</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">GraphService.ServicePerEndpoint</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;followers&quot;</span><span class="o">)</span>
+    <span class="p">.</span><span class="n">methodBuilder</span><span class="p">(</span><span class="s">&quot;inet!localhost:8989&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">withTimeoutPerRequest</span><span class="p">(</span><span class="mi">20</span><span class="p">.</span><span class="n">milliseconds</span><span class="p">)</span>
+    <span class="p">.</span><span class="n">servicePerEndpoint</span><span class="p">[</span><span class="nc">GraphService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span><span class="p">](</span><span class="n">methodName</span> <span class="o">=</span> <span class="s">&quot;followers&quot;</span><span class="p">)</span>
 
 <span class="c1">// `MethodPerEndpoint` is a collection of methods that return `Futures`.</span>
 <span class="c1">// It will use the configuration from the `ServicePerEndpoint` which allows</span>
 <span class="c1">// you to decorate the endpoints with `Filters`.</span>
-<span class="k">val</span> <span class="n">loggingFilter</span><span class="k">:</span> <span class="kt">Filter</span><span class="o">[</span><span class="kt">GraphService.Follow.Args</span>, <span class="kt">GraphService.Follow.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">filtered</span><span class="k">:</span> <span class="kt">GraphService.ServicePerEndpoint</span> <span class="o">=</span>
-  <span class="n">servicePerEndpoint</span><span class="o">.</span><span class="n">withFollow</span><span class="o">(</span><span class="n">loggingFilter</span><span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">servicePerEndpoint</span><span class="o">.</span><span class="n">follow</span><span class="o">))</span>
-<span class="k">val</span> <span class="n">methodPerEndpoint</span><span class="k">:</span> <span class="kt">GraphService.MethodPerEndpoint</span> <span class="o">=</span>
-  <span class="k">new</span> <span class="nc">GraphService</span><span class="o">.</span><span class="nc">MethodPerEndpoint</span><span class="o">(</span><span class="n">filtered</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">loggingFilter</span><span class="p">:</span> <span class="nc">Filter</span><span class="p">[</span><span class="nc">GraphService</span><span class="p">.</span><span class="nc">Follow</span><span class="p">.</span><span class="nc">Args</span><span class="p">,</span> <span class="nc">GraphService</span><span class="p">.</span><span class="nc">Follow</span><span class="p">.</span><span class="nc">SuccessType</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">filtered</span><span class="p">:</span> <span class="nc">GraphService</span><span class="p">.</span><span class="nc">ServicePerEndpoint</span> <span class="o">=</span>
+  <span class="n">servicePerEndpoint</span><span class="p">.</span><span class="n">withFollow</span><span class="p">(</span><span class="n">loggingFilter</span><span class="p">.</span><span class="n">andThen</span><span class="p">(</span><span class="n">servicePerEndpoint</span><span class="p">.</span><span class="n">follow</span><span class="p">))</span>
+<span class="kd">val</span> <span class="n">methodPerEndpoint</span><span class="p">:</span> <span class="nc">GraphService</span><span class="p">.</span><span class="nc">MethodPerEndpoint</span> <span class="o">=</span>
+  <span class="k">new</span> <span class="nc">GraphService</span><span class="p">.</span><span class="nc">MethodPerEndpoint</span><span class="p">(</span><span class="n">filtered</span><span class="p">)</span>
 
-<span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">methodPerEndpoint</span><span class="o">.</span><span class="n">follow</span><span class="o">(</span><span class="n">follower</span> <span class="k">=</span> <span class="mi">568825492L</span><span class="o">,</span> <span class="n">followee</span> <span class="k">=</span> <span class="mi">4196983835L</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">result</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">methodPerEndpoint</span><span class="p">.</span><span class="n">follow</span><span class="p">(</span><span class="n">follower</span> <span class="o">=</span> <span class="il">568825492L</span><span class="p">,</span> <span class="n">followee</span> <span class="o">=</span> <span class="il">4196983835L</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Further details on the differences between <code class="docutils literal notranslate"><span class="pre">ServicePerEndpoint</span></code> and <code class="docutils literal notranslate"><span class="pre">MethodPerEndpoint</span></code>
 and how to work with them are in
 <a class="reference external" href="https://twitter.github.io/scrooge/Finagle.html">Scrooge’s Finagle docs</a>.</p>
-</div>
-<div class="section" id="logical-request-definition">
+</section>
+<section id="logical-request-definition">
 <span id="mb-logical-req"></span><h2>Logical request definition<a class="headerlink" href="#logical-request-definition" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code>’s logical requests represent the result of the
+<p><code class="docutils literal notranslate"><span class="pre">MethodBuilder</span></code>'s logical requests represent the result of the
 initial request, after any retries have occurred. Concretely, should a request result
 in a retryable failure on the first attempt, but succeed upon retry, this is considered
 a single successful logical request while the logical request latency is the sum of
 both the initial attempt and the retry.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -613,7 +614,7 @@ both the initial attempt and the retry.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

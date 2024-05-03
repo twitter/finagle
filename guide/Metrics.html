@@ -1,23 +1,22 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Metrics &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Flags" href="Flags.html" />
+    <link rel="next" title="Metrics Format" href="MetricsFormat.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
   
@@ -44,12 +43,13 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="Flags.html" title="Flags"
+          <a href="MetricsFormat.html" title="Metrics Format"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Protocols.html" title="Protocols"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Metrics</a></li> 
       </ul>
     </div>  
 
@@ -58,531 +58,535 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="metrics">
+  <section id="metrics">
 <h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
 <p>This section aims to be a comprehensive list of all of the metrics that Finagle
 exposes. The metrics are organized by layer and then by class.</p>
-<p>Finagle leverages <a class="reference external" href="https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels">verbosity levels</a> and defines some of its low-utility metrics as “debug”.
-Unless explicitly stated, assume <code class="docutils literal notranslate"><span class="pre">Verbosity.Default</span></code> is used to define a given metric.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>Some of the metrics are only for clients, some only for servers, and some are for both.</p>
-<p class="last">Some metrics are only visible when certain optional classes are used.</p>
+<p>Some metrics are only visible when certain optional classes are used.</p>
 </div>
-<p>NB: Finagle sometimes uses <code class="docutils literal notranslate"><span class="pre">RollupStatsReceivers</span></code> internally, which will take
-stats like “failures/twitter/TimeoutException” and roll them up, aggregating
-into “failures/twitter” and also “failures”. For example, if there are 3
-“failures/twitter/TimeoutException” counted, and 4
-“failures/twitter/ConnectTimeoutException”, then it will count 7 for
-“failures/twitter”.</p>
-<div class="section" id="public">
+<section id="metrics-format">
+<h2>Metrics Format<a class="headerlink" href="#metrics-format" title="Permalink to this headline">¶</a></h2>
+<p>The format that <cite>finagle-stats</cite> exports metrics in varies based on its <a class="reference external" href="MetricsFormat.html">type, verbosity level, and scope separator</a>.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="public">
 <h2>Public<a class="headerlink" href="#public" title="Permalink to this headline">¶</a></h2>
 <p id="public-stats">These stats come from the public interface, and are the ones that you should look at first
 to figure out whether a client is abusing you, or you are misusing a downstream service.
 They are also useful in diagnosing what contributes to request latency.</p>
-<div class="section" id="statsfilter">
+<section id="statsfilter">
 <span id="metrics-stats-filter"></span><h3>StatsFilter<a class="headerlink" href="#statsfilter" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>requests</strong></dt>
-<dd>A counter of the total number of successes + failures.</dd>
-<dt><strong>success</strong></dt>
-<dd>A counter of the total number of successes.</dd>
-<dt><strong>request_latency_ms</strong></dt>
-<dd>A histogram of the latency of requests in milliseconds.</dd>
-<dt><strong>pending</strong></dt>
-<dd>A gauge of the current total number of outstanding requests.</dd>
-<dt><strong>failures/&lt;exception_name&gt;+</strong></dt>
-<dd>A counter of the number of times a specific exception has been thrown.
+<dl class="simple">
+<dt><strong>requests</strong></dt><dd><p>A counter of the total number of successes + failures.</p>
+</dd>
+<dt><strong>success</strong></dt><dd><p>A counter of the total number of successes.</p>
+</dd>
+<dt><strong>request_latency_ms</strong></dt><dd><p>A histogram of the latency of requests in milliseconds.</p>
+</dd>
+<dt><strong>pending</strong></dt><dd><p>A gauge of the current total number of outstanding requests.</p>
+</dd>
+<dt><strong>failures/&lt;exception_name&gt;+</strong></dt><dd><p>A counter of the number of times a specific exception has been thrown.
 If you are using a <code class="docutils literal notranslate"><span class="pre">ResponseClassifier</span></code> that classifies non-Exceptions
 as failures, it will use a synthetic Exception,
 <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code>,
 to account for these. See the
 <a class="reference external" href="https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
-for more details.</dd>
-<dt><strong>failures</strong></dt>
-<dd>A counter of the number of times any failure has been observed.</dd>
-<dt><strong>sourcedfailures/&lt;source_service_name&gt;{/&lt;exception_name&gt;}+</strong></dt>
-<dd>A counter of the number of times a specific
+for more details.</p>
+</dd>
+<dt><strong>failures</strong></dt><dd><p>A counter of the number of times any failure has been observed.</p>
+</dd>
+<dt><strong>sourcedfailures/&lt;source_service_name&gt;{/&lt;exception_name&gt;}+</strong></dt><dd><p>A counter of the number of times a specific
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown. Sourced
-failures include additional information on what service caused the failure.</dd>
-<dt><strong>sourcedfailures/&lt;source_service_name&gt;</strong></dt>
-<dd>A counter of the number of times any
+failures include additional information on what service caused the failure.</p>
+</dd>
+<dt><strong>sourcedfailures/&lt;source_service_name&gt;</strong></dt><dd><p>A counter of the number of times any
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown from this
 service. Sourced failures include additional information on what service
-caused the failure.</dd>
-<dt><strong>sourcedfailures</strong></dt>
-<dd>A counter of the number of times any
+caused the failure.</p>
+</dd>
+<dt><strong>sourcedfailures</strong></dt><dd><p>A counter of the number of times any
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> has been thrown. Sourced
-failures include additional information on what service caused the failure.</dd>
+failures include additional information on what service caused the failure.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="statsfactorywrapper">
+</section>
+<section id="statsfactorywrapper">
 <h3>StatsFactoryWrapper<a class="headerlink" href="#statsfactorywrapper" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils" id="service-factory-failures">
-<dt><strong>failures/&lt;exception_class_name&gt;</strong></dt>
-<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
-creation has failed with this specific exception.</dd>
-<dt><strong>failures</strong></dt>
-<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
-creation has failed.</dd>
-<dt><strong>service_acquisition_latency_ms</strong></dt>
-<dd><p class="first">A stat of the latency, in milliseconds, to acquire a service (a session). This entails
+<dl id="service-factory-failures">
+<dt><strong>failures/&lt;exception_class_name&gt;</strong></dt><dd><p>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
+creation has failed with this specific exception.</p>
+</dd>
+<dt><strong>failures</strong></dt><dd><p>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
+creation has failed.</p>
+</dd>
+<dt><strong>service_acquisition_latency_ms</strong></dt><dd><p>A stat of the latency, in milliseconds, to acquire a service (a session). This entails
 an amortized cost of materializing a connection for each request, either by establishing new
 (slow path) or by checking it out from the connection pool (fast path).</p>
-<p class="last">In the worst case (establishing a connection on each request), this histogram converges on
+<p>In the worst case (establishing a connection on each request), this histogram converges on
 <cite>connect_latency_ms</cite> (socket connect latency, including SSL/TLS handshaking). In the best case,
 this represents a cost of acquiring connection from the pool.</p>
 </dd>
 </dl>
-</div>
-<div class="section" id="serverstatsfilter">
+</section>
+<section id="serverstatsfilter">
 <h3>ServerStatsFilter<a class="headerlink" href="#serverstatsfilter" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>handletime_us</strong></dt>
-<dd>A  stat of the time it takes to handle the request in microseconds.
+<dl class="simple">
+<dt><strong>handletime_us</strong></dt><dd><p>A  stat of the time it takes to handle the request in microseconds.
 This is how long it takes to set up the chain of <code class="docutils literal notranslate"><span class="pre">Future</span></code>s to be used in the
 response without waiting for the response. Large values suggest blocking code
-on a Finagle thread.</dd>
-<dt><strong>transit_latency_ms</strong></dt>
-<dd>A stat that attempts to measure (wall time) transit times between hops, e.g.,
+on a Finagle thread.</p>
+</dd>
+<dt><strong>transit_latency_ms</strong></dt><dd><p>A stat that attempts to measure (wall time) transit times between hops, e.g.,
 from client to server. Be aware that clock drift between hosts, stop the world
-pauses, and queue backups can contribute here. Not supported by all protocols.</dd>
+pauses, and queue backups can contribute here. Not supported by all protocols.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="requestsemaphorefilter">
+</section>
+<section id="requestsemaphorefilter">
 <h3>RequestSemaphoreFilter<a class="headerlink" href="#requestsemaphorefilter" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils" id="requests-concurrency-limit">
-<dt><strong>request_concurrency</strong></dt>
-<dd>A gauge of the total number of current concurrent requests.</dd>
-<dt><strong>request_queue_size</strong></dt>
-<dd>A gauge of the total number of requests which are waiting because of the limit
-on simultaneous requests.</dd>
+<dl class="simple" id="requests-concurrency-limit">
+<dt><strong>request_concurrency</strong></dt><dd><p>A gauge of the total number of current concurrent requests.</p>
+</dd>
+<dt><strong>request_queue_size</strong></dt><dd><p>A gauge of the total number of requests which are waiting because of the limit
+on simultaneous requests.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="payloadsizefilter-enabled-for-mux-http-thrift">
+</section>
+<section id="payloadsizefilter-enabled-for-mux-http-thrift">
 <h3>PayloadSizeFilter (enabled for Mux, HTTP, Thrift)<a class="headerlink" href="#payloadsizefilter-enabled-for-mux-http-thrift" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>request_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes per request’s payload.</dd>
-<dt><strong>response_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes per response’s payload.</dd>
+<dl class="simple">
+<dt><strong>request_payload_bytes</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the number of bytes per request’s payload.</p>
+</dd>
+<dt><strong>response_payload_bytes</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the number of bytes per response’s payload.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="construction">
+</section>
+</section>
+<section id="construction">
 <h2>Construction<a class="headerlink" href="#construction" title="Permalink to this headline">¶</a></h2>
 <p id="construction-stats">These stats are about setting up services in Finagle, and expose whether you are
 having trouble making services.</p>
-<div class="section" id="clientbuilder">
+<section id="clientbuilder">
 <h3>ClientBuilder<a class="headerlink" href="#clientbuilder" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>codec_connection_preparation_latency_ms</strong></dt>
-<dd>A histogram of the length of time it takes to prepare a connection and get
-back a service, regardless of success or failure.</dd>
+<dl class="simple">
+<dt><strong>codec_connection_preparation_latency_ms</strong></dt><dd><p>A histogram of the length of time it takes to prepare a connection and get
+back a service, regardless of success or failure.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="statsservicefactory">
+</section>
+<section id="statsservicefactory">
 <h3>StatsServiceFactory<a class="headerlink" href="#statsservicefactory" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>available</strong></dt>
-<dd>A gauge of whether the underlying factory is available (1) or not (0).
+<dl class="simple">
+<dt><strong>available</strong></dt><dd><p>A gauge of whether the underlying factory is available (1) or not (0).
 Finagle uses this primarily to decide whether a host is eligible for new
-connections in the load balancer.</dd>
+connections in the load balancer.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="finagle">
+</section>
+</section>
+<section id="finagle">
 <h2>Finagle<a class="headerlink" href="#finagle" title="Permalink to this headline">¶</a></h2>
 <p id="finagle-stats">These metrics track various Finagle internals.</p>
-<div class="section" id="tracing">
+<section id="tracing">
 <h3>Tracing<a class="headerlink" href="#tracing" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>finagle/tracing/sampled</strong></dt>
-<dd>A counter for the number of times a positive sampling decision is made on an
+<dl class="simple">
+<dt><strong>finagle/tracing/sampled</strong></dt><dd><p>A counter for the number of times a positive sampling decision is made on an
 unsampled trace. A sampling decision is made using a client’s configured <code class="docutils literal notranslate"><span class="pre">Tracer</span></code>,
-using <code class="docutils literal notranslate"><span class="pre">Tracer#sampleTrace</span></code>.</dd>
+using <code class="docutils literal notranslate"><span class="pre">Tracer#sampleTrace</span></code>.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="aperture">
+</section>
+<section id="aperture">
 <h3>Aperture<a class="headerlink" href="#aperture" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>finagle/aperture/coordinate</strong></dt>
-<dd>The process global coordinate for the process as sampled by
-the Aperture implementation.</dd>
-<dt><strong>finagle/aperture/peerset_size</strong></dt>
-<dd>A gauge of the size of the services peerset.</dd>
+<dl class="simple">
+<dt><strong>finagle/aperture/coordinate</strong></dt><dd><p>The process global coordinate for the process as sampled by
+the Aperture implementation.</p>
+</dd>
+<dt><strong>finagle/aperture/peerset_size</strong></dt><dd><p>A gauge of the size of the services peerset.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="futurepool">
+</section>
+<section id="futurepool">
 <h3>FuturePool<a class="headerlink" href="#futurepool" title="Permalink to this headline">¶</a></h3>
 <p>These metrics correspond to the state of <code class="docutils literal notranslate"><span class="pre">FuturePool.unboundedPool</span></code> and
 <code class="docutils literal notranslate"><span class="pre">FuturePool.interruptibleUnboundedPool</span></code>. Only one set of metrics is
 exported as they share their underlying “thread pool”.</p>
-<dl class="docutils">
-<dt><strong>finagle/future_pool/pool_size</strong></dt>
-<dd>A gauge of the number of threads in the pool.</dd>
-<dt><strong>finagle/future_pool/active_tasks</strong></dt>
-<dd>A gauge of the number of tasks actively executing.</dd>
-<dt><strong>finagle/future_pool/completed_tasks</strong></dt>
-<dd>A gauge of the number of total tasks that have completed execution.</dd>
+<dl class="simple">
+<dt><strong>finagle/future_pool/pool_size</strong></dt><dd><p>A gauge of the number of threads in the pool.</p>
+</dd>
+<dt><strong>finagle/future_pool/active_tasks</strong></dt><dd><p>A gauge of the number of tasks actively executing.</p>
+</dd>
+<dt><strong>finagle/future_pool/completed_tasks</strong></dt><dd><p>A gauge of the number of total tasks that have completed execution.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="push-based-abstractions">
+</section>
+<section id="push-based-abstractions">
 <h3>Push Based Abstractions<a class="headerlink" href="#push-based-abstractions" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>finagle/push/unhandled_exceptions</strong></dt>
-<dd>Family of counters for unhandled exceptions caught by the serial executor.</dd>
+<dl class="simple">
+<dt><strong>finagle/push/unhandled_exceptions</strong></dt><dd><p>Family of counters for unhandled exceptions caught by the serial executor.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="scheduler">
+</section>
+<section id="scheduler">
 <h3>Scheduler<a class="headerlink" href="#scheduler" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>scheduler/dispatches</strong></dt>
-<dd>A gauge of the number of dispatches performed by the
-<code class="docutils literal notranslate"><span class="pre">com.twitter.concurrent.Scheduler</span></code>.</dd>
-<dt><strong>scheduler/blocking_ms</strong></dt>
-<dd>A gauge of how much time, in milliseconds, the <code class="docutils literal notranslate"><span class="pre">com.twitter.concurrent.Scheduler</span></code>
+<dl class="simple">
+<dt><strong>scheduler/dispatches</strong></dt><dd><p>A gauge of the number of dispatches performed by the
+<code class="docutils literal notranslate"><span class="pre">com.twitter.concurrent.Scheduler</span></code>.</p>
+</dd>
+<dt><strong>scheduler/blocking_ms</strong></dt><dd><p>A gauge of how much time, in milliseconds, the <code class="docutils literal notranslate"><span class="pre">com.twitter.concurrent.Scheduler</span></code>
 is spending doing blocking operations on threads that have opted into tracking.
 Of the built-in <code class="docutils literal notranslate"><span class="pre">Schedulers</span></code>, this is only enabled for the
 <code class="docutils literal notranslate"><span class="pre">com.twitter.concurrent.LocalScheduler</span></code> which is the default <code class="docutils literal notranslate"><span class="pre">Scheduler</span></code>
 implementation. Note that this does not include time spent doing blocking code
 outside of <code class="docutils literal notranslate"><span class="pre">com.twitter.util.Await.result</span></code>/<code class="docutils literal notranslate"><span class="pre">Await.ready</span></code>. For example,
-<code class="docutils literal notranslate"><span class="pre">Future(someSlowSynchronousIO)</span></code> would not be accounted for in this metric.</dd>
+<code class="docutils literal notranslate"><span class="pre">Future(someSlowSynchronousIO)</span></code> would not be accounted for in this metric.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="offloadfilter">
+</section>
+<section id="offloadfilter">
 <h3>OffloadFilter<a class="headerlink" href="#offloadfilter" title="Permalink to this headline">¶</a></h3>
 <p>These metrics correspond to the state of the offload filter thread pool when configured.</p>
-<dl class="docutils">
-<dt><strong>finagle/offload_pool/pool_size</strong></dt>
-<dd>A gauge of the number of threads in the pool.</dd>
-<dt><strong>finagle/offload_pool/active_tasks</strong></dt>
-<dd>A gauge of the number of tasks actively executing.</dd>
-<dt><strong>finagle/offload_pool/completed_tasks</strong></dt>
-<dd>A gauge of the number of total tasks that have completed execution.</dd>
-<dt><strong>finagle/offload_pool/not_offloaded_tasks</strong></dt>
-<dd>A counter of how many tasks weren’t offloaded because the queue has grown over a proposed limit
+<dl class="simple">
+<dt><strong>finagle/offload_pool/pool_size</strong></dt><dd><p>A gauge of the number of threads in the pool.</p>
+</dd>
+<dt><strong>finagle/offload_pool/active_tasks</strong></dt><dd><p>A gauge of the number of tasks actively executing.</p>
+</dd>
+<dt><strong>finagle/offload_pool/completed_tasks</strong></dt><dd><p>A gauge of the number of total tasks that have completed execution.</p>
+</dd>
+<dt><strong>finagle/offload_pool/not_offloaded_tasks</strong></dt><dd><p>A counter of how many tasks weren’t offloaded because the queue has grown over a proposed limit
 (set via a flag <cite>com.twitter.finagle.offload.queueSize</cite>). If a task can’t be offloaded it is run
-the caller thread which is commonly a Netty IO worker.</dd>
-<dt><strong>finagle/offload_pool/queue_depth</strong></dt>
-<dd>A Gauge of the number of tasks that are waiting to be executed.</dd>
-<dt><strong>finagle/offload_pool/pending_tasks</strong></dt>
-<dd>A histogram reporting the number of pending tasks in the offload queue. For efficiency reasons,
+the caller thread which is commonly a Netty IO worker.</p>
+</dd>
+<dt><strong>finagle/offload_pool/queue_depth</strong></dt><dd><p>A Gauge of the number of tasks that are waiting to be executed.</p>
+</dd>
+<dt><strong>finagle/offload_pool/pending_tasks</strong></dt><dd><p>A histogram reporting the number of pending tasks in the offload queue. For efficiency reasons,
 this stat is sampled each <cite>com.twitter.finagle.offload.statsSampleInterval</cite> interval. This stat is
-only enabled if <cite>statsSampleInterval</cite> is both positive and finite.</dd>
-<dt><strong>finagle/offload_pool/delay_ms</strong></dt>
-<dd>A histogram reporting offloading delay - how long a task has been sitting in the offload queue
+only enabled if <cite>statsSampleInterval</cite> is both positive and finite.</p>
+</dd>
+<dt><strong>finagle/offload_pool/delay_ms</strong></dt><dd><p>A histogram reporting offloading delay - how long a task has been sitting in the offload queue
 before it gets executed. For efficiency reasons, this stat is sampled each
 <cite>com.twitter.finagle.offload.statsSampleInterval</cite> interval. This stat is  only enabled if
-<cite>statsSampleInterval</cite> is both positive and finite.</dd>
+<cite>statsSampleInterval</cite> is both positive and finite.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="timer">
+</section>
+<section id="timer">
 <h3>Timer<a class="headerlink" href="#timer" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>finagle/timer/pending_tasks</strong> <cite>verbosity:debug</cite></dt>
-<dd>A stat of the number of pending tasks to run for the
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/DefaultTimer.scala">DefaultTimer</a>.</dd>
-<dt><strong>finagle/timer/deviation_ms</strong> <cite>verbosity:debug</cite></dt>
-<dd>A stat of the deviation in milliseconds of tasks scheduled on the
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/DefaultTimer.scala">DefaultTimer</a> from their expected time.</dd>
-<dt><strong>finagle/timer/slow</strong></dt>
-<dd>A counter of the number of tasks found to be executing for longer
-than 2 seconds.</dd>
+<dl class="simple">
+<dt><strong>finagle/timer/pending_tasks</strong> <cite>verbosity:debug</cite></dt><dd><p>A stat of the number of pending tasks to run for the
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/DefaultTimer.scala">DefaultTimer</a>.</p>
+</dd>
+<dt><strong>finagle/timer/deviation_ms</strong> <cite>verbosity:debug</cite></dt><dd><p>A stat of the deviation in milliseconds of tasks scheduled on the
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/util/DefaultTimer.scala">DefaultTimer</a> from their expected time.</p>
+</dd>
+<dt><strong>finagle/timer/slow</strong></dt><dd><p>A counter of the number of tasks found to be executing for longer
+than 2 seconds.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="clientregistry">
+</section>
+<section id="clientregistry">
 <h3>ClientRegistry<a class="headerlink" href="#clientregistry" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>finagle/clientregistry/size</strong></dt>
-<dd>A gauge of the current number of clients registered in the
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">ClientRegistry</a>.</dd>
+<dl class="simple">
+<dt><strong>finagle/clientregistry/size</strong></dt><dd><p>A gauge of the current number of clients registered in the
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">ClientRegistry</a>.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="name-resolution">
+</section>
+<section id="name-resolution">
 <h3>Name Resolution<a class="headerlink" href="#name-resolution" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>inet/dns/queue_size</strong></dt>
-<dd>A gauge of the current number of DNS resolutions waiting for
-lookup in <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</dd>
-<dt><strong>inet/dns/dns_lookups</strong></dt>
-<dd>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</dd>
-<dt><strong>inet/dns/dns_lookup_failures</strong></dt>
-<dd>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a> and failed.</dd>
-<dt><strong>inet/dns/lookup_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of the time to lookup
-every host (successfully or not) in a <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.Addr</span></code>.</dd>
-<dt><strong>inet/dns/successes</strong></dt>
-<dd>A counter of the number of <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.Addr</span></code> s with
-at least one resolved host.</dd>
-<dt><strong>inet/dns/failures</strong></dt>
-<dd>A counter of the number of <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.Addr</span></code> s with
-no resolved hosts.</dd>
-<dt><strong>inet/dns/cache/size</strong></dt>
-<dd>A gauge of the approximate number of cached DNS resolutions in
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a>.</dd>
-<dt><strong>inet/dns/cache/evicts</strong></dt>
-<dd>A gauge of the number of times a cached DNS resolution has been
-evicted from <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a>.</dd>
-<dt><strong>inet/dns/cache/hit_rate</strong></dt>
-<dd>A gauge of the ratio of DNS lookups which were already cached by
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a></dd>
+<dl class="simple">
+<dt><strong>inet/dns/queue_size</strong></dt><dd><p>A gauge of the current number of DNS resolutions waiting for
+lookup in <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</p>
+</dd>
+<dt><strong>inet/dns/dns_lookups</strong></dt><dd><p>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</p>
+</dd>
+<dt><strong>inet/dns/dns_lookup_failures</strong></dt><dd><p>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a> and failed.</p>
+</dd>
+<dt><strong>inet/dns/lookup_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of the time to lookup
+every host (successfully or not) in a <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.Addr</span></code>.</p>
+</dd>
+<dt><strong>inet/dns/successes</strong></dt><dd><p>A counter of the number of <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.Addr</span></code> s with
+at least one resolved host.</p>
+</dd>
+<dt><strong>inet/dns/failures</strong></dt><dd><p>A counter of the number of <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.Addr</span></code> s with
+no resolved hosts.</p>
+</dd>
+<dt><strong>inet/dns/cache/size</strong></dt><dd><p>A gauge of the approximate number of cached DNS resolutions in
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a>.</p>
+</dd>
+<dt><strong>inet/dns/cache/evicts</strong></dt><dd><p>A gauge of the number of times a cached DNS resolution has been
+evicted from <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a>.</p>
+</dd>
+<dt><strong>inet/dns/cache/hit_rate</strong></dt><dd><p>A gauge of the ratio of DNS lookups which were already cached by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a></p>
+</dd>
 </dl>
-</div>
-<div class="section" id="netty-4">
+</section>
+<section id="netty-4">
 <h3>Netty 4<a class="headerlink" href="#netty-4" title="Permalink to this headline">¶</a></h3>
 <p>These metrics are exported from Finagle’s underlying transport
 implementation, the Netty 4 library and available under <cite>finagle/netty4</cite>
 on any instance running Finagle with Netty 4.</p>
-<dl class="docutils">
-<dt><strong>worker_threads</strong></dt>
-<dd>A gauge for the size of the Netty worker pool. This will only
+<dl class="simple">
+<dt><strong>pending_io_events</strong></dt><dd><p>A gauge of the number of pending IO events enqueued in all event loops servicing
+this client or server. If this metric climbs up, it indicates an overload scenario
+when IO threads are not being able to process the scheduled work (handling new
+requests and new connections). A very typical cause of these symptoms is either
+blocking or running a CPU intensive workloads on IO threads.</p>
+</dd>
+<dt><strong>worker_threads</strong></dt><dd><p>A gauge for the size of the Netty worker pool. This will only
 reflect <a href="#id1"><span class="problematic" id="id2">`</span></a>EventLoopGroup`s constructed by Finagle and not those
-manually created by the application.</dd>
-<dt><strong>pooling/allocations/huge</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the total number of HUGE <em>direct allocations</em>
-(i.e., unpooled allocations that exceed the current chunk size).</dd>
-<dt><strong>pooling/allocations/normal</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the total number of NORMAL <em>direct allocations</em>
-(i.e., less than a current chunk size).</dd>
-<dt><strong>pooling/allocations/small</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the total number of SMALL <em>direct allocations</em>
-(i.e., less than a page size, 8192 bytes).</dd>
-<dt><strong>pooling/allocations/tiny</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the total number of TINY <em>direct allocations</em>
-(i.e., less than 512 bytes).</dd>
-<dt><strong>pooling/deallocations/huge</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the total number of HUGE <em>direct deallocations</em>
-(i.e., unpooled allocations that exceed the current chunk size).</dd>
-<dt><strong>pooling/deallocations/normal</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the total number of NORMAL <em>direct deallocations</em>
-(i.e., less than a chunk size).</dd>
-<dt><strong>pooling/deallocations/small</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the total number of SMALL <em>direct deallocations</em>
-(i.e., less than a page size, 8192 bytes).</dd>
-<dt><strong>pooling/deallocations/tiny</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the total number of TINY <em>direct deallocations</em>
-(i.e., less than 512 bytes).</dd>
-<dt><strong>pooling/used*</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the number of bytes used for <em>direct allocations</em> (this includes buffers in the
-thread-local caches).</dd>
-<dt><strong>reference_leaks</strong></dt>
-<dd>A counter of detected reference leaks. See longer note on
-<cite>com.twitter.finagle.netty4.trackReferenceLeaks</cite> for details.</dd>
+manually created by the application.</p>
+</dd>
+<dt><strong>pooling/allocations/huge</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the total number of HUGE <em>direct allocations</em>
+(i.e., unpooled allocations that exceed the current chunk size).</p>
+</dd>
+<dt><strong>pooling/allocations/normal</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the total number of NORMAL <em>direct allocations</em>
+(i.e., less than a current chunk size).</p>
+</dd>
+<dt><strong>pooling/allocations/small</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the total number of SMALL <em>direct allocations</em>
+(i.e., less than a page size, 8192 bytes).</p>
+</dd>
+<dt><strong>pooling/allocations/tiny</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the total number of TINY <em>direct allocations</em>
+(i.e., less than 512 bytes).</p>
+</dd>
+<dt><strong>pooling/deallocations/huge</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the total number of HUGE <em>direct deallocations</em>
+(i.e., unpooled allocations that exceed the current chunk size).</p>
+</dd>
+<dt><strong>pooling/deallocations/normal</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the total number of NORMAL <em>direct deallocations</em>
+(i.e., less than a chunk size).</p>
+</dd>
+<dt><strong>pooling/deallocations/small</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the total number of SMALL <em>direct deallocations</em>
+(i.e., less than a page size, 8192 bytes).</p>
+</dd>
+<dt><strong>pooling/deallocations/tiny</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the total number of TINY <em>direct deallocations</em>
+(i.e., less than 512 bytes).</p>
+</dd>
+<dt><strong>pooling/used*</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the number of bytes used for <em>direct allocations</em> (this includes buffers in the
+thread-local caches).</p>
+</dd>
+<dt><strong>reference_leaks</strong></dt><dd><p>A counter of detected reference leaks. See longer note on
+<cite>com.twitter.finagle.netty4.trackReferenceLeaks</cite> for details.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="load-balancing">
+</section>
+</section>
+<section id="load-balancing">
 <h2>Load Balancing<a class="headerlink" href="#load-balancing" title="Permalink to this headline">¶</a></h2>
 <p id="loadbalancer-stats">The client stats under the <cite>loadbalancer</cite> scope expose the innards of
 what’s going on with load balancing, and the management of equivalent
 groups of hosts.</p>
-<div class="section" id="all-balancers">
+<section id="all-balancers">
 <h3>All Balancers<a class="headerlink" href="#all-balancers" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>size</strong></dt>
-<dd>A gauge of the number of nodes being balanced across.</dd>
-<dt><strong>available</strong></dt>
-<dd>A gauge of the number of <em>available</em> nodes as seen by the load balancer.
-These nodes are ready to receive traffic.</dd>
-<dt><strong>busy</strong></dt>
-<dd>A gauge of the number of <em>busy</em> nodes as seen by the load balancer.
-These nodes are current unavailable for service.</dd>
-<dt><strong>closed</strong></dt>
-<dd>A gauge of the number of <em>closed</em> nodes as seen by the load balancer.
-These nodes will never be available for service.</dd>
-<dt><strong>load</strong></dt>
-<dd>A gauge of the total load over all nodes being balanced across.</dd>
-<dt><strong>meanweight</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge tracking the arithmetic mean of the weights of the endpoints
-being load-balanced across.</dd>
-<dt><strong>num_weight_classes</strong></dt>
-<dd>The number of groups (or classes) of weights in the load balancer. Each class gets
+<dl class="simple">
+<dt><strong>size</strong></dt><dd><p>A gauge of the number of nodes being balanced across.</p>
+</dd>
+<dt><strong>available</strong></dt><dd><p>A gauge of the number of <em>available</em> nodes as seen by the load balancer.
+These nodes are ready to receive traffic.</p>
+</dd>
+<dt><strong>busy</strong></dt><dd><p>A gauge of the number of <em>busy</em> nodes as seen by the load balancer.
+These nodes are current unavailable for service.</p>
+</dd>
+<dt><strong>closed</strong></dt><dd><p>A gauge of the number of <em>closed</em> nodes as seen by the load balancer.
+These nodes will never be available for service.</p>
+</dd>
+<dt><strong>load</strong></dt><dd><p>A gauge of the total load over all nodes being balanced across.</p>
+</dd>
+<dt><strong>meanweight</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge tracking the arithmetic mean of the weights of the endpoints
+being load-balanced across.</p>
+</dd>
+<dt><strong>num_weight_classes</strong></dt><dd><p>The number of groups (or classes) of weights in the load balancer. Each class gets
 a fresh instance of the client’s load balancer and receives traffic proportional
-to its weight.</dd>
-<dt><strong>busy_weight_classes</strong></dt>
-<dd>A counter of the number of times a weight class in the loadbalancer was found busy or
-closed.</dd>
-<dt><strong>adds</strong></dt>
-<dd>A counter of the number of hosts added to the loadbalancer.</dd>
-<dt><strong>removes</strong></dt>
-<dd>A counter of the number of hosts removed from the loadbalancer.</dd>
-<dt><strong>rebuilds</strong></dt>
-<dd>A counter of the number of times the loadbalancer rebuilds its state
-(triggered by either an underlying namer or failing nodes).</dd>
-<dt><strong>updates</strong></dt>
-<dd>A counter of the number of times the underlying namer triggers
+to its weight.</p>
+</dd>
+<dt><strong>busy_weight_classes</strong></dt><dd><p>A counter of the number of times a weight class in the loadbalancer was found busy or
+closed.</p>
+</dd>
+<dt><strong>adds</strong></dt><dd><p>A counter of the number of hosts added to the loadbalancer.</p>
+</dd>
+<dt><strong>removes</strong></dt><dd><p>A counter of the number of hosts removed from the loadbalancer.</p>
+</dd>
+<dt><strong>rebuilds</strong></dt><dd><p>A counter of the number of times the loadbalancer rebuilds its state
+(triggered by either an underlying namer or failing nodes).</p>
+</dd>
+<dt><strong>updates</strong></dt><dd><p>A counter of the number of times the underlying namer triggers
 the loadbalancer to rebuild its state (e.g., because the server set
 has changed). Note that these kind of events are usually collapsed
 so the actual number of <code class="docutils literal notranslate"><span class="pre">rebuilds</span></code> is usually less than the number
-of <code class="docutils literal notranslate"><span class="pre">updates</span></code>.</dd>
-<dt><strong>max_effort_exhausted</strong></dt>
-<dd>A counter of the number of times a balancer failed to find a node that was
-<code class="docutils literal notranslate"><span class="pre">Status.Open</span></code> within <code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.loadbalancer.Balancer.maxEffort</span></code>
-attempts. When this occurs, a non-open node may be selected for that
-request.</dd>
-<dt><strong>algorithm/{type}</strong></dt>
-<dd>A gauge exported with the name of the algorithm used for load balancing.</dd>
+of <code class="docutils literal notranslate"><span class="pre">updates</span></code>.</p>
+</dd>
+<dt><strong>panicked</strong></dt><dd><p>A counter of the number of times a balancer enters panic mode. The
+estimated portion of unhealthy nodes (status is not <cite>Status.Open</cite>)
+in the balancer exceeded the allowable threshold in
+<cite>com.twitter.finagle.loadbalancer.PanicMode</cite>. When this occurs, a
+non-open node may be selected for that request.</p>
+</dd>
+<dt><strong>algorithm/{type}</strong></dt><dd><p>A gauge exported with the name of the algorithm used for load balancing.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="aperture-based-load-balancers">
+</section>
+<section id="aperture-based-load-balancers">
 <h3>Aperture Based Load Balancers<a class="headerlink" href="#aperture-based-load-balancers" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>logical_aperture</strong></dt>
-<dd>A gauge of the width of the window over which endpoints are load-balanced.
+<dl class="simple">
+<dt><strong>logical_aperture</strong></dt><dd><p>A gauge of the width of the window over which endpoints are load-balanced.
 This is primarily an accounting mechanism and for a true representation of
-the number of endpoints the client is talking to see <cite>physical_aperture</cite>.</dd>
-<dt><strong>physical_aperture</strong></dt>
-<dd>When using deterministic aperture (i.e. <cite>useDeterministicOrdering</cite> is set),
+the number of endpoints the client is talking to see <cite>physical_aperture</cite>.</p>
+</dd>
+<dt><strong>physical_aperture</strong></dt><dd><p>When using deterministic aperture (i.e. <cite>useDeterministicOrdering</cite> is set),
 the width of the window over which endpoints are load-balanced may be
 wider than the <cite>logical_aperture</cite> gauge. The <cite>physical_aperture</cite> represents
-this value.</dd>
-<dt><strong>use_deterministic_ordering</strong></dt>
-<dd>1 if the Aperture implementation uses deterministic ordering
-0, otherwise.</dd>
-<dt><strong>vector_hash</strong></dt>
-<dd>A gauge of the hash of the distributors serverset vector with range from
+this value.</p>
+</dd>
+<dt><strong>use_deterministic_ordering</strong></dt><dd><p>1 if the Aperture implementation uses deterministic ordering
+0, otherwise.</p>
+</dd>
+<dt><strong>vector_hash</strong></dt><dd><p>A gauge of the hash of the distributors serverset vector with range from
 [Int.MinValue, Int.MaxValue]. It is useful for identifying inconsistencies
 in the serverset observed by different instances of the same client since
 inconsistencies will result in very different values of vector_hash. This
 information is useful for identifying load banding issues when using the
 deterministic aperture load balancer which requires a consistent view of
-the backends to operate correctly.</dd>
-<dt><strong>coordinate_updates</strong></dt>
-<dd>A counter of the number of times the Aperture implementation receives
-updates from the <cite>ProcessCoordinate</cite> process global.</dd>
-<dt><strong>expired</strong></dt>
-<dd>A counter of the number of endpoints which have been closed because they
-have fallen out of the aperture window and become idle.</dd>
+the backends to operate correctly.</p>
+</dd>
+<dt><strong>coordinate_updates</strong></dt><dd><p>A counter of the number of times the Aperture implementation receives
+updates from the <cite>ProcessCoordinate</cite> process global.</p>
+</dd>
+<dt><strong>expired</strong></dt><dd><p>A counter of the number of endpoints which have been closed because they
+have fallen out of the aperture window and become idle.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="fail-fast">
+</section>
+</section>
+<section id="fail-fast">
 <h2>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h2>
 <p id="fail-fast-stats">The client stats under the <cite>failfast</cite> scope give insight into how
 Finagle handles services where it can’t establish a connection.</p>
-<div class="section" id="failfastfactory">
+<section id="failfastfactory">
 <h3>FailFastFactory<a class="headerlink" href="#failfastfactory" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>marked_dead</strong></dt>
-<dd>A counter of how many times the host has been marked dead due to connection
-problems.</dd>
-<dt><strong>marked_available</strong></dt>
-<dd>A counter of how many times the host has been marked available after Finagle
-reestablished a connection to a dead host.</dd>
-<dt><strong>unhealthy_for_ms</strong></dt>
-<dd>A gauge of how long, in milliseconds, Finagle has been trying to reestablish
-a connection.</dd>
-<dt><strong>unhealthy_num_tries</strong></dt>
-<dd>A gauge of the number of times the Factory has tried to reestablish a
-connection.</dd>
-<dt><strong>is_marked_dead</strong></dt>
-<dd>A gauge of whether the host is marked as dead(1) or not(0).</dd>
+<dl class="simple">
+<dt><strong>marked_dead</strong></dt><dd><p>A counter of how many times the host has been marked dead due to connection
+problems.</p>
+</dd>
+<dt><strong>marked_available</strong></dt><dd><p>A counter of how many times the host has been marked available after Finagle
+reestablished a connection to a dead host.</p>
+</dd>
+<dt><strong>unhealthy_for_ms</strong></dt><dd><p>A gauge of how long, in milliseconds, Finagle has been trying to reestablish
+a connection.</p>
+</dd>
+<dt><strong>unhealthy_num_tries</strong></dt><dd><p>A gauge of the number of times the Factory has tried to reestablish a
+connection.</p>
+</dd>
+<dt><strong>is_marked_dead</strong></dt><dd><p>A gauge of whether the host is marked as dead(1) or not(0).</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="failure-accrual">
+</section>
+</section>
+<section id="failure-accrual">
 <h2>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h2>
 <p id="failure-accrual-stats">The client stats under the <cite>failure_accrual</cite> scope track how
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>
 manages failures.</p>
-<div class="section" id="failureaccrualfactory">
+<section id="failureaccrualfactory">
 <h3>FailureAccrualFactory<a class="headerlink" href="#failureaccrualfactory" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>removed_for_ms</strong></dt>
-<dd>A counter of the total time in milliseconds any host has spent in dead
-state due to failure accrual.</dd>
-<dt><strong>probes</strong></dt>
-<dd>A counter of the number of requests sent through failure accrual while
-a host was marked dead to probe for revival.</dd>
-<dt><strong>removals</strong></dt>
-<dd>A count of how many times any host has been removed due to failure
+<dl class="simple">
+<dt><strong>removed_for_ms</strong></dt><dd><p>A counter of the total time in milliseconds any host has spent in dead
+state due to failure accrual.</p>
+</dd>
+<dt><strong>probes</strong></dt><dd><p>A counter of the number of requests sent through failure accrual while
+a host was marked dead to probe for revival.</p>
+</dd>
+<dt><strong>removals</strong></dt><dd><p>A count of how many times any host has been removed due to failure
 accrual.  Note that there is no specificity on which host in the
 cluster has been removed, so a high value here could be one
-problem-child or aggregate problems across all hosts.</dd>
-<dt><strong>revivals</strong></dt>
-<dd>A count of how many times a previously-removed host has been
-reactivated after the penalty period has elapsed.</dd>
+problem-child or aggregate problems across all hosts.</p>
+</dd>
+<dt><strong>revivals</strong></dt><dd><p>A count of how many times a previously-removed host has been
+reactivated after the penalty period has elapsed.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="idle-apoptosis">
+</section>
+</section>
+<section id="idle-apoptosis">
 <h2>Idle Apoptosis<a class="headerlink" href="#idle-apoptosis" title="Permalink to this headline">¶</a></h2>
 <p id="idle-apoptosis-stats">These client stats keep track of how frequently
 <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Services</span></a> are closed due to prolonged idleness.</p>
-<div class="section" id="expiringservice">
+<section id="expiringservice">
 <h3>ExpiringService<a class="headerlink" href="#expiringservice" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>idle</strong></dt>
-<dd>A counter of the number of times the service has expired from staying idle
-for too long in between requests.</dd>
-<dt><strong>lifetime</strong></dt>
-<dd>A counter of the number of times the service has exceeded its lifetime
-expiration duration.</dd>
+<dl class="simple">
+<dt><strong>idle</strong></dt><dd><p>A counter of the number of times the service has expired from staying idle
+for too long in between requests.</p>
+</dd>
+<dt><strong>lifetime</strong></dt><dd><p>A counter of the number of times the service has exceeded its lifetime
+expiration duration.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="rate-limiting">
+</section>
+</section>
+<section id="rate-limiting">
 <h2>Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permalink to this headline">¶</a></h2>
 <p id="rate-limiting-stats">These client stats show how much you’re hitting your rate limit if you’re using rate limiting.</p>
-<div class="section" id="ratelimitingfilter">
+<section id="ratelimitingfilter">
 <h3>RateLimitingFilter<a class="headerlink" href="#ratelimitingfilter" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>refused</strong></dt>
-<dd>A counter of the number of refused connections by the rate limiting filter.</dd>
+<dl class="simple">
+<dt><strong>refused</strong></dt><dd><p>A counter of the number of refused connections by the rate limiting filter.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="pooling">
+</section>
+</section>
+<section id="pooling">
 <h2>Pooling<a class="headerlink" href="#pooling" title="Permalink to this headline">¶</a></h2>
 <p id="pool-stats">These client stats help you keep track of connection churn.</p>
-<div class="section" id="cachingpool">
+<section id="cachingpool">
 <h3>CachingPool<a class="headerlink" href="#cachingpool" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>pool_cached</strong></dt>
-<dd>A gauge of the number of connections cached.</dd>
+<dl class="simple">
+<dt><strong>pool_cached</strong></dt><dd><p>A gauge of the number of connections cached.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="watermarkpool">
+</section>
+<section id="watermarkpool">
 <h3>WatermarkPool<a class="headerlink" href="#watermarkpool" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>pool_waiters</strong></dt>
-<dd>A gauge of the number of clients waiting on connections.</dd>
-<dt><strong>pool_size</strong></dt>
-<dd>A gauge of the number of connections that are currently alive, either in use
-or not.</dd>
-<dt><strong>pool_num_waited</strong></dt>
-<dd>A counter of the number of times there were no connections immediately
-available and the client waited for a connection.</dd>
-<dt><strong>pool_num_too_many_waiters</strong></dt>
-<dd>A counter of the number of times there were no connections immediately
-available and there were already too many waiters.</dd>
+<dl class="simple">
+<dt><strong>pool_waiters</strong></dt><dd><p>A gauge of the number of clients waiting on connections.</p>
+</dd>
+<dt><strong>pool_size</strong></dt><dd><p>A gauge of the number of connections that are currently alive, either in use
+or not.</p>
+</dd>
+<dt><strong>pool_num_waited</strong></dt><dd><p>A counter of the number of times there were no connections immediately
+available and the client waited for a connection.</p>
+</dd>
+<dt><strong>pool_num_too_many_waiters</strong></dt><dd><p>A counter of the number of times there were no connections immediately
+available and there were already too many waiters.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="singletonpool">
+</section>
+<section id="singletonpool">
 <h3>SingletonPool<a class="headerlink" href="#singletonpool" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>conn/fail</strong></dt>
-<dd>A counter of the number of times the connection could not be established and
-must be retried.</dd>
-<dt><strong>conn/dead</strong></dt>
-<dd>A counter of the number of times the connection succeeded once, but later
-died and must be retried.</dd>
+<dl class="simple">
+<dt><strong>conn/fail</strong></dt><dd><p>A counter of the number of times the connection could not be established and
+must be retried.</p>
+</dd>
+<dt><strong>conn/dead</strong></dt><dd><p>A counter of the number of times the connection succeeded once, but later
+died and must be retried.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="pendingrequestfilter">
+</section>
+</section>
+<section id="pendingrequestfilter">
 <h2>PendingRequestFilter<a class="headerlink" href="#pendingrequestfilter" title="Permalink to this headline">¶</a></h2>
 <p id="pending-request-filter">These stats represent information about the behavior of PendingRequestFilter.</p>
-<dl class="docutils">
-<dt><strong>pending_requests/rejected</strong></dt>
-<dd>A counter of the number of requests that have been rejected by this filter.</dd>
+<dl class="simple">
+<dt><strong>pending_requests/rejected</strong></dt><dd><p>A counter of the number of requests that have been rejected by this filter.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="retries">
+</section>
+<section id="retries">
 <h2>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h2>
 <p id="id3">These metrics track the retries of failed requests
 via the
@@ -606,149 +610,151 @@ Those metrics represent logical requests, while the metrics below
 are for the  physical requests, including the retries. You can replicate
 this behavior for clients built with the <code class="docutils literal notranslate"><span class="pre">Stack</span></code> API by wrapping the service
 with a <code class="docutils literal notranslate"><span class="pre">StatsFilter</span></code> scoped to <cite>tries</cite>.</p>
-<dl class="docutils">
-<dt><strong>retries</strong></dt>
-<dd>A stat of the number of times requests are retried as per a policy
-defined by the <code class="docutils literal notranslate"><span class="pre">RetryPolicy</span></code> from a <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>.</dd>
-<dt><strong>retries/requeues</strong></dt>
-<dd>A counter of the number of times requests are requeued. Failed requests which are
-eligible for requeues are failures which are known to be safe&nbsp;—&nbsp;see
-<code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.service.RetryPolicy.RetryableWriteException</span></code>.</dd>
-<dt><strong>retries/requeues_per_request</strong></dt>
-<dd>A stat of the number of times requests are requeued.</dd>
-<dt><strong>retries/budget</strong></dt>
-<dd>A gauge of the currently available retry budget.</dd>
-<dt><strong>retries/budget_exhausted</strong></dt>
-<dd>A counter of the number of times when the budget is exhausted.</dd>
-<dt><strong>retries/request_limit</strong></dt>
-<dd>A counter of the number of times the limit of retry attempts for a logical
-request has been reached.</dd>
-<dt><strong>retries/not_open</strong></dt>
-<dd>A counter of the number of times a request was deemed retryable but
+<dl class="simple">
+<dt><strong>retries</strong></dt><dd><p>A stat of the number of times requests are retried as per a policy
+defined by the <code class="docutils literal notranslate"><span class="pre">RetryPolicy</span></code> from a <code class="docutils literal notranslate"><span class="pre">ClientBuilder</span></code>.</p>
+</dd>
+<dt><strong>retries/requeues</strong></dt><dd><p>A counter of the number of times requests are requeued. Failed requests which are
+eligible for requeues are failures which are known to be safe — see
+<code class="docutils literal notranslate"><span class="pre">com.twitter.finagle.service.RetryPolicy.RetryableWriteException</span></code>.</p>
+</dd>
+<dt><strong>retries/requeues_per_request</strong></dt><dd><p>A stat of the number of times requests are requeued.</p>
+</dd>
+<dt><strong>retries/budget</strong></dt><dd><p>A gauge of the currently available retry budget.</p>
+</dd>
+<dt><strong>retries/budget_exhausted</strong></dt><dd><p>A counter of the number of times when the budget is exhausted.</p>
+</dd>
+<dt><strong>retries/request_limit</strong></dt><dd><p>A counter of the number of times the limit of retry attempts for a logical
+request has been reached.</p>
+</dd>
+<dt><strong>retries/not_open</strong></dt><dd><p>A counter of the number of times a request was deemed retryable but
 was not retried due to the underlying <code class="docutils literal notranslate"><span class="pre">Service</span></code> not having a status
-of <code class="docutils literal notranslate"><span class="pre">Open</span></code>.</dd>
-<dt><strong>retries/cannot_retry</strong></dt>
-<dd>A counter of the number of times a request was deemed requeueable but
+of <code class="docutils literal notranslate"><span class="pre">Open</span></code>.</p>
+</dd>
+<dt><strong>retries/cannot_retry</strong></dt><dd><p>A counter of the number of times a request was deemed requeueable but
 was not requeued due to the underlying <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code> not having a
-status of <code class="docutils literal notranslate"><span class="pre">Open</span></code>.</dd>
+status of <code class="docutils literal notranslate"><span class="pre">Open</span></code>.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="backup-requests">
+</section>
+<section id="backup-requests">
 <h2>Backup Requests<a class="headerlink" href="#backup-requests" title="Permalink to this headline">¶</a></h2>
 <p id="id4">These stats provide information on the state and behavior of
 <cite>com.twitter.finagle.client.BackupRequestFilter</cite>.</p>
-<dl class="docutils">
-<dt><strong>backups/send_backup_after_ms</strong></dt>
-<dd>A histogram of the time, in  milliseconds, after which a request will be re-issued if it has
-not yet completed.</dd>
-<dt><strong>backups/backups_sent</strong></dt>
-<dd>A counter of the number of backup requests sent.</dd>
-<dt><strong>backups/backups_won</strong></dt>
-<dd>A counter of the number of backup requests that completed successfully before the original
-request.</dd>
-<dt><strong>backups/budget_exhausted</strong></dt>
-<dd>A counter of the number of times the backup request budget (computed using the current value
+<dl class="simple">
+<dt><strong>backups/send_backup_after_ms</strong></dt><dd><p>A histogram of the time, in  milliseconds, after which a request will be re-issued if it has
+not yet completed.</p>
+</dd>
+<dt><strong>backups/backups_sent</strong></dt><dd><p>A counter of the number of backup requests sent.</p>
+</dd>
+<dt><strong>backups/backups_won</strong></dt><dd><p>A counter of the number of backup requests that completed successfully before the original
+request.</p>
+</dd>
+<dt><strong>backups/budget_exhausted</strong></dt><dd><p>A counter of the number of times the backup request budget (computed using the current value
 of the <cite>maxExtraLoad</cite> param) or client retry budget was exhausted, preventing a backup from being
-sent.</dd>
+sent.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="dispatching">
+</section>
+<section id="dispatching">
 <h2>Dispatching<a class="headerlink" href="#dispatching" title="Permalink to this headline">¶</a></h2>
 <p id="id5">The client metrics scoped under <cite>dispatcher</cite> represent information about a
 client’s dispatching layer.</p>
 <p>Depending on the underlying protocol, dispatchers may have different request
 queueing rules.</p>
-<dl class="docutils">
-<dt><strong>serial/queue_size</strong></dt>
-<dd>A gauge used by serial dispatchers that can only have a single request
-per connection at a time that represents the number of pending requests.</dd>
+<dl class="simple">
+<dt><strong>serial/queue_size</strong></dt><dd><p>A gauge used by serial dispatchers that can only have a single request
+per connection at a time that represents the number of pending requests.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="server-thread-usage">
+</section>
+<section id="server-thread-usage">
 <h2>Server Thread Usage<a class="headerlink" href="#server-thread-usage" title="Permalink to this headline">¶</a></h2>
 <p id="threadusage">Metrics scoped under “thread_usage/requests” can be used as a signal for
 seeing if your connections or threads are imbalanced on a server.</p>
 <p>There are caveats which can make these metrics unreliable or not applicable:</p>
 <ul class="simple">
-<li>Work is done on a <code class="docutils literal notranslate"><span class="pre">FuturePool</span></code> instead of the server’s thread.</li>
-<li>The amount of work done per request is highly inconsistent.</li>
-<li>Low number of requests.</li>
+<li><p>Work is done on a <code class="docutils literal notranslate"><span class="pre">FuturePool</span></code> instead of the server’s thread.</p></li>
+<li><p>The amount of work done per request is highly inconsistent.</p></li>
+<li><p>Low number of requests.</p></li>
 </ul>
-<dl class="docutils">
-<dt><strong>relative_stddev</strong></dt>
-<dd><p class="first">A gauge of the relative standard deviation, or coefficient of variation, for
+<dl>
+<dt><strong>relative_stddev</strong></dt><dd><p>A gauge of the relative standard deviation, or coefficient of variation, for
 the number of requests handled by each thread. Put another way, the closer this
 is to 0.0 the less variance there is in the number of requests handled per thread.</p>
-<p class="last">If this value is large, before taking action, you may want to first verify the metric
+<p>If this value is large, before taking action, you may want to first verify the metric
 by looking at the node’s thread utilization. Examples include <cite>mpstat -P ALL</cite>
 and <cite>top -p $pid -H</cite>. You may also want to look at the debug metrics for
 “mean” and “stdev” to help quantify the amount of imbalance. One solution to
 mitigate imbalance is to move work to a <code class="docutils literal notranslate"><span class="pre">FuturePool</span></code>.</p>
 </dd>
-<dt><strong>mean</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the arithemetic mean, or average, of the number of requests handled
-by each thread.</dd>
-<dt><strong>stddev</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the standard of deviation of the number of requests handled
-by each thread.</dd>
-<dt><strong>per_thread/&lt;thread_name&gt;</strong> <cite>verbosity:debug</cite></dt>
-<dd>A counter which indicates the number of requests that a specific thread has received.</dd>
+<dt><strong>mean</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the arithemetic mean, or average, of the number of requests handled
+by each thread.</p>
+</dd>
+<dt><strong>stddev</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the standard of deviation of the number of requests handled
+by each thread.</p>
+</dd>
+<dt><strong>per_thread/&lt;thread_name&gt;</strong> <cite>verbosity:debug</cite></dt><dd><p>A counter which indicates the number of requests that a specific thread has received.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="admission-control">
+</section>
+<section id="admission-control">
 <h2>Admission Control<a class="headerlink" href="#admission-control" title="Permalink to this headline">¶</a></h2>
 <p id="admission-control-stats">The stats under the <cite>admission_control</cite> scope show stats for the different admission control
 strategies.</p>
-<div class="section" id="deadline-admission-control">
+<section id="deadline-admission-control">
 <h3>Deadline Admission Control<a class="headerlink" href="#deadline-admission-control" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils" id="deadline-admission-control-stats">
-<dt><strong>admission_control/deadline/exceeded</strong></dt>
-<dd>A counter of the number of requests whose deadline has expired.</dd>
-<dt><strong>admission_control/deadline/expired_ms</strong></dt>
-<dd>A stat of the elapsed time since expiry if a deadline has expired, in
-milliseconds.</dd>
-<dt><strong>admission_control/deadline/remaining_ms</strong></dt>
-<dd>A stat of the remaining time in a deadline if it has not expired, in
-milliseconds.</dd>
+<p id="deadline-admission-control-stats">Note that if the deadline filter is in darkmode (which is the default),
+these metrics will have the prefix <cite>admission_control/darkmode_deadline</cite>
+instead of <cite>admission_control/deadline</cite>.</p>
+<dl class="simple">
+<dt><strong>admission_control/deadline/exceeded</strong></dt><dd><p>A counter of the number of requests whose deadline has expired.</p>
+</dd>
+<dt><strong>admission_control/deadline/expired_ms</strong></dt><dd><p>A stat of the elapsed time since expiry if a deadline has expired, in
+milliseconds.</p>
+</dd>
+<dt><strong>admission_control/deadline/remaining_ms</strong></dt><dd><p>A stat of the remaining time in a deadline if it has not expired, in
+milliseconds.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="nack-admission-control">
+</section>
+<section id="nack-admission-control">
 <h3>Nack Admission Control<a class="headerlink" href="#nack-admission-control" title="Permalink to this headline">¶</a></h3>
 <p id="id6">These metrics reflect the behavior of the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>.</p>
-<dl class="docutils">
-<dt><strong>dropped_requests</strong></dt>
-<dd>A counter of the number of requests probabilistically dropped.</dd>
-<dt><strong>nonretryable</strong></dt>
-<dd>A counter of the number of requests that were deemed non-retryable and thus
-were not passed through the set of nack admission filters.</dd>
-<dt><strong>ema_value</strong></dt>
-<dd>A gauge of the EMA value. Between 0 and 100, inclusive.</dd>
+<dl class="simple">
+<dt><strong>dropped_requests</strong></dt><dd><p>A counter of the number of requests probabilistically dropped.</p>
+</dd>
+<dt><strong>nonretryable</strong></dt><dd><p>A counter of the number of requests that were deemed non-retryable and thus
+were not passed through the set of nack admission filters.</p>
+</dd>
+<dt><strong>ema_value</strong></dt><dd><p>A gauge of the EMA value. Between 0 and 100, inclusive.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="threshold-failure-detector">
+</section>
+</section>
+<section id="threshold-failure-detector">
 <h2>Threshold Failure Detector<a class="headerlink" href="#threshold-failure-detector" title="Permalink to this headline">¶</a></h2>
 <p id="failure-detector">The client metrics under the <cite>mux/failuredetector</cite> scope track the behavior of
 out-of-band RTT-based failure detection. They only apply to the mux
 protocol.</p>
-<div class="section" id="thresholdfailuredetector">
+<section id="thresholdfailuredetector">
 <h3>ThresholdFailureDetector<a class="headerlink" href="#thresholdfailuredetector" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>ping</strong></dt>
-<dd>A counter of the number of pings sent to remote peers.</dd>
-<dt><strong>ping_latency_us</strong> <cite>verbosity:debug</cite></dt>
-<dd>A stat of round trip ping latencies in microseconds.</dd>
-<dt><strong>marked_busy</strong></dt>
-<dd>A counter of the number of times the endpoints are marked busy.</dd>
-<dt><strong>revivals</strong></dt>
-<dd>A counter of the number of times the endpoints revive.</dd>
-<dt><strong>close</strong></dt>
-<dd>A counter of the number of endpoints that are closed.</dd>
+<dl class="simple">
+<dt><strong>ping</strong></dt><dd><p>A counter of the number of pings sent to remote peers.</p>
+</dd>
+<dt><strong>ping_latency_us</strong> <cite>verbosity:debug</cite></dt><dd><p>A stat of round trip ping latencies in microseconds.</p>
+</dd>
+<dt><strong>marked_busy</strong></dt><dd><p>A counter of the number of times the endpoints are marked busy.</p>
+</dd>
+<dt><strong>revivals</strong></dt><dd><p>A counter of the number of times the endpoints revive.</p>
+</dd>
+<dt><strong>close</strong></dt><dd><p>A counter of the number of endpoints that are closed.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="method-builder">
+</section>
+</section>
+<section id="method-builder">
 <h2>Method Builder<a class="headerlink" href="#method-builder" title="Permalink to this headline">¶</a></h2>
 <p>Client metrics that are created when using <a class="reference internal" href="MethodBuilder.html#methodbuilder"><span class="std std-ref">MethodBuilder</span></a>.</p>
 <p>Metrics are scoped to your client’s label and method name.</p>
@@ -773,140 +779,134 @@ followed by the last try, where there’s a successful service acquisition,
 and a successful request:</p>
 <img alt="_images/logicalstats.png" src="_images/logicalstats.png" />
 <ul class="simple">
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/requests</cite> — A counter of the total
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/requests</cite> — A counter of the total
 number of <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> successes and failures.
-This does not include any retries.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/success</cite> — A counter of the total
-number of <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures</cite> — A counter of the total
-number of <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> failures.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures/&lt;exception_name&gt;</cite> — A counter of the
-number of times a specific exception has caused a <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> failure.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/request_latency_ms</cite> — A histogram of
-the latency of the <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/retries</cite> — A histogram of the number of times
-requests are retried.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/send_backup_after_ms</cite> - A histogram of the time,
+This does not include any retries.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/success</cite> — A counter of the total
+number of <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures</cite> — A counter of the total
+number of <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> failures.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures/&lt;exception_name&gt;</cite> — A counter of the
+number of times a specific exception has caused a <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> failure.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/request_latency_ms</cite> — A histogram of
+the latency of the <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/retries</cite> — A histogram of the number of times
+requests are retried.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/send_backup_after_ms</cite> - A histogram of the time,
 in  milliseconds, after which a request will be re-issued (backup sent) if it has not yet
-completed. Present only if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_sent</cite> - A counter of the number of backup
-requests sent. Present only if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_won</cite> - A counter of the number of backup
+completed. Present only if <cite>idempotent</cite> is configured.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_sent</cite> - A counter of the number of backup
+requests sent. Present only if <cite>idempotent</cite> is configured.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_won</cite> - A counter of the number of backup
 requests that completed before the original, regardless of whether they succeeded. Present only
-if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/budget_exhausted</cite> - A counter of the number of times
+if <cite>idempotent</cite> is configured.</p></li>
+<li><p><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/budget_exhausted</cite> - A counter of the number of times
 the backup request budget (computed using the current value of the <cite>maxExtraLoad</cite> param) or client
 retry budget was exhausted, preventing a backup from being sent. Present only if <cite>idempotent</cite> is
-configured.</li>
+configured.</p></li>
 </ul>
-</div>
-<div class="section" id="transport">
+</section>
+<section id="transport">
 <h2>Transport<a class="headerlink" href="#transport" title="Permalink to this headline">¶</a></h2>
 <p id="transport-stats">These metrics pertain to where the Finagle abstraction ends and the bytes are sent over the wire.
 Understanding these stats often requires deep knowledge of the protocol, or individual transport
 (e.g. Netty) internals.</p>
-<div class="section" id="netty-transporter">
+<section id="netty-transporter">
 <h3>Netty Transporter<a class="headerlink" href="#netty-transporter" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>connect_latency_ms</strong></dt>
-<dd>A histogram of the length of time it takes for a socket connection (including SSL/TLS handshake)
-to succeed, in milliseconds.</dd>
-<dt><strong>failed_connect_latency_ms</strong></dt>
-<dd>A histogram of the length of time it takes for a socket connection (including SSL/TLS handshake)
-to fail, in milliseconds.</dd>
-<dt><strong>cancelled_connects</strong></dt>
-<dd>A counter of the number of attempts to connect that were cancelled before
-they succeeded.</dd>
+<dl class="simple">
+<dt><strong>connect_latency_ms</strong></dt><dd><p>A histogram of the length of time it takes for a socket connection (including SSL/TLS handshake)
+to succeed, in milliseconds.</p>
+</dd>
+<dt><strong>failed_connect_latency_ms</strong></dt><dd><p>A histogram of the length of time it takes for a socket connection (including SSL/TLS handshake)
+to fail, in milliseconds.</p>
+</dd>
+<dt><strong>cancelled_connects</strong></dt><dd><p>A counter of the number of attempts to connect that were cancelled before
+they succeeded.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="serverbridge">
+</section>
+<section id="serverbridge">
 <h3>ServerBridge<a class="headerlink" href="#serverbridge" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>read_timeout</strong></dt>
-<dd>A counter of the number of times the netty channel has caught a
-<code class="docutils literal notranslate"><span class="pre">ReadTimeoutException</span></code> while reading.</dd>
-<dt><strong>write_timeout</strong></dt>
-<dd>A counter of the number of times the netty channel has caught a
-<code class="docutils literal notranslate"><span class="pre">WriteTimeoutException</span></code> while writing.</dd>
+<dl class="simple">
+<dt><strong>read_timeout</strong></dt><dd><p>A counter of the number of times the netty channel has caught a
+<code class="docutils literal notranslate"><span class="pre">ReadTimeoutException</span></code> while reading.</p>
+</dd>
+<dt><strong>write_timeout</strong></dt><dd><p>A counter of the number of times the netty channel has caught a
+<code class="docutils literal notranslate"><span class="pre">WriteTimeoutException</span></code> while writing.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="channelrequeststatshandler">
+</section>
+<section id="channelrequeststatshandler">
 <h3>ChannelRequestStatsHandler<a class="headerlink" href="#channelrequeststatshandler" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>connection_requests</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of requests received over the lifetime of a
-connection.</dd>
+<dl class="simple">
+<dt><strong>connection_requests</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the number of requests received over the lifetime of a
+connection.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="channelstatshandler">
+</section>
+<section id="channelstatshandler">
 <h3>ChannelStatsHandler<a class="headerlink" href="#channelstatshandler" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>connects</strong></dt>
-<dd>A counter of the total number of successful connections made.</dd>
-<dt><strong>closes</strong></dt>
-<dd>A counter of the total number of channel close operations initiated. To see the
+<dl class="simple">
+<dt><strong>connects</strong></dt><dd><p>A counter of the total number of successful connections made.</p>
+</dd>
+<dt><strong>closes</strong></dt><dd><p>A counter of the total number of channel close operations initiated. To see the
 total number of closes completed, use the total count from one of the
 “connection_duration”, “connection_received_bytes”, or “connection_sent_bytes”
-histograms.</dd>
-<dt><strong>connection_duration</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the duration of the lifetime of a connection, in milliseconds.</dd>
-<dt><strong>connection_received_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes received over the lifetime of a connection.</dd>
-<dt><strong>connection_sent_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes sent over the lifetime of a connection.</dd>
-<dt><strong>received_bytes</strong></dt>
-<dd>A counter of the total number of received bytes.</dd>
-<dt><strong>sent_bytes</strong></dt>
-<dd>A counter of the total number of sent bytes.</dd>
-<dt><strong>tcp_retransmits</strong> <cite>verbosity:debug</cite></dt>
-<dd>A counter of the number of TCP retransmits that have occurred.</dd>
-<dt><strong>tcp_send_window_size</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the TCP send window size (in bytes) per channel.</dd>
-<dt><strong>writableDuration</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the length of time the socket has been writable in the channel.</dd>
-<dt><strong>unwritableDuration</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the length of time the socket has been unwritable in the channel.</dd>
-<dt><strong>connections</strong></dt>
-<dd>A gauge of the total number of connections that are currently open in the
-channel.</dd>
-<dt><strong>pending_io_events</strong></dt>
-<dd>A gauge of the number of pending IO events enqueued in all event loops servicing
-this client or server. If this metric climbs up, it indicates an overload scenario
-when IO threads are not being able to process the scheduled work (handling new
-requests and new connections). A very typical cause of these symptoms is either
-blocking or running a CPU intensive workloads on IO threads.</dd>
-<dt><strong>exn/&lt;exception_name&gt;+</strong></dt>
-<dd>A counter of the number of times a specific exception has been thrown within
-a Netty pipeline.</dd>
-<dt><strong>tls/connections</strong></dt>
-<dd>A gauge of the total number of SSL/TLS connections that are currently open in
-the channel.</dd>
-<dt><strong>tls/snooped_connects</strong></dt>
-<dd>A counter of the number of TLS connections that were detected via snooping.</dd>
+histograms.</p>
+</dd>
+<dt><strong>connection_duration</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the duration of the lifetime of a connection, in milliseconds.</p>
+</dd>
+<dt><strong>connection_received_bytes</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the number of bytes received over the lifetime of a connection.</p>
+</dd>
+<dt><strong>connection_sent_bytes</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the number of bytes sent over the lifetime of a connection.</p>
+</dd>
+<dt><strong>received_bytes</strong></dt><dd><p>A counter of the total number of received bytes.</p>
+</dd>
+<dt><strong>sent_bytes</strong></dt><dd><p>A counter of the total number of sent bytes.</p>
+</dd>
+<dt><strong>tcp_retransmits</strong> <cite>verbosity:debug</cite></dt><dd><p>A counter of the number of TCP retransmits that have occurred.</p>
+</dd>
+<dt><strong>tcp_send_window_size</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the TCP send window size (in bytes) per channel.</p>
+</dd>
+<dt><strong>writableDuration</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the length of time the socket has been writable in the channel.</p>
+</dd>
+<dt><strong>unwritableDuration</strong> <cite>verbosity:debug</cite></dt><dd><p>A gauge of the length of time the socket has been unwritable in the channel.</p>
+</dd>
+<dt><strong>connections</strong></dt><dd><p>A gauge of the total number of connections that are currently open in the
+channel.</p>
+</dd>
+<dt><strong>exn/&lt;exception_name&gt;+</strong></dt><dd><p>A counter of the number of times a specific exception has been thrown within
+a Netty pipeline.</p>
+</dd>
+<dt><strong>tls/connections</strong></dt><dd><p>A gauge of the total number of SSL/TLS connections that are currently open in
+the channel.</p>
+</dd>
+<dt><strong>tls/snooped_connects</strong></dt><dd><p>A counter of the number of TLS connections that were detected via snooping.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="idlechannelhandler">
+</section>
+<section id="idlechannelhandler">
 <h3>IdleChannelHandler<a class="headerlink" href="#idlechannelhandler" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>disconnects/{READER_IDLE,WRITER_IDLE}</strong></dt>
-<dd>A counter of the number of times a connection was disconnected because of a
-given idle state.</dd>
+<dl class="simple">
+<dt><strong>disconnects/{READER_IDLE,WRITER_IDLE}</strong></dt><dd><p>A counter of the number of times a connection was disconnected because of a
+given idle state.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="ssl-tls">
+</section>
+<section id="ssl-tls">
 <h3>SSL/TLS<a class="headerlink" href="#ssl-tls" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>handshake_latency_ms</strong></dt>
-<dd>A histogram of the SSL/TLS handshake latency in milliseconds.</dd>
-<dt><strong>failed_handshake_latency_ms</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the failed SSL/TLS handshake latency in milliseconds.</dd>
+<dl class="simple">
+<dt><strong>handshake_latency_ms</strong></dt><dd><p>A histogram of the SSL/TLS handshake latency in milliseconds.</p>
+</dd>
+<dt><strong>failed_handshake_latency_ms</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the failed SSL/TLS handshake latency in milliseconds.</p>
+</dd>
 </dl>
-</div>
-</div>
-<div class="section" id="service-discovery">
+</section>
+</section>
+<section id="service-discovery">
 <h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
 <p id="id7">These metrics track the state of name resolution and service discovery.</p>
-<div class="section" id="id8">
+<section id="id8">
 <h3>Name Resolution<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <p>Finagle clients resolve <a class="reference internal" href="Names.html"><span class="doc">names</span></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
@@ -917,139 +917,140 @@ involved in this process are cached (i.e.
 The following stats are recorded under the
 <cite>namer/{dtabcache,namecache,nametreecache}</cite> scopes to provide
 visibility into this caching.</p>
-<dl class="docutils">
-<dt><strong>misses</strong></dt>
-<dd>A counter of the number of cache misses.</dd>
-<dt><strong>evicts</strong></dt>
-<dd>A counter of the number of cache evictions.</dd>
-<dt><strong>expires</strong></dt>
-<dd>A counter of the number of idle <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code>s
-that were actively evicted.</dd>
-<dt><strong>idle</strong></dt>
-<dd>A gauge of the number of cached idle <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code>s.</dd>
-<dt><strong>oneshots</strong></dt>
-<dd>A counter of the number of “one-off” <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code>s that are
-created in the event that no idle <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code>s are cached.</dd>
-<dt><strong>namer/bind_latency_us</strong></dt>
-<dd>A stat of the total time spent resolving <code class="docutils literal notranslate"><span class="pre">Name</span></code>s.</dd>
+<dl class="simple">
+<dt><strong>misses</strong></dt><dd><p>A counter of the number of cache misses.</p>
+</dd>
+<dt><strong>evicts</strong></dt><dd><p>A counter of the number of cache evictions.</p>
+</dd>
+<dt><strong>expires</strong></dt><dd><p>A counter of the number of idle <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code>s
+that were actively evicted.</p>
+</dd>
+<dt><strong>idle</strong></dt><dd><p>A gauge of the number of cached idle <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code>s.</p>
+</dd>
+<dt><strong>oneshots</strong></dt><dd><p>A counter of the number of “one-off” <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code>s that are
+created in the event that no idle <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code>s are cached.</p>
+</dd>
+<dt><strong>namer/bind_latency_us</strong></dt><dd><p>A stat of the total time spent resolving <code class="docutils literal notranslate"><span class="pre">Name</span></code>s.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="initial-resolution">
+</section>
+<section id="initial-resolution">
 <h3>Initial Resolution<a class="headerlink" href="#initial-resolution" title="Permalink to this headline">¶</a></h3>
 <p><strong>finagle/clientregistry/initialresolution_ms</strong></p>
 <blockquote>
-<div>A counter of the time spent waiting for client resolution via
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">ClientRegistry.expAllRegisteredClientsResolved</a>.</div></blockquote>
-</div>
-<div class="section" id="address-stabilization">
+<div><p>A counter of the time spent waiting for client resolution via
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">ClientRegistry.expAllRegisteredClientsResolved</a>.</p>
+</div></blockquote>
+</section>
+<section id="address-stabilization">
 <h3>Address Stabilization<a class="headerlink" href="#address-stabilization" title="Permalink to this headline">¶</a></h3>
 <p>Resolved addresses (represented as an instance of
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-core/src/main/scala/com/twitter/finagle/Addr.scala">Addr</a>) are stabilized in two ways:</p>
 <ol class="arabic simple">
-<li>ZooKeeper failures will not cause a previously bound address to fail.</li>
-<li>When a member leaves a cluster, its removal is delayed.</li>
+<li><p>ZooKeeper failures will not cause a previously bound address to fail.</p></li>
+<li><p>When a member leaves a cluster, its removal is delayed.</p></li>
 </ol>
 <p>Note that hosts added to a cluster are reflected immediately.</p>
 <p>The following metrics are scoped under the concatenation of <cite>zk2/</cite> and
 the ServerSet’s ZooKeeper path.</p>
-<dl class="docutils">
-<dt><strong>limbo</strong></dt>
-<dd>A gauge tracking the number of endpoints that are in “limbo”. When a
+<dl class="simple">
+<dt><strong>limbo</strong></dt><dd><p>A gauge tracking the number of endpoints that are in “limbo”. When a
 member leaves a cluster, it is placed in limbo. Hosts in limbo are
 still presented to the load balancer as belonging to the cluster,
 but are staged for removal. They are removed if they do not recover
-within an interval bound by the ZooKeeper session timeout.</dd>
-<dt><strong>size</strong></dt>
-<dd>A gauge tracking the total size of the live cluster, not including
-members in limbo.</dd>
-<dt><strong>zkHealth</strong></dt>
-<dd>A gauge tracking the health of the underlying zk client as seen by the resolver.
-Unknown(0), Healthy(1), Unhealthy(2), Probation(3)</dd>
-<dt><strong>observed_serversets</strong></dt>
-<dd>A gauge tracking the number of clusters whose membership status is
+within an interval bound by the ZooKeeper session timeout.</p>
+</dd>
+<dt><strong>size</strong></dt><dd><p>A gauge tracking the total size of the live cluster, not including
+members in limbo.</p>
+</dd>
+<dt><strong>zkHealth</strong></dt><dd><p>A gauge tracking the health of the underlying zk client as seen by the resolver.
+Unknown(0), Healthy(1), Unhealthy(2), Probation(3)</p>
+</dd>
+<dt><strong>observed_serversets</strong></dt><dd><p>A gauge tracking the number of clusters whose membership status is
 <em>currently</em> been tracked within the process. This metric differs from
 <cite>session_cache_size</cite> below in that it tracks live clusters rather
-than the total number of cached sessions.</dd>
+than the total number of cached sessions.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="zookeeper-diagnostics">
+</section>
+<section id="zookeeper-diagnostics">
 <h3>ZooKeeper Diagnostics<a class="headerlink" href="#zookeeper-diagnostics" title="Permalink to this headline">¶</a></h3>
 <p>The following stats reflect diagnostic information about the ZooKeeper
 sessions opened for the purposes of service discovery.</p>
-<div class="section" id="under-the-zk2-scope">
+<section id="under-the-zk2-scope">
 <h4>Under the `zk2` scope<a class="headerlink" href="#under-the-zk2-scope" title="Permalink to this headline">¶</a></h4>
-<dl class="docutils">
-<dt><strong>session_cache_size</strong></dt>
-<dd>A gauge tracking the number of distinct logical clusters whose
-membership status has been tracked within the process.</dd>
-<dt><strong>entries/read_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of reading entry znodes.</dd>
-<dt><strong>entries/parse_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of parsing the data
-within entry znodes.</dd>
-<dt><strong>vectors/read_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of reading vector znodes.</dd>
-<dt><strong>vectors/parse_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of parsing the data
-within vector znodes.</dd>
+<dl class="simple">
+<dt><strong>session_cache_size</strong></dt><dd><p>A gauge tracking the number of distinct logical clusters whose
+membership status has been tracked within the process.</p>
+</dd>
+<dt><strong>entries/read_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of reading entry znodes.</p>
+</dd>
+<dt><strong>entries/parse_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of parsing the data
+within entry znodes.</p>
+</dd>
+<dt><strong>vectors/read_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of reading vector znodes.</p>
+</dd>
+<dt><strong>vectors/parse_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of parsing the data
+within vector znodes.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="under-the-zkclient-scope">
+</section>
+<section id="under-the-zkclient-scope">
 <h4>Under the `zkclient` scope<a class="headerlink" href="#under-the-zkclient-scope" title="Permalink to this headline">¶</a></h4>
-<dl class="docutils">
-<dt><strong>ephemeral_successes</strong></dt>
-<dd>A counter of the number successful ephemeral node creations.</dd>
-<dt><strong>ephemeral_failures</strong></dt>
-<dd>A counter of the number failed ephemeral node creations.</dd>
-<dt><strong>ephemeral_latency_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of ephemeral node creation.</dd>
-<dt><strong>watch_successes</strong></dt>
-<dd>A counter of the number successful watch-related operations
+<dl class="simple">
+<dt><strong>ephemeral_successes</strong></dt><dd><p>A counter of the number successful ephemeral node creations.</p>
+</dd>
+<dt><strong>ephemeral_failures</strong></dt><dd><p>A counter of the number failed ephemeral node creations.</p>
+</dd>
+<dt><strong>ephemeral_latency_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of ephemeral node creation.</p>
+</dd>
+<dt><strong>watch_successes</strong></dt><dd><p>A counter of the number successful watch-related operations
 (i.e. “watch exists”, “get watch data”, and “get child watches”
-operations).</dd>
-<dt><strong>watch_failures</strong></dt>
-<dd>A counter of the number failed watch-related operations.</dd>
-<dt><strong>watch_latency_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of watch-related operations.</dd>
-<dt><strong>read_successes</strong></dt>
-<dd>A counter of the number successful ZooKeeper reads.</dd>
-<dt><strong>read_failures</strong></dt>
-<dd>A counter of the number failed ZooKeeper reads.</dd>
-<dt><strong>read_latency_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of ZooKeeper reads.</dd>
-<dt><strong>write_successes</strong></dt>
-<dd>A counter of the number successful ZooKeeper writes.</dd>
-<dt><strong>write_failures</strong></dt>
-<dd>A counter of the number failed ZooKeeper writes.</dd>
-<dt><strong>write_latency_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of ZooKeeper writes.</dd>
-<dt><strong>multi_successes</strong></dt>
-<dd>A counter of the number successful transactional operations.</dd>
-<dt><strong>multi_failures</strong></dt>
-<dd>A counter of the number failed transactional operations.</dd>
-<dt><strong>multi_latency_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of transactional operations.</dd>
-<dt><strong>session_sync_connected</strong></dt>
-<dd>A counter of the number of read-write session transitions.</dd>
-<dt><strong>session_connected_read_only</strong></dt>
-<dd>A counter of the number of read-only session transitions.</dd>
-<dt><strong>session_no_sync_connected</strong></dt>
-<dd>Unused (should always be 0).</dd>
-<dt><strong>session_sasl_authenticated</strong></dt>
-<dd>A counter of the number of sessions upgraded to SASL.</dd>
-<dt><strong>session_auth_failed</strong></dt>
-<dd>A counter of the number of session authentication failures.</dd>
-<dt><strong>session_disconnected</strong></dt>
-<dd>A counter of the number of temporary session disconnects.</dd>
-<dt><strong>session_expired</strong></dt>
-<dd>A counter of the number of session expirations.</dd>
-<dt><strong>session_closed</strong></dt>
-<dd>A counter of the number of closed sessions.</dd>
+operations).</p>
+</dd>
+<dt><strong>watch_failures</strong></dt><dd><p>A counter of the number failed watch-related operations.</p>
+</dd>
+<dt><strong>watch_latency_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of watch-related operations.</p>
+</dd>
+<dt><strong>read_successes</strong></dt><dd><p>A counter of the number successful ZooKeeper reads.</p>
+</dd>
+<dt><strong>read_failures</strong></dt><dd><p>A counter of the number failed ZooKeeper reads.</p>
+</dd>
+<dt><strong>read_latency_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of ZooKeeper reads.</p>
+</dd>
+<dt><strong>write_successes</strong></dt><dd><p>A counter of the number successful ZooKeeper writes.</p>
+</dd>
+<dt><strong>write_failures</strong></dt><dd><p>A counter of the number failed ZooKeeper writes.</p>
+</dd>
+<dt><strong>write_latency_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of ZooKeeper writes.</p>
+</dd>
+<dt><strong>multi_successes</strong></dt><dd><p>A counter of the number successful transactional operations.</p>
+</dd>
+<dt><strong>multi_failures</strong></dt><dd><p>A counter of the number failed transactional operations.</p>
+</dd>
+<dt><strong>multi_latency_ms</strong></dt><dd><p>A histogram of the latency, in milliseconds, of transactional operations.</p>
+</dd>
+<dt><strong>session_sync_connected</strong></dt><dd><p>A counter of the number of read-write session transitions.</p>
+</dd>
+<dt><strong>session_connected_read_only</strong></dt><dd><p>A counter of the number of read-only session transitions.</p>
+</dd>
+<dt><strong>session_no_sync_connected</strong></dt><dd><p>Unused (should always be 0).</p>
+</dd>
+<dt><strong>session_sasl_authenticated</strong></dt><dd><p>A counter of the number of sessions upgraded to SASL.</p>
+</dd>
+<dt><strong>session_auth_failed</strong></dt><dd><p>A counter of the number of session authentication failures.</p>
+</dd>
+<dt><strong>session_disconnected</strong></dt><dd><p>A counter of the number of temporary session disconnects.</p>
+</dd>
+<dt><strong>session_expired</strong></dt><dd><p>A counter of the number of session expirations.</p>
+</dd>
+<dt><strong>session_closed</strong></dt><dd><p>A counter of the number of closed sessions.</p>
+</dd>
 </dl>
-</div>
-</div>
-</div>
-<div class="section" id="jvm">
+</section>
+</section>
+</section>
+<section id="jvm">
 <h2>JVM<a class="headerlink" href="#jvm" title="Permalink to this headline">¶</a></h2>
 <p id="jvm-metrics">A wide variety of metrics are exported which provide insight into the JVM’s
 runtime. These include garbage collection, allocations, threads, uptime,
@@ -1059,163 +1060,162 @@ may be useful. This includes safe point time (<cite>jvm/safepoint</cite>),
 metaspace usage (<cite>jvm/mem/metaspace</cite>), allocation rates (<cite>jvm/mem/allocations</cite>),
 time running application code since start (<cite>jvm/application_time_millis</cite>),
 and tenuring threshold (<cite>jvm/tenuring_threshold</cite>).</p>
-<dl class="docutils">
-<dt><strong>jvm/mem/allocations/eden/bytes</strong></dt>
-<dd>A gauge of the number of bytes allocated into the eden. This is a particularly
+<dl class="simple">
+<dt><strong>jvm/mem/allocations/eden/bytes</strong></dt><dd><p>A gauge of the number of bytes allocated into the eden. This is a particularly
 relevant metric for service developers. The vast majority of allocations are
 done into the eden space, so this metric can be used to calculate the allocations
 per request which in turn can be used to validate code changes
-don’t increase garbage collection pressure on the hot path.</dd>
-<dt><strong>jvm/gc/msec</strong></dt>
-<dd>A gauge of the total elapsed time doing collections, in milliseconds.</dd>
-<dt><strong>jvm/gc/cycles</strong></dt>
-<dd>A gauge of the number of the total number of collections that have occurred.</dd>
-<dt><strong>jvm/gc/eden/pause_msec</strong></dt>
-<dd>A stat of the durations, in millseconds, of the eden collection pauses.</dd>
-<dt><strong>jvm/gc/{gc_pool_name}/msec</strong></dt>
-<dd>A gauge for the named gc pool of the total elapsed time garbage collection pool
-doing collections, in milliseconds. Names are subject to change.</dd>
-<dt><strong>jvm/gc/{gc_pool_name}/cycles</strong></dt>
-<dd>A gauge for the named gc pool of the total number of collections that have occurred.
-Names are subject to change.</dd>
-<dt><strong>jvm/thread/count</strong></dt>
-<dd>A gauge of the number of live threads including both daemon and non-daemon threads.</dd>
-<dt><strong>jvm/thread/daemon_count</strong></dt>
-<dd>A gauge of the number of live daemon threads.</dd>
-<dt><strong>jvm/thread/peak_count</strong></dt>
-<dd>A gauge of the peak live thread count since the Java virtual machine started or peak was reset.</dd>
-<dt><strong>jvm/uptime</strong></dt>
-<dd>A gauge of the uptime of the Java virtual machine in milliseconds.</dd>
-<dt><strong>jvm/spec_version</strong></dt>
-<dd>A gauge of the running Java virtual machine’s specification version. Generally maps to the
-VM’s major version.</dd>
-<dt><strong>jvm/start_time</strong></dt>
-<dd>A gauge of the start time of the Java virtual machine in milliseconds since the epoch.</dd>
-<dt><strong>jvm/application_time_millis</strong></dt>
-<dd>A gauge of the total time running application code since the process started in milliseconds.</dd>
-<dt><strong>jvm/tenuring_threshold</strong></dt>
-<dd>A gauge of the number of times an object must survive GC in order to be promoted
-or 0 if the metric is unavailable.</dd>
-<dt><strong>jvm/num_cpus</strong></dt>
-<dd>A gauge of the number of processors available to the JVM.</dd>
-<dt><strong>jvm/fd_limit</strong></dt>
-<dd>(only available on Unix-based OS) A gauge of the maximum number of file descriptors.</dd>
-<dt><strong>jvm/fd_count</strong></dt>
-<dd>(only available on Unix-based OS) A gauge of the number of open file descriptors.</dd>
-<dt><strong>jvm/compilation/time_msec</strong></dt>
-<dd>A gauge of the elapsed time, in milliseconds, spent in compilation.</dd>
-<dt><strong>jvm/classes/current_loaded</strong></dt>
-<dd>A gauge of the number of classes that are currently loaded.</dd>
-<dt><strong>jvm/classes/total_loaded</strong></dt>
-<dd>A gauge of total number of classes that have been loaded since the JVM started.</dd>
-<dt><strong>jvm/classes/total_unloaded</strong></dt>
-<dd>A gauge of total number of classes that have been unloaded since the JVM started.</dd>
-<dt><strong>jvm/safepoint/count</strong></dt>
-<dd>A gauge of the number of safepoints taken place since the JVM started.</dd>
-<dt><strong>jvm/safepoint/sync_time_millis</strong></dt>
-<dd>A gauge of the cumulative time, in milliseconds, spent getting all threads to
-safepoint states.</dd>
-<dt><strong>jvm/safepoint/total_time_millis</strong></dt>
-<dd>A gauge of the cumulative time, in milliseconds, that the application has been
-stopped for safepoint operations.</dd>
-<dt><strong>jvm/mem/metaspace/max_capacity</strong></dt>
-<dd>A gauge of the maximum size, in bytes, that the metaspace can grow to.</dd>
-<dt><strong>jvm/heap/used</strong></dt>
-<dd>For the heap used for object allocation, a gauge of the current amount of memory used, in bytes.</dd>
-<dt><strong>jvm/heap/committed</strong></dt>
-<dd>For the heap used for object allocation, a gauge of the amount of memory, in bytes,
-committed for the JVM to use.</dd>
-<dt><strong>jvm/heap/max</strong></dt>
-<dd>For the heap used for object allocation, a gauge of the maximum amount of memory, in bytes,
-that can be used by the JVM.</dd>
-<dt><strong>jvm/nonheap/used</strong></dt>
-<dd>For the non-heap memory, a gauge of the current amount of memory used, in bytes.</dd>
-<dt><strong>jvm/nonheap/committed</strong></dt>
-<dd>For the non-heap memory, a gauge of the amount of memory, in bytes,
-committed for the JVM to use.</dd>
-<dt><strong>jvm/nonheap/max</strong></dt>
-<dd>For the non-heap memory, a gauge of the maximum amount of memory, in bytes,
-that can be used by the JVM.</dd>
-<dt><strong>jvm/mem/current/used</strong></dt>
-<dd>A gauge of the of the current memory used, in bytes, across all memory pools.</dd>
-<dt><strong>jvm/mem/current/{memory_pool_name}/used</strong></dt>
-<dd>A gauge of the of the current memory used, in bytes, for the named memory pools.</dd>
-<dt><strong>jvm/mem/current/{memory_pool_name}/max</strong></dt>
-<dd>A gauge of the of the maximum memory that can be used, in bytes, for the named memory pool.</dd>
-<dt><strong>jvm/mem/postGC/used</strong></dt>
-<dd>A gauge of the memory used, in bytes, across all memory pools after the most recent
-garbage collection.</dd>
-<dt><strong>jvm/mem/postGC/{memory_pool_name}/used</strong></dt>
-<dd>A gauge of the memory used, in bytes, for the named memory pool after the most recent
-garbage collection.</dd>
-<dt><strong>jvm/mem/buffer/{buffer_pool_name}/count</strong></dt>
-<dd>A gauge of the number of buffers in the named pool. Example pool names include direct and mapped,
-though the names are subject to change.</dd>
-<dt><strong>jvm/mem/buffer/{buffer_pool_name}/used</strong></dt>
-<dd>A gauge of the amount of memory used, in bytes, for the named pool. Example pool names
-include direct and mapped, though the names are subject to change.</dd>
-<dt><strong>jvm/mem/buffer/{buffer_pool_name}/max</strong></dt>
-<dd>A gauge of the amount of memory capacity, in bytes, for the named pool. Example pool names
-include direct and mapped, though the names are subject to change.</dd>
+don’t increase garbage collection pressure on the hot path.</p>
+</dd>
+<dt><strong>jvm/gc/msec</strong></dt><dd><p>A gauge of the total elapsed time doing collections, in milliseconds.</p>
+</dd>
+<dt><strong>jvm/gc/cycles</strong></dt><dd><p>A gauge of the number of the total number of collections that have occurred.</p>
+</dd>
+<dt><strong>jvm/gc/eden/pause_msec</strong></dt><dd><p>A stat of the durations, in millseconds, of the eden collection pauses.</p>
+</dd>
+<dt><strong>jvm/gc/{gc_pool_name}/msec</strong></dt><dd><p>A gauge for the named gc pool of the total elapsed time garbage collection pool
+doing collections, in milliseconds. Names are subject to change.</p>
+</dd>
+<dt><strong>jvm/gc/{gc_pool_name}/cycles</strong></dt><dd><p>A gauge for the named gc pool of the total number of collections that have occurred.
+Names are subject to change.</p>
+</dd>
+<dt><strong>jvm/thread/count</strong></dt><dd><p>A gauge of the number of live threads including both daemon and non-daemon threads.</p>
+</dd>
+<dt><strong>jvm/thread/daemon_count</strong></dt><dd><p>A gauge of the number of live daemon threads.</p>
+</dd>
+<dt><strong>jvm/thread/peak_count</strong></dt><dd><p>A gauge of the peak live thread count since the Java virtual machine started or peak was reset.</p>
+</dd>
+<dt><strong>jvm/uptime</strong></dt><dd><p>A gauge of the uptime of the Java virtual machine in milliseconds.</p>
+</dd>
+<dt><strong>jvm/spec_version</strong></dt><dd><p>A gauge of the running Java virtual machine’s specification version. Generally maps to the
+VM’s major version.</p>
+</dd>
+<dt><strong>jvm/start_time</strong></dt><dd><p>A gauge of the start time of the Java virtual machine in milliseconds since the epoch.</p>
+</dd>
+<dt><strong>jvm/application_time_millis</strong></dt><dd><p>A gauge of the total time running application code since the process started in milliseconds.</p>
+</dd>
+<dt><strong>jvm/tenuring_threshold</strong></dt><dd><p>A gauge of the number of times an object must survive GC in order to be promoted
+or 0 if the metric is unavailable.</p>
+</dd>
+<dt><strong>jvm/num_cpus</strong></dt><dd><p>A gauge of the number of processors available to the JVM.</p>
+</dd>
+<dt><strong>jvm/fd_limit</strong></dt><dd><p>(only available on Unix-based OS) A gauge of the maximum number of file descriptors.</p>
+</dd>
+<dt><strong>jvm/fd_count</strong></dt><dd><p>(only available on Unix-based OS) A gauge of the number of open file descriptors.</p>
+</dd>
+<dt><strong>jvm/compilation/time_msec</strong></dt><dd><p>A gauge of the elapsed time, in milliseconds, spent in compilation.</p>
+</dd>
+<dt><strong>jvm/classes/current_loaded</strong></dt><dd><p>A gauge of the number of classes that are currently loaded.</p>
+</dd>
+<dt><strong>jvm/classes/total_loaded</strong></dt><dd><p>A gauge of total number of classes that have been loaded since the JVM started.</p>
+</dd>
+<dt><strong>jvm/classes/total_unloaded</strong></dt><dd><p>A gauge of total number of classes that have been unloaded since the JVM started.</p>
+</dd>
+<dt><strong>jvm/safepoint/count</strong></dt><dd><p>A gauge of the number of safepoints taken place since the JVM started.</p>
+</dd>
+<dt><strong>jvm/safepoint/sync_time_millis</strong></dt><dd><p>A gauge of the cumulative time, in milliseconds, spent getting all threads to
+safepoint states.</p>
+</dd>
+<dt><strong>jvm/safepoint/total_time_millis</strong></dt><dd><p>A gauge of the cumulative time, in milliseconds, that the application has been
+stopped for safepoint operations.</p>
+</dd>
+<dt><strong>jvm/mem/metaspace/max_capacity</strong></dt><dd><p>A gauge of the maximum size, in bytes, that the metaspace can grow to.</p>
+</dd>
+<dt><strong>jvm/heap/used</strong></dt><dd><p>For the heap used for object allocation, a gauge of the current amount of memory used, in bytes.</p>
+</dd>
+<dt><strong>jvm/heap/committed</strong></dt><dd><p>For the heap used for object allocation, a gauge of the amount of memory, in bytes,
+committed for the JVM to use.</p>
+</dd>
+<dt><strong>jvm/heap/max</strong></dt><dd><p>For the heap used for object allocation, a gauge of the maximum amount of memory, in bytes,
+that can be used by the JVM.</p>
+</dd>
+<dt><strong>jvm/nonheap/used</strong></dt><dd><p>For the non-heap memory, a gauge of the current amount of memory used, in bytes.</p>
+</dd>
+<dt><strong>jvm/nonheap/committed</strong></dt><dd><p>For the non-heap memory, a gauge of the amount of memory, in bytes,
+committed for the JVM to use.</p>
+</dd>
+<dt><strong>jvm/nonheap/max</strong></dt><dd><p>For the non-heap memory, a gauge of the maximum amount of memory, in bytes,
+that can be used by the JVM.</p>
+</dd>
+<dt><strong>jvm/mem/current/used</strong></dt><dd><p>A gauge of the of the current memory used, in bytes, across all memory pools.</p>
+</dd>
+<dt><strong>jvm/mem/current/{memory_pool_name}/used</strong></dt><dd><p>A gauge of the of the current memory used, in bytes, for the named memory pools.</p>
+</dd>
+<dt><strong>jvm/mem/current/{memory_pool_name}/max</strong></dt><dd><p>A gauge of the of the maximum memory that can be used, in bytes, for the named memory pool.</p>
+</dd>
+<dt><strong>jvm/mem/postGC/used</strong></dt><dd><p>A gauge of the memory used, in bytes, across all memory pools after the most recent
+garbage collection.</p>
+</dd>
+<dt><strong>jvm/mem/postGC/{memory_pool_name}/used</strong></dt><dd><p>A gauge of the memory used, in bytes, for the named memory pool after the most recent
+garbage collection.</p>
+</dd>
+<dt><strong>jvm/mem/buffer/{buffer_pool_name}/count</strong></dt><dd><p>A gauge of the number of buffers in the named pool. Example pool names include direct and mapped,
+though the names are subject to change.</p>
+</dd>
+<dt><strong>jvm/mem/buffer/{buffer_pool_name}/used</strong></dt><dd><p>A gauge of the amount of memory used, in bytes, for the named pool. Example pool names
+include direct and mapped, though the names are subject to change.</p>
+</dd>
+<dt><strong>jvm/mem/buffer/{buffer_pool_name}/max</strong></dt><dd><p>A gauge of the amount of memory capacity, in bytes, for the named pool. Example pool names
+include direct and mapped, though the names are subject to change.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="toggles">
+</section>
+<section id="toggles">
 <h2>Toggles<a class="headerlink" href="#toggles" title="Permalink to this headline">¶</a></h2>
 <p>These metrics correspond to <a class="reference internal" href="Configuration.html#toggles"><span class="std std-ref">feature toggles</span></a>.</p>
-<dl class="docutils">
-<dt><strong>toggles/&lt;libraryName&gt;/checksum</strong></dt>
-<dd>A gauge summarizing the current state of a <cite>ToggleMap</cite> which may be useful
-for comparing state across a cluster or over time.</dd>
+<dl class="simple">
+<dt><strong>toggles/&lt;libraryName&gt;/checksum</strong></dt><dd><p>A gauge summarizing the current state of a <cite>ToggleMap</cite> which may be useful
+for comparing state across a cluster or over time.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="streaming">
+</section>
+<section id="streaming">
 <h2>Streaming<a class="headerlink" href="#streaming" title="Permalink to this headline">¶</a></h2>
 <p id="streaming-metrics">All streaming metrics are automatically collected by Finagle by setting <cite>isChunked</cite> as true on Http
 request or response. All metrics are traced using the binary annotations with a <cite>clnt/&lt;clnt_name&gt;/</cite>
 prefix on the client side, and <cite>srv/</cite> prefix on the server side.</p>
 <p>The following metrics are added by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StreamingStatsFilter.scala">StreamingStatsFilter</a></p>
-<dl class="docutils">
-<dt><strong>http/stream/request/closed</strong></dt>
-<dd>A counter of the number of closed request streams.</dd>
-<dt><strong>http/stream/request/duration_ms</strong></dt>
-<dd>A histogram of the duration of the lifetime of request streams, from the time a stream is
-initialized until it’s closed, in milliseconds.</dd>
-<dt><strong>http/stream/request/failures</strong></dt>
-<dd>A counter of the number of times any failure has been observed in the middle of a request stream.</dd>
-<dt><strong>http/stream/request/failures/&lt;exception_name&gt;</strong></dt>
-<dd>A counter of the number of times a specific exception has been thrown in the middle of a request
-stream.</dd>
-<dt><strong>http/stream/request/opened</strong></dt>
-<dd>A counter of the number of opened request streams.</dd>
-<dt><strong>http/stream/request/pending</strong></dt>
-<dd>A gauge of the number of pending request streams.</dd>
-<dt><strong>http/stream/response/closed</strong></dt>
-<dd>A counter of the number of closed response streams.</dd>
-<dt><strong>http/stream/response/duration_ms</strong></dt>
-<dd>A histogram of the duration of the lifetime of response streams, from the time a stream is
-initialized until it’s closed, in milliseconds.</dd>
-<dt><strong>http/stream/response/failures</strong></dt>
-<dd>A counter of the number of times any failure has been observed in the middle of a response stream.</dd>
-<dt><strong>http/stream/response/failures/&lt;exception_name&gt;</strong></dt>
-<dd>A counter of the number of times a specific exception has been thrown in the middle of a response
-stream.</dd>
-<dt><strong>http/stream/response/opened</strong></dt>
-<dd>A counter of the number of opened response streams.</dd>
-<dt><strong>http/stream/response/pending</strong></dt>
-<dd>A gauge of the number of pending response streams.</dd>
-<dt><strong>stream/request/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes per chunk’s payload of request streams. This is measured in
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></dd>
-<dt><strong>stream/response/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes per chunk’s payload of response streams. This is measured in
-<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></dd>
-<dt>You could derive the streaming success rate of:</dt>
-<dd><ul class="first last simple">
-<li>the total number of streams
-number of successful streams divided by number of total streams</li>
-<li>closed streams
-number of successful streams divided by number of closed streams</li>
+<dl class="simple">
+<dt><strong>http/stream/request/closed</strong></dt><dd><p>A counter of the number of closed request streams.</p>
+</dd>
+<dt><strong>http/stream/request/duration_ms</strong></dt><dd><p>A histogram of the duration of the lifetime of request streams, from the time a stream is
+initialized until it’s closed, in milliseconds.</p>
+</dd>
+<dt><strong>http/stream/request/failures</strong></dt><dd><p>A counter of the number of times any failure has been observed in the middle of a request stream.</p>
+</dd>
+<dt><strong>http/stream/request/failures/&lt;exception_name&gt;</strong></dt><dd><p>A counter of the number of times a specific exception has been thrown in the middle of a request
+stream.</p>
+</dd>
+<dt><strong>http/stream/request/opened</strong></dt><dd><p>A counter of the number of opened request streams.</p>
+</dd>
+<dt><strong>http/stream/request/pending</strong></dt><dd><p>A gauge of the number of pending request streams.</p>
+</dd>
+<dt><strong>http/stream/response/closed</strong></dt><dd><p>A counter of the number of closed response streams.</p>
+</dd>
+<dt><strong>http/stream/response/duration_ms</strong></dt><dd><p>A histogram of the duration of the lifetime of response streams, from the time a stream is
+initialized until it’s closed, in milliseconds.</p>
+</dd>
+<dt><strong>http/stream/response/failures</strong></dt><dd><p>A counter of the number of times any failure has been observed in the middle of a response stream.</p>
+</dd>
+<dt><strong>http/stream/response/failures/&lt;exception_name&gt;</strong></dt><dd><p>A counter of the number of times a specific exception has been thrown in the middle of a response
+stream.</p>
+</dd>
+<dt><strong>http/stream/response/opened</strong></dt><dd><p>A counter of the number of opened response streams.</p>
+</dd>
+<dt><strong>http/stream/response/pending</strong></dt><dd><p>A gauge of the number of pending response streams.</p>
+</dd>
+<dt><strong>stream/request/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the number of bytes per chunk’s payload of request streams. This is measured in
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></p>
+</dd>
+<dt><strong>stream/response/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt><dd><p>A histogram of the number of bytes per chunk’s payload of response streams. This is measured in
+<a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></p>
+</dd>
+<dt>You could derive the streaming success rate of:</dt><dd><ul class="simple">
+<li><p>the total number of streams
+number of successful streams divided by number of total streams</p></li>
+<li><p>closed streams
+number of successful streams divided by number of closed streams</p></li>
 </ul>
 </dd>
 </dl>
@@ -1227,207 +1227,209 @@ values are monotonically increasing:</p>
 <div><p># Success rate of total number of streams:
 1 - (rated_counter(stream/request/failures)</p>
 <blockquote>
-<div>/ (gauge(stream/request/pending) + rated_counter(stream/request/closed)))</div></blockquote>
+<div><p>/ (gauge(stream/request/pending) + rated_counter(stream/request/closed)))</p>
+</div></blockquote>
 <p># Success rate of number of closed streams:
 1 - (rated_counter(stream/request/failures) / rated_counter(stream/request/closed))</p>
 </div></blockquote>
-</div>
-<div class="section" id="http">
+</section>
+<section id="http">
 <h2>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
 <p id="http-stats">These stats pertain to the HTTP protocol.</p>
-<dl class="docutils">
-<dt><strong>nacks</strong></dt>
-<dd>A counter of the number of retryable HTTP 503 responses the Http server returns. Those
-responses are automatically retried by Finagle HTTP client.</dd>
-<dt><strong>nonretryable_nacks</strong></dt>
-<dd>A counter of the number of non-retryable HTTP 503 responses the HTTP server returns. Those
-responses are not automatically retried.</dd>
-<dt><strong>Deprecated: stream/failures/&lt;exception_name&gt;</strong></dt>
-<dd>The replacement is <cite>stream/request/failures/&lt;exception_name&gt;</cite> and <cite>stream/response/failures/&lt;exception_name&gt;</cite>.
-A counter of the number of times a specific exception has been thrown in the middle of a stream.</dd>
-<dt><strong>Deprecated: stream/failures</strong></dt>
-<dd>The replacement is <cite>stream/request/failures</cite> and <cite>stream/response/failures</cite>.
-A counter of the number of times any failure has been observed in the middle of a stream.</dd>
-<dt><strong>http/cookie/samesite_failures</strong> <cite>verbosity:debug</cite></dt>
-<dd>A counter of the number of failed attempts to decode the SameSite Cookie attribute.</dd>
-<dt><strong>rejected_invalid_header_names</strong></dt>
-<dd>A counter of the number of rejected requests by a server due to an invalid (as seen by RFC-7230)
-header name.</dd>
-<dt><strong>rejected_invalid_header_values</strong></dt>
-<dd>A counter of the number of rejected requests by a server due to an invalid (as seen by RFC-7230)
-header value.</dd>
+<dl class="simple">
+<dt><strong>nacks</strong></dt><dd><p>A counter of the number of retryable HTTP 503 responses the Http server returns. Those
+responses are automatically retried by Finagle HTTP client.</p>
+</dd>
+<dt><strong>nonretryable_nacks</strong></dt><dd><p>A counter of the number of non-retryable HTTP 503 responses the HTTP server returns. Those
+responses are not automatically retried.</p>
+</dd>
+<dt><strong>Deprecated: stream/failures/&lt;exception_name&gt;</strong></dt><dd><p>The replacement is <cite>stream/request/failures/&lt;exception_name&gt;</cite> and <cite>stream/response/failures/&lt;exception_name&gt;</cite>.
+A counter of the number of times a specific exception has been thrown in the middle of a stream.</p>
+</dd>
+<dt><strong>Deprecated: stream/failures</strong></dt><dd><p>The replacement is <cite>stream/request/failures</cite> and <cite>stream/response/failures</cite>.
+A counter of the number of times any failure has been observed in the middle of a stream.</p>
+</dd>
+<dt><strong>http/cookie/samesite_failures</strong> <cite>verbosity:debug</cite></dt><dd><p>A counter of the number of failed attempts to decode the SameSite Cookie attribute.</p>
+</dd>
+<dt><strong>rejected_invalid_header_names</strong></dt><dd><p>A counter of the number of rejected requests by a server due to an invalid (as seen by RFC-7230)
+header name.</p>
+</dd>
+<dt><strong>rejected_invalid_header_values</strong></dt><dd><p>A counter of the number of rejected requests by a server due to an invalid (as seen by RFC-7230)
+header value.</p>
+</dd>
 </dl>
 <p>These metrics are added by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/release/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StatsFilter.scala">StatsFilter</a> and can be enabled by
 using <cite>.withHttpStats</cite> on <cite>Http.Client</cite> and <cite>Http.Server</cite>.</p>
-<dl class="docutils">
-<dt><strong>status/&lt;statusCode&gt;</strong></dt>
-<dd>A counter of the number of responses received, or returned for servers, that had this
-statusCode.</dd>
-<dt><strong>status/&lt;statusClass&gt;</strong></dt>
-<dd>Same as <strong>status/statusCode</strong> but aggregated per category, e.g. all 500 range responses
-count as 5XX for this counter.</dd>
-<dt><strong>time/&lt;statusCode&gt;</strong></dt>
-<dd>A histogram on duration in milliseconds per HTTP status code.</dd>
-<dt><strong>time/&lt;statusCategory&gt;</strong></dt>
-<dd>A histogram on duration in milliseconds per HTTP status code category.</dd>
+<dl class="simple">
+<dt><strong>status/&lt;statusCode&gt;</strong></dt><dd><p>A counter of the number of responses received, or returned for servers, that had this
+statusCode.</p>
+</dd>
+<dt><strong>status/&lt;statusClass&gt;</strong></dt><dd><p>Same as <strong>status/statusCode</strong> but aggregated per category, e.g. all 500 range responses
+count as 5XX for this counter.</p>
+</dd>
+<dt><strong>time/&lt;statusCode&gt;</strong></dt><dd><p>A histogram on duration in milliseconds per HTTP status code.</p>
+</dd>
+<dt><strong>time/&lt;statusCategory&gt;</strong></dt><dd><p>A histogram on duration in milliseconds per HTTP status code category.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="http2">
+</section>
+<section id="http2">
 <h2>HTTP2<a class="headerlink" href="#http2" title="Permalink to this headline">¶</a></h2>
 <p>These stats pertain to HTTP2 only.</p>
-<dl class="docutils">
-<dt><strong>&lt;server_label&gt;/upgrade/success</strong></dt>
-<dd>A counter of http2 upgrades and new prior knowledge connections server side.</dd>
-<dt><strong>&lt;client_label&gt;/upgrade/success</strong></dt>
-<dd>A counter of http2 upgrades and new prior knowledge connections client side.</dd>
-<dt><strong>&lt;server_label&gt;/upgrade/ignored</strong></dt>
-<dd>A counter of http2 upgrades that were ignored due to an unsuitable request.</dd>
-<dt><strong>&lt;client_label&gt;/upgrade/ignored</strong></dt>
-<dd>A counter of http2 upgrades that were ignored due to an unsuitable request.</dd>
-<dt><strong>&lt;client_label&gt;/upgrade/attempt</strong></dt>
-<dd>A counter of http2 upgrade attempts made by the client.</dd>
-<dt><strong>&lt;server_label&gt;/streams</strong></dt>
-<dd>A gauge exposing the number of opened streams on the server.</dd>
-<dt><strong>&lt;client_label&gt;/streams</strong></dt>
-<dd>A gauge exposing the number of opened streams on the client.</dd>
-<dt><strong>&lt;client_label&gt;/buffered_streams</strong></dt>
-<dd>A gauge exposing the number of buffered streams on the client.</dd>
-<dt><strong>&lt;client_label&gt;/dead_session</strong></dt>
-<dd>A counter of the number of closed sessions evicted.</dd>
-<dt><strong>&lt;client_label&gt;/dead_child_transport</strong></dt>
-<dd>A counter of the number of child transports that were returned in a dead state.</dd>
-<dt><strong>&lt;client_label&gt;closed_before_upgrade</strong></dt>
-<dd>A counter of the number of h2c upgrade transports that were closed before the
-upgrade had completed.</dd>
+<dl class="simple">
+<dt><strong>&lt;server_label&gt;/upgrade/success</strong></dt><dd><p>A counter of http2 upgrades and new prior knowledge connections server side.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/upgrade/success</strong></dt><dd><p>A counter of http2 upgrades and new prior knowledge connections client side.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/upgrade/ignored</strong></dt><dd><p>A counter of http2 upgrades that were ignored due to an unsuitable request.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/upgrade/ignored</strong></dt><dd><p>A counter of http2 upgrades that were ignored due to an unsuitable request.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/upgrade/attempt</strong></dt><dd><p>A counter of http2 upgrade attempts made by the client.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/streams</strong></dt><dd><p>A gauge exposing the number of opened streams on the server.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/streams</strong></dt><dd><p>A gauge exposing the number of opened streams on the client.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/buffered_streams</strong></dt><dd><p>A gauge exposing the number of buffered streams on the client.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/dead_session</strong></dt><dd><p>A counter of the number of closed sessions evicted.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/dead_child_transport</strong></dt><dd><p>A counter of the number of child transports that were returned in a dead state.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;closed_before_upgrade</strong></dt><dd><p>A counter of the number of h2c upgrade transports that were closed before the
+upgrade had completed.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="memcached">
+</section>
+<section id="memcached">
 <h2>Memcached<a class="headerlink" href="#memcached" title="Permalink to this headline">¶</a></h2>
 <p id="memcached-stats">These stats pertain to the Memcached protocol.</p>
-<dl class="docutils">
-<dt><strong>&lt;label&gt;/redistributes</strong></dt>
-<dd>A counter of the number of times the cache ring has been rebuilt. This occurs
-whenever a node has been ejected or revived, or the set of nodes changes.</dd>
-<dt><strong>&lt;label&gt;/joins</strong></dt>
-<dd>A counter of the number of times a node has been added to the cache ring because
-the backing set of servers has changed.</dd>
-<dt><strong>&lt;label/leaves&gt;</strong></dt>
-<dd>A counter of the number of times a node has been removed from the cache ring
-because the backing set of servers has changed.</dd>
-<dt><strong>&lt;label&gt;/ejections</strong></dt>
-<dd>A counter of the number of times a node has been ejected from the cache ring.</dd>
-<dt><strong>&lt;label&gt;/revivals</strong></dt>
-<dd>A counter of the number of times an ejected node has been re-added to the cache ring.</dd>
+<dl class="simple">
+<dt><strong>&lt;label&gt;/redistributes</strong></dt><dd><p>A counter of the number of times the cache ring has been rebuilt. This occurs
+whenever a node has been ejected or revived, or the set of nodes changes.</p>
+</dd>
+<dt><strong>&lt;label&gt;/joins</strong></dt><dd><p>A counter of the number of times a node has been added to the cache ring because
+the backing set of servers has changed.</p>
+</dd>
+<dt><strong>&lt;label/leaves&gt;</strong></dt><dd><p>A counter of the number of times a node has been removed from the cache ring
+because the backing set of servers has changed.</p>
+</dd>
+<dt><strong>&lt;label&gt;/ejections</strong></dt><dd><p>A counter of the number of times a node has been ejected from the cache ring.</p>
+</dd>
+<dt><strong>&lt;label&gt;/revivals</strong></dt><dd><p>A counter of the number of times an ejected node has been re-added to the cache ring.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="mux">
+</section>
+<section id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
 <p id="mux-stats">These stats pertain to the <a class="reference internal" href="Protocols.html#mux"><span class="std std-ref">Mux</span></a> protocol.</p>
-<dl class="docutils">
-<dt><strong>&lt;server_label&gt;/mux/draining</strong></dt>
-<dd>A counter of the number of times the server has initiated session draining.</dd>
-<dt><strong>&lt;server_label&gt;/mux/leased</strong> <cite>verbosity:debug</cite></dt>
-<dd>A counter of the number of leases issued by the server when the session is
-is in a state other than draining or drained.</dd>
-<dt><strong>&lt;client_label&gt;/mux/draining</strong></dt>
-<dd>A counter of the number of times a server initiated session draining.</dd>
-<dt><strong>&lt;client_label&gt;/mux/drained</strong></dt>
-<dd>A counter of the number of times server-initiated draining completed
-successfully.</dd>
-<dt><strong>&lt;server_label&gt;/mux/duplicate_tag</strong></dt>
-<dd>A counter of the number of requests with a tag while a server is
-processing another request with the same tag.</dd>
-<dt><strong>&lt;server_label&gt;/mux/orphaned_tdiscard</strong></dt>
-<dd>A counter of the number of Tdiscard messages for which the server does
+<dl class="simple">
+<dt><strong>&lt;server_label&gt;/mux/draining</strong></dt><dd><p>A counter of the number of times the server has initiated session draining.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/mux/leased</strong> <cite>verbosity:debug</cite></dt><dd><p>A counter of the number of leases issued by the server when the session is
+is in a state other than draining or drained.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/mux/draining</strong></dt><dd><p>A counter of the number of times a server initiated session draining.</p>
+</dd>
+<dt><strong>&lt;client_label&gt;/mux/drained</strong></dt><dd><p>A counter of the number of times server-initiated draining completed
+successfully.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/mux/duplicate_tag</strong></dt><dd><p>A counter of the number of requests with a tag while a server is
+processing another request with the same tag.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/mux/orphaned_tdiscard</strong></dt><dd><p>A counter of the number of Tdiscard messages for which the server does
 not have a corresponding request.  This happens when a server has already
-responded to the request when it receives a Tdiscard.</dd>
-<dt><strong>clienthangup</strong></dt>
-<dd>A counter of the number of times sessions have been abruptly terminated by
-the client.</dd>
-<dt><strong>serverhangup</strong></dt>
-<dd>A counter of the number of times sessions have been abruptly terminated by
-the server.</dd>
-<dt><strong>&lt;label&gt;/mux/framer/write_stream_bytes</strong></dt>
-<dd>A histogram of the number of bytes written to the transport when
-mux framing is enabled.</dd>
-<dt><strong>&lt;label&gt;/mux/framer/read_stream_bytes</strong></dt>
-<dd>A histogram of the number of bytes read from the transport when
-mux framing is enabled.</dd>
-<dt><strong>&lt;label&gt;/mux/framer/pending_write_streams</strong></dt>
-<dd>A gauge of the number of outstanding write streams when mux framing is enabled.</dd>
-<dt><strong>&lt;label&gt;/mux/framer/pending_read_streams</strong></dt>
-<dd>A gauge of the number of outstanding read streams when mux framing is enabled.</dd>
-<dt><strong>&lt;label&gt;/mux/framer/write_window_bytes</strong></dt>
-<dd>A gauge indicating the maximum size of fragments when mux framing is enabled.
-A value of -1 means that writes are not fragmented.</dd>
-<dt><strong>&lt;label&gt;/mux/transport/read/failures/</strong></dt>
-<dd>A counter indicating any exceptions that occur on the transport read path for mux.
-This includes exceptions in handshaking, thrift downgrading (for servers), etc.</dd>
-<dt><strong>&lt;label&gt;/mux/transport/write/failures/</strong></dt>
-<dd>A counter indicating any exceptions that occur on the transport write path for mux.
-This includes exceptions in handshaking, thrift downgrading (for servers), etc.</dd>
-<dt><strong>&lt;label&gt;/mux/tls/upgrade/success</strong></dt>
-<dd>A counter of the number of times the client or server has successfully
-upgraded a connection to TLS.</dd>
-<dt><strong>&lt;label&gt;/mux/tls/upgrade/incompatible</strong></dt>
-<dd>A counter of the number of times a client or server failed to establish a session
-due to incompatible TLS requirements or capabilities.</dd>
+responded to the request when it receives a Tdiscard.</p>
+</dd>
+<dt><strong>clienthangup</strong></dt><dd><p>A counter of the number of times sessions have been abruptly terminated by
+the client.</p>
+</dd>
+<dt><strong>serverhangup</strong></dt><dd><p>A counter of the number of times sessions have been abruptly terminated by
+the server.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/framer/write_stream_bytes</strong></dt><dd><p>A histogram of the number of bytes written to the transport when
+mux framing is enabled.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/framer/read_stream_bytes</strong></dt><dd><p>A histogram of the number of bytes read from the transport when
+mux framing is enabled.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/framer/pending_write_streams</strong></dt><dd><p>A gauge of the number of outstanding write streams when mux framing is enabled.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/framer/pending_read_streams</strong></dt><dd><p>A gauge of the number of outstanding read streams when mux framing is enabled.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/framer/write_window_bytes</strong></dt><dd><p>A gauge indicating the maximum size of fragments when mux framing is enabled.
+A value of -1 means that writes are not fragmented.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/transport/read/failures/</strong></dt><dd><p>A counter indicating any exceptions that occur on the transport read path for mux.
+This includes exceptions in handshaking, thrift downgrading (for servers), etc.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/transport/write/failures/</strong></dt><dd><p>A counter indicating any exceptions that occur on the transport write path for mux.
+This includes exceptions in handshaking, thrift downgrading (for servers), etc.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/tls/upgrade/success</strong></dt><dd><p>A counter of the number of times the client or server has successfully
+upgraded a connection to TLS.</p>
+</dd>
+<dt><strong>&lt;label&gt;/mux/tls/upgrade/incompatible</strong></dt><dd><p>A counter of the number of times a client or server failed to establish a session
+due to incompatible TLS requirements or capabilities.</p>
+</dd>
 </dl>
 <p><strong>&lt;label&gt;/mux/handshake_latency_us</strong> <cite>verbosity:debug</cite></p>
 <blockquote>
-<div>A histogram of the mux handshake latency.</div></blockquote>
-</div>
-<div class="section" id="mysql">
+<div><p>A histogram of the mux handshake latency.</p>
+</div></blockquote>
+</section>
+<section id="mysql">
 <h2>Mysql<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h2>
-<p>These stats pertain to the finagle-mysql implementation.</p>
-<dl class="docutils">
-<dt><strong>&lt;label&gt;/rollback_latency_ms</strong></dt>
-<dd>The latency of the automatic rollback issued when a connection
-is put back into the pool.</dd>
-<dt><strong>&lt;label&gt;/cursor/time_per_stream_ms</strong></dt>
-<dd>The latency from start to finish of a cursor stream.</dd>
-<dt><strong>&lt;label&gt;/cursor/time_per_fetch_ms</strong></dt>
-<dd>The latency of individual cursor fetches.</dd>
-<dt><strong>&lt;label&gt;/cursor/time_between_fetch_ms</strong></dt>
-<dd>The latency between individual cursor fetches.</dd>
-<dt><strong>&lt;label&gt;/cursor/opened</strong></dt>
-<dd>A counter of the number of opened cursors.</dd>
-<dt><strong>&lt;label&gt;/cursor/closed</strong></dt>
-<dd>A counter of the number of closed cursors.</dd>
-<dt><strong>&lt;label&gt;/pstmt-cache/calls</strong></dt>
-<dd>A counter of the number of requested prepared statements.</dd>
-<dt><strong>&lt;label&gt;/pstmt-cache/misses</strong></dt>
-<dd>A counter of the number of times when a prepared statement was not the cache.</dd>
-<dt><strong>&lt;label&gt;/pstmt-cache/evicted_size</strong></dt>
-<dd>A counter of the number of times prepared statements were evicted from the cache.</dd>
+<p id="mysql-stats">These stats pertain to the finagle-mysql implementation.</p>
+<dl class="simple">
+<dt><strong>&lt;label&gt;/rollback_latency_ms</strong></dt><dd><p>The latency of the automatic rollback issued when a connection
+is put back into the pool.</p>
+</dd>
+<dt><strong>&lt;label&gt;/cursor/time_per_stream_ms</strong></dt><dd><p>The latency from start to finish of a cursor stream.</p>
+</dd>
+<dt><strong>&lt;label&gt;/cursor/time_per_fetch_ms</strong></dt><dd><p>The latency of individual cursor fetches.</p>
+</dd>
+<dt><strong>&lt;label&gt;/cursor/time_between_fetch_ms</strong></dt><dd><p>The latency between individual cursor fetches.</p>
+</dd>
+<dt><strong>&lt;label&gt;/cursor/opened</strong></dt><dd><p>A counter of the number of opened cursors.</p>
+</dd>
+<dt><strong>&lt;label&gt;/cursor/closed</strong></dt><dd><p>A counter of the number of closed cursors.</p>
+</dd>
+<dt><strong>&lt;label&gt;/pstmt-cache/calls</strong></dt><dd><p>A counter of the number of requested prepared statements.</p>
+</dd>
+<dt><strong>&lt;label&gt;/pstmt-cache/misses</strong></dt><dd><p>A counter of the number of times when a prepared statement was not the cache.</p>
+</dd>
+<dt><strong>&lt;label&gt;/pstmt-cache/evicted_size</strong></dt><dd><p>A counter of the number of times prepared statements were evicted from the cache.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="thriftmux">
+</section>
+<section id="thriftmux">
 <h2>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h2>
 <p id="thriftmux-stats">These stats pertain to the <a class="reference internal" href="FAQ.html#whats-thriftmux"><span class="std std-ref">ThriftMux</span></a> protocol.</p>
-<dl class="docutils">
-<dt><strong>&lt;server_label&gt;/thriftmux/connects</strong></dt>
-<dd>A counter of the number of times the server has created a ThriftMux
-connection. This does not include downgraded Thrift connections.</dd>
-<dt><strong>&lt;server_label&gt;/thriftmux/downgraded_connects</strong></dt>
-<dd>A counter of the number of times the server has created a downgraded
-connection for “plain” Thrift.</dd>
+<dl class="simple">
+<dt><strong>&lt;server_label&gt;/thriftmux/connects</strong></dt><dd><p>A counter of the number of times the server has created a ThriftMux
+connection. This does not include downgraded Thrift connections.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/thriftmux/downgraded_connects</strong></dt><dd><p>A counter of the number of times the server has created a downgraded
+connection for “plain” Thrift.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="perendpoint-statsfilter">
+</section>
+<section id="perendpoint-statsfilter">
 <h2>PerEndpoint StatsFilter<a class="headerlink" href="#perendpoint-statsfilter" title="Permalink to this headline">¶</a></h2>
 <p>Thrift/ThriftMux server side per-endpoint stats can be enabled by <cite>.withPerEndpointStats</cite>,
 such as <cite>ThriftMux.server.withPerEndpointStats…</cite></p>
-<dl class="docutils">
-<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/requests</strong></dt>
-<dd>A counter of the total number of successes + failures for &lt;method_name&gt;.</dd>
-<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/success</strong></dt>
-<dd>A counter of the total number of successes for &lt;method_name&gt;.</dd>
-<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures/&lt;exception_name&gt;+</strong></dt>
-<dd>A counter of the number of times a specific exception has been thrown for &lt;method_name&gt;.</dd>
-<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures</strong></dt>
-<dd>A counter of the number of times any failure has been observed for &lt;method_name&gt;.</dd>
+<dl class="simple">
+<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/requests</strong></dt><dd><p>A counter of the total number of successes + failures for &lt;method_name&gt;.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/success</strong></dt><dd><p>A counter of the total number of successes for &lt;method_name&gt;.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures/&lt;exception_name&gt;+</strong></dt><dd><p>A counter of the number of times a specific exception has been thrown for &lt;method_name&gt;.</p>
+</dd>
+<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures</strong></dt><dd><p>A counter of the number of times any failure has been observed for &lt;method_name&gt;.</p>
+</dd>
 </dl>
 <p>Thrift/ThriftMux client side per-endpoint stats need to be enabled by <cite>.withPerEndpointStats</cite>
 when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as server side:</p>
@@ -1435,49 +1437,50 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 <p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/success</strong></p>
 <p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures/&lt;exception_name&gt;+</strong></p>
 <p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures</strong></p>
-</div>
-<div class="section" id="partitioning">
+</section>
+<section id="partitioning">
 <h2>Partitioning<a class="headerlink" href="#partitioning" title="Permalink to this headline">¶</a></h2>
 <p>See <a class="reference internal" href="PartitionAwareClient.html"><span class="doc">here</span></a> for how to enable ThriftMux Partition Aware Client.</p>
 <p>Partitioning metrics are under <strong>clnt/&lt;server_label&gt;/partitioner/</strong> scope given insights
 into how client stack manages partition nodes.</p>
-<div class="section" id="hashingpartitioningstrategy">
+<section id="hashingpartitioningstrategy">
 <h3>HashingPartitioningStrategy<a class="headerlink" href="#hashingpartitioningstrategy" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>redistributes</dt>
-<dd>A counter of the times the nodes on the hash ring have been redistributed.</dd>
-<dt>joins</dt>
-<dd>A counter of the times a new node joins the hash ring, indicating a new partition
-joins the cluster.</dd>
-<dt>leaves</dt>
-<dd>A counter of the times a node leaves the hash ring, indicating service discovery
-detects a node leave.</dd>
-<dt>ejections</dt>
-<dd>A counter of the times an unhealthy node marked by ConsistentHashingFailureAccrual
+<dl class="simple">
+<dt>redistributes</dt><dd><p>A counter of the times the nodes on the hash ring have been redistributed.</p>
+</dd>
+<dt>joins</dt><dd><p>A counter of the times a new node joins the hash ring, indicating a new partition
+joins the cluster.</p>
+</dd>
+<dt>leaves</dt><dd><p>A counter of the times a node leaves the hash ring, indicating service discovery
+detects a node leave.</p>
+</dd>
+<dt>ejections</dt><dd><p>A counter of the times an unhealthy node marked by ConsistentHashingFailureAccrual
 has been removed from the hash ring. <em>leaves</em> and <em>joins</em> indicate service discovery updates,
-while <em>ejections</em> and <em>revivals</em> indicate the code health status.</dd>
-<dt>revivals</dt>
-<dd>A counter of the times an ejected node has been marked as live on the hash ring. <em>leaves</em>
+while <em>ejections</em> and <em>revivals</em> indicate the code health status.</p>
+</dd>
+<dt>revivals</dt><dd><p>A counter of the times an ejected node has been marked as live on the hash ring. <em>leaves</em>
 and <em>joins</em> indicate service discovery updates, while <em>ejections</em> and <em>revivals</em> indicate
-node health status.</dd>
-<dt>live_nodes</dt>
-<dd>A gauge of the current total number of healthy partitions.</dd>
-<dt>dead_nodes</dt>
-<dd>A gauge of the current total number of unhealthy partitions marked by
-ConsistentHashingFailureAccrual.</dd>
+node health status.</p>
+</dd>
+<dt>live_nodes</dt><dd><p>A gauge of the current total number of healthy partitions.</p>
+</dd>
+<dt>dead_nodes</dt><dd><p>A gauge of the current total number of unhealthy partitions marked by
+ConsistentHashingFailureAccrual.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="custompartitioningstrategy-thriftmux">
+</section>
+<section id="custompartitioningstrategy-thriftmux">
 <h3>CustomPartitioningStrategy (ThriftMux)<a class="headerlink" href="#custompartitioningstrategy-thriftmux" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>nodes</dt>
-<dd>A gauge of the current total number of logical partitions.</dd>
+<dl class="simple">
+<dt>nodes</dt><dd><p>A gauge of the current total number of logical partitions.</p>
+</dd>
 </dl>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -1497,6 +1500,7 @@ ConsistentHashingFailureAccrual.</dd>
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Metrics</a><ul>
+<li><a class="reference internal" href="#metrics-format">Metrics Format</a></li>
 <li><a class="reference internal" href="#public">Public</a><ul>
 <li><a class="reference internal" href="#statsfilter">StatsFilter</a></li>
 <li><a class="reference internal" href="#statsfactorywrapper">StatsFactoryWrapper</a></li>
@@ -1607,7 +1611,7 @@ ConsistentHashingFailureAccrual.</dd>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="Protocols.html" title="previous chapter">Protocols</a></li>
-      <li>Next: <a href="Flags.html" title="next chapter">Flags</a></li>
+      <li>Next: <a href="MetricsFormat.html" title="next chapter">Metrics Format</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">
@@ -1627,7 +1631,7 @@ ConsistentHashingFailureAccrual.</dd>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

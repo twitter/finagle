@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Names and Naming in Finagle &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Names and Naming in Finagle &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="Contexts.html" title="Contexts"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Names and Naming in Finagle</a></li> 
       </ul>
     </div>  
 
@@ -58,21 +58,21 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="names-and-naming-in-finagle">
+  <section id="names-and-naming-in-finagle">
 <h1>Names and Naming in Finagle<a class="headerlink" href="#names-and-naming-in-finagle" title="Permalink to this headline">¶</a></h1>
-<p id="finagle-names">Finagle uses <em>names</em> <a class="footnote-reference" href="#names" id="id1">[1]</a> to identify network locations. Names must be
+<p id="finagle-names">Finagle uses <em>names</em> <a class="footnote-reference brackets" href="#names" id="id1">1</a> to identify network locations. Names must be
 supplied when constructing a Finagle client through
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/builder/ClientBuilder">ClientBuilder.dest</a>
 or through implementations of <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Client">Client</a>.</p>
 <p>Names are represented by the data-type <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Name">Name</a> comprising two variants:</p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Bound(va:</span> <span class="pre">Var[Addr])</span></code></dt>
-<dd>Identifies a set of network locations. <code class="docutils literal notranslate"><span class="pre">Var[Addr]</span></code> (see <a class="reference internal" href="#addr"><span class="std std-ref">Addr</span></a>)
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Bound(va:</span> <span class="pre">Var[Addr])</span></code></dt><dd><p>Identifies a set of network locations. <code class="docutils literal notranslate"><span class="pre">Var[Addr]</span></code> (see <a class="reference internal" href="#addr"><span class="std std-ref">Addr</span></a>)
 represents a set of changeable Internet addresses — or host,
-port pairs — described below.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Path(path:</span> <span class="pre">Path)</span></code></dt>
-<dd>Represents a name denoted by a hierarchical <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Path">path</a>, represented by a sequence of byte
-strings.</dd>
+port pairs — described below.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Path(path:</span> <span class="pre">Path)</span></code></dt><dd><p>Represents a name denoted by a hierarchical <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Path">path</a>, represented by a sequence of byte
+strings.</p>
+</dd>
 </dl>
 <p><a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Resolver$">Resolver.eval</a> parses strings
 into <cite>Names</cite>. Strings of the form</p>
@@ -100,7 +100,7 @@ named by <code class="docutils literal notranslate"><span class="pre">myzkhost.m
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>inet!twitter.com:8080
 </pre></div>
 </div>
-<div class="section" id="paths">
+<section id="paths">
 <h2>Paths<a class="headerlink" href="#paths" title="Permalink to this headline">¶</a></h2>
 <p>Names beginning with the character <code class="docutils literal notranslate"><span class="pre">/</span></code> are hierarchical <em>paths</em> in the
 tradition of Unix. They denote an abstract location — i.e. <em>what</em> you
@@ -111,8 +111,8 @@ identify <em>where</em> the network location(s) are.</p>
 </pre></div>
 </div>
 <p>might denote the <code class="docutils literal notranslate"><span class="pre">crawler</span></code> service.</p>
-</div>
-<div class="section" id="interpreting-paths-with-delegation-tables">
+</section>
+<section id="interpreting-paths-with-delegation-tables">
 <span id="dtabs"></span><h2>Interpreting Paths With Delegation Tables<a class="headerlink" href="#interpreting-paths-with-delegation-tables" title="Permalink to this headline">¶</a></h2>
 <p>A delegation table (or “dtab”) defines the namespace for a Finagle
 transaction. A dtab comprises an ordered list of delegations which
@@ -300,8 +300,8 @@ throughout the distributed request graph — i.e. scope of the
 namespace is a transaction. Delegations are added dynamically through
 the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Dtab$">Dtab</a> API.</p>
 <p>(This is a powerful facility that should be used with care.)</p>
-</div>
-<div class="section" id="the-dtab-api">
+</section>
+<section id="the-dtab-api">
 <h2>The Dtab API<a class="headerlink" href="#the-dtab-api" title="Permalink to this headline">¶</a></h2>
 <p>Delegations can be added or overridden dynamically through the
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Dtab$">Dtab</a> API – specifically by way of scoped
@@ -326,52 +326,52 @@ however, will only exist for the scope of the request in <em>ServiceA</em>. The 
 of the <cite>Dtab.limited</cite> will not be visible to <em>ServiceB</em> or <em>ServiceC</em>.</p>
 <p>Let’s consider a few more examples:</p>
 <ol class="arabic simple">
-<li><em>ServiceA</em> sets a <cite>Dtab.local</cite> for <em>ServiceC</em> for a request, rerouting it to
+<li><p><em>ServiceA</em> sets a <cite>Dtab.local</cite> for <em>ServiceC</em> for a request, rerouting it to
 <em>ServiceD</em>. <em>ServiceB</em> will, accordingly, propagate the <cite>Dtab.local</cite> and
-re-route requests to <em>ServiceD</em>.</li>
-<li><em>ServiceA</em> sets a <cite>Dtab.limited</cite> for <em>ServiceC</em> for a request, rerouting it to
+re-route requests to <em>ServiceD</em>.</p></li>
+<li><p><em>ServiceA</em> sets a <cite>Dtab.limited</cite> for <em>ServiceC</em> for a request, rerouting it to
 <em>ServiceD</em>. This has no effect because <em>ServiceA</em> does not call <em>ServiceC</em>
-directly and the limited state is not propagated to <em>ServiceB</em>.</li>
-<li><em>ServiceA</em> sets a <cite>Dtab.local</cite> for <em>ServiceC</em>, rerouting it to <em>ServiceD</em>.
+directly and the limited state is not propagated to <em>ServiceB</em>.</p></li>
+<li><p><em>ServiceA</em> sets a <cite>Dtab.local</cite> for <em>ServiceC</em>, rerouting it to <em>ServiceD</em>.
 <em>ServiceA</em> also sets a <cite>Dtab.limited</cite> for <em>ServiceC</em>, rerouting it to <em>ServiceE</em>.
-The behavior of example 1 will be seen again.</li>
-<li><em>ServiceA</em> sets a <cite>Dtab.limited</cite> for <em>ServiceB</em> for a request, rerouting it to
+The behavior of example 1 will be seen again.</p></li>
+<li><p><em>ServiceA</em> sets a <cite>Dtab.limited</cite> for <em>ServiceB</em> for a request, rerouting it to
 <em>ServiceD</em>. The request to <em>ServiceB</em> will be rerouted, but the state will not
-be propagated.</li>
+be propagated.</p></li>
 </ol>
-</div>
-<div class="section" id="addr">
+</section>
+<section id="addr">
 <span id="id2"></span><h2>Addr<a class="headerlink" href="#addr" title="Permalink to this headline">¶</a></h2>
 <p><cite>Name.Bound</cite> comprises a <code class="docutils literal notranslate"><span class="pre">Var[Addr]</span></code>, representing a dynamically
 changing <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Addr">Addr</a>. (<a class="reference external" href="https://twitter.github.io/util/docs/com/twitter/util/Var">Var</a> implements a form of self-adjusting
 computation); <code class="docutils literal notranslate"><span class="pre">Addrs</span></code> are in one of 3 states:</p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">Addr.Pending</span></code></dt>
-<dd>The binding is still pending: perhaps because we are awaiting a DNS answer
-or Zookeeper operation completion.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">Addr.Neg</span></code></dt>
-<dd>The binding was negative, meaning that the destination does not exist.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">Addr.Failed(cause:</span> <span class="pre">Throwable)</span></code></dt>
-<dd>The binding failed with the given <code class="docutils literal notranslate"><span class="pre">cause</span></code>.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">Addr.Bound(addrs:</span> <span class="pre">Set[Address])</span></code></dt>
-<dd>The binding succeeded with the given set of addresses, representing
-concrete endpoints.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Addr.Pending</span></code></dt><dd><p>The binding is still pending: perhaps because we are awaiting a DNS answer
+or Zookeeper operation completion.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">Addr.Neg</span></code></dt><dd><p>The binding was negative, meaning that the destination does not exist.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">Addr.Failed(cause:</span> <span class="pre">Throwable)</span></code></dt><dd><p>The binding failed with the given <code class="docutils literal notranslate"><span class="pre">cause</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">Addr.Bound(addrs:</span> <span class="pre">Set[Address])</span></code></dt><dd><p>The binding succeeded with the given set of addresses, representing
+concrete endpoints.</p>
+</dd>
 </dl>
 <p>We now see that a <code class="docutils literal notranslate"><span class="pre">Var[Addr]</span></code> is capable of representing a moving target,
 for example a dynamic <a class="reference external" href="https://github.com/twitter-archive/commons/blob/master/src/java/com/twitter/common/zookeeper/ServerSet.java">serverset</a>.</p>
 <p class="rubric">Footnotes</p>
-<table class="docutils footnote" frame="void" id="names" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>A <cite>name</cite> identities <em>what</em> you want; an
+<dl class="footnote brackets">
+<dt class="label" id="names"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>A <cite>name</cite> identities <em>what</em> you want; an
 <cite>address</cite> is a <cite>location</cite>, identifying <cite>where</cite> an object resides.
-<cite>Binding</cite> is the process that turns names into addresses.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
+<cite>Binding</cite> is the process that turns names into addresses.</p>
+</dd>
+</dl>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -422,7 +422,7 @@ for example a dynamic <a class="reference external" href="https://github.com/twi
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Glossary of Terms &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Glossary of Terms &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="FAQ.html" title="FAQ"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Glossary of Terms</a></li> 
       </ul>
     </div>  
 
@@ -58,37 +58,37 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="glossary-of-terms">
+  <section id="glossary-of-terms">
 <h1>Glossary of Terms<a class="headerlink" href="#glossary-of-terms" title="Permalink to this headline">¶</a></h1>
-<dl class="docutils" id="glossary-retry-storm">
-<dt><strong>Retry Storm</strong></dt>
-<dd><p class="first">A retry storm is an undesirable client/server failure mode where one or more
+<dl id="glossary-retry-storm">
+<dt><strong>Retry Storm</strong></dt><dd><p>A retry storm is an undesirable client/server failure mode where one or more
 peers become unhealthy, causing clients to retry a significant fraction of
 requests. This has the effect of multiplying the volume of traffic sent to the
 unhealthy peers, exacerbating the problem.</p>
-<p class="last">For instance, consider two services, <cite>A</cite> -&gt; <cite>B</cite> where <cite>B</cite> becomes overloaded
+<p>For instance, consider two services, <cite>A</cite> -&gt; <cite>B</cite> where <cite>B</cite> becomes overloaded
 and starts to fail a large fraction of requests. If <cite>A</cite> is configured to
 greedily optimize its client success rate by retrying requests, the total
 number of requests to <cite>B</cite> will be substantially amplified. <cite>B</cite> is the victim
 of a retry storm.</p>
 </dd>
 </dl>
-<dl class="docutils" id="glossary-back-pressure">
-<dt><strong>Back pressure</strong></dt>
-<dd>Back pressure is a way of signaling that a service is overloaded to its clients.
+<dl class="simple" id="glossary-back-pressure">
+<dt><strong>Back pressure</strong></dt><dd><p>Back pressure is a way of signaling that a service is overloaded to its clients.
 This allows for graceful degradation of a system if one or more components are
-not performing well.</dd>
+not performing well.</p>
+</dd>
 </dl>
-<dl class="docutils" id="glossary-nack">
-<dt><strong>Nack</strong></dt>
-<dd>A nack is a Negative ACKnowledgement. A service responds with a nack to signal
+<dl class="simple" id="glossary-nack">
+<dt><strong>Nack</strong></dt><dd><p>A nack is a Negative ACKnowledgement. A service responds with a nack to signal
 that it is refusing to process the request. Generally, this indicates that the
 request is safe to retry, but Finagle also supports non-retryable nacks.
-Responding with a nack is one way a service may exert back pressure.</dd>
+Responding with a nack is one way a service may exert back pressure.</p>
+</dd>
 </dl>
-</div>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@ Responding with a nack is one way a service may exert back pressure.</dd>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

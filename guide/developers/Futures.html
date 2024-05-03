@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Twitter Futures &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Twitter Futures &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/finagle.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="Extending.html" title="Extending Finagle"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Twitter Futures</a></li> 
       </ul>
     </div>  
 
@@ -58,9 +58,9 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="twitter-futures">
+  <section id="twitter-futures">
 <h1>Twitter Futures<a class="headerlink" href="#twitter-futures" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="history">
+<section id="history">
 <h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
 <p>Futures represent asynchronous values.  Over time, the java community has experimented with a few
 different styles of working with them, starting with transforming them to synchronous code, where
@@ -78,8 +78,8 @@ our own Futures implementation, which turned into Twitter Futures.  Around the s
 working on an actors implementation, and produced their own Futures implementation, which turned
 into the <cite>scala.concurrent.Future</cite>.  More recently, Java came out with their own Future which you
 can attach closures to, <cite>java.util.concurrent.CompletableFuture</cite>.</p>
-</div>
-<div class="section" id="scheduling">
+</section>
+<section id="scheduling">
 <h2>Scheduling<a class="headerlink" href="#scheduling" title="Permalink to this headline">¶</a></h2>
 <p>Each of the modern Futures implementations, Scala, Java, and Twitter, represents a different way of
 scheduling the closures that should run on satisfaction.</p>
@@ -87,23 +87,23 @@ scheduling the closures that should run on satisfaction.</p>
 more granular basis), so this model isn’t set in stone.  With that said, we often unthinkingly
 program against the semantics of the default scheduler, so it would be a significant undertaking to
 change the scheduler.</p>
-<dl class="docutils">
-<dt>Scala</dt>
-<dd>Someone else run this.  Typically this means that we schedule the closure to be run in a thread
+<dl class="simple">
+<dt>Scala</dt><dd><p>Someone else run this.  Typically this means that we schedule the closure to be run in a thread
 pool somewhere.  This has the advantage that there’s a fixed cost of satisfying a future per
 closure hanging off of it, which is just the cost of scheduling each closure.  It can also allow
 parallelism if you’re doing CPU-intensive work, and is kinder to blocking work.  The
 disadvantage is that it requires doing the work on another thread, and comes with all of the
 costs of passing the message to the other thread.  The way work gets scheduled in Scala can be
-changed on a per-closure basis, but the default is to be backed by a thread pool.</dd>
-<dt>Java</dt>
-<dd>I’ll run this now.  This can be good for caching behavior, and lets us get better stack traces,
+changed on a per-closure basis, but the default is to be backed by a thread pool.</p>
+</dd>
+<dt>Java</dt><dd><p>I’ll run this now.  This can be good for caching behavior, and lets us get better stack traces,
 because we can see the causal link between satisfying a Future and running the closures.  The
 disadvantage is that this is no longer stack-safe, because hanging subsequent closures off will
-deepen the stack.  Note that at each point of asynchrony, the stack trace is broken.</dd>
-<dt>Twitter</dt>
-<dd>I’ll run this later.  This still helps with caching, but can be stack-safe.  The disadvantage is
-that the stack traces aren’t as useful (in practice we sometimes “run it now”).</dd>
+deepen the stack.  Note that at each point of asynchrony, the stack trace is broken.</p>
+</dd>
+<dt>Twitter</dt><dd><p>I’ll run this later.  This still helps with caching, but can be stack-safe.  The disadvantage is
+that the stack traces aren’t as useful (in practice we sometimes “run it now”).</p>
+</dd>
 </dl>
 <p>To illustrate this, imagine that we’re doing three pieces of work, doWorkA, doWorkB, doWorkC.</p>
 <p>We write it as:</p>
@@ -143,8 +143,8 @@ doWorkC(b)
 </div>
 <p>We’ve chosen this style for performance and for stack safety, and have been quite happy with it
 historically.</p>
-</div>
-<div class="section" id="interruption">
+</section>
+<section id="interruption">
 <h2>Interruption<a class="headerlink" href="#interruption" title="Permalink to this headline">¶</a></h2>
 <p>The other main difference that the different future types have is how they deal with cancellation.
 It can be useful to cancel asynchronous work to free up the resources, even though the thread itself
@@ -162,8 +162,8 @@ by default, and we don’t need to treat each Future#flatMap specially to propag
 Interruptions are also advisory for Twitter futures, so that we can choose to ignore them if we
 wish.  One nice thing about this style is that it’s analogous to the Java interrupt mechanism, where
 we in effect set a field that an implementor can choose to respect or not.</p>
-</div>
-<div class="section" id="guts">
+</section>
+<section id="guts">
 <h2>Guts<a class="headerlink" href="#guts" title="Permalink to this headline">¶</a></h2>
 <p>There are two main implementations of Twitter future, which are <cite>ConstFuture</cite> and <cite>Promise</cite>.
 <cite>ConstFuture</cite> is an already satisfied future–effectively a thin wrapper around a <cite>Try</cite>.  <cite>Promise</cite>
@@ -183,8 +183,8 @@ do it themselves, so they can also do recursion without space leaks.  <cite>Prom
 its derivatives, like <cite>Promise#setValue</cite>, will move a <cite>Promise</cite> from any state to Done, if they are
 not already satisfied, at which point its closures will be submitted to the scheduler to be run by
 the calling thread that satisfied the <cite>Promise</cite>.</p>
-</div>
-<div class="section" id="detachable">
+</section>
+<section id="detachable">
 <h2>Detachable<a class="headerlink" href="#detachable" title="Permalink to this headline">¶</a></h2>
 <p>When more than one execution dependency depends on the result of a future, it can be dangerous to
 interrupt it, since you might inadvertently fail other folks’ work.  However, if you never interrupt
@@ -192,10 +192,11 @@ it, you can end up with memory leaks if the future is never satisfied and we con
 to it.  Detachable Promises are an attempt to fix this, so that we can mark promises as “may not be
 needed later, though the underlying future they depend on will be useful”, and must be
 constructed explicitly by saying <cite>Promise.attached(underlying)</cite> like <a class="reference external" href="https://github.com/twitter/finagle/blob/2ae7cdd6124d5d10c9bcbf7c68a0ef2784abf968/finagle-core/src/main/scala/com/twitter/finagle/service/DelayedFactory.scala#L34">here</a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -247,7 +248,7 @@ constructed explicitly by saying <cite>Promise.attached(underlying)</cite> like 
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

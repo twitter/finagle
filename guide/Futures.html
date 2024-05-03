@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Concurrent Programming with Futures &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Concurrent Programming with Futures &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="Quickstart.html" title="Quickstart"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Concurrent Programming with Futures</a></li> 
       </ul>
     </div>  
 
@@ -58,11 +58,11 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="concurrent-programming-with-futures">
+  <section id="concurrent-programming-with-futures">
 <h1>Concurrent Programming with Futures<a class="headerlink" href="#concurrent-programming-with-futures" title="Permalink to this headline">¶</a></h1>
-<p>Finagle uses <em>futures</em> <a class="footnote-reference" href="#futures" id="id1">[1]</a> to encapsulate and compose
+<p>Finagle uses <em>futures</em> <a class="footnote-reference brackets" href="#futures" id="id1">1</a> to encapsulate and compose
 concurrent operations such as network RPCs. Futures are directly
-analogous to threads —&nbsp;they provide independent and overlapping
+analogous to threads — they provide independent and overlapping
 threads of control — and can be thought of as <em>featherweight
 threads</em>. They are cheap in construction, so the economies of
 traditional threads do not apply. It is no problem to maintain
@@ -79,7 +79,7 @@ operations, and cause your application to experience unexpected
 slowness, a decrease in throughput, and potentially deadlocks. But
 of course it’s possible for blocking operations to be combined safely
 with Futures as we’ll see.</p>
-<div class="section" id="blocking-or-synchronous-work">
+<section id="blocking-or-synchronous-work">
 <h2>Blocking or synchronous work<a class="headerlink" href="#blocking-or-synchronous-work" title="Permalink to this headline">¶</a></h2>
 <p id="future-pools">When you have work that is blocking, say I/O or a library
 not written in an asynchronous style, you should use a
@@ -92,28 +92,28 @@ I/O and returns a string (e.g., reading from a file). Wrapping
 <code class="docutils literal notranslate"><span class="pre">Future[String]</span></code>, which allows us to combine this blocking
 operation with other Futures in a safe way.</p>
 <p>Scala:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Future</span><span class="o">,</span> <span class="nc">FuturePool</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.{</span><span class="nc">Future</span><span class="p">,</span> <span class="nc">FuturePool</span><span class="p">}</span>
 
-<span class="k">def</span> <span class="n">someIO</span><span class="o">()</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span>
+<span class="k">def</span> <span class="nf">someIO</span><span class="p">():</span> <span class="nc">String</span> <span class="o">=</span>
   <span class="c1">// does some blocking I/O and returns a string</span>
 
-<span class="k">val</span> <span class="n">futureResult</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="nc">FuturePool</span><span class="o">.</span><span class="n">unboundedPool</span> <span class="o">{</span>
-  <span class="n">someIO</span><span class="o">()</span>
-<span class="o">}</span>
+<span class="kd">val</span> <span class="n">futureResult</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span> <span class="nc">FuturePool</span><span class="p">.</span><span class="n">unboundedPool</span> <span class="p">{</span>
+  <span class="n">someIO</span><span class="p">()</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Java:</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.util.Future</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.twitter.util.FuturePools</span><span class="o">;</span>
-<span class="kn">import static</span> <span class="nn">com.twitter.util.Function.func0</span><span class="o">;</span>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.util.Future</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.util.FuturePools</span><span class="p">;</span>
+<span class="kn">import static</span> <span class="nn">com.twitter.util.Function.func0</span><span class="p">;</span>
 
-<span class="n">Future</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">futureResult</span> <span class="o">=</span> <span class="n">FuturePools</span><span class="o">.</span><span class="na">unboundedPool</span><span class="o">().</span><span class="na">apply</span><span class="o">(</span>
-  <span class="n">func0</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="n">someIO</span><span class="o">());</span>
-<span class="o">);</span>
+<span class="n">Future</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">futureResult</span> <span class="o">=</span> <span class="n">FuturePools</span><span class="p">.</span><span class="na">unboundedPool</span><span class="p">().</span><span class="na">apply</span><span class="p">(</span>
+  <span class="n">func0</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="n">someIO</span><span class="p">());</span>
+<span class="p">);</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="synchronized-work">
+</section>
+<section id="synchronized-work">
 <h2>Synchronized work<a class="headerlink" href="#synchronized-work" title="Permalink to this headline">¶</a></h2>
 <p>Synchronization is different from synchronous behavior. Synchronous
 calls wait on some work to complete before executing the next statement
@@ -121,10 +121,10 @@ within the same thread. Synchronized sections, in contrast, allow one
 thread to execute statements and block all other callers until the
 initial thread is finished with the enclosed statements.</p>
 <p>An example that could fail without synchronization would be:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">incrementAndReturn</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
   <span class="n">counter</span>
-<span class="o">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>If two threads are executing the <cite>incrementAndReturn</cite> function concurrently
@@ -135,16 +135,16 @@ be returned to both threads).</p>
 <p>A simple way to guarantee that each thread sees a unique counter value without
 skipping would be to enclose the critical statements in a synchonized block.
 Syntactially it looks like this:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">incrementAndReturn</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="bp">this</span><span class="p">.</span><span class="k">synchronized</span> <span class="p">{</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">counter</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="scoping-synchronization">
+</section>
+<section id="scoping-synchronization">
 <h2>Scoping synchronization<a class="headerlink" href="#scoping-synchronization" title="Permalink to this headline">¶</a></h2>
 <p>In the previous section a simple introduction and example were given for
 synchronization wherein multiple threads have a handle to an object and
@@ -156,19 +156,19 @@ object which grants access to the block that follows. Only one thread at a time
 can be in control of a lock object. In the example the <cite>this</cite> object was the
 lock, meaning that within the class anywhere a <cite>this.synchronized {…}</cite> block
 occurs, it is tied to the same object, <cite>this</cite>. For example:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">incrementAndReturn</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="bp">this</span><span class="p">.</span><span class="k">synchronized</span> <span class="p">{</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">counter</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+<span class="k">def</span> <span class="nf">decrementAndReturn</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="bp">this</span><span class="p">.</span><span class="k">synchronized</span> <span class="p">{</span>
+    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">counter</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Both functions above are now gated on the same object, <cite>this</cite>, so not only
@@ -177,49 +177,49 @@ will multiple threads with the same object handle serially execute
 <cite>decrementAndReturn</cite>.</p>
 <p>Other methods within the class could be free to execute without waiting by
 omitting the synchronized block</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">incrementAndReturn</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="bp">this</span><span class="p">.</span><span class="k">synchronized</span> <span class="p">{</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">counter</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="k">this</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+<span class="k">def</span> <span class="nf">decrementAndReturn</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="bp">this</span><span class="p">.</span><span class="k">synchronized</span> <span class="p">{</span>
+    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">counter</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">def</span> <span class="n">readCounter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+<span class="k">def</span> <span class="nf">readCounter</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
   <span class="n">counter</span>
-<span class="o">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Here, any thread may call <cite>readCounter</cite> without waiting to control <cite>this</cite>.</p>
 <p>Furthermore, it may be useful for readability and segmenting logic to define
 objects whose only purpose is as a synchronization lock rather than blocking
 at the granularity of the whole instance. For example:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">var</span> <span class="n">counter</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">lock</span><span class="k">:</span> <span class="kt">Object</span> <span class="o">=</span> <span class="n">counter</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">private</span><span class="p">[</span><span class="bp">this</span><span class="p">]</span> <span class="kd">var</span> <span class="n">counter</span><span class="p">:</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">private</span><span class="p">[</span><span class="bp">this</span><span class="p">]</span> <span class="kd">val</span> <span class="n">lock</span><span class="p">:</span> <span class="nc">Object</span> <span class="o">=</span> <span class="n">counter</span>
 
-<span class="k">def</span> <span class="n">incrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span>
+<span class="k">def</span> <span class="nf">incrementAndReturn</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="n">lock</span><span class="p">.</span><span class="k">synchronized</span> <span class="p">{</span>
+    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">counter</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">def</span> <span class="n">decrementAndReturn</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
-  <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="o">;</span>
+<span class="k">def</span> <span class="nf">decrementAndReturn</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="n">lock</span><span class="p">.</span><span class="k">synchronized</span> <span class="p">{</span>
+    <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">counter</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">def</span> <span class="n">readCounter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Integer</span> <span class="o">=</span> <span class="o">{</span>
+<span class="k">def</span> <span class="nf">readCounter</span><span class="p">():</span> <span class="nc">Integer</span> <span class="o">=</span> <span class="p">{</span>
   <span class="n">counter</span>
-<span class="o">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>This gives us flexibility as we evolve the class to discover new operations
@@ -227,8 +227,8 @@ that need synchronization that can be covered under the umbrella of the <cite>lo
 object. At the moment, the <cite>lock</cite> object is synonymous with the counter itself,
 but we may discover some other useful member to use as the <cite>lock</cite> in the future,
 or have separate locks for different sets of entangled state.</p>
-</div>
-<div class="section" id="synchronization-risks">
+</section>
+<section id="synchronization-risks">
 <h2>Synchronization risks<a class="headerlink" href="#synchronization-risks" title="Permalink to this headline">¶</a></h2>
 <p>Synchronzation is a very useful language feature to define critical sections
 and let the runtime manage blocking, scheduling, and handing off control
@@ -253,48 +253,48 @@ and lock the siblings of their person. Thread A will be waiting for Thread B to
 be “finished” with Person B, and Thread B is likewise waiting for Thread A to be
 “finished” with Person A. Deadlock. A detailed example of a <a class="reference internal" href="#deadlock">deadlock</a> will follow
 below.</p>
-</div>
-<div class="section" id="futures-as-containers">
+</section>
+<section id="futures-as-containers">
 <h2>Futures as containers<a class="headerlink" href="#futures-as-containers" title="Permalink to this headline">¶</a></h2>
 <p>Common examples of operations that are represented by futures are:</p>
 <ul class="simple">
-<li>an RPC to a remote host</li>
-<li>a long computation in another thread</li>
-<li>reading from disk</li>
+<li><p>an RPC to a remote host</p></li>
+<li><p>a long computation in another thread</p></li>
+<li><p>reading from disk</p></li>
 </ul>
 <p>Note that these operations are all fallible: remote hosts could
 crash, computations might throw an exception, disks could fail, etc.
 A <code class="docutils literal notranslate"><span class="pre">Future[T]</span></code>, then, occupies exactly one of three states:</p>
 <ul class="simple">
-<li>Empty (pending)</li>
-<li>Succeeded (with a result of type <code class="docutils literal notranslate"><span class="pre">T</span></code>)</li>
-<li>Failed (with a <code class="docutils literal notranslate"><span class="pre">Throwable</span></code>)</li>
+<li><p>Empty (pending)</p></li>
+<li><p>Succeeded (with a result of type <code class="docutils literal notranslate"><span class="pre">T</span></code>)</p></li>
+<li><p>Failed (with a <code class="docutils literal notranslate"><span class="pre">Throwable</span></code>)</p></li>
 </ul>
 <p>While it is possible to directly query this state, this is rarely useful.
 Instead, a callback may be registered to receive the results once
 they are made available:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">f</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
 
-<span class="n">f</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">res</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=&gt;</span>
-  <span class="n">println</span><span class="o">(</span><span class="s">&quot;The result is &quot;</span> <span class="o">+</span> <span class="n">res</span><span class="o">)</span>
-<span class="o">}</span>
+<span class="n">f</span><span class="p">.</span><span class="n">onSuccess</span> <span class="p">{</span> <span class="n">res</span><span class="p">:</span> <span class="nc">Int</span> <span class="o">=&gt;</span>
+  <span class="n">println</span><span class="p">(</span><span class="s">&quot;The result is &quot;</span> <span class="o">+</span> <span class="n">res</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>which will be invoked only on success. Callbacks may also be registered
 to account for failures:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">f</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
 
-<span class="n">f</span><span class="o">.</span><span class="n">onFailure</span> <span class="o">{</span> <span class="n">cause</span><span class="k">:</span> <span class="kt">Throwable</span> <span class="o">=&gt;</span>
-  <span class="n">println</span><span class="o">(</span><span class="s">&quot;f failed with &quot;</span> <span class="o">+</span> <span class="n">cause</span><span class="o">)</span>
-<span class="o">}</span>
+<span class="n">f</span><span class="p">.</span><span class="n">onFailure</span> <span class="p">{</span> <span class="n">cause</span><span class="p">:</span> <span class="nc">Throwable</span> <span class="o">=&gt;</span>
+  <span class="n">println</span><span class="p">(</span><span class="s">&quot;f failed with &quot;</span> <span class="o">+</span> <span class="n">cause</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="sequential-composition">
+</section>
+<section id="sequential-composition">
 <h2>Sequential composition<a class="headerlink" href="#sequential-composition" title="Permalink to this headline">¶</a></h2>
 <p>Registering callbacks is useful but presents a cumbersome API. The
 power of Futures lie in how they <em>compose</em>. Most operations can be
@@ -304,35 +304,35 @@ operations.</p>
 <p>Consider the simple example of fetching a representative thumbnail
 from a website (ala Pinterest). This typically involves:</p>
 <ol class="arabic simple">
-<li>Fetching the homepage</li>
-<li>Parsing that page to find the first image link</li>
-<li>Fetching the image link</li>
+<li><p>Fetching the homepage</p></li>
+<li><p>Parsing that page to find the first image link</p></li>
+<li><p>Fetching the image link</p></li>
 </ol>
 <p>This is an example of <em>sequential</em> composition: in order to do the
 next step, we must have successfully completed the previous one. With
-Futures, this is called <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> <a class="footnote-reference" href="#flatmap" id="id2">[3]</a>. The result of <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> is a Future
+Futures, this is called <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> <a class="footnote-reference brackets" href="#flatmap" id="id2">3</a>. The result of <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> is a Future
 representing the result of this composite operation. Given some helper
-methods —&nbsp;<code class="docutils literal notranslate"><span class="pre">fetchUrl</span></code> fetches the given URL, <code class="docutils literal notranslate"><span class="pre">findImageUrls</span></code> parses an HTML
-page to find image links —&nbsp;we can implement our Pinterest-style thumbnail
+methods — <code class="docutils literal notranslate"><span class="pre">fetchUrl</span></code> fetches the given URL, <code class="docutils literal notranslate"><span class="pre">findImageUrls</span></code> parses an HTML
+page to find image links — we can implement our Pinterest-style thumbnail
 extract like this:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">def</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">def</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">])</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">def</span> <span class="nf">fetchUrl</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nc">String</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Array</span><span class="p">[</span><span class="nc">Byte</span><span class="p">]]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">def</span> <span class="nf">findImageUrls</span><span class="p">(</span><span class="n">bytes</span><span class="p">:</span> <span class="nc">Array</span><span class="p">[</span><span class="nc">Byte</span><span class="p">]):</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
 
-<span class="k">val</span> <span class="n">url</span> <span class="k">=</span> <span class="s">&quot;https://www.google.com&quot;</span>
+<span class="kd">val</span> <span class="n">url</span> <span class="o">=</span> <span class="s">&quot;https://www.google.com&quot;</span>
 
-<span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]</span> <span class="k">=</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">bytes</span> <span class="k">=&gt;</span>
-  <span class="k">val</span> <span class="n">images</span> <span class="k">=</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="o">)</span>
-  <span class="k">if</span> <span class="o">(</span><span class="n">images</span><span class="o">.</span><span class="n">isEmpty</span><span class="o">)</span>
-    <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="k">new</span> <span class="nc">Exception</span><span class="o">(</span><span class="s">&quot;no image&quot;</span><span class="o">))</span>
+<span class="kd">val</span> <span class="n">f</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Array</span><span class="p">[</span><span class="nc">Byte</span><span class="p">]]</span> <span class="o">=</span> <span class="n">fetchUrl</span><span class="p">(</span><span class="n">url</span><span class="p">).</span><span class="n">flatMap</span> <span class="p">{</span> <span class="n">bytes</span> <span class="o">=&gt;</span>
+  <span class="kd">val</span> <span class="n">images</span> <span class="o">=</span> <span class="n">findImageUrls</span><span class="p">(</span><span class="n">bytes</span><span class="p">)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">isEmpty</span><span class="p">)</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">exception</span><span class="p">(</span><span class="k">new</span> <span class="nc">Exception</span><span class="p">(</span><span class="s">&quot;no image&quot;</span><span class="p">))</span>
   <span class="k">else</span>
-    <span class="n">fetchUrl</span><span class="o">(</span><span class="n">images</span><span class="o">.</span><span class="n">head</span><span class="o">)</span>
-<span class="o">}</span>
+    <span class="n">fetchUrl</span><span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">head</span><span class="p">)</span>
+<span class="p">}</span>
 
-<span class="n">f</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">image</span> <span class="k">=&gt;</span>
-  <span class="n">println</span><span class="o">(</span><span class="s">&quot;Found image of size &quot;</span> <span class="o">+</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="o">)</span>
-<span class="o">}</span>
+<span class="n">f</span><span class="p">.</span><span class="n">onSuccess</span> <span class="p">{</span> <span class="n">image</span> <span class="o">=&gt;</span>
+  <span class="n">println</span><span class="p">(</span><span class="s">&quot;Found image of size &quot;</span> <span class="o">+</span> <span class="n">image</span><span class="p">.</span><span class="n">size</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">f</span></code> represents the <em>composite</em> operation. It is the result of first
@@ -346,19 +346,19 @@ semicolons sequence two statements, and with traditional I/O
 operations, have the same effect as <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> does above (the
 exception mechanism takes the role of a failed future). Futures
 are much more versatile, however, as we’ll see.</p>
-</div>
-<div class="section" id="concurrent-composition">
+</section>
+<section id="concurrent-composition">
 <h2>Concurrent composition<a class="headerlink" href="#concurrent-composition" title="Permalink to this headline">¶</a></h2>
 <p>It is also possible to compose Futures <em>concurrently</em>. We can extend
 our above example to demonstrate: let’s fetch <em>all</em> the images.
 Concurrent composition is provided by <code class="docutils literal notranslate"><span class="pre">Future.collect</span></code>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">collected</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]]</span> <span class="k">=</span>
-  <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">bytes</span> <span class="k">=&gt;</span>
-    <span class="k">val</span> <span class="n">fetches</span> <span class="k">=</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="o">).</span><span class="n">map</span> <span class="o">{</span> <span class="n">url</span> <span class="k">=&gt;</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">)</span> <span class="o">}</span>
-    <span class="nc">Future</span><span class="o">.</span><span class="n">collect</span><span class="o">(</span><span class="n">fetches</span><span class="o">)</span>
-  <span class="o">}</span>
+<span class="kd">val</span> <span class="n">collected</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Seq</span><span class="p">[</span><span class="nc">Array</span><span class="p">[</span><span class="nc">Byte</span><span class="p">]]]</span> <span class="o">=</span>
+  <span class="n">fetchUrl</span><span class="p">(</span><span class="n">url</span><span class="p">).</span><span class="n">flatMap</span> <span class="p">{</span> <span class="n">bytes</span> <span class="o">=&gt;</span>
+    <span class="kd">val</span> <span class="n">fetches</span> <span class="o">=</span> <span class="n">findImageUrls</span><span class="p">(</span><span class="n">bytes</span><span class="p">).</span><span class="n">map</span> <span class="p">{</span> <span class="n">url</span> <span class="o">=&gt;</span> <span class="n">fetchUrl</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="p">}</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">collect</span><span class="p">(</span><span class="n">fetches</span><span class="p">)</span>
+  <span class="p">}</span>
 </pre></div>
 </div>
 <p>Here we have combined both concurrent and sequential composition:
@@ -366,13 +366,13 @@ first we fetch the web page, then we collect the results of fetching
 all of the underlying images.</p>
 <p>As with sequential composition, concurrent composition propagates
 failures: the future <code class="docutils literal notranslate"><span class="pre">collected</span></code> will fail if any of the underlying
-futures do <a class="footnote-reference" href="#collecttotry" id="id3">[2]</a>.</p>
+futures do <a class="footnote-reference brackets" href="#collecttotry" id="id3">2</a>.</p>
 <p>It is also simple to write your own combinators that operate over
 Futures. This is quite useful, and gives rise to a great amount of
 modularity in distributed systems as common patterns can be cleanly
 abstracted.</p>
-</div>
-<div class="section" id="parallel-composition">
+</section>
+<section id="parallel-composition">
 <h2>Parallel composition<a class="headerlink" href="#parallel-composition" title="Permalink to this headline">¶</a></h2>
 <p>Collect is specialized for when you do the same operation many times, returning
 the same result, and want to know when they’re all complete.  However, we often
@@ -390,38 +390,38 @@ should be usable from Java without any problem.</p>
 accepts another Future as an argument and will return a Future that will be
 satisfied once both <cite>this</cite> and the argument passed to <cite>join</cite> are satisfied, and
 will contain the contents of both Futures.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">numFollowers</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">profileImageURL</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">numFollowers</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">profileImageURL</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
 
-<span class="k">val</span> <span class="n">userProfileData</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[(</span><span class="kt">Int</span>, <span class="kt">String</span><span class="o">)]</span> <span class="k">=</span> <span class="n">numFollowers</span><span class="o">.</span><span class="n">join</span><span class="o">(</span><span class="n">profileImageURL</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">userProfileData</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[(</span><span class="nc">Int</span><span class="p">,</span> <span class="nc">String</span><span class="p">)]</span> <span class="o">=</span> <span class="n">numFollowers</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">profileImageURL</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>There’s also <code class="docutils literal notranslate"><span class="pre">Future.join</span></code>, which can be used for many different results.
 There are many <code class="docutils literal notranslate"><span class="pre">Future.join</span></code> methods to support many different numbers of
 futures that need to be joined.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">numFollowers</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">profileImageURL</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">followersYouKnow</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">User</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">numFollowers</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">profileImageURL</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">followersYouKnow</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Seq</span><span class="p">[</span><span class="nc">User</span><span class="p">]]</span> <span class="o">=</span> <span class="o">???</span>
 
-<span class="k">val</span> <span class="n">userProfileData</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[(</span><span class="kt">Int</span>, <span class="kt">String</span>, <span class="kt">Seq</span><span class="o">[</span><span class="kt">User</span><span class="o">])]</span> <span class="k">=</span>
-  <span class="nc">Future</span><span class="o">.</span><span class="n">join</span><span class="o">(</span><span class="n">numFollowers</span><span class="o">,</span> <span class="n">profileImageURL</span><span class="o">,</span> <span class="n">followersYouKnow</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">userProfileData</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[(</span><span class="nc">Int</span><span class="p">,</span> <span class="nc">String</span><span class="p">,</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">User</span><span class="p">])]</span> <span class="o">=</span>
+  <span class="nc">Future</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">numFollowers</span><span class="p">,</span> <span class="n">profileImageURL</span><span class="p">,</span> <span class="n">followersYouKnow</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>A common thing to do after calling <code class="docutils literal notranslate"><span class="pre">Future#join</span></code> is to immediately transform
 the result.  As a minor optimization, we can avoid allocating the Tuple2
 instance by using <code class="docutils literal notranslate"><span class="pre">Future#joinWith</span></code>.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">numFollowers</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">profileImageURL</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">constructUserProfile</span><span class="k">:</span> <span class="o">(</span><span class="kt">Int</span><span class="o">,</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">UserProfile</span>
+<span class="kd">val</span> <span class="n">numFollowers</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">profileImageURL</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">constructUserProfile</span><span class="p">:</span> <span class="p">(</span><span class="nc">Int</span><span class="p">,</span> <span class="nc">String</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nc">UserProfile</span>
 
-<span class="k">val</span> <span class="n">userProfile</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">UserProfile</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">numFollowers</span><span class="o">.</span><span class="n">joinWith</span><span class="o">(</span><span class="n">profileImageURL</span><span class="o">)(</span><span class="n">constructUserProfile</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">userProfile</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">UserProfile</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">numFollowers</span><span class="p">.</span><span class="n">joinWith</span><span class="p">(</span><span class="n">profileImageURL</span><span class="p">)(</span><span class="n">constructUserProfile</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The last <code class="docutils literal notranslate"><span class="pre">Future.join</span></code> is a bit of an odd one out–like <code class="docutils literal notranslate"><span class="pre">Future.collect</span></code> it
@@ -430,18 +430,18 @@ end–namely, whether all of the components pieces succeeded or not. This method
 is used for implementing the other <code class="docutils literal notranslate"><span class="pre">Future.join</span></code> methods, and is exposed as a
 minor optimization for uses cases where all you need to know is success or failure,
 and not what the actual results was.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">numFollowers</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">profileImageURL</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">followersYouKnow</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">User</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">numFollowers</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">profileImageURL</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">String</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">followersYouKnow</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Seq</span><span class="p">[</span><span class="nc">User</span><span class="p">]]</span> <span class="o">=</span> <span class="o">???</span>
 
-<span class="k">val</span> <span class="n">profileDataIsReady</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span>
-  <span class="nc">Future</span><span class="o">.</span><span class="n">join</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="n">numFollowers</span><span class="o">,</span> <span class="n">profileImageUrl</span><span class="o">,</span> <span class="n">followersYouKnow</span><span class="o">))</span>
+<span class="kd">val</span> <span class="n">profileDataIsReady</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Unit</span><span class="p">]</span> <span class="o">=</span>
+  <span class="nc">Future</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="nc">Seq</span><span class="p">(</span><span class="n">numFollowers</span><span class="p">,</span> <span class="n">profileImageUrl</span><span class="p">,</span> <span class="n">followersYouKnow</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="synchronization-within-composition">
+</section>
+<section id="synchronization-within-composition">
 <h2>Synchronization within composition<a class="headerlink" href="#synchronization-within-composition" title="Permalink to this headline">¶</a></h2>
 <p id="deadlock">As teased above, synchronization can introduce a new class of bugs in
 a concurrent environment. A real world example of a deadlock can be found here:
@@ -452,40 +452,40 @@ deadlocks if we have two threads interacting with two separate AsyncSemaphores.
 Here is a toy example that sets up cross-semaphore interaction. It will look a
 bit too obviously-broken to really happen, but isolates the misbehavior that could
 reasonably happen by accident:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">semaphore1</span><span class="o">,</span> <span class="n">semaphore2</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">AsyncSemaphore</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">semaphore1</span><span class="p">,</span> <span class="n">semaphore2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">AsyncSemaphore</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="c1">// The semaphores have already been taken:</span>
-<span class="k">val</span> <span class="n">permitForSemaphore1</span> <span class="k">=</span> <span class="n">await</span><span class="o">(</span><span class="n">semaphore1</span><span class="o">.</span><span class="n">acquire</span><span class="o">())</span>
-<span class="k">val</span> <span class="n">permitForSemaphore2</span> <span class="k">=</span> <span class="n">await</span><span class="o">(</span><span class="n">semaphore2</span><span class="o">.</span><span class="n">acquire</span><span class="o">())</span>
+<span class="kd">val</span> <span class="n">permitForSemaphore1</span> <span class="o">=</span> <span class="n">await</span><span class="p">(</span><span class="n">semaphore1</span><span class="p">.</span><span class="n">acquire</span><span class="p">())</span>
+<span class="kd">val</span> <span class="n">permitForSemaphore2</span> <span class="o">=</span> <span class="n">await</span><span class="p">(</span><span class="n">semaphore2</span><span class="p">.</span><span class="n">acquire</span><span class="p">())</span>
 
 <span class="c1">// The semaphores have had continuations attached as follows:</span>
-<span class="n">semaphore1</span><span class="o">.</span><span class="n">acquire</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">permit</span> <span class="k">=&gt;</span>
-  <span class="k">val</span> <span class="n">otherWaiters</span> <span class="k">=</span> <span class="n">semaphore2</span><span class="o">.</span><span class="n">numWaiters</span> <span class="c1">// synchronizing method</span>
-  <span class="n">permit</span><span class="o">.</span><span class="n">release</span><span class="o">()</span>
+<span class="n">semaphore1</span><span class="p">.</span><span class="n">acquire</span><span class="p">().</span><span class="n">flatMap</span> <span class="p">{</span> <span class="n">permit</span> <span class="o">=&gt;</span>
+  <span class="kd">val</span> <span class="n">otherWaiters</span> <span class="o">=</span> <span class="n">semaphore2</span><span class="p">.</span><span class="n">numWaiters</span> <span class="c1">// synchronizing method</span>
+  <span class="n">permit</span><span class="p">.</span><span class="n">release</span><span class="p">()</span>
   <span class="n">otherWaiters</span>
-<span class="o">}</span>
+<span class="p">}</span>
 
-<span class="n">semaphore2</span><span class="o">.</span><span class="n">acquire</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">permit</span> <span class="k">=&gt;</span>
-  <span class="k">val</span> <span class="n">otherWaiters</span> <span class="k">=</span> <span class="n">semaphore1</span><span class="o">.</span><span class="n">numWaiters</span> <span class="c1">// synchronizing method</span>
-  <span class="n">permit</span><span class="o">.</span><span class="n">release</span><span class="o">()</span>
+<span class="n">semaphore2</span><span class="p">.</span><span class="n">acquire</span><span class="p">().</span><span class="n">flatMap</span> <span class="p">{</span> <span class="n">permit</span> <span class="o">=&gt;</span>
+  <span class="kd">val</span> <span class="n">otherWaiters</span> <span class="o">=</span> <span class="n">semaphore1</span><span class="p">.</span><span class="n">numWaiters</span> <span class="c1">// synchronizing method</span>
+  <span class="n">permit</span><span class="p">.</span><span class="n">release</span><span class="p">()</span>
   <span class="n">otherWaiters</span>
-<span class="o">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Now we can trigger a deadlock.</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">threadOne</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Thread</span> <span class="o">{</span>
-  <span class="k">override</span> <span class="k">def</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
-    <span class="n">permitForSemaphore1</span><span class="o">.</span><span class="n">release</span><span class="o">()</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="kd">val</span> <span class="n">threadOne</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span> <span class="p">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">permitForSemaphore1</span><span class="p">.</span><span class="n">release</span><span class="p">()</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="k">val</span> <span class="n">threadTwo</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Thread</span> <span class="o">{</span>
-  <span class="k">override</span> <span class="k">def</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
-    <span class="n">permitForSemaphore2</span><span class="o">.</span><span class="n">release</span><span class="o">()</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+<span class="kd">val</span> <span class="n">threadTwo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span> <span class="p">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">permitForSemaphore2</span><span class="p">.</span><span class="n">release</span><span class="p">()</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-<span class="n">threadOne</span><span class="o">.</span><span class="n">start</span>
-<span class="n">threadTwo</span><span class="o">.</span><span class="n">start</span>
+<span class="n">threadOne</span><span class="p">.</span><span class="n">start</span>
+<span class="n">threadTwo</span><span class="p">.</span><span class="n">start</span>
 </pre></div>
 </div>
 <p>In this situation threadOne and threadTwo may potentially deadlock. It isn’t
@@ -515,26 +515,26 @@ The new structure of the <cite>release()</cite> method on the Permit:</p>
 <span class="c1">// reference. It is synonymous with the internal Queue as that is what is</span>
 <span class="c1">// driving our need for synchronization, but using this special-purpose reference</span>
 <span class="c1">// gives us an opportunity in the future to refactor more easily.</span>
-<span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">final</span> <span class="k">def</span> <span class="n">lock</span><span class="k">:</span> <span class="kt">Object</span> <span class="o">=</span> <span class="n">waitq</span>
+<span class="k">private</span><span class="p">[</span><span class="bp">this</span><span class="p">]</span> <span class="k">final</span> <span class="k">def</span> <span class="nf">lock</span><span class="p">:</span> <span class="nc">Object</span> <span class="o">=</span> <span class="n">waitq</span>
 
-<span class="nd">@tailrec</span> <span class="k">def</span> <span class="n">release</span><span class="o">()</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+<span class="nd">@tailrec</span> <span class="k">def</span> <span class="nf">release</span><span class="p">():</span> <span class="nc">Unit</span> <span class="o">=</span> <span class="p">{</span>
 <span class="c1">// we pass the Promise outside of the lock</span>
-<span class="k">val</span> <span class="n">waiter</span> <span class="k">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">synchronized</span> <span class="o">{</span>
-  <span class="k">val</span> <span class="n">next</span> <span class="k">=</span> <span class="n">waitq</span><span class="o">.</span><span class="n">pollFirst</span><span class="o">()</span>
-  <span class="k">if</span> <span class="o">(</span><span class="n">next</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+<span class="kd">val</span> <span class="n">waiter</span> <span class="o">=</span> <span class="n">lock</span><span class="p">.</span><span class="k">synchronized</span> <span class="p">{</span>
+  <span class="kd">val</span> <span class="n">next</span> <span class="o">=</span> <span class="n">waitq</span><span class="p">.</span><span class="n">pollFirst</span><span class="p">()</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">next</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">availablePermits</span> <span class="o">+=</span> <span class="mi">1</span>
-  <span class="o">}</span>
+  <span class="p">}</span>
   <span class="n">next</span>
-<span class="o">}</span>
+<span class="p">}</span>
 
-<span class="k">if</span> <span class="o">(</span><span class="n">waiter</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">waiter</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// since we are no longer synchronized with the interrupt handler</span>
   <span class="c1">// we leverage the atomic state of the Promise to do the right</span>
   <span class="c1">// thing if we race.</span>
-  <span class="k">if</span> <span class="o">(!</span><span class="n">waiter</span><span class="o">.</span><span class="n">updateIfEmpty</span><span class="o">(</span><span class="nc">Return</span><span class="o">(</span><span class="k">this</span><span class="o">)))</span> <span class="o">{</span>
-    <span class="n">release</span><span class="o">()</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">waiter</span><span class="p">.</span><span class="n">updateIfEmpty</span><span class="p">(</span><span class="nc">Return</span><span class="p">(</span><span class="bp">this</span><span class="p">)))</span> <span class="p">{</span>
+    <span class="n">release</span><span class="p">()</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>The new implementation is more complex and no longer synchronizes on the interrupt
@@ -543,17 +543,17 @@ interrupting the Promise and giving it the Permit.</p>
 <p>Using synchronization and Promises together requires a significant amount of care
 ensure a program is not at risk of deadlock. Some low risk uses of synchronization are:</p>
 <ul class="simple">
-<li>Mutate or access a field.</li>
-<li>Push or pop an element from a private ArrayDeque.</li>
+<li><p>Mutate or access a field.</p></li>
+<li><p>Push or pop an element from a private ArrayDeque.</p></li>
 </ul>
 <p>Some examples of risky actions to take in a synchronized block are:</p>
 <ul class="simple">
-<li>Calling a function injected by a caller; the function could block, acquire locks of its own, compute pi to a billion digits, etc.</li>
-<li>Calling methods on a trait of unknown origin: this is essentially the same thing as calling a user-injected function.</li>
-<li>Completing a Promise: an example above with dangerous continuations.</li>
+<li><p>Calling a function injected by a caller; the function could block, acquire locks of its own, compute pi to a billion digits, etc.</p></li>
+<li><p>Calling methods on a trait of unknown origin: this is essentially the same thing as calling a user-injected function.</p></li>
+<li><p>Completing a Promise: an example above with dangerous continuations.</p></li>
 </ul>
-</div>
-<div class="section" id="recovering-from-failure">
+</section>
+<section id="recovering-from-failure">
 <span id="future-failure"></span><h2>Recovering from failure<a class="headerlink" href="#recovering-from-failure" title="Permalink to this headline">¶</a></h2>
 <p>Composed futures fail whenever any of their constituent futures
 fail. However it is often useful to recover from such failures. The
@@ -562,70 +562,185 @@ fail. However it is often useful to recover from such failures. The
 are otherwise identical. It is often desirable to handle only a subset
 of possible exceptions. To accommodate for this <code class="docutils literal notranslate"><span class="pre">rescue</span></code> accepts
 a <code class="docutils literal notranslate"><span class="pre">PartialFunction</span></code>, mapping a <code class="docutils literal notranslate"><span class="pre">Throwable</span></code> to a <code class="docutils literal notranslate"><span class="pre">Future</span></code>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="o">{</span>
-  <span class="o">..</span>
-  <span class="k">def</span> <span class="n">rescue</span><span class="o">[</span><span class="kt">B</span> <span class="k">&gt;:</span> <span class="kt">A</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">PartialFunction</span><span class="o">[</span><span class="kt">Throwable</span>, <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span>
-  <span class="o">..</span>
-<span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">A</span><span class="p">]</span> <span class="p">{</span>
+  <span class="p">..</span>
+  <span class="k">def</span> <span class="nf">rescue</span><span class="p">[</span><span class="nc">B</span> <span class="o">&gt;:</span> <span class="nc">A</span><span class="p">](</span><span class="n">f</span><span class="p">:</span> <span class="nc">PartialFunction</span><span class="p">[</span><span class="nc">Throwable</span><span class="p">,</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">B</span><span class="p">]]):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">B</span><span class="p">]</span>
+  <span class="p">..</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>The following retries a request infinitely should it fail with a
 <code class="docutils literal notranslate"><span class="pre">TimeoutException</span></code>:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.TimeoutException</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="n">http</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">TimeoutException</span>
 
-<span class="k">def</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">def</span> <span class="nf">fetchUrl</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nc">String</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
 
-<span class="k">def</span> <span class="n">fetchUrlWithRetry</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">rescue</span> <span class="o">{</span>
-    <span class="k">case</span> <span class="n">exc</span><span class="k">:</span> <span class="kt">TimeoutException</span> <span class="o">=&gt;</span> <span class="n">fetchUrlWithRetry</span><span class="o">(</span><span class="n">url</span><span class="o">)</span>
-  <span class="o">}</span>
+<span class="k">def</span> <span class="nf">fetchUrlWithRetry</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nc">String</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">fetchUrl</span><span class="p">(</span><span class="n">url</span><span class="p">).</span><span class="n">rescue</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">exc</span><span class="p">:</span> <span class="nc">TimeoutException</span> <span class="o">=&gt;</span> <span class="n">fetchUrlWithRetry</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+  <span class="p">}</span>
 </pre></div>
 </div>
+</section>
+<section id="racing-futures">
+<h2>Racing Futures<a class="headerlink" href="#racing-futures" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes we don’t care which Future finishes first.  There are three common
+cases for this:</p>
+<ol class="arabic simple">
+<li><p>Backup or hedged requests, where we send two identical requests in the hope
+that if one of them is slow, the second one won’t be.  This is usually a
+good opportunity to use <a class="reference internal" href="MethodBuilder.html#mb-backup-requests"><span class="std std-ref">backup requests</span></a>.</p></li>
+<li><p>Concurrent work where you want to queue up more work as the work is
+completed.</p></li>
+<li><p>Concurrent work where there’s processing that needs to be done after each
+future is satisfied, and which future is satisfied first doesn’t matter.</p></li>
+</ol>
+<p>For cases where <a class="reference internal" href="MethodBuilder.html#mb-backup-requests"><span class="std std-ref">backup requests</span></a> aren’t easy to use,
+<code class="docutils literal notranslate"><span class="pre">Future.select</span></code> is often the right tool.</p>
+<p>There are three modes of <code class="docutils literal notranslate"><span class="pre">Future.select</span></code>.  Although they were originally
+written for Scala, there is also an implementation of <code class="docutils literal notranslate"><span class="pre">Futures.select</span></code>. The
+methods on the <code class="docutils literal notranslate"><span class="pre">Future</span></code> instance should be usable from Java without any
+problem.</p>
+<p>The simplest is the methods on the <code class="docutils literal notranslate"><span class="pre">Future</span></code> instance, which will simply return
+the future that’s returned first, <code class="docutils literal notranslate"><span class="pre">Future#select</span></code> and <code class="docutils literal notranslate"><span class="pre">Future#or</span></code> which have
+identical behavior.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
+
+<span class="kd">val</span> <span class="n">original</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">hedged</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="c1">// Future#select[U &gt;: A](Future[U]): Future[U]</span>
+<span class="kd">val</span> <span class="n">fasterTweet</span> <span class="o">=</span> <span class="n">original</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">hedged</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="other-resources">
+<p>The more powerful one is <code class="docutils literal notranslate"><span class="pre">Future.select</span></code> or <code class="docutils literal notranslate"><span class="pre">Future.selectIndex</span></code>.
+<code class="docutils literal notranslate"><span class="pre">Future.select</span></code> accepts a collection of Futures.  It then returns a
+Future which will contain a tuple of the contents of the first satisfied
+Future, and a collection of the rest of the futures.  It can be quite
+useful to have the rest of the futures. You can interrupt the rest if they’re
+unneeded, or you can inspect whether other futures have also been satisfied
+and can be process immediately without yielding, or you can select again
+on the futures and yield until one of them is satisfied.  Processing the results
+of <code class="docutils literal notranslate"><span class="pre">Future.select</span></code> typically takes advantage of Future recursion. Here are
+some examples of the different modes:</p>
+<p>Interrupt the rest:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Try</span>
+<span class="k">import</span> <span class="nn">java</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nn">concurrent</span><span class="p">.</span><span class="nc">CancellationException</span>
+
+<span class="kd">val</span> <span class="n">doWork</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">tweets</span><span class="p">:</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]]</span> <span class="o">=</span> <span class="nc">Seq</span><span class="p">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">10</span><span class="p">)(</span><span class="n">doWork</span><span class="p">)</span>
+<span class="c1">// Future.select[A](Seq[Future[A]]): Future[(Try[A], Seq[Future[A]])]</span>
+<span class="kd">val</span> <span class="n">first</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">tweets</span><span class="p">).</span><span class="n">flatMap</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="kd">val</span> <span class="n">cancelEx</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CancellationException</span><span class="p">(</span><span class="s">&quot;lost the race&quot;</span><span class="p">)</span>
+    <span class="n">rest</span><span class="p">.</span><span class="n">foreach</span> <span class="p">{</span> <span class="n">f</span> <span class="o">=&gt;</span> <span class="n">f</span><span class="p">.</span><span class="n">raise</span><span class="p">(</span><span class="n">cancelEx</span><span class="p">)</span> <span class="p">}</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">const</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Process as much as you can as eagerly as you can:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Try</span>
+
+<span class="kd">val</span> <span class="n">doWork</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span>
+<span class="kd">val</span> <span class="n">tweets</span><span class="p">:</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]]</span> <span class="o">=</span> <span class="nc">Seq</span><span class="p">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">10</span><span class="p">)(</span><span class="n">doWork</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">tweetSentiment</span><span class="p">(</span><span class="n">tweet</span><span class="p">:</span> <span class="nc">Tweet</span><span class="p">):</span> <span class="nc">Int</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">def</span> <span class="nf">aggregateTweetSentiment</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[(</span><span class="nc">Try</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">],</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]])]):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Seq</span><span class="p">[</span><span class="nc">Int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">f</span> <span class="k">match</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="kd">val</span> <span class="p">(</span><span class="n">finished</span><span class="p">,</span> <span class="n">unfinished</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="nc">Future</span><span class="p">.</span><span class="n">const</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="o">+:</span> <span class="n">rest</span><span class="p">).</span><span class="n">foldLeft</span><span class="p">((</span><span class="nc">Seq</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">](),</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]]()))</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="p">((</span><span class="n">complete</span><span class="p">,</span> <span class="n">incomplete</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">f</span><span class="p">.</span><span class="n">poll</span> <span class="k">match</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="nc">Some</span><span class="p">(</span><span class="nc">Return</span><span class="p">(</span><span class="n">tweet</span><span class="p">))</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">complete</span> <span class="o">:+</span> <span class="n">tweet</span><span class="p">,</span> <span class="n">incomplete</span><span class="p">)</span>
+        <span class="k">case</span> <span class="nc">None</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">complete</span><span class="p">,</span> <span class="n">incomplete</span> <span class="o">:+</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">_</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="n">complete</span><span class="p">,</span> <span class="n">incomplete</span><span class="p">)</span> <span class="c1">// failed future</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="kd">val</span> <span class="n">sentiments</span> <span class="o">=</span> <span class="n">finished</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="n">tweetSentiment</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">unfinished</span><span class="p">.</span><span class="n">isEmpty</span><span class="p">)</span> <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="n">sentiments</span><span class="p">)</span>
+    <span class="k">else</span> <span class="nc">Future</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">unfinished</span><span class="p">).</span><span class="n">flatMap</span><span class="p">(</span><span class="n">aggregateTweetSentiment</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="n">sentiments</span> <span class="o">++</span> <span class="n">_</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="c1">// Future.select[A](Seq[Future[A]]): Future[(Try[A], Seq[Future[A]])]</span>
+<span class="kd">val</span> <span class="n">avgTweetSentiment</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Int</span><span class="p">]</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">tweets</span><span class="p">).</span><span class="n">flatMap</span><span class="p">(</span><span class="n">aggregateTweetSentiment</span><span class="p">).</span><span class="n">map</span> <span class="p">{</span> <span class="n">seq</span> <span class="o">=&gt;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">seq</span><span class="p">.</span><span class="n">isEmpty</span><span class="p">)</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">seq</span><span class="p">.</span><span class="n">sum</span> <span class="o">/</span> <span class="n">seq</span><span class="p">.</span><span class="n">length</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Keep going until the first successful result:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Try</span>
+
+<span class="kd">val</span> <span class="n">doWork</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span>
+<span class="kd">val</span> <span class="n">tweets</span><span class="p">:</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]]</span> <span class="o">=</span> <span class="nc">Seq</span><span class="p">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">10</span><span class="p">)(</span><span class="n">doWork</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">raceTheTweets</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[(</span><span class="nc">Try</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">],</span> <span class="nc">Seq</span><span class="p">[</span><span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]])]):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span> <span class="k">match</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="p">(</span><span class="nc">Throw</span><span class="p">(</span><span class="n">_</span><span class="p">),</span> <span class="n">rest</span><span class="p">)</span> <span class="k">if</span> <span class="n">rest</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">=&gt;</span> <span class="c1">// There was a failure, but there are more futures to await</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">rest</span><span class="p">).</span><span class="n">flatMap</span><span class="p">(</span><span class="n">raceTheTweets</span> <span class="n">_</span><span class="p">)</span>
+  <span class="k">case</span> <span class="p">(</span><span class="nc">Throw</span><span class="p">(</span><span class="n">_</span><span class="p">),</span> <span class="nc">Seq</span><span class="p">(</span><span class="n">last</span><span class="p">))</span> <span class="o">=&gt;</span> <span class="c1">// Only one remaining, we will return it regardless of success</span>
+    <span class="n">last</span>
+  <span class="k">case</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="c1">// This is either successful or the last Future has failed</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">const</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="c1">// Future.select[A](Seq[Future[A]]): Future[(Try[A], Seq[Future[A]])]</span>
+<span class="kd">val</span> <span class="n">first</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">tweets</span><span class="p">).</span><span class="n">flatMap</span><span class="p">(</span><span class="n">raceTheTweets</span> <span class="n">_</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>An even more powerful, but slightly more cumbersome API is <code class="docutils literal notranslate"><span class="pre">Future.selectIndex</span></code>.  From an
+<cite>IndexedSeq[Future]</cite>, it simply returns which one was satisfied first.  This has two benefits.
+The first is that if you have additional information about the sequence of the collection you
+passed in, you can exploit that in making decisions about what to do.  In comparison, you don’t
+know which Future <code class="docutils literal notranslate"><span class="pre">Future.select</span></code> returns.  The second benefit is that it avoids returning a
+complex type, and simply returns the index of the array.</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Try</span>
+<span class="k">import</span> <span class="nn">java</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nn">concurrent</span><span class="p">.</span><span class="nc">CancellationException</span>
+
+<span class="kd">val</span> <span class="n">doWork</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span>
+<span class="kd">val</span> <span class="n">tweets</span><span class="p">:</span> <span class="nc">IndexedSeq</span><span class="p">[</span><span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]]</span> <span class="o">=</span> <span class="nc">IndexedSeq</span><span class="p">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">10</span><span class="p">)(</span><span class="n">doWork</span><span class="p">)</span>
+<span class="c1">// Future.selectIndex[A](IndexedSeq[Future[A]]): Future[Int]</span>
+<span class="kd">val</span> <span class="n">first</span><span class="p">:</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Tweet</span><span class="p">]</span> <span class="o">=</span> <span class="nc">Future</span><span class="p">.</span><span class="n">selectIndex</span><span class="p">(</span><span class="n">tweets</span><span class="p">).</span><span class="n">flatMap</span> <span class="p">{</span> <span class="n">idx</span> <span class="o">=&gt;</span>
+  <span class="kd">val</span> <span class="n">cancelEx</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CancellationException</span><span class="p">(</span><span class="s">&quot;lost the race&quot;</span><span class="p">)</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="n">until</span> <span class="mi">10</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">idx</span><span class="p">)</span> <span class="n">tweets</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="n">raise</span><span class="p">(</span><span class="n">cancelEx</span><span class="p">)</span>
+  <span class="n">tweets</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="other-resources">
 <h2>Other resources<a class="headerlink" href="#other-resources" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://twitter.github.io/effectivescala/">Effective Scala</a> contains a <a class="reference external" href="https://twitter.github.io/effectivescala/#Twitter's%20standard%20libraries-Futures">section discussing futures</a></li>
-<li>As of Scala 2.10, the Scala standard library has its own futures
+<li><p><a class="reference external" href="https://twitter.github.io/effectivescala/">Effective Scala</a> contains a <a class="reference external" href="https://twitter.github.io/effectivescala/#Twitter's%20standard%20libraries-Futures">section discussing futures</a></p></li>
+<li><p>As of Scala 2.10, the Scala standard library has its own futures
 implementation and API, described <a class="reference external" href="https://docs.scala-lang.org/overviews/core/futures.html">here</a>. Note that
 this is largely similar to the API used in Finagle
 (<em>com.twitter.util.Future</em>), but there are still some naming
-differences.</li>
-<li><a class="reference external" href="https://akka.io/">Akka</a>’s documentation also has a <a class="reference external" href="https://doc.akka.io/docs/akka/2.1.0/scala/futures.html">section dedicated to futures</a>.</li>
-<li><a class="reference external" href="https://finagle.github.io/blog/2016/09/01/block-party/">Finagle Block Party</a> details why blocking is bad, and more
-importantly how to detect and fix it.</li>
+differences.</p></li>
+<li><p><a class="reference external" href="https://akka.io/">Akka</a>’s documentation also has a <a class="reference external" href="https://doc.akka.io/docs/akka/2.1.0/scala/futures.html">section dedicated to futures</a>.</p></li>
+<li><p><a class="reference external" href="https://finagle.github.io/blog/2016/09/01/block-party/">Finagle Block Party</a> details why blocking is bad, and more
+importantly how to detect and fix it.</p></li>
 </ul>
 <p class="rubric">Footnotes</p>
-<table class="docutils footnote" frame="void" id="futures" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Finagle uses its own <code class="docutils literal notranslate"><span class="pre">Future</span></code> implementation by a variety of reasons
+<dl class="footnote brackets">
+<dt class="label" id="futures"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Finagle uses its own <code class="docutils literal notranslate"><span class="pre">Future</span></code> implementation by a variety of reasons
 (fewer context switches, interruptibility, support for continuation-local variables,
-tail-call elimination), but mostly because it’s preceded <a class="reference external" href="https://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="collecttotry" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Use <code class="docutils literal notranslate"><span class="pre">Future.collectToTry</span></code> to concurrently collect a sequence of
-futures while accumulating errors instead of failing fast.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="flatmap" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[3]</a></td><td>The name <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> may seem strange and unrelated to our present
+tail-call elimination), but mostly because it’s preceded <a class="reference external" href="https://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</p>
+</dd>
+<dt class="label" id="collecttotry"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
+<dd><p>Use <code class="docutils literal notranslate"><span class="pre">Future.collectToTry</span></code> to concurrently collect a sequence of
+futures while accumulating errors instead of failing fast.</p>
+</dd>
+<dt class="label" id="flatmap"><span class="brackets"><a class="fn-backref" href="#id2">3</a></span></dt>
+<dd><p>The name <code class="docutils literal notranslate"><span class="pre">flatMap</span></code> may seem strange and unrelated to our present
 discussion, but its etymology is impeccable: it derives from a deeper relationship
 between the sort of sequential composition we do with futures, to a similar sort of
-composition we can perform over collections. See the <a class="reference external" href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">this</a> page for more details.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
+composition we can perform over collections. See the <a class="reference external" href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">this</a> page for more details.</p>
+</dd>
+</dl>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -655,6 +770,7 @@ composition we can perform over collections. See the <a class="reference externa
 <li><a class="reference internal" href="#parallel-composition">Parallel composition</a></li>
 <li><a class="reference internal" href="#synchronization-within-composition">Synchronization within composition</a></li>
 <li><a class="reference internal" href="#recovering-from-failure">Recovering from failure</a></li>
+<li><a class="reference internal" href="#racing-futures">Racing Futures</a></li>
 <li><a class="reference internal" href="#other-resources">Other resources</a></li>
 </ul>
 </li>
@@ -683,7 +799,7 @@ composition we can perform over collections. See the <a class="reference externa
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>

@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Services &amp; Filters &#8212; Finagle 22.4.0 documentation</title>
-    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Services &amp; Filters &#8212; Finagle 24.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/finagle.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +48,8 @@
         <li class="right" >
           <a href="Futures.html" title="Concurrent Programming with Futures"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Services &amp; Filters</a></li> 
       </ul>
     </div>  
 
@@ -58,16 +58,16 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="services-filters">
+  <section id="services-filters">
 <h1>Services &amp; Filters<a class="headerlink" href="#services-filters" title="Permalink to this headline">¶</a></h1>
 <p>Services and filters constitute the core abstractions with which
 clients and servers are constructed with the Finagle network library.
 They are very simple, but also quite versatile. Most of Finagle’s
 internals are structured around Services and Filters.</p>
-<div class="section" id="services">
+<section id="services">
 <span id="id1"></span><h2>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
 <p>A service, at its heart, is a simple function:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span> <span class="nc">extends</span> <span class="o">(</span><span class="nc">Req</span> <span class="k">=&gt;</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">Rep</span><span class="o">])</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]</span> <span class="k">extends</span> <span class="p">(</span><span class="nc">Req</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Rep</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Put another way, a service takes some request of type <code class="docutils literal notranslate"><span class="pre">Req</span></code> and returns
@@ -76,40 +76,40 @@ of type <code class="docutils literal notranslate"><span class="pre">Rep</span><
 <p>Services are used to represent both clients and servers. An <em>instance</em>
 of a service is used through a client; a server <em>implements</em> a <code class="docutils literal notranslate"><span class="pre">Service</span></code>.</p>
 <p>To use an HTTP client:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Service</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="n">http</span>
 
-<span class="k">val</span> <span class="n">httpService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="kd">val</span> <span class="n">httpService</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
 
-<span class="n">httpService</span><span class="o">(</span><span class="nc">Request</span><span class="o">(</span><span class="s">&quot;/foo/bar&quot;</span><span class="o">)).</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">response</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
-  <span class="n">println</span><span class="o">(</span><span class="s">&quot;received response &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="n">contentString</span><span class="o">)</span>
-<span class="o">}</span>
+<span class="n">httpService</span><span class="p">(</span><span class="nc">Request</span><span class="p">(</span><span class="s">&quot;/foo/bar&quot;</span><span class="p">)).</span><span class="n">onSuccess</span> <span class="p">{</span> <span class="n">response</span><span class="p">:</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span> <span class="o">=&gt;</span>
+  <span class="n">println</span><span class="p">(</span><span class="s">&quot;received response &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="p">.</span><span class="n">contentString</span><span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>or to provide an HTTP server:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Service</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="n">http</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.</span><span class="nc">Future</span>
 
-<span class="k">val</span> <span class="n">httpService</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">http.Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="nc">Response</span><span class="o">())</span> <span class="c1">// HTTP 200</span>
-<span class="o">}</span>
+<span class="kd">val</span> <span class="n">httpService</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="p">{</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">):</span> <span class="nc">Future</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span>
+    <span class="nc">Future</span><span class="p">.</span><span class="n">value</span><span class="p">(</span><span class="nc">Response</span><span class="p">())</span> <span class="c1">// HTTP 200</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Services implement <em>application logic</em>. You might, for instance,
 define a <code class="docutils literal notranslate"><span class="pre">Service[http.Request,</span> <span class="pre">http.Response]</span></code> to implement your
 application’s external API.</p>
-</div>
-<div class="section" id="filters">
+</section>
+<section id="filters">
 <span id="id2"></span><h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
 <p>It is often useful to define <em>application-agnostic</em> behavior as well.
 A common example of this is to implement timeouts: if a request
 fails to complete within a certain time, the timeout mechanism fails
 it with a timeout exception.</p>
 <p>Like services, filters are also simple functions:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">abstract</span> <span class="k">class</span> <span class="nc">Filter</span><span class="o">[</span><span class="kt">-ReqIn</span>, <span class="kt">+RepOut</span>, <span class="kt">+ReqOut</span>, <span class="kt">-RepIn</span><span class="o">]</span>
-  <span class="nc">extends</span> <span class="o">((</span><span class="nc">ReqIn</span><span class="o">,</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">ReqOut</span>, <span class="kt">RepIn</span><span class="o">])</span> <span class="k">=&gt;</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">RepOut</span><span class="o">])</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">abstract</span> <span class="k">class</span> <span class="nc">Filter</span><span class="p">[</span><span class="o">-</span><span class="nc">ReqIn</span><span class="p">,</span> <span class="o">+</span><span class="nc">RepOut</span><span class="p">,</span> <span class="o">+</span><span class="nc">ReqOut</span><span class="p">,</span> <span class="o">-</span><span class="nc">RepIn</span><span class="p">]</span>
+  <span class="k">extends</span> <span class="p">((</span><span class="nc">ReqIn</span><span class="p">,</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">ReqOut</span><span class="p">,</span> <span class="nc">RepIn</span><span class="p">])</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">RepOut</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>or: given a request of type <code class="docutils literal notranslate"><span class="pre">ReqIn</span></code> and a service of type
@@ -118,23 +118,23 @@ type). All types are parameterized so that filters may also transform
 request or reply types; visualized:</p>
 <img alt="_images/filter2.png" src="_images/filter2.png" />
 <p>In most common cases, <code class="docutils literal notranslate"><span class="pre">ReqIn</span></code> is equal to <code class="docutils literal notranslate"><span class="pre">ReqOut</span></code>, and <code class="docutils literal notranslate"><span class="pre">RepIn</span></code> is
-equal to <code class="docutils literal notranslate"><span class="pre">RepOut</span></code> —&nbsp;this is in fact sufficiently common to warrant its
+equal to <code class="docutils literal notranslate"><span class="pre">RepOut</span></code> — this is in fact sufficiently common to warrant its
 own alias:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span> <span class="nc">extends</span> <span class="nc">Filter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span>, <span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">SimpleFilter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]</span> <span class="k">extends</span> <span class="nc">Filter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">,</span> <span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>This, then, is a complete definition of a timeout filter:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">SimpleFilter</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Duration</span><span class="o">,</span> <span class="nc">Future</span><span class="o">,</span> <span class="nc">Timer</span><span class="o">}</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.{</span><span class="nc">Service</span><span class="p">,</span> <span class="nc">SimpleFilter</span><span class="p">}</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">util</span><span class="p">.{</span><span class="nc">Duration</span><span class="p">,</span> <span class="nc">Future</span><span class="p">,</span> <span class="nc">Timer</span><span class="p">}</span>
 
-<span class="k">class</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](</span><span class="n">timeout</span><span class="k">:</span> <span class="kt">Duration</span><span class="o">,</span> <span class="n">timer</span><span class="k">:</span> <span class="kt">Timer</span><span class="o">)</span>
-  <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span> <span class="o">{</span>
+<span class="k">class</span> <span class="nc">TimeoutFilter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">](</span><span class="n">timeout</span><span class="p">:</span> <span class="nc">Duration</span><span class="p">,</span> <span class="n">timer</span><span class="p">:</span> <span class="nc">Timer</span><span class="p">)</span>
+  <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]</span> <span class="p">{</span>
 
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Req</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Rep</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">res</span> <span class="k">=</span> <span class="n">service</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
-    <span class="n">res</span><span class="o">.</span><span class="n">within</span><span class="o">(</span><span class="n">timer</span><span class="o">,</span> <span class="n">timeout</span><span class="o">)</span>
-  <span class="o">}</span>
-<span class="o">}</span>
+  <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="nc">Req</span><span class="p">,</span> <span class="n">service</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]):</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Rep</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="n">res</span> <span class="o">=</span> <span class="n">service</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="n">res</span><span class="p">.</span><span class="n">within</span><span class="p">(</span><span class="n">timer</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>The filter is given a request and the next service in the filter chain.
@@ -142,52 +142,53 @@ It then dispatches this request, applying a timeout on the returned
 <code class="docutils literal notranslate"><span class="pre">Future</span></code> — <code class="docutils literal notranslate"><span class="pre">within</span></code> is a method on <code class="docutils literal notranslate"><span class="pre">Future</span></code> which applies the given
 timeout, failing the future with a timeout exception should it fail
 to complete within the given deadline.</p>
-</div>
-<div class="section" id="composing-filters-and-services">
+</section>
+<section id="composing-filters-and-services">
 <span id="composing-services-filters"></span><h2>Composing filters and services<a class="headerlink" href="#composing-filters-and-services" title="Permalink to this headline">¶</a></h2>
 <p>Filters and services compose with the <code class="docutils literal notranslate"><span class="pre">andThen</span></code> method. For example
 to furnish a service with timeout behavior:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Service</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="n">http</span>
 
-<span class="k">val</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">...</span>
-<span class="k">val</span> <span class="n">timeoutFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">](...)</span>
+<span class="kd">val</span> <span class="n">service</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span> <span class="p">...</span>
+<span class="kd">val</span> <span class="n">timeoutFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">](...)</span>
 
-<span class="k">val</span> <span class="n">serviceWithTimeout</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">timeoutFilter</span><span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">service</span><span class="o">)</span>
+<span class="kd">val</span> <span class="n">serviceWithTimeout</span><span class="p">:</span> <span class="nc">Service</span><span class="p">[</span><span class="n">http</span><span class="p">.</span><span class="nc">Request</span><span class="p">,</span> <span class="n">http</span><span class="p">.</span><span class="nc">Response</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">timeoutFilter</span><span class="p">.</span><span class="n">andThen</span><span class="p">(</span><span class="n">service</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Applying a filter to a <code class="docutils literal notranslate"><span class="pre">Service</span></code> produces a new <code class="docutils literal notranslate"><span class="pre">Service</span></code> whose requests
 are first filtered through <code class="docutils literal notranslate"><span class="pre">timeoutFilter</span></code>.</p>
 <p>We can also compose filters with <code class="docutils literal notranslate"><span class="pre">andThen</span></code>, creating composite filters,
 so that</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Filter</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.RetryFilter</span>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nc">Filter</span>
+<span class="k">import</span> <span class="nn">com</span><span class="p">.</span><span class="nn">twitter</span><span class="p">.</span><span class="nn">finagle</span><span class="p">.</span><span class="nn">service</span><span class="p">.</span><span class="nc">RetryFilter</span>
 
-<span class="k">def</span> <span class="n">retry</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span><span class="k">:</span> <span class="kt">RetryFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">def</span> <span class="n">retryWithTimeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span><span class="k">:</span> <span class="kt">Filter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span>, <span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">retry</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">].</span><span class="n">andThen</span><span class="o">(</span><span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](...))</span>
+<span class="k">def</span> <span class="nf">retry</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]:</span> <span class="nc">RetryFilter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">def</span> <span class="nf">retryWithTimeoutFilter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]:</span> <span class="nc">Filter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">,</span> <span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]</span> <span class="o">=</span>
+  <span class="n">retry</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">].</span><span class="n">andThen</span><span class="p">(</span><span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">](...))</span>
 </pre></div>
 </div>
 <p>creates a filter that dispatches requests first through <code class="docutils literal notranslate"><span class="pre">retryFilter</span></code> and
 then <code class="docutils literal notranslate"><span class="pre">timeoutFilter</span></code>.</p>
-</div>
-<div class="section" id="servicefactory">
+</section>
+<section id="servicefactory">
 <span id="service-factory"></span><h2>ServiceFactory<a class="headerlink" href="#servicefactory" title="Permalink to this headline">¶</a></h2>
 <p>In certain modules, it’s important to take into account the process of acquiring
 a <code class="docutils literal notranslate"><span class="pre">Service</span></code>. For example, a connection pool would need to play a significant role
 in the <code class="docutils literal notranslate"><span class="pre">Service</span></code> acquisition phase. The <code class="docutils literal notranslate"><span class="pre">ServiceFactory</span></code> exists for this exact reason.
-It produces <code class="docutils literal notranslate"><span class="pre">Service</span></code>’s over which requests can be dispatched. Its definition:</p>
-<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">abstract</span> <span class="k">class</span> <span class="nc">ServiceFactory</span><span class="o">[</span><span class="kt">-Req</span>, <span class="kt">+Rep</span><span class="o">]</span>
-  <span class="nc">extends</span> <span class="o">(</span><span class="nc">ClientConnection</span> <span class="k">=&gt;</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]])</span>
+It produces <code class="docutils literal notranslate"><span class="pre">Service</span></code>'s over which requests can be dispatched. Its definition:</p>
+<div class="highlight-scala notranslate"><div class="highlight"><pre><span></span><span class="k">abstract</span> <span class="k">class</span> <span class="nc">ServiceFactory</span><span class="p">[</span><span class="o">-</span><span class="nc">Req</span><span class="p">,</span> <span class="o">+</span><span class="nc">Rep</span><span class="p">]</span>
+  <span class="k">extends</span> <span class="p">(</span><span class="nc">ClientConnection</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="p">[</span><span class="nc">Service</span><span class="p">[</span><span class="nc">Req</span><span class="p">,</span> <span class="nc">Rep</span><span class="p">]])</span>
 </pre></div>
 </div>
 <p>Internally, Finagle makes heavy use of this. In Finagle’s client and server stacks, modules
 are lifted into ServiceFactories and then composed using the aforementioned combinators.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -238,7 +239,7 @@ are lifted into ServiceFactories and then composed using the aforementioned comb
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2022 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2024 Twitter, Inc.</div>
   
   </body>
 </html>
