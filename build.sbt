@@ -4,7 +4,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 Global / excludeLintKeys += scalacOptions
 
 // All Twitter library releases are date versioned as YY.MM.patch
-val releaseVersion = "24.2.0-SNAPSHOT"
+val releaseVersion = "24.5.0"
 
 val libthriftVersion = "0.10.0"
 
