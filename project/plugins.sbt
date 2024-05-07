@@ -1,7 +1,7 @@
 resolvers += Classpaths.sbtPluginReleases
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-val releaseVersion = "24.5.0"
+val releaseVersion = "24.8.0-SNAPSHOT"
 
 addSbtPlugin("com.twitter" % "scrooge-sbt-plugin" % releaseVersion)
 
