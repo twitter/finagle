@@ -1,6 +1,8 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig, MySqlVersion}
+import com.twitter.finagle.mysql.harness.config.DatabaseConfig
+import com.twitter.finagle.mysql.harness.config.InstanceConfig
+import com.twitter.finagle.mysql.harness.config.MySqlVersion
 
 package object integration {
 
@@ -50,8 +52,11 @@ package object integration {
   /**
    * This is the default InstanceConfig used by the integration package.
    * This will look for mysql binaries in java.io.tmpdir.
+   *
+   * When updating this, please update the README in this folder to specify the expected
+   * installation location.
    */
-  val defaultInstanceConfig: InstanceConfig = InstanceConfig(v5_7_28)
+  val defaultInstanceConfig: InstanceConfig = InstanceConfig(v8_0_21)
   val defaultDatabaseConfig: DatabaseConfig =
     DatabaseConfig(databaseName = "a_database", users = Seq.empty, setupQueries = Seq.empty)
 }

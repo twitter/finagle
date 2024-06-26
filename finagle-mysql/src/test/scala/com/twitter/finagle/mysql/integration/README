@@ -1,0 +1,8 @@
+In order for the integration tests to run, a mysql installation must exist at:
+
+/tmp/.embedded_mysql/8.0.21
+
+(The version defined by `defaultInstanceConfig` in
+finagle/finagle-mysql/src/test/scala/com/twitter/finagle/mysql/integration/package.scala)
+
+You can download this from: https://dev.mysql.com/downloads/mysql/

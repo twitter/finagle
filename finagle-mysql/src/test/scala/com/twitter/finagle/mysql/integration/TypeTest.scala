@@ -1,15 +1,18 @@
 package com.twitter.finagle.mysql.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.module.scala.ScalaObjectMapper
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.harness.EmbeddedSimpleSuite
-import com.twitter.finagle.mysql.harness.config.{DatabaseConfig, InstanceConfig}
+import com.twitter.finagle.mysql.harness.config.DatabaseConfig
+import com.twitter.finagle.mysql.harness.config.InstanceConfig
 import com.twitter.finagle.mysql.param.UnsignedColumns
 import com.twitter.util.TwitterDateFormat
 import java.sql.Timestamp
 import java.util.TimeZone
-import org.scalactic.{Equality, TolerantNumerics}
+import org.scalactic.Equality
+import org.scalactic.TolerantNumerics
 
 object NumericTypeTest {
   val createTableQuery: String =
