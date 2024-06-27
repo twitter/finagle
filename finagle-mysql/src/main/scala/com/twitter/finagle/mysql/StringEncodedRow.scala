@@ -18,7 +18,7 @@ private class StringEncodedRow(
   /**
    * Convert the string representation of each value
    * into an appropriate Value object.
-   * [[https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow]]
+   * [[https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_com_query_response_text_resultset.html]]
    */
   lazy val values: IndexedSeq[Value] = {
     val reader = MysqlBuf.reader(rawRow)
@@ -59,14 +59,9 @@ private class StringEncodedRow(
           case Type.Year =>
             ShortValue(bytesToLong(bytes).toShort)
           case Type.VarChar | Type.String | Type.VarString | Type.TinyBlob | Type.Blob |
-              Type.MediumBlob if !MysqlCharset.isBinary(charset) =>
+              Type.MediumBlob | Type.LongBlob if !MysqlCharset.isBinary(charset) =>
             // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
             StringValue(bytesToString(bytes, charset))
-          case Type.LongBlob =>
-            // LongBlobs indicate a sequence of bytes with length >= 2^24 which
-            // can't fit into a Array[Byte]. This should be streamed and
-            // support for this needs to begin at the transport layer.
-            throw new UnsupportedOperationException("LongBlob is not supported!")
           case typ =>
             RawValue(typ, charset, isBinary = false, bytes)
         }

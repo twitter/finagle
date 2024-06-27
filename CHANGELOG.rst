@@ -13,6 +13,12 @@ Runtime Behavior Changes
 * finagle-mysql: (Testing behaviour change only) Updated mysql version expected by integration tests to 8.0.21.
   Added README in integration tests noting that this must exist for integration tests to run. ``PHAB_ID=D1152235``
 
+
+New Features
+~~~~~~~~~~
+
+* finagle-mysql: Added support for LONG_BLOB data type. ``PHAB_ID=D1152247``
+
 24.5.0
 ------
 

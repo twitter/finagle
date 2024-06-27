@@ -311,7 +311,7 @@ object BlobTypeTest {
         VALUES (1, 'a', 'b', 'c', 'd', 'e', X'66',
         X'67', X'68', X'6970', X'6A', 'small', '1');"""
 
-  val sqlQuery: String = "SELECT * FROM `blobs`"
+  val selectRowQuery: String = "SELECT * FROM `blobs`"
 }
 
 class BlobTypeTest extends EmbeddedSimpleSuite {
@@ -325,21 +325,40 @@ class BlobTypeTest extends EmbeddedSimpleSuite {
     // Setup temporary table and insert into it
     await(client.query(createTableQuery))
     await(client.query(insertQuery))
-    val textEncoded = getTextEncodedRow(client)
-    val binaryEncoded = getBinaryEncodedRow(client)
+    val textEncoded = getTextEncodedRow(client, selectRowQuery)
+    val binaryEncoded = getBinaryEncodedRow(client, selectRowQuery)
 
     testRow(textEncoded)
     testRow(binaryEncoded)
+
+    test("extract text from longblob") {
+      // Note -- in mysql 8 group_concat will return a long_blob. If we add a long_blob column,
+      // we'll get back a string in binary when we select, which doesn't exercise the long_blob code
+      // path, so don't test that.
+      val textExcodedRow = getTextEncodedRow(client, "select group_concat('1', '2', '3')")
+      assert(textExcodedRow.fields.map(_.fieldType) == Seq(Type.LongBlob))
+      assert(
+        textExcodedRow.values == Seq(
+          StringValue("123")
+        ))
+
+      val binaryEncodedRow = getBinaryEncodedRow(client, "select group_concat('1', '2', '3')")
+      assert(binaryEncodedRow.fields.map(_.fieldType) == Seq(Type.LongBlob))
+      assert(
+        binaryEncodedRow.values == Seq(
+          StringValue("123")
+        ))
+    }
   })
 
-  def getTextEncodedRow(client: Client with Transactions): Row =
-    await(client.query(sqlQuery) map {
+  def getTextEncodedRow(client: Client with Transactions, query: String): Row =
+    await(client.query(query) map {
       case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
-  def getBinaryEncodedRow(client: Client with Transactions): Row = {
-    val ps = client.prepare(sqlQuery)
+  def getBinaryEncodedRow(client: Client with Transactions, query: String): Row = {
+    val ps = client.prepare(query)
     val binaryrows: Seq[Row] = await(ps.select()(identity))
     assert(binaryrows.size == 1)
     binaryrows.head

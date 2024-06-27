@@ -1,6 +1,7 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader}
+import com.twitter.finagle.mysql.transport.MysqlBuf
+import com.twitter.finagle.mysql.transport.MysqlBufReader
 import com.twitter.io.Buf
 
 /**
@@ -39,7 +40,7 @@ private class BinaryEncodedRow(
    * Convert the binary representation of each value
    * into an appropriate Value object.
    *
-   * @see [[https://mariadb.com/kb/en/mariadb/resultset-row/]] for details
+   * @see [[https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_binary_resultset.html]] for details
    *     about the binary row format.
    */
   lazy val values: IndexedSeq[Value] = {
@@ -69,14 +70,11 @@ private class BinaryEncodedRow(
             case Type.Year => ShortValue(reader.readShortLE())
             // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
             case Type.VarChar | Type.String | Type.VarString | Type.TinyBlob | Type.Blob |
-                Type.MediumBlob
+                Type.MediumBlob | Type.LongBlob
                 if !MysqlCharset.isBinary(field.charset) && MysqlCharset.isCompatible(
                   field.charset
                 ) =>
               StringValue(reader.readLengthCodedString(MysqlCharset(field.charset)))
-
-            case Type.LongBlob =>
-              throw new UnsupportedOperationException("LongBlob is not supported!")
             case typ => RawValue(typ, field.charset, isBinary = true, reader.readLengthCodedBytes())
           }
         }
