@@ -1,6 +1,7 @@
 package com.twitter.finagle.decoder
 
-import com.twitter.io.{Buf, ByteReader}
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
 import scala.collection.mutable.ArrayBuffer
 
 private[twitter] object LengthFieldFramer {
@@ -150,7 +151,7 @@ private[twitter] class LengthFieldFramer(
         }
 
         accum = accum.slice(frameCursor, accum.length)
-        frames.toIndexedSeq
+        frames.asInstanceOf[IndexedSeq[Buf]]
       } else {
         NoFrames
       }
