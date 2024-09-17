@@ -1,0 +1,27 @@
+[ req ]
+default_bits       = 256
+default_md         = sha256
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt             = no
+
+[ req_distinguished_name ]
+C  = US
+ST = CA
+L  = San Francisco
+O  = Twitter
+OU = Core System Libraries
+CN = Twitter Core System Libraries Certificate
+
+[ req_ext ]
+subjectAltName = @alt_names
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = clientAuth
+
+[ alt_names ]
+URI.1 = twtr:svc:csl-test:test-ecserver:devel:local
+
+[ v3_ca ]
+keyUsage = critical, keyEncipherment, dataEncipherment
+extendedKeyUsage = TLS Web Client Authentication
+subjectAltName = @alt_names

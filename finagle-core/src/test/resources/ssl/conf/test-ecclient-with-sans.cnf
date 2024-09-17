@@ -1,0 +1,27 @@
+[ req ]
+distinguished_name  = req_distinguished_name
+x509_extensions     = v3_req
+prompt              = no
+
+[ req_distinguished_name ]
+C  = US
+ST = CA
+L  = San Francisco
+O  = Twitter
+OU = Core System Libraries
+CN = Core System Libraries Client
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = critical, KeyEncipherment, DataEncipherment
+extendedKeyUsage = TLS Web Client Authentication
+subjectAltName = @alt_names
+
+[ alt_names ]
+URI.1 = twtr:svc:csl-test:test-ecclient:devel:local
+
+[ v3_ca ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer
+basicConstraints = critical, CA:FALSE
+subjectAltName = @alt_names

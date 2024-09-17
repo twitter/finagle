@@ -60,7 +60,6 @@ junit_tests(
     # env_local is tag for bazel only, added due to DPB-14188
     tags = [
         "bazel-compatible",
-        "known-to-fail-jira:CSL-12418",
     ],
     dependencies = [
         ":pushsession-utils",
