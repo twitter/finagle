@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.protocol.text
 import com.twitter.io.Buf
 import scala.collection.mutable
 
-private[memcached] trait FrameDecoder[Result] {
+private[memcached] abstract class FrameDecoder[Result] {
 
   /**
    * Return the number of raw bytes needed, or -1 if a text line is needed.

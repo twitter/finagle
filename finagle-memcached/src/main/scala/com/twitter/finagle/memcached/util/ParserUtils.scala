@@ -44,7 +44,7 @@ object ParserUtils {
         segmentStart = segmentEnd + 1
       }
     }
-    split.toSeq
+    split
   }
 
   /**
@@ -69,5 +69,4 @@ object ParserUtils {
       num
     }
   }
-
 }
