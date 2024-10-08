@@ -61,11 +61,16 @@ private object WorkerEventLoop {
     )
   }
 
-  def make(executor: Executor, numWorkers: Int): EventLoopGroup = {
+  def make(executor: Executor, numWorkers: Int, ioRatio: Int = 50): EventLoopGroup = {
     workerPoolSize.addAndGet(numWorkers)
     val result =
-      if (useNativeEpoll() && Epoll.isAvailable) new EpollEventLoopGroup(numWorkers, executor)
-      else new NioEventLoopGroup(numWorkers, executor)
+      if (useNativeEpoll() && Epoll.isAvailable) {
+        val group = new EpollEventLoopGroup(numWorkers, executor)
+        group.setIoRatio(ioRatio)
+        group
+      } else {
+        new NioEventLoopGroup(numWorkers, executor)
+      }
 
     eventLoopGroups.add(result)
 
@@ -73,7 +78,10 @@ private object WorkerEventLoop {
   }
 
   lazy val Global: EventLoopGroup = make(
-    Executors.newCachedThreadPool(new BlockingTimeTrackingThreadFactory(mkNettyThreadFactory())),
-    numWorkers()
+    executor = Executors.newCachedThreadPool(
+      new BlockingTimeTrackingThreadFactory(mkNettyThreadFactory())
+    ),
+    numWorkers = numWorkers(),
+    ioRatio = ioRatio()
   )
 }
