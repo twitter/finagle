@@ -22,11 +22,15 @@ and tenuring threshold (`jvm/tenuring_threshold`).
   A gauge of the number of the total number of collections that have occurred.
 
 **jvm/gc/eden/pause_msec**
-  A stat of the durations, in millseconds, of the eden collection pauses.
+  A stat of the durations, in millseconds, of the eden collection pauses. This is equivalent
+  to jvm/gc/ParNew/pause_msec.
 
 **jvm/gc/{gc_pool_name}/msec**
   A gauge for the named gc pool of the total elapsed time garbage collection pool
   doing collections, in milliseconds. Names are subject to change.
+
+**jvm/gc/{gc_pool_name}/pause_msec**
+  A stat for the durations, in milliseconds, of the collection pauses for the named gc pool.
 
 **jvm/gc/{gc_pool_name}/cycles**
   A gauge for the named gc pool of the total number of collections that have occurred.
