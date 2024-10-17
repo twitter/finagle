@@ -104,7 +104,7 @@ object ClientFunction {
     tlReusableBuffer: TReusableBuffer,
     protocolFactory: TProtocolFactory
   ): ThriftClientRequest = {
-    val memoryBuffer = tlReusableBuffer.get()
+    val memoryBuffer = tlReusableBuffer.take()
     try {
       val oprot = protocolFactory.getProtocol(memoryBuffer)
 

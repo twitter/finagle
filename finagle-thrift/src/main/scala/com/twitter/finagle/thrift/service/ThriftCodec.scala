@@ -1,13 +1,25 @@
 package com.twitter.finagle.thrift.service
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.thrift.{ClientDeserializeCtx, ThriftClientRequest, maxReusableBufferSize}
-import com.twitter.finagle.{Filter, Service, SourcedException}
-import com.twitter.scrooge.{TReusableBuffer, ThriftMethod, ThriftStruct, ThriftStructCodec}
-import com.twitter.util.{Future, Return, Throw, Try}
+import com.twitter.finagle.thrift.ClientDeserializeCtx
+import com.twitter.finagle.thrift.ThriftClientRequest
+import com.twitter.finagle.thrift.maxReusableBufferSize
+import com.twitter.finagle.Filter
+import com.twitter.finagle.Service
+import com.twitter.finagle.SourcedException
+import com.twitter.scrooge.TReusableBuffer
+import com.twitter.scrooge.ThriftMethod
+import com.twitter.scrooge.ThriftStruct
+import com.twitter.scrooge.ThriftStructCodec
+import com.twitter.util.Future
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Try
 import java.util.Arrays
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
+import org.apache.thrift.protocol.TMessage
+import org.apache.thrift.protocol.TMessageType
+import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.transport.TMemoryInputTransport
 
 object ThriftCodec {
@@ -63,7 +75,7 @@ object ThriftCodec {
     pf: TProtocolFactory,
     oneway: Boolean
   ): ThriftClientRequest = {
-    val buf = tlReusableBuffer.get()
+    val buf = tlReusableBuffer.take()
     val oprot = pf.getProtocol(buf)
 
     oprot.writeMessageBegin(new TMessage(methodName, TMessageType.CALL, 0))
