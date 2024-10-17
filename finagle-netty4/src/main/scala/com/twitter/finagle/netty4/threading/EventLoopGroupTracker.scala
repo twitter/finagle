@@ -8,7 +8,7 @@ import io.netty.channel.EventLoopGroup
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import scala.reflect.internal.util.WeakHashSet
 
-object EventLoopGroupExecutionDelayTracker {
+object EventLoopGroupTracker {
 
   private[threading] val trackedEventLoopGroups = new WeakHashSet[EventLoopGroup]()
 
@@ -19,8 +19,8 @@ object EventLoopGroupExecutionDelayTracker {
    * instrumentation.
    *
    * @param nettyEventLoopGroup The netty EventLoopGroup for which thread delays should be captured
-   * @param injectionPeriod The fixed delay for the runnables added to the EventLoopGroup threads to
-   *                        capture thread execution delays.
+   * @param trackingTaskPeriod The fixed delay for the runnables added to the EventLoopGroup threads to
+   *                        capture thread tracking information.
    * @param dumpThreshold If > 0ms log seen delay for threads and the stack trace for threads at
    *                      the when the threads exceed the dumpThreshold delay.
    * @param statsReceiver The stats receiver under which execution delay stats should be reported.
@@ -29,7 +29,7 @@ object EventLoopGroupExecutionDelayTracker {
    */
   def track(
     nettyEventLoopGroup: EventLoopGroup,
-    injectionPeriod: Duration,
+    trackingTaskPeriod: Duration,
     dumpThreshold: Duration,
     statsReceiver: StatsReceiver,
     dumpThreadPoolName: String,
@@ -50,10 +50,11 @@ object EventLoopGroupExecutionDelayTracker {
       val stat = statsReceiver.stat("workerpool", "deviation_ms")
       while (workerIter.hasNext) {
         val loop = workerIter.next()
-        new EventLoopGroupExecutionDelayTrackingRunnable(
+        new EventLoopGroupTrackingRunnable(
           loop,
-          injectionPeriod,
+          trackingTaskPeriod,
           stat,
+          statsReceiver,
           dumpThreshold,
           dumpThresholdExceededThreadPool,
           logger

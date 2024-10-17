@@ -4,7 +4,7 @@ import com.twitter.finagle.ListeningServer
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.channel.Netty4FramedServerChannelInitializer
 import com.twitter.finagle.netty4.channel.Netty4RawServerChannelInitializer
-import com.twitter.finagle.netty4.threading.EventLoopGroupExecutionDelayTracker
+import com.twitter.finagle.netty4.threading.EventLoopGroupTracker
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.Listener
@@ -221,13 +221,13 @@ private[finagle] class ListeningServerBuilder(
 
       def boundAddress: SocketAddress = ch.localAddress()
 
-      private[this] val workerPoolExecutionDelayTrackingSettings =
-        params[param.TrackWorkerPoolExecutionDelay]
-      if (workerPoolExecutionDelayTrackingSettings.enableTracking) {
-        EventLoopGroupExecutionDelayTracker.track(
+      private[this] val workerPoolTrackingSettings =
+        params[param.TrackWorkerPool]
+      if (workerPoolTrackingSettings.enableTracking) {
+        EventLoopGroupTracker.track(
           params[param.WorkerPool].eventLoopGroup,
-          workerPoolExecutionDelayTrackingSettings.trackingTaskPeriod,
-          workerPoolExecutionDelayTrackingSettings.threadDumpThreshold,
+          workerPoolTrackingSettings.trackingTaskPeriod,
+          workerPoolTrackingSettings.threadDumpThreshold,
           params[Stats].statsReceiver,
           s"finagle/netty-4/delayTracking/${boundAddress}",
           Logger.get("com.twitter.finagle.netty4.Netty4Listener.threadDelay")

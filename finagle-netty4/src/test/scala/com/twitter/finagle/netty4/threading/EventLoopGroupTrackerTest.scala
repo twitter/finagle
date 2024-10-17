@@ -18,14 +18,14 @@ import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.JavaConverters._
 import org.scalatest.funsuite.AnyFunSuite
 
-class EventLoopGroupExecutionDelayTrackerTest
+class EventLoopGroupTrackerTest
     extends AnyFunSuite
     with Eventually
     with IntegrationPatience
     with MockitoSugar {
 
   test(
-    "EventLoopGroupExecutionDelayTracker with thread dump disabled records stats but no threads created and no logging"
+    "EventLoopGroupTracker with thread dump disabled records stats but no threads created and no logging"
   ) {
     val statsReceiver = new InMemoryStatsReceiver
 
@@ -37,7 +37,7 @@ class EventLoopGroupExecutionDelayTrackerTest
 
     val eventLoopGroup = new NioEventLoopGroup(1, executor)
 
-    EventLoopGroupExecutionDelayTracker.track(
+    EventLoopGroupTracker.track(
       eventLoopGroup,
       Duration.fromMilliseconds(50),
       Duration.Zero,
@@ -55,8 +55,14 @@ class EventLoopGroupExecutionDelayTrackerTest
     // Force ourselves to wait
     Thread.sleep(300)
 
-    // we should have deviation stats
+    // we should have deviation, cpu time, and active sockets stats
     assert(statsReceiver.stats.get(Seq("workerpool", "deviation_ms")).isDefined)
+    assert(
+      statsReceiver.counters
+        .get(Seq("finagle_thread_delay_tracking_test-1", "cpu_time_ms")).isDefined)
+    assert(
+      statsReceiver.stats
+        .get(Seq("finagle_thread_delay_tracking_test-1", "active_sockets")).isDefined)
 
     // we should have no threads with the name no_threads_expected
     Thread.getAllStackTraces.keySet().asScala.foreach { thread: Thread =>
@@ -68,7 +74,7 @@ class EventLoopGroupExecutionDelayTrackerTest
   }
 
   test(
-    "EventLoopGroupExecutionDelayTracker with thread dump enabled records stats creates watch threads and logs dumps"
+    "EventLoopGroupTracker with thread dump enabled records stats creates watch threads and logs dumps"
   ) {
     val statsReceiver = new InMemoryStatsReceiver
 
@@ -80,7 +86,7 @@ class EventLoopGroupExecutionDelayTrackerTest
 
     val eventLoopGroup = new NioEventLoopGroup(1, executor)
 
-    EventLoopGroupExecutionDelayTracker.track(
+    EventLoopGroupTracker.track(
       eventLoopGroup,
       Duration.fromMilliseconds(50),
       Duration.fromMilliseconds(10),
@@ -115,10 +121,10 @@ class EventLoopGroupExecutionDelayTrackerTest
   }
 
   test(
-    "validate EventLoopGroupExecutionDelayTracker track guards against multiple submissions of the same EventLoopGroup"
+    "validate EventLoopGroupTracker track guards against multiple submissions of the same EventLoopGroup"
   ) {
     // clear our tracking set first as other tests added to the set
-    EventLoopGroupExecutionDelayTracker.trackedEventLoopGroups.clear()
+    EventLoopGroupTracker.trackedEventLoopGroups.clear()
 
     val statsReceiver = new InMemoryStatsReceiver
 
@@ -131,7 +137,7 @@ class EventLoopGroupExecutionDelayTrackerTest
     val eventLoopGroup = new NioEventLoopGroup(1, executor)
     val eventLoopGroup2 = new NioEventLoopGroup(1, executor)
 
-    EventLoopGroupExecutionDelayTracker.track(
+    EventLoopGroupTracker.track(
       eventLoopGroup,
       Duration.fromMilliseconds(50),
       Duration.Zero,
@@ -139,9 +145,9 @@ class EventLoopGroupExecutionDelayTrackerTest
       "execution_delay_test_pool",
       mockLogger
     )
-    assert(EventLoopGroupExecutionDelayTracker.trackedEventLoopGroups.size == 1)
+    assert(EventLoopGroupTracker.trackedEventLoopGroups.size == 1)
 
-    EventLoopGroupExecutionDelayTracker.track(
+    EventLoopGroupTracker.track(
       eventLoopGroup2,
       Duration.fromMilliseconds(50),
       Duration.Zero,
@@ -149,9 +155,9 @@ class EventLoopGroupExecutionDelayTrackerTest
       "execution_delay_test_pool",
       mockLogger
     )
-    assert(EventLoopGroupExecutionDelayTracker.trackedEventLoopGroups.size == 2)
+    assert(EventLoopGroupTracker.trackedEventLoopGroups.size == 2)
 
-    EventLoopGroupExecutionDelayTracker.track(
+    EventLoopGroupTracker.track(
       eventLoopGroup,
       Duration.fromMilliseconds(50),
       Duration.Zero,
@@ -159,7 +165,7 @@ class EventLoopGroupExecutionDelayTrackerTest
       "execution_delay_test_pool",
       mockLogger
     )
-    assert(EventLoopGroupExecutionDelayTracker.trackedEventLoopGroups.size == 2)
+    assert(EventLoopGroupTracker.trackedEventLoopGroups.size == 2)
 
   }
 }

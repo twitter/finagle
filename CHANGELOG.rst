@@ -12,12 +12,24 @@ Runtime Behavior Changes
 
 * finagle-mysql: (Testing behaviour change only) Updated mysql version expected by integration tests to 8.0.21.
   Added README in integration tests noting that this must exist for integration tests to run. ``PHAB_ID=D1152235``
+* finagle-netty4: `EventLoopGroupTracker` (previously named `EventLoopGroupExecutionDelayTracker`) now collects
+  stats cpu_time_ms and active_sockets per netty worker thread.
 
 
 New Features
 ~~~~~~~~~~
 
 * finagle-mysql: Added support for LONG_BLOB data type. ``PHAB_ID=D1152247``
+
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-netty4: `c.t.f.netty4.threading.EventLoopGroupExecutionDelayTracker` has been renamed to
+  `EventLoopGroupTracker`, `c.t.f.netty4.threading.TrackWorkerPoolExecutionDelay` has been renamed to
+  `TrackWorkerPoolExcutionDelay`, `c.t.f.netty4.param.TrackWorkerPoolExecutionDelay` has been renamed
+  to `TrackWorkerPool`. These changes reflect the tracker's new functionality of collecting metrics
+  and data other than the execution delay (see Runtime Behaviour Changes). ``PHAB_ID=D1176906``
 
 24.5.0
 ------
