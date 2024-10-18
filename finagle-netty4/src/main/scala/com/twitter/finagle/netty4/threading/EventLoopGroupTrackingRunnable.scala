@@ -1,5 +1,8 @@
 package com.twitter.finagle.netty4.threading
 
+import com.twitter.finagle.stats.HistogramFormat
+import com.twitter.finagle.stats.MetricBuilder
+import com.twitter.finagle.stats.MetricBuilder.HistogramType
 import com.twitter.finagle.stats.Stat
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
@@ -51,11 +54,35 @@ private[threading] class EventLoopGroupTrackingRunnable(
   private[this] val threadMXBean = ManagementFactory.getThreadMXBean
 
   private[this] val scopedStatsReceiver = statsReceiver.scope(threadName)
-  private[this] val activeSocketsStat = scopedStatsReceiver.stat("active_sockets")
+  private[this] val pendingTasksStat = scopedStatsReceiver.stat(
+    MetricBuilder(
+      metricType = HistogramType,
+      name = Seq("pending_tasks"),
+      percentiles = Array[Double](0.25, 0.50, 0.75, 0.90, 0.95, 0.99),
+      histogramFormat = HistogramFormat.FullSummary
+    )
+  )
+  private[this] val allSocketsStat = scopedStatsReceiver.stat(
+    MetricBuilder(
+      metricType = HistogramType,
+      name = Seq("all_sockets"),
+      percentiles = Array[Double](0.50),
+      histogramFormat = HistogramFormat.FullSummary
+    )
+  )
   private[this] val cpuTimeCounter = scopedStatsReceiver.counter("cpu_time_ms")
+  private[this] val cpuUtilStat = scopedStatsReceiver.stat(
+    MetricBuilder(
+      metricType = HistogramType,
+      name = Seq("cpu_util"),
+      percentiles = Array[Double](0.25, 0.50, 0.75, 0.90, 0.95, 0.99),
+      histogramFormat = HistogramFormat.FullSummary
+    )
+  )
 
   // Accessed only from within the same netty thread
-  private[this] var prevCPUTimeMs = 0L
+  private[this] var prevCPUTimeNs = 0L
+  private[this] var prevWallTimeNs = 0L
 
   setWatchTask()
   executor.scheduleWithFixedDelay(
@@ -71,7 +98,8 @@ private[threading] class EventLoopGroupTrackingRunnable(
       watchTask.get.cancel(false)
     }
 
-    val executionDelay = Time.now - scheduledExecutionTime
+    val now = Time.now
+    val executionDelay = now - scheduledExecutionTime
     if (threadDumpEnabled && executionDelay.inMillis > threadDumpThreshold.inMillis) {
       dumpLogger.warning(
         s"THREAD: $threadName EXECUTION DELAY is greater than ${threadDumpThreshold.inMillis}ms, was ${executionDelay.inMillis}ms"
@@ -79,23 +107,28 @@ private[threading] class EventLoopGroupTrackingRunnable(
     }
 
     delayStat.add(executionDelay.inMillis)
-    scheduledExecutionTime = Time.now.plus(taskTrackingPeriod)
+    scheduledExecutionTime = now.plus(taskTrackingPeriod)
     setWatchTask()
 
-    var numActiveSockets = 0
     // This will be nio event loop or epoll event loop.
-    executor.asInstanceOf[SingleThreadEventLoop].registeredChannelsIterator().forEachRemaining {
-      channel =>
-        if (channel.isActive) {
-          numActiveSockets += 1
-        }
-    }
-    activeSocketsStat.add(numActiveSockets)
+    val loop = executor.asInstanceOf[SingleThreadEventLoop]
+    allSocketsStat.add(loop.registeredChannels())
+    pendingTasksStat.add(loop.pendingTasks())
 
     // `getThreadCPUTime` returns the time in nanoseconds.
-    val currentCPUTimeMs = threadMXBean.getThreadCpuTime(threadId) / 1000000
-    cpuTimeCounter.incr(currentCPUTimeMs - prevCPUTimeMs)
-    prevCPUTimeMs = currentCPUTimeMs
+    val currCPUTimeNs = threadMXBean.getThreadCpuTime(threadId)
+    val cpuTime = currCPUTimeNs - prevCPUTimeNs
+
+    val currWallTimeNs = System.nanoTime()
+    val wallTimeNs = currWallTimeNs - prevWallTimeNs
+    cpuTimeCounter.incr(TimeUnit.NANOSECONDS.toMillis(cpuTime))
+    if (prevWallTimeNs != 0 && wallTimeNs != 0) {
+      cpuUtilStat.add(
+        10000 * cpuTime / wallTimeNs
+      )
+    }
+    prevCPUTimeNs = currCPUTimeNs
+    prevWallTimeNs = currWallTimeNs
   }
 
   private[this] def setWatchTask(): Unit = {

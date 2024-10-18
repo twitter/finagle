@@ -14,6 +14,8 @@ Runtime Behavior Changes
   Added README in integration tests noting that this must exist for integration tests to run. ``PHAB_ID=D1152235``
 * finagle-netty4: `EventLoopGroupTracker` (previously named `EventLoopGroupExecutionDelayTracker`) now collects
   stats cpu_time_ms and active_sockets per netty worker thread.
+* finagle-netty4: `EventLoopGroupTracker`  now collects the distribution of cpu utilization by each netty thread
+  and all_sockets instead of active_sockets. ``PHAB_ID=D1177719``
 
 
 New Features

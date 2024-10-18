@@ -62,7 +62,7 @@ class EventLoopGroupTrackerTest
         .get(Seq("finagle_thread_delay_tracking_test-1", "cpu_time_ms")).isDefined)
     assert(
       statsReceiver.stats
-        .get(Seq("finagle_thread_delay_tracking_test-1", "active_sockets")).isDefined)
+        .get(Seq("finagle_thread_delay_tracking_test-1", "all_sockets")).isDefined)
 
     // we should have no threads with the name no_threads_expected
     Thread.getAllStackTraces.keySet().asScala.foreach { thread: Thread =>
