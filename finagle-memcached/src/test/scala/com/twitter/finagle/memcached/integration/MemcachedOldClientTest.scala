@@ -4,7 +4,8 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.memcached.Client
-import com.twitter.finagle.param.{Stats, Timer}
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.Timer
 import com.twitter.finagle.partitioning.param
 import com.twitter.finagle.partitioning.param.EjectFailedHost
 import com.twitter.finagle.stats.InMemoryStatsReceiver

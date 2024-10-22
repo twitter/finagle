@@ -90,48 +90,50 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
     client.close()
   }
 
-  test("traces fanout requests") {
-    // we use an eventually block to retry the request if we didn't get partitioned to different shards
-    eventually {
-      val tracer = new BufferingTracer()
+  if (!Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
+    test("traces fanout requests") {
+      // we use an eventually block to retry the request if we didn't get partitioned to different shards
+      eventually {
+        val tracer = new BufferingTracer()
 
-      // the servers created in MemcachedTest have inconsistent addresses, which means sharding
-      // will be inconsistent across runs. To combat this, we'll start our own servers and rerun the
-      // tests if we partition to the same shard.
-      val serverOpts =
-        for (_ <- 1 to NumServers)
-          yield TestMemcachedServer.start(
-            Some(new InetSocketAddress(InetAddress.getLoopbackAddress, 0)))
-      val servers: Seq[TestMemcachedServer] = serverOpts.flatten
+        // the servers created in MemcachedTest have inconsistent addresses, which means sharding
+        // will be inconsistent across runs. To combat this, we'll start our own servers and rerun the
+        // tests if we partition to the same shard.
+        val serverOpts =
+          for (_ <- 1 to NumServers)
+            yield TestMemcachedServer.start(
+              Some(new InetSocketAddress(InetAddress.getLoopbackAddress, 0)))
+        val servers: Seq[TestMemcachedServer] = serverOpts.flatten
 
-      val client = Memcached.client
-        .configured(param.KeyHasher(KeyHasher.FNV1_32))
-        .connectionsPerEndpoint(1)
-        .withTracer(tracer)
-        .newRichClient(Name.bound(servers.map { s => Address(s.address) }: _*), clientName)
+        val client = Memcached.client
+          .configured(param.KeyHasher(KeyHasher.FNV1_32))
+          .connectionsPerEndpoint(1)
+          .withTracer(tracer)
+          .newRichClient(Name.bound(servers.map { s => Address(s.address) }: _*), clientName)
 
-      awaitResult(client.set("foo", Buf.Utf8("bar")))
-      awaitResult(client.set("baz", Buf.Utf8("boing")))
-      awaitResult(
-        client.gets(Seq("foo", "baz"))
-      ).flatMap {
-        case (key, (Buf.Utf8(value1), Buf.Utf8(value2))) =>
-          Map((key, (value1, value2)))
-      }
+        awaitResult(client.set("foo", Buf.Utf8("bar")))
+        awaitResult(client.set("baz", Buf.Utf8("boing")))
+        awaitResult(
+          client.gets(Seq("foo", "baz"))
+        ).flatMap {
+          case (key, (Buf.Utf8(value1), Buf.Utf8(value2))) =>
+            Map((key, (value1, value2)))
+        }
 
-      client.close()
-      servers.foreach(_.stop())
+        client.close()
+        servers.foreach(_.stop())
 
-      val gets: Seq[TraceId] = tracer.iterator.toList collect {
-        case Record(id, _, Annotation.Rpc("Gets"), _) => id
-      }
+        val gets: Seq[TraceId] = tracer.iterator.toList collect {
+          case Record(id, _, Annotation.Rpc("Gets"), _) => id
+        }
 
-      // Moving the MemcachedTracingFilter means that partitioned requests should result in two gets spans
-      assert(gets.length == 2)
-      // However the FanoutProxy should ensure that the requests are stored in peers, not the same tid.
-      gets.tail.foreach { get =>
-        assert(get._parentId == gets.head._parentId)
-        assert(get.spanId != gets.head.spanId)
+        // Moving the MemcachedTracingFilter means that partitioned requests should result in two gets spans
+        assert(gets.length == 2)
+        // However the FanoutProxy should ensure that the requests are stored in peers, not the same tid.
+        gets.tail.foreach { get =>
+          assert(get._parentId == gets.head._parentId)
+          assert(get.spanId != gets.head.spanId)
+        }
       }
     }
   }

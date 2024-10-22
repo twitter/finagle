@@ -1,8 +1,13 @@
 package com.twitter.finagle.memcached.integration.external
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.util.{Duration, RandomSocket, Stopwatch}
-import java.net.{BindException, InetAddress, InetSocketAddress, ServerSocket}
+import com.twitter.util.Duration
+import com.twitter.util.RandomSocket
+import com.twitter.util.Stopwatch
+import java.net.BindException
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.ServerSocket
 import scala.jdk.CollectionConverters
 import scala.collection._
 import scala.collection.immutable.Stream
@@ -12,9 +17,12 @@ object TestMemcachedServer {
   def start(): Option[TestMemcachedServer] = start(None)
 
   def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
-    if (!Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined)
-      InternalMemcached.start(address)
-    else ExternalMemcached.start(address)
+    Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")) match {
+      case Some(externalMemcachedPath) =>
+        ExternalMemcached.start(address, externalMemcachedPath)
+      case None =>
+        InternalMemcached.start(address)
+    }
   }
 }
 
@@ -68,13 +76,13 @@ private[memcached] object ExternalMemcached { self =>
     address
   }
 
-  // Use overloads instead of default args to support java integration tests
-
-  def start(): Option[TestMemcachedServer] = start(None)
-
-  def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
+  def start(
+    address: Option[InetSocketAddress],
+    externalMemcachedPath: String
+  ): Option[TestMemcachedServer] = {
     def exec(address: InetSocketAddress): Process = {
-      val cmd = List("memcached", "-l", address.getHostName, "-p", address.getPort.toString)
+      val cmd =
+        List(externalMemcachedPath, "-l", address.getHostName, "-p", address.getPort.toString)
       val builder = new ProcessBuilder(cmd: _*)
       builder.start()
     }
@@ -124,7 +132,7 @@ private[memcached] object ExternalMemcached { self =>
       result = true
     } catch {
       case ex: BindException =>
-        result = (ex.getMessage != "Address already in use")
+        result = !ex.getMessage.contains("Address already in use")
     } finally {
       if (ss != null)
         ss.close()

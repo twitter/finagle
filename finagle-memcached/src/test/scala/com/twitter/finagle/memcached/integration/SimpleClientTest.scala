@@ -109,8 +109,9 @@ class SimpleClientTest extends AnyFunSuite with BeforeAndAfter {
     )
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("gets") {
+      assert(awaitResult(client.gets("foos")).isEmpty)
       awaitResult(client.set("foos", Buf.Utf8("xyz")))
       awaitResult(client.set("bazs", Buf.Utf8("xyz")))
       awaitResult(client.set("bazs", Buf.Utf8("zyx")))
@@ -125,23 +126,23 @@ class SimpleClientTest extends AnyFunSuite with BeforeAndAfter {
           "foos" -> (
             (
               "xyz",
-              "1"
+              "2"
             )
           ), // the "cas unique" values are predictable from a fresh memcached
-          "bazs" -> (("zyx", "3"))
+          "bazs" -> (("zyx", "4"))
         )
       )
     }
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("cas") {
       awaitResult(client.set("x", Buf.Utf8("y")))
       val Some((value, casUnique)) = awaitResult(client.gets("x"))
       assert(value == Buf.Utf8("y"))
-      assert(casUnique == Buf.Utf8("1"))
+      assert(casUnique == Buf.Utf8("2"))
 
-      assert(!awaitResult(client.checkAndSet("x", Buf.Utf8("z"), Buf.Utf8("2")).map(_.replaced)))
+      assert(!awaitResult(client.checkAndSet("x", Buf.Utf8("z"), Buf.Utf8("1")).map(_.replaced)))
       assert(
         awaitResult(client.checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue
       )
@@ -176,7 +177,7 @@ class SimpleClientTest extends AnyFunSuite with BeforeAndAfter {
     assert(awaitResult(client.decr("foo", l)) == Some(0L))
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("stats") {
       val stats = awaitResult(client.stats())
       assert(stats != null)

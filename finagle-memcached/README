@@ -1,0 +1,15 @@
+To run the memcached tests against a real memcached server:
+
+1. Ensure you have a Memcached installation. If not, you can install it with:
+
+   $ brew install memcached
+
+2. Take note of the path where memcached is now installed:
+
+  $ which memcached
+
+3. Run the memcached tests with the jvm flag EXTERNAL_MEMCACHED_PATH=<path>. For example, if you
+   are using bazel:
+
+   $ ./bazel test --test_arg=--jvm_flags="-DEXTERNAL_MEMCACHED_PATH=<path>" \
+     finagle/finagle-memcached/src/test/scala:scala

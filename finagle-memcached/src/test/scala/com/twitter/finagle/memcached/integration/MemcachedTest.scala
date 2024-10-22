@@ -41,6 +41,7 @@ abstract class MemcachedTest
   protected[this] val Timeout: Duration = 15.seconds
   protected[this] var servers: Seq[TestMemcachedServer] = Seq.empty
   protected[this] var client: Client = _
+  protected[this] var singleServerClient: Client = _
   protected[this] val clientName = "test_client"
 
   protected[this] val redistributesKey: Seq[String]
@@ -57,6 +58,9 @@ abstract class MemcachedTest
       val dest = Name.bound(servers.map { s => Address(s.address) }: _*)
       client = createClient(dest, clientName)
     }
+
+    singleServerClient =
+      createClient(Name.bound(Seq(Address(servers.head.address)): _*), clientName)
   }
 
   after {
@@ -136,18 +140,18 @@ abstract class MemcachedTest
     )
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("gets") {
-      // create a client that connects to only one server so we can predict CAS tokens
-      awaitResult(client.set("foos", Buf.Utf8("xyz"))) // CAS: 1
-      awaitResult(client.set("bazs", Buf.Utf8("xyz"))) // CAS: 2
-      awaitResult(client.set("bazs", Buf.Utf8("zyx"))) // CAS: 3
-      awaitResult(client.set("bars", Buf.Utf8("xyz"))) // CAS: 4
-      awaitResult(client.set("bars", Buf.Utf8("zyx"))) // CAS: 5
-      awaitResult(client.set("bars", Buf.Utf8("yxz"))) // CAS: 6
+      // use client that connects to only one server so we can predict CAS tokens
+      awaitResult(singleServerClient.set("foos", Buf.Utf8("xyz")))
+      awaitResult(singleServerClient.set("bazs", Buf.Utf8("xyz")))
+      awaitResult(singleServerClient.set("bazs", Buf.Utf8("zyx")))
+      awaitResult(singleServerClient.set("bars", Buf.Utf8("xyz")))
+      awaitResult(singleServerClient.set("bars", Buf.Utf8("zyx")))
+      awaitResult(singleServerClient.set("bars", Buf.Utf8("yxz")))
       val result =
         awaitResult(
-          client.gets(Seq("foos", "bazs", "bars", "somethingelse"))
+          singleServerClient.gets(Seq("foos", "bazs", "bars", "somethingelse"))
         ).map {
           case (key, (Buf.Utf8(value), Buf.Utf8(casUnique))) =>
             (key, (value, casUnique))
@@ -155,47 +159,54 @@ abstract class MemcachedTest
       // the "cas unique" values are predictable from a fresh memcached
       val expected =
         Map(
-          "foos" -> (("xyz", "1")),
-          "bazs" -> (("zyx", "3")),
-          "bars" -> (("yxz", "6"))
+          "foos" -> (("xyz", "2")),
+          "bazs" -> (("zyx", "4")),
+          "bars" -> (("yxz", "7"))
         )
       assert(result == expected)
     }
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("getsWithFlag") {
-      awaitResult(client.set("foos1", Buf.Utf8("xyz")))
-      awaitResult(client.set("bazs1", Buf.Utf8("xyz")))
-      awaitResult(client.set("bazs1", Buf.Utf8("zyx")))
-      val result = awaitResult(client.getsWithFlag(Seq("foos1", "bazs1", "somethingelse")))
-        .map {
-          case (key, (Buf.Utf8(value), Buf.Utf8(flag), Buf.Utf8(casUnique))) =>
-            (key, (value, flag, casUnique))
-        }
+      // use client that connects to only one server so we can predict CAS tokens
+      awaitResult(singleServerClient.set("foos1", Buf.Utf8("xyz")))
+      awaitResult(singleServerClient.set("bazs1", Buf.Utf8("xyz")))
+      awaitResult(singleServerClient.set("bazs1", Buf.Utf8("zyx")))
+      val result =
+        awaitResult(singleServerClient.getsWithFlag(Seq("foos1", "bazs1", "somethingelse")))
+          .map {
+            case (key, (Buf.Utf8(value), Buf.Utf8(flag), Buf.Utf8(casUnique))) =>
+              (key, (value, flag, casUnique))
+          }
 
       // the "cas unique" values are predictable from a fresh memcached
       assert(
         result == Map(
-          "foos1" -> (("xyz", "0", "1")),
-          "bazs1" -> (("zyx", "0", "2"))
+          "foos1" -> (("xyz", "0", "2")),
+          "bazs1" -> (("zyx", "0", "4"))
         )
       )
     }
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("cas") {
-      awaitResult(client.set("x", Buf.Utf8("y")))
-      val Some((value, casUnique)) = awaitResult(client.gets("x"))
+      // use client that connects to only one server so we can predict CAS tokens
+      awaitResult(singleServerClient.set("x", Buf.Utf8("y"))) // Next CAS: 2
+      val Some((value, casUnique)) = awaitResult(singleServerClient.gets("x"))
       assert(value == Buf.Utf8("y"))
-      assert(casUnique == Buf.Utf8("1"))
+      assert(casUnique == Buf.Utf8("2"))
 
-      assert(!awaitResult(client.checkAndSet("x", Buf.Utf8("z"), Buf.Utf8("2")).map(_.replaced)))
       assert(
-        awaitResult(client.checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue
+        !awaitResult(
+          singleServerClient.checkAndSet("x", Buf.Utf8("z"), Buf.Utf8("1")).map(_.replaced)))
+      assert(
+        awaitResult(
+          singleServerClient
+            .checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue
       )
-      val res = awaitResult(client.get("x"))
+      val res = awaitResult(singleServerClient.get("x"))
       assert(res.isDefined)
       assert(res.get == Buf.Utf8("z"))
     }
@@ -224,7 +235,7 @@ abstract class MemcachedTest
     assert(awaitResult(client.decr("foo", l)) == Some(0L))
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("stats") {
       // We can't use a partitioned client to get stats, because we don't hash to a server based on
       // a key. Instead, we create a ConnectedClient, which is connected to one server.
@@ -483,39 +494,49 @@ abstract class MemcachedTest
     assertRead(newClient, keys2)
   }
 
-  test("partial success") {
-    val keys = writeKeys(client, 1000, 20)
-    assertRead(client, keys)
+  // This works with our internal memcached because when the server is shutdown, we get an immediate
+  // "connection refused" when trying to send a request. With external memcached, the connection
+  // establishment instead hangs. To make this test pass with external memcached, we could add
+  // `withSession.acquisitionTimeout` to the client, but this makes the test a) slow and b) can
+  // make the other tests flakey, so don't bother.
+  if (!Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
+    test("partial success") {
+      val keys = writeKeys(client, 1000, 20)
+      assertRead(client, keys)
 
-    val initialResult = awaitResult { client.getResult(keys) }
-    assert(initialResult.failures.isEmpty)
-    assert(initialResult.misses.isEmpty)
-    assert(initialResult.values.size == keys.size)
+      val initialResult = awaitResult {
+        client.getResult(keys)
+      }
+      assert(initialResult.failures.isEmpty)
+      assert(initialResult.misses.isEmpty)
+      assert(initialResult.values.size == keys.size)
 
-    // now kill one server
-    servers.head.stop()
+      // now kill one server
+      servers.head.stop()
 
-    // test partial success with getResult()
-    val getResult = awaitResult { client.getResult(keys) }
-    // assert the failures are set to the exception received from the failing partition
-    assert(getResult.failures.nonEmpty)
-    getResult.failures.foreach {
-      case (_, e) =>
-        assert(e.isInstanceOf[Exception])
+      // test partial success with getResult()
+      val getResult = awaitResult {
+        client.getResult(keys)
+      }
+      // assert the failures are set to the exception received from the failing partition
+      assert(getResult.failures.nonEmpty)
+      getResult.failures.foreach {
+        case (_, e) =>
+          assert(e.isInstanceOf[Exception])
+      }
+      // there should be no misses as all keys are known
+      assert(getResult.misses.isEmpty)
+
+      // assert that the values are what we expect them to be. We are not checking for exact
+      // number of failures and successes here because we don't know how many keys will fall into
+      // the failed partition. The accuracy of the responses are tested in other tests anyways.
+      assert(getResult.values.nonEmpty)
+      assert(getResult.values.size < keys.size)
+      getResult.values.foreach {
+        case (keyStr, valueBuf) =>
+          val Buf.Utf8(valStr) = valueBuf
+          assert(valStr == s"$keyStr$ValueSuffix")
+      }
     }
-    // there should be no misses as all keys are known
-    assert(getResult.misses.isEmpty)
-
-    // assert that the values are what we expect them to be. We are not checking for exact
-    // number of failures and successes here because we don't know how many keys will fall into
-    // the failed partition. The accuracy of the responses are tested in other tests anyways.
-    assert(getResult.values.nonEmpty)
-    assert(getResult.values.size < keys.size)
-    getResult.values.foreach {
-      case (keyStr, valueBuf) =>
-        val Buf.Utf8(valStr) = valueBuf
-        assert(valStr == s"$keyStr$ValueSuffix")
-    }
-
   }
 }

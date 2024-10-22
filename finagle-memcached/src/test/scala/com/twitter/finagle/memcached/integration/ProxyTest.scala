@@ -4,11 +4,15 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
-import com.twitter.finagle.memcached.protocol.{Command, Response}
+import com.twitter.finagle.memcached.protocol.Command
+import com.twitter.finagle.memcached.protocol.Response
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Awaitable}
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.util.Await
+import com.twitter.util.Awaitable
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import org.scalatest.BeforeAndAfter
+import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.funsuite.AnyFunSuite
 
 class ProxyTest extends AnyFunSuite with BeforeAndAfter {
@@ -85,7 +89,7 @@ class ProxyTest extends AnyFunSuite with BeforeAndAfter {
     awaitResult(externalClient.close())
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("stats is supported") {
       awaitResult(externalClient.delete("foo"))
       assert(awaitResult(externalClient.get("foo")) == None)
@@ -100,7 +104,7 @@ class ProxyTest extends AnyFunSuite with BeforeAndAfter {
     }
   }
 
-  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+  if (Option(System.getProperty("EXTERNAL_MEMCACHED_PATH")).isDefined) {
     test("stats (cachedump) is supported") {
       awaitResult(externalClient.delete("foo"))
       assert(awaitResult(externalClient.get("foo")) == None)
@@ -109,11 +113,15 @@ class ProxyTest extends AnyFunSuite with BeforeAndAfter {
       assert(slabs != null)
       assert(!slabs.isEmpty)
       val n = slabs.head.split(" ")(1).split(":")(0).toInt
-      val stats = awaitResult(externalClient.stats(Some("cachedump " + n + " 100")))
-      assert(stats != null)
-      assert(!stats.isEmpty)
-      stats.foreach { stat => assert(stat.startsWith("ITEM")) }
-      assert(stats.find { stat => stat.contains("foo") }.isDefined)
+
+      eventually {
+        val stats = awaitResult(externalClient.stats(Some("cachedump " + n + " 100")))
+        assert(stats != null)
+        assert(!stats.isEmpty)
+        stats.foreach { stat => assert(stat.startsWith("ITEM")) }
+        assert(stats.find { stat => stat.contains("foo") }.isDefined)
+      }
+
       awaitResult(externalClient.close())
     }
   }

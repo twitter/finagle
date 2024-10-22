@@ -24,6 +24,13 @@ New Features
 * finagle-mysql: Added support for LONG_BLOB data type. ``PHAB_ID=D1152247``
 
 
+Bug Fixes
+~~~~~~~~~~
+
+* finagle-memcached: Fixed support for running memcached tests with external memcached. Added README with
+  instructions under finagle/finagle-memcached. ``PHAB_ID=D1120240``
+
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
