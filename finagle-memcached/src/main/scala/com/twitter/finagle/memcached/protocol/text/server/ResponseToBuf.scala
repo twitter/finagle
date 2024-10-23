@@ -2,7 +2,9 @@ package com.twitter.finagle.memcached.protocol.text.server
 
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.EncodingConstants._
-import com.twitter.io.{Buf, BufByteWriter, ByteWriter}
+import com.twitter.io.Buf
+import com.twitter.io.BufByteWriter
+import com.twitter.io.ByteWriter
 import java.nio.charset.StandardCharsets
 
 /**
@@ -22,10 +24,17 @@ private[finagle] object ResponseToBuf {
   private[this] def encodeResponse(response: Seq[Buf]): Buf = {
     // + 2 to estimated size for DELIMITER.
     val bw = BufByteWriter.dynamic(10 * response.size + 2)
-    response.foreach { token =>
-      bw.writeBytes(token)
+    var i = 0
+    while (i < response.length - 1) {
+      bw.writeBytes(response(i))
       bw.writeBytes(SPACE)
+      i += 1
     }
+
+    if (response.nonEmpty) {
+      bw.writeBytes(response(i))
+    }
+
     bw.writeBytes(DELIMITER)
 
     bw.owned()
@@ -59,12 +68,8 @@ private[finagle] object ResponseToBuf {
     // + 5 to estimated size for END + DELIMITER.
     val bw = BufByteWriter.dynamic(100 * lines.size + 5)
 
-    lines.foreach { tokens =>
-      tokens.foreach { token =>
-        bw.writeBytes(token)
-        bw.writeBytes(SPACE)
-      }
-      bw.writeBytes(DELIMITER)
+    lines.foreach { line =>
+      bw.writeBytes(encodeResponse(line))
     }
     bw.writeBytes(END)
     bw.writeBytes(DELIMITER)

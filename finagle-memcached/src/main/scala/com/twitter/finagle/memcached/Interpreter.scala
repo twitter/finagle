@@ -72,7 +72,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
                 data(key) = Entry(value, expiry, flags)
                 Stored
               } else {
-                NotStored
+                Exists
               }
             case _ =>
               NotStored
@@ -122,17 +122,19 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           existing match {
             case Some(entry) if entry.valid =>
               val Buf.Utf8(existingString) = entry.value
-              if (!existingString.isEmpty && !ParserUtils.isDigits(entry.value))
-                throw new ClientError("cannot increment or decrement non-numeric value")
+              if (!existingString.isEmpty && !ParserUtils.isDigits(entry.value)) {
+                Error(new ClientError("cannot increment or decrement non-numeric value"))
+              } else {
 
-              val existingValue: Long =
-                if (existingString.isEmpty) 0L
-                else existingString.toLong
+                val existingValue: Long =
+                  if (existingString.isEmpty) 0L
+                  else existingString.toLong
 
-              val result: Long = existingValue + delta
-              data(key) = Entry(Buf.Utf8(result.toString), entry.expiry, 0)
+                val result: Long = existingValue + delta
+                data(key) = Entry(Buf.Utf8(result.toString), entry.expiry, 0)
 
-              Number(result)
+                Number(result)
+              }
             case Some(_) =>
               data.remove(key) // expired
               NotFound

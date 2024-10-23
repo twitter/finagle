@@ -41,7 +41,11 @@ class InterpreterTest extends AnyFunSuite {
     assert(interpreter(Gets(Seq(key))) == Values(Seq(Value(key, value1, hashValue1, emptyFlags))))
 
     assert(interpreter(Cas(key, 0, Time.epoch, value2, hashValue1.get)) == Stored)
-    assert(interpreter(Cas(key, 0, Time.epoch, value3, hashValue1.get)) == NotStored)
+    assert(interpreter(Cas(key, 0, Time.epoch, value3, hashValue1.get)) == Exists)
+
+    assert(
+      interpreter(
+        Cas(Buf.Utf8("non_existant"), 0, Time.epoch, value2, hashValue1.get)) == NotStored)
   }
 
   test("correctly perform the QUIT command") {
