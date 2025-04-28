@@ -42,22 +42,6 @@ For extensive documentation, please see the
 websites. Documentation improvements are always welcome, so please send patches
 our way.
 
-## Adopters
-
-The following are a few of the companies that are using Finagle:
-
-* [Foursquare](https://foursquare.com/)
-* [ING Bank](https://ing.nl)
-* [Pinterest](https://www.pinterest.com/)
-* [SoundCloud](https://soundcloud.com/)
-* [Tumblr](https://www.tumblr.com/)
-* [Twitter](https://twitter.com/)
-
-For a more complete list, please see
-[our adopter page](https://github.com/twitter/finagle/blob/release/ADOPTERS.md).
-If your organization is using Finagle, consider adding a link there and sending
-us a pull request!
-
 ## Contributing
 
 We feel that a welcoming community is important and we ask that you follow Twitter's

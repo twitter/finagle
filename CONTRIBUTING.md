@@ -11,7 +11,7 @@ repository: [https://oss.sonatype.org/content/repositories/snapshots/](https://o
 ## Building dependencies
 
 If you want to manually build and publish the `develop` branches of Finagle's 
-dependencies locally, you can use our build tool, [dodo](https://github.com/twitter/dodo).
+dependencies locally, you can use our build tool, [dodo](https://github.com/revivebird/dodo).
 
 ``` bash
 curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
@@ -22,12 +22,12 @@ from the `develop` branch of Finagle's other Twitter open source dependencies.
 
 It is your choice to use the published nightly snapshot versions or to build 
 the snapshots locally from their respective `develop` branches via the
-[dodo](https://github.com/twitter/dodo) build tool.
+[dodo](https://github.com/revivebird/dodo) build tool.
 
 ## Building Finagle
 
 Finagle is built using [sbt][sbt]. When building please use the included
-[`./sbt`](https://github.com/twitter/finagle/blob/develop/sbt) script which
+[`./sbt`](https://github.com/revivebird/finagle/blob/develop/sbt) script which
 provides a thin wrapper over [sbt][sbt] and correctly sets memory and other
 settings.
 

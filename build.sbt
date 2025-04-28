@@ -226,7 +226,7 @@ val sharedSettings = Seq(
   autoAPIMappings := true,
   apiURL := Some(url("https://twitter.github.io/finagle/docs/")),
   pomExtra :=
-    <url>https://github.com/twitter/finagle</url>
+    <url>https://github.com/revivebird/finagle</url>
     <licenses>
       <license>
         <name>Apache License, Version 2.0</name>
