@@ -517,7 +517,7 @@ lazy val finagleServersets = Project(
         ExclusionRule("com.sun.jmx", "jmxri"),
         ExclusionRule("javax.jms", "jms")
       ),
-      "commons-lang" % "commons-lang" % "2.6"
+      "org.apache.commons" % "commons-lang3" % "3.20.0"
     ),
     libraryDependencies ++= jacksonLibs,
     libraryDependencies ++= scroogeLibs,

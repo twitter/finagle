@@ -18,7 +18,7 @@ package com.twitter.finagle.common.base;
 
 import java.util.Objects;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A utility helpful in concisely checking preconditions on arguments.
