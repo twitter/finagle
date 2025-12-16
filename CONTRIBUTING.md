@@ -18,7 +18,7 @@ curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash 
 ```
 
 This will clone, build, and publish locally the current `-SNAPSHOT` version 
-from the `develop` branch of Finagle's other Twitter open source dependencies.
+from the `develop` branch of Finagle's other X/Twitter open source dependencies.
 
 It is your choice to use the published nightly snapshot versions or to build 
 the snapshots locally from their respective `develop` branches via the
