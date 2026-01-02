@@ -2,7 +2,8 @@ package com.twitter.finagle.factory
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util._
 import java.util
 import java.util.concurrent.atomic.AtomicInteger
@@ -24,7 +25,7 @@ private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep])
       Future.exception(exc)
 
     case Return(service) =>
-      Future.value(new ServiceProxy(service) {
+      new ImmediateValueFuture(new ServiceProxy(service) {
         override def close(deadline: Time): Future[Unit] = {
           decr()
           super.close(deadline)

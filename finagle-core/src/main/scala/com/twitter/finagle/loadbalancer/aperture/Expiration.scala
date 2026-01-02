@@ -1,7 +1,8 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.{BalancerNode, NodeT}
+import com.twitter.finagle.loadbalancer.BalancerNode
+import com.twitter.finagle.loadbalancer.NodeT
 import com.twitter.util._
 
 private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] {
@@ -93,7 +94,7 @@ private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] 
       onRequest()
       super.apply(conn).transform {
         case Return(svc) =>
-          Future.value(new ServiceProxy(svc) {
+          new ImmediateValueFuture(new ServiceProxy(svc) {
             override def close(deadline: Time) =
               super.close(deadline).ensure {
                 onResponse()

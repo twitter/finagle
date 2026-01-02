@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.util.Throw
 import com.twitter.util.Time
 import com.twitter.util.Future
+import com.twitter.util.ImmediateValueFuture
 import com.twitter.util.Return
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -28,7 +29,7 @@ private trait LeastLoaded[Req, Rep] extends BalancerNode[Req, Rep] { self: Balan
       counter.incrementAndGet()
       super.apply(conn).transform {
         case Return(svc) =>
-          Future.value(new ServiceProxy(svc) {
+          new ImmediateValueFuture(new ServiceProxy(svc) {
             override def close(deadline: Time): Future[Unit] =
               super.close(deadline).ensure {
                 counter.decrementAndGet()

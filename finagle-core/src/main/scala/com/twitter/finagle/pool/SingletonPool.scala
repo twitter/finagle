@@ -3,8 +3,14 @@ package com.twitter.finagle.pool
 import com.twitter.finagle._
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Future, Return, Throw, Time, Promise}
-import java.util.concurrent.atomic.{AtomicReference, AtomicInteger}
+import com.twitter.util.ImmediateValueFuture
+import com.twitter.util.Future
+import com.twitter.util.Promise
+import com.twitter.util.Return
+import com.twitter.util.Throw
+import com.twitter.util.Time
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
 
 private[finagle] object SingletonPool {
@@ -41,7 +47,7 @@ private[finagle] object SingletonPool {
   private class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
       extends ServiceProxy[Req, Rep](underlying) {
     private[this] val count = new AtomicInteger(1)
-    private[this] val future = Future.value(this)
+    private[this] val future = new ImmediateValueFuture(this)
 
     def open(): Future[Service[Req, Rep]] = {
       count.incrementAndGet()

@@ -41,6 +41,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.io.ByteReader
 import com.twitter.util.Future
+import com.twitter.util.ImmediateValueFuture
 import com.twitter.util.StorageUnit
 import io.netty.channel.Channel
 import io.netty.channel.ChannelPipeline
@@ -277,7 +278,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         params[CompressionPreferences].compressionPreferences
       )
 
-      Future.value(
+      new ImmediateValueFuture(
         new MuxClientNegotiatingSession(
           handle = handle,
           version = Mux.LatestVersion,

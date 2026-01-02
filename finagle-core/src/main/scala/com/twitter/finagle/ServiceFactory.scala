@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.util.Closable
 import com.twitter.util.Future
+import com.twitter.util.ImmediateValueFuture
 import com.twitter.util.Return
 import com.twitter.util.Throw
 import com.twitter.util.Time
@@ -59,7 +60,7 @@ abstract class ServiceFactory[-Req, +Rep]
    * styles of factory wrappers.
    */
   def map[Req1, Rep1](f: Service[Req, Rep] => Service[Req1, Rep1]): ServiceFactory[Req1, Rep1] =
-    flatMap { s => Future.value(f(s)) }
+    flatMap { s => new ImmediateValueFuture(f(s)) }
 
   /**
    * Make a service that after dispatching a request on that service,
@@ -87,7 +88,7 @@ object ServiceFactory {
    */
   def const[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] =
     new ServiceFactory[Req, Rep] {
-      private[this] val noRelease = Future.value(new ServiceProxy[Req, Rep](service) {
+      private[this] val noRelease = new ImmediateValueFuture(new ServiceProxy[Req, Rep](service) {
         // close() is meaningless on connectionless services.
         override def close(deadline: Time): Future[Unit] = Future.Done
       })

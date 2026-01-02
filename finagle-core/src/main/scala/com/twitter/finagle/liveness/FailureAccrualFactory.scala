@@ -428,7 +428,7 @@ class FailureAccrualFactory[Req, Rep](
   }
 
   private[this] val acquireService: Try[Service[Req, Rep]] => Future[Service[Req, Rep]] = {
-    case Return(svc) => Future.value(makeService(svc))
+    case Return(svc) => new ImmediateValueFuture(makeService(svc))
     case t @ Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.ClientDiscarded) =>
       didReceiveIgnorable()
       Future.const(t.cast[Service[Req, Rep]])

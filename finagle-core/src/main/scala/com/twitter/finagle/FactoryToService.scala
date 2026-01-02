@@ -1,6 +1,8 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Future, Time}
+import com.twitter.util.ImmediateValueFuture
+import com.twitter.util.Future
+import com.twitter.util.Time
 
 /**
  * Turns a [[com.twitter.finagle.ServiceFactory]] into a
@@ -66,9 +68,10 @@ object FactoryToService {
            *
            * This is too complicated.
            */
-          val service = Future.value(new ServiceProxy[Req, Rep](new FactoryToService(next)) {
-            override def close(deadline: Time): Future[Unit] = Future.Done
-          })
+          val service = new ImmediateValueFuture(
+            new ServiceProxy[Req, Rep](new FactoryToService(next)) {
+              override def close(deadline: Time): Future[Unit] = Future.Done
+            })
           new ServiceFactoryProxy(next) {
             override def apply(conn: ClientConnection): Future[ServiceProxy[Req, Rep]] = service
           }

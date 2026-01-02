@@ -102,9 +102,9 @@ private[finagle] final class MuxClientSession(
             h_canDispatch = CanDispatch.No
             apply(request)
 
-          case m @ Return(_) =>
+          case Return(response) =>
             h_canDispatch = CanDispatch.Yes
-            Future.const(m)
+            new ImmediateValueFuture(response)
 
           case t @ Throw(_) =>
             Future.const(t.cast[Response])
@@ -198,7 +198,7 @@ private[finagle] final class MuxClientSession(
     pp
   }
 
-  def asService: Future[Service[Request, Response]] = Future.value(MuxClientServiceImpl)
+  def asService: Future[Service[Request, Response]] = new ImmediateValueFuture(MuxClientServiceImpl)
 
   def status: Status = {
     // Return the worst status reported among
