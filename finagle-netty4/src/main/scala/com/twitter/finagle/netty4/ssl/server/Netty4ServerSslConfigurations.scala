@@ -91,6 +91,66 @@ private[finagle] object Netty4ServerSslConfigurations {
   }
 
   /**
+   * Wraps trust credentials to inject service identifier capturing for servers.
+   * This allows us to track which clients fail SSL handshakes even when PKIX validation fails.
+   *
+   * For CertCollection (the common mTLS case), we convert it to a TrustManagerFactory and wrap it.
+   * For TrustManagerFactory, we wrap it directly.
+   * Other types pass through to preserve existing error handling.
+   */
+  private def wrapTrustCredentialsForCapture(
+    trustCredentials: com.twitter.finagle.ssl.TrustCredentials
+  ): com.twitter.finagle.ssl.TrustCredentials = {
+    import com.twitter.util.Try
+    import com.twitter.util.security.X509CertificateFile
+
+    trustCredentials match {
+      case com.twitter.finagle.ssl.TrustCredentials.TrustManagerFactory(factory) =>
+        com.twitter.finagle.ssl.TrustCredentials.TrustManagerFactory(
+          new ServiceIdentifierCapturingTrustManagerFactory(factory)
+        )
+
+      case com.twitter.finagle.ssl.TrustCredentials.CertCollection(file) =>
+        // Convert CertCollection to TrustManagerFactory, then wrap it
+        // This is the common case for mTLS servers using ca-bundle.crt
+        // We use X509CertificateFile for validation, matching Netty's behavior
+        val tmfResult = for {
+          certs <- new X509CertificateFile(file).readX509Certificates()
+          tmf <- Try {
+            val factory = javax.net.ssl.TrustManagerFactory.getInstance(
+              javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm
+            )
+            val ks = java.security.KeyStore.getInstance(java.security.KeyStore.getDefaultType)
+            ks.load(null, null)
+
+            var i = 0
+            certs.foreach { cert =>
+              ks.setCertificateEntry(s"cert-$i", cert)
+              i += 1
+            }
+
+            factory.init(ks)
+            factory
+          }
+        } yield tmf
+
+        // If conversion succeeds, wrap it; otherwise pass through original to let Netty handle the error
+        tmfResult match {
+          case com.twitter.util.Return(tmf) =>
+            com.twitter.finagle.ssl.TrustCredentials.TrustManagerFactory(
+              new ServiceIdentifierCapturingTrustManagerFactory(tmf)
+            )
+          case com.twitter.util.Throw(_) =>
+            // Conversion failed (e.g., empty file, invalid format)
+            // Pass through original CertCollection to preserve existing error handling
+            trustCredentials
+        }
+
+      case other => other // Unspecified, Insecure, X509Certificates - pass through
+    }
+  }
+
+  /**
    * Creates an `SslContext` based on the supplied `SslServerConfiguration`. This method uses
    * the `KeyCredentials`, `TrustCredentials`, `CipherSuites`, and `ApplicationProtocols` from the provided
    * configuration, and forces the JDK provider if forceJdk is true.
@@ -98,7 +158,9 @@ private[finagle] object Netty4ServerSslConfigurations {
   def createServerContext(config: SslServerConfiguration, forceJdk: Boolean): SslContext = {
     val builder = startServerWithKey(config.keyCredentials)
     val withProvider = Netty4SslConfigurations.configureProvider(builder, forceJdk)
-    val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
+    // Wrap trust credentials to capture service identifiers during cert validation
+    val wrappedTrust = wrapTrustCredentialsForCapture(config.trustCredentials)
+    val withTrust = Netty4SslConfigurations.configureTrust(withProvider, wrappedTrust)
     val withCiphers = config.cipherSuites match {
       case CipherSuites.Enabled(s) => withTrust.ciphers(s.asJava)
       case _ => withTrust

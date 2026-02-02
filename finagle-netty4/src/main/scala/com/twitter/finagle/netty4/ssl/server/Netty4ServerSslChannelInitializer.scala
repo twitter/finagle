@@ -1,16 +1,19 @@
 package com.twitter.finagle.netty4.ssl.server
 
-import com.twitter.finagle.netty4.ssl.{Alpn, Netty4SslHandler}
+import com.twitter.finagle.netty4.ssl.Alpn
+import com.twitter.finagle.netty4.ssl.Netty4SslHandler
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
-import com.twitter.finagle.ssl.server.{
-  SslServerConfiguration,
-  SslServerEngineFactory,
-  SslServerSessionVerifier
-}
+import com.twitter.finagle.ssl.ApplicationProtocols
+import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.ssl.server.SslServerConfiguration
+import com.twitter.finagle.ssl.server.SslServerEngineFactory
+import com.twitter.finagle.ssl.server.SslServerSessionVerifier
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Address, Stack}
-import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
+import com.twitter.finagle.Address
+import com.twitter.finagle.Stack
+import io.netty.channel.Channel
+import io.netty.channel.ChannelInitializer
+import io.netty.channel.ChannelPipeline
 import io.netty.handler.ssl.SslHandler
 import java.net.InetSocketAddress
 
@@ -64,7 +67,13 @@ final private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Par
     config: SslServerConfiguration
   ): SslServerVerificationHandler = {
     val sessionVerifier = params[SslServerSessionVerifier.Param].verifier
-    new SslServerVerificationHandler(sslHandler, remoteAddress, config, sessionVerifier)
+    val statsReceiver = params[Stats].statsReceiver.scope("tls")
+    new SslServerVerificationHandler(
+      sslHandler,
+      remoteAddress,
+      config,
+      sessionVerifier,
+      statsReceiver)
   }
 
   private[this] def addHandlersToPipeline(
