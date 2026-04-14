@@ -41,6 +41,9 @@ private[netty4] class SslServerVerificationHandler(
   private[this] val onHandshakeComplete = Promise[Unit]()
   private[this] val sslExceptionStats = statsReceiver.scope("ssl_exn")
 
+  private[this] val NoPeerCert = "no_peer_cert"
+  private[this] val Unknown = "unknown"
+
   private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Unit = {
     // Clean up ThreadLocal immediately for successful handshakes
     // This prevents leaking the service identifier to subsequent requests on the same thread
@@ -103,24 +106,21 @@ private[netty4] class SslServerVerificationHandler(
     }
 
     // No certificate available
-    Some("no_peer_cert")
+    Some(NoPeerCert)
   }
 
   private[this] def trackHandshakeFailure(cause: Throwable): Unit = {
-    val serviceId = extractServiceIdentifier().getOrElse("unknown")
+    val serviceId = extractServiceIdentifier().getOrElse(Unknown)
     // Sanitize service identifier for use in metric names
     val sanitized = serviceId.replaceAll("[^a-zA-Z0-9:_-]", "_")
 
-    // Log every time we increment the counter to debug potential double-counting
-    log.warning(
-      s"Incrementing ssl_exn counter for service '$serviceId' from $remoteAddress: ${cause.getClass.getSimpleName}: ${cause.getMessage}")
+    if (serviceId != NoPeerCert && serviceId != Unknown) {
+      // Log every time we increment the counter to debug potential double-counting
+      log.warning(
+        s"Incrementing ssl_exn counter for service '$serviceId' from $remoteAddress: ${cause.getClass.getSimpleName}: ${cause.getMessage}")
+    }
 
     sslExceptionStats.counter(sanitized).incr()
-
-    if (log.isLoggable(Level.DEBUG)) {
-      log.debug(
-        s"SSL handshake failed for service identifier '$serviceId' from $remoteAddress: ${cause.getMessage}")
-    }
   }
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
