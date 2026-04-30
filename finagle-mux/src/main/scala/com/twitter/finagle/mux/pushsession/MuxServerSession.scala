@@ -1,16 +1,25 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.finagle.{CancelledRequestException, Mux, Service, Stack, Status, param}
-import com.twitter.finagle.context.{Contexts, RemoteInfo}
+import com.twitter.finagle.CancelledRequestException
+import com.twitter.finagle.Mux
+import com.twitter.finagle.Service
+import com.twitter.finagle.Stack
+import com.twitter.finagle.Status
+import com.twitter.finagle.param
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message.Tags
-import com.twitter.finagle.mux.{Request, Response}
-import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.mux.Request
+import com.twitter.finagle.mux.Response
+import com.twitter.finagle.pushsession.PushChannelHandle
+import com.twitter.finagle.pushsession.PushSession
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Buf, ByteReader}
+import com.twitter.io.Buf
+import com.twitter.io.ByteReader
 import com.twitter.logging.Logger
 import com.twitter.util._
 import scala.util.control.NonFatal
@@ -161,7 +170,8 @@ private[finagle] final class MuxServerSession(
       // We wrap the underlying exc in a `CancelledRequestException` since it's the
       // historical API we've used to signal interrupted dispatches.
       val cause = new CancelledRequestException(reason match {
-        case Return(_) => new Exception("mux server shutdown")
+        case Return(_) =>
+          new Exception(s"mux server shutdown. Remote address: ${handle.remoteAddress}")
         case Throw(t) => t
       })
       h_tracker.interruptOutstandingDispatches(cause)
@@ -169,7 +179,9 @@ private[finagle] final class MuxServerSession(
 
       reason.onFailure { t =>
         val name = params[Label].label
-        log.info(t, s"Server session ($name) closed due to error")
+        log.info(
+          t,
+          s"Server session ($name) closed due to error. Remote address: ${handle.remoteAddress}")
       }
     }
   }
