@@ -8,9 +8,10 @@ import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import org.scalatest.OneInstancePerTest
 import org.scalatest.funsuite.AnyFunSuite
 
-class InetResolverTest extends AnyFunSuite {
+class InetResolverTest extends AnyFunSuite with OneInstancePerTest {
   val statsReceiver = new InMemoryStatsReceiver
 
   val dnsResolver = new DnsResolver(statsReceiver, FuturePool.unboundedPool)
@@ -53,7 +54,42 @@ class InetResolverTest extends AnyFunSuite {
       case _ => fail()
     }
     assert(statsReceiver.counter("successes")() > 0)
+    assert(statsReceiver.counter("partial_failures")() == 1)
     assert(statsReceiver.stat("lookup_ms")().size > 0)
+  }
+
+  test("partial resolution with cancellation") {
+    val stats = new InMemoryStatsReceiver
+    def oneInterrupted(host: String): Future[Seq[InetAddress]] =
+      if (host == "interrupted") Future.exception(InetResolver.ResolutionInterrupted)
+      else Future.value(Seq(InetAddress.getLoopbackAddress))
+
+    val addr = new InetResolver(oneInterrupted, stats, None).bind("interrupted:80,present:81")
+    Await.result(addr.changes.filter(_ != Addr.Pending).toFuture, 10.seconds) match {
+      case Addr.Bound(bound, _) => assert(bound.size == 1)
+      case other => fail(s"expected a bound address, got $other")
+    }
+
+    assert(stats.counter("successes")() == 1)
+    assert(stats.counter("partial_cancels")() == 1)
+    assert(stats.counter("partial_failures")() == 0)
+  }
+
+  test("a fully failed resolution reports the first failure it saw") {
+    val stats = new InMemoryStatsReceiver
+    def interruptedFirst(host: String): Future[Seq[InetAddress]] =
+      if (host == "interrupted") Future.exception(InetResolver.ResolutionInterrupted)
+      else Future.exception(new Exception("boom"))
+
+    val addr =
+      new InetResolver(interruptedFirst, stats, None).bind("interrupted:80,broken:81")
+    Await.result(addr.changes.filter(_ != Addr.Pending).toFuture, 10.seconds) match {
+      case Addr.Failed(e) => assert(e == InetResolver.ResolutionInterrupted)
+      case other => fail(s"expected a failed address, got $other")
+    }
+
+    assert(stats.counter("cancels")() == 1)
+    assert(stats.counter("failures")() == 0)
   }
 
   test("empty host list returns an empty set") {
@@ -74,6 +110,7 @@ class InetResolverTest extends AnyFunSuite {
       case _ => fail()
     }
     assert(statsReceiver.counter("successes")() > 0)
+    assert(statsReceiver.counter("partial_failures")() == 0)
     assert(statsReceiver.stat("lookup_ms")().size > 0)
   }
 
