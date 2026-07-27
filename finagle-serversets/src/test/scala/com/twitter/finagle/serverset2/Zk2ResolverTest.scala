@@ -3,14 +3,25 @@ package com.twitter.finagle.serverset2
 import com.twitter.finagle.common.zookeeper.ServerSetImpl
 import com.twitter.finagle.Addr
 import com.twitter.finagle.Address
+import com.twitter.finagle.InetResolver
 import com.twitter.finagle.Name
 import com.twitter.finagle.Resolver
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.partitioning.zk.ZkMetadata
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.zookeeper.ZkInstance
+import com.twitter.util.Duration
+import com.twitter.util.Future
 import com.twitter.util.RandomSocket
 import com.twitter.util.Var
+import com.twitter.util.Witness
+import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.net.UnknownHostException
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.ZooDefs.Ids
 import org.scalatest.concurrent.Eventually
@@ -21,7 +32,30 @@ import org.scalatest.BeforeAndAfter
 import scala.jdk.CollectionConverters._
 import org.scalatest.funsuite.AnyFunSuite
 
+object Zk2ResolverTest {
+
+  private val HostCount = 10
+
+  private val Path = "/foo/bar"
+
+  // When resolving a 10-host serverset, causes the first resolution to return 1 address and the
+  // second to return 10.
+  private class FlakyDns(hostCount: Int) extends (String => Future[Seq[InetAddress]]) {
+    private[this] val counter = new AtomicInteger(0)
+
+    def lookups: Int = counter.get
+
+    def apply(host: String): Future[Seq[InetAddress]] = {
+      val n = counter.incrementAndGet()
+      if (n > 1 && n <= hostCount) Future.exception(new UnknownHostException(host))
+      else Future.value(Seq(InetAddress.getLoopbackAddress))
+    }
+  }
+}
+
 class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually with SpanSugar {
+  import Zk2ResolverTest._
+
   val zkTimeout: Span = 100.milliseconds
 
   override implicit val patienceConfig: PatienceConfig =
@@ -43,6 +77,9 @@ class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually wi
   before {
     inst = new ZkInstance
     inst.start()
+    // Increase session timeout from 100ms default to avoid disconnects mid-test
+    inst.zookeeperServer.setMinSessionTimeout(4000)
+    inst.zookeeperServer.setMaxSessionTimeout(40000)
   }
 
   after {
@@ -311,5 +348,120 @@ class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually wi
         case _ => false
       }
     )
+  }
+
+  // This demonstrates incorrect current behaviour, fix to follow in subsequent PR.
+  test("addrOf resolves the serverset separately for stats / clients") {
+    def join(serverSet: ServerSetImpl, shardId: Int): Unit = {
+      val member = new InetSocketAddress(InetAddress.getLoopbackAddress, 10000 + shardId)
+      serverSet.join(member, Map.empty[String, InetSocketAddress].asJava, shardId)
+    }
+
+    val zkScope = Zk2Resolver.statsOf(inst.zookeeperConnectString)
+
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, Path)
+    (1 to HostCount).foreach(join(serverSet, _))
+
+    val dns = new FlakyDns(HostCount)
+    val stats = new InMemoryStatsReceiver
+    val resolver = new Zk2Resolver(
+      statsReceiver = stats,
+      stabilizerWindow = Duration.fromMilliseconds(100),
+      unhealthyWindow = Duration.fromMinutes(5),
+      // No pollInterval; this is what we use in production (since updates arrive via ZK
+      // watches).
+      inetResolver = new InetResolver(dns, NullStatsReceiver, pollIntervalOpt = None),
+      timer = DefaultTimer
+    )
+
+    val published = new AtomicReference[Addr]
+    val observation = resolver
+      .addrOf(inst.zookeeperConnectString, Path, None, None)
+      .changes
+      .register(Witness(published))
+
+    try {
+      eventually {
+        assert(Zk2Resolver.sizeOf(published.get) > 0)
+      }
+
+      // In `Zk2Resolver`:
+      // val stabilizedServerSetAddr = Stabilizer(rawServerSetAddr, stabilizerEpoch)
+      // val addrWithMetadata = stabilizedServerSetAddr.changes.joinLast(rawServerSetAddr.changes)
+      //
+      // In `Event`:
+      // def joinLast[U](other: Event[U]): Event[(T, U)] = new Event[(T, U)] {
+      //   val left  = self.respond  { … }
+      //   val right = other.respond { … }
+      //
+      // So what we end up with is:
+      // val left = stabilizedServerSetAddr.changes.respond { ... }
+      //          = rawServerSetAddr.changes.select(epoch.event).respond { ... }
+      //          = serverSetOf(...).flatMap { hosts => bindHostPortsToAddr(hosts) }
+      //               .changes.select(epoch.event).respond { ... }
+      //
+      // val right = rawServerSetAddr.changes.respond { ... }
+      //           = serverSetOf(...).flatMap { hosts => bindHostPortsToAddr(hosts) }
+      //               .changes.respond { ... }
+      //
+      // Note how `left` and `right` *independently* call `bindHostPortsToAddr(hosts)` --
+      // we get 2x the resolutions.
+      assert(dns.lookups == 2 * HostCount)
+
+      // This is from the first observation (left). As per our `FlakyDns`, it resolves to a serverset
+      // with 1 address.
+      assert(Zk2Resolver.sizeOf(published.get) == 1)
+
+      // Our endpoint stats are derived from:
+      // stabilizedServerSetAddr.changes
+      //          .joinLast(rawServerSetAddr.changes)
+      //          .collect {
+      //            case (stable, unstable) if stable != Addr.Pending =>
+      //              val nstable = sizeOf(stable)
+      //              val nunstable = sizeOf(unstable)
+      //              State(stable, nstable - nunstable, nstable)
+      //          }
+
+      // size is nstable -- so the size of the left observation (1)
+      assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "size"))() == 1f)
+
+      // limbo is nstable - nunstable -- so the size of the left observation - right observation
+      // (1 - HostCount)
+      assert(
+        stats.gauges(
+          Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == (1 - HostCount).toFloat)
+
+      // Many stabilizer epochs later nothing has moved. An epoch only promotes the
+      // buffer, the buffer only moves when the raw address emits, and with no poll
+      // interval the address never re-resolves on its own.
+      Thread.sleep(Duration.fromSeconds(2).inMilliseconds)
+      assert(dns.lookups == 2 * HostCount)
+      assert(Zk2Resolver.sizeOf(published.get) == 1)
+      assert(
+        stats.gauges(
+          Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == (1 - HostCount).toFloat)
+
+      // A change to the serverset is the only thing that triggers re-resolution
+      join(serverSet, HostCount + 1)
+      eventually {
+        // left observation re-resolves and sees the full serverset
+        assert(Zk2Resolver.sizeOf(published.get) == HostCount + 1)
+
+        // size is nstable, so it reports the same address that was just published
+        assert(
+          stats.gauges(
+            Seq(zkScope, "foo", "bar", "endpoint=default", "size"))() == (HostCount + 1).toFloat)
+
+        // limbo is nstable - nunstable -- so the size of the left observation - right observation
+        // ((HostCount + 1) - (HostCount + 1)) = 0
+        assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == 0f)
+      }
+
+      // Checked once the resolution has settled rather than inside `eventually` -- lookups
+      // only ever increase, so an overshoot there would spin until the patience runs out
+      // instead of failing on the spot. Our original 2x lookups, plus another set of
+      // lookups for each observation with the additional host we added.
+      assert(dns.lookups == (2 * HostCount) + (2 * (HostCount + 1)))
+    } finally observation.close()
   }
 }

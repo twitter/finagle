@@ -50,6 +50,9 @@ class ZkResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually {
   before {
     inst = new ZkInstance
     inst.start()
+    // Increase session timeout from 100ms default to avoid disconnects mid-test
+    inst.zookeeperServer.setMinSessionTimeout(4000)
+    inst.zookeeperServer.setMaxSessionTimeout(40000)
   }
 
   after {
@@ -112,10 +115,10 @@ class ZkResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually {
     Seq(ephAddr1, ephAddr2, ephAddr3).foreach { sockAddr =>
       serverSet
         .join(
-        sockAddr,
+          sockAddr,
           Map[String, InetSocketAddress]().asJava,
           sockAddr.getPort
-      )
+        )
     }
 
     eventually { assert(clust().size == 3) }
@@ -185,9 +188,9 @@ class ZkResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually {
     Seq(ephAddr1, ephAddr2, ephAddr3).foreach { sockAddr =>
       serverSet
         .join(
-        sockAddr,
+          sockAddr,
           Map[String, InetSocketAddress](sockAddr.getPort.toString -> sockAddr).asJava
-      )
+        )
     }
 
     eventually { assert(clust().size == 3) }
