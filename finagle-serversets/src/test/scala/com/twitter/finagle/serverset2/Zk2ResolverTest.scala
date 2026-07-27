@@ -350,8 +350,7 @@ class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually wi
     )
   }
 
-  // This demonstrates incorrect current behaviour, fix to follow in subsequent PR.
-  test("addrOf resolves the serverset separately for stats / clients") {
+  test("addrOf shares serverset resolution for stats / clients") {
     def join(serverSet: ServerSetImpl, shardId: Int): Unit = {
       val member = new InetSocketAddress(InetAddress.getLoopbackAddress, 10000 + shardId)
       serverSet.join(member, Map.empty[String, InetSocketAddress].asJava, shardId)
@@ -385,83 +384,35 @@ class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually wi
         assert(Zk2Resolver.sizeOf(published.get) > 0)
       }
 
-      // In `Zk2Resolver`:
-      // val stabilizedServerSetAddr = Stabilizer(rawServerSetAddr, stabilizerEpoch)
-      // val addrWithMetadata = stabilizedServerSetAddr.changes.joinLast(rawServerSetAddr.changes)
-      //
-      // In `Event`:
-      // def joinLast[U](other: Event[U]): Event[(T, U)] = new Event[(T, U)] {
-      //   val left  = self.respond  { … }
-      //   val right = other.respond { … }
-      //
-      // So what we end up with is:
-      // val left = stabilizedServerSetAddr.changes.respond { ... }
-      //          = rawServerSetAddr.changes.select(epoch.event).respond { ... }
-      //          = serverSetOf(...).flatMap { hosts => bindHostPortsToAddr(hosts) }
-      //               .changes.select(epoch.event).respond { ... }
-      //
-      // val right = rawServerSetAddr.changes.respond { ... }
-      //           = serverSetOf(...).flatMap { hosts => bindHostPortsToAddr(hosts) }
-      //               .changes.respond { ... }
-      //
-      // Note how `left` and `right` *independently* call `bindHostPortsToAddr(hosts)` --
-      // we get 2x the resolutions.
-      assert(dns.lookups == 2 * HostCount)
+      assert(dns.lookups == HostCount)
 
-      // This is from the first observation (left). As per our `FlakyDns`, it resolves to a serverset
-      // with 1 address.
       assert(Zk2Resolver.sizeOf(published.get) == 1)
-
-      // Our endpoint stats are derived from:
-      // stabilizedServerSetAddr.changes
-      //          .joinLast(rawServerSetAddr.changes)
-      //          .collect {
-      //            case (stable, unstable) if stable != Addr.Pending =>
-      //              val nstable = sizeOf(stable)
-      //              val nunstable = sizeOf(unstable)
-      //              State(stable, nstable - nunstable, nstable)
-      //          }
-
-      // size is nstable -- so the size of the left observation (1)
       assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "size"))() == 1f)
 
-      // limbo is nstable - nunstable -- so the size of the left observation - right observation
-      // (1 - HostCount)
-      assert(
-        stats.gauges(
-          Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == (1 - HostCount).toFloat)
+      // limbo is nstable - nunstable
+      // (1 - 1) = 0
+      assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == 0f)
 
       // Many stabilizer epochs later nothing has moved. An epoch only promotes the
       // buffer, the buffer only moves when the raw address emits, and with no poll
       // interval the address never re-resolves on its own.
       Thread.sleep(Duration.fromSeconds(2).inMilliseconds)
-      assert(dns.lookups == 2 * HostCount)
+      assert(dns.lookups == HostCount)
       assert(Zk2Resolver.sizeOf(published.get) == 1)
-      assert(
-        stats.gauges(
-          Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == (1 - HostCount).toFloat)
+      assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "size"))() == 1f)
+      assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == 0f)
 
       // A change to the serverset is the only thing that triggers re-resolution
       join(serverSet, HostCount + 1)
       eventually {
-        // left observation re-resolves and sees the full serverset
         assert(Zk2Resolver.sizeOf(published.get) == HostCount + 1)
-
-        // size is nstable, so it reports the same address that was just published
         assert(
           stats.gauges(
             Seq(zkScope, "foo", "bar", "endpoint=default", "size"))() == (HostCount + 1).toFloat)
-
-        // limbo is nstable - nunstable -- so the size of the left observation - right observation
-        // ((HostCount + 1) - (HostCount + 1)) = 0
         assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == 0f)
       }
 
-      // Checked once the resolution has settled rather than inside `eventually` -- lookups
-      // only ever increase, so an overshoot there would spin until the patience runs out
-      // instead of failing on the spot. Our original 2x lookups, plus another set of
-      // lookups for each observation with the additional host we added.
-      assert(dns.lookups == (2 * HostCount) + (2 * (HostCount + 1)))
+      assert(dns.lookups == HostCount + HostCount + 1)
     } finally observation.close()
   }
 }

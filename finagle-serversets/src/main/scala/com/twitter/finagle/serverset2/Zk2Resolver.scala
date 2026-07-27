@@ -203,7 +203,7 @@ class Zk2Resolver(
         scoped.provideGauge("size") { size }
 
         // Convert the Op-based serverset address to a Var[Addr].
-        val rawServerSetAddr: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
+        val perObserverServerSetAddr: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
           case Activity.Pending => Var.value(Addr.Pending)
           case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
           case Activity.Ok(weightedEntries) =>
@@ -230,6 +230,12 @@ class Zk2Resolver(
 
             if (hosts.isEmpty) Var.value(Addr.Neg)
             else inetResolver.bindHostPortsToAddr(hosts)
+        }
+
+        // Use `Var.async` (which refcounts observers) so observation is shared and there is a single
+        // resolution.
+        val rawServerSetAddr: Var[Addr] = Var.async(Addr.Pending: Addr) { u =>
+          perObserverServerSetAddr.changes.register(Witness(u))
         }
 
         // The stabilizer ensures that we qualify changes by putting
