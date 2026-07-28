@@ -392,6 +392,9 @@ class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually wi
       // limbo is nstable - nunstable
       // (1 - 1) = 0
       assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == 0f)
+      assert(
+        stats.gauges(
+          Seq(zkScope, "foo", "bar", "endpoint=default", "members"))() == HostCount.toFloat)
 
       // Many stabilizer epochs later nothing has moved. An epoch only promotes the
       // buffer, the buffer only moves when the raw address emits, and with no poll
@@ -401,6 +404,9 @@ class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually wi
       assert(Zk2Resolver.sizeOf(published.get) == 1)
       assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "size"))() == 1f)
       assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == 0f)
+      assert(
+        stats.gauges(
+          Seq(zkScope, "foo", "bar", "endpoint=default", "members"))() == HostCount.toFloat)
 
       // A change to the serverset is the only thing that triggers re-resolution
       join(serverSet, HostCount + 1)
@@ -410,6 +416,9 @@ class Zk2ResolverTest extends AnyFunSuite with BeforeAndAfter with Eventually wi
           stats.gauges(
             Seq(zkScope, "foo", "bar", "endpoint=default", "size"))() == (HostCount + 1).toFloat)
         assert(stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "limbo"))() == 0f)
+        assert(
+          stats.gauges(Seq(zkScope, "foo", "bar", "endpoint=default", "members"))()
+            == (HostCount + 1).toFloat)
       }
 
       assert(dns.lookups == HostCount + HostCount + 1)

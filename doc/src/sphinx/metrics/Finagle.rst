@@ -132,9 +132,21 @@ Name Resolution
   A counter of the number of ``com.twitter.finagle.Addr`` s with
   at least one resolved host.
 
+**inet/dns/unresolved_hosts**
+  A stat of the number of unresolved hosts per ``com.twitter.finagle.Addr``.
+  Recorded only where there is at least one unresolved host.
+
 **inet/dns/failures**
   A counter of the number of ``com.twitter.finagle.Addr`` s with
   no resolved hosts.
+
+**inet/dns/partial_failures**
+  A counter of the number of ``com.twitter.finagle.Addr`` s with
+  at least one unresolved host.
+
+**inet/dns/partial_cancels**
+  A counter of the number of ``com.twitter.finagle.Addr`` s with
+  at least one resolution cancelled.
 
 **inet/dns/cache/size**
   A gauge of the approximate number of cached DNS resolutions in

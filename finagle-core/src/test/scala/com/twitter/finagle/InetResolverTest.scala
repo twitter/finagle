@@ -55,7 +55,29 @@ class InetResolverTest extends AnyFunSuite with OneInstancePerTest {
     }
     assert(statsReceiver.counter("successes")() > 0)
     assert(statsReceiver.counter("partial_failures")() == 1)
+    assert(statsReceiver.stat("unresolved_hosts")() == Seq(1.0f))
     assert(statsReceiver.stat("lookup_ms")().size > 0)
+  }
+
+  test("unresolved hosts are counted per host, not per address") {
+    val stats = new InMemoryStatsReceiver
+    def threeAddressesEach(host: String): Future[Seq[InetAddress]] =
+      if (host == "missing") Future.exception(new UnknownHostException(host))
+      else
+        Future.value(
+          Seq(
+            InetAddress.getByAddress(Array[Byte](127, 0, 0, 1)),
+            InetAddress.getByAddress(Array[Byte](127, 0, 0, 2)),
+            InetAddress.getByAddress(Array[Byte](127, 0, 0, 3))
+          ))
+
+    val addr = new InetResolver(threeAddressesEach, stats, None).bind("missing:80,multi:81")
+    Await.result(addr.changes.filter(_ != Addr.Pending).toFuture, 10.seconds) match {
+      case Addr.Bound(bound, _) => assert(bound.size == 3)
+      case other => fail(s"expected a bound address, got $other")
+    }
+
+    assert(stats.stat("unresolved_hosts")() == Seq(1.0f))
   }
 
   test("partial resolution with cancellation") {
@@ -73,6 +95,7 @@ class InetResolverTest extends AnyFunSuite with OneInstancePerTest {
     assert(stats.counter("successes")() == 1)
     assert(stats.counter("partial_cancels")() == 1)
     assert(stats.counter("partial_failures")() == 0)
+    assert(stats.stat("unresolved_hosts")() == Seq(1.0f))
   }
 
   test("a fully failed resolution reports the first failure it saw") {

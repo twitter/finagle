@@ -140,6 +140,7 @@ private[finagle] class InetResolver(
   private[this] val cancels = statsReceiver.counter("cancels")
   private[this] val partialFailures = statsReceiver.counter("partial_failures")
   private[this] val partialCancels = statsReceiver.counter("partial_cancels")
+  private[this] val unresolvedHosts = statsReceiver.stat("unresolved_hosts")
 
   /**
    * Resolve all hostnames and merge into a final Addr.
@@ -183,6 +184,9 @@ private[finagle] class InetResolver(
           if (failure.nonEmpty) {
             if (failure.contains(ResolutionInterrupted)) partialCancels.incr()
             else partialFailures.incr()
+
+            unresolvedHosts.add(seq.count(_.isThrow))
+
             log.debug(s"Resolution partially failed (reason: $failure) for hosts in $hp")
           }
 

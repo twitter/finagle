@@ -196,11 +196,13 @@ class Zk2Resolver(
 
         @volatile var nlimbo = 0
         @volatile var size = 0
+        @volatile var members = 0
 
         // The lifetimes of these gauges need to be managed if we
         // ever de-memoize addrOf.
         scoped.provideGauge("limbo") { nlimbo }
         scoped.provideGauge("size") { size }
+        scoped.provideGauge("members") { members }
 
         // Convert the Op-based serverset address to a Var[Addr].
         val perObserverServerSetAddr: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
@@ -227,6 +229,8 @@ class Zk2Resolver(
             if (chatty()) {
               logger.info("Received new serverset vector: %s\n", hosts mkString ",")
             }
+
+            members = hosts.size
 
             if (hosts.isEmpty) Var.value(Addr.Neg)
             else inetResolver.bindHostPortsToAddr(hosts)

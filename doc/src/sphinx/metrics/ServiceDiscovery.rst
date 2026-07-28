@@ -60,6 +60,9 @@ the ServerSet's ZooKeeper path.
   but are staged for removal. They are removed if they do not recover
   within an interval bound by the ZooKeeper session timeout.
 
+**members**
+  A gauge tracking the number of members for the given path.
+
 **size**
   A gauge tracking the total size of the live cluster, not including
   members in limbo.
