@@ -27,6 +27,7 @@ Runtime Behavior Changes
 * finagle-core: Dimensional client & server metrics are prefixed with just `finagle_` instead of `rpc_finagle_client`
   and `rpc_finagle_server`, respectively. ``PHAB_ID=D1218090``
 * finagle-core: Dimensional metrics from `DefaultStatsReceiver` are no longer prefixed with `app_`. ``PHAB_ID=D1218090``
+* finagle-serversets: Update commons-lang to 3.20.0 to resolve CVEs
 
 New Features
 ~~~~~~~~~~
