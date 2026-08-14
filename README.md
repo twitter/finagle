@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/twitter/finagle/blob/develop/doc/src/sphinx/_static/logo_medium.png"><br><br>
+  <img src="https://user-images.githubusercontent.com/70687014/233679576-740ea0b2-52a6-4cb5-b8ca-d4ff96f34f6e.png" alt="background-removed-image" />
 </div>
 
 
